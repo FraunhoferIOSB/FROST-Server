@@ -127,16 +127,6 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     }
 
     @Override
-    public void registerProperties() {
-        LOGGER.info("Initialising MultiDatastream Properties...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityProperty(epMultiObservationDataTypes);
-        modelRegistry.registerEntityProperty(epUnitOfMeasurements);
-        modelRegistry.registerNavProperty(npMultiDatastream);
-        modelRegistry.registerNavProperty(npMultiDatastreams);
-    }
-
-    @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking MultiDatastream Types...");
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);

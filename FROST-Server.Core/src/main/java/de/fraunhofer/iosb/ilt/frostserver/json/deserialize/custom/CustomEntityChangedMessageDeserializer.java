@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,30 +73,37 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     break;
 
                 case "epFields":
+                    if (type == null) {
+                        throw new IllegalArgumentException("Type not know yet.");
+                    }
                     currentToken = parser.nextToken();
                     while (currentToken == JsonToken.VALUE_STRING) {
                         fieldName = parser.getValueAsString();
-                        message.addEpField(modelRegistry.getEntityProperty(fieldName));
+                        message.addEpField((EntityPropertyMain) type.getProperty(fieldName));
                         currentToken = parser.nextToken();
                     }
                     break;
 
                 case "npFields":
+                    if (type == null) {
+                        throw new IllegalArgumentException("Type not know yet.");
+                    }
                     currentToken = parser.nextToken();
                     while (currentToken == JsonToken.VALUE_STRING) {
                         fieldName = parser.getValueAsString();
-                        message.addNpField(modelRegistry.getNavProperty(fieldName));
+                        message.addNpField((NavigationPropertyMain) type.getProperty(fieldName));
                         currentToken = parser.nextToken();
                     }
                     break;
 
                 case "entity":
+                    if (type == null) {
+                        throw new IllegalArgumentException("Type not know yet.");
+                    }
                     entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
                             .deserialize(parser, ctxt);
-                    if (type != null) {
-                        entity.setQuery(queryGenerator.getQueryFor(type));
-                        message.setEntity(entity);
-                    }
+                    entity.setQuery(queryGenerator.getQueryFor(type));
+                    message.setEntity(entity);
                     break;
 
                 default:

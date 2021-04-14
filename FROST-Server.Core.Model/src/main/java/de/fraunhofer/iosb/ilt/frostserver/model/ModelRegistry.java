@@ -21,8 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import java.util.HashMap;
@@ -47,11 +47,11 @@ public class ModelRegistry {
     /**
      * The global EntityProperty SelfLink.
      */
-    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "SelfLink");
+    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "selfLink");
     /**
      * The global EntityProperty properties.
      */
-    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("Properties", TYPE_REFERENCE_MAP, true, false);
+    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TYPE_REFERENCE_MAP, true, false);
     /**
      * The global EntityProperty encodingType.
      */
@@ -60,85 +60,14 @@ public class ModelRegistry {
     private final Map<String, EntityType> typesByName = new HashMap<>();
     private final Set<EntityType> types = new LinkedHashSet<>();
 
-    private final Map<String, NavigationPropertyMain> navPropertyByName = new HashMap<>();
-    private final Set<NavigationPropertyMain> navProperties = new LinkedHashSet<>();
-
-    private final Map<String, EntityPropertyMain> entityPropertyByName = new HashMap<>();
-    private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
-    private final Set<EntityPropertyMain> entityPropertiesJsonObject = new LinkedHashSet<>();
-
     private Class<? extends Id> idClass;
+
+    private ParserHelper parserHelper;
 
     /**
      * Entities need queries, even when sent through messages.
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
-
-    public final Set<NavigationPropertyMain> getNavProperties() {
-        return navProperties;
-    }
-
-    public Set<EntityPropertyMain> getEntityProperties() {
-        return entityProperties;
-    }
-
-    /**
-     * Get The entity properties that are free-form json objects.
-     *
-     * @return The entity properties that are free-form json objects that, for
-     * instance, can hold custom links.
-     */
-    public Set<EntityPropertyMain> getEntityPropertiesJsonObject() {
-        return entityPropertiesJsonObject;
-    }
-
-    public EntityPropertyMain getEntityProperty(String name) {
-        return entityPropertyByName.get(name);
-    }
-
-    public final <T> EntityPropertyMain<T> registerEntityProperty(EntityPropertyMain<T> property) {
-        if (entityPropertyByName.containsKey(property.name)) {
-            if (entityPropertyByName.get(property.name) == property) {
-                // This exact property is already registered
-                return property;
-            } else {
-                LOGGER.warn("A property named {} is already registered.", property.name);
-            }
-        }
-        entityPropertyByName.put(property.name, property);
-        for (String alias : property.getAliases()) {
-            entityPropertyByName.put(alias, property);
-        }
-        entityProperties.add(property);
-        if (property.hasCustomProperties) {
-            entityPropertiesJsonObject.add(property);
-        }
-        return property;
-    }
-
-    /**
-     * Finds the NavigationProperty registered for the given name.
-     *
-     * @param name The name to search for.
-     * @return The NavigationProperty registered for the given name, or NULL.
-     */
-    public final NavigationPropertyMain getNavProperty(String name) {
-        return navPropertyByName.get(name);
-    }
-
-    public final <T extends NavigationPropertyMain> T registerNavProperty(T property) {
-        if (navPropertyByName.containsKey(property.getName())) {
-            if (navPropertyByName.get(property.getName()) == property) {
-                // This exact property is already registered
-                return property;
-            } else {
-                LOGGER.warn("A property named {} is already registered.", property.getName());
-            }
-        }
-        navPropertyByName.put(property.getName(), property);
-        navProperties.add(property);
-        return property;
-    }
 
     public final EntityType registerEntityType(EntityType type) {
         if (typesByName.containsKey(type.entityName)) {
@@ -172,13 +101,16 @@ public class ModelRegistry {
     }
 
     public synchronized void initFinalise() {
-        for (NavigationPropertyMain navProperty : navProperties) {
-            navProperty.setEntityType(getEntityTypeForName(navProperty.getName()));
-        }
         LOGGER.info("Finalising {} EntityTypes.", types.size());
         for (EntityType type : types) {
             type.init();
         }
     }
 
+    public ParserHelper getParserHelper() {
+        if (parserHelper == null) {
+            parserHelper = new ParserHelper(this);
+        }
+        return parserHelper;
+    }
 }

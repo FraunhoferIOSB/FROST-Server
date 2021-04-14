@@ -19,13 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -55,17 +53,13 @@ public class QueryParser extends AbstractParserVisitor {
     private final CoreSettings settings;
     private final ModelRegistry modelRegistry;
     private final ExpressionParser expressionParser;
-    private final ParserHelper parserHelper;
     private final ResourcePath path;
-    private final boolean customLinksEnabled;
 
     public QueryParser(CoreSettings settings, ResourcePath path) {
         this.settings = settings;
         this.modelRegistry = settings.getModelRegistry();
-        this.parserHelper = new ParserHelper(modelRegistry);
-        this.expressionParser = new ExpressionParser(parserHelper);
+        this.expressionParser = new ExpressionParser();
         this.path = path;
-        customLinksEnabled = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
@@ -236,25 +230,24 @@ public class QueryParser extends AbstractParserVisitor {
         }
     }
 
-    public List<Property> visit(ASTPlainPaths node, Query data) {
-        List<Property> result = new ArrayList<>();
+    public List<PropertyPlaceholder> visit(ASTPlainPaths node, Query data) {
+        List<PropertyPlaceholder> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             ASTPlainPath child = getChildOfType(node, i, ASTPlainPath.class);
-            Property property = visit(child, data);
-            result.add(property);
+            result.add(visit(child, data));
         }
         return result;
     }
 
     @Override
-    public Property visit(ASTPlainPath node, Object data) {
+    public PropertyPlaceholder visit(ASTPlainPath node, Object data) {
         int childCount = node.jjtGetNumChildren();
         if (childCount == 1) {
             ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
             return visit(child, data);
         } else {
             ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
-            EntityPropertyCustomSelect property = new EntityPropertyCustomSelect(modelRegistry.getEntityProperty(StringHelper.urlDecode(child.getName())));
+            PropertyPlaceholder property = new PropertyPlaceholder(StringHelper.urlDecode(child.getName()));
             for (int idx = 1; idx < childCount; idx++) {
                 child = getChildOfType(node, idx, ASTPathElement.class);
                 property.addToSubPath(child.getName());
@@ -264,15 +257,11 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     @Override
-    public Property visit(ASTPathElement node, Object data) {
+    public PropertyPlaceholder visit(ASTPathElement node, Object data) {
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside select");
         }
-        Property previous = null;
-        if (data instanceof Property) {
-            previous = (Property) data;
-        }
-        return parserHelper.parseProperty(node.getName(), previous);
+        return new PropertyPlaceholder(node.getName());
     }
 
     @Override

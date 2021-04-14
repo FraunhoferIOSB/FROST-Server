@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.coremodel;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -29,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -118,8 +119,8 @@ public class UrlHelperTest {
     public void testNextLinkSelectMultipleMixed() {
         testNextLink(
                 coreSettings,
-                "/Things?$select=Observations, @iot.id&$top=2",
-                "/Things?$select=Observations, @iot.id&$top=2&$skip=2");
+                "/Datastreams?$select=Observations, @iot.id&$top=2",
+                "/Datastreams?$select=Observations, @iot.id&$top=2&$skip=2");
     }
 
     @Test
@@ -134,36 +135,36 @@ public class UrlHelperTest {
     public void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
                 coreSettings,
-                "/Things?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
-                "/Things?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
+                "/Datastreams?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
+                "/Datastreams?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
     }
 
     @Test
     public void testNextLink() {
         String[] bases = {
-            "$filter=length(result) le 2",
-            "$filter=name eq 'it''s a quote'",
-            "$filter=name eq 'it''''s two quotes'",
-            "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)",
-            "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty",
-            "$orderby=geo.distance(location,geography'POINT(8.0 52.0)')",
-            "$filter=geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
-            "$filter=st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
-            "$filter=st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)",
-            "$filter=st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
-            "$filter=st_equals(location, geography'POINT(8 53)')",
-            "$filter=st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
-            "$filter=st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
-            "$filter=st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
-            "$filter=st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)",
-            "$filter=st_within(geography'POINT(7.5 52.75)', location)",
-            "$filter=validTime gt 2016-01-02T01:01:01.000Z/2016-01-03T23:59:59.999Z sub duration'P1D'"
+            "/Observations?$filter=length(result) le 2",
+            "/Things?$filter=name eq 'it''s a quote'",
+            "/Things?$filter=name eq 'it''''s two quotes'",
+            "/Things?$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)",
+            "/Datastreams?$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty",
+            "/Locations?$orderby=geo.distance(location,geography'POINT(8.0 52.0)')",
+            "/Locations?$filter=geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
+            "/Locations?$filter=st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "/Locations?$filter=st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)",
+            "/Locations?$filter=st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "/Locations?$filter=st_equals(location, geography'POINT(8 53)')",
+            "/Locations?$filter=st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
+            "/Locations?$filter=st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "/Locations?$filter=st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
+            "/Locations?$filter=st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)",
+            "/Locations?$filter=st_within(geography'POINT(7.5 52.75)', location)",
+            "/Observations?$filter=validTime gt 2016-01-02T01:01:01.000Z/2016-01-03T23:59:59.999Z sub duration'P1D'"
         };
         for (String base : bases) {
             testNextLink(
                     coreSettings,
-                    "/Things?" + base + "&$top=2",
-                    "/Things?" + base + "&$top=2&$skip=2");
+                    base + "&$top=2",
+                    base + "&$top=2&$skip=2");
         }
     }
 
@@ -233,12 +234,12 @@ public class UrlHelperTest {
     }
 
     private static void testNextLink(CoreSettings settings, IdManager idManager, String baseUrl, String expectedNextUrl) {
-        Query queryBase = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
-        Query queryExpected = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+        Query queryBase = ParserUtils.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+        Query queryExpected = ParserUtils.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase);
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
-        Query next = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+        Query next = ParserUtils.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
 
         Assert.assertEquals(queryExpected, next);
     }

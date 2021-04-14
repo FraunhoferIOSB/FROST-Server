@@ -11,19 +11,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -31,7 +26,6 @@ import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
-import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -263,19 +257,6 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     @Override
     public TableImpLocations<J> as(Name alias) {
         return new TableImpLocations<>(alias, this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
-    public PropertyFields<TableImpLocations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginCoreModel.epLocation) {
-            PropertyFields<TableImpLocations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
-            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
-
-            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
-            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
-        }
-        return super.handleEntityPropertyCustomSelect(epCustomSelect);
     }
 
     @Override

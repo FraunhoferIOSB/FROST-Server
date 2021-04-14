@@ -105,6 +105,11 @@ public class EntityType implements Comparable<EntityType> {
     public EntityType registerProperty(Property property, boolean required) {
         propertyMap.put(property, required);
         propertiesByName.put(property.getName(), property);
+        if (property instanceof EntityPropertyMain) {
+            for (String alias : ((EntityPropertyMain<?>) property).getAliases()) {
+                propertiesByName.put(alias, property);
+            }
+        }
         return this;
     }
 
@@ -119,6 +124,10 @@ public class EntityType implements Comparable<EntityType> {
             }
             if (property instanceof NavigationPropertyMain) {
                 NavigationPropertyMain np = (NavigationPropertyMain) property;
+                if (np.getEntityType() == null) {
+                    np.setEntityType(modelRegistry.getEntityTypeForName(np.getName()));
+                }
+
                 navigationProperties.add(np);
                 if (np.isEntitySet()) {
                     navigationSets.add(np);
@@ -137,6 +146,22 @@ public class EntityType implements Comparable<EntityType> {
 
     public Property getProperty(String name) {
         return propertiesByName.get(name);
+    }
+
+    public EntityPropertyMain getEntityProperty(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof EntityPropertyMain) {
+            return (EntityPropertyMain) property;
+        }
+        return null;
+    }
+
+    public NavigationPropertyMain getNavigationProperty(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyMain) {
+            return (NavigationPropertyMain) property;
+        }
+        return null;
     }
 
     /**

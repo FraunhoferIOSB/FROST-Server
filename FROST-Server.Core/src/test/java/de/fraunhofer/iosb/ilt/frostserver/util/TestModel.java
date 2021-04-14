@@ -22,17 +22,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_NUMBER;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
 
 /**
  *
@@ -40,76 +39,72 @@ import org.junit.Assert;
  */
 public class TestModel {
 
-    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("Name", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Number> epValue = new EntityPropertyMain<>("Value", TYPE_REFERENCE_NUMBER);
-    public final EntityPropertyMain<TimeValue> epTime = new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEVALUE);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TYPE_REFERENCE_NUMBER);
+    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TYPE_REFERENCE_TIMEVALUE);
 
-    public final NavigationPropertyEntity npHouse = new NavigationPropertyEntity("House");
-    public final NavigationPropertyEntitySet npHouses = new NavigationPropertyEntitySet("Houses");
-    public final NavigationPropertyEntity npRoom = new NavigationPropertyEntity("Room");
-    public final NavigationPropertyEntitySet npRooms = new NavigationPropertyEntitySet("Rooms");
+    public final NavigationPropertyMain.NavigationPropertyEntity NP_HOUSE = new NavigationPropertyMain.NavigationPropertyEntity("House");
+    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyMain.NavigationPropertyEntitySet("Houses");
+    public final NavigationPropertyMain.NavigationPropertyEntity NP_ROOM = new NavigationPropertyMain.NavigationPropertyEntity("Room");
+    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_ROOMS = new NavigationPropertyMain.NavigationPropertyEntitySet("Rooms");
 
-    public final EntityType etHouse = new EntityType("House", "Houses");
-    public final EntityType etRoom = new EntityType("Room", "Rooms");
+    public final EntityType ET_HOUSE = new EntityType("House", "Houses");
+    public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
 
     public void initModel(ModelRegistry modelRegistry) {
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_ID);
-        modelRegistry.registerEntityProperty(epName);
-        modelRegistry.registerEntityProperty(epValue);
-        modelRegistry.registerEntityProperty(epTime);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_PROPERTIES);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_SELFLINK);
-
-        modelRegistry.registerNavProperty(npHouse);
-        modelRegistry.registerNavProperty(npHouses);
-        modelRegistry.registerNavProperty(npRoom);
-        modelRegistry.registerNavProperty(npRooms);
-
-        modelRegistry.registerEntityType(etHouse)
+        modelRegistry.registerEntityType(ET_HOUSE)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epValue, false)
+                .registerProperty(EP_NAME, true)
+                .registerProperty(EP_VALUE, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npRooms, false);
-        modelRegistry.registerEntityType(etRoom)
+                .registerProperty(NP_ROOMS, false);
+        modelRegistry.registerEntityType(ET_ROOM)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epValue, false)
-                .registerProperty(epTime, false)
+                .registerProperty(EP_NAME, true)
+                .registerProperty(EP_VALUE, false)
+                .registerProperty(EP_TIME, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npHouse, true)
-                .registerProperty(npHouses, false);
+                .registerProperty(NP_ROOMS, false)
+                .registerProperty(NP_HOUSE, true);
     }
 
-    public Map<Property, Object> getTextPropertyValues(ModelRegistry modelRegistry) {
-        Map<Property, Object> propertyValues = new HashMap<>();
-        propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValues.put(epName, "myName");
+    public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {
+        Map<EntityType, Map<Property, Object>> propertyValues = new HashMap<>();
+        Map<Property, Object> propertyValuesHouse = new HashMap<>();
+        Map<Property, Object> propertyValuesRoom = new HashMap<>();
+        propertyValues.put(ET_HOUSE, propertyValuesHouse);
+        propertyValues.put(ET_ROOM, propertyValuesRoom);
+
+        propertyValuesHouse.put(ModelRegistry.EP_ID, new IdLong(1));
+        propertyValuesRoom.put(ModelRegistry.EP_ID, new IdLong(1));
+        propertyValuesHouse.put(EP_NAME, "myName");
+        propertyValuesRoom.put(EP_NAME, "myName");
+        propertyValuesHouse.put(EP_VALUE, 6);
+        propertyValuesRoom.put(EP_VALUE, 7);
+        propertyValuesRoom.put(EP_TIME, TimeInstant.now());
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", 2);
-        propertyValues.put(ModelRegistry.EP_PROPERTIES, parameters);
-        propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-
-        for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
-            Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
-        }
+        propertyValuesHouse.put(ModelRegistry.EP_PROPERTIES, parameters);
+        propertyValuesRoom.put(ModelRegistry.EP_PROPERTIES, parameters);
+        propertyValuesHouse.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
+        propertyValuesRoom.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
 
         int nextId = 100;
-        propertyValues.put(npHouse, new DefaultEntity(etHouse, new IdLong(nextId++)));
-        propertyValues.put(npRoom, new DefaultEntity(etRoom, new IdLong(nextId++)));
+        propertyValuesRoom.put(NP_HOUSE, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
 
-        EntitySetImpl rooms = new EntitySetImpl(etRoom);
-        rooms.add(new DefaultEntity(etRoom, new IdLong(nextId++)));
-        rooms.add(new DefaultEntity(etRoom, new IdLong(nextId++)));
-        propertyValues.put(npRooms, rooms);
+        EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
+        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
+        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
+        propertyValuesHouse.put(NP_ROOMS, rooms);
 
-        EntitySetImpl houses = new EntitySetImpl(etHouse);
-        houses.add(new DefaultEntity(etHouse, new IdLong(nextId++)));
-        houses.add(new DefaultEntity(etHouse, new IdLong(nextId++)));
-        propertyValues.put(npHouses, houses);
+        EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
+        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        propertyValuesRoom.put(NP_ROOMS, houses);
         return propertyValues;
     }
 }

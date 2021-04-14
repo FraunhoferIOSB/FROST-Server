@@ -36,7 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,13 +65,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         this.modelRegistry = modelRegistry;
         this.entityType = entityType;
         final Set<Property> propertySet;
-        if (entityType == null) {
-            propertySet = new HashSet<>();
-            propertySet.addAll(modelRegistry.getEntityProperties());
-            propertySet.addAll(modelRegistry.getNavProperties());
-        } else {
-            propertySet = entityType.getPropertySet();
-        }
+        propertySet = entityType.getPropertySet();
 
         for (Property property : propertySet) {
             if (property instanceof EntityPropertyMain) {

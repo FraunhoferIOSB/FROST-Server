@@ -17,7 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,21 +34,67 @@ import java.util.Objects;
  */
 public class Path implements Variable {
 
+    private final PropertyPlaceholder rawElements;
     private final List<Property> elements;
 
     public Path() {
+        this.rawElements = null;
+        this.elements = new ArrayList<>();
+    }
+
+    public Path(PropertyPlaceholder rawElements) {
+        this.rawElements = rawElements;
         this.elements = new ArrayList<>();
     }
 
     public Path(Property... elements) {
+        this.rawElements = null;
         this.elements = Arrays.asList(elements);
     }
 
     public Path(List<Property> elements) {
+        this.rawElements = null;
         this.elements = elements;
     }
 
+    /**
+     * Validate the raw elements in this Path against the given EntityType,
+     * turning it into a usable Path.
+     *
+     * @param type The starting point of this Path, or null to validate against
+     * the service Root.
+     */
+    @Override
+    public void validate(ParserHelper helper, EntityType type) {
+        if (!elements.isEmpty()) {
+            throw new IllegalStateException("Double Validation of Path!");
+        }
+        EntityType localType = type;
+        String topName = rawElements.getName();
+        Property property = localType.getProperty(topName);
+        if (property == null) {
+            throw new IllegalArgumentException("Unknown Property: " + topName);
+        }
+        elements.add(property);
+        if (property instanceof NavigationPropertyMain) {
+            localType = ((NavigationPropertyMain) property).getEntityType();
+        }
+        for (String rawElement : rawElements.getSubPath()) {
+            property = helper.parseProperty(localType, rawElement, property);
+            if (property instanceof NavigationProperty) {
+                localType = ((NavigationProperty) property).getEntityType();
+            }
+            if (property == null) {
+                throw new IllegalArgumentException("Unknown Property: " + rawElement);
+            }
+            elements.add(property);
+        }
+    }
+
     public List<Property> getElements() {
+        if (elements.isEmpty() && rawElements != null) {
+            throw new IllegalStateException("Path with raw elements must be validated before use.");
+        }
         return elements;
     }
 
@@ -84,6 +135,9 @@ public class Path implements Variable {
 
     @Override
     public String toUrl() {
+        if (elements.isEmpty() && rawElements != null) {
+            throw new IllegalStateException("Path with raw elements must be validated before use.");
+        }
         return toString();
     }
 

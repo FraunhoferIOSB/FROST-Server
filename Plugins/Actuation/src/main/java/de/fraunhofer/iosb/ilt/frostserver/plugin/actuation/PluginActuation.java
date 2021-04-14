@@ -131,19 +131,6 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public void registerProperties() {
-        LOGGER.info("Initialising Actuation Properties...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityProperty(epTaskingParameters);
-        modelRegistry.registerNavProperty(npActuator);
-        modelRegistry.registerNavProperty(npActuators);
-        modelRegistry.registerNavProperty(npTask);
-        modelRegistry.registerNavProperty(npTasks);
-        modelRegistry.registerNavProperty(npTaskingCapability);
-        modelRegistry.registerNavProperty(npTaskingCapabilities);
-    }
-
-    @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking Actuation Types...");
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);

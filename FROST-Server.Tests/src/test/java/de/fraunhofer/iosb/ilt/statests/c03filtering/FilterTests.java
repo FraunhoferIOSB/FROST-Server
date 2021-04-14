@@ -264,7 +264,7 @@ public class FilterTests extends AbstractTestClass {
         LOGGER.info("  testIndirectFilter");
         ThingDao doa = service.things();
         filterAndCheck(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
-        filterAndCheck(doa, "startswith(HistoricalLocations/Location/name, 'Location 1')", getFromList(THINGS, 0));
+        filterAndCheck(doa, "startswith(HistoricalLocations/Locations/name, 'Location 1')", getFromList(THINGS, 0));
     }
 
     /**
@@ -277,8 +277,8 @@ public class FilterTests extends AbstractTestClass {
         LOGGER.info("  testDeepIndirection");
         ObservedPropertyDao doa = service.observedProperties();
 
-        filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
-        filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
+        filterAndCheck(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
+        filterAndCheck(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
     }
 
     /**

@@ -61,7 +61,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
@@ -346,7 +345,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public void doDelete(ResourcePath path, Query query) {
         init();
         query.clearSelect();
-        query.addSelect(Arrays.asList(ModelRegistry.EP_ID));
+        query.addSelect(path.getMainElementType().getEntityProperty("id"));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);

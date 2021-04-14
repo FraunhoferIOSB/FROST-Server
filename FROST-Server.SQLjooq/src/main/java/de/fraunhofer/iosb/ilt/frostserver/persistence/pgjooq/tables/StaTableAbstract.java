@@ -292,16 +292,15 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         J entityId = (J) entity.getId().getValue();
         EntityType entityType = getEntityType();
-        NavigationPropertyMain npToThis = modelRegistry.getNavProperty(entityType.entityName);
-        NavigationPropertyMain npToThiss = modelRegistry.getNavProperty(entityType.plural);
-        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        final EntityType linkedType = linkedSet.getEntityType();
+        NavigationPropertyMain backLink = linkedType.getNavigationProperty(entityType);
 
-        final Set<NavigationPropertyMain> linkedSetNavigationProperties = linkedSet.getEntityType().getNavigationProperties();
         Relation relation = findRelation(linkedSet.getEntityType().entityName);
         RelationManyToMany relationManyToMany = null;
-        if (linkedSetNavigationProperties.contains(npToThis)) {
-            // One to Many
-        } else if (linkedSetNavigationProperties.contains(npToThiss)) {
+        if (backLink == null) {
+            LOGGER.error("Target type ({}) does not actually link to this ({}).", linkedSet.getEntityType(), entityType);
+            throw new IllegalStateException("Target type (" + linkedSet.getEntityType() + ") does not actually link to this (" + entityType + ").");
+        } else if (backLink.isEntitySet()) {
             if (relation instanceof RelationManyToMany) {
                 relationManyToMany = (RelationManyToMany) relation;
             } else {
@@ -309,15 +308,16 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
                 throw new IllegalStateException("Many-to-many relation not linked by RelationManyToMany");
             }
         } else {
-            LOGGER.error("Target type ({}) does not actually link to this ({}).", linkedSet.getEntityType(), entityType);
-            throw new IllegalStateException("Target type (" + linkedSet.getEntityType() + ") does not actually link to this (" + entityType + ").");
+            // One to Many
         }
+
+        EntityFactories<J> entityFactories = pm.getEntityFactories();
         for (Entity child : linkedSet) {
             if (relationManyToMany == null) {
                 if (entityFactories.entityExists(pm, child)) {
                     ((RelationOneToMany) relation).link(pm, entityId, (J) child.getId().getValue());
                 } else if (forInsert) {
-                    child.setProperty(npToThis, entity);
+                    child.setProperty(backLink, entity);
                     child.complete();
                     pm.insert(child);
                 } else {
@@ -434,8 +434,9 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     @Override
     public PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == ModelRegistry.EP_PROPERTIES) {
+        final String epName = epCustomSelect.getMainEntityPropertyName();
+        final EntityPropertyMain mainEntityProperty = getEntityType().getEntityProperty(epName);
+        if (mainEntityProperty.hasCustomProperties) {
             PropertyFields<T> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
 
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());

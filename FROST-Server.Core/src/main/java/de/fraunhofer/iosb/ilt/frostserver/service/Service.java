@@ -46,7 +46,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -109,14 +108,12 @@ public class Service implements AutoCloseable {
 
     private final CoreSettings settings;
     private final ModelRegistry modelRegistry;
-    private final CustomLinksHelper customLinksHelper;
     private PersistenceManager persistenceManager;
     private boolean transactionActive = false;
 
     public Service(CoreSettings settings) {
         this.settings = settings;
         modelRegistry = settings.getModelRegistry();
-        customLinksHelper = new CustomLinksHelper(modelRegistry);
         PersistenceManagerFactory.init(settings);
     }
 
@@ -357,8 +354,9 @@ public class Service implements AutoCloseable {
         Query query;
         ResultFormatter formatter;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
-            query.validate();
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
             formatter = settings.getFormatter(query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
@@ -461,7 +459,7 @@ public class Service implements AutoCloseable {
         try {
             entity = jsonReader.parseEntity(type, request.getContent());
             entity.complete(mainSet);
-            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
             LOGGER.trace("Exception:", ex);
@@ -517,7 +515,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
             JsonReader entityParser = new JsonReader(modelRegistry);
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
-            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
@@ -639,7 +637,7 @@ public class Service implements AutoCloseable {
             JsonReader entityParser = new JsonReader(modelRegistry);
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
             entity.complete(true);
-            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -776,7 +774,9 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handleDeleteSet(ServiceRequest request, ServiceResponse<T> response, PersistenceManager pm, ResourcePath path) {
         Query query;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, "Failed to parse query: " + e.getMessage());
         }

@@ -18,12 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -48,8 +45,7 @@ public class EntityBuilderTest {
     private static ModelRegistry modelRegistry;
     private static TestModel testModel;
 
-    private Map<Property, Object> propertyValues;
-    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+    private Map<EntityType, Map<Property, Object>> propertyValues;
 
     @BeforeClass
     public static void beforeClass() {
@@ -61,9 +57,16 @@ public class EntityBuilderTest {
 
     @Before
     public void setUp() {
-        propertyValues = testModel.getTextPropertyValues(modelRegistry);
-        for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
-            Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
+        propertyValues = testModel.getTestPropertyValues(modelRegistry);
+        for (EntityType et : modelRegistry.getEntityTypes()) {
+            Assert.assertTrue("Missing values for " + et, propertyValues.containsKey(et));
+            final Map<Property, Object> propertValuesEt = propertyValues.get(et);
+            for (EntityPropertyMain ep : et.getEntityProperties()) {
+                Assert.assertTrue("Missing value for " + ep, propertValuesEt.containsKey(ep));
+            }
+            for (NavigationPropertyMain np : et.getNavigationProperties()) {
+                Assert.assertTrue("Missing value for " + np, propertValuesEt.containsKey(np));
+            }
         }
     }
 
@@ -97,11 +100,7 @@ public class EntityBuilderTest {
     }
 
     private void addPropertyToObject(Entity entity, Property property) {
-        try {
-            addPropertyToObject(entity, property, propertyValues);
-        } catch (IllegalArgumentException ex) {
-            addPropertyToObject(entity, property, propertyValuesAlternative);
-        }
+        addPropertyToObject(entity, property, propertyValues.get(entity.getEntityType()));
     }
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) {
@@ -119,11 +118,10 @@ public class EntityBuilderTest {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
                 Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
-            Object value = propertyValues.get(property);
-            Object value2 = propertyValuesAlternative.get(property);
+            Object value = propertyValues.get(entity.getEntityType()).get(property);
             Object setValue = property.getFrom(entity);
 
-            if (!(Objects.equals(value, setValue) || Objects.equals(value2, setValue))) {
+            if (!Objects.equals(value, setValue)) {
                 Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {

@@ -63,15 +63,6 @@ public class DefEntityType {
         return entityType;
     }
 
-    public void registerProperties(ModelRegistry modelRegistry) {
-        for (DefEntityProperty defEp : entityProperties.values()) {
-            modelRegistry.registerEntityProperty(defEp.getEntityPropertyMain());
-        }
-        for (DefNavigationProperty defNp : navigationProperties.values()) {
-            modelRegistry.registerNavProperty(defNp.getNavigationProperty(modelRegistry));
-        }
-    }
-
     public void linkProperties(ModelRegistry modelRegistry) {
         entityType.registerProperty(ModelRegistry.EP_SELFLINK, false);
         for (DefEntityProperty defEp : entityProperties.values()) {

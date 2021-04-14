@@ -175,50 +175,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public void registerProperties() {
-        LOGGER.info("Initialising Core Model Properties...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityProperty(epCreationTime);
-        modelRegistry.registerEntityProperty(epDefinition);
-        modelRegistry.registerEntityProperty(epDescription);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_ENCODINGTYPE);
-        modelRegistry.registerEntityProperty(epFeature);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_ID);
-        modelRegistry.registerEntityProperty(epLocation);
-        modelRegistry.registerEntityProperty(epMetadata);
-        modelRegistry.registerEntityProperty(epName);
-        modelRegistry.registerEntityProperty(epObservationType);
-        modelRegistry.registerEntityProperty(epObservedArea);
-        modelRegistry.registerEntityProperty(epParameters);
-        modelRegistry.registerEntityProperty(epPhenomenonTime);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_PROPERTIES);
-        modelRegistry.registerEntityProperty(epResult);
-        modelRegistry.registerEntityProperty(epResultQuality);
-        modelRegistry.registerEntityProperty(epResultTime);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_SELFLINK);
-        modelRegistry.registerEntityProperty(epTime);
-        modelRegistry.registerEntityProperty(epUnitOfMeasurement);
-        modelRegistry.registerEntityProperty(epValidTime);
-
-        modelRegistry.registerNavProperty(npDatastream);
-        modelRegistry.registerNavProperty(npDatastreams);
-        modelRegistry.registerNavProperty(npFeatureOfInterest);
-        modelRegistry.registerNavProperty(npFeaturesOfInterest);
-        modelRegistry.registerNavProperty(npHistoricalLocation);
-        modelRegistry.registerNavProperty(npHistoricalLocations);
-        modelRegistry.registerNavProperty(npLocation);
-        modelRegistry.registerNavProperty(npLocations);
-        modelRegistry.registerNavProperty(npObservation);
-        modelRegistry.registerNavProperty(npObservations);
-        modelRegistry.registerNavProperty(npObservedProperties);
-        modelRegistry.registerNavProperty(npObservedProperty);
-        modelRegistry.registerNavProperty(npSensor);
-        modelRegistry.registerNavProperty(npSensors);
-        modelRegistry.registerNavProperty(npThing);
-        modelRegistry.registerNavProperty(npThings);
-    }
-
-    @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking Core Model Types...");
         etDatastream

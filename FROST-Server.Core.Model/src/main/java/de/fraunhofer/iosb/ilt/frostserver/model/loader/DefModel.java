@@ -45,12 +45,6 @@ public class DefModel {
         }
     }
 
-    public void registerProperties(ModelRegistry modelRegistry) {
-        for (DefEntityType defType : entityTypes.values()) {
-            defType.registerProperties(modelRegistry);
-        }
-    }
-
     public boolean linkEntityTypes(ModelRegistry modelRegistry) {
         for (DefEntityType defType : entityTypes.values()) {
             defType.linkProperties(modelRegistry);

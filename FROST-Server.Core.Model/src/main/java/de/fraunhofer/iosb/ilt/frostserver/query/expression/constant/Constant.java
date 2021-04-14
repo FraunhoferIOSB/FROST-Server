@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
 import java.util.Objects;
 
@@ -39,6 +41,11 @@ public abstract class Constant<T> implements Value {
 
     public T getValue() {
         return value;
+    }
+
+    @Override
+    public void validate(ParserHelper helper, EntityType type) {
+        // Nothing to validate by default.
     }
 
     @Override

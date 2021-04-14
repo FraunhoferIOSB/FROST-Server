@@ -114,10 +114,6 @@ public class EntityBuilderTest {
         propertyValues.put(pluginMultiDatastream.epUnitOfMeasurements, Arrays.asList(unit1, unit2));
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
-        for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
-            Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
-        }
-
         int nextId = 100;
         propertyValues.put(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
@@ -174,8 +170,16 @@ public class EntityBuilderTest {
         things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npThings, things);
 
-        for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
-            Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+            for (EntityPropertyMain ep : entityType.getEntityProperties()) {
+                Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
+            }
+        }
+
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+            for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
+                Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
+            }
         }
 
     }

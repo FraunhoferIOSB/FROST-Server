@@ -32,11 +32,6 @@ public interface PluginModel extends Plugin {
     public void registerEntityTypes();
 
     /**
-     * Register entity and navigation properties.
-     */
-    public void registerProperties();
-
-    /**
      * Link entityTypes to their Properties, and to the PersistenceManager.
      *
      * @param pm The PersistenceManager used to store entities.

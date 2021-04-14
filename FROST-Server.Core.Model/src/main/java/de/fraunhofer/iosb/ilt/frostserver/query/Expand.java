@@ -86,8 +86,9 @@ public class Expand {
 
     public List<String> getRawPath() {
         if (rawPath == null) {
-            rawPath = new ArrayList<>(3);
-            for (String item : StringUtils.split(validatedPath.getName(), '/')) {
+            final String[] items = StringUtils.split(validatedPath.getName(), '/');
+            rawPath = new ArrayList<>(items.length);
+            for (String item : items) {
                 rawPath.add(item);
             }
         }

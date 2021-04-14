@@ -272,9 +272,10 @@ public class PathParser implements ParserVisitor {
         PathElement parent = data.getLastElement();
         if (parent instanceof PathElementEntity) {
             PathElementEntity parentEntity = (PathElementEntity) parent;
-            EntityPropertyMain property = modelRegistry.getEntityProperty(node.value.toString());
-            if (property == null || !parentEntity.getEntityType().getPropertySet().contains(property)) {
-                throw new IllegalArgumentException("Entities of type " + parentEntity.getEntityType() + " do not have an entity property named " + node.value);
+            final EntityType parentEntityType = parentEntity.getEntityType();
+            EntityPropertyMain property = parentEntityType.getEntityProperty(node.value.toString());
+            if (property == null) {
+                throw new IllegalArgumentException("Entities of type " + parentEntityType + " do not have an entity property named " + node.value);
             }
             addAsEntitiyProperty(data, property);
             return defltAction(node, data);

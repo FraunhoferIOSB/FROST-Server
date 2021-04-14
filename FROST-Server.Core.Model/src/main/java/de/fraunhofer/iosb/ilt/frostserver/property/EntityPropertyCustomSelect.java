@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,19 +38,25 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
-    private final EntityPropertyMain entityProperty;
+    private final String entityPropertyName;
+    private EntityPropertyMain entityProperty;
     private final List<String> subPath = new ArrayList<>();
 
-    public EntityPropertyCustomSelect(EntityPropertyMain entityProperty) {
-        this.entityProperty = entityProperty;
+    public EntityPropertyCustomSelect(String entityPropertyName) {
+        this.entityPropertyName = entityPropertyName;
     }
 
-    public EntityPropertyMain getMainEntityProperty() {
-        return entityProperty;
+    public String getMainEntityPropertyName() {
+        return entityPropertyName;
     }
 
     public List<String> getSubPath() {
         return subPath;
+    }
+
+    public EntityPropertyCustomSelect addToSubPath(Collection<String> subPathElements) {
+        subPath.addAll(subPathElements);
+        return this;
     }
 
     public EntityPropertyCustomSelect addToSubPath(String subPathElement) {
@@ -59,7 +66,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     @Override
     public String getName() {
-        return entityProperty.name + "/" + StringUtils.join(subPath, '/');
+        return entityPropertyName + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
@@ -74,6 +81,9 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     @Override
     public Object getFrom(Entity entity) {
+        if (entityProperty == null) {
+            entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);
+        }
         Object baseProperty = entity.getProperty(entityProperty);
         if (baseProperty instanceof Map) {
             return CollectionsHelper.getFrom((Map<String, Object>) baseProperty, subPath);
@@ -83,6 +93,9 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     @Override
     public void setOn(Entity entity, Object value) {
+        if (entityProperty == null) {
+            entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);
+        }
         Object baseProperty = entity.getProperty(entityProperty);
         if (baseProperty == null) {
             Map<String, Object> basePropertyMap = new HashMap<>();
@@ -92,7 +105,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
         if (baseProperty instanceof Map) {
             CollectionsHelper.setOn((Map<String, Object>) baseProperty, subPath, value);
         } else {
-            throw new UnsupportedOperationException("Can not set: " + entityProperty + " value is not a map.");
+            throw new UnsupportedOperationException("Can not set: " + entityPropertyName + " value is not a map.");
         }
     }
 
@@ -108,7 +121,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityProperty, subPath);
+        return Objects.hash(entityPropertyName, subPath);
     }
 
     @Override
@@ -123,7 +136,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
             return false;
         }
         final EntityPropertyCustomSelect other = (EntityPropertyCustomSelect) obj;
-        return Objects.equals(this.entityProperty, other.entityProperty)
+        return Objects.equals(this.entityPropertyName, other.entityPropertyName)
                 && Objects.equals(this.subPath, other.subPath);
     }
 

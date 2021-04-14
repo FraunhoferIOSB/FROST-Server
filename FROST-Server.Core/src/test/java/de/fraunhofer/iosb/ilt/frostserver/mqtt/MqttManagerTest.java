@@ -147,9 +147,9 @@ public class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new DefaultEntity(testModel.etRoom, new IdLong(pubId))
-                                    .setProperty(testModel.epName, "" + pubId)
-                                    .setProperty(testModel.npHouse, new DefaultEntity(testModel.etHouse, new IdLong(topicId)))
+                            new DefaultEntity(testModel.ET_ROOM, new IdLong(pubId))
+                                    .setProperty(testModel.EP_NAME, "" + pubId)
+                                    .setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId)))
                     );
             topicId++;
             if (topicId >= subscriptionCount) {

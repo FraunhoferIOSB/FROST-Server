@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -63,6 +64,7 @@ public class Query {
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
+    private final List<PropertyPlaceholder> rawSelect;
     private final Set<Property> select;
     private boolean selectDistinct = false;
     private Expression filter;
@@ -79,6 +81,7 @@ public class Query {
         this.count = Optional.empty();
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
+        this.rawSelect = new ArrayList<>();
         this.select = new LinkedHashSet<>();
     }
 
@@ -100,25 +103,33 @@ public class Query {
             this.entityType = entityType;
         }
         selectEntityPropMain = null;
-        Set<Property> propertySet = entityType.getPropertySet();
-        Optional<Property> invalidProperty = select.stream()
-                .filter(x -> {
-                    if (x instanceof EntityPropertyMain) {
-                        return !propertySet.contains(x);
-                    }
-                    if (x instanceof EntityPropertyCustomSelect) {
-                        EntityPropertyCustomSelect csX = (EntityPropertyCustomSelect) x;
-                        EntityPropertyMain mep = csX.getMainEntityProperty();
-                        return !mep.hasCustomProperties || !propertySet.contains(mep);
-                    }
-                    return false;
-                })
-                .findAny();
-        if (invalidProperty.isPresent()) {
-            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
+        for (PropertyPlaceholder pp : rawSelect) {
+            Property property = entityType.getProperty(pp.getName());
+            if (property == null) {
+                throw new IllegalArgumentException("Invalid property '" + pp.getName() + "' found in select, for entity type " + entityType.entityName);
+            }
+            if (property instanceof NavigationProperty) {
+                select.add(property);
+            } else if (property instanceof EntityPropertyMain) {
+                if (pp.hasSubPath()) {
+                    select.add(new EntityPropertyCustomSelect(property.getName()).addToSubPath(pp.getSubPath()));
+                } else {
+                    select.add(property);
+                }
+            }
         }
-        expand.forEach(x -> x.validate(entityType));
+
+        for (Expand e : expand) {
+            e.validate(entityType);
+        }
         reNestExpands();
+
+        if (filter != null) {
+            filter.validate(modelRegistry.getParserHelper(), entityType);
+        }
+        for (OrderBy order : orderBy) {
+            order.getExpression().validate(modelRegistry.getParserHelper(), entityType);
+        }
         return this;
     }
 
@@ -192,13 +203,26 @@ public class Query {
         return this;
     }
 
+    public Query addSelect(Collection<PropertyPlaceholder> properties) {
+        if (!select.isEmpty()) {
+            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+        }
+        rawSelect.addAll(properties);
+        return this;
+    }
+
     public Query addSelect(Property property) {
+        if (!rawSelect.isEmpty()) {
+            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+        }
         select.add(property);
         return this;
     }
 
-    public Query addSelect(Collection<Property> properties) {
-        select.addAll(properties);
+    public Query addSelect(Property... properties) {
+        for (Property property : properties) {
+            select.add(property);
+        }
         return this;
     }
 
@@ -221,7 +245,7 @@ public class Query {
      */
     public Set<EntityPropertyMain> getSelectMainEntityProperties(boolean inExpand) {
         if (selectEntityPropMain == null) {
-            initSelectedProperties(inExpand);
+            return initSelectedProperties(inExpand);
         }
         return selectEntityPropMain;
     }
@@ -238,19 +262,19 @@ public class Query {
         return selectNavProp;
     }
 
-    private void initSelectedProperties(boolean inExpand) {
+    private Set<EntityPropertyMain> initSelectedProperties(boolean inExpand) {
         if (path.isRef()) {
             selectEntityPropMain = refSelect;
             selectNavProp = new HashSet<>();
-            return;
+            return refSelect;
         }
-        selectEntityPropMain = new HashSet<>();
+        Set<EntityPropertyMain> selectedEntityPropMain = new HashSet<>();
         selectNavProp = new HashSet<>();
         if (select.isEmpty()) {
             if (entityType == null) {
                 validate();
             }
-            selectEntityPropMain.addAll(entityType.getEntityProperties());
+            selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
                 selectNavProp.addAll(entityType.getNavigationEntities());
                 selectNavProp.addAll(entityType.getNavigationSets());
@@ -258,15 +282,17 @@ public class Query {
         } else {
             for (Property s : select) {
                 if (s instanceof EntityPropertyMain) {
-                    selectEntityPropMain.add((EntityPropertyMain) s);
+                    selectedEntityPropMain.add((EntityPropertyMain) s);
                 } else if (s instanceof EntityPropertyCustomSelect) {
                     EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
-                    selectEntityPropMain.add(epcs.getMainEntityProperty());
+                    selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
                 } else if (s instanceof NavigationPropertyMain) {
                     selectNavProp.add((NavigationPropertyMain) s);
                 }
             }
         }
+        selectEntityPropMain = selectedEntityPropMain;
+        return selectedEntityPropMain;
     }
 
     public Expression getFilter() {
@@ -401,7 +427,7 @@ public class Query {
 
         addSkipToUrl(sb, separator);
 
-        addSelectToUrl(sb, separator);
+        addSelectToUrl(sb, separator, inExpand);
 
         addFilterToUrl(sb, separator, inExpand);
 
@@ -492,7 +518,7 @@ public class Query {
         }
     }
 
-    private void addSelectToUrl(StringBuilder sb, char separator) {
+    private void addSelectToUrl(StringBuilder sb, char separator, boolean inExpand) {
         if (!select.isEmpty()) {
             sb.append(separator).append("$select=");
             if (isSelectDistinct()) {
@@ -505,7 +531,11 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                sb.append(StringHelper.urlEncode(property.getName()));
+                if (!inExpand) {
+                    sb.append(StringHelper.urlEncode(property.getName()));
+                } else {
+                    sb.append(property.getName());
+                }
             }
         }
     }

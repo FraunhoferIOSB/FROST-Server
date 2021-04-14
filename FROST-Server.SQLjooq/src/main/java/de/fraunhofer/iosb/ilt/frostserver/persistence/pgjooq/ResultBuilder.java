@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -39,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +96,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         this.sqlQuery = sqlQueryBuilder.buildSelect();
         final CoreSettings coreSettings = pm.getCoreSettings();
         this.persistenceSettings = coreSettings.getPersistenceSettings();
-        this.customLinksHelper = new CustomLinksHelper(coreSettings.getModelRegistry());
+        this.customLinksHelper = pm.getCoreSettings().getCustomLinksHelper();
     }
 
     public Object getEntity() {
@@ -138,7 +138,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (query == null) {
             return;
         }
-        customLinksHelper.expandCustomLinks(pm.getCoreSettings(), entity, path);
+        customLinksHelper.expandCustomLinks(entity, path);
         for (Expand expand : query.getExpand()) {
             addExpandToEntity(entity, expand);
         }

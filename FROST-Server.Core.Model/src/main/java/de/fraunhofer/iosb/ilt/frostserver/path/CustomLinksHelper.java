@@ -15,17 +15,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,8 +40,12 @@ public class CustomLinksHelper {
     private final Pattern entityLinkNamePattern;
 
     private final ModelRegistry modelRegistry;
+    private final boolean enable;
+    private final int recurseDepth;
 
-    public CustomLinksHelper(ModelRegistry modelRegistry) {
+    public CustomLinksHelper(ModelRegistry modelRegistry, boolean enable, int recurseDepth) {
+        this.enable = enable;
+        this.recurseDepth = recurseDepth;
         this.modelRegistry = modelRegistry;
         String entityTypeRegex = StringUtils.join(
                 modelRegistry.getEntityTypes()
@@ -72,16 +72,20 @@ public class CustomLinksHelper {
         return modelRegistry.getEntityTypeForName(last);
     }
 
-    public void expandCustomLinks(CoreSettings settings, Entity entity, ResourcePath path) {
-        final Settings experimentalSettings = settings.getExtensionSettings();
-        if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
-            int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            for (EntityPropertyMain property : modelRegistry.getEntityPropertiesJsonObject()) {
-                final Object properties = entity.getProperty(property);
-                if (properties instanceof Map) {
-                    expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
+    public void expandCustomLinks(Entity entity, ResourcePath path) {
+        if (enable) {
+            for (EntityPropertyMain property : entity.getEntityType().getEntityProperties()) {
+                if (property.hasCustomProperties) {
+                    expandCustomLinks(property, entity, path, recurseDepth);
                 }
             }
+        }
+    }
+
+    private void expandCustomLinks(EntityPropertyMain property, Entity entity, ResourcePath path, int recurseDepth) {
+        final Object properties = entity.getProperty(property);
+        if (properties instanceof Map) {
+            expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
         }
     }
 
@@ -112,21 +116,21 @@ public class CustomLinksHelper {
         properties.putAll(toAdd);
     }
 
-    public void cleanPropertiesMap(CoreSettings settings, Entity entity) {
-        final Settings experimentalSettings = settings.getExtensionSettings();
-        if (!experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
+    public void cleanPropertiesMap(Entity entity) {
+        if (!enable) {
             return;
         }
-        int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-        for (EntityPropertyMain property : modelRegistry.getEntityPropertiesJsonObject()) {
-            final Object properties = entity.getProperty(property);
-            if (properties instanceof Map) {
-                cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
+        for (EntityPropertyMain property : entity.getEntityType().getEntityProperties()) {
+            if (property.hasCustomProperties) {
+                final Object properties = entity.getProperty(property);
+                if (properties instanceof Map) {
+                    cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
+                }
             }
         }
     }
 
-    public void cleanPropertiesMap(Map<String, Object> properties, int recurseDepth) {
+    private void cleanPropertiesMap(Map<String, Object> properties, int recurseDepth) {
         if (properties == null) {
             return;
         }

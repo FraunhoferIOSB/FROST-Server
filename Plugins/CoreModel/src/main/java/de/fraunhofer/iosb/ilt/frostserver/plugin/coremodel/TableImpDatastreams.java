@@ -261,7 +261,8 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
 
     @Override
     public PropertyFields<TableImpDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
+        final String epName = epCustomSelect.getMainEntityPropertyName();
+        final EntityPropertyMain mainEntityProperty = getEntityType().getEntityProperty(epName);
         if (mainEntityProperty == pluginCoreModel.epUnitOfMeasurement) {
             PropertyFields<TableImpDatastreams<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();

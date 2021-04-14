@@ -122,9 +122,6 @@ public class PluginManager implements ConfigDefaults {
         for (PluginModel plugin : modelModifiers) {
             plugin.registerEntityTypes();
         }
-        for (PluginModel plugin : modelModifiers) {
-            plugin.registerProperties();
-        }
         List<PluginModel> redo = new ArrayList<>(modelModifiers);
         int pass = 0;
         while (!redo.isEmpty() && pass < 5) {

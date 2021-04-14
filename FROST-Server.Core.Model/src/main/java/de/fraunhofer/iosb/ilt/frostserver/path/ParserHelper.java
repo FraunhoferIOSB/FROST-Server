@@ -15,22 +15,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 
 /**
  *
@@ -39,44 +33,26 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
  */
 public class ParserHelper {
 
-    private final ModelRegistry modelRegistry;
     private final CustomLinksHelper customLinksHelper;
 
     public ParserHelper(ModelRegistry modelRegistry) {
-        this.modelRegistry = modelRegistry;
-        this.customLinksHelper = new CustomLinksHelper(modelRegistry);
+        this.customLinksHelper = new CustomLinksHelper(modelRegistry, false, 0);
     }
 
-    public Property parseProperty(String propertyName, Property previous) {
+    public Property parseProperty(EntityType type, String propertyName, Property previous) {
         String decodedName = StringHelper.urlDecode(propertyName);
         if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
-        NavigationPropertyMain navProp = null;
-        try {
-            navProp = modelRegistry.getNavProperty(decodedName);
-        } catch (IllegalArgumentException exc) {
-            // Not a navigationProperty
-        }
-        EntityPropertyMain entityProp = null;
-        try {
-            entityProp = modelRegistry.getEntityProperty(decodedName);
-        } catch (IllegalArgumentException exc) {
-            // Not an entityProperty
-        }
-        if (navProp != null && entityProp != null) {
-            char first = decodedName.charAt(0);
-            if (first >= 'A' && first <= 'Z') {
-                return navProp;
-            } else {
-                return entityProp;
-            }
-        } else if (navProp != null) {
+        NavigationPropertyMain navProp = type.getNavigationProperty(decodedName);
+        if (navProp != null) {
             return navProp;
-        } else if (entityProp != null) {
+        }
+        EntityPropertyMain entityProp = type.getEntityProperty(decodedName);
+        if (entityProp != null) {
             return entityProp;
         }
-        return parseCustomProperty(decodedName);
+        throw new IllegalArgumentException("Could not place " + propertyName + " under type " + type + " after " + previous);
     }
 
     private Property parseCustomProperty(String decodedName) {
@@ -86,13 +62,5 @@ public class ParserHelper {
         } else {
             return new EntityPropertyCustomLink(decodedName, typeForCustomLink);
         }
-    }
-
-    public Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
-        int index = pathAndQuery.indexOf('?');
-        String pathString = pathAndQuery.substring(0, index);
-        String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(modelRegistry, idManager, serviceRootUrl, version, pathString);
-        return QueryParser.parseQuery(queryString, settings, path);
     }
 }

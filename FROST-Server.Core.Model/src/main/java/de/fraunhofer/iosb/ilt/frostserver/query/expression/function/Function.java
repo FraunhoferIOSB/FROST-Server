@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
@@ -125,6 +127,13 @@ public abstract class Function implements Expression {
                         .map(Expression::compress)
                         .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public void validate(ParserHelper helper, EntityType type) {
+        for (Expression p : parameters) {
+            p.validate(helper, type);
+        }
     }
 
     /**

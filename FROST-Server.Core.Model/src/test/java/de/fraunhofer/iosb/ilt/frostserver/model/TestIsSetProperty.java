@@ -18,20 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.LngLatAlt;
-import org.geojson.Point;
-import org.geojson.Polygon;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,7 +43,7 @@ public class TestIsSetProperty {
     private static ModelRegistry modelRegistry;
     private static TestModel testModel;
 
-    private Map<Property, Object> propertyValues;
+    private Map<EntityType, Map<Property, Object>> propertyValues;
 
     @BeforeClass
     public static void beforeClass() {
@@ -64,14 +55,17 @@ public class TestIsSetProperty {
 
     @Before
     public void setUp() {
-        propertyValues = testModel.getTextPropertyValues(modelRegistry);
+        propertyValues = testModel.getTestPropertyValues(modelRegistry);
 
-        for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
-            Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
-        }
-
-        for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
-            Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
+        for (EntityType et : modelRegistry.getEntityTypes()) {
+            Assert.assertTrue("Missing values for " + et, propertyValues.containsKey(et));
+            final Map<Property, Object> propertValuesEt = propertyValues.get(et);
+            for (EntityPropertyMain ep : et.getEntityProperties()) {
+                Assert.assertTrue("Missing value for " + ep, propertValuesEt.containsKey(ep));
+            }
+            for (NavigationPropertyMain np : et.getNavigationProperties()) {
+                Assert.assertTrue("Missing value for " + np, propertValuesEt.containsKey(np));
+            }
         }
 
     }
@@ -143,7 +137,7 @@ public class TestIsSetProperty {
     }
 
     private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
-        addPropertyToObject(entity, property, propertyValues);
+        addPropertyToObject(entity, property, propertyValues.get(entity.getEntityType()));
     }
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {

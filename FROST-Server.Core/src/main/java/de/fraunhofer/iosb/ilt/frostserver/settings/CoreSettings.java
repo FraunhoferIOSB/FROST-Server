@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDef
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -199,9 +200,11 @@ public class CoreSettings implements ConfigDefaults {
      */
     private final Set<LiquibaseUser> liquibaseUsers = new LinkedHashSet<>();
 
-    private final ModelRegistry entityTypes = new ModelRegistry();
+    private final ModelRegistry modelRegistry = new ModelRegistry();
 
     private MessageBus messageBus;
+
+    private CustomLinksHelper customLinksHelper;
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -324,7 +327,7 @@ public class CoreSettings implements ConfigDefaults {
      * @return the registry of entity types currently enabled.
      */
     public ModelRegistry getModelRegistry() {
-        return entityTypes;
+        return modelRegistry;
     }
 
     public static CoreSettings load(String file) {
@@ -453,6 +456,16 @@ public class CoreSettings implements ConfigDefaults {
 
     public void setMessageBus(MessageBus messageBus) {
         this.messageBus = messageBus;
+    }
+
+    public CustomLinksHelper getCustomLinksHelper() {
+        if (customLinksHelper == null) {
+            final Settings experimentalSettings = getExtensionSettings();
+            boolean customLinksEnabled = experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
+            int customLinksRecurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
+            customLinksHelper = new CustomLinksHelper(modelRegistry, customLinksEnabled, customLinksRecurseDepth);
+        }
+        return customLinksHelper;
     }
 
 }

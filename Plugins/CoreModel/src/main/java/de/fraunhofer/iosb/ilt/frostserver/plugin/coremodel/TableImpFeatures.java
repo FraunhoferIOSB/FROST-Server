@@ -9,23 +9,17 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.geolatte.geom.Geometry;
 import org.jooq.DataType;
-import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -159,19 +153,6 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     @Override
     public TableImpFeatures<J> as(Name alias) {
         return new TableImpFeatures<>(alias, this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
-    public PropertyFields<TableImpFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginCoreModel.epFeature) {
-            PropertyFields<TableImpFeatures<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
-            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
-
-            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
-            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
-        }
-        return super.handleEntityPropertyCustomSelect(epCustomSelect);
     }
 
     @Override

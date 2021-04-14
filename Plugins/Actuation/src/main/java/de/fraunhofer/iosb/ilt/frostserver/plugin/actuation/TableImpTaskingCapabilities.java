@@ -6,17 +6,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import org.jooq.DataType;
-import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -158,19 +153,6 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     @Override
     public TableImpTaskingCapabilities<J> as(Name alias) {
         return new TableImpTaskingCapabilities<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
-    public PropertyFields<TableImpTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginActuation.epTaskingParameters) {
-            PropertyFields<TableImpTaskingCapabilities<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
-            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
-
-            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
-            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
-        }
-        return super.handleEntityPropertyCustomSelect(epCustomSelect);
     }
 
     @Override
