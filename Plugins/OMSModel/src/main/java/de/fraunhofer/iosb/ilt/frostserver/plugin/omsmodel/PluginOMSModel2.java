@@ -132,14 +132,6 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public void registerProperties() {
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        for (DefModel modelDefinition : modelDefinitions) {
-            modelDefinition.registerProperties(modelRegistry);
-        }
-    }
-
-    @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Initialising OMS Model Types...");
         ModelRegistry modelRegistry = settings.getModelRegistry();

@@ -186,58 +186,6 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
         modelRegistry.registerEntityType(etResult);
     }
 
-    @Override
-    public void registerProperties() {
-        LOGGER.info("Initialising OMS Model Properties...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        registerEps(modelRegistry);
-        registerNps(modelRegistry);
-    }
-
-    private void registerEps(ModelRegistry modelRegistry) {
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_ID);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_SELFLINK);
-        modelRegistry.registerEntityProperty(ModelRegistry.EP_PROPERTIES);
-        modelRegistry.registerEntityProperty(epAccuracyHori);
-        modelRegistry.registerEntityProperty(epAccuracyVert);
-        modelRegistry.registerEntityProperty(epDataQuality);
-        modelRegistry.registerEntityProperty(epDescription);
-        modelRegistry.registerEntityProperty(epLink);
-        modelRegistry.registerEntityProperty(epLocation);
-        modelRegistry.registerEntityProperty(epMetadata);
-        modelRegistry.registerEntityProperty(epName);
-        modelRegistry.registerEntityProperty(epObservationType);
-        modelRegistry.registerEntityProperty(epParameters);
-        modelRegistry.registerEntityProperty(epPhenomenonTime);
-        modelRegistry.registerEntityProperty(epReason);
-        modelRegistry.registerEntityProperty(epResult);
-        modelRegistry.registerEntityProperty(epResultTime);
-        modelRegistry.registerEntityProperty(epSampleType);
-        modelRegistry.registerEntityProperty(epShape);
-        modelRegistry.registerEntityProperty(epDeploymentTime);
-        modelRegistry.registerEntityProperty(epValidTime);
-        modelRegistry.registerEntityProperty(epValue);
-    }
-
-    private void registerNps(ModelRegistry modelRegistry) {
-        modelRegistry.registerNavProperty(npDeployment);
-        modelRegistry.registerNavProperty(npDeployments);
-        modelRegistry.registerNavProperty(npFoi);
-        modelRegistry.registerNavProperty(npFois);
-        modelRegistry.registerNavProperty(npHost);
-        modelRegistry.registerNavProperty(npHosts);
-        modelRegistry.registerNavProperty(npObservation);
-        modelRegistry.registerNavProperty(npObservations);
-        modelRegistry.registerNavProperty(npObservedProcedure);
-        modelRegistry.registerNavProperty(npObservedProcedures);
-        modelRegistry.registerNavProperty(npObservedProperty);
-        modelRegistry.registerNavProperty(npObservedProperties);
-        modelRegistry.registerNavProperty(npObserver);
-        modelRegistry.registerNavProperty(npObservers);
-        modelRegistry.registerNavProperty(npResult);
-        modelRegistry.registerNavProperty(npResults);
-    }
-
     private static class TablesAndIndices<J extends Comparable> {
 
         public StaTableDynamic<J> tDeployment;
