@@ -15,16 +15,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 
 /**
  * A validator that checks if an Entity has no missing properties.
  */
-
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface EntityValidator {
 
     /**
