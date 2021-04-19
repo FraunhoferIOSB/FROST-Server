@@ -153,6 +153,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return getThis();
     }
 
+    @Override
     public void registerRelation(Relation<J, T> relation) {
         relations.put(relation.getName(), relation);
     }

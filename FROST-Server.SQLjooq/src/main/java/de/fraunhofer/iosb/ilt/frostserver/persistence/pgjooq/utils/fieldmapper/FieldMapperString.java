@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import org.jooq.Name;
 import org.jooq.Table;
 
@@ -35,20 +35,24 @@ public class FieldMapperString extends FieldMapperAbstract {
 
     private int fieldIdx;
 
+    private DefEntityProperty parent;
+
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
+    public void setParent(DefEntityProperty parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
         fieldIdx = getOrRegisterField(field, dbTable, staTable);
     }
 
     @Override
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        if (!(property instanceof EntityProperty)) {
-            throw new IllegalArgumentException("Property must be an EntityProperty, got: " + property);
-        }
-        EntityProperty entityProperty = (EntityProperty) property;
-        PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        final EntityProperty entityProperty = parent.getEntityProperty();
+        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
         pfReg.addEntryString(entityProperty, t -> t.field(idx));
     }

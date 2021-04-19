@@ -18,9 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -40,23 +40,27 @@ public class FieldMapperId extends FieldMapperAbstract {
     private String field;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
-        final Name tableName = staTable.getQualifiedName();
-        Table<?> dbTable = ppm.getDbTable(tableName);
-        Field<?> dbField = dbTable.field(field);
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+        if (!(staTable instanceof StaTableDynamic)) {
+            throw new IllegalArgumentException("Id fields can only be registered on StaTableDynamic, not on " + staTable.getClass().getName());
+        }
+        StaTableDynamic staTableDynamic = (StaTableDynamic) staTable;
+        final Name tableName = staTableDynamic.getQualifiedName();
+        final Table<?> dbTable = ppm.getDbTable(tableName);
+        final Field<?> dbField = dbTable.field(field);
         if (dbField == null) {
             LOGGER.error("Could not find field {} on table {}.", field, tableName);
             return;
         }
         DataType<?> dataType = dbField.getDataType();
-        LOGGER.info("  Registering {} -> {}.{}", staTable.getName(), dbTable.getName(), field);
-        staTable.registerIdField(field, dataType);
+        LOGGER.info("  Registering {} -> {}.{}", staTableDynamic.getName(), dbTable.getName(), field);
+        staTableDynamic.registerIdField(field, dataType);
     }
 
     @Override
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
-        pfReg.addEntryId(ppm.getIdManager(), StaTableDynamic::getId);
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
+        pfReg.addEntryId(ppm.getIdManager(), t -> t.getId());
     }
 
     /**

@@ -39,7 +39,9 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
@@ -47,7 +49,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUti
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -487,47 +488,45 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 final String tableName = entityTypeDef.getTable();
                 LOGGER.info("  Table: {}.", tableName);
                 getDbTable(tableName);
-                getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             }
         }
 
         for (DefModel modelDefinition : modelDefinitions) {
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-                StaTableDynamic<J> typeStaTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                StaTableDynamic<J> typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
 
                 for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
-                    final Property property = propertyDef.getEntityPropertyMain();
                     for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
                         if (handler instanceof FieldMapper) {
-                            ((FieldMapper) handler).registerField(this, typeStaTable, property);
-                        }
-                    }
-                }
-                for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
-                    final Property property = propertyDef.getNavigationProperty(modelRegistry);
-                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                        if (handler instanceof FieldMapper) {
-                            ((FieldMapper) handler).registerField(this, typeStaTable, property);
-                        }
-                    }
-                }
-            }
-        }
-
-        for (DefModel modelDefinition : modelDefinitions) {
-            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-                StaTableDynamic<J> orCreateTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
-                for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
-                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                        if (handler instanceof FieldMapper) {
-                            ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getEntityPropertyMain());
+                            ((FieldMapper) handler).registerField(this, typeStaTable);
                         }
                     }
                 }
                 for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
                     for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
                         if (handler instanceof FieldMapper) {
-                            ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getNavigationProperty(modelRegistry));
+                            ((FieldMapper) handler).registerField(this, typeStaTable);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+                StaTableDynamic<J> orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerMapping(this, orCreateTable);
+                        }
+                    }
+                }
+                for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerMapping(this, orCreateTable);
                         }
                     }
                 }
@@ -555,7 +554,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return tables.get(0);
     }
 
-    private StaTableDynamic<J> getOrCreateTable(EntityType entityType, String tableName) {
+    private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, String tableName) {
         if (entityType == null) {
             throw new IllegalArgumentException("Not implemented yet");
         }
@@ -570,6 +569,20 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             return (StaTableDynamic<J>) table;
         }
         throw new IllegalStateException("Table already exists, but is not of type dynamic.");
+    }
+
+    public StaLinkTableDynamic<J> getOrCreateLinkTable(String tableName) {
+        StaTable<J, ?> table = tableCollection.getTableForName(tableName);
+        if (table == null) {
+            LOGGER.info("  Registering StaLinkTable {} ({})", tableName);
+            StaLinkTableDynamic<J> newTable = new StaLinkTableDynamic<>(DSL.name(tableName), tableCollection.getIdType());
+            tableCollection.registerTable(newTable);
+            table = newTable;
+        }
+        if (table instanceof StaLinkTableDynamic) {
+            return (StaLinkTableDynamic<J>) table;
+        }
+        throw new IllegalStateException("Table already exists, but is not of type StaLinkTableDynamic.");
     }
 
 }

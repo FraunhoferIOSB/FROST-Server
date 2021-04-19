@@ -18,17 +18,20 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
 /**
@@ -40,26 +43,50 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
     private String fieldSource;
     private String fieldGeom;
 
-    private int fieldSourceIdx;
+    private int fieldSourceIdx = -1;
     private int fieldGeomIdx;
 
+    private DefEntityProperty parent;
+
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
-        final Name tableName = staTable.getQualifiedName();
-        Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldSourceIdx = getOrRegisterField(fieldSource, dbTable, staTable);
-        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, new PostGisGeometryBinding());
+    public void setParent(DefEntityProperty parent) {
+        this.parent = parent;
     }
 
     @Override
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+        final Name tableName = staTable.getQualifiedName();
+        final Table<?> dbTable = ppm.getDbTable(tableName);
+        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, new PostGisGeometryBinding());
+        if (!StringHelper.isNullOrEmpty(fieldSource)) {
+            fieldSourceIdx = getOrRegisterField(fieldSource, dbTable, staTable);
+        }
+    }
+
+    @Override
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        final EntityPropertyMain property = parent.getEntityProperty();
+        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
         final int idxLocation = fieldSourceIdx;
         final int idxGeom = fieldGeomIdx;
-        pfReg.addEntry(property,
+        final PropertyFieldRegistry.NFP<T> sourcePfr;
+        if (idxLocation >= 0) {
+            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation));
+        } else {
+            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)));
+        }
+        pfReg.addEntry(
+                property,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (StaTableDynamic<J> t, Record tuple, Entity entity, DataSize dataSize) -> {
-                            String locationString = tuple.get(t.field(idxLocation, SQLDataType.CLOB));
+                        (T t, Record tuple, Entity entity, DataSize dataSize) -> {
+                            String locationString;
+                            if (idxLocation >= 0) {
+                                locationString = tuple.get(t.field(idxLocation, SQLDataType.CLOB));
+                            } else {
+                                locationString = tuple.get(
+                                        DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB))
+                                );
+                            }
                             dataSize.increase(locationString == null ? 0 : locationString.length());
                             entity.setProperty(property, Utils.locationUnknownEncoding(locationString));
                         },
@@ -72,7 +99,7 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
                             EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
                             message.addField(property);
                         }),
-                new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation)));
+                sourcePfr);
         pfReg.addEntryNoSelect(property, "g", t -> t.field(idxGeom));
     }
 

@@ -49,31 +49,59 @@ public class DefNavigationProperty {
     /**
      * Handlers used to map the property to a persistence manager.
      */
+    private Inverse inverse;
+
     private List<PropertyPersistenceMapper> handlers;
 
     @JsonIgnore
+    private EntityType sourceEntityType;
+    @JsonIgnore
+    private EntityType targetEntityType;
+    @JsonIgnore
     private NavigationPropertyMain navProp;
+    @JsonIgnore
+    private NavigationPropertyMain navPropInverse;
 
     public void init() {
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
+        if (entityType == null) {
+            entityType = name;
+        }
+        for (PropertyPersistenceMapper handler : handlers) {
+            handler.setParent(this);
+        }
     }
 
-    public NavigationPropertyMain getNavigationProperty(ModelRegistry modelRegistry) {
+    public void registerProperties(ModelRegistry modelRegistry) {
         if (navProp == null) {
-            if (entityType == null) {
-                entityType = name;
-            }
             if (entitySet) {
                 navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name);
             } else {
                 navProp = new NavigationPropertyMain.NavigationPropertyEntity(name);
             }
-            EntityType entityTypeForName = modelRegistry.getEntityTypeForName(entityType);
-            navProp.setEntityType(entityTypeForName);
+            targetEntityType = modelRegistry.getEntityTypeForName(entityType);
+            navProp.setEntityType(targetEntityType);
+            sourceEntityType.registerProperty(navProp, required);
         }
+        if (inverse != null) {
+            if (inverse.entitySet) {
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name);
+            } else {
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name);
+            }
+            navPropInverse.setEntityType(sourceEntityType);
+            targetEntityType.registerProperty(navPropInverse, inverse.required);
+        }
+    }
+
+    public NavigationPropertyMain getNavigationProperty() {
         return navProp;
+    }
+
+    public NavigationPropertyMain getNavigationPropertyInverse() {
+        return navPropInverse;
     }
 
     /**
@@ -164,6 +192,123 @@ public class DefNavigationProperty {
      */
     public void setHandlers(List<PropertyPersistenceMapper> handlers) {
         this.handlers = handlers;
+    }
+
+    /**
+     * Handlers used to map the property to a persistence manager.
+     *
+     * @return the inverse
+     */
+    public Inverse getInverse() {
+        return inverse;
+    }
+
+    /**
+     * Handlers used to map the property to a persistence manager.
+     *
+     * @param inverse the inverse to set
+     */
+    public void setInverse(Inverse inverse) {
+        this.inverse = inverse;
+    }
+
+    /**
+     * @return the sourceEntityType
+     */
+    public EntityType getSourceEntityType() {
+        return sourceEntityType;
+    }
+
+    /**
+     * @param sourceEntityType the sourceEntityType to set
+     */
+    public void setSourceEntityType(EntityType sourceEntityType) {
+        this.sourceEntityType = sourceEntityType;
+    }
+
+    /**
+     * @return the targetEntityType
+     */
+    public EntityType getTargetEntityType() {
+        return targetEntityType;
+    }
+
+    /**
+     * @param targetEntityType the targetEntityType to set
+     */
+    public void setTargetEntityType(EntityType targetEntityType) {
+        this.targetEntityType = targetEntityType;
+    }
+
+    public class Inverse {
+
+        /**
+         * The name of the NavigationProperty.
+         */
+        private String name;
+        /**
+         * Flag indicating the NavigationProperty points to an EntitySet.
+         */
+        private boolean entitySet;
+        /**
+         * Flag indicating the property must be set.
+         */
+        private boolean required;
+
+        /**
+         * The name of the NavigationProperty.
+         *
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * The name of the NavigationProperty.
+         *
+         * @param name the name to set
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Flag indicating the NavigationProperty points to an EntitySet.
+         *
+         * @return the entitySet
+         */
+        public boolean isEntitySet() {
+            return entitySet;
+        }
+
+        /**
+         * Flag indicating the NavigationProperty points to an EntitySet.
+         *
+         * @param entitySet the entitySet to set
+         */
+        public void setEntitySet(boolean entitySet) {
+            this.entitySet = entitySet;
+        }
+
+        /**
+         * Flag indicating the property must be set.
+         *
+         * @return the required
+         */
+        public boolean isRequired() {
+            return required;
+        }
+
+        /**
+         * Flag indicating the property must be set.
+         *
+         * @param required the required to set
+         */
+        public void setRequired(boolean required) {
+            this.required = required;
+        }
+
     }
 
 }

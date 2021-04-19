@@ -19,8 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 
 /**
  * Interface for classes that set up the mapping between database fields and
@@ -30,8 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
  */
 public interface FieldMapper extends PropertyPersistenceMapper {
 
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property);
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable);
 
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> staTable, Property property);
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable);
 
 }

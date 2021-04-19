@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
@@ -25,5 +26,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface PropertyPersistenceMapper {
+
+    @JsonIgnore
+    public default void setParent(DefNavigationProperty parent) {
+        // Default does nothing.
+    }
+
+    @JsonIgnore
+    public default void setParent(DefEntityProperty parent) {
+        // Default does nothing.
+    }
 
 }

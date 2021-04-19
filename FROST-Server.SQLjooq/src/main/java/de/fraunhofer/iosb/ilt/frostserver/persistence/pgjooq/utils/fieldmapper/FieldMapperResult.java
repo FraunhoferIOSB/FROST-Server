@@ -18,16 +18,18 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperAbstract.getOrRegisterField;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.math.BigDecimal;
 import java.util.Map;
@@ -54,8 +56,15 @@ public class FieldMapperResult extends FieldMapperAbstract {
     private int fieldJsonIdx;
     private int fieldBooleanIdx;
 
+    private DefEntityProperty parent;
+
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
+    public void setParent(DefEntityProperty parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
@@ -67,17 +76,18 @@ public class FieldMapperResult extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, final Property property) {
-        PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
         final int idxType = fieldTypeIdx;
         final int idxString = fieldStringIdx;
         final int idxNumber = fieldNumberIdx;
         final int idxJson = fieldJsonIdx;
         final int idxBoolean = fieldBooleanIdx;
+        final EntityPropertyMain property = parent.getEntityProperty();
 
         pfReg.addEntry(property,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (StaTableDynamic<J> t, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (T t, Record tuple, Entity entity, DataSize dataSize) -> {
                             readResultFromDb(entity, property, t, tuple, dataSize, idxType, idxString, idxNumber, idxBoolean, idxJson);
                         },
                         (t, entity, insertFields) -> {
@@ -94,9 +104,9 @@ public class FieldMapperResult extends FieldMapperAbstract {
                 new PropertyFieldRegistry.NFP<>("t", t -> t.field(idxType)));
     }
 
-    public <J extends Comparable<J>> void handleResult(
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void handleResult(
             Entity entity, Property property,
-            StaTableDynamic<J> table, Map<Field, Object> record,
+            T table, Map<Field, Object> record,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
         Object result = entity.getProperty(property);
         if (result instanceof Number) {
@@ -126,9 +136,9 @@ public class FieldMapperResult extends FieldMapperAbstract {
         }
     }
 
-    public <J extends Comparable<J>> void readResultFromDb(
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void readResultFromDb(
             Entity entity, Property property,
-            StaTableDynamic<J> table, Record tuple, DataSize dataSize,
+            T table, Record tuple, DataSize dataSize,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, (Field<Short>) table.field(idxReTy));
         if (resultTypeOrd != null) {
@@ -160,7 +170,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
         }
     }
 
-    private <J extends Comparable> void handleNumber(Entity entity, Property property, StaTableDynamic<J> table, Record tuple, int idxReSt, int idxReNu) {
+    private <J extends Comparable<J>, T extends StaMainTable<J, T>> void handleNumber(Entity entity, Property property, T table, Record tuple, int idxReSt, int idxReNu) {
         try {
             entity.setProperty(property, new BigDecimal(Utils.getFieldOrNull(tuple, (Field<String>) table.field(idxReSt))));
         } catch (NumberFormatException | NullPointerException e) {

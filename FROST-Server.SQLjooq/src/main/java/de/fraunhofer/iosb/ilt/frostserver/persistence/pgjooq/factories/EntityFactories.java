@@ -236,7 +236,9 @@ public class EntityFactories<J extends Comparable> {
             String json;
             json = objectToJson(location);
             clause.put(geomPath, NULL_FIELD);
-            clause.put(locationPath, json);
+            if (locationPath != null) {
+                clause.put(locationPath, json);
+            }
         }
     }
 
@@ -281,7 +283,9 @@ public class EntityFactories<J extends Comparable> {
         }
         final String template = "ST_Force2D(ST_Transform(ST_GeomFromGeoJSON({0}), 4326))";
         clause.put(geomPath, DSL.field(template, Object.class, geoJson));
-        clause.put(locationPath, locJson);
+        if (locationPath != null) {
+            clause.put(locationPath, locJson);
+        }
     }
 
     public static Object reParseGeometry(String encodingType, Object object) {

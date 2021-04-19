@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Collections;
@@ -63,6 +65,8 @@ public class DefEntityProperty {
     private List<PropertyPersistenceMapper> handlers;
 
     @JsonIgnore
+    private EntityType entityType;
+    @JsonIgnore
     private EntityPropertyMain entityProperty;
 
     public void init() {
@@ -72,9 +76,12 @@ public class DefEntityProperty {
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
+        for (PropertyPersistenceMapper handler : handlers) {
+            handler.setParent(this);
+        }
     }
 
-    public EntityPropertyMain getEntityPropertyMain() {
+    public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             TypeReference typeReference = TypeReferencesHelper.getTypeReference(type);
             if (typeReference == null) {
@@ -82,6 +89,10 @@ public class DefEntityProperty {
             }
             entityProperty = new EntityPropertyMain(name, typeReference, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new));
         }
+        entityType.registerProperty(entityProperty, required);
+    }
+
+    public EntityPropertyMain getEntityProperty() {
         return entityProperty;
     }
 
@@ -214,4 +225,13 @@ public class DefEntityProperty {
     public void setHasCustomProperties(boolean hasCustomProperties) {
         this.hasCustomProperties = hasCustomProperties;
     }
+
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
 }

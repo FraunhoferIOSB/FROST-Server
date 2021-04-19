@@ -135,6 +135,9 @@ public class Utils {
     }
 
     public static Object locationUnknownEncoding(String locationString) {
+        if (locationString == null) {
+            return null;
+        }
         // We have to guess, since encodingType is not loaded.
         try {
             return new GeoJsonDeserializier().deserialize(locationString);

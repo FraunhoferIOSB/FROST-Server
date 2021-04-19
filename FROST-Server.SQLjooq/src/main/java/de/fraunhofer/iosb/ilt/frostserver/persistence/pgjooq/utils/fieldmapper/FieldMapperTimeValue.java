@@ -18,13 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import org.jooq.Name;
 import org.jooq.Table;
 
@@ -40,23 +40,30 @@ public class FieldMapperTimeValue extends FieldMapperAbstract {
     private int fieldStartIdx;
     private int fieldEndIdx;
 
+    private DefEntityProperty parent;
+
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
+    public void setParent(DefEntityProperty parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
-        Table<?> dbTable = ppm.getDbTable(tableName);
+        final Table<?> dbTable = ppm.getDbTable(tableName);
         fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable);
         fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable);
     }
 
     @Override
-    public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        EntityProperty<TimeValue> tvp = (EntityProperty<TimeValue>) property;
-        PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
+    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        final EntityProperty<TimeValue> property = parent.getEntityProperty();
+        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
         final int idxStart = fieldStartIdx;
         final int idxEnd = fieldEndIdx;
         pfReg.addEntry(property,
-                new PropertyFieldRegistry.ConverterTimeValue<>(tvp, t -> t.field(idxStart), t -> t.field(idxEnd)),
+                new PropertyFieldRegistry.ConverterTimeValue<>(property, t -> t.field(idxStart), t -> t.field(idxEnd)),
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_START, t -> t.field(idxStart)),
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_END, t -> t.field(idxEnd)));
     }

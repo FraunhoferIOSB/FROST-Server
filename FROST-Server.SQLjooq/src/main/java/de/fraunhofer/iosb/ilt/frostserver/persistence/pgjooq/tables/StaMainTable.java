@@ -23,6 +23,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -60,6 +63,8 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
 
     public Relation<J, T> findRelation(String name);
 
+    public void registerRelation(Relation<J, T> relation);
+
     public TableRef<J> createJoin(String name, QueryState<J, ?> queryState, TableRef<J> sourceRef);
 
     public PropertyFieldRegistry<J, T> getPropertyFieldRegistry();
@@ -77,4 +82,35 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
     public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J dsId) throws NoSuchEntityException, IncompleteEntityException;
 
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
+
+    /**
+     * Add a hook that runs pre-insert.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreInsert(double priority, HookPreInsert<J> hook);
+
+    /**
+     * Add a hook that runs pre-update.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreUpdate(double priority, HookPreUpdate<J> hook);
+
+    /**
+     * Add a hook that runs pre-delete.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreDelete(double priority, HookPreDelete<J> hook);
+
 }

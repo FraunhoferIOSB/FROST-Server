@@ -91,10 +91,12 @@ public class DefEntityType {
     public void linkProperties(ModelRegistry modelRegistry) {
         entityType.registerProperty(ModelRegistry.EP_SELFLINK, false);
         for (DefEntityProperty defEp : entityProperties.values()) {
-            entityType.registerProperty(defEp.getEntityPropertyMain(), defEp.isRequired());
+            defEp.setEntityType(entityType);
+            defEp.registerProperties(modelRegistry);
         }
         for (DefNavigationProperty defNp : navigationProperties.values()) {
-            entityType.registerProperty(defNp.getNavigationProperty(modelRegistry), defNp.isRequired());
+            defNp.setSourceEntityType(entityType);
+            defNp.registerProperties(modelRegistry);
         }
     }
 
