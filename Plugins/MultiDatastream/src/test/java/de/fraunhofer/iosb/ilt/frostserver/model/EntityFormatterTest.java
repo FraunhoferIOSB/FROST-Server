@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -58,11 +62,17 @@ public class EntityFormatterTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
+    private static EntityType etMultiDatastream;
+    private static EntityPropertyMain epMultiObservationDataTypes;
+    private static EntityPropertyMain epUnitOfMeasurements;
+    private static NavigationPropertyEntity npMultiDatastream;
+    private static NavigationPropertyEntitySet npMultiDatastreams;
 
     @BeforeClass
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
+            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
@@ -70,8 +80,12 @@ public class EntityFormatterTest {
             pluginCoreModel.init(coreSettings);
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
-            coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
             coreSettings.getPluginManager().initPlugins(null);
+            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+            epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
+            epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
+            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+            npMultiDatastreams = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
         }
     }
 
@@ -676,7 +690,7 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/MultiDatastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
+        DefaultEntity entity = new DefaultEntity(etMultiDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
@@ -684,11 +698,11 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the wind.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring wind direction and speed.")
-                .setProperty(pluginMultiDatastream.epUnitOfMeasurements, Arrays.asList(
+                .setProperty(epUnitOfMeasurements, Arrays.asList(
                         new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
                         new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
                 ))
-                .setProperty(pluginMultiDatastream.epMultiObservationDataTypes, Arrays.asList(
+                .setProperty(epMultiObservationDataTypes, Arrays.asList(
                         "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
                         "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
                 ))
@@ -815,7 +829,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
@@ -841,7 +855,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
@@ -867,7 +881,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))

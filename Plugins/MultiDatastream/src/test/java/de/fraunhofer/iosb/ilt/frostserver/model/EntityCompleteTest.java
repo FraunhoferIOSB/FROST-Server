@@ -26,6 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -47,11 +51,17 @@ public class EntityCompleteTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
+    private static EntityType etMultiDatastream;
+    private static EntityPropertyMain epMultiObservationDataTypes;
+    private static EntityPropertyMain epUnitOfMeasurements;
+    private static NavigationPropertyEntity npMultiDatastream;
+    private static NavigationPropertyEntitySet npMultiDatastreams;
 
     @BeforeClass
     public static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
+            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
@@ -59,8 +69,12 @@ public class EntityCompleteTest {
             pluginCoreModel.init(coreSettings);
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
-            coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
             coreSettings.getPluginManager().initPlugins(null);
+            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+            epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
+            epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
+            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+            npMultiDatastreams = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
         }
     }
 
@@ -75,9 +89,9 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(pluginMultiDatastream.etMultiDatastream, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(etMultiDatastream, null);
 
-        Entity entity = new DefaultEntity(pluginMultiDatastream.etMultiDatastream);
+        Entity entity = new DefaultEntity(etMultiDatastream);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.epName, "Test MultiDatastream");
@@ -88,7 +102,7 @@ public class EntityCompleteTest {
 
         List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, unitOfMeasurements);
+        entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
@@ -96,7 +110,7 @@ public class EntityCompleteTest {
 
         List<String> multiObservationDataTypes = new ArrayList<>();
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, multiObservationDataTypes);
+        entity.setProperty(epMultiObservationDataTypes, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setId(new IdLong(1)));
@@ -112,16 +126,16 @@ public class EntityCompleteTest {
 
         entity.setProperty(pluginCoreModel.npThing, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(pluginMultiDatastream.etMultiDatastream, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(etMultiDatastream, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
 
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, unitOfMeasurements);
+        entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, multiObservationDataTypes);
+        entity.setProperty(epMultiObservationDataTypes, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setId(new IdLong(3)));
@@ -141,7 +155,7 @@ public class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream).setId(new IdLong(2)));
+        entity.setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.npDatastream, null);
@@ -153,14 +167,14 @@ public class EntityCompleteTest {
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
 
         entity.setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
-        entity.setProperty(pluginMultiDatastream.npMultiDatastream, null);
+        entity.setProperty(npMultiDatastream, null);
 
         containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), pluginCoreModel.etDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), pluginMultiDatastream.etMultiDatastream, null));
+        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), etMultiDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));

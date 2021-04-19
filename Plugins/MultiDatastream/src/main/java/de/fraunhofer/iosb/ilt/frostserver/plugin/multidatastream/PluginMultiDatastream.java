@@ -17,23 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_ID;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -43,15 +35,15 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,36 +57,51 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
-    public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING);
-    public final EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements = new EntityPropertyMain<>("UnitOfMeasurements", TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM, true, false);
-
-    public final NavigationPropertyEntity npMultiDatastream = new NavigationPropertyEntity("MultiDatastream");
-    public final NavigationPropertyEntitySet npMultiDatastreams = new NavigationPropertyEntitySet("MultiDatastreams");
-
-    public final EntityType etMultiDatastream = new EntityType("MultiDatastream", "MultiDatastreams");
+    private static final String MODEL_PATH = "pluginmultidatastream";
+    private static final String[] MODEL_FILES = new String[]{
+        "MultiDatastream.json"
+    };
 
     @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_MULTI_DATASTREAM = "multiDatastream.enable";
+    public static final String TAG_ENABLE_MDS_MODEL = "multiDatastream.enable";
 
-    private static final List<String> REQUIREMENTS_MULTIDATASTREAM = Arrays.asList(
+    private static final List<String> REQUIREMENTS_MDS_MODEL = Arrays.asList(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
     );
 
     private CoreSettings settings;
     private boolean enabled;
     private boolean fullyInitialised;
+    private List<DefModel> modelDefinitions = new ArrayList<>();
 
     public PluginMultiDatastream() {
-        LOGGER.info("Creating new MultiDatastream Plugin.");
+        LOGGER.info("Creating new MultiDatastream++ Plugin. {}", ValidatorsHooks.ValidatorMultiDatastream.class.getName());
     }
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_MULTI_DATASTREAM, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_MDS_MODEL, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
+            for (String fileName : MODEL_FILES) {
+                loadModelFile(fileName);
+            }
+        }
+    }
+
+    private void loadModelFile(String fileName) {
+        final String fullPath = MODEL_PATH + "/" + fileName;
+        LOGGER.info("Loading model definition from {}", fullPath);
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            DefModel modelDefinition = objectMapper.readValue(stream, DefModel.class);
+            modelDefinition.init();
+            modelDefinitions.add(modelDefinition);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load model definition", ex);
         }
     }
 
@@ -116,93 +123,52 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             return;
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
-        extensionList.addAll(REQUIREMENTS_MULTIDATASTREAM);
+        extensionList.addAll(REQUIREMENTS_MDS_MODEL);
     }
 
     @Override
     public void registerEntityTypes() {
-        LOGGER.info("Initialising MultiDatastream Types...");
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityType(etMultiDatastream);
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        for (DefModel modelDefinition : modelDefinitions) {
+            modelDefinition.registerEntityTypes(modelRegistry);
+        }
     }
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Linking MultiDatastream Types...");
-        final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
-            return false;
+        LOGGER.info("Initialising OMS Model Types...");
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        for (DefModel modelDefinition : modelDefinitions) {
+            modelDefinition.linkEntityTypes(modelRegistry);
+            if (pm != null) {
+                pm.addModelMapping(modelDefinition);
+            }
         }
-        etMultiDatastream
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(pluginCoreModel.epName, true)
-                .registerProperty(pluginCoreModel.epDescription, true)
-                .registerProperty(pluginCoreModel.epObservationType, false)
-                .registerProperty(epMultiObservationDataTypes, true)
-                .registerProperty(epUnitOfMeasurements, true)
-                .registerProperty(pluginCoreModel.epObservedArea, false)
-                .registerProperty(pluginCoreModel.epPhenomenonTimeDs, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(pluginCoreModel.epResultTimeDs, false)
-                .registerProperty(pluginCoreModel.npObservedProperties, false)
-                .registerProperty(pluginCoreModel.npSensor, true)
-                .registerProperty(pluginCoreModel.npThing, true)
-                .registerProperty(pluginCoreModel.npObservations, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
-                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
-                    List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
-                    EntitySet observedProperties = entity.getProperty(pluginCoreModel.npObservedProperties);
-                    if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-                    }
-                    if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
-                        final int opSize = observedProperties == null ? 0 : observedProperties.size();
-                        throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-                    }
-                    String observationType = entity.getProperty(pluginCoreModel.epObservationType);
-                    if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
-                        throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
-                    }
-                });
-        // Register multiDatastream on existing entities.
-        pluginCoreModel.etThing
-                .registerProperty(npMultiDatastreams, false);
-        pluginCoreModel.etObservedProperty
-                .registerProperty(npMultiDatastreams, false);
-        pluginCoreModel.etSensor
-                .registerProperty(npMultiDatastreams, false);
-        // Now make DATASTREAM optional and register a validator that checks if
-        // either Datastream or MultiDatastream is set.
-        pluginCoreModel.etObservation
-                .registerProperty(pluginCoreModel.npDatastream, false)
-                .registerProperty(npMultiDatastream, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
-                    if (!entityPropertiesOnly) {
-                        Entity datastream = entity.getProperty(pluginCoreModel.npDatastream);
-                        Entity multiDatastream = entity.getProperty(npMultiDatastream);
-                        if (datastream != null && multiDatastream != null) {
-                            throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
-                        }
-                        if (datastream == null && multiDatastream == null) {
-                            throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
-                        }
-                        if (multiDatastream != null) {
-                            Object result = entity.getProperty(pluginCoreModel.epResult);
-                            if (!(result instanceof List)) {
-                                throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
-                            }
-                        }
-                    }
-                });
+
+        // Make DATASTREAM optional.
+        final EntityType etObservation = modelRegistry.getEntityTypeForName("Observation");
+        final EntityType etObservedProperty = modelRegistry.getEntityTypeForName("ObservedProperty");
+        final NavigationPropertyMain npDatastream = etObservation.getNavigationProperty("Datastream");
+        etObservation.registerProperty(npDatastream, false);
+        etObservation.addValidator(new ValidatorsHooks.ValidatorObservations());
 
         if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            TableCollection tableCollection = ppm.getTableCollection();
-            DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(idType, this, pluginCoreModel));
-            tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
+            final PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            final StaMainTable obsPropsTable = ppm.getTableCollection().getTableForType(etObservedProperty);
+            final StaMainTable observationsTable = ppm.getTableCollection().getTableForType(etObservation);
+
+            // Register hooks to alter behaviour of other tables
+            obsPropsTable.registerHookPreInsert(-1, new ValidatorsHooks.HookPreInsertObservedProperty());
+            obsPropsTable.registerHookPreUpdate(-1, new ValidatorsHooks.HookPreUpdateObservedProperty());
+            obsPropsTable.registerHookPreDelete(-1, new ValidatorsHooks.HookPreDeleteObservedProperty());
+            // On insert Observation
+            observationsTable.registerHookPreInsert(-1, new ValidatorsHooks.HookPreInsertObservation());
+            // On update, make sure we still have either a DS or MDS, but not both.
+            observationsTable.registerHookPreUpdate(-1, new ValidatorsHooks.HookPreUpdateObservation());
         }
+
+        // Done, release the model definition.
+        modelDefinitions = null;
         fullyInitialised = true;
         return true;
     }

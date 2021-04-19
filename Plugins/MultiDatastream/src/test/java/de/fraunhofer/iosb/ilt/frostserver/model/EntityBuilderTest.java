@@ -25,8 +25,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -61,6 +64,11 @@ public class EntityBuilderTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
+    private static EntityType etMultiDatastream;
+    private static EntityPropertyMain epMultiObservationDataTypes;
+    private static EntityPropertyMain epUnitOfMeasurements;
+    private static NavigationPropertyEntity npMultiDatastream;
+    private static NavigationPropertyEntitySet npMultiDatastreams;
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
     private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
@@ -69,6 +77,7 @@ public class EntityBuilderTest {
     public static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
+            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
@@ -76,8 +85,12 @@ public class EntityBuilderTest {
             pluginCoreModel.init(coreSettings);
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
-            coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
             coreSettings.getPluginManager().initPlugins(null);
+            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+            epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
+            epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
+            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+            npMultiDatastreams = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
         }
     }
 
@@ -91,7 +104,7 @@ public class EntityBuilderTest {
         propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
         propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
         propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
-        propertyValues.put(pluginMultiDatastream.epMultiObservationDataTypes, Arrays.asList("Type 1", "Type 2"));
+        propertyValues.put(epMultiObservationDataTypes, Arrays.asList("Type 1", "Type 2"));
         propertyValues.put(pluginCoreModel.epName, "myName");
         propertyValues.put(pluginCoreModel.epObservationType, "my Type");
         propertyValues.put(pluginCoreModel.epObservedArea, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
@@ -111,7 +124,7 @@ public class EntityBuilderTest {
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
         propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
-        propertyValues.put(pluginMultiDatastream.epUnitOfMeasurements, Arrays.asList(unit1, unit2));
+        propertyValues.put(epUnitOfMeasurements, Arrays.asList(unit1, unit2));
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         int nextId = 100;
@@ -119,7 +132,7 @@ public class EntityBuilderTest {
         propertyValues.put(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npHistoricalLocation, new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npLocation, new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
-        propertyValues.put(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(nextId++)));
+        propertyValues.put(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npObservation, new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
@@ -145,10 +158,10 @@ public class EntityBuilderTest {
         locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
         propertyValues.put(pluginCoreModel.npLocations, locations);
 
-        EntitySetImpl multiDatastreams = new EntitySetImpl(pluginMultiDatastream.etMultiDatastream);
-        multiDatastreams.add(new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(nextId++)));
-        multiDatastreams.add(new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(nextId++)));
-        propertyValues.put(pluginMultiDatastream.npMultiDatastreams, multiDatastreams);
+        EntitySetImpl multiDatastreams = new EntitySetImpl(etMultiDatastream);
+        multiDatastreams.add(new DefaultEntity(etMultiDatastream, new IdLong(nextId++)));
+        multiDatastreams.add(new DefaultEntity(etMultiDatastream, new IdLong(nextId++)));
+        propertyValues.put(npMultiDatastreams, multiDatastreams);
 
         EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.etObservation);
         observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));

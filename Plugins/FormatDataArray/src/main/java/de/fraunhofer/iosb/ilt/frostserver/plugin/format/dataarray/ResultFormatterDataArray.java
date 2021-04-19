@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -51,19 +51,21 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     private final CoreSettings settings;
     private final PluginCoreModel pluginCoreModel;
-    private final PluginMultiDatastream pluginMd;
     private final ModelRegistry modelRegistry;
+    private NavigationPropertyEntity npMultiDatastream;
 
     public ResultFormatterDataArray(CoreSettings settings) {
         this.settings = settings;
         modelRegistry = settings.getModelRegistry();
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        if (npMultiDatastream == null) {
+            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+        }
         if (!(path.getLastElement() instanceof PathElementEntitySet)
                 || path.isRef()) {
             throw new IncorrectRequestException(OBSERVATIONS_ONLY);
@@ -73,8 +75,8 @@ public class ResultFormatterDataArray implements ResultFormatter {
             final ModelRegistry modelRegistry = settings.getModelRegistry();
             if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
                 query.getSelect().add(pluginCoreModel.npDatastream);
-                if (pluginMd != null) {
-                    query.getSelect().add(pluginMd.npMultiDatastream);
+                if (npMultiDatastream != null) {
+                    query.getSelect().add(npMultiDatastream);
                 }
             }
         }
@@ -114,16 +116,14 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public final boolean parameters;
         private final ModelRegistry modelRegistry;
         private final PluginCoreModel pluginCoreModel;
-        private final PluginMultiDatastream pluginMultiDatastream;
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs) {
-            this(modelRegistry, pCoreModel, pMultiDs, false);
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel) {
+            this(modelRegistry, pCoreModel, false);
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs, boolean allValue) {
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, boolean allValue) {
             this.modelRegistry = modelRegistry;
             this.pluginCoreModel = pCoreModel;
-            this.pluginMultiDatastream = pMultiDs;
             id = allValue;
             phenomenonTime = allValue;
             result = allValue;
@@ -133,10 +133,9 @@ public class ResultFormatterDataArray implements ResultFormatter {
             parameters = allValue;
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs, Set<Property> select) {
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, Set<Property> select) {
             this.modelRegistry = modelRegistry;
             this.pluginCoreModel = pCoreModel;
-            this.pluginMultiDatastream = pMultiDs;
             id = select.contains(ModelRegistry.EP_ID);
             phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
             result = select.contains(pCoreModel.epResult);
@@ -202,18 +201,18 @@ public class ResultFormatterDataArray implements ResultFormatter {
     public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
-            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, pluginMd, true);
+            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, true);
         } else {
-            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, pluginMd, query.getSelect());
+            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, query.getSelect());
         }
         List<String> components = visComps.getComponents();
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastream, pluginMd.npMultiDatastream);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastream, npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastream, pluginMd.npMultiDatastream)
+                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastream, npMultiDatastream)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

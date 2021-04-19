@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -67,13 +67,15 @@ public class ServiceDataArray {
 
     private final CoreSettings settings;
     private final PluginCoreModel pluginCoreModel;
-    private final PluginMultiDatastream pluginMd;
     private final ArrayValueHandlers arrayValueHandlers;
+    private NavigationPropertyEntity npMultiDatastream;
 
     public ServiceDataArray(CoreSettings settings) {
         this.settings = settings;
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
+        npMultiDatastream = (NavigationPropertyEntity) settings.getModelRegistry()
+                .getEntityTypeForName("Observation")
+                .getNavigationProperty("MultiDatastream");
         arrayValueHandlers = new ArrayValueHandlers();
     }
 
@@ -123,10 +125,10 @@ public class ServiceDataArray {
                 if (datastream != null) {
                     observation.setProperty(pluginCoreModel.npDatastream, datastream);
                 } else {
-                    if (pluginMd == null) {
+                    if (npMultiDatastream == null) {
                         throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
                     }
-                    observation.setProperty(pluginMd.npMultiDatastream, multiDatastream);
+                    observation.setProperty(npMultiDatastream, multiDatastream);
                 }
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);
