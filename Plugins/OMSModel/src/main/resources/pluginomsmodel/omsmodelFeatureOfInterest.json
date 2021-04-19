@@ -87,6 +87,17 @@
                             "field": "parameters"
                         }
                     ]
+                },
+                "shape": {
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
+                            "fieldSource": "shape",
+                            "fieldGeom": "geom"
+                        }
+                    ]
                 }
             },
             "navigationProperties": {
