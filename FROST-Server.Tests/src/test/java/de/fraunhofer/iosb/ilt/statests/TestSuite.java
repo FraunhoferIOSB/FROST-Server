@@ -127,6 +127,7 @@ public class TestSuite {
     private final Map<Properties, Server> httpServers = new HashMap<>();
     private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
     private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
+
     private String pgConnectUrl;
     private AtomicInteger nextId = new AtomicInteger(1);
 

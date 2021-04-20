@@ -178,25 +178,27 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public String checkForUpgrades() {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.checkForUpgrades(fileName);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.checkForUpgrades(fileName);
+            }
+            return "Unknown persistence manager class";
         }
-        return "Unknown persistence manager class";
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.doUpgrades(fileName, out);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.doUpgrades(fileName, out);
+            }
+            out.append("Unknown persistence manager class");
+            return false;
         }
-        out.append("Unknown persistence manager class");
-        return false;
     }
 
 }

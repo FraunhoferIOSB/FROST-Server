@@ -41,8 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
@@ -51,11 +49,6 @@ import org.slf4j.LoggerFactory;
  * @author jab
  */
 public class JsonReader {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonReader.class);
 
     private static final Map<ModelRegistry, ObjectMapper> mappers = new HashMap<>();
 

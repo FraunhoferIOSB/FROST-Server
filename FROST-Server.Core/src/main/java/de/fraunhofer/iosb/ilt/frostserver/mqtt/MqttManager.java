@@ -153,7 +153,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         final EntityChangedMessage.Type eventType = message.getEventType();
         EntityType entityType = message.getEntityType();
         LOGGER.trace("Received a {} message for a {}.", eventType, entityType);
-        if (message.getEventType() == EntityChangedMessage.Type.DELETE) {
+        if (eventType == EntityChangedMessage.Type.DELETE) {
             // v1.0 does not do delete notification.
             return;
         }
@@ -174,7 +174,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     public void notifySubscription(Subscription subscription, Entity entity) {
         final String topic = subscription.getTopic();
         try {
-            LOGGER.trace("Notifying Topic {}", topic);
             String payload = subscription.formatMessage(entity);
             server.publish(topic, payload, settings.getMqttSettings().getQosLevel());
         } catch (IOException ex) {

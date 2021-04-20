@@ -42,11 +42,11 @@ public class MessageBusFactory {
     }
 
     public static synchronized void createMessageBus(CoreSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("settings must be non-null");
+        }
         MessageBus instance = settings.getMessageBus();
         if (instance == null) {
-            if (settings == null) {
-                throw new IllegalArgumentException("settings must be non-null");
-            }
             String mbClsName = settings.getBusSettings().getBusImplementationClass();
             try {
 

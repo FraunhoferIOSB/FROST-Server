@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 public class MqttManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManagerTest.class.getName());
+
     private static final int REPEAT_COUNT = 0;
     private static final int MESSAGE_COUNT = 20000;
 
