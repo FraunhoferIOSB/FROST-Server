@@ -65,55 +65,102 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
+    public static final String NAME_ET_DATASTREAM = "Datastream";
+    public static final String NAME_NP_DATASTREAM = "Datastream";
+    public static final String NAME_NP_DATASTREAMS = "Datastreams";
+    public static final String NAME_ET_FEATUREOFINTEREST = "FeatureOfInterest";
+    public static final String NAME_NP_FEATUREOFINTEREST = "FeatureOfInterest";
+    public static final String NAME_NP_FEATURESOFINTEREST = "FeaturesOfInterest";
+    public static final String NAME_ET_HISTORICALLOCATION = "HistoricalLocation";
+    public static final String NAME_NP_HISTORICALLOCATION = "HistoricalLocation";
+    public static final String NAME_NP_HISTORICALLOCATIONS = "HistoricalLocations";
+    public static final String NAME_ET_LOCATION = "Location";
+    public static final String NAME_NP_LOCATION = "Location";
+    public static final String NAME_NP_LOCATIONS = "Locations";
+    public static final String NAME_ET_OBSERVATION = "Observation";
+    public static final String NAME_NP_OBSERVATION = "Observation";
+    public static final String NAME_NP_OBSERVATIONS = "Observations";
+    public static final String NAME_ET_OBSERVEDPROPERTY = "ObservedProperty";
+    public static final String NAME_NP_OBSERVEDPROPERTY = "ObservedProperty";
+    public static final String NAME_NP_OBSERVEDPROPERTIES = "ObservedProperties";
+    public static final String NAME_ET_SENSOR = "Sensor";
+    public static final String NAME_NP_SENSOR = "Sensor";
+    public static final String NAME_NP_SENSORS = "Sensors";
+    public static final String NAME_ET_THING = "Thing";
+    public static final String NAME_NP_THING = "Thing";
+    public static final String NAME_NP_THINGS = "Things";
+
+    public static final String NAME_EP_CREATIONTIME = "creationTime";
+    public static final String NAME_EP_DESCRIPTION = "description";
+    public static final String NAME_EP_DEFINITION = "definition";
+    public static final String NAME_EP_FEATURE = "feature";
+    public static final String NAME_EP_LOCATION = "location";
+    public static final String NAME_EP_METADATA = "metadata";
+    public static final String NAME_EP_NAME = "name";
+    public static final String NAME_EP_OBSERVATIONTYPE = "observationType";
+    public static final String NAME_EP_OBSERVEDAREA = "observedArea";
+    public static final String NAME_EP_PARAMETERS = "parameters";
+    public static final String NAME_EP_PHENOMENONTIME = "phenomenonTime";
+    public static final String NAME_EP_RESULT = "result";
+    public static final String NAME_EP_RESULTTIME = "resultTime";
+    public static final String NAME_EP_RESULTQUALITY = "resultQuality";
+    public static final String NAME_EP_TIME = "time";
+    public static final String NAME_EP_UNITOFMEASUREMENT = "unitOfMeasurement";
+    public static final String NAME_EP_VALIDTIME = "validTime";
+
+    public static final String NAME_LINKTABLE_THINGS_LOCATIONS = "THINGS_LOCATIONS";
+    public static final String NAME_COL_LT_THINGID = "THING_ID";
+    public static final String NAME_COL_LT_LOCATIONID = "LOCATION_ID";
+
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/plugincoremodel/tables";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
-    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>("CreationTime", TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>("Description", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>("Definition", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>("Feature", null, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>("Location", null, true, false);
-    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>("Metadata", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("Name", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>("ObservationType", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>("ObservedArea", TYPE_REFERENCE_GEOJSONOBJECT);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEVALUE);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEINTERVAL);
-    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>("Parameters", TYPE_REFERENCE_MAP, true, false);
-    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>("Result", TYPE_REFERENCE_OBJECT, true, true);
-    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINSTANT, false, true);
-    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINTERVAL, false, true);
-    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>("ResultQuality", TYPE_REFERENCE_OBJECT, true, false);
-    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement = new EntityPropertyMain<>("UnitOfMeasurement", TYPE_REFERENCE_UOM, true, false);
-    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL);
+    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, TYPE_REFERENCE_TIMEINSTANT);
+    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, null, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, null, true, false);
+    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, TYPE_REFERENCE_STRING);
+    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TYPE_REFERENCE_GEOJSONOBJECT);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TYPE_REFERENCE_TIMEVALUE);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TYPE_REFERENCE_TIMEINTERVAL);
+    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TYPE_REFERENCE_MAP, true, false);
+    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TYPE_REFERENCE_OBJECT, true, true);
+    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TYPE_REFERENCE_TIMEINSTANT, false, true);
+    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TYPE_REFERENCE_TIMEINTERVAL, false, true);
+    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TYPE_REFERENCE_OBJECT, true, false);
+    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, TYPE_REFERENCE_TIMEINSTANT);
+    public final EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TYPE_REFERENCE_UOM, true, false);
+    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TYPE_REFERENCE_TIMEINTERVAL);
 
-    public final NavigationPropertyEntity npDatastream = new NavigationPropertyEntity("Datastream");
-    public final NavigationPropertyEntitySet npDatastreams = new NavigationPropertyEntitySet("Datastreams");
-    public final NavigationPropertyEntity npFeatureOfInterest = new NavigationPropertyEntity("FeatureOfInterest");
-    public final NavigationPropertyEntitySet npFeaturesOfInterest = new NavigationPropertyEntitySet("FeaturesOfInterest");
-    public final NavigationPropertyEntity npHistoricalLocation = new NavigationPropertyEntity("HistoricalLocation");
-    public final NavigationPropertyEntitySet npHistoricalLocations = new NavigationPropertyEntitySet("HistoricalLocations");
-    public final NavigationPropertyEntity npLocation = new NavigationPropertyEntity("Location");
-    public final NavigationPropertyEntitySet npLocations = new NavigationPropertyEntitySet("Locations");
-    public final NavigationPropertyEntity npObservation = new NavigationPropertyEntity("Observation");
-    public final NavigationPropertyEntitySet npObservations = new NavigationPropertyEntitySet("Observations");
-    public final NavigationPropertyEntity npObservedProperty = new NavigationPropertyEntity("ObservedProperty");
-    public final NavigationPropertyEntitySet npObservedProperties = new NavigationPropertyEntitySet("ObservedProperties");
-    public final NavigationPropertyEntity npSensor = new NavigationPropertyEntity("Sensor");
-    public final NavigationPropertyEntitySet npSensors = new NavigationPropertyEntitySet("Sensors");
-    public final NavigationPropertyEntity npThing = new NavigationPropertyEntity("Thing");
-    public final NavigationPropertyEntitySet npThings = new NavigationPropertyEntitySet("Things");
+    public final NavigationPropertyEntity npDatastream = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
+    public final NavigationPropertyEntitySet npDatastreams = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
+    public final NavigationPropertyEntity npFeatureOfInterest = new NavigationPropertyEntity(NAME_NP_FEATUREOFINTEREST);
+    public final NavigationPropertyEntitySet npFeaturesOfInterest = new NavigationPropertyEntitySet(NAME_NP_FEATURESOFINTEREST);
+    public final NavigationPropertyEntity npHistoricalLocation = new NavigationPropertyEntity(NAME_NP_HISTORICALLOCATION);
+    public final NavigationPropertyEntitySet npHistoricalLocations = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
+    public final NavigationPropertyEntity npLocation = new NavigationPropertyEntity(NAME_NP_LOCATION);
+    public final NavigationPropertyEntitySet npLocations = new NavigationPropertyEntitySet(NAME_NP_LOCATIONS);
+    public final NavigationPropertyEntity npObservation = new NavigationPropertyEntity(NAME_NP_OBSERVATION);
+    public final NavigationPropertyEntitySet npObservations = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS);
+    public final NavigationPropertyEntity npObservedProperty = new NavigationPropertyEntity(NAME_NP_OBSERVEDPROPERTY);
+    public final NavigationPropertyEntitySet npObservedProperties = new NavigationPropertyEntitySet(NAME_NP_OBSERVEDPROPERTIES);
+    public final NavigationPropertyEntity npSensor = new NavigationPropertyEntity(NAME_NP_SENSOR);
+    public final NavigationPropertyEntitySet npSensors = new NavigationPropertyEntitySet(NAME_NP_SENSORS);
+    public final NavigationPropertyEntity npThing = new NavigationPropertyEntity(NAME_NP_THING);
+    public final NavigationPropertyEntitySet npThings = new NavigationPropertyEntitySet(NAME_NP_THINGS);
 
-    public final EntityType etThing = new EntityType("Thing", "Things");
-    public final EntityType etSensor = new EntityType("Sensor", "Sensors");
-    public final EntityType etObservedProperty = new EntityType("ObservedProperty", "ObservedProperties");
-    public final EntityType etObservation = new EntityType("Observation", "Observations");
-    public final EntityType etLocation = new EntityType("Location", "Locations");
-    public final EntityType etHistoricalLocation = new EntityType("HistoricalLocation", "HistoricalLocations");
-    public final EntityType etFeatureOfInterest = new EntityType("FeatureOfInterest", "FeaturesOfInterest");
-    public final EntityType etDatastream = new EntityType("Datastream", "Datastreams");
+    public final EntityType etThing = new EntityType(NAME_NP_THING, NAME_NP_THINGS);
+    public final EntityType etSensor = new EntityType(NAME_NP_SENSOR, NAME_NP_SENSORS);
+    public final EntityType etObservedProperty = new EntityType(NAME_NP_OBSERVEDPROPERTY, NAME_NP_OBSERVEDPROPERTIES);
+    public final EntityType etObservation = new EntityType(NAME_NP_OBSERVATION, NAME_NP_OBSERVATIONS);
+    public final EntityType etLocation = new EntityType(NAME_NP_LOCATION, NAME_NP_LOCATIONS);
+    public final EntityType etHistoricalLocation = new EntityType(NAME_NP_HISTORICALLOCATION, NAME_NP_HISTORICALLOCATIONS);
+    public final EntityType etFeatureOfInterest = new EntityType(NAME_NP_FEATUREOFINTEREST, NAME_NP_FEATURESOFINTEREST);
+    public final EntityType etDatastream = new EntityType(NAME_NP_DATASTREAM, NAME_NP_DATASTREAMS);
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_MODEL = "coreModel.enable";
@@ -276,25 +323,27 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public String checkForUpgrades() {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.checkForUpgrades(fileName);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.checkForUpgrades(fileName);
+            }
+            return "Unknown persistence manager class";
         }
-        return "Unknown persistence manager class";
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.doUpgrades(fileName, out);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.doUpgrades(fileName, out);
+            }
+            out.append("Unknown persistence manager class");
+            return false;
         }
-        out.append("Unknown persistence manager class");
-        return false;
     }
 
 }

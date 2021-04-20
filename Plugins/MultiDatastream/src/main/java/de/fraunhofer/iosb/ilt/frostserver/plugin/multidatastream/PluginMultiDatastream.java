@@ -25,6 +25,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_ET_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_ET_OBSERVATION;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_ET_OBSERVEDPROPERTY;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
@@ -52,6 +55,21 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
+
+    public static final String NAME_ET_MULTIDATASTREAM = "MultiDatastream";
+
+    public static final String NAME_NP_MULTIDATASTREAM = "MultiDatastream";
+    public static final String NAME_NP_MULTIDATASTREAMS = "MultiDatastreams";
+
+    public static final String NAME_EP_UNITOFMEASUREMENTS = "unitOfMeasurements";
+    public static final String NAME_EP_MULTIOBSERVATIONDATATYPES = "multiObservationDataTypes";
+
+    public static final String NAME_TABLE_MD = "MULTI_DATASTREAMS";
+    public static final String NAME_COL_MD_THINGID = "THING_ID";
+
+    public static final String NAME_LINKTABLE_MDS_OBSPROPS = "MULTI_DATASTREAMS_OBS_PROPERTIES";
+    public static final String NAME_COL_LT_MULTIDATASTREAMID = "MULTI_DATASTREAM_ID";
+    public static final String NAME_COL_LT_OBSPROPERTYID = "OBS_PROPERTY_ID";
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginmultidatastream/tables";
 
@@ -146,9 +164,9 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         }
 
         // Make DATASTREAM optional.
-        final EntityType etObservation = modelRegistry.getEntityTypeForName("Observation");
-        final EntityType etObservedProperty = modelRegistry.getEntityTypeForName("ObservedProperty");
-        final NavigationPropertyMain npDatastream = etObservation.getNavigationProperty("Datastream");
+        final EntityType etObservation = modelRegistry.getEntityTypeForName(NAME_ET_OBSERVATION);
+        final EntityType etObservedProperty = modelRegistry.getEntityTypeForName(NAME_ET_OBSERVEDPROPERTY);
+        final NavigationPropertyMain npDatastream = etObservation.getNavigationProperty(NAME_ET_DATASTREAM);
         etObservation.registerProperty(npDatastream, false);
         etObservation.addValidator(new ValidatorsHooks.ValidatorObservations());
 
@@ -175,25 +193,27 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     @Override
     public String checkForUpgrades() {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.checkForUpgrades(fileName);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.checkForUpgrades(fileName);
+            }
+            return "Unknown persistence manager class";
         }
-        return "Unknown persistence manager class";
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
-            return ppm.doUpgrades(fileName, out);
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.doUpgrades(fileName, out);
+            }
+            out.append("Unknown persistence manager class");
+            return false;
         }
-        out.append("Unknown persistence manager class");
-        return false;
     }
 
 }

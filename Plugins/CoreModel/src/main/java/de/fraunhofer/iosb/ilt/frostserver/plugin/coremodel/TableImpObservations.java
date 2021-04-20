@@ -48,80 +48,98 @@ import org.slf4j.LoggerFactory;
 
 public class TableImpObservations<J extends Comparable> extends StaTableAbstract<J, TableImpObservations<J>> {
 
+    public static final String NAME_TABLE = "OBSERVATIONS";
+    public static final String NAME_COL_DATASTREAMID = "DATASTREAM_ID";
+    public static final String NAME_COL_FEATUREID = "FEATURE_ID";
+    public static final String NAME_COL_ID = "ID";
+    public static final String NAME_COL_PARAMETERS = "PARAMETERS";
+    public static final String NAME_COL_PHENOMENONTIMESTART = "PHENOMENON_TIME_START";
+    public static final String NAME_COL_PHENOMENONTIMEEND = "PHENOMENON_TIME_END";
+    public static final String NAME_COL_RESULTTIME = "RESULT_TIME";
+    public static final String NAME_COL_RESULTTYPE = "RESULT_TYPE";
+    public static final String NAME_COL_RESULTJSON = "RESULT_JSON";
+    public static final String NAME_COL_RESULTBOOLEAN = "RESULT_BOOLEAN";
+    public static final String NAME_COL_RESULTNUMBER = "RESULT_NUMBER";
+    public static final String NAME_COL_RESULTSTRING = "RESULT_STRING";
+    public static final String NAME_COL_RESULTQUALITY = "RESULT_QUALITY";
+    public static final String NAME_COL_VALIDTIMESTART = "VALID_TIME_START";
+    public static final String NAME_COL_VALIDTIMEEND = "VALID_TIME_END";
+
     private static final long serialVersionUID = -1104422281;
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpObservations.class.getName());
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTime = createField(DSL.name("RESULT_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> colResultTime = createField(DSL.name(NAME_COL_RESULTTIME), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_NUMBER</code>.
      */
-    public final TableField<Record, Double> colResultNumber = createField(DSL.name("RESULT_NUMBER"), SQLDataType.DOUBLE, this);
+    public final TableField<Record, Double> colResultNumber = createField(DSL.name(NAME_COL_RESULTNUMBER), SQLDataType.DOUBLE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_STRING</code>.
      */
-    public final TableField<Record, String> colResultString = createField(DSL.name("RESULT_STRING"), SQLDataType.CLOB, this);
+    public final TableField<Record, String> colResultString = createField(DSL.name(NAME_COL_RESULTSTRING), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_QUALITY</code>.
      */
-    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name("RESULT_QUALITY"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name(NAME_COL_RESULTQUALITY), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeStart = createField(DSL.name("VALID_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> colValidTimeStart = createField(DSL.name(NAME_COL_VALIDTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeEnd = createField(DSL.name("VALID_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> colValidTimeEnd = createField(DSL.name(NAME_COL_VALIDTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.
      */
-    public final TableField<Record, JsonValue> colParameters = createField(DSL.name("PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colParameters = createField(DSL.name(NAME_COL_PARAMETERS), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TYPE</code>.
      */
-    public final TableField<Record, Short> colResultType = createField(DSL.name("RESULT_TYPE"), SQLDataType.SMALLINT, this);
+    public final TableField<Record, Short> colResultType = createField(DSL.name(NAME_COL_RESULTTYPE), SQLDataType.SMALLINT, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_JSON</code>.
      */
-    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name("RESULT_JSON"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name(NAME_COL_RESULTJSON), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_BOOLEAN</code>.
      */
-    public final TableField<Record, Boolean> colResultBoolean = createField(DSL.name("RESULT_BOOLEAN"), SQLDataType.BOOLEAN, this);
+    public final TableField<Record, Boolean> colResultBoolean = createField(DSL.name(NAME_COL_RESULTBOOLEAN), SQLDataType.BOOLEAN, this);
 
     /**
      * The column <code>public.OBSERVATIONS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     /**
      * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
      */
-    public final TableField<Record, J> colDatastreamId = createField(DSL.name("DATASTREAM_ID"), getIdType(), this);
+    public final TableField<Record, J> colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), getIdType(), this);
 
     /**
      * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
      */
-    public final TableField<Record, J> colFeatureId = createField(DSL.name("FEATURE_ID"), getIdType(), this);
+    public final TableField<Record, J> colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), getIdType(), this);
 
     private final PluginCoreModel pluginCoreModel;
 
@@ -133,7 +151,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObservations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("OBSERVATIONS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 

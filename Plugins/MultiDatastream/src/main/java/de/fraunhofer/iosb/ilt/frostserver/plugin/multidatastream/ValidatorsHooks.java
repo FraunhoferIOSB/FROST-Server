@@ -32,7 +32,28 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUp
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_EP_OBSERVATIONTYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_EP_RESULT;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_LINKTABLE_THINGS_LOCATIONS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_NP_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_NP_FEATUREOFINTEREST;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel.NAME_NP_OBSERVEDPROPERTIES;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations.NAME_COL_ENCODING_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations.NAME_COL_GEN_FOI_ID;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObservations;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_COL_LT_MULTIDATASTREAMID;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_COL_LT_OBSPROPERTYID;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_COL_MD_THINGID;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_EP_MULTIOBSERVATIONDATATYPES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_EP_UNITOFMEASUREMENTS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_ET_MULTIDATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_LINKTABLE_MDS_OBSPROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_NP_MULTIDATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_NP_MULTIDATASTREAMS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.NAME_TABLE_MD;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -69,17 +90,18 @@ public class ValidatorsHooks {
         public void validate(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
             if (epUnitOfMeasurements == null) {
                 final ModelRegistry modelRegistry = entity.getEntityType().getModelRegistry();
-                final EntityType etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
-                epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
-                epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
-                epObservationType = etMultiDatastream.getEntityProperty("observationType");
-                npObservedProperties = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
+                final EntityType etMultiDatastream = modelRegistry.getEntityTypeForName(NAME_ET_MULTIDATASTREAM);
+                epUnitOfMeasurements = etMultiDatastream.getEntityProperty(NAME_EP_UNITOFMEASUREMENTS);
+                epMultiObservationDataTypes = etMultiDatastream.getEntityProperty(NAME_EP_MULTIOBSERVATIONDATATYPES);
+                epObservationType = etMultiDatastream.getEntityProperty(NAME_EP_OBSERVATIONTYPE);
+                npObservedProperties = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty(NAME_NP_OBSERVEDPROPERTIES);
             }
             List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
             List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
             EntitySet observedProperties = entity.getProperty(npObservedProperties);
-            if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+            final int countUoM = unitOfMeasurements == null ? 0 : unitOfMeasurements.size();
+            if (countUoM != multiObservationDataTypes.size()) {
+                throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + countUoM + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
             }
             if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
                 final int opSize = observedProperties == null ? 0 : observedProperties.size();
@@ -102,9 +124,9 @@ public class ValidatorsHooks {
         public void validate(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
             if (epResult == null) {
                 final EntityType etObservation = entity.getEntityType();
-                epResult = etObservation.getEntityProperty("result");
-                npMultiDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty("MultiDatastream");
-                npDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty("Datastream");
+                epResult = etObservation.getEntityProperty(NAME_EP_RESULT);
+                npMultiDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty(NAME_NP_MULTIDATASTREAM);
+                npDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty(NAME_NP_DATASTREAM);
             }
             if (!entityPropertiesOnly) {
                 Entity datastream = entity.getProperty(npDatastream);
@@ -132,7 +154,7 @@ public class ValidatorsHooks {
         @Override
         public void insertIntoDatabase(PostgresPersistenceManager pm, Entity entity, Map insertFields) throws NoSuchEntityException, IncompleteEntityException {
             if (npMultiDatastreams == null) {
-                npMultiDatastreams = (NavigationPropertyEntitySet) entity.getEntityType().getNavigationProperty("MultiDatastreams");
+                npMultiDatastreams = (NavigationPropertyEntitySet) entity.getEntityType().getNavigationProperty(NAME_NP_MULTIDATASTREAMS);
             }
             EntitySet mds = entity.getProperty(npMultiDatastreams);
             if (mds != null && !mds.isEmpty()) {
@@ -148,7 +170,7 @@ public class ValidatorsHooks {
         @Override
         public void updateInDatabase(PostgresPersistenceManager pm, Entity entity, Comparable entityId) throws NoSuchEntityException, IncompleteEntityException {
             if (npMultiDatastreams == null) {
-                npMultiDatastreams = (NavigationPropertyEntitySet) entity.getEntityType().getNavigationProperty("MultiDatastreams");
+                npMultiDatastreams = (NavigationPropertyEntitySet) entity.getEntityType().getNavigationProperty(NAME_NP_MULTIDATASTREAMS);
             }
             EntitySet mds = entity.getProperty(npMultiDatastreams);
             if (mds != null && !mds.isEmpty()) {
@@ -170,11 +192,11 @@ public class ValidatorsHooks {
             // Delete all MultiDatastreams that link to this ObservedProperty.
             // Must happen first, since the links in the link table would be gone otherwise.
             final TableCollection tables = pm.getTableCollection();
-            final StaTable tMdOp = tables.getTableForName("MULTI_DATASTREAMS_OBS_PROPERTIES");
+            final StaTable tMdOp = tables.getTableForName(NAME_LINKTABLE_MDS_OBSPROPS);
             if (etMultiDatastream == null) {
-                etMultiDatastream = pm.getCoreSettings().getModelRegistry().getEntityTypeForName("MultiDatastream");
-                idxColMultiDsId = tMdOp.indexOf("MULTI_DATASTREAM_ID");
-                idxColObsPropId = tMdOp.indexOf("OBS_PROPERTY_ID");
+                etMultiDatastream = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(NAME_ET_MULTIDATASTREAM);
+                idxColMultiDsId = tMdOp.indexOf(NAME_COL_LT_MULTIDATASTREAMID);
+                idxColObsPropId = tMdOp.indexOf(NAME_COL_LT_OBSPROPERTYID);
             }
             final StaMainTable tMd = tables.getTableForType(etMultiDatastream);
             long count = pm.getDslContext()
@@ -202,13 +224,13 @@ public class ValidatorsHooks {
             if (npDatastream == null) {
                 foiGen = new FeatureGenerater();
                 final EntityType etObservation = entity.getEntityType();
-                epResult = etObservation.getEntityProperty("result");
-                npDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty("Datastream");
-                npMultiDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty("MultiDatastream");
-                npFeatureOfInterest = (NavigationPropertyEntity) etObservation.getNavigationProperty("FeatureOfInterest");
+                epResult = etObservation.getEntityProperty(NAME_EP_RESULT);
+                npDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty(NAME_NP_DATASTREAM);
+                npMultiDatastream = (NavigationPropertyEntity) etObservation.getNavigationProperty(NAME_NP_MULTIDATASTREAM);
+                npFeatureOfInterest = (NavigationPropertyEntity) etObservation.getNavigationProperty(NAME_NP_FEATUREOFINTEREST);
                 final TableCollection tables = pm.getTableCollection();
-                final StaTable tMdOp = tables.getTableForName("MULTI_DATASTREAMS_OBS_PROPERTIES");
-                idxColMultiDsId = tMdOp.indexOf("MULTI_DATASTREAM_ID");
+                final StaTable tMdOp = tables.getTableForName(NAME_LINKTABLE_MDS_OBSPROPS);
+                idxColMultiDsId = tMdOp.indexOf(NAME_COL_LT_MULTIDATASTREAMID);
             }
             final Entity ds = entity.getProperty(npDatastream);
             final Entity mds = entity.getProperty(npMultiDatastream);
@@ -222,7 +244,7 @@ public class ValidatorsHooks {
                 }
                 final List list = (List) result;
                 final Object mdsId = mds.getId().getValue();
-                final StaTable tMdsOp = tables.getTableForName("MULTI_DATASTREAMS_OBS_PROPERTIES");
+                final StaTable tMdsOp = tables.getTableForName(NAME_LINKTABLE_MDS_OBSPROPS);
                 final Integer count = pm.getDslContext()
                         .selectCount()
                         .from(tMdsOp)
@@ -252,8 +274,8 @@ public class ValidatorsHooks {
         @Override
         public void updateInDatabase(PostgresPersistenceManager pm, Entity entity, Comparable entityId) throws NoSuchEntityException, IncompleteEntityException {
             if (npDatastream == null) {
-                npDatastream = (NavigationPropertyEntity) entity.getEntityType().getNavigationProperty("Datastream");
-                npMultiDatastream = (NavigationPropertyEntity) entity.getEntityType().getNavigationProperty("MultiDatastream");
+                npDatastream = (NavigationPropertyEntity) entity.getEntityType().getNavigationProperty(NAME_NP_DATASTREAM);
+                npMultiDatastream = (NavigationPropertyEntity) entity.getEntityType().getNavigationProperty(NAME_NP_MULTIDATASTREAM);
             }
             Entity oldObservation = pm.get(entity.getEntityType(), pm.getEntityFactories().idFromObject(entityId));
             boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
@@ -304,17 +326,17 @@ public class ValidatorsHooks {
             final Object dsId = datastreamId.getValue();
             final DSLContext dslContext = pm.getDslContext();
             TableCollection tableCollection = pm.getTableCollection();
-            StaMainTable tl = (StaMainTable) tableCollection.getTableForName("LOCATIONS");
-            StaTable ttl = tableCollection.getTableForName("THINGS_LOCATIONS");
-            StaMainTable tt = (StaMainTable) tableCollection.getTableForName("THINGS");
-            StaMainTable tmd = (StaMainTable) tableCollection.getTableForName("MULTI_DATASTREAMS");
+            StaMainTable tl = (StaMainTable) tableCollection.getTableForName(TableImpLocations.NAME_TABLE);
+            StaTable ttl = tableCollection.getTableForName(NAME_LINKTABLE_THINGS_LOCATIONS);
+            StaMainTable tt = (StaMainTable) tableCollection.getTableForName(TableImpThings.NAME_TABLE);
+            StaMainTable tmd = (StaMainTable) tableCollection.getTableForName(NAME_TABLE_MD);
             TableImpObservations tblObs = (TableImpObservations) tableCollection.getTableForClass(TableImpObservations.class);
 
-            SelectConditionStep<Record3<?, ?, String>> query = dslContext.select(tl.getId(), tl.field("GEN_FOI_ID"), tl.field("ENCODING_TYPE"))
+            SelectConditionStep<Record3<?, ?, String>> query = dslContext.select(tl.getId(), tl.field(NAME_COL_GEN_FOI_ID), tl.field(NAME_COL_ENCODING_TYPE))
                     .from(tl)
-                    .innerJoin(ttl).on(tl.getId().eq(ttl.field("LOCATION_ID")))
-                    .innerJoin(tt).on(tt.getId().eq(ttl.field("THING_ID")))
-                    .innerJoin(tmd).on(tmd.field("THING_ID").eq(tt.getId()))
+                    .innerJoin(ttl).on(tl.getId().eq(ttl.field(TableImpThingsLocations.NAME_COL_TL_LOCATIONID)))
+                    .innerJoin(tt).on(tt.getId().eq(ttl.field(TableImpThingsLocations.NAME_COL_TL_THINGID)))
+                    .innerJoin(tmd).on(tmd.field(NAME_COL_MD_THINGID).eq(tt.getId()))
                     .where(tmd.getId().eq(dsId));
             return tblObs.generateFeatureOfInterest(pm, query);
         }

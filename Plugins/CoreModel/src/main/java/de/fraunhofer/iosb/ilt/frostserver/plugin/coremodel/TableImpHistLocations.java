@@ -29,23 +29,28 @@ import org.slf4j.LoggerFactory;
 
 public class TableImpHistLocations<J extends Comparable> extends StaTableAbstract<J, TableImpHistLocations<J>> {
 
+    public static final String NAME_TABLE = "HIST_LOCATIONS";
+    public static final String NAME_COL_ID = "ID";
+    public static final String NAME_COL_THINGID = "THING_ID";
+    public static final String NAME_COL_TIME = "TIME";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpHistLocations.class.getName());
     private static final long serialVersionUID = -1457801967;
 
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> time = createField(DSL.name("TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, OffsetDateTime> time = createField(DSL.name(NAME_COL_TIME), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     /**
      * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+    public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType(), this);
 
     private final PluginCoreModel pluginCoreModel;
 
@@ -57,7 +62,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpHistLocations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("HIST_LOCATIONS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 

@@ -9,16 +9,20 @@ import org.jooq.impl.DSL;
 
 public class TableImpLocationsHistLocations<J extends Comparable> extends StaLinkTable<J, TableImpLocationsHistLocations<J>> {
 
+    public static final String NAME_TABLE = "LOCATIONS_HIST_LOCATIONS";
+    public static final String NAME_COL_HISTLOCATIONID = "HIST_LOCATION_ID";
+    public static final String NAME_COL_LOCATIONID = "LOCATION_ID";
+
     private static final long serialVersionUID = -1022733888;
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colLocationId = createField(DSL.name("LOCATION_ID"), getIdType(), this);
+    public final TableField<Record, J> colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), getIdType(), this);
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colHistLocationId = createField(DSL.name("HIST_LOCATION_ID"), getIdType(), this);
+    public final TableField<Record, J> colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), getIdType(), this);
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference.
@@ -27,7 +31,7 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
      * database.
      */
     public TableImpLocationsHistLocations(DataType<J> idType) {
-        super(idType, DSL.name("LOCATIONS_HIST_LOCATIONS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
     }
 
     private TableImpLocationsHistLocations(Name alias, TableImpLocationsHistLocations<J> aliased) {

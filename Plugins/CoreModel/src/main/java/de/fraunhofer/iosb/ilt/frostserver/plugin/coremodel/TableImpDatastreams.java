@@ -38,62 +38,80 @@ import org.jooq.impl.SQLDataType;
 
 public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpDatastreams<J>> {
 
+    public static final String NAME_TABLE = "DATASTREAMS";
+    public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";
+    public static final String NAME_COL_ID = "ID";
+    public static final String NAME_COL_NAME = "NAME";
+    public static final String NAME_COL_OBSERVEDAREA = "OBSERVED_AREA";
+    public static final String NAME_COL_OBSERVATIONTYPE = "OBSERVATION_TYPE";
+    public static final String NAME_COL_OBSPROPERTYID = "OBS_PROPERTY_ID";
+    public static final String NAME_COL_PHENOMENONTIMESTART = "PHENOMENON_TIME_START";
+    public static final String NAME_COL_PHENOMENONTIMEEND = "PHENOMENON_TIME_END";
+    public static final String NAME_COL_PROPERTIES = "PROPERTIES";
+    public static final String NAME_COL_RESULTTIMESTART = "RESULT_TIME_START";
+    public static final String NAME_COL_RESULTTIMEEND = "RESULT_TIME_END";
+    public static final String NAME_COL_SENSORID = "SENSOR_ID";
+    public static final String NAME_COL_THINGID = "THING_ID";
+    public static final String NAME_COL_UNITDEFINITION = "UNIT_DEFINITION";
+    public static final String NAME_COL_UNITNAME = "UNIT_NAME";
+    public static final String NAME_COL_UNITSYMBOL = "UNIT_SYMBOL";
+
     private static final long serialVersionUID = -1460005950;
 
     /**
      * The column <code>public.DATASTREAMS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name(NAME_COL_DESCRIPTION), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.OBSERVATION_TYPE</code>.
      */
-    public final TableField<Record, String> colObservationType = createField(DSL.name("OBSERVATION_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colObservationType = createField(DSL.name(NAME_COL_OBSERVATIONTYPE), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name("RESULT_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name(NAME_COL_RESULTTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name("RESULT_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name(NAME_COL_RESULTTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_NAME</code>.
      */
-    public final TableField<Record, String> colUnitName = createField(DSL.name("UNIT_NAME"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitName = createField(DSL.name(NAME_COL_UNITNAME), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_SYMBOL</code>.
      */
-    public final TableField<Record, String> colUnitSymbol = createField(DSL.name("UNIT_SYMBOL"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitSymbol = createField(DSL.name(NAME_COL_UNITSYMBOL), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_DEFINITION</code>.
      */
-    public final TableField<Record, String> colUnitDefinition = createField(DSL.name("UNIT_DEFINITION"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitDefinition = createField(DSL.name(NAME_COL_UNITDEFINITION), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name(NAME_COL_NAME), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name(NAME_COL_OBSERVEDAREA), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea
@@ -103,27 +121,27 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * The column <code>public.DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType().nullable(false), this);
+    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType().nullable(false), this);
 
     /**
      * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, J> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType().nullable(false), this);
+    public final TableField<Record, J> colSensorId = createField(DSL.name(NAME_COL_SENSORID), getIdType().nullable(false), this);
 
     /**
      * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, J> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), getIdType().nullable(false), this);
+    public final TableField<Record, J> colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), getIdType().nullable(false), this);
 
     /**
      * The column <code>public.DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType().nullable(false), this);
+    public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType().nullable(false), this);
 
     private final PluginCoreModel pluginCoreModel;
 
@@ -135,7 +153,7 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpDatastreams(DataType<J> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("DATASTREAMS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 

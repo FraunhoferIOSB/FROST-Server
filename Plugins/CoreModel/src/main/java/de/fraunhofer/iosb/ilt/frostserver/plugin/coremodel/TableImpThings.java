@@ -34,28 +34,34 @@ import org.slf4j.LoggerFactory;
 
 public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, TableImpThings<J>> {
 
+    public static final String NAME_TABLE = "THINGS";
+    public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";
+    public static final String NAME_COL_ID = "ID";
+    public static final String NAME_COL_NAME = "NAME";
+    public static final String NAME_COL_PROPERTIES = "PROPERTIES";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpThings.class.getName());
     private static final long serialVersionUID = -729589982;
 
     /**
      * The column <code>public.THINGS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
+    public final TableField<Record, String> colDescription = createField(DSL.name(NAME_COL_DESCRIPTION), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.THINGS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * The column <code>public.THINGS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
+    public final TableField<Record, String> colName = createField(DSL.name(NAME_COL_NAME), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
 
     /**
      * The column <code>public.THINGS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     private final PluginCoreModel pluginCoreModel;
 
@@ -67,7 +73,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpThings(DataType<J> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("THINGS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 

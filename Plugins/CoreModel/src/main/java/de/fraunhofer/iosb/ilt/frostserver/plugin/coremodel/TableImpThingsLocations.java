@@ -9,17 +9,21 @@ import org.jooq.impl.DSL;
 
 public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<J, TableImpThingsLocations<J>> {
 
+    public static final String NAME_TABLE = "THINGS_LOCATIONS";
+    public static final String NAME_COL_TL_LOCATIONID = "LOCATION_ID";
+    public static final String NAME_COL_TL_THINGID = "THING_ID";
+
     private static final long serialVersionUID = -1443552218;
 
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+    public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_TL_THINGID), getIdType(), this);
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colLocationId = createField(DSL.name("LOCATION_ID"), getIdType(), this);
+    public final TableField<Record, J> colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), getIdType(), this);
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference.
@@ -28,7 +32,7 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
      * database.
      */
     public TableImpThingsLocations(DataType<J> idType) {
-        super(idType, DSL.name("THINGS_LOCATIONS"), null);
+        super(idType, DSL.name(NAME_TABLE), null);
     }
 
     private TableImpThingsLocations(Name alias, TableImpThingsLocations<J> aliased) {
