@@ -34,16 +34,16 @@ import org.geojson.Polygon;
 public class GeoHelper {
 
     private static final String NUMBER_REGEX = "[+-]?[0-9]*(\\.[0-9]+)?";
-    private static final String POINT_2D_REGEX = NUMBER_REGEX + "\\s+" + NUMBER_REGEX;
-    private static final String POINT_3D_REGEX = POINT_2D_REGEX + "\\s+" + NUMBER_REGEX;
-    private static final String LIST_POINT_2D_REGEX = POINT_2D_REGEX + "(?:\\s*,\\s*" + POINT_2D_REGEX + ")*";
-    private static final String LIST_POINT_3D_REGEX = POINT_3D_REGEX + "(?:\\s*,\\s*" + POINT_3D_REGEX + ")*";
-    private static final String LIST_LIST_POINT_2D_REGEX = "[(]" + LIST_POINT_2D_REGEX + "[)](?:\\s*,\\s*[(]" + LIST_POINT_2D_REGEX + "[)])*";
-    private static final String LIST_LIST_POINT_3D_REGEX = "[(]" + LIST_POINT_3D_REGEX + "[)](?:\\s*,\\s*[(]" + LIST_POINT_3D_REGEX + "[)])*";
+    private static final String POINT_2D_REGEX = NUMBER_REGEX + " " + NUMBER_REGEX;
+    private static final String POINT_3D_REGEX = POINT_2D_REGEX + " " + NUMBER_REGEX;
+    private static final String LIST_POINT_2D_REGEX = POINT_2D_REGEX + "(?:," + POINT_2D_REGEX + ")*";
+    private static final String LIST_POINT_3D_REGEX = POINT_3D_REGEX + "(?:," + POINT_3D_REGEX + ")*";
+    private static final String LIST_LIST_POINT_2D_REGEX = "[(]" + LIST_POINT_2D_REGEX + "[)](?:,[(]" + LIST_POINT_2D_REGEX + "[)])*";
+    private static final String LIST_LIST_POINT_3D_REGEX = "[(]" + LIST_POINT_3D_REGEX + "[)](?:,[(]" + LIST_POINT_3D_REGEX + "[)])*";
 
-    private static final String WKT_POINT_REGEX = "POINT\\s*[(](" + POINT_2D_REGEX + "|" + POINT_3D_REGEX + ")[)]";
-    private static final String WKT_LINE_REGEX = "LINESTRING\\s*[(](" + LIST_POINT_2D_REGEX + "|" + LIST_POINT_3D_REGEX + ")[)]";
-    private static final String WKT_POLYGON_REGEX = "POLYGON( Z)?\\s*[(](" + LIST_LIST_POINT_2D_REGEX + "|" + LIST_LIST_POINT_3D_REGEX + ")[)]";
+    private static final String WKT_POINT_REGEX = "POINT[(](" + POINT_2D_REGEX + "|" + POINT_3D_REGEX + ")[)]";
+    private static final String WKT_LINE_REGEX = "LINESTRING[(](" + LIST_POINT_2D_REGEX + "|" + LIST_POINT_3D_REGEX + ")[)]";
+    private static final String WKT_POLYGON_REGEX = "POLYGON( Z)?[(](" + LIST_LIST_POINT_2D_REGEX + "|" + LIST_LIST_POINT_3D_REGEX + ")[)]";
 
     public static final Pattern WKT_POINT_PATTERN = Pattern.compile(WKT_POINT_REGEX, Pattern.CASE_INSENSITIVE);
     public static final Pattern WKT_LINE_PATTERN = Pattern.compile(WKT_LINE_REGEX, Pattern.CASE_INSENSITIVE);
@@ -56,7 +56,9 @@ public class GeoHelper {
     }
 
     public static Point parsePoint(String value) {
-        Matcher matcher = GeoHelper.WKT_POINT_PATTERN.matcher(value.trim());
+        // Replace all whitespace-chains with a single space.
+        value = cleanInput(value);
+        Matcher matcher = GeoHelper.WKT_POINT_PATTERN.matcher(value);
         if (matcher.matches()) {
             String[] coordinates = matcher.group(1).split(" ");
             if (coordinates.length < 2 || coordinates.length > 3) {
@@ -73,9 +75,10 @@ public class GeoHelper {
     }
 
     public static LineString parseLine(String value) {
-        Matcher matcher = GeoHelper.WKT_LINE_PATTERN.matcher(value.trim());
+        value = cleanInput(value);
+        Matcher matcher = GeoHelper.WKT_LINE_PATTERN.matcher(value);
         if (matcher.matches()) {
-            String[] points = matcher.group(1).split("\\s*,\\s*");
+            String[] points = matcher.group(1).split(" ?, ?");
             return new LineString(
                     Arrays.asList(points).stream()
                             .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
@@ -87,8 +90,16 @@ public class GeoHelper {
         }
     }
 
+    private static String cleanInput(String value) {
+        // Replace all whitespace-chains with a single space.
+        // Remove spaces before and after ,()
+        return value.trim()
+                .replaceAll("\\s+", " ")
+                .replaceAll(" ?([,()]) ?", "$1");
+    }
+
     private static LngLatAlt[] stringListToPoints(String value) {
-        return Arrays.asList(value.split("\\s*,\\s*")).stream()
+        return Arrays.asList(value.split(" ?, ?")).stream()
                 .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
                 .map(x -> x.stream().map(Double::parseDouble)) // parse each coordinate to double
                 .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
@@ -96,12 +107,14 @@ public class GeoHelper {
     }
 
     public static Polygon parsePolygon(String value) {
-        Matcher matcher = GeoHelper.WKT_POLYGON_PATTERN.matcher(value.trim());
+        // Replace all whitespace-chains with a single space.
+        value = cleanInput(value);
+        Matcher matcher = GeoHelper.WKT_POLYGON_PATTERN.matcher(value);
         if (matcher.matches()) {
             // definition of GeoJson Polygon:
             // First parameter is exterior ring, all others are interior rings
             String group = matcher.group(2);
-            String[] rings = group.trim().substring(1, group.length() - 1).split("[)]\\s*,\\s*[(]");
+            String[] rings = group.trim().substring(1, group.length() - 1).split("[)] ?, ?[(]");
             Polygon result = new Polygon(stringListToPoints(rings[0]));
             for (int i = 1; i < rings.length; i++) {
                 // add interior rings

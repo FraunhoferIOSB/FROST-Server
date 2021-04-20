@@ -28,6 +28,13 @@ import org.junit.Test;
 public class PointConstantTest {
 
     @Test
+    public void testparseFromStringSpaces() {
+        String text = "POINT                     (      30                                              10    )";
+        PointConstant result = new PointConstant(text);
+        Assert.assertEquals(TestHelper.getPoint(30, 10), result.getValue());
+    }
+
+    @Test
     public void testparseFromString2D() {
         String text = "POINT (30 10)";
         PointConstant result = new PointConstant(text);

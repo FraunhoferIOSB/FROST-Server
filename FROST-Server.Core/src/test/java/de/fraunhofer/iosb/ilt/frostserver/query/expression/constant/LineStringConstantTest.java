@@ -42,6 +42,10 @@ public class LineStringConstantTest {
         text = "LINESTRING  (30 10 , 10 30 , 40 40)";
         result = new LineStringConstant(text);
         Assert.assertEquals(expected, result.getValue());
+
+        text = "LINESTRING      (30             10                 ,                    10                 30                ,           40             40        )         ";
+        result = new LineStringConstant(text);
+        Assert.assertEquals(expected, result.getValue());
     }
 
     @Test
