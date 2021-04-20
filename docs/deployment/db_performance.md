@@ -26,10 +26,14 @@ it on your database.
 A tutorial on how to read `explain analyze` output can be found on
 [postgresqltutorial.com](https://www.postgresqltutorial.com/postgresql-explain/)
 
+
 ## Adding Indices
 
+
+### Indexing timestamps
+
 By default, only primary and foreign keys have indices on them. A very common index
-is for Datastreams(x)/observations?$orderby=phenomenonTime asc:
+is for _Datastreams(x)/observations?$orderby=phenomenonTime asc_:
 
 ```sql
 create index "OBS-DS_ID-PHTIME_SE-O_ID"
@@ -37,6 +41,9 @@ create index "OBS-DS_ID-PHTIME_SE-O_ID"
   using btree
   ("DATASTREAM_ID", "PHENOMENON_TIME_START" asc, "PHENOMENON_TIME_END" asc);
 ```
+
+
+### Spatial indices
 
 You can also add indices to geometry columns using the PostGIS `GIST(column)` function.
 See [Spatial Indexing](https://postgis.net/workshops/postgis-intro/indexing.html)
@@ -46,18 +53,30 @@ For the Locations table:
 ```sql
 create index "LOCATIONS_GEOM"
   on "LOCATION"
-  using gist("GEOM");
+  using gist ("GEOM");
 ```
 
 For the FeaturesOfInterest table:
 ```sql
 create index "FEATURES_GEOM"
   on "FEATURES"
-  using gist("GEOM");
+  using gist ("GEOM");
 ```
 
 
-## Regenerating generated properties:
+### Indexing JSON fields
+
+Indices can be added to fields within `jsonb`-type columns to speed up queries
+like _Observations?$filter=parameters/secondary_id eq 123_:
+
+```sql
+create index "IDX_OBS_PARAM_SECONDARYID"
+  on "OBSERVATIONS"
+  using btree (("PARAMETERS" #> '{ secondary_id }') asc);
+```
+
+
+## Regenerating generated properties
 
 If you ever need to re-generate the ObservedArea properties of Datastreams,
 you can use the SQL query:
