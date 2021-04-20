@@ -1,22 +1,22 @@
 [
-	{
-		"key": "main",
-		"title": "Main"
+    {
+        "key": "main",
+        "title": "Main"
     },
-	{
-		"key": "deployment",
-		"title": "Deployment"
+    {
+        "key": "deployment",
+        "title": "Deployment"
     },
-	{
-		"key": "settings",
-		"title": "Settings"
+    {
+        "key": "settings",
+        "title": "Settings"
     },
-	{
-		"key": "STA",
-		"title": "SensorThings API HowTo"
-	},
-	{
-		"key": "extensions",
-		"title": "Extensions"
-	}
+    {
+        "key": "STA",
+        "title": "SensorThings API HowTo"
+    },
+    {
+        "key": "extensions",
+        "title": "Extensions"
+    }
 ]

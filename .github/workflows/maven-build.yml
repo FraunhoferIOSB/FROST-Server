@@ -14,20 +14,20 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+
     - name: Cache maven repository
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: |
           ~/.m2/repository
           ~/.sonar/cache
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven
-
-    - name: Checkout Source
-      uses: actions/checkout@v2
-      with:
-        # Disabling shallow clone is recommended for improving relevancy of reporting
-        fetch-depth: 0
 
     - name: Set up JDK 11
       uses: actions/setup-java@v2
@@ -49,17 +49,6 @@ jobs:
     - name: Build Docker Images
       run: |
         mvn -B dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-
-    - name: Push Docker Image - Tagged Commit
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: |
-        export DOCKER_TAG=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
-        echo "Tagging and Pushing ${DOCKER_TAG}"
-        mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
 
     - name: Push Docker Images - Master branch
       if: github.ref == 'refs/heads/master'
@@ -85,3 +74,4 @@ jobs:
         echo "Tagging and Pushing ${DOCKER_TAG}"
         mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
+
