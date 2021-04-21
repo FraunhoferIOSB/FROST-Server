@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,7 +32,8 @@ public class ServiceRequestBuilder {
     private Optional<String> url;
     private Optional<String> urlPath;
     private Optional<String> urlQuery;
-    private Optional<String> content;
+    private Optional<String> contentString;
+    private Optional<InputStream> contentBinary;
     private Optional<String> contentType;
     private Optional<Map<String, String[]>> parameterMap;
     private final Version version;
@@ -42,7 +44,7 @@ public class ServiceRequestBuilder {
         this.url = Optional.empty();
         this.urlPath = Optional.empty();
         this.urlQuery = Optional.empty();
-        this.content = Optional.empty();
+        this.contentBinary = Optional.empty();
         this.contentType = Optional.empty();
         this.parameterMap = Optional.empty();
     }
@@ -62,8 +64,13 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withContent(InputStream content) {
+        this.contentBinary = Optional.ofNullable(content);
+        return this;
+    }
+
     public ServiceRequestBuilder withContent(String content) {
-        this.content = Optional.ofNullable(content);
+        this.contentString = Optional.ofNullable(content);
         return this;
     }
 
@@ -94,8 +101,10 @@ public class ServiceRequestBuilder {
         if (urlQuery.isPresent()) {
             result.setUrlQuery(urlQuery.get());
         }
-        if (content.isPresent()) {
-            result.setContent(content.get());
+        if (contentBinary.isPresent()) {
+            result.setContent(contentBinary.get());
+        } else if (contentString.isPresent()) {
+            result.setContent(contentString.get());
         }
         if (contentType.isPresent()) {
             result.setContentType(contentType.get());

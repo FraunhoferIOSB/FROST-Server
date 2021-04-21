@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(
         name = "STA1.0",
-        // This annotation MUST be kept aligned with the constant 
+        // This annotation MUST be kept aligned with the constant
         // de.fraunhofer.iosb.ilt.frostserver.util.Contants.HTTP_URL_PATTERNS!
         urlPatterns = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"},
         initParams = {
@@ -151,7 +151,7 @@ public class ServletV1P0 extends HttpServlet {
                 .withUrlQuery(request.getQueryString() != null
                         ? StringHelper.urlDecode(request.getQueryString())
                         : null)
-                .withContent(readRequestData(request.getReader()))
+                .withContent(request.getInputStream())
                 .withContentType(request.getContentType())
                 .withParameterMap(request.getParameterMap())
                 .build();
@@ -220,10 +220,6 @@ public class ServletV1P0 extends HttpServlet {
             return;
         }
         super.service(request, response);
-    }
-
-    private String readRequestData(BufferedReader reader) {
-        return reader.lines().collect(Collectors.joining("\n"));
     }
 
 }

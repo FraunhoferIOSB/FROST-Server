@@ -46,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
+import java.io.Reader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,6 +179,10 @@ public class JsonReader {
         return mapper.readValue(value, clazz);
     }
 
+    public <T extends Entity> T parseEntity(Class<T> clazz, Reader value) throws IOException {
+        return mapper.readValue(value, clazz);
+    }
+
     public <T extends Entity> T parseEntity(Class<T> clazz, JsonNode value) throws IOException {
         return mapper.treeToValue(value, clazz);
     }
@@ -186,7 +191,15 @@ public class JsonReader {
         return mapper.readValue(value, clazz);
     }
 
+    public <T> T parseObject(Class<T> clazz, Reader value) throws IOException {
+        return mapper.readValue(value, clazz);
+    }
+
     public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
+        return mapper.readValue(value, typeReference);
+    }
+
+    public <T> T parseObject(TypeReference<T> typeReference, Reader value) throws IOException {
         return mapper.readValue(value, typeReference);
     }
 
