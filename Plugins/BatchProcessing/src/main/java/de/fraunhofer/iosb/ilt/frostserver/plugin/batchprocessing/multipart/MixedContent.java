@@ -101,7 +101,7 @@ public class MixedContent implements Content {
         }
         String boundaryHeader = matcher.group(1);
         setBoundaryHeader(boundaryHeader);
-        try (BufferedReader reader = new BufferedReader(new StringReader(request.getContent()))) {
+        try (BufferedReader reader = new BufferedReader(request.getContentReader())) {
             String line;
             while (finished != IsFinished.FINISHED && (line = reader.readLine()) != null) {
                 parseLine(line);

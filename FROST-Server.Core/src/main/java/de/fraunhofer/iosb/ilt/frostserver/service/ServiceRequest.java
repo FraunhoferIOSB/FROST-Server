@@ -18,7 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -29,7 +37,8 @@ public class ServiceRequest {
     private String requestType;
     private String urlPath;
     private String urlQuery;
-    private String content;
+    private String contentString;
+    private InputStream contentBinary;
     private Version version;
     private String contentType;
     private Map<String, String[]> parameterMap;
@@ -42,8 +51,27 @@ public class ServiceRequest {
         return requestType;
     }
 
-    public String getContent() {
-        return content;
+    public String getContentString() {
+        if (contentString != null) {
+            return contentString;
+        }
+        return new BufferedReader(new InputStreamReader(contentBinary, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+    }
+
+    public Reader getContentReader() {
+        if (contentString != null) {
+            return new StringReader(contentString);
+        }
+        return new BufferedReader(new InputStreamReader(contentBinary, StandardCharsets.UTF_8));
+    }
+
+    public InputStream getContentStream() {
+        if (contentString != null) {
+            return new ByteArrayInputStream(contentString.getBytes(StandardCharsets.UTF_8));
+        }
+        return contentBinary;
     }
 
     public String getContentType() {
@@ -91,8 +119,12 @@ public class ServiceRequest {
         this.urlQuery = urlQuery;
     }
 
+    public void setContent(InputStream content) {
+        this.contentBinary = content;
+    }
+
     public void setContent(String content) {
-        this.content = content;
+        this.contentString = content;
     }
 
     public void setContentType(String contentType) {

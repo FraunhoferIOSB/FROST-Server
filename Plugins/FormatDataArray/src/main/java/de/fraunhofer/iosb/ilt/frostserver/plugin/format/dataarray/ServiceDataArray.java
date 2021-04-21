@@ -85,7 +85,7 @@ public class ServiceDataArray {
         final PersistenceManager pm = service.getPm();
         try {
             JsonReader entityParser = new JsonReader(settings.getModelRegistry());
-            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser, settings);
+            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
                 Entity datastream = daValue.getDatastream();

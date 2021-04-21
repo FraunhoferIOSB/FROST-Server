@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,11 +124,28 @@ public class JsonReader {
         }
     }
 
+    public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
+            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
+                    .deserializeFull(parser, dsc);
+        }
+    }
+
     public <T> T parseObject(Class<T> clazz, String value) throws IOException {
         return mapper.readValue(value, clazz);
     }
 
+    public <T> T parseObject(Class<T> clazz, Reader value) throws IOException {
+        return mapper.readValue(value, clazz);
+    }
+
     public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
+        return mapper.readValue(value, typeReference);
+    }
+
+    public <T> T parseObject(TypeReference<T> typeReference, Reader value) throws IOException {
         return mapper.readValue(value, typeReference);
     }
 

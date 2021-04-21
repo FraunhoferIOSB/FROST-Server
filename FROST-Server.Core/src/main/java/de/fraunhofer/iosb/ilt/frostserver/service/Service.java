@@ -457,7 +457,7 @@ public class Service implements AutoCloseable {
         JsonReader jsonReader = new JsonReader(modelRegistry);
         Entity entity;
         try {
-            entity = jsonReader.parseEntity(type, request.getContent());
+            entity = jsonReader.parseEntity(type, request.getContentReader());
             entity.complete(mainSet);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
@@ -514,7 +514,7 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
             JsonReader entityParser = new JsonReader(modelRegistry);
-            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
@@ -548,7 +548,7 @@ public class Service implements AutoCloseable {
         JsonPatch jsonPatch;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
+            jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContentReader(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());
@@ -635,7 +635,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
 
             JsonReader entityParser = new JsonReader(modelRegistry);
-            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             entity.complete(true);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);

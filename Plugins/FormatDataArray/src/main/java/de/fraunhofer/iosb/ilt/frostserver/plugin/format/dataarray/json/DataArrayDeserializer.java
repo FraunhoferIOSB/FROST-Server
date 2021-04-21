@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -59,6 +60,15 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
     }
 
     public static List<DataArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws IOException {
+        ObjectMapper mapper = reader.getMapper();
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
+            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            return new DataArrayDeserializer(settings).deserialize(parser, dsc);
+        }
+    }
+
+    public static List<DataArrayValue> deserialize(Reader value, JsonReader reader, CoreSettings settings) throws IOException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
