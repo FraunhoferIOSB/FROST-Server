@@ -29,6 +29,10 @@
     </modules>
 
     <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <annotation-api.version>1.3.1</annotation-api.version>
         <codegen.version>0.6.8-uuid</codegen.version>
         <commons-io.version>2.8.0</commons-io.version>
@@ -74,13 +78,8 @@
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
-
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
 
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
