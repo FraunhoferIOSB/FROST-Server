@@ -17,8 +17,10 @@ jobs:
         path: |
           ~/.m2/repository
           ~/.sonar/cache
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-maven
+        key: pr-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          pr-${{ runner.os }}-maven
+          ${{ runner.os }}-maven
 
     - name: Checkout Source
       uses: actions/checkout@v2
