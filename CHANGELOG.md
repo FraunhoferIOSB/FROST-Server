@@ -1,5 +1,11 @@
 # Changelog
 
+## Release Version 1.13.2
+
+**Internal changes & Bugfixes**
+* Fixed the search_path if Liquibase changes it
+
+
 ## Release Version 1.13.1
 
 **Internal changes & Bugfixes**
