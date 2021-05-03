@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -59,8 +62,7 @@ public class LiquibaseHelper {
 
     public static boolean doUpgrades(Connection connection, String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
         try {
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            runLiquibaseUpdate(liquibaseChangelogFilename, database, out);
+            runLiquibaseUpdate(liquibaseChangelogFilename, connection, out);
         } catch (DatabaseException ex) {
             outputError(ex, out, "Failed to initialise database");
             return false;
@@ -78,14 +80,50 @@ public class LiquibaseHelper {
         }
     }
 
-    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Database database, Writer out) throws UpgradeFailedException, IOException {
+    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Connection connection, Writer out) throws UpgradeFailedException, IOException, DatabaseException {
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
+            String searchPath = getSearchPath(connection);
+
             liquibase.update(new Contexts());
+
+            setSearchPath(connection, searchPath);
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
             throw new UpgradeFailedException(ex);
         } catch (Exception ex) {
             LOGGER.warn("Exception happened when closing liquibase.", ex);
+        }
+    }
+
+    private static String getSearchPath(Connection connection) {
+        try (PreparedStatement call = connection.prepareStatement("show search_path")) {
+            call.execute();
+            try (ResultSet resultSet = call.getResultSet()) {
+                if (resultSet.next()) {
+                    final String searchPath = resultSet.getString(1);
+                    LOGGER.debug("Found search_path: {}", searchPath);
+                    return searchPath;
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.error("Failed to fetch search_path: ", ex);
+        }
+        return "";
+    }
+
+    private static void setSearchPath(Connection connection, String wantedSearchPath) {
+        String searchPath = getSearchPath(connection);
+        if (wantedSearchPath.equals(searchPath)) {
+            return;
+        }
+        LOGGER.info("Liquibase changed the search_path from '{}' to '{}'. Changing it back.", wantedSearchPath, searchPath);
+        try (PreparedStatement call = connection.prepareStatement("select set_config('search_path', ?, false)")) {
+            call.setString(1, wantedSearchPath);
+            call.execute();
+            connection.commit();
+        } catch (SQLException ex) {
+            LOGGER.error("Failed to set search_path: ", ex);
         }
     }
 
