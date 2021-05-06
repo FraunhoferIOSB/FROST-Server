@@ -114,6 +114,10 @@ public class UrlHelperTest {
                 settings,
                 "/Things?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
                 "/Things?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
+        testNextLink(
+                settings,
+                "/Things?$expand=Locations($select=id,properties/field)&$top=2",
+                "/Things?$expand=Locations($select=id,properties/field)&$top=2&$skip=2");
     }
 
     @Test

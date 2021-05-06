@@ -3,7 +3,8 @@
 ## Release Version 1.13.2
 
 **Internal changes & Bugfixes**
-* Fixed the search_path if Liquibase changes it
+* Fixed the search_path if Liquibase changes it.
+* Fixed double URLEncode in $select of nextLinks.
 
 
 ## Release Version 1.13.1

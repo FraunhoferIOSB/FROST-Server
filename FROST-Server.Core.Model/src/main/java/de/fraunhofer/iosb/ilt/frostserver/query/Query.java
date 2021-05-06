@@ -400,7 +400,7 @@ public class Query {
 
         addSkipToUrl(sb, separator);
 
-        addSelectToUrl(sb, separator);
+        addSelectToUrl(sb, separator, inExpand);
 
         addFilterToUrl(sb, separator, inExpand);
 
@@ -484,14 +484,15 @@ public class Query {
         if (filter != null) {
             sb.append(separator).append("$filter=");
             String filterUrl = filter.toUrl();
-            if (!inExpand) {
-                filterUrl = StringHelper.urlEncode(filterUrl);
+            if (inExpand) {
+                sb.append(filterUrl);
+            } else {
+                sb.append(StringHelper.urlEncode(filterUrl));
             }
-            sb.append(filterUrl);
         }
     }
 
-    private void addSelectToUrl(StringBuilder sb, char separator) {
+    private void addSelectToUrl(StringBuilder sb, char separator, boolean inExpand) {
         if (!select.isEmpty()) {
             sb.append(separator).append("$select=");
             if (isSelectDistinct()) {
@@ -504,7 +505,11 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                sb.append(StringHelper.urlEncode(property.getName()));
+                if (inExpand) {
+                    sb.append(property.getName());
+                } else {
+                    sb.append(StringHelper.urlEncode(property.getName()));
+                }
             }
         }
     }
