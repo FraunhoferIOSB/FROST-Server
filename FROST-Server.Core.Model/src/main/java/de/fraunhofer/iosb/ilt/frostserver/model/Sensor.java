@@ -86,7 +86,7 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> implements EncodingType
     @Override
     public Sensor setEncodingType(String encodingType) {
         this.encodingType = encodingType;
-        setEncodingType = true;
+        setEncodingType = this.encodingType != null;
         return this;
     }
 
@@ -101,7 +101,7 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> implements EncodingType
 
     public Sensor setMetadata(Object metadata) {
         this.metadata = metadata;
-        setMetadata = true;
+        setMetadata = this.metadata != null;
         return this;
     }
 

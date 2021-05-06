@@ -51,6 +51,21 @@ public class EntityCompleteTest {
     }
 
     @Test
+    public void testSensorComplete() {
+        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.SENSOR, null);
+        Sensor entity = new Sensor();
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        entity.setName("name");
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        entity.setDescription("description");
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        entity.setEncodingType("application/text");
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        entity.setMetadata("Sensor Metadata");
+        Assert.assertTrue(isEntityComplete(entity, containingSet));
+    }
+
+    @Test
     public void testMultiDatastreamComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTIDATASTREAM, null);
 
