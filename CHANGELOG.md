@@ -9,7 +9,8 @@
 * Fixed newest mosquitto not working in docker-compose demo.
 * Fix CME when getting parallel requests directly after startup.
 * Regularly check if connection with message bus is there, connect if not
-* Fixed the search_path if Liquibase changes it
+* Fixed the search_path if Liquibase changes it.
+* Fixed double URLEncode in $select of nextLinks.
 
 
 ## Release Version 1.13.0
