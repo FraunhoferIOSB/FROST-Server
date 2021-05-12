@@ -225,9 +225,9 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTEntityType node, ResourcePath data) {
-        PathElement parent = data.getLastElement();
+        final PathElement parent = data.getLastElement();
         final String name = node.value.toString();
-        EntityType entityType = modelRegistry.getEntityTypeForName(name);
+        final EntityType entityType = modelRegistry.getEntityTypeForName(name);
         if (parent == null) {
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
@@ -235,25 +235,32 @@ public class PathParser implements ParserVisitor {
             addAsEntitiySet(data, entityType);
             return defltAction(node, data);
         }
+
+        final EntityType parentType;
         if (parent instanceof PathElementEntity) {
             PathElementEntity parentEntity = (PathElementEntity) parent;
-            EntityType parentType = parentEntity.getEntityType();
-            NavigationPropertyMain np = parentType.getNavigationProperty(entityType);
-            if (np == null) {
-                throw new IllegalArgumentException("Entities of type " + parentEntity.getEntityType() + " do not have a navigation property named " + node.value);
-            }
-            if (!np.getName().equals(name)) {
-                throw new IllegalArgumentException("Entities of type " + parentEntity.getEntityType() + " do not have a navigation property named " + node.value);
-            }
-            if (entityType.plural.equals(name)) {
-                addAsEntitiySet(data, entityType);
-                return defltAction(node, data);
-            } else {
-                addAsEntitiy(data, node, entityType, null);
-                return defltAction(node, data);
-            }
+            parentType = parentEntity.getEntityType();
+        } else if (parent instanceof PathElementEntitySet) {
+            PathElementEntitySet parentEntity = (PathElementEntitySet) parent;
+            parentType = parentEntity.getEntityType();
+        } else {
+            throw new IllegalArgumentException("Do not know what to do with: " + node.value);
         }
-        throw new IllegalArgumentException("Do not know what to do with: " + node.value);
+
+        final NavigationPropertyMain np = parentType.getNavigationProperty(entityType);
+        if (np == null) {
+            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
+        }
+        if (!np.getName().equals(name)) {
+            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
+        }
+        if (entityType.plural.equals(name)) {
+            addAsEntitiySet(data, entityType);
+            return defltAction(node, data);
+        } else {
+            addAsEntitiy(data, node, entityType, null);
+            return defltAction(node, data);
+        }
     }
 
     @Override

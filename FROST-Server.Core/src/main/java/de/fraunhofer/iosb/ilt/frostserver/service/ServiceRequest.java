@@ -51,6 +51,11 @@ public class ServiceRequest {
         return requestType;
     }
 
+    /**
+     * Get the content as a String.
+     *
+     * @return the content as a String.
+     */
     public String getContentString() {
         if (contentString != null) {
             return contentString;
@@ -60,6 +65,11 @@ public class ServiceRequest {
                 .collect(Collectors.joining("\n"));
     }
 
+    /**
+     * Get the content as a character stream, through a Reader.
+     *
+     * @return The content in a Reader.
+     */
     public Reader getContentReader() {
         if (contentString != null) {
             return new StringReader(contentString);
@@ -67,6 +77,11 @@ public class ServiceRequest {
         return new BufferedReader(new InputStreamReader(contentBinary, StandardCharsets.UTF_8));
     }
 
+    /**
+     * Get the content as a (binary) InputStream.
+     *
+     * @return The content as InputStream.
+     */
     public InputStream getContentStream() {
         if (contentString != null) {
             return new ByteArrayInputStream(contentString.getBytes(StandardCharsets.UTF_8));

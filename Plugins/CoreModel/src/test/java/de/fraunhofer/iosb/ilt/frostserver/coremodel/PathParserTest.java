@@ -329,6 +329,24 @@ public class PathParserTest {
     }
 
     @Test
+    public void testPathdeep0() {
+        String path = "/ObservedProperties(1)/Datastreams/Observations";
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservedProperty, null);
+        expResult.addPathElement(espe, false, false);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservedProperty, espe);
+        expResult.addPathElement(epe, false, true);
+        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        expResult.addPathElement(espe, false, false);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation, espe);
+        expResult.addPathElement(espe, false, false);
+
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
     public void testPathdeep1() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(7)/Observations(8)/FeatureOfInterest";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);

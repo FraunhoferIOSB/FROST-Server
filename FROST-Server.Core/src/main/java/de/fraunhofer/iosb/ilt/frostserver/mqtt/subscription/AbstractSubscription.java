@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -88,16 +89,26 @@ public abstract class AbstractSubscription implements Subscription {
     protected void generateFilter(int pathElementOffset) {
         EntityType lastType = getEntityType();
         List<Property> properties = new ArrayList<>();
+        boolean direct = true;
         for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
             PathElement element = path.get(i);
-            if (!(element instanceof PathElementEntity)) {
+            if (!(element instanceof PathElementEntity) && !(element instanceof PathElementEntitySet)) {
                 continue;
             }
+            if (element instanceof PathElementEntitySet) {
+                final PathElementEntitySet pees = (PathElementEntitySet) element;
+                final NavigationPropertyMain navProp = lastType.getNavigationProperty(pees.getEntityType());
+                properties.add(navProp);
+                lastType = pees.getEntityType();
+                direct = false;
+                continue;
+            }
+
             final PathElementEntity epe = (PathElementEntity) element;
             final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
 
             Id id = epe.getId();
-            if (!navProp.isEntitySet() && id != null) {
+            if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
                 createMatcher(navProp, id);
                 assert (i <= 1);
                 return;
