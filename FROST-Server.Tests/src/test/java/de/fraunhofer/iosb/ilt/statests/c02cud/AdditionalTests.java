@@ -22,7 +22,9 @@ import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdditionalTests extends AbstractTestClass {
 
     /**
@@ -76,8 +79,8 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testMultipleLocations() throws ServiceFailureException {
-        LOGGER.info("  testMultipleLocations");
+    public void test01MultipleLocations() throws ServiceFailureException {
+        LOGGER.info("  test01MultipleLocations");
         EntityUtils.deleteAll(version, serverSettings, service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -114,6 +117,19 @@ public class AdditionalTests extends AbstractTestClass {
         Assert.assertNotNull("A FeatureOfInterest should have been generated, but got NULL.", featureOfInterest);
     }
 
+    @Test
+    public void test02GeneratePhenomenonTime() throws ServiceFailureException {
+        LOGGER.info("  test02GeneratePhenomenonTime");
+        ObservationDao doa = service.observations();
+        Observation observation = new Observation(1.0, DATASTREAMS.get(0));
+        doa.create(observation);
+        OBSERVATIONS.add(observation);
+
+        Observation found;
+        found = doa.find(observation.getId());
+        Assert.assertNotNull("phenomenonTime should be auto generated.", found.getPhenomenonTime());
+    }
+
     /**
      * Check if adding a new HistoricalLocation to a Thing changes the Location
      * of the Thing, if the new HistoricalLocation has a time that is later than
@@ -126,8 +142,8 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testHistoricalLocationThing() throws ServiceFailureException {
-        LOGGER.info("  testHistoricalLocationThing");
+    public void test03HistoricalLocationThing() throws ServiceFailureException {
+        LOGGER.info("  test03HistoricalLocationThing");
         EntityUtils.deleteAll(version, serverSettings, service);
 
         // Create a thing
@@ -193,8 +209,8 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testPostInvalidPath() throws ServiceFailureException {
-        LOGGER.info("  testPostInvalidPath");
+    public void test04PostInvalidPath() throws ServiceFailureException {
+        LOGGER.info("  test04PostInvalidPath");
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
@@ -313,8 +329,8 @@ public class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    public void testRecreateAutomaticFoi() throws ServiceFailureException {
-        LOGGER.info("  testRecreateAutomaticFoi");
+    public void test05RecreateAutomaticFoi() throws ServiceFailureException {
+        LOGGER.info("  test05RecreateAutomaticFoi");
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
