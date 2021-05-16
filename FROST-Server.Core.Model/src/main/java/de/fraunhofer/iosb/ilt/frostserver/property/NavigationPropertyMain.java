@@ -44,12 +44,22 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
         public NavigationPropertyEntity(String propertyName) {
             super(propertyName, false, TYPE_REFERENCE_ENTITY);
         }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse) {
+            super(propertyName, false, TYPE_REFERENCE_ENTITY);
+            setInverses(inverse);
+        }
     }
 
     public static class NavigationPropertyEntitySet extends NavigationPropertyMain<EntitySet> {
 
         public NavigationPropertyEntitySet(String propertyName) {
             super(propertyName, true, TYPE_REFERENCE_ENTITYSET);
+        }
+
+        public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse) {
+            super(propertyName, true, TYPE_REFERENCE_ENTITYSET);
+            setInverses(inverse);
         }
     }
 
@@ -72,6 +82,8 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     private final Collection<String> aliases;
 
+    private NavigationPropertyMain inverse;
+
     private NavigationPropertyMain(String propertyName, boolean isSet, TypeReference<P> type) {
         this.type = type;
         this.name = propertyName;
@@ -82,6 +94,19 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
+    }
+
+    public NavigationPropertyMain getInverse() {
+        return inverse;
+    }
+
+    public final void setInverse(NavigationPropertyMain inverse) {
+        this.inverse = inverse;
+    }
+
+    public final void setInverses(NavigationPropertyMain inverse) {
+        this.inverse = inverse;
+        inverse.setInverse(this);
     }
 
     @Override

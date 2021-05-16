@@ -74,7 +74,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             PathElement lastElement = path.getLastElement();
             final ModelRegistry modelRegistry = settings.getModelRegistry();
             if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
-                query.getSelect().add(pluginCoreModel.npDatastream);
+                query.getSelect().add(pluginCoreModel.npDatastreamObservation);
                 if (npMultiDatastream != null) {
                     query.getSelect().add(npMultiDatastream);
                 }
@@ -209,10 +209,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastream, npMultiDatastream);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastreamObservation, npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastream, npMultiDatastream)
+                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

@@ -115,21 +115,20 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTaskingCapabilities::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npActuator, TableImpTaskingCapabilities::getActuatorId, idManager);
-        pfReg.addEntry(pluginCoreModel.npThing, TableImpTaskingCapabilities::getThingId, idManager);
-        pfReg.addEntry(pluginActuation.npTasks, TableImpTaskingCapabilities::getId, idManager);
+        pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId, idManager);
+        pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId, idManager);
+        pfReg.addEntry(pluginActuation.npTasksTaskCap, TableImpTaskingCapabilities::getId, idManager);
 
         // We register a navigationProperty on the Things table.
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
-                .addEntry(pluginActuation.npTaskingCapabilities, TableImpThings::getId, idManager);
+                .addEntry(pluginActuation.npTaskingCapabilitiesThing, TableImpThings::getId, idManager);
     }
 
     @Override

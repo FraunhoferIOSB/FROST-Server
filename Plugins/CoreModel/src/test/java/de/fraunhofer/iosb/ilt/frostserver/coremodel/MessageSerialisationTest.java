@@ -108,7 +108,7 @@ public class MessageSerialisationTest {
         message.setEntity(entity);
         message.addEpField(pluginCoreModel.epName);
         message.addEpField(pluginCoreModel.epDescription);
-        message.addField(pluginCoreModel.npDatastreams);
+        message.addField(pluginCoreModel.npDatastreamsThing);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
@@ -127,7 +127,7 @@ public class MessageSerialisationTest {
                 .setProperty(pluginCoreModel.epParameters, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
                         .build())
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(12)));
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(12)));
         entity.setProperty(pluginCoreModel.epResultTime, null);
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);

@@ -192,7 +192,7 @@ public class QueryParserTest {
         String query = "$filter=Datastream/id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
-                new Path(pluginCoreModel.npDatastream, ModelRegistry.EP_ID),
+                new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID),
                 new IntegerConstant(1)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
@@ -202,7 +202,7 @@ public class QueryParserTest {
         query = "$filter=Thing/Locations/location eq 1";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
-                new Path(pluginCoreModel.npThing, pluginCoreModel.npLocations, pluginCoreModel.epLocation),
+                new Path(pluginCoreModel.npThingDatasteam, pluginCoreModel.npLocationsThing, pluginCoreModel.epLocation),
                 new IntegerConstant(1)));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
@@ -559,7 +559,7 @@ public class QueryParserTest {
     public void testOrderByMixedPath() {
         String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastream, ModelRegistry.EP_ID)));
+        expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -581,18 +581,18 @@ public class QueryParserTest {
     @Test
     public void testSelect() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getSelect().add(pluginCoreModel.npObservations);
+        expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
         expResult.getSelect().add(ModelRegistry.EP_ID);
         Query result = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        result.addSelect(pluginCoreModel.npObservations)
+        result.addSelect(pluginCoreModel.npObservationsDatastream)
                 .addSelect(ModelRegistry.EP_ID);
         Assert.assertEquals(expResult, result);
 
         expResult.getSelect().clear();
-        expResult.getSelect().add(pluginCoreModel.npThing);
+        expResult.getSelect().add(pluginCoreModel.npThingDatasteam);
         expResult.getSelect().add(ModelRegistry.EP_ID);
         result.clearSelect();
-        result.addSelect(pluginCoreModel.npThing)
+        result.addSelect(pluginCoreModel.npThingDatasteam)
                 .addSelect(ModelRegistry.EP_ID);
         Assert.assertEquals(expResult, result);
     }
@@ -695,7 +695,7 @@ public class QueryParserTest {
     public void testSelectNavigationProperty() {
         String query = "$select=Observations";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getSelect().add(pluginCoreModel.npObservations);
+        expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -705,7 +705,7 @@ public class QueryParserTest {
     public void testSelectMultipleMixed() {
         String query = "$select=Observations, id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.addSelect(pluginCoreModel.npObservations)
+        expResult.addSelect(pluginCoreModel.npObservationsDatastream)
                 .addSelect(ModelRegistry.EP_ID);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
@@ -716,7 +716,7 @@ public class QueryParserTest {
     public void testExpandSingleNavigationProperty() {
         String query = "$expand=Observations";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservations));
+        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -726,9 +726,9 @@ public class QueryParserTest {
     public void testExpandDeep() {
         String query = "$expand=Observations/FeatureOfInterest";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterest));
+        subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservations));
+        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -765,7 +765,7 @@ public class QueryParserTest {
         {
             String query = "$expand=Things,properties/link.Thing";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
-                    .addExpand(new Expand(modelRegistry, pluginCoreModel.npThings))
+                    .addExpand(new Expand(modelRegistry, pluginCoreModel.npThingsLocation))
                     .addExpand(
                             new Expand(
                                     modelRegistry,
@@ -787,7 +787,7 @@ public class QueryParserTest {
                                             .addToSubPath("link.Thing")
                             )
                     )
-                    .addExpand(new Expand(modelRegistry, pluginCoreModel.npThings));
+                    .addExpand(new Expand(modelRegistry, pluginCoreModel.npThingsLocation));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
             Assert.assertEquals(expResult, result);
@@ -803,9 +803,9 @@ public class QueryParserTest {
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subSubQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subSubQuery.getSelect().add(ModelRegistry.EP_ID);
-        subQuery.getExpand().add(new Expand(modelRegistry, subSubQuery, pluginCoreModel.npFeatureOfInterest));
+        subQuery.getExpand().add(new Expand(modelRegistry, subSubQuery, pluginCoreModel.npFeatureOfInterestObservation));
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservations));
+        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -815,8 +815,8 @@ public class QueryParserTest {
     public void testExpandMultipleNavigationProperties() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservations));
-        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedProperty));
+        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream));
+        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -826,10 +826,10 @@ public class QueryParserTest {
     public void testExpandMultipleNavigationPropertiesDeep1() {
         String query = "$expand=Datastreams/Observations,Datastreams/ObservedProperty";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
-                .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreams)
+                .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreamsThing)
                         .setSubQuery(new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
-                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservations))
-                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedProperty))));
+                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream))
+                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
         Assert.assertEquals(expResult, result);
@@ -839,10 +839,10 @@ public class QueryParserTest {
     public void testExpandMultipleNavigationPropertiesDeep2() {
         String query = "$expand=Datastreams($expand=Observations,ObservedProperty)";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
-                .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreams)
+                .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreamsThing)
                         .setSubQuery(new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
-                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservations))
-                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedProperty))
+                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream))
+                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream))
                         ));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
@@ -855,14 +855,14 @@ public class QueryParserTest {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery.setFilter(new Equal(new Path(pluginCoreModel.epResult), new IntegerConstant(1)));
-        subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterest));
+        subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
         subQuery.getSelect().add(ModelRegistry.EP_ID);
         subQuery.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID)));
         subQuery.setSkip(5);
         subQuery.setTop(10);
         subQuery.setCount(true);
-        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservations));
-        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedProperty));
+        expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
+        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
@@ -875,10 +875,10 @@ public class QueryParserTest {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery1 = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery1.setFilter(new Equal(new Path(pluginCoreModel.epResult), new IntegerConstant(1)));
-        subQuery1.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterest));
+        subQuery1.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
         subQuery1.getSelect().add(ModelRegistry.EP_ID);
-        expResult.getExpand().add(new Expand(modelRegistry, subQuery1, pluginCoreModel.npObservations));
-        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedProperty));
+        expResult.getExpand().add(new Expand(modelRegistry, subQuery1, pluginCoreModel.npObservationsDatastream));
+        expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
@@ -891,20 +891,20 @@ public class QueryParserTest {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new And(
                 new Equal(
-                        new Path(pluginCoreModel.npDatastreams,
-                                pluginCoreModel.npObservations,
-                                pluginCoreModel.npFeatureOfInterest,
+                        new Path(pluginCoreModel.npDatastreamsThing,
+                                pluginCoreModel.npObservationsDatastream,
+                                pluginCoreModel.npFeatureOfInterestObservation,
                                 ModelRegistry.EP_ID),
                         new StringConstant("FOI_1")),
                 new And(
                         new GreaterEqual(
-                                new Path(pluginCoreModel.npDatastreams,
-                                        pluginCoreModel.npObservations,
+                                new Path(pluginCoreModel.npDatastreamsThing,
+                                        pluginCoreModel.npObservationsDatastream,
                                         pluginCoreModel.epResultTime),
                                 new DateTimeConstant(new DateTime(2010, 06, 01, 0, 0, DateTimeZone.UTC))),
                         new LessEqual(
-                                new Path(pluginCoreModel.npDatastreams,
-                                        pluginCoreModel.npObservations,
+                                new Path(pluginCoreModel.npDatastreamsThing,
+                                        pluginCoreModel.npObservationsDatastream,
                                         pluginCoreModel.epResultTime),
                                 new DateTimeConstant(new DateTime(2010, 07, 01, 0, 0, DateTimeZone.UTC))))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);

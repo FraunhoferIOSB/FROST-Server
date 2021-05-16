@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -80,13 +79,12 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTasks::getId);
         pfReg.addEntry(pluginCoreModel.epCreationTime, table -> table.colCreationTime,
                 new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime));
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npTaskingCapability, TableImpTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override

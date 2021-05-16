@@ -94,7 +94,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreams, TableImpObsProperties::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsObsProp, TableImpObsProperties::getId, idManager);
     }
 
     @Override

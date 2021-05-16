@@ -96,15 +96,15 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
         pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
                 new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
         );
-        pfReg.addEntry(pluginCoreModel.npThing, TableImpHistLocations::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.npLocations, TableImpHistLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId, idManager);
     }
 
     @Override
     public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
         super.insertIntoDatabase(pm, histLoc);
         EntityFactories<J> entityFactories = pm.getEntityFactories();
-        Entity thing = histLoc.getProperty(pluginCoreModel.npThing);
+        Entity thing = histLoc.getProperty(pluginCoreModel.npThingHistLoc);
         J thingId = (J) thing.getId().getValue();
         DSLContext dslContext = pm.getDslContext();
         TableImpHistLocations<J> thl = getTables().getTableForClass(TableImpHistLocations.class);
@@ -132,7 +132,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing.
-            for (Entity l : histLoc.getProperty(pluginCoreModel.npLocations)) {
+            for (Entity l : histLoc.getProperty(pluginCoreModel.npLocationsHistLoc)) {
                 if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }

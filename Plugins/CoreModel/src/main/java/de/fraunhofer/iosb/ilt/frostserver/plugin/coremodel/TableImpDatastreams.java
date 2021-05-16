@@ -244,10 +244,10 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(pluginCoreModel.npSensor, TableImpDatastreams::getSensorId, idManager);
-        pfReg.addEntry(pluginCoreModel.npObservedProperty, TableImpDatastreams::getObsPropertyId, idManager);
-        pfReg.addEntry(pluginCoreModel.npThing, TableImpDatastreams::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.npObservations, TableImpDatastreams::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservationsDatastream, TableImpDatastreams::getId, idManager);
     }
 
     @Override

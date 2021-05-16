@@ -136,22 +136,29 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     public final EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TYPE_REFERENCE_UOM, true, false);
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TYPE_REFERENCE_TIMEINTERVAL);
 
-    public final NavigationPropertyEntity npDatastream = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
-    public final NavigationPropertyEntitySet npDatastreams = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
-    public final NavigationPropertyEntity npFeatureOfInterest = new NavigationPropertyEntity(NAME_NP_FEATUREOFINTEREST);
-    public final NavigationPropertyEntitySet npFeaturesOfInterest = new NavigationPropertyEntitySet(NAME_NP_FEATURESOFINTEREST);
-    public final NavigationPropertyEntity npHistoricalLocation = new NavigationPropertyEntity(NAME_NP_HISTORICALLOCATION);
-    public final NavigationPropertyEntitySet npHistoricalLocations = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
-    public final NavigationPropertyEntity npLocation = new NavigationPropertyEntity(NAME_NP_LOCATION);
-    public final NavigationPropertyEntitySet npLocations = new NavigationPropertyEntitySet(NAME_NP_LOCATIONS);
-    public final NavigationPropertyEntity npObservation = new NavigationPropertyEntity(NAME_NP_OBSERVATION);
-    public final NavigationPropertyEntitySet npObservations = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS);
-    public final NavigationPropertyEntity npObservedProperty = new NavigationPropertyEntity(NAME_NP_OBSERVEDPROPERTY);
-    public final NavigationPropertyEntitySet npObservedProperties = new NavigationPropertyEntitySet(NAME_NP_OBSERVEDPROPERTIES);
-    public final NavigationPropertyEntity npSensor = new NavigationPropertyEntity(NAME_NP_SENSOR);
-    public final NavigationPropertyEntitySet npSensors = new NavigationPropertyEntitySet(NAME_NP_SENSORS);
-    public final NavigationPropertyEntity npThing = new NavigationPropertyEntity(NAME_NP_THING);
-    public final NavigationPropertyEntitySet npThings = new NavigationPropertyEntitySet(NAME_NP_THINGS);
+    public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
+    public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
+    public final NavigationPropertyEntitySet npDatastreamsSensor = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
+    public final NavigationPropertyEntitySet npDatastreamsObsProp = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
+
+    public final NavigationPropertyEntity npFeatureOfInterestObservation = new NavigationPropertyEntity(NAME_NP_FEATUREOFINTEREST);
+
+    public final NavigationPropertyEntitySet npHistoricalLocationsThing = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
+    public final NavigationPropertyEntitySet npHistoricalLocationsLocation = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
+
+    public final NavigationPropertyEntitySet npLocationsThing = new NavigationPropertyEntitySet(NAME_NP_LOCATIONS);
+    public final NavigationPropertyEntitySet npLocationsHistLoc = new NavigationPropertyEntitySet(NAME_NP_LOCATIONS, npHistoricalLocationsLocation);
+
+    public final NavigationPropertyEntitySet npObservationsDatastream = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS, npDatastreamObservation);
+    public final NavigationPropertyEntitySet npObservationsFeature = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS, npFeatureOfInterestObservation);
+
+    public final NavigationPropertyEntity npObservedPropertyDatastream = new NavigationPropertyEntity(NAME_NP_OBSERVEDPROPERTY, npDatastreamsObsProp);
+
+    public final NavigationPropertyEntity npSensorDatastream = new NavigationPropertyEntity(NAME_NP_SENSOR, npDatastreamsSensor);
+
+    public final NavigationPropertyEntity npThingDatasteam = new NavigationPropertyEntity(NAME_NP_THING, npDatastreamsThing);
+    public final NavigationPropertyEntity npThingHistLoc = new NavigationPropertyEntity(NAME_NP_THING, npHistoricalLocationsThing);
+    public final NavigationPropertyEntitySet npThingsLocation = new NavigationPropertyEntitySet(NAME_NP_THINGS, npLocationsThing);
 
     public final EntityType etThing = new EntityType(NAME_NP_THING, NAME_NP_THINGS);
     public final EntityType etSensor = new EntityType(NAME_NP_SENSOR, NAME_NP_SENSORS);
@@ -239,10 +246,10 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epPhenomenonTimeDs, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(epResultTimeDs, false)
-                .registerProperty(npObservedProperty, true)
-                .registerProperty(npSensor, true)
-                .registerProperty(npThing, true)
-                .registerProperty(npObservations, false);
+                .registerProperty(npObservedPropertyDatastream, true)
+                .registerProperty(npSensorDatastream, true)
+                .registerProperty(npThingDatasteam, true)
+                .registerProperty(npObservationsDatastream, false);
         etFeatureOfInterest
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -251,13 +258,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
                 .registerProperty(epFeature, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npObservations, false);
+                .registerProperty(npObservationsFeature, false);
         etHistoricalLocation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epTime, true)
-                .registerProperty(npThing, true)
-                .registerProperty(npLocations, false);
+                .registerProperty(npThingHistLoc, true)
+                .registerProperty(npLocationsHistLoc, false);
         etLocation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -266,8 +273,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
                 .registerProperty(epLocation, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npHistoricalLocations, false)
-                .registerProperty(npThings, false);
+                .registerProperty(npHistoricalLocationsLocation, false)
+                .registerProperty(npThingsLocation, false);
         etObservation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -277,8 +284,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epResultQuality, false)
                 .registerProperty(epValidTime, false)
                 .registerProperty(epParameters, false)
-                .registerProperty(npDatastream, true)
-                .registerProperty(npFeatureOfInterest, false);
+                .registerProperty(npDatastreamObservation, true)
+                .registerProperty(npFeatureOfInterestObservation, false);
         etObservedProperty
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -286,7 +293,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epDefinition, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npDatastreams, false);
+                .registerProperty(npDatastreamsObsProp, false);
         etSensor
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -295,16 +302,16 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
                 .registerProperty(epMetadata, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npDatastreams, false);
+                .registerProperty(npDatastreamsSensor, false);
         etThing
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npLocations, false)
-                .registerProperty(npHistoricalLocations, false)
-                .registerProperty(npDatastreams, false);
+                .registerProperty(npLocationsThing, false)
+                .registerProperty(npHistoricalLocationsThing, false)
+                .registerProperty(npDatastreamsThing, false);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;

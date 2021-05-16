@@ -100,7 +100,7 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
-    private static final String NOT_A_VALID_ID = "Not a valid id";
+    private static final String NOT_A_VALID_ID = "Not a valid path";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";

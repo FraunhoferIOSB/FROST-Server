@@ -112,9 +112,9 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreams, TableImpThings::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npHistoricalLocations, TableImpThings::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npLocations, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsThing, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsThing, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npLocationsThing, TableImpThings::getId, idManager);
     }
 
     @Override

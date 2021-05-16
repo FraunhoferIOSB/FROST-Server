@@ -88,7 +88,6 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpActuators::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
@@ -96,7 +95,7 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginActuation.npTaskingCapabilities, TableImpActuators::getId, idManager);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilitiesActuator, TableImpActuators::getId, idManager);
     }
 
     @Override

@@ -60,12 +60,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
 
-    public final NavigationPropertyEntity npActuator = new NavigationPropertyEntity("Actuator");
-    public final NavigationPropertyEntitySet npActuators = new NavigationPropertyEntitySet("Actuators");
-    public final NavigationPropertyEntity npTask = new NavigationPropertyEntity("Task");
-    public final NavigationPropertyEntitySet npTasks = new NavigationPropertyEntitySet("Tasks");
-    public final NavigationPropertyEntity npTaskingCapability = new NavigationPropertyEntity("TaskingCapability");
-    public final NavigationPropertyEntitySet npTaskingCapabilities = new NavigationPropertyEntitySet("TaskingCapabilities");
+    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity("Actuator");
+    public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");
+    public final NavigationPropertyEntitySet npTasksTaskCap = new NavigationPropertyEntitySet("Tasks");
+
+    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity("TaskingCapability", npTasksTaskCap);
+    public final NavigationPropertyEntitySet npTaskingCapabilitiesActuator = new NavigationPropertyEntitySet("TaskingCapabilities", npActuatorTaskCap);
+    public final NavigationPropertyEntitySet npTaskingCapabilitiesThing = new NavigationPropertyEntitySet("TaskingCapabilities", npThingTaskCap);
 
     public final EntityType etActuator = new EntityType("Actuator", "Actuators");
     public final EntityType etTask = new EntityType("Task", "Tasks");
@@ -145,13 +146,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
                 .registerProperty(pluginCoreModel.epMetadata, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npTaskingCapabilities, false);
+                .registerProperty(npTaskingCapabilitiesActuator, false);
         etTask
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
-                .registerProperty(npTaskingCapability, true);
+                .registerProperty(npTaskingCapabilityTask, true);
         etTaskingCapability
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -159,10 +160,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(epTaskingParameters, true)
-                .registerProperty(npActuator, true)
-                .registerProperty(npTasks, false)
-                .registerProperty(pluginCoreModel.npThing, true);
-        pluginCoreModel.etThing.registerProperty(npTaskingCapabilities, false);
+                .registerProperty(npActuatorTaskCap, true)
+                .registerProperty(npTasksTaskCap, false)
+                .registerProperty(npThingTaskCap, true);
+        pluginCoreModel.etThing.registerProperty(npTaskingCapabilitiesThing, false);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;

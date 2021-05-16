@@ -87,9 +87,9 @@ public class DefNavigationProperty {
         }
         if (inverse != null) {
             if (inverse.entitySet) {
-                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name);
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp);
             } else {
-                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name);
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp);
             }
             navPropInverse.setEntityType(sourceEntityType);
             targetEntityType.registerProperty(navPropInverse, inverse.required);

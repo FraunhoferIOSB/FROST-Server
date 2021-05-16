@@ -22,13 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -36,9 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.LngLatAlt;
-import org.geojson.Point;
-import org.geojson.Polygon;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,7 +54,6 @@ public class TestIsSetProperty {
     private static PluginCoreModel pluginCoreModel;
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
-    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
 
     @BeforeClass
     public static void initClass() {
@@ -80,97 +70,7 @@ public class TestIsSetProperty {
 
     @Before
     public void setUp() {
-        propertyValues.put(pluginCoreModel.epCreationTime, TimeInstant.now());
-        propertyValues.put(pluginCoreModel.epDefinition, "MyDefinition");
-        propertyValues.put(pluginCoreModel.epDescription, "My description");
-        propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(pluginCoreModel.epFeature, new Point(8, 42));
-        propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
-        propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
-        propertyValues.put(pluginCoreModel.epName, "myName");
-        propertyValues.put(pluginCoreModel.epObservationType, "my Type");
-        propertyValues.put(pluginCoreModel.epObservedArea, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("key1", "value1");
-        parameters.put("key2", 2);
-        propertyValues.put(pluginCoreModel.epParameters, parameters);
-        propertyValues.put(pluginCoreModel.epPhenomenonTime, TimeInstant.now());
-        propertyValuesAlternative.put(pluginCoreModel.epPhenomenonTime, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(ModelRegistry.EP_PROPERTIES, parameters);
-        propertyValues.put(pluginCoreModel.epResult, 42);
-        propertyValues.put(pluginCoreModel.epResultQuality, "myQuality");
-        propertyValues.put(pluginCoreModel.epResultTime, TimeInstant.now());
-        propertyValuesAlternative.put(pluginCoreModel.epResultTime, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-        propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
-        UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
-        propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
-
-        int nextId = 100;
-        propertyValues.put(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npHistoricalLocation, new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npLocation, new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npObservation, new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
-
-        EntitySetImpl datastreams = new EntitySetImpl(pluginCoreModel.etDatastream);
-        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
-        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npDatastreams, datastreams);
-
-        EntitySetImpl features = new EntitySetImpl(pluginCoreModel.etFeatureOfInterest);
-        features.add(new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
-        features.add(new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npFeaturesOfInterest, features);
-
-        EntitySetImpl histLocations = new EntitySetImpl(pluginCoreModel.etHistoricalLocation);
-        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
-        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npHistoricalLocations, histLocations);
-
-        EntitySetImpl locations = new EntitySetImpl(pluginCoreModel.etLocation);
-        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
-        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npLocations, locations);
-
-        EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.etObservation);
-        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
-        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npObservations, observations);
-
-        EntitySetImpl obsProperties = new EntitySetImpl(pluginCoreModel.etObservedProperty);
-        obsProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
-        obsProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npObservedProperties, obsProperties);
-
-        EntitySetImpl sensors = new EntitySetImpl(pluginCoreModel.etSensor);
-        sensors.add(new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
-        sensors.add(new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npSensors, sensors);
-
-        EntitySetImpl things = new EntitySetImpl(pluginCoreModel.etThing);
-        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
-        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.npThings, things);
-
-        for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            for (EntityPropertyMain ep : entityType.getEntityProperties()) {
-                Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
-            }
-        }
-
-        for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
-            }
-        }
-
+        TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, modelRegistry);
     }
 
     @Test
@@ -240,11 +140,7 @@ public class TestIsSetProperty {
     }
 
     private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
-        try {
-            addPropertyToObject(entity, property, propertyValues);
-        } catch (IllegalArgumentException ex) {
-            addPropertyToObject(entity, property, propertyValuesAlternative);
-        }
+        addPropertyToObject(entity, property, propertyValues);
     }
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
@@ -283,7 +179,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity datastream) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, datastream);
-        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.npObservedProperty));
+        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.npObservedPropertyDatastream));
         Assert.assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.epUnitOfMeasurement));
     }
 
@@ -325,7 +221,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity hl) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, hl);
-        Assert.assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.npThing));
+        Assert.assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.npThingHistLoc));
         Assert.assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.epTime));
     }
 
@@ -350,14 +246,14 @@ public class TestIsSetProperty {
         Assert.assertEquals(shouldBeSet, location.isSetProperty(pluginCoreModel.epLocation));
     }
 
-    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity mds) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, mds);
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.epObservationType));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.epObservedArea));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.epPhenomenonTime));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.epResultTime));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.npSensor));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(pluginCoreModel.npThing));
+    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity ds) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, ds);
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservationType));
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservedArea));
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epPhenomenonTime));
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epResultTime));
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npSensorDatastream));
+        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npThingDatasteam));
     }
 
     @Test
@@ -377,8 +273,8 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity o) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, o);
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npDatastream));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npFeatureOfInterest));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npDatastreamObservation));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation));
         Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epParameters));
         Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epPhenomenonTime));
         Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResult));

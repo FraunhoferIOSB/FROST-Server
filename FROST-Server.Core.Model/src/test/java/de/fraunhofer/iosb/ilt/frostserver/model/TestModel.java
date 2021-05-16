@@ -43,6 +43,7 @@ public class TestModel {
     public final NavigationPropertyMain.NavigationPropertyEntity NP_HOUSE = new NavigationPropertyMain.NavigationPropertyEntity("House");
     public final NavigationPropertyMain.NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyMain.NavigationPropertyEntitySet("Houses");
     public final NavigationPropertyMain.NavigationPropertyEntity NP_ROOM = new NavigationPropertyMain.NavigationPropertyEntity("Room");
+    public final NavigationPropertyMain.NavigationPropertyEntity NP_BATHROOM = new NavigationPropertyMain.NavigationPropertyEntity("Bathroom");
     public final NavigationPropertyMain.NavigationPropertyEntitySet NP_ROOMS = new NavigationPropertyMain.NavigationPropertyEntitySet("Rooms");
 
     public final EntityType ET_HOUSE = new EntityType("House", "Houses");
@@ -55,7 +56,8 @@ public class TestModel {
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_ROOMS, false);
+                .registerProperty(NP_ROOMS, false)
+                .registerProperty(NP_BATHROOM, false);
         modelRegistry.registerEntityType(ET_ROOM)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -97,6 +99,7 @@ public class TestModel {
         rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
         rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
         propertyValuesHouse.put(NP_ROOMS, rooms);
+        propertyValuesHouse.put(NP_BATHROOM, new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
 
         EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
         houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));

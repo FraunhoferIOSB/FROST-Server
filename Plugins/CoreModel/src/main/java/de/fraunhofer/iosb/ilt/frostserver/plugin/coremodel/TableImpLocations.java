@@ -161,8 +161,8 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
                 new NFP<>("j", table -> table.colLocation));
         pfReg.addEntryNoSelect(pluginCoreModel.epLocation, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npThings, TableImpLocations::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npHistoricalLocations, TableImpLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId, idManager);
     }
 
     @Override

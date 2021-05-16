@@ -65,8 +65,13 @@ public class EntityFormatterTest {
     private static EntityType etMultiDatastream;
     private static EntityPropertyMain epMultiObservationDataTypes;
     private static EntityPropertyMain epUnitOfMeasurements;
-    private static NavigationPropertyEntity npMultiDatastream;
-    private static NavigationPropertyEntitySet npMultiDatastreams;
+    private static NavigationPropertyEntity npMultiDatastreamObservation;
+    private static NavigationPropertyEntity npThingMds;
+    private static NavigationPropertyEntity npSensorMds;
+    private static NavigationPropertyEntitySet npObservedPropertiesMds;
+    private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
+    private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
+    private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
     @BeforeClass
     public static void initClass() {
@@ -84,8 +89,15 @@ public class EntityFormatterTest {
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
             epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
             epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
-            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
-            npMultiDatastreams = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
+
+            npThingMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Thing");
+            npSensorMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Sensor");
+            npObservedPropertiesMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
+
+            npMultiDatastreamObservation = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+            npMultiDatastreamsThing = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
+            npMultiDatastreamsSensor = (NavigationPropertyEntitySet) pluginCoreModel.etSensor.getNavigationProperty("MultiDatastreams");
+            npMultiDatastreamsObsProp = (NavigationPropertyEntitySet) pluginCoreModel.etObservedProperty.getNavigationProperty("MultiDatastreams");
         }
     }
 
@@ -302,7 +314,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        ((EntitySet) entity.getProperty(pluginCoreModel.npDatastreams)).setCount(1);
+        ((EntitySet) entity.getProperty(pluginCoreModel.npDatastreamsThing)).setCount(1);
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
@@ -333,7 +345,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npLocations, new EntitySetImpl(pluginCoreModel.etLocation))
+                .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
@@ -388,12 +400,12 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npLocations, new EntitySetImpl(pluginCoreModel.etLocation))
+                .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setProperty(pluginCoreModel.npHistoricalLocations, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
+                .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -416,242 +428,14 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npLocations, new EntitySetImpl(pluginCoreModel.etLocation))
-                .setProperty(pluginCoreModel.npHistoricalLocations, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
+                .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
+                .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeLocationBasic() throws IOException {
-        {
-            String expResult
-                    = "{\n"
-                    + "	\"@iot.id\": 1,\n"
-                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                    + "	\"encodingType\": \"application/vnd.geo+json\""
-                    + "}";
-            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
-            Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", coreSettings, path)
-                    .validate();
-            DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
-                    .setQuery(query)
-                    .setId(new IdLong(1))
-                    .setProperty(pluginCoreModel.npThings, new EntitySetImpl(pluginCoreModel.etThing))
-                    .setProperty(pluginCoreModel.npHistoricalLocations, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
-            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-        }
-        {
-            String expResult
-                    = "{\n"
-                    + "	\"@iot.id\": 1,\n"
-                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                    + "	\"encodingType\": \"application/geo+json\""
-                    + "}";
-            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
-            Query query = QueryParser.parseQuery("", coreSettings, path)
-                    .validate();
-            DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
-                    .setQuery(query)
-                    .setId(new IdLong(1))
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
-            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-        }
-    }
-
-    @Test
-    public void writeLocationWithGeoJsonLocation() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                + "	\"encodingType\": \"application/geo+json\""
-                + ",\n"
-                + "	\"location\": \n"
-                + "	{\n"
-                + "		\"type\": \"Feature\",\n"
-                + "		\"geometry\":\n"
-                + "		{\n"
-                + "			\"type\": \"Point\",\n"
-                + "			\"coordinates\": [-114.06,51.05]\n"
-                + "		}\n"
-                + "	}\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                .setProperty(pluginCoreModel.epLocation, TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeHistoricalLocationBasic() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/HistoricalLocations(1)\",\n"
-                + "	\"Locations@iot.navigationLink\": \"HistoricalLocations(1)/Locations\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
-                + "	\"time\": \"2015-01-25T19:00:00.000Z\"\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeDatastreamBasic() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
-                .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
-                        .setName("degree Celsius")
-                        .setSymbol("°C")
-                        .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                )
-                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeDatastreamWithEmptyUnitOfMeasurement() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": null,\n"
-                + "		\"symbol\": null,\n"
-                + "		\"definition\": null\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
-                .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement())
-                .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"observedArea\": \n"
-                + "	{\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
-                + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
-                .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
-                        .setName("degree Celsius")
-                        .setSymbol("°C")
-                        .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                )
-                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -693,8 +477,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(etMultiDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(npThingMds, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(npSensorMds, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the wind.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring wind direction and speed.")
@@ -803,8 +587,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
@@ -829,8 +613,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
@@ -855,8 +639,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
@@ -881,8 +665,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");

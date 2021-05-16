@@ -97,7 +97,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreams, TableImpSensors::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsSensor, TableImpSensors::getId, idManager);
     }
 
     @Override

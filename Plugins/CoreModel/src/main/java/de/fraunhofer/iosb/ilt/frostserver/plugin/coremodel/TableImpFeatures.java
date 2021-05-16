@@ -133,7 +133,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
                 new NFP<>("j", table -> table.colFeature));
         pfReg.addEntryNoSelect(pluginCoreModel.epFeature, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npObservations, TableImpFeatures::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservationsFeature, TableImpFeatures::getId, idManager);
     }
 
     @Override

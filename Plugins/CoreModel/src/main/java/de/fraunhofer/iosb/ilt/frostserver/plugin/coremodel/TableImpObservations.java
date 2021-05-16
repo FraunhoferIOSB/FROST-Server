@@ -221,19 +221,19 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 new ConverterTimeInterval<>(pluginCoreModel.epValidTime, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(pluginCoreModel.npFeatureOfInterest, TableImpObservations::getFeatureId, idManager);
-        pfReg.addEntry(pluginCoreModel.npDatastream, TableImpObservations::getDatastreamId, idManager);
+        pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId, idManager);
 
         registerHookPreInsert(0, (pm, entity, insertFields) -> {
-            Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterest);
+            Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
             if (f == null) {
-                final Entity ds = entity.getProperty(pluginCoreModel.npDatastream);
+                final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
                 if (ds != null) {
                     f = generateFeatureOfInterest(entityFactories, pm, ds.getId());
                     if (f == null) {
                         throw new IncompleteEntityException("No FeatureOfInterest provided, and none can be generated.");
                     }
-                    entity.setProperty(pluginCoreModel.npFeatureOfInterest, f);
+                    entity.setProperty(pluginCoreModel.npFeatureOfInterestObservation, f);
                 }
             }
         });

@@ -91,9 +91,9 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
@@ -124,9 +124,9 @@ public class EntityParserTest {
                 && result.isSetProperty(pluginCoreModel.epObservationType)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
-                && result.isSetProperty(pluginCoreModel.npThing)
-                && result.isSetProperty(pluginCoreModel.npObservedProperty)
-                && result.isSetProperty(pluginCoreModel.npSensor)
+                && result.isSetProperty(pluginCoreModel.npThingDatasteam)
+                && result.isSetProperty(pluginCoreModel.npObservedPropertyDatastream)
+                && result.isSetProperty(pluginCoreModel.npSensorDatastream)
                 && result.isSetProperty(pluginCoreModel.epObservedArea)
                 && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime));
@@ -140,9 +140,9 @@ public class EntityParserTest {
                 && !result.isSetProperty(pluginCoreModel.epObservationType)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
-                && !result.isSetProperty(pluginCoreModel.npThing)
-                && !result.isSetProperty(pluginCoreModel.npObservedProperty)
-                && !result.isSetProperty(pluginCoreModel.npSensor)
+                && !result.isSetProperty(pluginCoreModel.npThingDatasteam)
+                && !result.isSetProperty(pluginCoreModel.npObservedPropertyDatastream)
+                && !result.isSetProperty(pluginCoreModel.npSensorDatastream)
                 && !result.isSetProperty(pluginCoreModel.epObservedArea)
                 && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultTime));
@@ -174,9 +174,9 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(5394815)))
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(5394815)))
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
@@ -209,13 +209,13 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.npObservedProperty,
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream,
                         new DefaultEntity(pluginCoreModel.etObservedProperty)
                                 .setProperty(pluginCoreModel.epName, "Temperature")
                                 .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
                                 .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
                 )
-                .setProperty(pluginCoreModel.npSensor,
+                .setProperty(pluginCoreModel.npSensorDatastream,
                         new DefaultEntity(pluginCoreModel.etSensor)
                                 .setProperty(pluginCoreModel.epDescription, "Sensor 101")
                                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
@@ -287,7 +287,7 @@ public class EntityParserTest {
         Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest));
+                && !result.isSetProperty(pluginCoreModel.epFeature));
     }
 
     @Test
@@ -360,7 +360,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "my backyard")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
-                .setProperty(pluginCoreModel.npThings, things);
+                .setProperty(pluginCoreModel.npThingsLocation, things);
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etLocation, json));
     }
 
@@ -381,8 +381,8 @@ public class EntityParserTest {
         Assert.assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime)
                 && result.isSetProperty(pluginCoreModel.epResult)
-                && result.isSetProperty(pluginCoreModel.npDatastream)
-                && result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && result.isSetProperty(pluginCoreModel.npDatastreamObservation)
+                && result.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation)
                 && result.isSetProperty(pluginCoreModel.epParameters)
                 && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultQuality)
@@ -396,8 +396,8 @@ public class EntityParserTest {
         Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultTime)
                 && !result.isSetProperty(pluginCoreModel.epResult)
-                && !result.isSetProperty(pluginCoreModel.npDatastream)
-                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && !result.isSetProperty(pluginCoreModel.npDatastreamObservation)
+                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation)
                 && !result.isSetProperty(pluginCoreModel.epParameters)
                 && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultQuality)
@@ -416,7 +416,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream)
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
@@ -433,7 +433,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(14269)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
@@ -457,13 +457,13 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 99)
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
                         .setProperty(pluginCoreModel.epFeature, "tarmac")
                 )
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -862,13 +862,13 @@ public class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "Temperature measurement")
                         .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(pluginCoreModel.npObservedProperty,
+                        .setProperty(pluginCoreModel.npObservedPropertyDatastream,
                                 new DefaultEntity(pluginCoreModel.etObservedProperty)
                                         .setProperty(pluginCoreModel.epName, "Temperature")
                                         .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
                                         .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
                         )
-                        .setProperty(pluginCoreModel.npSensor,
+                        .setProperty(pluginCoreModel.npSensorDatastream,
                                 new DefaultEntity(pluginCoreModel.etSensor)
                                         .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
                                         .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")

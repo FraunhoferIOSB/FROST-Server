@@ -17,11 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
@@ -35,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,8 +58,13 @@ public class EntityParserTest {
     private static EntityType etMultiDatastream;
     private static EntityPropertyMain epMultiObservationDataTypes;
     private static EntityPropertyMain epUnitOfMeasurements;
-    private static NavigationPropertyEntity npMultiDatastream;
-    private static NavigationPropertyEntitySet npMultiDatastreams;
+    private static NavigationPropertyEntity npMultiDatastreamObservation;
+    private static NavigationPropertyEntity npThingMds;
+    private static NavigationPropertyEntity npSensorMds;
+    private static NavigationPropertyEntitySet npObservedPropertiesMds;
+    private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
+    private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
+    private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
     @BeforeClass
     public static void beforeClass() {
@@ -83,8 +84,15 @@ public class EntityParserTest {
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
             epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
             epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
-            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
-            npMultiDatastreams = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
+
+            npThingMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Thing");
+            npSensorMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Sensor");
+            npObservedPropertiesMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
+
+            npMultiDatastreamObservation = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+            npMultiDatastreamsThing = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
+            npMultiDatastreamsSensor = (NavigationPropertyEntitySet) pluginCoreModel.etSensor.getNavigationProperty("MultiDatastreams");
+            npMultiDatastreamsObsProp = (NavigationPropertyEntitySet) pluginCoreModel.etObservedProperty.getNavigationProperty("MultiDatastreams");
         }
     }
 
@@ -110,136 +118,9 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
-    }
-
-    @Test
-    public void readDatastreamWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"symbol\": \"%\",\n"
-                + "		\"name\": \"Percentage\",\n"
-                + "		\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html\"\n"
-                + "	},\n"
-                + "	\"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "	\"name\": \"Temperature measurement\",\n"
-                + "	\"description\": \"Temperature measurement\",\n"
-                + "	\"Thing\": {\"@iot.id\": 5394817},\n"
-                + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
-                + "	\"Sensor\": {\"@iot.id\": 5394815},\n"
-                + "	\"observedArea\": {\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
-                + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
-                + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
-                && result.isSetProperty(pluginCoreModel.epObservationType)
-                && result.isSetProperty(pluginCoreModel.epName)
-                && result.isSetProperty(pluginCoreModel.epDescription)
-                && result.isSetProperty(pluginCoreModel.npThing)
-                && result.isSetProperty(pluginCoreModel.npObservedProperty)
-                && result.isSetProperty(pluginCoreModel.npSensor)
-                && result.isSetProperty(pluginCoreModel.epObservedArea)
-                && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
-                && result.isSetProperty(pluginCoreModel.epResultTime));
-    }
-
-    @Test
-    public void readDatastreamWithAllValuesMissing() throws IOException {
-        String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
-                && !result.isSetProperty(pluginCoreModel.epObservationType)
-                && !result.isSetProperty(pluginCoreModel.epName)
-                && !result.isSetProperty(pluginCoreModel.epDescription)
-                && !result.isSetProperty(pluginCoreModel.npThing)
-                && !result.isSetProperty(pluginCoreModel.npObservedProperty)
-                && !result.isSetProperty(pluginCoreModel.npSensor)
-                && !result.isSetProperty(pluginCoreModel.epObservedArea)
-                && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
-                && !result.isSetProperty(pluginCoreModel.epResultTime));
-    }
-
-    @Test
-    public void readDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
-        String json = "{\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"symbol\": \"%\",\n"
-                + "		\"name\": \"Percentage\",\n"
-                + "		\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html\"\n"
-                + "	},\n"
-                + "	\"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "	\"name\": \"Temperature measurement\",\n"
-                + "	\"description\": \"Temperature measurement\",\n"
-                + "	\"Thing\": {\"@iot.id\": 5394817},\n"
-                + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
-                + "	\"Sensor\": {\"@iot.id\": 5394815},\n"
-                + "	\"observedArea\": {\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
-                + "	}\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
-                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epName, "Temperature measurement")
-                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(5394815)))
-                .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
-    }
-
-    @Test
-    public void readDatastreamWithObservedPropertyAndSensor() throws IOException {
-        String json = "{\n"
-                + "    \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Celsius\",\n"
-                + "        \"symbol\": \"C\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius\"\n"
-                + "    },\n"
-                + "    \"name\": \"Temperature measurement\",\n"
-                + "    \"description\": \"Temperature measurement\",\n"
-                + "    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "    \"ObservedProperty\": {\n"
-                + "        \"name\": \"Temperature\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature\",\n"
-                + "        \"description\": \"Temperature of the camping site\"\n"
-                + "    },\n"
-                + "    \"Sensor\": {\n"
-                + "        \"description\": \"Sensor 101\",\n"
-                + "        \"encodingType\": \"http://schema.org/description\",\n"
-                + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
-                + "    }\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
-                .setProperty(pluginCoreModel.epName, "Temperature measurement")
-                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.npObservedProperty,
-                        new DefaultEntity(pluginCoreModel.etObservedProperty)
-                                .setProperty(pluginCoreModel.epName, "Temperature")
-                                .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
-                )
-                .setProperty(pluginCoreModel.npSensor,
-                        new DefaultEntity(pluginCoreModel.etSensor)
-                                .setProperty(pluginCoreModel.epDescription, "Sensor 101")
-                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11")
-                );
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
@@ -305,152 +186,12 @@ public class EntityParserTest {
                         .setProperty(pluginCoreModel.epDefinition, "SomeDefinition")
                         .setProperty(pluginCoreModel.epDescription, "Wind Speed")
                 )
-                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(npSensorMds, new DefaultEntity(pluginCoreModel.etSensor)
                         .setProperty(pluginCoreModel.epDescription, "Wind Sensor 101")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                         .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11")
                 );
         assertEquals(expectedResult, entityParser.parseEntity(etMultiDatastream, json));
-    }
-
-    @Test
-    public void readFeatureOfInterstBasic() throws IOException {
-        {
-            String json = "{\n"
-                    + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
-                    + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
-                    + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "    \"feature\": {\n"
-                    + "        \"coordinates\": [51.08386,-114.13036],\n"
-                    + "        \"type\": \"Point\"\n"
-                    + "      }\n"
-                    + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                    .setProperty(pluginCoreModel.epName, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(pluginCoreModel.epDescription, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                    .setProperty(pluginCoreModel.epFeature, TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json));
-        }
-        {
-            String json = "{\n"
-                    + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
-                    + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
-                    + "    \"encodingType\": \"application/geo+json\",\n"
-                    + "    \"feature\": {\n"
-                    + "        \"coordinates\": [51.08386,-114.13036],\n"
-                    + "        \"type\": \"Point\"\n"
-                    + "      }\n"
-                    + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                    .setProperty(pluginCoreModel.epName, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(pluginCoreModel.epDescription, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                    .setProperty(pluginCoreModel.epFeature, TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json));
-        }
-    }
-
-    @Test
-    public void readFeatureOfInterstWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
-                + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
-                + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"feature\": {\n"
-                + "        \"coordinates\": [51.08386,-114.13036],\n"
-                + "        \"type\": \"Point\"\n"
-                + "      }\n"
-                + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
-                && result.isSetProperty(pluginCoreModel.epName)
-                && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && result.isSetProperty(pluginCoreModel.epFeature));
-    }
-
-    @Test
-    public void readFeatureOfInterstWithAllValuesMissing() throws IOException {
-        String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
-                && !result.isSetProperty(pluginCoreModel.epName)
-                && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest));
-    }
-
-    @Test
-    public void readLocationBasic() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"my backyard\",\n"
-                + "    \"description\": \"my backyard\",\n"
-                + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"location\": {\n"
-                + "        \"type\": \"Point\",\n"
-                + "        \"coordinates\": [-117.123,\n"
-                + "        54.123]\n"
-                + "    }\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etLocation)
-                .setProperty(pluginCoreModel.epName, "my backyard")
-                .setProperty(pluginCoreModel.epDescription, "my backyard")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etLocation, json));
-    }
-
-    @Test
-    public void readLocationWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"my backyard\",\n"
-                + "    \"description\": \"my backyard\",\n"
-                + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"location\": {\n"
-                + "        \"type\": \"Point\",\n"
-                + "        \"coordinates\": [-117.123,\n"
-                + "        54.123]\n"
-                + "    }\n"
-                + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
-                && result.isSetProperty(pluginCoreModel.epName)
-                && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && result.isSetProperty(pluginCoreModel.epLocation));
-    }
-
-    @Test
-    public void readLocationWithAllValuesMissing() throws IOException {
-        String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
-                && !result.isSetProperty(pluginCoreModel.epName)
-                && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.epLocation));
-    }
-
-    @Test
-    public void readLocationWithLinkedThings() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"my backyard\",\n"
-                + "    \"description\": \"my backyard\",\n"
-                + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"location\": {\n"
-                + "        \"type\": \"Point\",\n"
-                + "        \"coordinates\": [-117.123,\n"
-                + "        54.123]\n"
-                + "    },"
-                + "    \"Things\":[{\"@iot.id\":100}]\n"
-                + "}";
-        Entity thing = new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(100));
-        EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
-        things.add(thing);
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etLocation)
-                .setProperty(pluginCoreModel.epName, "my backyard")
-                .setProperty(pluginCoreModel.epDescription, "my backyard")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
-                .setProperty(pluginCoreModel.npThings, things);
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etLocation, json));
     }
 
     @Test
@@ -470,8 +211,8 @@ public class EntityParserTest {
         Assert.assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime)
                 && result.isSetProperty(pluginCoreModel.epResult)
-                && result.isSetProperty(pluginCoreModel.npDatastream)
-                && result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && result.isSetProperty(pluginCoreModel.npDatastreamObservation)
+                && result.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation)
                 && result.isSetProperty(pluginCoreModel.epParameters)
                 && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultQuality)
@@ -485,8 +226,8 @@ public class EntityParserTest {
         Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultTime)
                 && !result.isSetProperty(pluginCoreModel.epResult)
-                && !result.isSetProperty(pluginCoreModel.npDatastream)
-                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && !result.isSetProperty(pluginCoreModel.npDatastreamObservation)
+                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation)
                 && !result.isSetProperty(pluginCoreModel.epParameters)
                 && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultQuality)
@@ -505,7 +246,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream)
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
 
@@ -519,7 +260,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
-                .setProperty(npMultiDatastream, new DefaultEntity(etMultiDatastream)
+                .setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
@@ -536,7 +277,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(14269)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
@@ -560,33 +301,14 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 99)
-                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
                         .setProperty(pluginCoreModel.epFeature, "tarmac")
                 )
-                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
-    }
-
-    @Test
-    public void readObservationPrecision() throws IOException {
-        String json = "{\n"
-                + "  \"result\" : 100.00\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
-                .setProperty(pluginCoreModel.epResult, new BigDecimal("100.00"));
-        Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        assertEquals(expectedResult, result);
-
-        json = "{\n"
-                + "  \"result\" : 0.00\n"
-                + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
-                .setProperty(pluginCoreModel.epResult, new BigDecimal("0.00"));
-        result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        assertEquals(expectedResult, result);
     }
 
     @Test
@@ -1047,134 +769,6 @@ public class EntityParserTest {
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
-    }
-
-    @Test
-    public void readThingWithLocationAndDatastream() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Locations\": [{\n"
-                + "        \"name\": \"my backyard\",\n"
-                + "        \"description\": \"my backyard\",\n"
-                + "        \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "        \"location\": {\n"
-                + "            \"type\": \"Point\",\n"
-                + "            \"coordinates\": [-117.123,\n"
-                + "            54.123]\n"
-                + "        }\n"
-                + "    }],\n"
-                + "    \"Datastreams\": [{\n"
-                + "        \"unitOfMeasurement\": {\n"
-                + "            \"name\": \"Celsius\",\n"
-                + "            \"symbol\": \"C\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius\"\n"
-                + "        },\n"
-                + "        \"name\": \"Temperature measurement\",\n"
-                + "        \"description\": \"Temperature measurement\",\n"
-                + "        \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "        \"ObservedProperty\": {\n"
-                + "            \"name\": \"Temperature\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature\",\n"
-                + "            \"description\": \"Temperature of the camping site\"\n"
-                + "        },\n"
-                + "        \"Sensor\": {\n"
-                + "            \"name\": \"SensorUp Tempomatic 1000-b\",\n"
-                + "            \"description\": \"SensorUp Tempomatic 1000-b\",\n"
-                + "            \"encodingType\": \"http://schema.org/description\",\n"
-                + "            \"metadata\": \"Calibration date:  Jan 11, 2015\"\n"
-                + "        }\n"
-                + "    }]\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
-                .setProperty(pluginCoreModel.epName, "camping lantern")
-                .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
-                        .addProperty("property1", "it’s waterproof")
-                        .addProperty("property2", "it glows in the dark")
-                        .addProperty("property3", "it repels insects")
-                        .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.epName, "my backyard")
-                        .setProperty(pluginCoreModel.epDescription, "my backyard")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
-                )
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                                new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
-                        .setProperty(pluginCoreModel.epName, "Temperature measurement")
-                        .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                        .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(pluginCoreModel.npObservedProperty,
-                                new DefaultEntity(pluginCoreModel.etObservedProperty)
-                                        .setProperty(pluginCoreModel.epName, "Temperature")
-                                        .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                        .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
-                        )
-                        .setProperty(pluginCoreModel.npSensor,
-                                new DefaultEntity(pluginCoreModel.etSensor)
-                                        .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
-                                        .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")
-                                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")
-                        )
-                );
-        final Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
-        assertEquals(expectedResult, result);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readThingWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etThing, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readSensorWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etSensor, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readDatastreamWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readLocationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etLocation, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readFeatureOfInterestWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readHistoricalLocationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etHistoricalLocation, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readObservedPropertyWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
-    }
-
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readObservationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etObservation, json);
     }
 
 }

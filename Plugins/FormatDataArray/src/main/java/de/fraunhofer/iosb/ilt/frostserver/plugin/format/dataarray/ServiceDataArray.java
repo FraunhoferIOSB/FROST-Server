@@ -123,7 +123,7 @@ public class ServiceDataArray {
             try {
                 Entity observation = new DefaultEntity(pluginCoreModel.etObservation);
                 if (datastream != null) {
-                    observation.setProperty(pluginCoreModel.npDatastream, datastream);
+                    observation.setProperty(pluginCoreModel.npDatastreamObservation, datastream);
                 } else {
                     if (npMultiDatastream == null) {
                         throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");

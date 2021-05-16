@@ -119,7 +119,7 @@ public class ArrayValueHandlers {
         });
         HANDLERS.put("FeatureOfInterest/id", (Object value, Entity target) -> {
             Id foiId = idManager.parseId(value.toString());
-            target.setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, foiId));
+            target.setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, foiId));
         });
 
     }
