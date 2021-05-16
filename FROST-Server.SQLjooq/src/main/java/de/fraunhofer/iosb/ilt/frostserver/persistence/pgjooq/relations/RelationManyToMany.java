@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,19 +71,15 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
      */
     private FieldAccessor<J, T> targetFieldAcc;
 
-    public RelationManyToMany(
-            S source,
-            L linkTable,
-            T target,
-            EntityType targetType) {
+    public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target) {
         if (source == null) {
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
         }
         this.linkTable = linkTable;
         this.target = target;
-        this.targetType = targetType;
-        this.name = targetType.entityName;
+        this.targetType = navProp.getEntityType();
+        this.name = navProp.getName();
     }
 
     public FieldAccessor<J, S> getSourceFieldAcc() {

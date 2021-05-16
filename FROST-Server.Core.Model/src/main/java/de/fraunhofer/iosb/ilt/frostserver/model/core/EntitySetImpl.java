@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -36,25 +37,21 @@ public class EntitySetImpl implements EntitySet {
     protected final List<Entity> data;
     protected long count = -1;
     protected String nextLink;
-    @JsonIgnore
-    private EntityType type;
 
-    public EntitySetImpl() {
-        this.data = new ArrayList<>();
-        this.type = null;
-    }
+    @JsonIgnore
+    private final EntityType type;
+    @JsonIgnore
+    private NavigationPropertyEntitySet navigationProperty;
 
     public EntitySetImpl(EntityType type) {
         this.data = new ArrayList<>();
         this.type = type;
     }
 
-    public EntitySetImpl(EntityType type, List<Entity> data) {
-        if (data == null) {
-            throw new IllegalArgumentException("data must be non-null!");
-        }
-        this.data = data;
-        this.type = type;
+    public EntitySetImpl(NavigationPropertyEntitySet navigationProperty) {
+        this.data = new ArrayList<>();
+        this.type = navigationProperty.getEntityType();
+        this.navigationProperty = navigationProperty;
     }
 
     @Override
@@ -89,9 +86,6 @@ public class EntitySetImpl implements EntitySet {
 
     @Override
     public boolean add(Entity e) {
-        if (type == null) {
-            type = e.getEntityType();
-        }
         return data.add(e);
     }
 
@@ -173,6 +167,16 @@ public class EntitySetImpl implements EntitySet {
     @Override
     public EntityType getEntityType() {
         return type;
+    }
+
+    @Override
+    public NavigationPropertyEntitySet getNavigationProperty() {
+        return navigationProperty;
+    }
+
+    public EntitySetImpl setNavigationProperty(NavigationPropertyEntitySet navigationProperty) {
+        this.navigationProperty = navigationProperty;
+        return this;
     }
 
 }

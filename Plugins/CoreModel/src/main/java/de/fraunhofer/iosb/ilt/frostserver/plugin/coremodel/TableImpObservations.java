@@ -164,12 +164,12 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpDatastreams<J> datastreamsTable = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(getThis(), datastreamsTable, pluginCoreModel.etDatastream)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamObservation, getThis(), datastreamsTable)
                 .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
                 .setTargetFieldAccessor(TableImpDatastreams::getId)
         );
         final TableImpFeatures<J> featuresTable = tables.getTableForClass(TableImpFeatures.class);
-        registerRelation(new RelationOneToMany<>(getThis(), featuresTable, pluginCoreModel.etFeatureOfInterest)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npFeatureOfInterestObservation, getThis(), featuresTable)
                 .setSourceFieldAccessor(TableImpObservations::getFeatureId)
                 .setTargetFieldAccessor(TableImpFeatures::getId)
         );

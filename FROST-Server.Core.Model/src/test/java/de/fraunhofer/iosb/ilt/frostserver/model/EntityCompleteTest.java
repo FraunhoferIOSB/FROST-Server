@@ -68,9 +68,9 @@ public class EntityCompleteTest {
         entity.setProperty(testModel.EP_NAME, "Name");
         containingSet = new PathElementEntitySet(testModel.ET_ROOM, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        containingSet = new PathElementEntitySet(testModel.ET_HOUSE, new PathElementEntity(new IdLong(1), testModel.ET_ROOM, null));
+        containingSet = new PathElementEntitySet(testModel.ET_HOUSE, new PathElementEntity(testModel.ET_ROOM, null).setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        containingSet = new PathElementEntitySet(testModel.ET_ROOM, new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, null));
+        containingSet = new PathElementEntitySet(testModel.ET_ROOM, new PathElementEntity(testModel.ET_HOUSE, null).setId(new IdLong(1)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

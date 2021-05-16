@@ -86,18 +86,18 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.etDatastream, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsThing, this, tableDs)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getThingId)
         );
         final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
-        registerRelation(new RelationOneToMany<>(this, tableHistLoc, pluginCoreModel.etHistoricalLocation, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npHistoricalLocationsThing, this, tableHistLoc)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpHistLocations::getThingId)
         );
         final TableImpThingsLocations<J> tableThingsLocs = tables.getTableForClass(TableImpThingsLocations.class);
         final TableImpLocations<J> tableLocs = tables.getTableForClass(TableImpLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableThingsLocs, tableLocs, pluginCoreModel.etLocation)
+        registerRelation(new RelationManyToMany<>(pluginCoreModel.npLocationsThing, this, tableThingsLocs, tableLocs)
                 .setSourceFieldAcc(TableImpThings::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getLocationId)

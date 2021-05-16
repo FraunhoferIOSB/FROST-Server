@@ -80,7 +80,7 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpTaskingCapabilities<J> tableTaskCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        registerRelation(new RelationOneToMany<>(this, tableTaskCaps, pluginActuation.etTaskingCapability, true)
+        registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesActuator, this, tableTaskCaps)
                 .setSourceFieldAccessor(TableImpActuators::getId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
         );

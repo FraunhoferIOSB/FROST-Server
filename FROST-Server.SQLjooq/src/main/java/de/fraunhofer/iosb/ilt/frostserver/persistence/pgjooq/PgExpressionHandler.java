@@ -235,7 +235,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
                 handleEntityProperty(state, path, element);
 
             } else if (element instanceof NavigationPropertyMain) {
-                handleNavigationProperty(state, path, element);
+                handleNavigationProperty(state, path, (NavigationPropertyMain) element);
             }
         }
         if (state.finalExpression == null) {
@@ -299,12 +299,12 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         }
     }
 
-    private void handleNavigationProperty(PathState<J> state, Path path, Property element) {
+    private void handleNavigationProperty(PathState<J> state, Path path, NavigationPropertyMain element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        NavigationPropertyMain navigationProperty = (NavigationPropertyMain) element;
-        state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getEntityType(), null, state.pathTableRef);
+        NavigationPropertyMain np = (NavigationPropertyMain) element;
+        state.pathTableRef = queryBuilder.queryEntityType(np, state.pathTableRef);
     }
 
     private FieldWrapper getSubExpression(PathState<J> state, Map<String, Field> pathExpressions) {

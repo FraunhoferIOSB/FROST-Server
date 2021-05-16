@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,4 +42,13 @@ public interface EntitySet extends Collection<Entity>, NavigableElement {
 
     @JsonIgnore
     public EntityType getEntityType();
+
+    /**
+     * Get the navigationProperty that manages this EntitySet. Can be null, for
+     * top-level entity sets.
+     *
+     * @return the navigationProperty that manages this EntitySet.
+     */
+    @JsonIgnore
+    public NavigationPropertyEntitySet getNavigationProperty();
 }

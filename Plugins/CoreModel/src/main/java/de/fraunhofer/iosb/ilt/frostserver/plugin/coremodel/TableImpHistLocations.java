@@ -75,13 +75,13 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.etThing)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingHistLoc, this, tableThings)
                 .setSourceFieldAccessor(TableImpHistLocations::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         final TableImpLocationsHistLocations<J> tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpLocations<J> tableLocations = tables.getTableForClass(TableImpLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableLocations, pluginCoreModel.etLocation)
+        registerRelation(new RelationManyToMany<>(pluginCoreModel.npLocationsHistLoc, this, tableLocHistLoc, tableLocations)
                 .setSourceFieldAcc(TableImpHistLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)

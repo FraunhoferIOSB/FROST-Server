@@ -166,6 +166,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * hooks.
      * @param hook The hook
      */
+    @Override
     public void registerHookPreInsert(double priority, HookPreInsert<J> hook) {
         hooksPreInsert.add(new SortingWrapper<>(priority, hook));
     }
@@ -178,6 +179,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * hooks.
      * @param hook The hook
      */
+    @Override
     public void registerHookPreUpdate(double priority, HookPreUpdate<J> hook) {
         hooksPreUpdate.add(new SortingWrapper<>(priority, hook));
     }
@@ -190,6 +192,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * hooks.
      * @param hook The hook
      */
+    @Override
     public void registerHookPreDelete(double priority, HookPreDelete<J> hook) {
         hooksPreDelete.add(new SortingWrapper<>(priority, hook));
     }
@@ -296,7 +299,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         final EntityType linkedType = linkedSet.getEntityType();
         NavigationPropertyMain backLink = linkedType.getNavigationProperty(entityType);
 
-        Relation relation = findRelation(linkedSet.getEntityType().entityName);
+        Relation relation = findRelation(linkedSet.getNavigationProperty().getName());
         RelationManyToMany relationManyToMany = null;
         if (backLink == null) {
             LOGGER.error("Target type ({}) does not actually link to this ({}).", linkedSet.getEntityType(), entityType);

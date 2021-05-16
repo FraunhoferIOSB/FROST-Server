@@ -36,6 +36,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -188,11 +190,17 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
+
         if (firstNp.isEntitySet()) {
-            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getEntityType(), parent);
+            PathElementEntitySet childPe = new PathElementEntitySet((NavigationPropertyEntitySet) firstNp, parent);
             ePath.addPathElement(childPe, true, false);
         } else {
-            PathElementEntity childPe = new PathElementEntity(null, firstNp.getEntityType(), parent);
+            PathElementEntity childPe;
+            if (firstNp instanceof NavigationPropertyEntity) {
+                childPe = new PathElementEntity((NavigationPropertyEntity) firstNp, parent);
+            } else {
+                childPe = new PathElementEntity(firstNp.getEntityType(), parent);
+            }
             ePath.addPathElement(childPe, true, false);
         }
         Object child = pm.get(ePath, subQuery);

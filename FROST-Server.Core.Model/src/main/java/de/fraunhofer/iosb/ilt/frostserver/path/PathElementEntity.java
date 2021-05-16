@@ -19,32 +19,61 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import java.util.Objects;
 
 /**
  *
  * @author jab
  */
-public class PathElementEntity implements PathElement {
+public class PathElementEntity implements PathElementEntityType {
 
-    private Id id;
-    private EntityType entityType;
+    private final NavigationPropertyEntity np;
+    private final EntityType entityType;
     private PathElement parent;
+    private Id id;
 
-    public PathElementEntity() {
+    public PathElementEntity(NavigationPropertyEntity np, PathElement parent) {
+        this.np = np;
+        this.entityType = null;
+        this.parent = parent;
+    }
+
+    public PathElementEntity(EntityType entityType, PathElement parent) {
+        this.np = null;
+        this.entityType = entityType;
+        this.parent = parent;
     }
 
     public PathElementEntity(Id id, EntityType entityType, PathElement parent) {
-        this.id = id;
+        this.np = null;
         this.entityType = entityType;
         this.parent = parent;
+        this.id = id;
     }
 
     public Id getId() {
         return id;
     }
 
+    @Override
+    public String getName() {
+        if (np != null) {
+            return np.getName();
+        }
+        return entityType.entityName;
+    }
+
+    @Override
+    public NavigationPropertyEntity getNavigationProperty() {
+        return np;
+    }
+
+    @Override
     public EntityType getEntityType() {
+        if (np != null) {
+            return np.getEntityType();
+        }
         return entityType;
     }
 
@@ -53,12 +82,9 @@ public class PathElementEntity implements PathElement {
         return parent;
     }
 
-    public void setId(Id id) {
+    public PathElementEntity setId(Id id) {
         this.id = id;
-    }
-
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
+        return this;
     }
 
     @Override
@@ -73,12 +99,12 @@ public class PathElementEntity implements PathElement {
 
     @Override
     public String toString() {
-        return entityType.entityName;
+        return getName();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, entityType, parent);
+        return Objects.hash(id, entityType, np, parent);
     }
 
     @Override
@@ -91,6 +117,7 @@ public class PathElementEntity implements PathElement {
         }
         final PathElementEntity other = (PathElementEntity) obj;
         return Objects.equals(this.id, other.id)
+                && this.np == other.np
                 && this.entityType == other.entityType
                 && Objects.equals(this.parent, other.parent);
     }

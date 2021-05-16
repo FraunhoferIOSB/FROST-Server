@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,18 +70,18 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
      */
     private final boolean distinctRequired;
 
-    public RelationOneToMany(S source, T target, EntityType targetType) {
-        this(source, target, targetType, false);
+    public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
+        this(navProp.getName(), source, target, navProp.getEntityType(), navProp.isEntitySet());
     }
 
-    public RelationOneToMany(S source, T target, EntityType targetType, boolean distinctRequired) {
+    public RelationOneToMany(String name, S source, T target, EntityType targetType, boolean distinctRequired) {
         if (source == null) {
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
         }
         this.target = target;
         this.targetType = targetType;
-        this.name = targetType.entityName;
+        this.name = name;
         this.distinctRequired = distinctRequired;
     }
 

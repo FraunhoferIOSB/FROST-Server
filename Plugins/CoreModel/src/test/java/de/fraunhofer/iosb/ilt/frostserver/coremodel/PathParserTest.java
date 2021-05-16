@@ -338,9 +338,9 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservedProperty, espe);
         expResult.addPathElement(epe, false, true);
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsObsProp, epe);
         expResult.addPathElement(espe, false, false);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, espe);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, espe);
         expResult.addPathElement(espe, false, false);
 
         Assert.assertEquals(expResult, result);
@@ -358,46 +358,46 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npLocationsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(2), pluginCoreModel.etLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etHistoricalLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npHistoricalLocationsLocation, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(3), pluginCoreModel.etHistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingHistLoc, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(5), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etSensor, epe);
+        epe = new PathElementEntity(pluginCoreModel.npSensorDatastream, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsSensor, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(6), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etObservedProperty, epe);
+        epe = new PathElementEntity(pluginCoreModel.npObservedPropertyDatastream, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsObsProp, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(7), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(8), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etFeatureOfInterest, epe);
+        epe = new PathElementEntity(pluginCoreModel.npFeatureOfInterestObservation, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -415,28 +415,28 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etFeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsFeature, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(2), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etDatastream, epe);
+        epe = new PathElementEntity(pluginCoreModel.npDatastreamObservation, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etHistoricalLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npHistoricalLocationsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(3), pluginCoreModel.etHistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npLocationsHistLoc, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(4), pluginCoreModel.etLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etThing, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npThingsLocation, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);
@@ -460,46 +460,46 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npLocationsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(2), pluginCoreModel.etLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etHistoricalLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npHistoricalLocationsLocation, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(3), pluginCoreModel.etHistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingHistLoc, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(5), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etSensor, epe);
+        epe = new PathElementEntity(pluginCoreModel.npSensorDatastream, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsSensor, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(6), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etObservedProperty, epe);
+        epe = new PathElementEntity(pluginCoreModel.npObservedPropertyDatastream, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etDatastream, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsObsProp, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(8), pluginCoreModel.etDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(9), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etFeatureOfInterest, epe);
+        epe = new PathElementEntity(pluginCoreModel.npFeatureOfInterestObservation, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -517,28 +517,28 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etFeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsFeature, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(2), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etDatastream, epe);
+        epe = new PathElementEntity(pluginCoreModel.npDatastreamObservation, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etHistoricalLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npHistoricalLocationsThing, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(3), pluginCoreModel.etHistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etLocation, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npLocationsHistLoc, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(4), pluginCoreModel.etLocation, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(pluginCoreModel.etThing, epe);
+        espe = new PathElementEntitySet(pluginCoreModel.npThingsLocation, epe);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);
@@ -570,10 +570,10 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(11), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etDatastream, epe);
+        epe = new PathElementEntity(pluginCoreModel.npDatastreamObservation, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -586,15 +586,15 @@ public class PathParserTest {
         result.compress();
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, null);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(11), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etDatastream, epe);
+        epe = new PathElementEntity(pluginCoreModel.npDatastreamObservation, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, pluginCoreModel.etThing, epe);
+        epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);

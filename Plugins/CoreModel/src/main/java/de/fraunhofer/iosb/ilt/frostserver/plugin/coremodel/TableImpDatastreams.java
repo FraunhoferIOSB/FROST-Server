@@ -166,22 +166,22 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, thingsTable, pluginCoreModel.etThing)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingDatasteam, this, thingsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
-        registerRelation(new RelationOneToMany<>(this, sensorsTable, pluginCoreModel.etSensor)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npSensorDatastream, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
                 .setTargetFieldAccessor(TableImpSensors::getId)
         );
         TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
-        registerRelation(new RelationOneToMany<>(this, obsPropsTable, pluginCoreModel.etObservedProperty)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservedPropertyDatastream, this, obsPropsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
                 .setTargetFieldAccessor(TableImpObsProperties::getId)
         );
         TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
-        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.etObservation, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsDatastream, this, observationsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getId)
                 .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
         );

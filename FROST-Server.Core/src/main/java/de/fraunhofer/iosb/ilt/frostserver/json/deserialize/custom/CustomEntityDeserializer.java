@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.util.HashMap;
@@ -154,7 +155,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     private void deserializeNavigationProperty(PropertyData propertyData, Entity result, JsonParser parser, DeserializationContext ctxt) throws IOException {
         NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
         if (propertyData.isEntitySet) {
-            deserialiseEntitySet(parser, ctxt, navPropertyMain, result, propertyData);
+            deserialiseEntitySet(parser, ctxt, (NavigationPropertyEntitySet) navPropertyMain, result, propertyData);
         } else {
             final EntityType targetEntityType = navPropertyMain.getEntityType();
             Object value = getInstance(modelRegistry, targetEntityType)
@@ -181,9 +182,9 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         return delayedField;
     }
 
-    private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyMain navPropertyMain, Entity result, PropertyData propertyData) throws IOException {
+    private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntitySet navPropertyMain, Entity result, PropertyData propertyData) throws IOException {
         final EntityType setType = navPropertyMain.getEntityType();
-        EntitySet entitySet = new EntitySetImpl(setType);
+        EntitySet entitySet = new EntitySetImpl(navPropertyMain);
         CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType);
         result.setProperty(navPropertyMain, entitySet);
         JsonToken curToken = parser.nextToken();

@@ -87,17 +87,17 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         final TableCollection<J> tables = getTables();
         final ModelRegistry modelRegistry = getModelRegistry();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.etThing)
+        registerRelation(new RelationOneToMany<>(pluginActuation.npThingTaskCap, this, tableThings)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         TableImpActuators<J> tableActuators = tables.getTableForClass(TableImpActuators.class);
-        registerRelation(new RelationOneToMany<>(this, tableActuators, pluginActuation.etActuator)
+        registerRelation(new RelationOneToMany<>(pluginActuation.npActuatorTaskCap, this, tableActuators)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
                 .setTargetFieldAccessor(TableImpActuators::getId)
         );
         final TableImpTasks<J> tableTasks = tables.getTableForClass(TableImpTasks.class);
-        registerRelation(new RelationOneToMany<>(this, tableTasks, pluginActuation.etTask, true)
+        registerRelation(new RelationOneToMany<>(pluginActuation.npTasksTaskCap, this, tableTasks)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
                 .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
         );
@@ -105,7 +105,7 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         // We add the relation to us to the Things table.
         final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        thingsTable.registerRelation(new RelationOneToMany<>(thingsTable, tableTaskingCaps, pluginActuation.etTaskingCapability, true)
+        thingsTable.registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesThing, thingsTable, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
         );

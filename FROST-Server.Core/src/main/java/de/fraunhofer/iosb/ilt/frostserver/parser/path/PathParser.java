@@ -31,6 +31,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -122,22 +124,40 @@ public class PathParser implements ParserVisitor {
         return data;
     }
 
-    private void addAsEntitiy(ResourcePath rp, SimpleNode node, EntityType type, String id) {
-        PathElementEntity epa = new PathElementEntity();
-        epa.setEntityType(type);
+    private void addAsEntity(ResourcePath rp, EntityType type, String id) {
+        PathElementEntity epa = new PathElementEntity(type, rp.getLastElement());
         if (id != null) {
             epa.setId(idmanager.parseId(id));
             rp.setIdentifiedElement(epa);
         }
-        epa.setParent(rp.getLastElement());
         rp.addPathElement(epa, true, false);
     }
 
+    private void addAsEntity(ResourcePath rp, NavigationPropertyMain type, String id) {
+        if (type instanceof NavigationPropertyEntity) {
+            PathElementEntity epa = new PathElementEntity((NavigationPropertyEntity) type, rp.getLastElement());
+            if (id != null) {
+                epa.setId(idmanager.parseId(id));
+                rp.setIdentifiedElement(epa);
+            }
+            rp.addPathElement(epa, true, false);
+        } else {
+            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntity, got: " + type);
+        }
+    }
+
     private void addAsEntitiySet(ResourcePath rp, EntityType type) {
-        PathElementEntitySet espa = new PathElementEntitySet();
-        espa.setEntityType(type);
-        espa.setParent(rp.getLastElement());
+        PathElementEntitySet espa = new PathElementEntitySet(type, rp.getLastElement());
         rp.addPathElement(espa, true, false);
+    }
+
+    private void addAsEntitiySet(ResourcePath rp, NavigationPropertyMain type) {
+        if (type instanceof NavigationPropertyEntitySet) {
+            PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, rp.getLastElement());
+            rp.addPathElement(espa, true, false);
+        } else {
+            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntitySet, got: " + type);
+        }
     }
 
     private void addAsEntitiyProperty(ResourcePath rp, EntityPropertyMain type) {
@@ -227,8 +247,8 @@ public class PathParser implements ParserVisitor {
     public ResourcePath visit(ASTEntityType node, ResourcePath data) {
         final PathElement parent = data.getLastElement();
         final String name = node.value.toString();
-        final EntityType entityType = modelRegistry.getEntityTypeForName(name);
         if (parent == null) {
+            final EntityType entityType = modelRegistry.getEntityTypeForName(name);
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
             }
@@ -247,18 +267,18 @@ public class PathParser implements ParserVisitor {
             throw new IllegalArgumentException("Do not know what to do with: " + node.value);
         }
 
-        final NavigationPropertyMain np = parentType.getNavigationProperty(entityType);
+        final NavigationPropertyMain np = parentType.getNavigationProperty(name);
         if (np == null) {
             throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
         }
         if (!np.getName().equals(name)) {
             throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
         }
-        if (entityType.plural.equals(name)) {
-            addAsEntitiySet(data, entityType);
+        if (np.isEntitySet()) {
+            addAsEntitiySet(data, np);
             return defltAction(node, data);
         } else {
-            addAsEntitiy(data, node, entityType, null);
+            addAsEntity(data, np, null);
             return defltAction(node, data);
         }
     }
@@ -268,7 +288,7 @@ public class PathParser implements ParserVisitor {
         PathElement parent = data.getLastElement();
         if (parent instanceof PathElementEntitySet) {
             PathElementEntitySet parentEntitySet = (PathElementEntitySet) parent;
-            addAsEntitiy(data, node, parentEntitySet.getEntityType(), node.value.toString());
+            addAsEntity(data, parentEntitySet.getEntityType(), node.value.toString());
             return defltAction(node, data);
         }
         throw new IllegalArgumentException("IDs must follow after EntitySets");

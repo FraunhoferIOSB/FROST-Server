@@ -80,7 +80,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.etDatastream, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsObsProp, this, tableDs)
                 .setSourceFieldAccessor(TableImpObsProperties::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
         );

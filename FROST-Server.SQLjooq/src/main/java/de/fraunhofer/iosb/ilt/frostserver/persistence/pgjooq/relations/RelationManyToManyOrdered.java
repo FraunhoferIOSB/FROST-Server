@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -46,12 +46,8 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     private FieldAccessor<Integer, L> orderFieldAcc;
     private boolean alwaysDistinct = false;
 
-    public RelationManyToManyOrdered(
-            S source,
-            L linkTable,
-            T target,
-            EntityType targetType) {
-        super(source, linkTable, target, targetType);
+    public RelationManyToManyOrdered(NavigationPropertyMain navProp, S source, L linkTable, T target) {
+        super(navProp, source, linkTable, target);
     }
 
     public RelationManyToManyOrdered<J, S, L, T> setOrderFieldAcc(FieldAccessor<Integer, L> orderFieldAcc) {

@@ -112,7 +112,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
         final IdManager idManager = ppm.getIdManager();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
 
-        staTable.registerRelation(new RelationManyToManyOrdered(staTable, staTableLink, staTableOther, navProp.getEntityType())
+        staTable.registerRelation(new RelationManyToManyOrdered(navProp, staTable, staTableLink, staTableOther)
                 .setAlwaysDistinct(distinct)
                 .setOrderFieldAcc(t -> (TableField) t.field(fieldIdxLinkRank))
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
@@ -126,7 +126,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
             final PropertyFieldRegistry<?, ?> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
-            staTableOther.registerRelation(new RelationManyToManyOrdered(staTableOther, staTableLink, staTable, navPropInverse.getEntityType())
+            staTableOther.registerRelation(new RelationManyToManyOrdered(navPropInverse, staTableOther, staTableLink, staTable)
                     .setAlwaysDistinct(distinctInverse)
                     .setOrderFieldAcc(t -> (TableField) t.field(fieldIdxLinkRank))
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))

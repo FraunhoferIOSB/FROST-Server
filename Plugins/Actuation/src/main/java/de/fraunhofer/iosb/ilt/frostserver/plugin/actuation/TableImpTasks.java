@@ -71,7 +71,7 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        registerRelation(new RelationOneToMany<>(this, tableTaskingCaps, pluginActuation.etTaskingCapability)
+        registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilityTask, this, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
         );

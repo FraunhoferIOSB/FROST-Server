@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -193,8 +192,7 @@ public interface Entity extends NavigableElement {
     @JsonIgnore
     public default ResourcePath getPath() {
         EntityType type = getEntityType();
-        PathElementEntity epe = new PathElementEntity();
-        epe.setEntityType(type);
+        PathElementEntity epe = new PathElementEntity(type, null);
         epe.setId(getId());
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.addPathElement(epe, true, false);

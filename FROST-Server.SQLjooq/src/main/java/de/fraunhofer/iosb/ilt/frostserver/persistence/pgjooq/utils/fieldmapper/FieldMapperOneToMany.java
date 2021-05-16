@@ -76,7 +76,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
 
         fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
-        staTable.registerRelation(new RelationOneToMany(staTable, staTableOther, navProp.getEntityType(), navProp.isEntitySet())
+        staTable.registerRelation(new RelationOneToMany(navProp, staTable, staTableOther)
                 .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdx))
                 .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
         );
@@ -86,7 +86,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
             final PropertyFieldRegistry<J, T> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
-            staTableOther.registerRelation(new RelationOneToMany(staTableOther, staTable, navPropInverse.getEntityType(), navPropInverse.isEntitySet())
+            staTableOther.registerRelation(new RelationOneToMany(navPropInverse, staTableOther, staTable)
                     .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
                     .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdx))
             );

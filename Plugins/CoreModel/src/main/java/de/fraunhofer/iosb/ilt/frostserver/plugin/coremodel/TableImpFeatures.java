@@ -98,7 +98,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
-        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.etObservation, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsFeature, this, observationsTable)
                 .setSourceFieldAccessor(TableImpFeatures::getId)
                 .setTargetFieldAccessor(TableImpObservations::getFeatureId)
         );

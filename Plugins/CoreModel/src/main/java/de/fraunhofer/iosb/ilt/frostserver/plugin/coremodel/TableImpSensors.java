@@ -82,7 +82,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.etDatastream, true)
+        registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsSensor, this, tableDs)
                 .setSourceFieldAccessor(TableImpSensors::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
