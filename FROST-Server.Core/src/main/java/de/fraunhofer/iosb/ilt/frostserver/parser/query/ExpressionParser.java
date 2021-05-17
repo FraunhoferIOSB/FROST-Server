@@ -92,6 +92,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -415,7 +416,7 @@ public class ExpressionParser extends AbstractParserVisitor {
         if (matcher.matches()) {
             return GeoJsonConstant.fromString(matcher.group(1).trim());
         } else {
-            throw new IllegalArgumentException("invalid geography string '" + raw + "'");
+            throw new IllegalArgumentException("invalid geography string '" + StringHelper.cleanForLogging(raw) + "'");
         }
     }
 

@@ -346,9 +346,7 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         Query query;
@@ -435,9 +433,7 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     urlPath);
-        } catch (IllegalArgumentException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         if (!(path.getMainElement() instanceof PathElementEntitySet)) {
@@ -583,10 +579,7 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException exc) {
-            LOGGER.trace(NOT_A_VALID_ID, exc);
-            throw new NoSuchEntityException(NOT_A_VALID_ID);
-        } catch (IllegalStateException exc) {
+        } catch (IllegalArgumentException | IllegalStateException exc) {
             throw new NoSuchEntityException(NOT_A_VALID_ID + ": " + exc.getMessage());
         }
 
@@ -677,10 +670,8 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException e) {
-            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
-            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException exc) {
+            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID + ": " + exc.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {

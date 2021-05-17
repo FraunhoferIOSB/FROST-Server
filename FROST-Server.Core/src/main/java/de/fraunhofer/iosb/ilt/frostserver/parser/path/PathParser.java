@@ -142,7 +142,7 @@ public class PathParser implements ParserVisitor {
             }
             rp.addPathElement(epa, true, false);
         } else {
-            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntity, got: " + type);
+            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntity, got: " + StringHelper.cleanForLogging(type));
         }
     }
 
@@ -156,7 +156,7 @@ public class PathParser implements ParserVisitor {
             PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, rp.getLastElement());
             rp.addPathElement(espa, true, false);
         } else {
-            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntitySet, got: " + type);
+            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntitySet, got: " + StringHelper.cleanForLogging(type));
         }
     }
 
@@ -178,7 +178,7 @@ public class PathParser implements ParserVisitor {
         PathElementArrayIndex cpai = new PathElementArrayIndex();
         String image = node.value.toString();
         if (!image.startsWith("[") && image.endsWith("]")) {
-            throw new IllegalArgumentException("Received node is not an array index: " + image);
+            throw new IllegalArgumentException("Received node is not an array index: " + StringHelper.cleanForLogging(image));
         }
         String numberString = image.substring(1, image.length() - 1);
         try {
@@ -187,7 +187,7 @@ public class PathParser implements ParserVisitor {
             cpai.setParent(rp.getLastElement());
             rp.addPathElement(cpai);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + image);
+            throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + StringHelper.cleanForLogging(image));
         }
     }
 
@@ -249,6 +249,9 @@ public class PathParser implements ParserVisitor {
         final String name = node.value.toString();
         if (parent == null) {
             final EntityType entityType = modelRegistry.getEntityTypeForName(name);
+            if (entityType == null) {
+                throw new IllegalArgumentException("Unknown EntityType: '" + StringHelper.cleanForLogging(name) + "'");
+            }
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
             }
@@ -264,15 +267,15 @@ public class PathParser implements ParserVisitor {
             PathElementEntitySet parentEntity = (PathElementEntitySet) parent;
             parentType = parentEntity.getEntityType();
         } else {
-            throw new IllegalArgumentException("Do not know what to do with: " + node.value);
+            throw new IllegalArgumentException("Do not know what to do with: " + StringHelper.cleanForLogging(node.value));
         }
 
         final NavigationPropertyMain np = parentType.getNavigationProperty(name);
         if (np == null) {
-            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
+            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
         }
         if (!np.getName().equals(name)) {
-            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + node.value);
+            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
         }
         if (np.isEntitySet()) {
             addAsEntitiySet(data, np);
@@ -302,7 +305,7 @@ public class PathParser implements ParserVisitor {
             final EntityType parentEntityType = parentEntity.getEntityType();
             EntityPropertyMain property = parentEntityType.getEntityProperty(node.value.toString());
             if (property == null) {
-                throw new IllegalArgumentException("Entities of type " + parentEntityType + " do not have an entity property named " + node.value);
+                throw new IllegalArgumentException("Entities of type " + parentEntityType + " do not have an entity property named " + StringHelper.cleanForLogging(node.value));
             }
             addAsEntitiyProperty(data, property);
             return defltAction(node, data);
