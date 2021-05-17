@@ -1,5 +1,19 @@
 # Changelog
 
+## Release version 2.0.0
+
+**New Features**
+* The data model provided by FROST-Server is now completely defined in plugins.
+  This means it is possible to use FROST-Server with a totally different data
+  model, or to create plugins that extend the existing core SensorThings API
+  data model.
+* New plugin: CoreModel supplies the core data model from the
+  _OGC SensorThings API Part 1: Sensing_ version 1.0 and 1.1.
+* New plugin: MultiDatastream supplies the MultiDatastream extension.
+* New plugin: Actuation supplies the Actuation data model from the
+  _OGC SensorThings API Part 2 – Tasking Core_.
+
+
 ## Release Version 1.14.0
 
 **Internal changes & Bugfixes**
