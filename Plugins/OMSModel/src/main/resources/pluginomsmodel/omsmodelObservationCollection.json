@@ -19,7 +19,7 @@
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperStatic",
-                            "value": "Fruit Salad"
+                            "value": "SummarizingObservationCollection"
                         }
                     ]
                 },
@@ -115,6 +115,10 @@
                 "Observations": {
                     "entitySet": true,
                     "entityType": "Observation",
+                    "inverse": {
+                        "name": "ObservationCollection",
+                        "entitySet": false
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -127,6 +131,10 @@
                 "Host": {
                     "entitySet": false,
                     "entityType": "Host",
+                    "inverse": {
+                        "name": "ObservationCollections",
+                        "entitySet": true
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -139,6 +147,10 @@
                 "FeatureOfInterest": {
                     "entitySet": false,
                     "entityType": "FeatureOfInterest",
+                    "inverse": {
+                        "name": "ObservationCollections",
+                        "entitySet": true
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -151,6 +163,10 @@
                 "Observer": {
                     "entitySet": false,
                     "entityType": "Observer",
+                    "inverse": {
+                        "name": "ObservationCollections",
+                        "entitySet": true
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -163,6 +179,10 @@
                 "ObservedProperty": {
                     "entitySet": false,
                     "entityType": "ObservedProperty",
+                    "inverse": {
+                        "name": "ObservationCollections",
+                        "entitySet": true
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -175,6 +195,10 @@
                 "ObservedProcedure": {
                     "entitySet": false,
                     "entityType": "ObservedProcedure",
+                    "inverse": {
+                        "name": "ObservationCollections",
+                        "entitySet": true
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",

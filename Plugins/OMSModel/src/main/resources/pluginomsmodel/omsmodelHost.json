@@ -67,6 +67,10 @@
                 "Deployments": {
                     "entitySet": true,
                     "entityType": "Deployment",
+                    "inverse": {
+                        "name": "Host",
+                        "entitySet": false
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
@@ -79,6 +83,10 @@
                 "ObservationCollections": {
                     "entitySet": true,
                     "entityType": "ObservationCollection",
+                    "inverse": {
+                        "name": "Host",
+                        "entitySet": false
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",

@@ -104,6 +104,10 @@
                 "ObservationCollections": {
                     "entitySet": true,
                     "entityType": "ObservationCollection",
+                    "inverse": {
+                        "name": "FeatureOfInterest",
+                        "entitySet": false
+                    },
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
