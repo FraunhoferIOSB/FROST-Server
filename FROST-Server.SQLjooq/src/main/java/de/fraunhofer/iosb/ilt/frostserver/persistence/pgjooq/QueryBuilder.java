@@ -174,7 +174,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
         DSLContext dslContext = pm.getDslContext();
         AggregateFunction<Integer> count;
-        if (queryState.isDistinctRequired()) {
+        if (staQuery != null && staQuery.isSelectDistinct()) {
+            final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
+            count = DSL.countDistinct(sqlSelectFields.toArray(Field[]::new));
+        } else if (queryState.isDistinctRequired()) {
             count = DSL.countDistinct(queryState.getSqlMainIdField());
         } else {
             count = DSL.count(queryState.getSqlMainIdField());

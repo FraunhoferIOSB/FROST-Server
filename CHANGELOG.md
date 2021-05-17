@@ -5,6 +5,8 @@
 **Internal changes & Bugfixes**
 * Fixed the search_path if Liquibase changes it.
 * Fixed double URLEncode in $select of nextLinks.
+* Fixed error returned when creating a Sensor with NULL metadata.
+* Fixed `$count` when combined with `$select=distinct:`.
 
 
 ## Release Version 1.13.1
