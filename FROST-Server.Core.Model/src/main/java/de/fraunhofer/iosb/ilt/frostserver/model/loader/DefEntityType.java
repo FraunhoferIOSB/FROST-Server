@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class DefEntityType {
     /**
      * Validators that are used to validate entities of this type.
      */
-    private List<EntityValidator> validators;
+    private List<EntityValidator> validators = new ArrayList<>();
 
     @JsonIgnore
     private EntityType entityType;

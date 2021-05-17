@@ -23,12 +23,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
 public class DefNavigationProperty {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefNavigationProperty.class.getName());
 
     /**
      * The name of the NavigationProperty.
@@ -63,6 +67,9 @@ public class DefNavigationProperty {
     private NavigationPropertyMain navPropInverse;
 
     public void init() {
+        if (inverse == null) {
+            LOGGER.error("Inverse relation not defined for navLink {} on entityType {}", name, entityType);
+        }
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
@@ -75,17 +82,22 @@ public class DefNavigationProperty {
     }
 
     public void registerProperties(ModelRegistry modelRegistry) {
-        if (navProp == null) {
-            if (entitySet) {
-                navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name);
-            } else {
-                navProp = new NavigationPropertyMain.NavigationPropertyEntity(name);
-            }
-            targetEntityType = modelRegistry.getEntityTypeForName(entityType);
-            navProp.setEntityType(targetEntityType);
-            sourceEntityType.registerProperty(navProp, required);
+        if (navProp != null) {
+            return;
         }
-        if (inverse != null) {
+
+        if (entitySet) {
+            navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name);
+        } else {
+            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name);
+        }
+        targetEntityType = modelRegistry.getEntityTypeForName(entityType);
+        navProp.setEntityType(targetEntityType);
+        sourceEntityType.registerProperty(navProp, required);
+
+        navPropInverse = targetEntityType.getNavigationProperty(inverse.name);
+
+        if (navPropInverse == null) {
             if (inverse.entitySet) {
                 navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp);
             } else {
@@ -94,6 +106,7 @@ public class DefNavigationProperty {
             navPropInverse.setEntityType(sourceEntityType);
             targetEntityType.registerProperty(navPropInverse, inverse.required);
         }
+        navProp.setInverses(navPropInverse);
     }
 
     public NavigationPropertyMain getNavigationProperty() {
