@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -93,12 +94,18 @@ public abstract class AbstractContextListener implements ServletContextListener 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
-        coreSettings.getMessageBus().stop();
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException ex) {
-            LOGGER.debug("Rude wakeup?", ex);
-            Thread.currentThread().interrupt();
+        if (coreSettings == null) {
+            return;
+        }
+        final MessageBus messageBus = coreSettings.getMessageBus();
+        if (messageBus != null) {
+            messageBus.stop();
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException ex) {
+                LOGGER.debug("Rude wakeup?", ex);
+                Thread.currentThread().interrupt();
+            }
         }
         LOGGER.info("Context destroyed, done shutting down threads.");
     }
