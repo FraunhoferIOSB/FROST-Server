@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -144,9 +145,17 @@ public class DefaultEntity implements Entity {
     public DefaultEntity addNavigationEntity(Entity linkedEntity) {
         final EntityType linkedType = linkedEntity.getEntityType();
         final NavigationPropertyMain navProperty = entityType.getNavigationProperty(linkedType);
-        EntitySet entitySet = (EntitySet) getProperty(navProperty);
+        if (navProperty instanceof NavigationPropertyEntitySet) {
+            return addNavigationEntity((NavigationPropertyEntitySet) navProperty, linkedEntity);
+        }
+        throw new IllegalArgumentException("addNavigationEntity expects an entity type that goes into a set.");
+    }
+
+    @Override
+    public DefaultEntity addNavigationEntity(NavigationPropertyEntitySet navProperty, Entity linkedEntity) {
+        EntitySet entitySet = getProperty(navProperty);
         if (entitySet == null) {
-            entitySet = new EntitySetImpl(linkedType);
+            entitySet = new EntitySetImpl(navProperty);
             setProperty(navProperty, entitySet);
         }
         entitySet.add(linkedEntity);

@@ -271,18 +271,21 @@ public class EntityType implements Comparable<EntityType> {
             if (parentId == null) {
                 return;
             }
-            checkParent(entity, parentEntity, parentId);
+            checkParent(entity, containingSet.getNavigationProperty().getInverse(), parentId);
         }
     }
 
-    private void checkParent(Entity entity, PathElementEntity parentEntity, Id parentId) throws IncompleteEntityException {
-        EntityType parentType = parentEntity.getEntityType();
-        final NavigationPropertyMain parentNavProperty = navigationPropertiesByTarget.get(parentType);
-        if (parentNavProperty == null || parentNavProperty.isEntitySet()) {
-            LOGGER.error("Incorrect 'parent' entity type for {}: {}", entityName, parentType);
-            throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + parentType);
+    private void checkParent(Entity entity, NavigationPropertyMain navPropToParent, Id parentId) throws IncompleteEntityException {
+        if (navPropToParent == null) {
+            LOGGER.error("Incorrect 'parent' entity type for {}: {}", entityName, navPropToParent);
+            throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + navPropToParent);
         }
-        entity.setProperty(parentNavProperty, new DefaultEntity(parentType).setId(parentId));
+        EntityType parentType = navPropToParent.getEntityType();
+        if (navPropToParent.isEntitySet()) {
+            entity.addNavigationEntity(new DefaultEntity(parentType).setId(parentId));
+        } else {
+            entity.setProperty(navPropToParent, new DefaultEntity(parentType).setId(parentId));
+        }
     }
 
     /**
