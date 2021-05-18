@@ -1,13 +1,15 @@
 ---
 layout: default
 title: Example Queries
-category: STA
-order: 6
+category: gettingData
+topCategory: STA
+order: 8
 ---
 
 # Example Queries
 
 All these examples are not urlencoded, for readability. If you use these examples, don't forget to urlencode.
+On the [Implementations](STA-Implementations) you can find demo services to try them out.
 
 ## Greater than and smaller than
 All things with an Id greater equal 5 and lessequal 20:
@@ -98,10 +100,10 @@ v1.1/Things
 
 ## All stations at the river Rhine:
 ```
-https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/name eq 'Rhein'
+https://lubw.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/name eq 'Rhein'
 
 ```
 ## All stations at a river that flows into the Rhine:
 ```
-https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/properties/sink.Location/name eq 'Rhein'
+https://lubw.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/properties/sink.Location/name eq 'Rhein'
 ```

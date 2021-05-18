@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" rel="stylesheet" />
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+
+    <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
+    <link href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" rel="stylesheet" />
+
+    <script src="https://unpkg.com/sta-map"></script>
+
+    <style>
+        html, body {height:100%;}
+        #mymap {
+            height: 85%;
+            width: 100%;
+            background-color: #CCC;
+        }
+    </style>
+
+    <title>Demo Map</title>
+</head>
+<body>
+
+<h1>Demo Map</h1>
+
+<div id="mymap"></div>
+
+<script type="text/javascript">
+    var mymap = L.map('mymap').setView([49.0, 8.4], 5);
+    mymap.addControl(new L.Control.Fullscreen());
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(mymap);
+
+    L.stam({
+        baseUrl: "https://demography.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1",
+        cluster: false,
+        clusterMin: 10,
+        queryObject: [
+            {
+                zoomLevel: {
+                    from: 0,
+                    to: 5
+                },
+                query: {
+                    entityType: 'Things',
+                    filter: "properties/level eq 0",
+                    expand: [
+                        {
+                            entityType: 'Locations',
+                            filter: "properties/scale eq 60"
+                        }
+                    ]
+                }
+            },
+            {
+                zoomLevel: {
+                    from: 6,
+                    to: 6
+                },
+                query: {
+                    entityType: 'Things',
+                    filter: "properties/level eq 1",
+                    expand: [
+                        {
+                            entityType: 'Locations',
+                            filter: "properties/scale eq 20"
+                        }
+                    ]
+                }
+            },
+            {
+                zoomLevel: {
+                    from: 7,
+                    to: 8
+                },
+                query: {
+                    entityType: 'Things',
+                    filter: "properties/level eq 2",
+                    expand: [
+                        {
+                            entityType: 'Locations',
+                            filter: "properties/scale eq 10"
+                        }
+                    ]
+                }
+            },
+            {
+                zoomLevel: {
+                    from: 9,
+                    to: 9
+                },
+                query: {
+                    entityType: 'Things',
+                    filter: "properties/level eq 3",
+                    expand: [
+                        {
+                            entityType: 'Locations',
+                            filter: "properties/scale eq 3"
+                        }
+                    ]
+                }
+            },
+            {
+                zoomLevel: {
+                    from: 10
+                },
+                query: {
+                    entityType: 'Things',
+                    filter: "properties/level eq 3",
+                    expand: [
+                        {
+                            entityType: 'Locations',
+                            filter: "properties/scale eq 1"
+                        }
+                    ]
+                }
+            }
+        ]
+    }).addTo(mymap);
+</script>
+
+</body>
+</html>
+
