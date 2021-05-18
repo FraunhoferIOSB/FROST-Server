@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Using MQTT from JavaScript
-category: STA
+category: gettingData
+topCategory: STA
 order: 25
 ---
 
@@ -18,10 +19,11 @@ Steps:
 
 2. In your JS, create a new Paho Client (find the blue print for the instanciation of a Paho Client [here](https://github.com/eclipse/paho.mqtt.javascript "The github repository for Paho")) and give it appropriate callback handlers
 
-   ```
+   ```javascript
     let pahoConfig = {
             hostname: "localhost",  //The hostname is the url, under which your FROST-Server resides.
-            port: "9876",           //The port number is the WebSocket-Port, not (!) the MQTT-Port. This is a Paho characteristic.
+            port: "9876",           //The port number is the WebSocket-Port,
+                                    // not (!) the MQTT-Port. This is a Paho characteristic.
             clientId: "ClientId"    //Should be unique for every of your client connections.
     }
 
@@ -50,11 +52,13 @@ Steps:
         handleMessage(j);
     }
    ```
+
 3. Do something with your received message
-   ```
+   ```javascript
     function handleMessage(message) {
 	    if (message != null || message != undefined) {
 	           console.log(message)
 	    }
     }
    ```
+

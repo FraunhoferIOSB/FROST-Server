@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Tailoring Responses
-category: STA
+category: gettingData
+topCategory: STA
 order: 3
 ---
 
@@ -24,8 +25,12 @@ Parameters are separated using the `&` character and each request parameter can 
 ## Returning Specific Attributes of an Object
 
 Most applications do not require all attributes provided by the SensorThings API object types.
-While such as reduction in the breadth of the data may not seem especially relevant pertaining to one individual object, when thousands of objects are requested such reduction through filtering can vastly reduce the volume of data being transferred.
-In the following example, we request all Things from the API, but wish to reduce the individual objects to their identifier and description. The request for this is as follows:
+While such as reduction in the breadth of the data may not seem especially relevant pertaining to one
+ individual object, when thousands of objects are requested such reduction through filtering can vastly
+ reduce the volume of data being transferred.
+In the following example, we request all Things from the API, but wish to reduce the individual objects
+ to their identifier and description.
+The request for this is as follows:
 
 ```
 http://server.de/FROST-Server/v1.1/Things?$select=@iot.id,description
@@ -33,7 +38,7 @@ http://server.de/FROST-Server/v1.1/Things?$select=@iot.id,description
 
 This request provides a list of all Things reduced to the two attributes description and iot.id in the response:
 
-```
+```javascript
 {
   "value" : [
     {
@@ -51,8 +56,15 @@ This request provides a list of all Things reduced to the two attributes descrip
 
 ## Counts
 
-In many use cases, it is important to know how many objects of a specific type are available from the API. While many default deployments do not automatically return this value, setting the request parameter “count” to true enables this functionality. When “$count=true” is appended to the request URL, the response will contain an "@iot.count" attribute providing the total number of objects available from the API data source.
-A closely related request parameter is “top”, that makes it possible to specify the maximum number of objects to be returned in the response. Adding “$top=4” to the request URL will provide a maximum of 4 objects in the response. The following URL specifies that at most 4 Observations are to be returned, together with the total number of Observations available from the API:
+In many use cases, it is important to know how many objects of a specific type are available from the API.
+While many default deployments do not automatically return this value, setting the request parameter `count`
+ to true enables this functionality. When `$count=true` is appended to the request URL, the response will
+ contain an `@iot.count` attribute providing the total number of objects available from the API data source.
+A closely related request parameter is `top`, that makes it possible to specify the maximum number of objects
+ to be returned in the response. Adding `$top=4` to the request URL will provide a maximum of 4 objects in
+ the response.
+The following URL specifies that at most 4 Observations are to be returned, together with the total number
+ of Observations available from the API:
 
 ```
 http://server.de/FROST-Server/v1.1/Observations?$top=4&$count=true
@@ -60,7 +72,7 @@ http://server.de/FROST-Server/v1.1/Observations?$top=4&$count=true
 
 This request provides the following response:
 
-```
+```javascript
 {
   "@iot.count" : 16,
   "@iot.nextLink" : "/FROST-Server/v1.1/Observations?$top=4&$skip=4",
@@ -70,7 +82,7 @@ This request provides the following response:
       "resultTime" : null,
       "result" : 1,
       "@iot.id" : 34,
-      "@iot.selfLink" : "http://.../Observations(34)"
+      "@iot.selfLink" : "http://…/Observations(34)"
     }, {
       …
     }, {
@@ -83,18 +95,19 @@ This request provides the following response:
 ```
 
 Based on this response, we can see that four of the sixteen available Observations have been returned.
-The “$count” parameter can also be used inside an $expand parameter, for instance, to request the number of Datastreams in a Thing.
+The `$count` parameter can also be used inside an `$expand` parameter, for instance, to request the number of Datastreams in a Thing.
 
 
 ## Sorting Responses
 
-It is often useful to receive a dataset ordered by a specific attribute. The “orderBy” request parameter is available for this purpose, the response dataset can be ordered in either ascending or descending order by use of “asc” or desc” respectively.
+It is often useful to receive a dataset ordered by a specific attribute. The `orderby` request parameter is available for this purpose,
+ the response dataset can be ordered in either ascending or descending order by use of `asc` or `desc` respectively.
 ```
-http://.../Observations?$orderby=phenomenonTime asc
+http://…/Observations?$orderby=phenomenonTime asc
 ```
-A useful application of this request parameter is to pair it with “top” to get the latest available observation value for a feature:
+A useful application of this request parameter is to pair it with `top` to get the latest available observation value for a feature:
 ```
-http://.../ FeaturesOfInterest(1)/Observations?$orderby=phenomenonTime desc&$top=1
+http://…/FeaturesOfInterest(1)/Observations?$orderby=phenomenonTime desc&$top=1
 ```
 
 ## Mixing Request Parameters

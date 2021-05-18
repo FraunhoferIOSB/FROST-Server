@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<style>
+		.flex-container {
+			display: flex;
+			flex-direction: row;
+			width: 800px;
+		}
+		#data, #result {
+			width: 800px;
+			padding:5px 0px;
+			margin:5px 0px;
+		}
+	</style>
+	<script type="text/javascript">
+		function execute() {
+			let url = document.getElementById('url').value;
+			let data = document.getElementById('data').value;
+			document.getElementById('result').innerHTML = '<p>Importing data to ' + url + '</p>';
+			processData(url, data);
+		}
+
+		function processData(url, data) {
+			var allLines = data.split(/\r\n|\n/);
+			var lines = [];
+
+			for (var i=0; i<allLines.length; i++) {
+				var data = allLines[i].split(',');
+				if (data.length === 2) {
+					let observation = {
+						phenomenonTime: data[0].trim(),
+						result: data[1].trim()
+					};
+					post(url, JSON.stringify(observation));
+				}
+			}
+		}
+		
+		function post(url, data) {
+			var request = new XMLHttpRequest();
+			request.addEventListener("load", function (e) {
+				if (request.readyState === 4) {
+					let p = document.createElement('p');
+					if (request.status >= 200 && request.status < 300) {
+						let location = request.getResponseHeader('Location');
+						p.innerText = 'Done: ' + location;
+					} else {
+						p.innerText = 'Error ' + request.status + ": " + request.responseText + "";
+					}
+					document.getElementById('result').appendChild(p);
+				}
+			});
+			request.addEventListener("error", function (e) {
+				let p = document.createElement('p');
+				p.innerText = 'Error: ' + request.statusText;
+				document.getElementById('result').appendChild(p);
+			});
+			request.open('POST', url, true);
+			request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+			request.send(data);
+		}
+	</script>
+
+	<title>Observation Importer</title>
+</head>
+<body>
+
+<h1>Observation Importer</h1>
+
+Paste some CSV with two columns in the box.
+The first column must be the phenomenonTime.
+The second column must be the result.
+
+<div class="flex-container">
+	<label for="url" style="padding: 5px">URL:</label>
+	<input type="text" id="url" name="url" style="flex-grow: 1" value="http://localhost:8080/FROST-Server/v1.1/Datastreams(999)/Observations"><input type="button" value="execute" onclick="execute();">
+</div>
+<div>
+	<textarea id="data" name="content" rows="10" cols="80">
+2020-11-19T00:00:00.000Z,1
+2020-11-19T01:00:00.000Z,2
+2020-11-19T02:00:00.000Z,3
+2020-11-19T03:00:00.000Z,4
+2020-11-19T04:00:00.000Z,5
+2020-11-19T05:00:00.000Z,6
+2020-11-19T06:00:00.000Z,7
+2020-11-19T07:00:00.000Z,8
+2020-11-19T08:00:00.000Z,9
+2020-11-19T09:00:00.000Z,10
+2020-11-19T10:00:00.000Z,1
+2020-11-19T11:00:00.000Z,2
+2020-11-19T12:00:00.000Z,3
+2020-11-19T13:00:00.000Z,4
+2020-11-19T14:00:00.000Z,5
+2020-11-19T15:00:00.000Z,6
+2020-11-19T16:00:00.000Z,7
+2020-11-19T17:00:00.000Z,8
+2020-11-19T18:00:00.000Z,9
+2020-11-19T19:00:00.000Z,10
+2020-11-19T20:00:00.000Z,1
+2020-11-19T21:00:00.000Z,2
+2020-11-19T22:00:00.000Z,3
+2020-11-19T23:00:00.000Z,4
+	</textarea>
+</div>
+<div id="result"></div>
+
+</body>
+</html>
+

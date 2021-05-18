@@ -1,12 +1,14 @@
-<!-- include.mydocs, include.catKey -->
+<!-- include.mydocs, include.catKey, include.current -->
+{% assign classBase = 'tag-h2 normal' %}
 {% for catItem in include.mydocs %}
 	{% if catItem.name == include.catKey %}
 		{% assign items = catItem.items | sort: 'order' %}
 		{% for item in items %}
-			<li class="tag-h2"><a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+			{% assign class = classBase %}{% if include.current == item.url %}{% assign class = 'tag-h2 current' %}{% endif %}
+			<li class="{{ class }}"><a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
 				{% if item.childCategory %}
 					<ul>
-					{% include toc.html mydocs=include.mydocs catKey=item.childCategory %}
+					{% include toc.html mydocs=include.mydocs catKey=item.childCategory current=include.current %}
 					</ul>
 				{%endif%}
 			</li>

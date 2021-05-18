@@ -10,19 +10,31 @@ by Matt Graham
 body {
   font:14px/22px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
   color:#444;
-  font-weight:300;
   margin: 0px;
   padding:0px 0 20px 0px;
   background: url(../images/body-background.png) #eae6d1;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1 {
   color:#333;
+  margin:20px 0 10px;
+}
+
+h2, h3, h4, h5, h6 {
+  color:#333;
+  margin:15px 0 10px;
+}
+
+p, ol, table, pre, dl {
   margin:0 0 10px;
 }
 
-p, ul, ol, table, pre, dl {
-  margin:0 0 20px;
+ul {
+  margin:0 0 5px;
+}
+
+p + ul {
+  margin-top:-10px;
 }
 
 h1, h2, h3 {
@@ -34,22 +46,21 @@ h1 {
 }
 
 h2 {
-  font-size: 24px;
+  font-size: 20px;
   color:#393939;
+}
+
+h3 {
+  font-size: 16px;
+  line-height: 24px;
 }
 
 h3, h4, h5, h6 {
   color:#666666;
 }
 
-h3 {
-  font-size: 18px;
-  line-height: 24px;
-}
-
 a {
   color:#3399cc;
-  font-weight:400;
   text-decoration:none;
 }
 
@@ -113,7 +124,6 @@ pre {
 }
 
 table {
-  width:100%;
   border-collapse:collapse;
 }
 
@@ -121,7 +131,13 @@ th {
   text-align:left;
   padding:5px 10px;
   border-bottom:1px solid #e5e5e5;
+  border-left: 1px solid #ffcc00;
+  border-bottom: 1px solid #ffcc00;
   color: #444;
+
+  &:first-child {
+    border-left: none;
+  }
 }
 
 td {
@@ -273,7 +289,7 @@ header {
 
 section {
   width:690px;
-  padding: 30px 30px 50px 30px;
+  padding: 10px 30px 50px 30px;
   margin: 20px 0;
   margin-top: 190px;
   position:relative;
@@ -288,6 +304,7 @@ small {
 }
 
 nav {
+  padding-top: 10px;
   left:50%;
   min-height: 200px;
   margin-left:-630px;
@@ -303,6 +320,7 @@ nav {
 }
 
 nav2 {
+  padding-top: 10px;
   right:50%;
   margin-right:-630px;
   text-align: left;
@@ -318,30 +336,60 @@ nav, nav2 {
   border-radius: 3px;
   border: 1px solid #cbcbcb;
   box-shadow: 0px 1px 2px rgba(0,0,0,.09), inset 0px 0px 2px 2px rgba(255,255,255,.5), inset 0 0 5px 5px rgba(255,255,255,.4);
+  
+  .current {
+    font-weight: bold;
+  }
+  li .current {
+    background: #eee;
+  }
+  li .current > ul {
+    background: #fbfbfb;
+  }
+  .normal {
+    font-weight: normal;
+  }
+  li.normal.tag-h1 {
+    padding-bottom: 15px;
+    margin-bottom: 5px;
+  }
+  ul.collapse {
+    display:none;
+    float:right;
+    background-color: #fbfbfb;
+    border-left: 1px solid #e5e5e5;
+  }
+  li:hover .collapse {
+    display:block;
+    position: absolute;
+  }
 
   ul {
     list-style: none;
-    list-style-image:none;
     font-size: 14px;
     line-height:24px;
-    padding: 0 0 0 20px;
+    padding: 0;
+    max-width: 210px;
 
     li {
       padding: 0px 0px;
       margin:  5px 0px 15px 0px;
       line-height: 16px;
-      // padding-right:17px;
-      // position:relative;
-      // right:-12px;
+      color:#3399cc;
 
       &.tag-h1 {
         font-size: 1.2em;
-        font-weight: bold;
+        padding-left: 20px;
+
+        ul.collapse {
+          margin: 5px 0px 5px 10px;
+        }
 
         ul {
+          padding-left: 20px;
           list-style-image:url('../images/bullet.png');
-          margin:  5px 0px;
-          li {margin:  5px 0px;}
+          margin: 5px 0px;
+          li {margin: 5px 0px;}
         }
         a {
           color: #333;
@@ -385,8 +433,21 @@ footer {
     margin:0;
   }
 
-  nav, nav2 {
+  nav {
     display: none;
+  }
+  nav2 {
+    display: block;
+    width: auto;
+    height: auto;
+    position: relative;
+    margin: 10px;
+    padding: 10px;
+    top:auto;
+    bottom:auto;
+    left:auto;
+    right:auto;
+    max-width: 600px;
   }
 
   header, section, footer {

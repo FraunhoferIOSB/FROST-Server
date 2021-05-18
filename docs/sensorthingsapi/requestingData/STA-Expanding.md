@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Expanding Entities
-category: STA
+category: gettingData
+topCategory: STA
 order: 5
 ---
 
@@ -14,12 +15,14 @@ As we are performing this request only for a specific Thing with the identifier 
 For this purpose, we must add the expand request parameter to the URL from the previous example as follows:
 
 ```
-http://server.de/FROST-Server/v1.1/Things(1)?$select=@iot.id,description&$expand=Datastreams
+http://server.de/FROST-Server/v1.1/Things(1)
+	?$select=@iot.id,description
+	&$expand=Datastreams
 ```
 
 This request provides the identifier and description of Thing with identifier 1, together with all Datastreams associated with this Thing:
 
-```
+```javascript
 {
   "description" : "camping lantern",
   "@iot.id" : 1,
@@ -47,12 +50,14 @@ This request provides the identifier and description of Thing with identifier 1,
 As a further step, we only want an overview of the associated Datastreams; we’d like to reduce the content of the returned Datastreams to their identifier and description. This is done by adding the select request parameter for the Datastreams at the end of the URL from the example above:
 
 ```
-http://server.de/FROST-Server/v1.1/Things(1)?$select=@iot.id,description&$expand=Datastreams($select=@iot.id,description)
+http://server.de/FROST-Server/v1.1/Things(1)
+	?$select=@iot.id,description
+	&$expand=Datastreams($select=@iot.id,description)
 ```
 
 The resulting response provides us with a simple overview of Thing 1 together with the available Datastreams pertaining to this Thing:
 
-```
+```javascript
 {
   "description" : "camping lantern",
   "@iot.id" : 17,
@@ -68,7 +73,7 @@ The resulting response provides us with a simple overview of Thing 1 together wi
   ]
 }
 ```
-Inside each expand, all the request parameters can be used, including "expand" itself.
+Inside each expand, all the request parameters can be used, including `$expand` itself.
 We could expand the Datastreams in the example above with the result and phenomenonTime of the latest Observation of each Datastream, and the total number of Observations.
 
 
@@ -90,7 +95,7 @@ For clarity, the request example above is split over multiple lines. A real requ
 Inside each expand, the request parameters are separated with a `;` character, not with a `&`.
 The resulting response provides us with a simple overview of Thing 1 together with the available Datastreams pertaining to this Thing, and the last Observation for each Datastream:
 
-```
+```javascript
 {
   "description" : "camping lantern",
   "@iot.id" : 17,
@@ -105,7 +110,7 @@ The resulting response provides us with a simple overview of Thing 1 together wi
         }
       ],
       "Observations@iot.count": 11179,
-      "Observations@iot.nextLink": "http://server.de/FROST-Server/v1.1/Datastreams(19)/Observations?$top=1&$skip=1&$select=result,phenomenonTime&$orderby=phenomenonTime+desc&$count=true
+      "Observations@iot.nextLink": "http://server.de/FROST-Server/v1.1/Datastreams(19)/Observations?$top=1&$skip=1&$select=result,phenomenonTime&$orderby=phenomenonTime+desc&$count=true"
     },
     {
       "description" : "Humidity measurement",
@@ -117,7 +122,7 @@ The resulting response provides us with a simple overview of Thing 1 together wi
         }
       ],
       "Observations@iot.count": 19938,
-      "Observations@iot.nextLink": "http://server.de/FROST-Server/v1.1/Datastreams(21)/Observations?$top=1&$skip=1&$select=result,phenomenonTime&$orderby=phenomenonTime+desc&$count=true
+      "Observations@iot.nextLink": "http://server.de/FROST-Server/v1.1/Datastreams(21)/Observations?$top=1&$skip=1&$select=result,phenomenonTime&$orderby=phenomenonTime+desc&$count=true"
     }
   ]
 }
@@ -126,3 +131,4 @@ The resulting response provides us with a simple overview of Thing 1 together wi
 We now see serveral new things in the response:
 * Inside each Datastream there is a field `Observations@iot.count` the holds the total number of Observations for this Datastream.
 * Each Datastream has an `Observations@iot.nextLink` that holds a URL that points to the next Observation in the Datastream.
+

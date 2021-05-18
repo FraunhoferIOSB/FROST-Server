@@ -12,11 +12,11 @@
         "title": "Settings"
     },
     {
-        "key": "STA",
-        "title": "SensorThings API HowTo"
-    },
-    {
         "key": "extensions",
         "title": "Extensions"
+    },
+    {
+        "key": "STA",
+        "title": "SensorThings API HowTo"
     }
 ]
