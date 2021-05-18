@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Map;
@@ -58,16 +57,6 @@ public class EntityBuilderTest {
     @Before
     public void setUp() {
         propertyValues = testModel.getTestPropertyValues(modelRegistry);
-        for (EntityType et : modelRegistry.getEntityTypes()) {
-            Assert.assertTrue("Missing values for " + et, propertyValues.containsKey(et));
-            final Map<Property, Object> propertValuesEt = propertyValues.get(et);
-            for (EntityPropertyMain ep : et.getEntityProperties()) {
-                Assert.assertTrue("Missing value for " + ep, propertValuesEt.containsKey(ep));
-            }
-            for (NavigationPropertyMain np : et.getNavigationProperties()) {
-                Assert.assertTrue("Missing value for " + np, propertValuesEt.containsKey(np));
-            }
-        }
     }
 
     @Test

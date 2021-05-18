@@ -185,7 +185,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     }
 
     private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
-        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
+        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType());
         PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);

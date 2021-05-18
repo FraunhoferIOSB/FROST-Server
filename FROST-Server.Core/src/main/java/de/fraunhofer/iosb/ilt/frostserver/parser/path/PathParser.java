@@ -147,7 +147,10 @@ public class PathParser implements ParserVisitor {
     }
 
     private void addAsEntitiySet(ResourcePath rp, EntityType type) {
-        PathElementEntitySet espa = new PathElementEntitySet(type, rp.getLastElement());
+        if (rp.getLastElement() != null) {
+            throw new IllegalArgumentException("Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead." + rp);
+        }
+        PathElementEntitySet espa = new PathElementEntitySet(type);
         rp.addPathElement(espa, true, false);
     }
 

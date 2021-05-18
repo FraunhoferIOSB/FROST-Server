@@ -69,7 +69,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
 
@@ -88,7 +88,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
         expResult.setRef(true);
@@ -116,7 +116,7 @@ public class PathParserTest {
                     String path = "/" + entityType.plural + "(1)/" + property.getName();
                     ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
                     ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-                    PathElementEntitySet espe = new PathElementEntitySet(entityType, null);
+                    PathElementEntitySet espe = new PathElementEntitySet(entityType);
                     expResult.addPathElement(espe, false, false);
                     PathElementEntity epe = new PathElementEntity(new IdLong(1), entityType, espe);
                     expResult.addPathElement(epe, true, true);
@@ -135,7 +135,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);
@@ -152,7 +152,7 @@ public class PathParserTest {
             String path = "/Things(1)/properties/property1";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
             expResult.addPathElement(epe, true, true);
@@ -166,7 +166,7 @@ public class PathParserTest {
             String path = "/Things(1)/properties/name_two";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
             expResult.addPathElement(epe, true, true);
@@ -180,7 +180,7 @@ public class PathParserTest {
             String path = "/Things(1)/properties/property1[2]";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
             expResult.addPathElement(epe, true, true);
@@ -196,7 +196,7 @@ public class PathParserTest {
             String path = "/Things(1)/properties/property1[2][3]";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
             expResult.addPathElement(epe, true, true);
@@ -214,7 +214,7 @@ public class PathParserTest {
             String path = "/Things(1)/properties/property1[2]/deep[3]";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+            PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
             expResult.addPathElement(epe, true, true);
@@ -238,7 +238,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -251,7 +251,7 @@ public class PathParserTest {
         path = "/Observations(1)/parameters/property1[2]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -266,7 +266,7 @@ public class PathParserTest {
         path = "/Observations(1)/parameters/property1[2][3]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -283,7 +283,7 @@ public class PathParserTest {
         path = "/Observations(1)/parameters/property1[2]/deep[3]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -303,7 +303,7 @@ public class PathParserTest {
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -316,7 +316,7 @@ public class PathParserTest {
         path = "/Observations(1)/result[2]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, true, true);
@@ -334,7 +334,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservedProperty, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservedProperty);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etObservedProperty, espe);
         expResult.addPathElement(epe, false, true);
@@ -353,7 +353,7 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, false, false);
@@ -410,7 +410,7 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etFeatureOfInterest, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etFeatureOfInterest);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etFeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
@@ -455,7 +455,7 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, false, false);
@@ -512,7 +512,7 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etFeatureOfInterest, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etFeatureOfInterest);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), pluginCoreModel.etFeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
@@ -565,7 +565,7 @@ public class PathParserTest {
         result.compress();
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etObservation);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(11), pluginCoreModel.etObservation, espe);
         expResult.addPathElement(epe, false, true);
@@ -605,7 +605,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, new IdManagerLong(), "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(id), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);
@@ -618,7 +618,7 @@ public class PathParserTest {
         ResourcePath result = PathParser.parsePath(modelRegistry, new IdManagerString(), "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing, null);
+        PathElementEntitySet espe = new PathElementEntitySet(pluginCoreModel.etThing);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdString(id), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);

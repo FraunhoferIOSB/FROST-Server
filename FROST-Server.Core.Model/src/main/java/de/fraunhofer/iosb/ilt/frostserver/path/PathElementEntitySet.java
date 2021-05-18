@@ -37,10 +37,9 @@ public class PathElementEntitySet implements PathElementEntityType {
         this.parent = parent;
     }
 
-    public PathElementEntitySet(EntityType entityType, PathElement parent) {
+    public PathElementEntitySet(EntityType entityType) {
         this.np = null;
         this.entityType = entityType;
-        this.parent = parent;
     }
 
     @Override

@@ -58,6 +58,7 @@ public class EntityCompleteTest {
     private static NavigationPropertyEntity npThingMds;
     private static NavigationPropertyEntity npSensorMds;
     private static NavigationPropertyEntitySet npObservedPropertiesMds;
+    private static NavigationPropertyEntitySet npObservationsMds;
     private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
     private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
     private static NavigationPropertyEntitySet npMultiDatastreamsThing;
@@ -82,6 +83,7 @@ public class EntityCompleteTest {
             npThingMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Thing");
             npSensorMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Sensor");
             npObservedPropertiesMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
+            npObservationsMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("Observations");
 
             npMultiDatastreamObservation = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
             npMultiDatastreamsThing = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
@@ -101,7 +103,7 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(etMultiDatastream, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(etMultiDatastream);
 
         Entity entity = new DefaultEntity(etMultiDatastream);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
@@ -138,9 +140,9 @@ public class EntityCompleteTest {
 
         entity.setProperty(npThingMds, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(etMultiDatastream, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(npMultiDatastreamsThing, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream)));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
@@ -157,7 +159,7 @@ public class EntityCompleteTest {
 
     @Test
     public void testObservationComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(pluginCoreModel.etObservation);
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
@@ -176,17 +178,17 @@ public class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream)));
 
         entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
         entity.setProperty(npMultiDatastreamObservation, null);
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), pluginCoreModel.etDatastream, null));
+        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(new IdLong(1), pluginCoreModel.etDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), etMultiDatastream, null));
+        containingSet = new PathElementEntitySet(npObservationsMds, new PathElementEntity(new IdLong(1), etMultiDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));

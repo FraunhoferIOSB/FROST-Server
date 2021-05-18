@@ -98,7 +98,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     private Entity getEntityByEntityPath(PathElementEntity pathElement) {
         ResourcePath path = new ResourcePath();
-        path.addPathElement(new PathElementEntitySet(pathElement.getEntityType(), null), false, false);
+        path.addPathElement(new PathElementEntitySet(pathElement.getEntityType()), false, false);
         pathElement.setParent(path.getLastElement());
         path.addPathElement(pathElement, true, true);
         return (Entity) get(path, null);
