@@ -66,6 +66,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Plugin.ObservableProperty</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
             <version>${project.version}</version>
         </dependency>

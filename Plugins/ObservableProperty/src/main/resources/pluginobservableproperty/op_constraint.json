@@ -1,0 +1,69 @@
+{
+    "entityTypes": {
+        "Constraint": {
+            "plural": "Constraints",
+            "table": "OP_CONSTRAINT",
+            "entityProperties": {
+                "@iot.id": {
+                    "aliases": ["id"],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "ID"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "String",
+                    "required": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "NAME"
+                        }
+                    ]
+                },
+                "description": {
+                    "type": "String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "DESCRIPTION"
+                        }
+                    ]
+                },
+                "metadata": {
+                    "type": "String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "METADATA"
+                        }
+                    ]
+                },
+                "link": {
+                    "type": "String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "LINK"
+                        }
+                    ]
+                },
+                "properties": {
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "PROPERTIES"
+                        }
+                    ]
+                }
+            },
+            "navigationProperties": {
+            }
+        }
+    }
+}

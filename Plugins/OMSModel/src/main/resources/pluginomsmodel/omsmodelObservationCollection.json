@@ -80,7 +80,7 @@
                         }
                     ]
                 },
-                "ValidTime": {
+                "validTime": {
                     "type": "TimeInterval",
                     "handlers": [
                         {
@@ -90,7 +90,7 @@
                         }
                     ]
                 },
-                "DataQuality": {
+                "dataQuality": {
                     "type": "Object",
                     "hasCustomProperties": true,
                     "handlers": [
@@ -100,7 +100,7 @@
                         }
                     ]
                 },
-                "Parameters": {
+                "parameters": {
                     "type": "Object",
                     "hasCustomProperties": true,
                     "handlers": [

@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.omsmodel;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.observableproperty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -29,8 +31,11 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,42 +48,41 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDefaults {
+public class PluginObservableProperty implements PluginRootDocument, PluginModel, LiquibaseUser, ConfigDefaults {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginOMSModel.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginObservableProperty.class.getName());
 
-    private static final String MODEL_PATH = "pluginomsmodel";
+    private static final String MODEL_PATH = "pluginobservableproperty";
     private static final String[] MODEL_FILES = new String[]{
-        "omsmodelDeployment.json",
-        "omsmodelFeatureOfInterest.json",
-        "omsmodelHost.json",
-        "omsmodelObservationCollection.json",
-        "omsmodelObservedProcedure.json",
-        "omsmodelObservedProperty.json",
-        "omsmodelObserver.json",
-        "omsmodelObservation.json"
+        "op_constraint.json",
+        "op_contextobject.json",
+        "op_entitiy.json",
+        "op_matrix.json",
+        "op_ooi.json",
+        "op_property.json"
     };
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginobservableproperty/tables";
 
     @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_OMS_MODEL = "OMSModel.enable";
+    public static final String TAG_ENABLE_OBSERVABLEPROPERTIES_MODEL = "observableproperty.enable";
 
     private static final List<String> REQUIREMENTS_OMS_MODEL = Arrays.asList(
-            "http://www.opengis.net/spec/oms/3/req/datamodel");
+            "https://padlet.com/barbaramagagna/sogprgszse1bgd24");
 
     private CoreSettings settings;
     private boolean enabled;
     private boolean fullyInitialised;
     private List<DefModel> modelDefinitions = new ArrayList<>();
 
-    public PluginOMSModel() {
-        LOGGER.info("Creating new Observations, Measurements & Samples Model Plugin.");
+    public PluginObservableProperty() {
+        LOGGER.info("Creating new ObservableProperty Plugin.");
     }
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_OMS_MODEL, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_OBSERVABLEPROPERTIES_MODEL, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
 
@@ -133,7 +137,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Initialising OMS Model Types...");
+        LOGGER.info("Initialising ObservableProperty Model Types...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (DefModel modelDefinition : modelDefinitions) {
             modelDefinition.linkEntityTypes(modelRegistry);
@@ -144,6 +148,31 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
         modelDefinitions = null;
         fullyInitialised = true;
         return true;
+    }
+
+    @Override
+    public String checkForUpgrades() {
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.checkForUpgrades(fileName);
+            }
+            return "Unknown persistence manager class";
+        }
+    }
+
+    @Override
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            if (pm instanceof PostgresPersistenceManager) {
+                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                return ppm.doUpgrades(fileName, out);
+            }
+            out.append("Unknown persistence manager class");
+            return false;
+        }
     }
 
 }

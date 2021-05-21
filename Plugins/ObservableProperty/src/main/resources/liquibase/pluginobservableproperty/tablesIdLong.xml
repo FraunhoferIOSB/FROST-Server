@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     <column name="OP_" type="BIGINT" remarks="NavLink 
+    -->
+    <changeSet author="scf" id="2021-05-20-observableProperties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="OP_PROPERTY" />
+                <tableExists tableName="OP_OOI" />
+                <tableExists tableName="OP_MATRIX" />
+                <tableExists tableName="OP_CONTEXT_OBJECT" />
+                <tableExists tableName="OP_ENTITY" />
+                <tableExists tableName="OP_CONSTRAINT" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="OP_PROPERTY">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_PROPERTY_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="OOI_ID" type="BIGINT" remarks="NavLink PropertyOf" />
+        </createTable>
+
+        <createTable tableName="OP_OOI">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_OOI_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="ENTITY_ID" type="BIGINT" remarks="NavLink AssumedBy"/>
+            <column name="CONSTRAINT_ID" type="BIGINT" remarks="NavLink ConstrainedBy"/>
+        </createTable>
+
+        <createTable tableName="OP_MATRIX">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_MATRIX_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="ENTITY_ID" type="BIGINT" remarks="NavLink AssumedBy"/>
+            <column name="CONSTRAINT_ID" type="BIGINT" remarks="NavLink ConstrainedBy"/>
+        </createTable>
+
+        <createTable tableName="OP_CONTEXT_OBJECT">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_CONTEXT_OBJECT_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="ENTITY_ID" type="BIGINT" remarks="NavLink AssumedBy"/>
+            <column name="CONSTRAINT_ID" type="BIGINT" remarks="NavLink ConstrainedBy"/>
+        </createTable>
+
+        <createTable tableName="OP_ENTITY">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_ENTITY_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+
+        <createTable tableName="OP_CONSTRAINT">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="OP_CONSTRAINT_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+            <column name="LINK" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+
+        <addColumn tableName="OBS_PROPERTIES">
+            <column name="CONTEXT_OBJECT_ID" type="BIGINT" remarks="NavLink ContextObject"/>
+            <column name="MATRIX_ID" type="BIGINT" remarks="NavLink Matrix"/>
+            <column name="OOI_ID" type="BIGINT" remarks="NavLink Ooi"/>
+            <column name="PROPERTY_ID" type="BIGINT" remarks="NavLink Property"/>
+        </addColumn>
+
+
+        <addForeignKeyConstraint
+            constraintName="OP_PROPERTY_OOI_ID_FKEY"
+            baseTableName="OP_PROPERTY" baseColumnNames="OOI_ID"
+            referencedTableName="OP_OOI" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_PROPERTY" indexName="OP_PROPERTY_OOI_ID">
+            <column name="OOI_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_OOI_ENTITY_ID_FKEY"
+            baseTableName="OP_OOI" baseColumnNames="ENTITY_ID"
+            referencedTableName="OP_ENTITY" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_OOI" indexName="OP_OOI_ENTITY_ID">
+            <column name="ENTITY_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_OOI_CONSTRAINT_ID_FKEY"
+            baseTableName="OP_OOI" baseColumnNames="CONSTRAINT_ID"
+            referencedTableName="OP_CONSTRAINT" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_OOI" indexName="OP_OOI_CONSTRAINT_ID">
+            <column name="CONSTRAINT_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_MATRIX_ENTITY_ID_FKEY"
+            baseTableName="OP_MATRIX" baseColumnNames="ENTITY_ID"
+            referencedTableName="OP_ENTITY" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_MATRIX" indexName="OP_MATRIX_ENTITY_ID">
+            <column name="ENTITY_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_MATRIX_CONSTRAINT_ID_FKEY"
+            baseTableName="OP_MATRIX" baseColumnNames="CONSTRAINT_ID"
+            referencedTableName="OP_CONSTRAINT" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_MATRIX" indexName="OP_MATRIX_CONSTRAINT_ID">
+            <column name="CONSTRAINT_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_CONTEXT_OBJECT_ENTITY_ID_FKEY"
+            baseTableName="OP_CONTEXT_OBJECT" baseColumnNames="ENTITY_ID"
+            referencedTableName="OP_ENTITY" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_CONTEXT_OBJECT" indexName="OP_CONTEXT_OBJECT_ENTITY_ID">
+            <column name="ENTITY_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OP_CONTEXT_OBJECT_CONSTRAINT_ID_FKEY"
+            baseTableName="OP_CONTEXT_OBJECT" baseColumnNames="CONSTRAINT_ID"
+            referencedTableName="OP_CONSTRAINT" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OP_CONTEXT_OBJECT" indexName="OP_CONTEXT_OBJECT_CONSTRAINT_ID">
+            <column name="CONSTRAINT_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OBS_PROPERTY_CONTEXT_OBJECT_ID_FKEY"
+            baseTableName="OBS_PROPERTIES" baseColumnNames="CONTEXT_OBJECT_ID"
+            referencedTableName="OP_CONTEXT_OBJECT" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OBS_PROPERTIES" indexName="OBS_PROPERTIES_CONTEXT_OBJECT_ID">
+            <column name="CONTEXT_OBJECT_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OBS_PROPERTY_MATRIX_ID_FKEY"
+            baseTableName="OBS_PROPERTIES" baseColumnNames="MATRIX_ID"
+            referencedTableName="OP_MATRIX" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OBS_PROPERTIES" indexName="OBS_PROPERTIES_MATRIX_ID">
+            <column name="MATRIX_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OBS_PROPERTY_OOI_ID_FKEY"
+            baseTableName="OBS_PROPERTIES" baseColumnNames="OOI_ID"
+            referencedTableName="OP_OOI" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OBS_PROPERTIES" indexName="OBS_PROPERTIES_OOI_ID">
+            <column name="OOI_ID" />
+        </createIndex>
+
+        <addForeignKeyConstraint
+            constraintName="OBS_PROPERTY_PROPERTY_ID_FKEY"
+            baseTableName="OBS_PROPERTIES" baseColumnNames="PROPERTY_ID"
+            referencedTableName="OP_PROPERTY" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+        <createIndex tableName="OBS_PROPERTIES" indexName="OBS_PROPERTIES_PROPERTY_ID">
+            <column name="PROPERTY_ID" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

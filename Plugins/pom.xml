@@ -18,5 +18,6 @@
         <module>Actuation</module>
         <module>MultiDatastream</module>
         <module>OMSModel</module>
+        <module>ObservableProperty</module>
     </modules>
 </project>
