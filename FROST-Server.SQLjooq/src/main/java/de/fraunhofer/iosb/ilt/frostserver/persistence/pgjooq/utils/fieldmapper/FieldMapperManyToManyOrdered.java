@@ -41,6 +41,10 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      */
     private String field;
     /**
+     * Name of the schema of the link table.
+     */
+    private String linkTableSchema;
+    /**
      * Name of the link table.
      */
     private String linkTable;
@@ -56,6 +60,10 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      * Name of the sorting field in the link table.
      */
     private String linkRankField;
+    /**
+     * The name of the schema of the other table we link to.
+     */
+    private String otherTableSchema;
     /**
      * The name of the other table we link to.
      */
@@ -98,11 +106,11 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
     @Override
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
-        final Table dbTableOther = ppm.getDbTable(otherTable);
+        final Table dbTableOther = ppm.getDbTable(otherTableSchema, otherTable);
         fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
 
-        final StaLinkTable staTableLink = ppm.getOrCreateLinkTable(linkTable);
-        final Table dbTableLink = ppm.getDbTable(linkTable);
+        final StaLinkTable staTableLink = ppm.getOrCreateLinkTable(linkTableSchema, linkTable);
+        final Table dbTableLink = ppm.getDbTable(linkTableSchema, linkTable);
         fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
         fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
         fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);

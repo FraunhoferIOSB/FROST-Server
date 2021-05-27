@@ -53,6 +53,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -62,6 +63,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
@@ -98,6 +100,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private final IdManager idManager;
     private TableCollection<J> tableCollection;
     private EntityFactories<J> entityFactories;
+    private Map<Name, Table<?>> cacheUsedTables = new HashMap<>();
+    private List<Table<?>> cacheAllTables;
 
     private CoreSettings settings;
     private IdGenerationType idGenerationMode;
@@ -484,19 +488,19 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         getDslContext();
 
         for (DefModel modelDefinition : modelDefinitions) {
-
             LOGGER.info("Reading Database Tables.");
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
                 final String tableName = entityTypeDef.getTable();
-                LOGGER.info("  Table: {}.", tableName);
-                getDbTable(tableName);
-                getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                final String schemaName = entityTypeDef.getSchema();
+                LOGGER.info("  Table: {}.{}.", schemaName, tableName);
+                getDbTable(schemaName, tableName);
+                getOrCreateMainTable(entityTypeDef.getEntityType(), createName(schemaName, tableName));
             }
         }
 
         for (DefModel modelDefinition : modelDefinitions) {
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-                StaTableDynamic<J> typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                StaTableDynamic<J> typeStaTable = getOrCreateMainTable(entityTypeDef);
 
                 for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
                     for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
@@ -517,7 +521,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
         for (DefModel modelDefinition : modelDefinitions) {
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-                StaTableDynamic<J> orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                StaTableDynamic<J> orCreateTable = getOrCreateMainTable(entityTypeDef);
                 for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
                     for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
                         if (handler instanceof FieldMapper) {
@@ -536,34 +540,64 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
+        cacheAllTables = null;
     }
 
-    public Table<?> getDbTable(String tableName) {
-        return getDbTable(DSL.name(tableName));
+    public Name createName(String schemaName, String tableName) {
+        if (StringHelper.isNullOrEmpty(schemaName)) {
+            return DSL.name(tableName);
+        }
+        return DSL.name(schemaName, tableName);
+    }
+
+    public Table<?> getDbTable(String schema, String tableName) {
+        return getDbTable(createName(schema, tableName));
     }
 
     public Table<?> getDbTable(Name tableName) {
+        Table<?> table = cacheUsedTables.get(tableName);
+        if (table != null) {
+            return table;
+        }
         final Meta meta = dslContext.meta();
+        if (cacheAllTables == null) {
+            cacheAllTables = meta.getTables();
+            LOGGER.info("Found {} Tables total", cacheAllTables.size());
+        }
+        for (Table<?> t : cacheAllTables) {
+            if (tableName.equals(t.getQualifiedName())) {
+                cacheUsedTables.put(tableName, t);
+                return t;
+            }
+        }
         final List<Table<?>> tables = meta.getTables(tableName);
         if (tables.isEmpty()) {
             LOGGER.error("Table {} not found. Please initialise the database!", tableName);
             throw new IllegalArgumentException("Table " + tableName + " not found.");
         }
         if (tables.size() != 1) {
-            LOGGER.error("Table name {} found {} times.", tableName, tables.size());
-            throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
+            LOGGER.warn("Table name {} found {} times.", tableName, tables.size());
+            for (Table<?> t : tables) {
+                LOGGER.warn("      {}.{}", t.getSchema(), t.getName());
+            }
         }
-        return tables.get(0);
+        table = tables.get(0);
+        cacheUsedTables.put(tableName, table);
+        return table;
     }
 
-    private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, String tableName) {
+    private StaTableDynamic<J> getOrCreateMainTable(DefEntityType defType) {
+        return getOrCreateMainTable(defType.getEntityType(), createName(defType.getSchema(), defType.getTable()));
+    }
+
+    private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, Name tableName) {
         if (entityType == null) {
             throw new IllegalArgumentException("Not implemented yet");
         }
         StaMainTable<J, ?> table = tableCollection.getTableForType(entityType);
         if (table == null) {
             LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
-            StaTableDynamic<J> newTable = new StaTableDynamic<>(DSL.name(tableName), entityType, tableCollection.getIdType());
+            StaTableDynamic<J> newTable = new StaTableDynamic<>(tableName, entityType, tableCollection.getIdType());
             tableCollection.registerTable(entityType, newTable);
             table = newTable;
         }
@@ -573,8 +607,12 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         throw new IllegalStateException("Table already exists, but is not of type dynamic.");
     }
 
-    public StaLinkTableDynamic<J> getOrCreateLinkTable(String tableName) {
-        StaTable<J, ?> table = tableCollection.getTableForName(tableName);
+    public StaLinkTableDynamic<J> getOrCreateLinkTable(String schemaName, String tableName) {
+        return getOrCreateLinkTable(createName(schemaName, tableName));
+    }
+
+    public StaLinkTableDynamic<J> getOrCreateLinkTable(Name tableName) {
+        StaTable<J, ?> table = tableCollection.getTableForName(tableName.last());
         if (table == null) {
             LOGGER.info("  Registering StaLinkTable {} ({})", tableName);
             StaLinkTableDynamic<J> newTable = new StaLinkTableDynamic<>(DSL.name(tableName), tableCollection.getIdType());

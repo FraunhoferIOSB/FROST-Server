@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.SQLjooq</artifactId>
+            <artifactId>FROST-Server.SQLOrakel</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

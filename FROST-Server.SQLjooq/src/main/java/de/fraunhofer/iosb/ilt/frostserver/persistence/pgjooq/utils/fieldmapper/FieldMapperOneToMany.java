@@ -42,6 +42,10 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
     /**
      * The name of the other table we link to.
      */
+    private String otherTableSchema;
+    /**
+     * The name of the other table we link to.
+     */
     private String otherTable;
     /**
      * The field in the other table that is the key in the relation.
@@ -68,7 +72,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
     @Override
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
-        final Table dbTableOther = ppm.getDbTable(otherTable);
+        final Table dbTableOther = ppm.getDbTable(otherTableSchema, otherTable);
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
 
         PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
