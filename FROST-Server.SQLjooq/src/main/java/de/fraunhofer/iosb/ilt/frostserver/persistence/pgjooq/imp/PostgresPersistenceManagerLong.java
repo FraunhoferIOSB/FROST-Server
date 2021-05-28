@@ -55,7 +55,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
 
     @Override
     protected boolean validateClientSuppliedId(Id entityId) {
-        return entityId.getValue() != null;
+        return entityId != null && entityId.getValue() != null;
     }
 
 }

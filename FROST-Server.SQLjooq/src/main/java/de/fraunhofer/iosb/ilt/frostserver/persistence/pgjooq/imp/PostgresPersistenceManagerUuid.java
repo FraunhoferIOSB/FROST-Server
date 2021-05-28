@@ -53,6 +53,6 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
 
     @Override
     protected boolean validateClientSuppliedId(Id entityId) {
-        return entityId.getValue() != null;
+        return entityId != null && entityId.getValue() != null;
     }
 }
