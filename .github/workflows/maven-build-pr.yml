@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 0
 
     - name: Cache maven repository
-      uses: actions/cache@v2.1.5
+      uses: actions/cache@v2.1.6
       with:
         path: |
           ~/.m2/repository
