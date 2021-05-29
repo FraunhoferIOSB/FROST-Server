@@ -66,7 +66,7 @@ public class KeycloakFilter implements Filter {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakFilter.class);
 
-    private Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
+    private final Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
 
     private Map<Role, String> roleMappings;
     private AdapterDeploymentContext deploymentContext;
@@ -205,8 +205,13 @@ public class KeycloakFilter implements Filter {
         AuthChallenge challenge = authenticator.getChallenge();
         if (challenge != null) {
             LOGGER.debug("Challenge.");
-            challenge.challenge(facade);
-            return;
+            try {
+                challenge.challenge(facade);
+                return;
+            } catch (IllegalStateException ex) {
+                LOGGER.debug("Challenge failed.", ex);
+                // Failed the challenge.
+            }
         }
         LOGGER.debug("User is not allowed.");
         throwHttpError(403, httpResponse);

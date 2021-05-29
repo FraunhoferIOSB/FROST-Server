@@ -26,6 +26,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <version>${testcontainers-keycloak.version}</version>
+            <scope>test</scope>
+        </dependency>        
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.HTTP.Common</artifactId>
             <version>${project.version}</version>
