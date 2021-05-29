@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletV1P0;
@@ -41,6 +42,8 @@ import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
+import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
+import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
 import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -96,6 +99,8 @@ import org.testcontainers.containers.GenericContainer;
     Capability8Tests.class,
     BasicAuthTests.class,
     BasicAuthAnonReadTests.class,
+    KeyCloakTests.class,
+    KeyCloakAnonReadTests.class,
     CustomLinksTests.class
 })
 public class TestSuite {
@@ -123,16 +128,20 @@ public class TestSuite {
     private String pgConnectUrl;
 
     @Rule
-    public GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
+    private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
             .withEnv("POSTGRES_DB", VAL_PG_DB)
             .withEnv("POSTGRES_USER", VAL_PG_USER)
             .withEnv("POSTGRES_PASSWORD", VAL_PG_PASS)
             .withExposedPorts(5432);
 
     @Rule
-    public GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
+    private final GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
             .withExposedPorts(1883)
             .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
+
+    @Rule
+    private final KeycloakContainer keycloak = new KeycloakContainer()
+            .withRealmImportFile("keycloak/FROST-Test.json");
 
     public static TestSuite getInstance() {
         // Create a new instance if none exists. This only happens when running
@@ -179,6 +188,13 @@ public class TestSuite {
     public Server getServer(Properties parameters) throws IOException, InterruptedException {
         maybeStartServers(parameters);
         return httpServers.get(parameters);
+    }
+
+    public KeycloakContainer getKeycloak() {
+        if (!keycloak.isRunning()) {
+            keycloak.start();
+        }
+        return keycloak;
     }
 
     private synchronized void maybeStartServers(Properties parameters) throws IOException, InterruptedException {
@@ -348,6 +364,7 @@ public class TestSuite {
         for (Properties props : httpServers.keySet().toArray(new Properties[httpServers.size()])) {
             stopServer(props);
         }
+        keycloak.stop();
         pgServer.stop();
         mqttBus.stop();
     }

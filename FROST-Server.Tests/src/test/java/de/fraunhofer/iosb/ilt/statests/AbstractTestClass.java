@@ -43,6 +43,7 @@ public abstract class AbstractTestClass {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTestClass.class);
+
     /**
      * The server version to test. This is the JUnit parameter for this class.
      */
