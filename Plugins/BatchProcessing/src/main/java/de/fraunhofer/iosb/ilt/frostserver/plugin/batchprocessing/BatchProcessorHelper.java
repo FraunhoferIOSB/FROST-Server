@@ -17,7 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
@@ -31,11 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -64,8 +67,7 @@ public class BatchProcessorHelper {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;
-                String path = entity.getId().toString();
-                httpRequest.setContentIdValue(path);
+                httpRequest.setContentIdValue(entity.getId());
             }
         }
         HttpContent httpResponse = new HttpContent(serviceRequest.getVersion(), inChangeSet);
@@ -125,8 +127,8 @@ public class BatchProcessorHelper {
                 }
 
                 String contentId = httpContent.getContentId();
-                String contentIdValue = httpContent.getContentIdValue();
-                if (!StringHelper.isNullOrEmpty(contentId) && !StringHelper.isNullOrEmpty(contentIdValue)) {
+                Id contentIdValue = httpContent.getContentIdValue();
+                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null) {
                     contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
                 }
             } else {
