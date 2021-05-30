@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -34,7 +34,7 @@ import org.jooq.TableField;
  *
  * @author hylke
  */
-public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
+public class FieldMapperManyToMany extends FieldMapperAbstract {
 
     /**
      * The name of the field in "my" table.
@@ -53,10 +53,6 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      */
     private String linkOtherField;
     /**
-     * Name of the sorting field in the link table.
-     */
-    private String linkRankField;
-    /**
      * The name of the other table we link to.
      */
     private String otherTable;
@@ -64,21 +60,10 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      * The field in the other table that is the key in the relation.
      */
     private String otherField;
-    /**
-     * Flag indicating duplicates should be removed when following the relation
-     * over a navigationLink.
-     */
-    private boolean distinct = false;
-    /**
-     * Flag indicating duplicates should be removed when following the inverse
-     * relation over a navigationLink.
-     */
-    private boolean distinctInverse = false;
 
     private int fieldIdx;
     private int fieldIdxLinkOur;
     private int fieldIdxLinkOther;
-    private int fieldIdxLinkRank;
     private int fieldIdxOther;
 
     private DefNavigationProperty parent;
@@ -105,16 +90,13 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
         final Table dbTableLink = ppm.getDbTable(linkTable);
         fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
         fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
-        fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);
 
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
         final PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
         final IdManager idManager = ppm.getIdManager();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
 
-        staTable.registerRelation(new RelationManyToManyOrdered(navProp, staTable, staTableLink, staTableOther)
-                .setAlwaysDistinct(distinct)
-                .setOrderFieldAcc(t -> (TableField) t.field(fieldIdxLinkRank))
+        staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther)
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
                 .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
                 .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
@@ -126,9 +108,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
             final PropertyFieldRegistry<?, ?> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
-            staTableOther.registerRelation(new RelationManyToManyOrdered(navPropInverse, staTableOther, staTableLink, staTable)
-                    .setAlwaysDistinct(distinctInverse)
-                    .setOrderFieldAcc(t -> (TableField) t.field(fieldIdxLinkRank))
+            staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable)
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
                     .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
@@ -211,24 +191,6 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
     }
 
     /**
-     * Name of the sorting field in the link table.
-     *
-     * @return the linkOrderField
-     */
-    public String getLinkRankField() {
-        return linkRankField;
-    }
-
-    /**
-     * Name of the sorting field in the link table.
-     *
-     * @param linkRankField the linkOrderField to set
-     */
-    public void setLinkRankField(String linkRankField) {
-        this.linkRankField = linkRankField;
-    }
-
-    /**
      * The name of the other table we link to.
      *
      * @return the otherTable
@@ -262,46 +224,6 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      */
     public void setOtherField(String otherField) {
         this.otherField = otherField;
-    }
-
-    /**
-     * Flag indicating duplicates should be removed when following the relation
-     * over a navigationLink.
-     *
-     * @return the distinct
-     */
-    public boolean isDistinct() {
-        return distinct;
-    }
-
-    /**
-     * Flag indicating duplicates should be removed when following the relation
-     * over a navigationLink.
-     *
-     * @param distinct the distinct to set
-     */
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
-    }
-
-    /**
-     * Flag indicating duplicates should be removed when following the inverse
-     * relation over a navigationLink.
-     *
-     * @return the distinctInverse
-     */
-    public boolean isDistinctInverse() {
-        return distinctInverse;
-    }
-
-    /**
-     * Flag indicating duplicates should be removed when following the inverse
-     * relation over a navigationLink.
-     *
-     * @param distinctInverse the distinctInverse to set
-     */
-    public void setDistinctInverse(boolean distinctInverse) {
-        this.distinctInverse = distinctInverse;
     }
 
 }
