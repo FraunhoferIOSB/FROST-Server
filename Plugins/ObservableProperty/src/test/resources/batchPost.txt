@@ -1,0 +1,277 @@
+--------------POST to------------
+/v1.1/$batch
+
+--------------Headers------------
+Content-Type: multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77b
+
+------------ POST BODY-----------
+--batch_36522ad7-fc75-4b56-8c71-56071383e77b
+Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: constraint1
+
+POST /v1.1/Constraints HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Wet"
+}
+
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: matrix1
+
+POST /v1.1/Matrices HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Flesh",
+  "Constraints": [{"@iot.id":"$constraint1"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: matrix2
+
+POST /v1.1/Matrices HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Land Parcel"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: matrix3
+
+POST /v1.1/Matrices HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Open Ocean Water"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: co1
+
+POST /v1.1/ContextObjects HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Ostrea edulis"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: co2
+
+POST /v1.1/ContextObjects HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Limnococcus Limneticus"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: co3
+
+POST /v1.1/ContextObjects HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Picoplankton"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: co4
+
+POST /v1.1/ContextObjects HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Corona Measures"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: ooi1
+
+POST /v1.1/ObjectsOfInterest HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "endosulfan sulfate"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: ooi2
+
+POST /v1.1/ObjectsOfInterest HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "organism"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: ooi3
+
+POST /v1.1/ObjectsOfInterest HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "grass species"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: ooi4
+
+POST /v1.1/ObjectsOfInterest HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "18S rRNA"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: ooi5
+
+POST /v1.1/ObjectsOfInterest HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "person"
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: property1
+
+POST /v1.1/Properties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "concentration per unit mass",
+  "ObjectsOfInterest": [{"@iot.id": "$ooi1"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: property2
+
+POST /v1.1/Properties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "shape",
+  "ObjectsOfInterest": [{"@iot.id": "$ooi2"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: property3
+
+POST /v1.1/Properties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "taxonomy",
+  "ObjectsOfInterest": [{"@iot.id": "$ooi3"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: property4
+
+POST /v1.1/Properties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "nucleotide sequence",
+  "ObjectsOfInterest": [{"@iot.id": "$ooi4"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: property5
+
+POST /v1.1/Properties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "affectedness",
+  "ObjectsOfInterest": [{"@iot.id": "$ooi5"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: obsProp1
+
+POST /v1.1/ObservedProperties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Concentration of endosulfan sulfate in Ostrea edulis flesh expressed per unit wet weight",
+  "description": "Concentration of endosulfan sulfate in Ostrea edulis flesh expressed per unit wet weight",
+  "definition": "some url",
+  "Matrix": {"@iot.id": "$matrix1"},
+  "ObjectOfInterest": {"@iot.id": "$ooi1"},
+  "Property": {"@iot.id": "$property1"},
+  "ContextObjects": [{"@iot.id": "$co1"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: obsProp2
+
+POST /v1.1/ObservedProperties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "shape of Limnococcus limneticus",
+  "description": "shape of Limnococcus limneticus",
+  "definition": "some url",
+  "ObjectOfInterest": {"@iot.id": "$ooi2"},
+  "Property": {"@iot.id": "$property2"},
+  "ContextObjects": [{"@iot.id": "$co2"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: obsProp3
+
+POST /v1.1/ObservedProperties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Grass-species of land parcel",
+  "description": "Grass-species of land parcel",
+  "definition" : "some url",
+  "Matrix": {"@iot.id": "$matrix2"},
+  "ObjectOfInterest": {"@iot.id": "$ooi3"},
+  "Property": {"@iot.id": "$property3"}
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: obsProp4
+
+POST /v1.1/ObservedProperties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "18S rRNA amplicon nucleotide sequence of picoplankton from vertical profiles of open ocean water",
+  "description": "18S rRNA amplicon nucleotide sequence of picoplankton from vertical profiles of open ocean water",
+  "definition" : "some url",
+  "Matrix": {"@iot.id": "$matrix3"},
+  "ObjectOfInterest": {"@iot.id": "$ooi4"},
+  "Property": {"@iot.id": "$property4"},
+  "ContextObjects": [{"@iot.id": "$co3"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: obsProp5
+
+POST /v1.1/ObservedProperties HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "to what extent are you affected by Corona measures",
+  "description": "to what extent are you affected by Corona measures",
+  "definition" : "some url",
+  "ObjectOfInterest": {"@iot.id": "$ooi5"},
+  "Property": {"@iot.id": "$property5"},
+  "ContextObjects": [{"@iot.id": "$co4"}]
+}
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--
+--batch_36522ad7-fc75-4b56-8c71-56071383e77b--
+

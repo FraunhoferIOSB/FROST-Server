@@ -63,8 +63,8 @@
                 }
             },
             "navigationProperties": {
-                "ObjectOfInterest": {
-                    "entitySet": false,
+                "ObjectsOfInterest": {
+                    "entitySet": true,
                     "entityType": "ObjectOfInterest",
                     "inverse": {
                         "name": "Properties",
@@ -72,8 +72,11 @@
                     },
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "OOI_ID",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "ID",
+                            "linkTable": "LT_PROPERTY_OOI",
+                            "linkOurField": "PROPERTY_ID",
+                            "linkOtherField": "OOI_ID",
                             "otherTable": "OP_OOI",
                             "otherField": "ID"
                         }

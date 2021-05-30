@@ -63,24 +63,8 @@
                 }
             },
             "navigationProperties": {
-                "Entity": {
-                    "entitySet": false,
-                    "entityType": "Entity",
-                    "inverse": {
-                        "name": "ContextObjects",
-                        "entitySet": true
-                    },
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "ENTITY_ID",
-                            "otherTable": "OP_ENTITY",
-                            "otherField": "ID"
-                        }
-                    ]
-                },
-                "Constraint": {
-                    "entitySet": false,
+                "Constraints": {
+                    "entitySet": true,
                     "entityType": "Constraint",
                     "inverse": {
                         "name": "ContextObjects",
@@ -88,8 +72,11 @@
                     },
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "CONSTRAINT_ID",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "ID",
+                            "linkTable": "LT_CO_CONSTRAINT",
+                            "linkOurField": "CO_ID",
+                            "linkOtherField": "CONSTRAINT_ID",
                             "otherTable": "OP_CONSTRAINT",
                             "otherField": "ID"
                         }
@@ -99,15 +86,18 @@
                     "entitySet": true,
                     "entityType": "ObservedProperty",
                     "inverse": {
-                        "name": "ContextObject",
-                        "entitySet": false
+                        "name": "ContextObjects",
+                        "entitySet": true
                     },
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
                             "field": "ID",
+                            "linkTable": "LT_CO_VAR",
+                            "linkOurField": "CO_ID",
+                            "linkOtherField": "VAR_ID",
                             "otherTable": "OBS_PROPERTIES",
-                            "otherField": "CONTEXT_OBJECT_ID"
+                            "otherField": "ID"
                         }
                     ]
                 }

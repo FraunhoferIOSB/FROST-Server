@@ -63,6 +63,22 @@
                 }
             },
             "navigationProperties": {
+                "ObservedProperty": {
+                    "entitySet": false,
+                    "entityType": "ObservedProperty",
+                    "inverse": {
+                        "name": "Constraints",
+                        "entitySet": true
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "VAR_ID",
+                            "otherTable": "OBS_PROPERTIES",
+                            "otherField": "ID"
+                        }
+                    ]
+                }
             }
         }
     }

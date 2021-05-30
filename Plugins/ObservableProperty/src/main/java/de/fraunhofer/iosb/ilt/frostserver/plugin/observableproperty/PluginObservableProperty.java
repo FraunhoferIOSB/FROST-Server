@@ -56,7 +56,6 @@ public class PluginObservableProperty implements PluginRootDocument, PluginModel
     private static final String[] MODEL_FILES = new String[]{
         "op_constraint.json",
         "op_contextobject.json",
-        "op_entitiy.json",
         "op_matrix.json",
         "op_ooi.json",
         "op_property.json"

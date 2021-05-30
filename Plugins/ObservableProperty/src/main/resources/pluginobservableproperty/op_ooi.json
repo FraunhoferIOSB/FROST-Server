@@ -63,24 +63,8 @@
                 }
             },
             "navigationProperties": {
-                "Entity": {
-                    "entitySet": false,
-                    "entityType": "Entity",
-                    "inverse": {
-                        "name": "ObjectsOfInterest",
-                        "entitySet": true
-                    },
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "ENTITY_ID",
-                            "otherTable": "OP_ENTITY",
-                            "otherField": "ID"
-                        }
-                    ]
-                },
-                "Constraint": {
-                    "entitySet": false,
+                "Constraints": {
+                    "entitySet": true,
                     "entityType": "Constraint",
                     "inverse": {
                         "name": "ObjectsOfInterest",
@@ -88,8 +72,11 @@
                     },
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "CONSTRAINT_ID",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "ID",
+                            "linkTable": "LT_OOI_CONSTRAINT",
+                            "linkOurField": "OOI_ID",
+                            "linkOtherField": "CONSTRAINT_ID",
                             "otherTable": "OP_CONSTRAINT",
                             "otherField": "ID"
                         }
