@@ -64,6 +64,7 @@
             },
             "navigationProperties": {
                 "ObservedProperty": {
+                    "required": true,
                     "entitySet": false,
                     "entityType": "ObservedProperty",
                     "inverse": {

@@ -10,25 +10,13 @@ Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efb
 
 --changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
 Content-Type: application/http
-Content-ID: constraint1
-
-POST /v1.1/Constraints HTTP/1.1
-Content-Type: application/json
-
-{
-  "name": "Wet"
-}
-
---changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
-Content-Type: application/http
 Content-ID: matrix1
 
 POST /v1.1/Matrices HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Flesh",
-  "Constraints": [{"@iot.id":"$constraint1"}]
+  "name": "Flesh"
 }
 --changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
 Content-Type: application/http
@@ -272,6 +260,19 @@ Content-Type: application/json
   "Property": {"@iot.id": "$property5"},
   "ContextObjects": [{"@iot.id": "$co4"}]
 }
+--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd
+Content-Type: application/http
+Content-ID: constraint1
+
+POST /v1.1/Constraints HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Wet",
+  "ObservedProperty": {"@iot.id": "$obsProp1"},
+  "Matrices": [{"@iot.id": "$matrix1"}]
+}
+
 --changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--
 --batch_36522ad7-fc75-4b56-8c71-56071383e77b--
 
