@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+
 /**
  *
  * @author scf
@@ -24,9 +26,9 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 public final class ContentIdPair {
 
     public final String key;
-    public final String value;
+    public final Id value;
 
-    public ContentIdPair(String key, String value) {
+    public ContentIdPair(String key, Id value) {
         this.key = key;
         this.value = value;
     }
@@ -35,7 +37,7 @@ public final class ContentIdPair {
         return key;
     }
 
-    public String getValue() {
+    public Id getValue() {
         return value;
     }
 

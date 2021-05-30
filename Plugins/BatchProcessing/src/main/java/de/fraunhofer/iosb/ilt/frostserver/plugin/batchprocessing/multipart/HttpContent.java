@@ -1,5 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +59,7 @@ public class HttpContent implements Content {
 
     private final boolean requireContentId;
     private String contentId;
-    private String contentIdValue;
+    private Id contentIdValue;
     private final StringBuilder data = new StringBuilder();
     private String statusLine;
 
@@ -206,17 +208,19 @@ public class HttpContent implements Content {
         this.contentId = contentId;
     }
 
-    public String getContentIdValue() {
+    public Id getContentIdValue() {
         return contentIdValue;
     }
 
-    public void setContentIdValue(String contentIdValue) {
+    public void setContentIdValue(Id contentIdValue) {
         this.contentIdValue = contentIdValue;
     }
 
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value);
+            path = path.replace(pair.key, pair.value.getUrl());
+            data.replace(0, data.length(), StringUtils.replace(data.toString(), '"' + pair.key + '"', pair.value.getJson()));
+
         }
         LOGGER.debug("{}Using replaced Path: {}", logIndent, path);
     }

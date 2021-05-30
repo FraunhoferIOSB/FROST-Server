@@ -66,6 +66,11 @@ public class IdLong implements Id {
     }
 
     @Override
+    public String getJson() {
+        return value.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

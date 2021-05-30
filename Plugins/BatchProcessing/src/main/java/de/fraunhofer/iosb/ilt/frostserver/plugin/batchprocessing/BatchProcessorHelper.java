@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
@@ -67,8 +68,7 @@ public class BatchProcessorHelper {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;
-                String path = entity.getSelfLink();
-                httpRequest.setContentIdValue(path);
+                httpRequest.setContentIdValue(entity.getId());
             }
         }
         HttpContent httpResponse = new HttpContent(inChangeSet);
@@ -128,8 +128,8 @@ public class BatchProcessorHelper {
                 }
 
                 String contentId = httpContent.getContentId();
-                String contentIdValue = httpContent.getContentIdValue();
-                if (!StringHelper.isNullOrEmpty(contentId) && !StringHelper.isNullOrEmpty(contentIdValue)) {
+                Id contentIdValue = httpContent.getContentIdValue();
+                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null) {
                     contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
                 }
             } else {
