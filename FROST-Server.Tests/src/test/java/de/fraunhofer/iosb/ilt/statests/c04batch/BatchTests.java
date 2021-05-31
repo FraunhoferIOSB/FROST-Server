@@ -9,7 +9,6 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
-import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -26,9 +24,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Includes various tests of "A.4. SensorThings API Batch Request Extension
