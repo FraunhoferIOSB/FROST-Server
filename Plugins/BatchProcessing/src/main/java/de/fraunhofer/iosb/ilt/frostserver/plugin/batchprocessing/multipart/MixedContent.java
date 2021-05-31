@@ -17,12 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,8 +84,10 @@ public class MixedContent implements Content {
     private State state = State.PREAMBLE;
     private IsFinished finished = IsFinished.UNFINISHED;
     private Part currentPart;
+    private final Version batchVersion;
 
-    public MixedContent(CoreSettings settings, boolean isChangeSet) {
+    public MixedContent(Version batchVersion, CoreSettings settings, boolean isChangeSet) {
+        this.batchVersion = batchVersion;
         this.settings = settings;
         this.isChangeSet = isChangeSet;
     }
@@ -159,7 +161,7 @@ public class MixedContent implements Content {
     private void parsePreamble(String line) {
         if (boundaryPart.equals(line.trim())) {
             setState(State.PARTCONTENT);
-            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
         }
     }
 
@@ -175,7 +177,7 @@ public class MixedContent implements Content {
             LOGGER.debug("{}Found new part", logIndent);
             currentPart.stripLastNewline();
             parts.add(currentPart);
-            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
             setState(State.PARTCONTENT);
 
         } else if (checkBoundary && boundaryEnd.equals(line.trim())) {
@@ -199,7 +201,7 @@ public class MixedContent implements Content {
     private void parsePartDone(String line) {
         if (boundaryPart.equals(line.trim())) {
             LOGGER.debug("{}Found new part", logIndent);
-            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
             setState(State.PARTCONTENT);
         } else if (boundaryEnd.equals(line.trim())) {
             LOGGER.debug("{}Found end of multipart content", logIndent);
@@ -272,12 +274,13 @@ public class MixedContent implements Content {
         }
 
         for (Part part : parts) {
-            content.append('\n').append(boundaryPart).append('\n');
+            content.append(boundaryPart).append('\n');
             Content partContent = part.getContent();
             content.append(partContent.getContent(true));
+            content.append('\n');
         }
 
-        content.append('\n').append(boundaryEnd);
+        content.append(boundaryEnd);
         return content.toString();
     }
 

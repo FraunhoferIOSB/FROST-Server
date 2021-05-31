@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,14 @@ public class HttpContent implements Content {
     private Id contentIdValue;
     private final StringBuilder data = new StringBuilder();
     private String statusLine;
+    private final Version batchVersion;
 
-    public HttpContent() {
-        this.requireContentId = false;
+    public HttpContent(Version batchVersion) {
+        this(batchVersion, false);
     }
 
-    public HttpContent(boolean requireContentId) {
+    public HttpContent(Version batchVersion, boolean requireContentId) {
+        this.batchVersion = batchVersion;
         this.requireContentId = requireContentId;
     }
 
@@ -166,13 +168,8 @@ public class HttpContent implements Content {
                 path = "/";
             }
         } else {
-            if (fullUrl.contains("$")) {
-                LOGGER.debug("{}Url with no version, but possible replace pattern: {}", logIndent, fullUrl);
-                path = fullUrl;
-            } else {
-                LOGGER.error("{}Url contains no version number: {}", logIndent, fullUrl);
-                return;
-            }
+            version = batchVersion.urlPart;
+            path = "/" + fullUrl;
         }
         LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, method, version, path);
     }
@@ -219,10 +216,15 @@ public class HttpContent implements Content {
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
             path = path.replace(pair.key, pair.value.getUrl());
-            data.replace(0, data.length(), StringUtils.replace(data.toString(), '"' + pair.key + '"', pair.value.getJson()));
-
+            final String quotedKey = '"' + pair.key + '"';
+            final String valueJson = pair.value.getJson();
+            int keyIndex = 0;
+            while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
+                data.replace(keyIndex, keyIndex + quotedKey.length(), valueJson);
+                keyIndex += valueJson.length();
+            }
         }
-        LOGGER.debug("{}Using replaced Path: {}", logIndent, path);
+        LOGGER.debug("{}Using replaced path and data with content ids {}: {}, {}", logIndent, contentIds, path, data);
     }
 
     public HttpMethod getMethod() {
