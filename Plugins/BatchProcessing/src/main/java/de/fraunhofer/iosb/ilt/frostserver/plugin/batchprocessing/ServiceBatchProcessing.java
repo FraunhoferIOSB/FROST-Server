@@ -48,9 +48,9 @@ public class ServiceBatchProcessing {
     }
 
     public ServiceResponse<String> executeBatchOperation(final Service service, final ServiceRequest request) {
-        MixedContent multipartMixedData = new MixedContent(settings, false);
+        MixedContent multipartMixedData = new MixedContent(request.getVersion(), settings, false);
         multipartMixedData.parse(request);
-        MixedContent resultContent = BatchProcessorHelper.processMultipartMixed(service, multipartMixedData);
+        MixedContent resultContent = BatchProcessorHelper.processMultipartMixed(request, service, multipartMixedData);
         return sendMixedResponse(resultContent);
 
     }

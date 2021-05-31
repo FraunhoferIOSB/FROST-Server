@@ -1,15 +1,13 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import org.apache.http.Consts;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -89,21 +87,14 @@ public class HTTPMethods {
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
-        InputStream is = connection.getInputStream();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            response.append(line);
-            response.append('\r');
+        try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.name())) {
+            return scanner.useDelimiter("\\A").next();
         }
-        rd.close();
-        return response.toString();
     }
 
     /**
      * Send HTTP POST request to the urlString with postBody and return response
-     * code and response body
+     * code and response body, with application/json content type
      *
      * @param urlString The URL that the POST request should be sent to
      * @param postBody The body of the POST request
@@ -112,6 +103,26 @@ public class HTTPMethods {
      * created entity. Otherwise, it will be empty String.
      */
     public static HttpResponse doPost(String urlString, String postBody) {
+        HttpResponse response = doPost(urlString, postBody, "application/json");
+        if (response != null && response.code != 201) {
+            response.setResponse("");
+        }
+        return response;
+    }
+
+    /**
+     * Send HTTP POST request to the urlString with postBody and return response
+     * code and response body
+     *
+     * @param urlString   The URL that the POST request should be sent to
+     * @param postBody    The body of the POST request
+     * @param contentType The POST request content type header value
+     * @return response-code and response of the HTTP POST in the MAP format. If the
+     *         response is 201, the response will contain the self-link to the
+     *         created entity. If response is 200, it will be the HTTP response body
+     *         String.
+     */
+    public static HttpResponse doPost(String urlString, String postBody, String contentType) {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
@@ -123,7 +134,7 @@ public class HTTPMethods {
             connection.setDoOutput(true);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Type", contentType);
             connection.setRequestProperty("charset", "utf-8");
             connection.setRequestProperty("Content-Length", Integer.toString(postDataLength));
             connection.setUseCaches(false);
@@ -139,6 +150,8 @@ public class HTTPMethods {
                 } else {
                     result.setResponse(locationHeader);
                 }
+            } else if (connection.getResponseCode() == 200) {
+                result.setResponse(responseToString(connection));
             } else {
                 result.setResponse("");
             }

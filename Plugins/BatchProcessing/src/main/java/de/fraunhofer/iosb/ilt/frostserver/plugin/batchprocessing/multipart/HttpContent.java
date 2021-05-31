@@ -1,5 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
@@ -60,12 +61,14 @@ public class HttpContent implements Content {
     private String contentIdValue;
     private final StringBuilder data = new StringBuilder();
     private String statusLine;
+    private final Version batchVersion;
 
-    public HttpContent() {
-        this.requireContentId = false;
+    public HttpContent(Version batchVersion) {
+        this(batchVersion, false);
     }
 
-    public HttpContent(boolean requireContentId) {
+    public HttpContent(Version batchVersion, boolean requireContentId) {
+        this.batchVersion = batchVersion;
         this.requireContentId = requireContentId;
     }
 
@@ -164,13 +167,8 @@ public class HttpContent implements Content {
                 path = "/";
             }
         } else {
-            if (fullUrl.contains("$")) {
-                LOGGER.debug("{}Url with no version, but possible replace pattern: {}", logIndent, fullUrl);
-                path = fullUrl;
-            } else {
-                LOGGER.error("{}Url contains no version number: {}", logIndent, fullUrl);
-                return;
-            }
+            version = batchVersion.urlPart;
+            path = "/" + fullUrl;
         }
         LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, method, version, path);
     }
@@ -217,8 +215,13 @@ public class HttpContent implements Content {
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
             path = path.replace(pair.key, pair.value);
+            int keyIndex = 0;
+            while ((keyIndex = data.indexOf(pair.key, keyIndex)) != -1) {
+                data.replace(keyIndex, keyIndex + pair.key.length(), pair.value);
+                keyIndex += pair.value.length();
+            }
         }
-        LOGGER.debug("{}Using replaced Path: {}", logIndent, path);
+        LOGGER.debug("{}Using replaced path and data with content ids {}: {}, {}", logIndent, contentIds, path, data);
     }
 
     public HttpMethod getMethod() {

@@ -55,23 +55,20 @@ public class BatchProcessorHelper {
     public static HttpContent processHttpRequest(Service service, HttpContent httpRequest, boolean inChangeSet) {
         String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
         Version version = Version.forString(httpRequest.getVersion());
-
-        ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
-                .withRequestType(type)
-                .withUrl(httpRequest.getPath())
-                .withContent(httpRequest.getData())
-                .build();
+        ServiceRequest serviceRequest = new ServiceRequestBuilder(version).withRequestType(type)
+                .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
+                .withContent(httpRequest.getData()).build();
         ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);
 
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;
-                String path = entity.getSelfLink();
+                String path = entity.getId().toString();
                 httpRequest.setContentIdValue(path);
             }
         }
-        HttpContent httpResponse = new HttpContent(inChangeSet);
+        HttpContent httpResponse = new HttpContent(serviceRequest.getVersion(), inChangeSet);
         if (inChangeSet) {
             httpResponse.setContentId(httpRequest.getContentId());
         }
@@ -98,9 +95,9 @@ public class BatchProcessorHelper {
         return httpResponse;
     }
 
-    public static Content processChangeset(Service service, MixedContent changeset) {
+    public static Content processChangeset(ServiceRequest batchRequest, Service service, MixedContent changeset) {
         if (changeset.isParseFailed()) {
-            HttpContent content = new HttpContent();
+            HttpContent content = new HttpContent(batchRequest.getVersion());
             for (String error : changeset.getErrors()) {
                 content.addData(error);
                 content.addData("\n");
@@ -109,7 +106,7 @@ public class BatchProcessorHelper {
             return content;
         }
         service.startTransaction();
-        MixedContent mixedResponse = new MixedContent(service.getSettings(), true);
+        MixedContent mixedResponse = new MixedContent(batchRequest.getVersion(), service.getSettings(), true);
         List<Part> parts = changeset.getParts();
         List<ContentIdPair> contentIds = new ArrayList<>(parts.size());
         for (Part part : parts) {
@@ -124,7 +121,7 @@ public class BatchProcessorHelper {
                     service.rollbackTransaction();
                     return httpResponse;
                 } else {
-                    mixedResponse.addPart(new Part(service.getSettings(), true).setContent(httpResponse));
+                    mixedResponse.addPart(new Part(batchRequest.getVersion(), service.getSettings(), true).setContent(httpResponse));
                 }
 
                 String contentId = httpContent.getContentId();
@@ -140,19 +137,20 @@ public class BatchProcessorHelper {
         return mixedResponse;
     }
 
-    public static MixedContent processMultipartMixed(Service service, MixedContent multipartMixedData) {
-        MixedContent mixedResponse = new MixedContent(service.getSettings(), false);
+    public static MixedContent processMultipartMixed(ServiceRequest batchRequest, Service service, MixedContent multipartMixedData) {
+        Version batchVersion =batchRequest.getVersion();
+        MixedContent mixedResponse = new MixedContent(batchVersion, service.getSettings(), false);
         for (Part part : multipartMixedData.getParts()) {
             LOGGER.debug("Part: {}", part);
             Content content = part.getContent();
             if (content instanceof MixedContent) {
                 MixedContent changset = (MixedContent) content;
-                Content changesetResponse = processChangeset(service, changset);
-                mixedResponse.addPart(new Part(service.getSettings(), false).setContent(changesetResponse));
+                Content changesetResponse = processChangeset(batchRequest, service, changset);
+                mixedResponse.addPart(new Part(batchVersion, service.getSettings(), false).setContent(changesetResponse));
             } else if (content instanceof HttpContent) {
                 HttpContent httpContent = (HttpContent) content;
                 HttpContent httpResponse = processHttpRequest(service, httpContent, false);
-                mixedResponse.addPart(new Part(service.getSettings(), false).setContent(httpResponse));
+                mixedResponse.addPart(new Part(batchVersion, service.getSettings(), false).setContent(httpResponse));
             } else {
                 LOGGER.warn("Invalid multipart-part type: {}", content.getClass().getName());
             }

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content.IsFinished;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -57,14 +58,18 @@ public class Part {
 
     private final boolean inChangeSet;
 
+    private final Version batchVersion;
+
     /**
      * Creates a new Part.
      *
+     * @param batchVersion Batch request API version
      * @param settings The settings.
      * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
      * thus if the part itself can be a ChangeSet.
      */
-    public Part(CoreSettings settings, boolean inChangeSet) {
+    public Part(Version batchVersion, CoreSettings settings, boolean inChangeSet) {
+        this.batchVersion = batchVersion;
         this.settings = settings;
         this.inChangeSet = inChangeSet;
     }
@@ -156,11 +161,11 @@ public class Part {
                 throw new IllegalArgumentException("ChangeSets not allowed in ChangeSets.");
             }
             LOGGER.debug("{}Found multipart content", logIndent);
-            content = new MixedContent(settings, true)
+            content = new MixedContent(batchVersion, settings, true)
                     .setBoundaryHeader(getHeader("boundary"));
         } else if ("application/http".equalsIgnoreCase(contentType)) {
             LOGGER.debug("{}Found Http content", logIndent);
-            content = new HttpContent(inChangeSet);
+            content = new HttpContent(batchVersion, inChangeSet);
         } else {
             LOGGER.error("{}No or unknown content-type: {}", logIndent, contentType);
             if (inChangeSet) {

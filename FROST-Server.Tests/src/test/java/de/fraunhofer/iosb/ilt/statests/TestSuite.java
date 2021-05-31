@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests;
+import de.fraunhofer.iosb.ilt.statests.c04batch.BatchTests;
 import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests;
 import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
@@ -93,6 +94,7 @@ import org.testcontainers.containers.GenericContainer;
     FilterTests.class,
     GeoTests.class,
     JsonPropertiesTests.class,
+    BatchTests.class,
     MultiDatastreamTests.class,
     DataArrayTests.class,
     Capability7Tests.class,
