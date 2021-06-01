@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.util.Objects;
 import java.util.UUID;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  *
@@ -69,6 +70,11 @@ public class UuidId implements Id {
     @Override
     public String getUrl() {
         return "'" + value.toString() + "'";
+    }
+
+    @Override
+    public String getJson() {
+        return '"' + StringEscapeUtils.escapeJson(value.toString()) + '"';
     }
 
     @Override

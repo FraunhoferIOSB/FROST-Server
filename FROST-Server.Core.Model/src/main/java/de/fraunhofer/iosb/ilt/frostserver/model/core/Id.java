@@ -35,6 +35,14 @@ public interface Id {
      */
     public String getUrl();
 
+    /**
+     * Get the value as it appears in JSON, as an element. This is used to
+     * directly search and replace in a json string.
+     *
+     * @return the value as JSON element.
+     */
+    public String getJson();
+
     public String getBasicPersistenceType();
 
     public Object asBasicPersistenceType();

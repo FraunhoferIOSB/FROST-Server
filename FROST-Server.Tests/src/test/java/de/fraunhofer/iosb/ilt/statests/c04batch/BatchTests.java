@@ -93,7 +93,8 @@ public class BatchTests extends AbstractTestClass {
                 "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n" + //
                         "Content-Type: application/http\r\n" + //
                         "\r\n" + //
-                        "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId() + ")?$select=name HTTP/1.1\r\n" + //
+                        "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl()
+                        + ")?$select=name HTTP/1.1\r\n" + //
                         "Host: localhost\r\n" + //
                         "\r\n" + //
                         "\r\n" + //
@@ -114,7 +115,7 @@ public class BatchTests extends AbstractTestClass {
                         "Content-Type: application/http\r\n" + //
                         "Content-ID: 2\r\n" + //
                         "\r\n" + //
-                        "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId() + ") HTTP/1.1\r\n" + //
+                        "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n" + //
                         "Host: localhost\r\n" + //
                         "Content-Type: application/json\r\n" + //
                         "Content-Length: 18\r\n" + //
@@ -124,12 +125,12 @@ public class BatchTests extends AbstractTestClass {
                         "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n" + //
                         "Content-Type: application/http\r\n" + //
                         "\r\n" + //
-                        "GET /" + version.urlPart + "/Things(9999) HTTP/1.1\r\n" + //
+                        "GET /" + version.urlPart + "/Things(null) HTTP/1.1\r\n" + //
                         "Host: localhost\r\n" + //
                         "\r\n" + //
                         "\r\n" + //
                         "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
-        Object thingId = getLastestEntityId(EntityType.THING);
+        String thingId = getLastestEntityIdForPath(EntityType.THING);
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
         String mixedBoundary = response.substring(mixedBoundaryStart, mixedBoundaryStart + 40);
@@ -166,7 +167,7 @@ public class BatchTests extends AbstractTestClass {
                 "\n" + //
                 "http/1.1 404 no text\n" + //
                 "\n" + //
-                "{\"code\":404,\"type\":\"error\",\"message\":\"Nothing found.\"}\n" + //
+                "{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}\n" + //
                 batchBoundary + "--", response);
     }
 
@@ -198,7 +199,7 @@ public class BatchTests extends AbstractTestClass {
                 "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n" + //
                 "  },\n" + //
                 "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n" + //
-                "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId() + "},\r\n" + //
+                "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n" + //
                 "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n" + //
                 "}";
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
@@ -219,7 +220,8 @@ public class BatchTests extends AbstractTestClass {
                         "Content-Type: application/http\r\n" + //
                         "Content-ID: any\r\n" + //
                         "\r\n" + //
-                        "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId() + ")/Datastreams HTTP/1.1\r\n" + //
+                        "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl()
+                        + ")/Datastreams HTTP/1.1\r\n" + //
                         "Host: localhost\r\n" + //
                         "Content-Type: application/json\r\n" + //
                         "Content-Length: " + post2.length() + "\r\n" + //
@@ -228,8 +230,8 @@ public class BatchTests extends AbstractTestClass {
                         "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n" + //
                         "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
 
-        Object sensorId = getLastestEntityId(EntityType.SENSOR);
-        Object datastreamId = getLastestEntityId(EntityType.DATASTREAM);
+        String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
+        String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
         String mixedBoundary = response.substring(mixedBoundaryStart, mixedBoundaryStart + 40);
@@ -379,8 +381,14 @@ public class BatchTests extends AbstractTestClass {
         }
     }
 
-    private Object getLastestEntityId(EntityType entityType) {
+    private String getLastestEntityIdForPath(EntityType entityType) {
         EntityHelper entityHelper = new EntityHelper(serverSettings.getServiceUrl(version));
-        return entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
+        Object id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
+        if (id instanceof Number) {
+            return id.toString();
+        } else {
+            return '\'' + id.toString() + '\'';
+        }
+
     }
 }

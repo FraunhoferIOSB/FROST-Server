@@ -19,6 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Objects;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  *
@@ -62,6 +65,11 @@ public class IdString implements Id {
         return "'"
                 + StringHelper.urlEncode(StringHelper.escapeForStringConstant(value), true)
                 + "'";
+    }
+
+    @Override
+    public String getJson() {
+        return '"' + StringEscapeUtils.escapeJson(value) + '"';
     }
 
     @Override
