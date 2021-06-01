@@ -11,6 +11,9 @@
 * Regularly check if connection with message bus is there, connect if not
 * Fixed the search_path if Liquibase changes it.
 * Fixed double URLEncode in $select of nextLinks.
+* Fixed Content-ID referencing in batch requests.
+* Fixed batch request with encoded characters in the URL or relative resource paths.
+* Fixed newlines in batch-request response.
 
 
 ## Release Version 1.13.0
