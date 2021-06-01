@@ -40,7 +40,7 @@ public final class ContentIdPair {
     public Id getValue() {
         return value;
     }
-    
+
     @Override
     public String toString() {
         return "ContentIdPair [key=" + key + ", value=" + value + "]";

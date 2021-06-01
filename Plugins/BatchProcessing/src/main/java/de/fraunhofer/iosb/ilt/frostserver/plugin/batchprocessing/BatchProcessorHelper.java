@@ -138,7 +138,7 @@ public class BatchProcessorHelper {
     }
 
     public static MixedContent processMultipartMixed(ServiceRequest batchRequest, Service service, MixedContent multipartMixedData) {
-        Version batchVersion =batchRequest.getVersion();
+        Version batchVersion = batchRequest.getVersion();
         MixedContent mixedResponse = new MixedContent(batchVersion, service.getSettings(), false);
         for (Part part : multipartMixedData.getParts()) {
             LOGGER.debug("Part: {}", part);
