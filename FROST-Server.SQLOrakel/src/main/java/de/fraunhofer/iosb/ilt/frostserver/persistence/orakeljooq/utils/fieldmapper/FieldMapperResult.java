@@ -34,9 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.math.BigDecimal;
 import java.util.Map;
 import org.jooq.Field;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Table;
 
 /**
  *
@@ -65,14 +63,11 @@ public class FieldMapperResult extends FieldMapperAbstract {
 
     @Override
     public void registerField(OrakelPersistenceManager ppm, StaMainTable staTable) {
-        // find the actual field
-        final Name tableName = staTable.getQualifiedName();
-        Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldTypeIdx = getOrRegisterField(fieldType, dbTable, staTable);
-        fieldStringIdx = getOrRegisterField(fieldString, dbTable, staTable);
-        fieldNumberIdx = getOrRegisterField(fieldNumber, dbTable, staTable);
-        fieldJsonIdx = getOrRegisterField(fieldJson, dbTable, staTable, new JsonBinding());
-        fieldBooleanIdx = getOrRegisterField(fieldBoolean, dbTable, staTable);
+        fieldTypeIdx = getOrRegisterField(ppm, fieldType, staTable);
+        fieldStringIdx = getOrRegisterField(ppm, fieldString, staTable);
+        fieldNumberIdx = getOrRegisterField(ppm, fieldNumber, staTable);
+        fieldJsonIdx = getOrRegisterField(ppm, fieldJson, staTable, new JsonBinding());
+        fieldBooleanIdx = getOrRegisterField(ppm, fieldBoolean, staTable);
     }
 
     @Override

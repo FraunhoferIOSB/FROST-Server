@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.relations.Relat
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import org.jooq.Name;
 import org.jooq.Table;
 import org.jooq.TableField;
 
@@ -64,9 +63,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
 
     @Override
     public void registerField(OrakelPersistenceManager ppm, StaMainTable staTable) {
-        final Name tableName = staTable.getQualifiedName();
-        final Table dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable);
+        fieldIdx = getOrRegisterField(ppm, field, staTable);
     }
 
     @Override
@@ -79,7 +76,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
         IdManager idManager = ppm.getIdManager();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
 
-        fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
+        fieldIdxOther = getOrRegisterField(ppm, otherField, staTableOther);
         staTable.registerRelation(new RelationOneToMany(navProp, staTable, staTableOther)
                 .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdx))
                 .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther))

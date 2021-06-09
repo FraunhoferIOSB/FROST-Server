@@ -21,10 +21,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.OrakelPersisten
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyFieldRegistry;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.jooq.DataType;
 import org.jooq.Field;
-import org.jooq.Name;
-import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,16 +45,36 @@ public class FieldMapperId extends FieldMapperAbstract {
         if (!(staTable instanceof StaTableDynamic)) {
             throw new IllegalArgumentException("Id fields can only be registered on StaTableDynamic, not on " + staTable.getClass().getName());
         }
-        StaTableDynamic staTableDynamic = (StaTableDynamic) staTable;
-        final Name tableName = staTableDynamic.getQualifiedName();
-        final Table<?> dbTable = ppm.getDbTable(tableName);
-        final Field<?> dbField = dbTable.field(field);
-        if (dbField == null) {
-            LOGGER.error("Could not find field {} on table {}.", field, tableName);
+        int idx = staTable.indexOf(field);
+        if (idx >= 0) {
             return;
         }
+        StaTableDynamic staTableDynamic = (StaTableDynamic) staTable;
+        ResultSet resultSet = ppm.getDslContext()
+                .select(DSL.asterisk())
+                .from(staTable)
+                .where(DSL.field("ROWNUM").le(1))
+                .fetchResultSet();
+
+        int fieldColumn = -1;
+        Field<?> dbField = null;
+        try {
+            fieldColumn = resultSet.findColumn(field);
+            int columnType = resultSet.getMetaData().getColumnType(fieldColumn);
+            String columnTypeName = resultSet.getMetaData().getColumnTypeName(fieldColumn);
+
+            dbField = DSL.field(DSL.name(field));
+        } catch (SQLException ex) {
+            LOGGER.error("Failed to find column for {}", field, ex);
+            throw new IllegalArgumentException("Could not find field " + field + " on table " + staTable.getName());
+        }
+//        Field<?> dbField = new dbTable.field(fieldName);
+        if (dbField == null) {
+            LOGGER.error("Could not find field {} on table {}.", field, staTable.getName());
+            throw new IllegalArgumentException("Could not find field " + field + " on table " + staTable.getName());
+        }
         DataType<?> dataType = dbField.getDataType();
-        LOGGER.info("  Registering {} -> {}.{}", staTableDynamic.getName(), dbTable.getName(), field);
+        LOGGER.info("  Registering {} -> {}.{} ({})", staTable.getName(), staTable.getName(), field, dataType);
         staTableDynamic.registerIdField(field, dataType);
     }
 

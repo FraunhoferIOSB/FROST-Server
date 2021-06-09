@@ -25,8 +25,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.fieldwra
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import org.jooq.Name;
-import org.jooq.Table;
 
 /**
  *
@@ -49,11 +47,8 @@ public class FieldMapperTimeValue extends FieldMapperAbstract {
 
     @Override
     public void registerField(OrakelPersistenceManager ppm, StaMainTable staTable) {
-        // find the actual field
-        final Name tableName = staTable.getQualifiedName();
-        final Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable);
-        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable);
+        fieldStartIdx = getOrRegisterField(ppm, fieldStart, staTable);
+        fieldEndIdx = getOrRegisterField(ppm, fieldEnd, staTable);
     }
 
     @Override

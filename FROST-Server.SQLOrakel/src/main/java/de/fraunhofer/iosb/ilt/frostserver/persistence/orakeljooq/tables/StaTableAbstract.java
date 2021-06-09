@@ -62,6 +62,7 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -93,6 +94,17 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     private final SortedSet<SortingWrapper<Double, HookPreInsert<J>>> hooksPreInsert;
     private final SortedSet<SortingWrapper<Double, HookPreUpdate<J>>> hooksPreUpdate;
     private final SortedSet<SortingWrapper<Double, HookPreDelete<J>>> hooksPreDelete;
+
+    protected StaTableAbstract(DataType<J> idType, Name alias, Table aliased) {
+        super(alias, null, aliased);
+        this.idType = idType;
+        pfReg = new PropertyFieldRegistry<>(getThis());
+        relations = new HashMap<>();
+        hooksPreInsert = new TreeSet<>();
+        hooksPreUpdate = new TreeSet<>();
+        hooksPreDelete = new TreeSet<>();
+        customFields = new ArrayList<>();
+    }
 
     protected StaTableAbstract(DataType<J> idType, Name alias, StaTableAbstract<J, T> aliased) {
         super(alias, null, aliased);

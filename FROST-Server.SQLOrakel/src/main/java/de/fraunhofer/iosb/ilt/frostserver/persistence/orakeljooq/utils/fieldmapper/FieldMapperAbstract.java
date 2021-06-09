@@ -17,11 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.fieldmapper;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.OrakelPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaTable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.jooq.Binding;
 import org.jooq.DataType;
 import org.jooq.Field;
-import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +36,40 @@ public abstract class FieldMapperAbstract implements FieldMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldMapperAbstract.class.getName());
 
-    public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable) {
-        return getOrRegisterField(fieldName, dbTable, staTable, null);
+    public static int getOrRegisterField(final OrakelPersistenceManager opm, final String fieldName, StaTable staTable) {
+        return getOrRegisterField(opm, fieldName, staTable, null);
     }
 
-    public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable, Binding binding) {
+    public static int getOrRegisterField(final OrakelPersistenceManager opm, final String fieldName, StaTable staTable, Binding binding) {
         int idx = staTable.indexOf(fieldName);
         if (idx >= 0) {
             return idx;
         }
-        Field<?> dbField = dbTable.field(fieldName);
+        ResultSet resultSet = opm.getDslContext()
+                .select(DSL.asterisk())
+                .from(staTable)
+                .where(DSL.field("ROWNUM").le(1))
+                .fetchResultSet();
+
+        int fieldColumn = -1;
+        Field<?> dbField = null;
+        try {
+            fieldColumn = resultSet.findColumn(fieldName);
+            int columnType = resultSet.getMetaData().getColumnType(fieldColumn);
+            String columnTypeName = resultSet.getMetaData().getColumnTypeName(fieldColumn);
+
+            dbField = DSL.field(DSL.name(fieldName));
+        } catch (SQLException ex) {
+            LOGGER.error("Failed to find column for {}", fieldName, ex);
+            throw new IllegalArgumentException("Could not find field " + fieldName + " on table " + staTable.getName());
+        }
+//        Field<?> dbField = new dbTable.field(fieldName);
         if (dbField == null) {
-            LOGGER.error("Could not find field {} on table {}.", fieldName, dbTable.getName());
-            throw new IllegalArgumentException("Could not find field " + fieldName + " on table " + dbTable.getName());
+            LOGGER.error("Could not find field {} on table {}.", fieldName, staTable.getName());
+            throw new IllegalArgumentException("Could not find field " + fieldName + " on table " + staTable.getName());
         }
         DataType<?> dataType = dbField.getDataType();
-        LOGGER.info("  Registering {} -> {}.{} ({})", staTable.getName(), dbTable.getName(), fieldName, dataType);
+        LOGGER.info("  Registering {} -> {}.{} ({})", staTable.getName(), staTable.getName(), fieldName, dataType);
         return staTable.registerField(fieldName, dataType, binding);
     }
 

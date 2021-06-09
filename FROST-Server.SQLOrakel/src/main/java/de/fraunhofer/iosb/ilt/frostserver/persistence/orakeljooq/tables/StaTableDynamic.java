@@ -22,11 +22,13 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.factories.Entit
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 
 /**
  *
  * @author hylke
+ * @param <J> the ID type.
  */
 public final class StaTableDynamic<J extends Comparable> extends StaTableAbstract<J, StaTableDynamic<J>> {
 
@@ -34,8 +36,14 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
     private final EntityType entityType;
     private int idFieldIdx;
 
+    public StaTableDynamic(Name name, EntityType entityType, DataType<J> idType, Table aliased) {
+        super(idType, name, aliased);
+        this.tableName = name;
+        this.entityType = entityType;
+    }
+
     public StaTableDynamic(Name tableName, EntityType entityType, DataType<J> idType) {
-        super(idType, tableName, null);
+        super(idType, tableName, (StaTableAbstract) null);
         this.tableName = tableName;
         this.entityType = entityType;
     }

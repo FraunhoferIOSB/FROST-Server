@@ -25,8 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaLinkT
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import org.jooq.Name;
-import org.jooq.Table;
 import org.jooq.TableField;
 
 /**
@@ -83,21 +81,17 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
 
     @Override
     public void registerField(OrakelPersistenceManager opm, StaMainTable staTable) {
-        final Name tableName = staTable.getQualifiedName();
-        final Table dbTable = opm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable);
+        fieldIdx = getOrRegisterField(opm, field, staTable);
     }
 
     @Override
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(OrakelPersistenceManager opm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) opm.getTableCollection().getTableForName(otherTable);
-        final Table dbTableOther = opm.getDbTable(otherTableSchema, otherTable);
-        fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
+        fieldIdxOther = getOrRegisterField(opm, otherField, staTableOther);
 
         final StaLinkTable staTableLink = opm.getOrCreateLinkTable(linkTableSchema, linkTable);
-        final Table dbTableLink = opm.getDbTable(linkTableSchema, linkTable);
-        fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
-        fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
+        fieldIdxLinkOur = getOrRegisterField(opm, linkOurField, staTableLink);
+        fieldIdxLinkOther = getOrRegisterField(opm, linkOtherField, staTableLink);
 
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
         final PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();

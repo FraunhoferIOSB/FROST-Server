@@ -22,8 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.OrakelPersisten
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import org.jooq.Name;
-import org.jooq.Table;
 
 /**
  *
@@ -43,10 +41,8 @@ public class FieldMapperString extends FieldMapperAbstract {
     }
 
     @Override
-    public void registerField(OrakelPersistenceManager ppm, StaMainTable staTable) {
-        final Name tableName = staTable.getQualifiedName();
-        Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable);
+    public void registerField(OrakelPersistenceManager opm, StaMainTable staTable) {
+        fieldIdx = getOrRegisterField(opm, field, staTable);
     }
 
     @Override

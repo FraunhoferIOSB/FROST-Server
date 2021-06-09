@@ -489,9 +489,14 @@ public abstract class OrakelPersistenceManager<J extends Comparable> extends Abs
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
                 final String tableName = entityTypeDef.getTable();
                 final String schemaName = entityTypeDef.getSchema();
-                LOGGER.info("  Table: {}.{}.", schemaName, tableName);
-                getDbTable(schemaName, tableName);
-                getOrCreateMainTable(entityTypeDef.getEntityType(), createName(schemaName, tableName));
+                if (tableName.contains(" ")) {
+                    LOGGER.info("  Table: {}.{}.", schemaName, entityTypeDef.getName());
+                    createMainTable(entityTypeDef.getEntityType(), entityTypeDef.getName(), tableName);
+                } else {
+                    LOGGER.info("  Table: {}.{}.", schemaName, tableName);
+                    getDbTable(schemaName, tableName);
+                    getOrCreateMainTable(entityTypeDef.getEntityType(), createName(schemaName, tableName));
+                }
             }
         }
 
@@ -556,8 +561,8 @@ public abstract class OrakelPersistenceManager<J extends Comparable> extends Abs
         if (table != null) {
             return table;
         }
-        final Meta meta = dslContext.meta();
         if (cacheAllTables == null) {
+            final Meta meta = dslContext.meta();
             cacheAllTables = meta.getTables();
             LOGGER.info("Found {} Tables total", cacheAllTables.size());
         }
@@ -567,6 +572,7 @@ public abstract class OrakelPersistenceManager<J extends Comparable> extends Abs
                 return t;
             }
         }
+        final Meta meta = dslContext.meta();
         final List<Table<?>> tables = meta.getTables(tableName);
         if (tables.isEmpty()) {
             LOGGER.error("Table {} not found. Please initialise the database!", tableName);
@@ -585,6 +591,13 @@ public abstract class OrakelPersistenceManager<J extends Comparable> extends Abs
 
     private StaTableDynamic<J> getOrCreateMainTable(DefEntityType defType) {
         return getOrCreateMainTable(defType.getEntityType(), createName(defType.getSchema(), defType.getTable()));
+    }
+
+    private StaTableDynamic<J> createMainTable(EntityType entityType, String name, String expression) {
+        Table<Record> sqlTable = DSL.table('(' + expression + ')');
+        StaTableDynamic<J> newTable = new StaTableDynamic<>(DSL.name(name), entityType, tableCollection.getIdType(), sqlTable);
+        tableCollection.registerTable(entityType, newTable);
+        return newTable;
     }
 
     private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, Name tableName) {

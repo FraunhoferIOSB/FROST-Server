@@ -28,9 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.PropertyF
 import de.fraunhofer.iosb.ilt.frostserver.persistence.orakeljooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
@@ -55,11 +53,9 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
 
     @Override
     public void registerField(OrakelPersistenceManager ppm, StaMainTable staTable) {
-        final Name tableName = staTable.getQualifiedName();
-        final Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, new PostGisGeometryBinding());
+        fieldGeomIdx = getOrRegisterField(ppm, fieldGeom, staTable, new PostGisGeometryBinding());
         if (!StringHelper.isNullOrEmpty(fieldSource)) {
-            fieldSourceIdx = getOrRegisterField(fieldSource, dbTable, staTable);
+            fieldSourceIdx = getOrRegisterField(ppm, fieldSource, staTable);
         }
     }
 
