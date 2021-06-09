@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -323,6 +324,14 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     public void addEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
         PropertyFields<T> pf = new PropertyFields<>(property, new ConverterString<>(property, factory));
+        pf.addField(null, factory);
+        epMapSelect.put(property, pf);
+        allSelectPropertyFields.add(pf);
+        addEntry(epMapAll, property, null, factory);
+    }
+
+    public void addEntryNumeric(EntityProperty<BigDecimal> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterSimple<>(property, factory));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);

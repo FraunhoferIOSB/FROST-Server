@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,12 @@ public class TypeReferencesHelper {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TypeReferencesHelper.class.getName());
 
+    public static final TypeReference<BigDecimal> TYPE_REFERENCE_BIGDECIMAL = new TypeReference<BigDecimal>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<Boolean> TYPE_REFERENCE_BOOLEAN = new TypeReference<Boolean>() {
+        // Empty on purpose.
+    };
     public static final TypeReference<Entity> TYPE_REFERENCE_ENTITY = new TypeReference<Entity>() {
         // Empty on purpose.
     };
