@@ -20,12 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HeaderUtils;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HttpContent;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Part;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Content;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -41,26 +41,27 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author scf
+ * @param <C> the type of content
  */
-public class BatchProcessorHelper {
+public class BatchProcessor<C extends Content> {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessorHelper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
 
-    private BatchProcessorHelper() {
-        // Utility class, not to be instantiated.
+    private final BatchFactory<C> batchFactory;
+
+    public BatchProcessor(BatchFactory<C> batchFactory) {
+        this.batchFactory = batchFactory;
     }
 
-    public static HttpContent processHttpRequest(Service service, HttpContent httpRequest, boolean inChangeSet) {
+    public Request processHttpRequest(Service service, Request httpRequest, boolean inChangeSet) {
         String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
         Version version = Version.forString(httpRequest.getVersion());
-        ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
-                .withRequestType(type)
+        ServiceRequest serviceRequest = new ServiceRequestBuilder(version).withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
-                .withContent(httpRequest.getData())
-                .build();
+                .withContent(httpRequest.getData()).build();
         ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);
 
         if (RequestTypeUtils.CREATE.equals(type)) {
@@ -70,13 +71,10 @@ public class BatchProcessorHelper {
                 httpRequest.setContentIdValue(entity.getId());
             }
         }
-        HttpContent httpResponse = new HttpContent(serviceRequest.getVersion(), inChangeSet);
-        if (inChangeSet) {
-            httpResponse.setContentId(httpRequest.getContentId());
-        }
-
+        Request httpResponse = batchFactory.createRequest(serviceRequest.getVersion(), inChangeSet);
+        httpResponse.setContentId(httpRequest.getContentId());
         int statusCode = serviceResponse.getCode();
-        httpResponse.setStatusLine(HeaderUtils.generateStatusLine(statusCode, "no text"));
+        httpResponse.setStatus(statusCode, "no text");
 
         Map<String, String> headers = httpResponse.getHttpHeaders();
         serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
@@ -97,37 +95,39 @@ public class BatchProcessorHelper {
         return httpResponse;
     }
 
-    public static Content processChangeset(ServiceRequest batchRequest, Service service, MixedContent changeset) {
+    public Content processChangeset(ServiceRequest batchRequest, Service service, Batch changeset) {
         if (changeset.isParseFailed()) {
-            HttpContent content = new HttpContent(batchRequest.getVersion());
-            for (String error : changeset.getErrors()) {
+            Request content = batchFactory.createRequest(batchRequest.getVersion(), false);
+            for (String error : (List<String>) changeset.getErrors()) {
                 content.addData(error);
                 content.addData("\n");
             }
-            content.setStatusLine(HeaderUtils.generateStatusLine(400, "Bad Request"));
+            content.setStatus(400, "Bad Request");
             return content;
         }
         service.startTransaction();
-        MixedContent mixedResponse = new MixedContent(batchRequest.getVersion(), service.getSettings(), true);
+        Batch response = batchFactory.createBatch(batchRequest.getVersion(), service.getSettings(), true);
         List<Part> parts = changeset.getParts();
         List<ContentIdPair> contentIds = new ArrayList<>(parts.size());
         for (Part part : parts) {
             LOGGER.debug("SubPart: {}", part);
             Content content = part.getContent();
-            if (content instanceof HttpContent) {
-                HttpContent httpContent = (HttpContent) content;
-                httpContent.updateUsingContentIds(contentIds);
+            if (content instanceof Request) {
+                Request request = (Request) content;
+                request.updateUsingContentIds(contentIds);
 
-                HttpContent httpResponse = processHttpRequest(service, httpContent, true);
+                Request httpResponse = processHttpRequest(service, request, true);
                 if (httpResponse.isExecuteFailed()) {
                     service.rollbackTransaction();
                     return httpResponse;
                 } else {
-                    mixedResponse.addPart(new Part(batchRequest.getVersion(), service.getSettings(), true).setContent(httpResponse));
+                    Part newPart = batchFactory.createPart(batchRequest.getVersion(), service.getSettings(), true, "");
+                    newPart.setContent(httpResponse);
+                    response.addPart(newPart);
                 }
 
-                String contentId = httpContent.getContentId();
-                Id contentIdValue = httpContent.getContentIdValue();
+                String contentId = request.getContentId();
+                Id contentIdValue = request.getContentIdValue();
                 if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null) {
                     contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
                 }
@@ -136,28 +136,32 @@ public class BatchProcessorHelper {
             }
         }
         service.commitTransaction();
-        return mixedResponse;
+        return response;
     }
 
-    public static MixedContent processMultipartMixed(ServiceRequest batchRequest, Service service, MixedContent multipartMixedData) {
+    public Batch<C> processBatch(ServiceRequest batchRequest, Service service, Batch<C> batch) {
         Version batchVersion = batchRequest.getVersion();
-        MixedContent mixedResponse = new MixedContent(batchVersion, service.getSettings(), false);
-        for (Part part : multipartMixedData.getParts()) {
+        Batch<C> batchResponse = batchFactory.createBatch(batchVersion, service.getSettings(), false);
+        for (Part<C> part : batch.getParts()) {
             LOGGER.debug("Part: {}", part);
             Content content = part.getContent();
-            if (content instanceof MixedContent) {
-                MixedContent changset = (MixedContent) content;
+            if (content instanceof Batch) {
+                Batch<C> changset = (Batch<C>) content;
                 Content changesetResponse = processChangeset(batchRequest, service, changset);
-                mixedResponse.addPart(new Part(batchVersion, service.getSettings(), false).setContent(changesetResponse));
-            } else if (content instanceof HttpContent) {
-                HttpContent httpContent = (HttpContent) content;
-                HttpContent httpResponse = processHttpRequest(service, httpContent, false);
-                mixedResponse.addPart(new Part(batchVersion, service.getSettings(), false).setContent(httpResponse));
+                Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");
+                newPart.setContent(changesetResponse);
+                batchResponse.addPart(newPart);
+            } else if (content instanceof Request) {
+                Request request = (Request) content;
+                Request httpResponse = processHttpRequest(service, request, false);
+                Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");
+                newPart.setContent(httpResponse);
+                batchResponse.addPart(newPart);
             } else {
-                LOGGER.warn("Invalid multipart-part type: {}", content.getClass().getName());
+                LOGGER.warn("Invalid part type: {}", content.getClass().getName());
             }
         }
-        return mixedResponse;
+        return batchResponse;
     }
 
 }

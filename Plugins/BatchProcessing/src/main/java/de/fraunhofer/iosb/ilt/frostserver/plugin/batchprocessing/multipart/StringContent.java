@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class StringContent implements Content {
+public class StringContent implements MultipartContent {
 
     /**
      * The logger for this class.
