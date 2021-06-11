@@ -1,25 +1,20 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 
 /**
  *
  * @author scf
  */
-public class HttpContent implements Content {
+public class HttpContent extends Request implements MultipartContent {
 
     /**
      * The logger for this class.
@@ -27,8 +22,6 @@ public class HttpContent implements Content {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpContent.class);
     private static final String COMMAND_REGEX = "^(GET|PATCH|POST|PUT|DELETE) ([^ ]+)( HTTP/[0-9]\\.[0-9])?";
     private static final Pattern COMMAND_PATTERN = Pattern.compile(COMMAND_REGEX);
-    private static final String VERSION_REGEX = "/v[0-9]\\.[0-9](/|$)";
-    private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
     /**
      * The different states the parser can have.
@@ -40,39 +33,16 @@ public class HttpContent implements Content {
         DATA
     }
 
-    private String logIndent = "";
-
     private State parseState = State.PREHEADERS;
-    private HttpMethod method;
-    private String version;
-    private String path;
 
-    private final Map<String, String> headersOuter = new HashMap<>();
-    private final Map<String, String> headersInner = new HashMap<>();
-
-    /**
-     * Flag indicating there is a problem with the syntax of the multipart
-     * content. If this is a changeSet, then the entire changeSet will be
-     * discarded.
-     */
-    private boolean parseFailed = false;
-    private boolean executeFailed = false;
-    private final List<String> errors = new ArrayList<>();
-
-    private final boolean requireContentId;
-    private String contentId;
-    private Id contentIdValue;
-    private final StringBuilder data = new StringBuilder();
     private String statusLine;
-    private final Version batchVersion;
 
     public HttpContent(Version batchVersion) {
         this(batchVersion, false);
     }
 
     public HttpContent(Version batchVersion, boolean requireContentId) {
-        this.batchVersion = batchVersion;
-        this.requireContentId = requireContentId;
+        super(batchVersion, requireContentId);
     }
 
     @Override
@@ -132,24 +102,6 @@ public class HttpContent implements Content {
         }
     }
 
-    @Override
-    public boolean isParseFailed() {
-        return parseFailed;
-    }
-
-    public boolean isExecuteFailed() {
-        return executeFailed;
-    }
-
-    public void setExecuteFailed(boolean executeFailed) {
-        this.executeFailed = executeFailed;
-    }
-
-    @Override
-    public List<String> getErrors() {
-        return errors;
-    }
-
     private void parseCommand(String line) {
         Matcher commandMatcher = COMMAND_PATTERN.matcher(line);
         if (!commandMatcher.find()) {
@@ -157,80 +109,8 @@ public class HttpContent implements Content {
             return;
         }
         method = HttpMethod.fromString(commandMatcher.group(1));
-        String fullUrl = commandMatcher.group(2);
-        Matcher versionMatcher = VERSION_PATTERN.matcher(fullUrl);
-        if (versionMatcher.find()) {
-            int versionStart = versionMatcher.start() + 1;
-            int versionEnd = versionMatcher.end();
-            if ("/".equals(versionMatcher.group(1))) {
-                version = fullUrl.substring(versionStart, versionEnd - 1);
-                path = fullUrl.substring(versionEnd - 1);
-            } else {
-                version = fullUrl.substring(versionStart, versionEnd);
-                path = "/";
-            }
-        } else {
-            version = batchVersion.urlPart;
-            path = "/" + fullUrl;
-        }
+        parseUrl(commandMatcher.group(2));
         LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, method, version, path);
-    }
-
-    /**
-     * Get the path part of the http request.
-     *
-     * @return the URL part of the http request.
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * Get the data in the http request. This does not include the outer
-     * headers, command, nor inner headers.
-     *
-     * @return The data in http request.
-     */
-    public String getData() {
-        return data.toString();
-    }
-
-    public void addData(String data) {
-        this.data.append(data);
-    }
-
-    public String getContentId() {
-        return contentId;
-    }
-
-    public void setContentId(String contentId) {
-        this.contentId = contentId;
-    }
-
-    public Id getContentIdValue() {
-        return contentIdValue;
-    }
-
-    public void setContentIdValue(Id contentIdValue) {
-        this.contentIdValue = contentIdValue;
-    }
-
-    public void updateUsingContentIds(List<ContentIdPair> contentIds) {
-        for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value.getUrl());
-            int keyIndex = 0;
-            String quotedKey = '"' + pair.key + '"';
-            String value = pair.value.getJson();
-            while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
-                data.replace(keyIndex, keyIndex + quotedKey.length(), value);
-                keyIndex += value.length();
-            }
-        }
-        LOGGER.debug("{}Using replaced path and data with content ids {}: {}, {}", logIndent, contentIds, path, data);
-    }
-
-    public HttpMethod getMethod() {
-        return method;
     }
 
     public String getStatusLine() {
@@ -241,14 +121,9 @@ public class HttpContent implements Content {
         this.statusLine = statusLine;
     }
 
-    /**
-     * Get the headers of the http request. These are not the same as the
-     * multipart-headers.
-     *
-     * @return the headers of the http request.
-     */
-    public Map<String, String> getHttpHeaders() {
-        return headersInner;
+    @Override
+    public void setStatus(int code, String text) {
+        setStatusLine(HeaderUtils.generateStatusLine(code, text));
     }
 
     @Override
@@ -273,11 +148,6 @@ public class HttpContent implements Content {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
-        return headersOuter;
-    }
-
-    @Override
     public void stripLastNewline() {
         int lastIdx = data.length() - 1;
         if (lastIdx < 0) {
@@ -294,15 +164,6 @@ public class HttpContent implements Content {
     @Override
     public IsFinished isFinished() {
         return IsFinished.UNKNOWN;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setLogIndent(String logIndent) {
-        this.logIndent = logIndent;
     }
 
 }

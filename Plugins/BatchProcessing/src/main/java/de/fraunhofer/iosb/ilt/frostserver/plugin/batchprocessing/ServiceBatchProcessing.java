@@ -17,11 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchFactory;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartFactory;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
@@ -41,6 +47,13 @@ public class ServiceBatchProcessing {
      */
     public static final String REQUEST_TYPE_BATCH = "batchProcess";
 
+    private static final Map<String, BatchFactory<?>> CONTENT_TYPE_TO_FACTORY = new HashMap<>();
+    static {
+        for (BatchFactory<?> factory : Arrays.asList(new MultipartFactory(), new JsonBatchFactory())) {
+            CONTENT_TYPE_TO_FACTORY.put(factory.getContentType(), factory);
+        }
+    }
+
     private final CoreSettings settings;
 
     public ServiceBatchProcessing(CoreSettings settings) {
@@ -48,18 +61,23 @@ public class ServiceBatchProcessing {
     }
 
     public ServiceResponse<String> executeBatchOperation(final Service service, final ServiceRequest request) {
-        MixedContent multipartMixedData = new MixedContent(request.getVersion(), settings, false);
-        multipartMixedData.parse(request);
-        MixedContent resultContent = BatchProcessorHelper.processMultipartMixed(request, service, multipartMixedData);
-        return sendMixedResponse(resultContent);
-
+        BatchFactory<?> batchFactory = CONTENT_TYPE_TO_FACTORY
+                .get(request.getContentType().split(";", 2)[0].toLowerCase());
+        if (batchFactory == null) {
+            throw new IllegalArgumentException("Invalid Content-Type: " + request.getContentType());
+        }
+        Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
+        batch.parse(request);
+        Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service,
+                batch);
+        return sendResponse(resultContent);
     }
 
-    private ServiceResponse<String> sendMixedResponse(MixedContent multipartMixedData) {
-        final ServiceResponse response = new ServiceResponse<>();
+    private ServiceResponse<String> sendResponse(Batch batch) {
+        final ServiceResponse<String> response = new ServiceResponse<>();
         response.setCode(200);
-        multipartMixedData.getHeaders().entrySet().forEach(x -> response.addHeader(x.getKey(), x.getValue()));
-        response.setResultFormatted(multipartMixedData.getContent(false));
+        batch.getHeaders().entrySet().forEach(x -> response.addHeader(x.getKey(), x.getValue()));
+        response.setResultFormatted(batch.getContent(false));
         return response;
     }
 }

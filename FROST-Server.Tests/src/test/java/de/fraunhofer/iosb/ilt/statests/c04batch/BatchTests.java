@@ -370,10 +370,95 @@ public class BatchTests extends AbstractTestClass {
                 + batchBoundary + "--", response);
     }
 
+    @Test
+    public void test06JsonBatchRequest() {
+        LOGGER.info("  test06JsonBatchRequest");
+        String response = postBatch(null,
+                "{\"requests\":[{"
+                        + "\"id\": \"0\","
+                        + "\"method\": \"get\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
+                        + ")?$select=name\""
+                        + "},{"
+                        + "\"id\": \"1\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Things\","
+                        + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
+                        + "},{"
+                        + "\"id\": \"2\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"patch\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
+                        + "\"body\": {\"name\":\"Json Patched\"}"
+                        + "},{"
+                        + "\"id\": \"3\","
+                        + "\"method\": \"get\","
+                        + "\"url\": \"Things(null)\""
+                        + "}]}");
+        String thingId = getLastestEntityIdForPath(EntityType.THING);
+
+        Assert.assertEquals("{\"responses\":["
+                + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
+                + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
+                + thingId + ")\"},"
+                + "{\"id\":\"2\",\"status\":200},"
+                + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
+                + "]}", response);
+    }
+
+    @Test
+    public void test07JsonBatchRequestWithChangeSetReferencingNewEntities() {
+        LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntities");
+        String post1 = "{\r\n"
+                + "  \"name\": \"DS18B20\",\r\n"
+                + "  \"description\": \"DS18B20 is an air temperature sensor\",\r\n"
+                + "  \"encodingType\": \"application/pdf\",\r\n"
+                + "  \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\r\n"
+                + "}";
+        String post2 = "{\r\n"
+                + "  \"name\": \"Temperature Thing 5\",\r\n"
+                + "  \"description\": \"The temperature of thing 5\",\r\n"
+                + "  \"unitOfMeasurement\": {\r\n"
+                + "    \"name\": \"degree Celsius\",\r\n"
+                + "    \"symbol\": \"°C\",\r\n"
+                + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
+                + "  },\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
+                + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
+                + "}";
+        String response = postBatch(null,
+                "{\"requests\":[{"
+                        + "\"id\": \"sensor1\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Sensors\","
+                        + "\"body\":"
+                        + post1
+                        + "},{"
+                        + "\"id\": \"any\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
+                        + "\"body\":"
+                        + post2
+                        + "}]}");
+        String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
+        String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
+        Assert.assertEquals("{\"responses\":["
+                + "{\"id\":\"sensor1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                + "/Sensors(" + sensorId + ")\"},"
+                + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                + "/Datastreams(" + datastreamId + ")\"}"
+                + "]}", response);
+    }
+
     private String postBatch(String boundary, String body) {
         String urlString = serverSettings.getServiceUrl(version) + "/$batch";
         try {
-            HttpResponse httpResponse = HTTPMethods.doPost(urlString, body, "multipart/mixed;boundary=" + boundary);
+            HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
+                    boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary);
             Assert.assertEquals("Batch response should be 200", 200, httpResponse.code);
             return httpResponse.response;
         } catch (JSONException e) {
