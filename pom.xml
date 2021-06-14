@@ -35,7 +35,7 @@
 
         <annotation-api.version>1.3.1</annotation-api.version>
         <codegen.version>0.6.8-uuid</codegen.version>
-        <commons-io.version>2.9.0</commons-io.version>
+        <commons-io.version>2.10.0</commons-io.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-csv.version>1.8</commons-csv.version>
         <FROST-Client.version>0.34</FROST-Client.version>
