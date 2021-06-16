@@ -150,6 +150,7 @@ public class PluginManager implements ConfigDefaults {
         String[] split = classList.trim().split(",");
         for (String className : split) {
             try {
+                LOGGER.info("Loading {}", className);
                 Class<?> clazz = Class.forName(className.trim());
                 Object newInstance = clazz.getDeclaredConstructor().newInstance();
                 if (newInstance instanceof Plugin) {

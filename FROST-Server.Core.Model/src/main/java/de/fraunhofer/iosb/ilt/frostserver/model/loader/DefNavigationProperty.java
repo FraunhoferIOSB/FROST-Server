@@ -92,6 +92,10 @@ public class DefNavigationProperty {
             navProp = new NavigationPropertyMain.NavigationPropertyEntity(name);
         }
         targetEntityType = modelRegistry.getEntityTypeForName(entityType);
+        if (targetEntityType == null) {
+            LOGGER.error("Failed to find target EntityType: {}", entityType);
+            throw new IllegalArgumentException("Missing entityType: " + entityType);
+        }
         navProp.setEntityType(targetEntityType);
         sourceEntityType.registerProperty(navProp, required);
 
