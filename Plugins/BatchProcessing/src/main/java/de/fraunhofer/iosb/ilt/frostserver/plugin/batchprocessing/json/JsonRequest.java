@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
  */
 public class JsonRequest extends Request {
 
-    /** OData Batch response. */
+    /**
+     * OData Batch response.
+     */
     @JsonInclude(Include.NON_NULL)
     public static class ODataResponse {
 

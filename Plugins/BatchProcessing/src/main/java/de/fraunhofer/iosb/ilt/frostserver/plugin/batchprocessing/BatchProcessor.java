@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author scf
+ * @param <C> the type of content
  */
 public class BatchProcessor<C extends Content> {
 

@@ -52,9 +52,9 @@ public class MixedPart extends Part<MultipartContent> {
      * Creates a new Part.
      *
      * @param batchVersion Batch request API version
-     * @param settings     The settings.
-     * @param inChangeSet  flag indicating the Part is part of a ChangeSet, and thus
-     *                     if the part itself can be a ChangeSet.
+     * @param settings The settings.
+     * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
+     * thus if the part itself can be a ChangeSet.
      */
     public MixedPart(Version batchVersion, CoreSettings settings, boolean inChangeSet, String logIndent) {
         super(batchVersion, settings, inChangeSet, logIndent);

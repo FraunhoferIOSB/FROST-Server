@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Part<C extends Content> {
+
     protected final CoreSettings settings;
 
     protected final Map<String, String> headers = new HashMap<>();
@@ -22,9 +23,9 @@ public class Part<C extends Content> {
      * Creates a new Part.
      *
      * @param batchVersion Batch request API version
-     * @param settings     The settings.
-     * @param inChangeSet  flag indicating the Part is part of a ChangeSet, and thus
-     *                     if the part itself can be a ChangeSet.
+     * @param settings The settings.
+     * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
+     * thus if the part itself can be a ChangeSet.
      * @param logIndent
      */
     public Part(Version batchVersion, CoreSettings settings, boolean inChangeSet, String logIndent) {
@@ -57,7 +58,6 @@ public class Part<C extends Content> {
      * Set the Content of this Part.
      *
      * @param content the Content of this Part.
-     * @return this.
      */
     public void setContent(C content) {
         this.content = content;
@@ -68,11 +68,10 @@ public class Part<C extends Content> {
     }
 
     /**
-     * Sets the indentation of log messages. Since Content can be nested, this makes
-     * debug output better readable.
+     * Sets the indentation of log messages. Since Content can be nested, this
+     * makes debug output better readable.
      *
      * @param logIndent the indentation of log messages.
-     * @return this.
      */
     public void setLogIndent(String logIndent) {
         this.logIndent = logIndent;

@@ -12,8 +12,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Individual request or response inside the bach request. */
+/**
+ * Individual request or response inside the bach request.
+ */
 public abstract class Request implements Content {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Request.class);
     private static final String VERSION_REGEX = "/v[0-9]\\.[0-9](/|$)";
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
@@ -25,8 +28,8 @@ public abstract class Request implements Content {
     protected final Map<String, String> headersOuter = new HashMap<>();
     protected final Map<String, String> headersInner = new HashMap<>();
     /**
-     * Flag indicating there is a problem with the syntax of the content. If this is
-     * a changeSet, then the entire changeSet will be discarded.
+     * Flag indicating there is a problem with the syntax of the content. If
+     * this is a changeSet, then the entire changeSet will be discarded.
      */
     protected boolean parseFailed = false;
     protected boolean executeFailed = false;
@@ -87,8 +90,8 @@ public abstract class Request implements Content {
     }
 
     /**
-     * Get the data in the http request. This does not include the outer headers,
-     * command, nor inner headers.
+     * Get the data in the http request. This does not include the outer
+     * headers, command, nor inner headers.
      *
      * @return The data in http request.
      */
@@ -117,8 +120,8 @@ public abstract class Request implements Content {
     }
 
     /**
-     * Get the headers of the request inside the batch. These are not the same as
-     * the batch headers.
+     * Get the headers of the request inside the batch. These are not the same
+     * as the batch headers.
      *
      * @return the headers of the individual batch request.
      */

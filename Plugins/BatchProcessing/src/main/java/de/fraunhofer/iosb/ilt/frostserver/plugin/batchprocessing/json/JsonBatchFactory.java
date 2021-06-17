@@ -9,6 +9,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
 public class JsonBatchFactory implements BatchFactory<Content> {
+
     @Override
     public String getContentType() {
         return "application/json";

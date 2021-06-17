@@ -8,6 +8,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
 public class MultipartFactory implements BatchFactory<MultipartContent> {
+
     @Override
     public String getContentType() {
         return "multipart/mixed";

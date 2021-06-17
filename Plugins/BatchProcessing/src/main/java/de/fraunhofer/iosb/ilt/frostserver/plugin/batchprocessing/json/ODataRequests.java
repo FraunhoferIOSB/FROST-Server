@@ -2,10 +2,13 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 
 import java.util.List;
 
-/** OData Batch request. */
+/**
+ * OData Batch request.
+ */
 public class ODataRequests {
 
     public class ODataRequest {
+
         public final String id;
 
         public final String atomicityGroup;

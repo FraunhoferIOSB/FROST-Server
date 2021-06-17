@@ -5,7 +5,12 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.ArrayList;
 import java.util.List;
-/** Batch of requests or responses. */
+
+/**
+ * Batch of requests or responses.
+ *
+ * @param <C> The type of content.
+ */
 public abstract class Batch<C extends Content> implements Content {
 
     protected final CoreSettings settings;
@@ -13,8 +18,8 @@ public abstract class Batch<C extends Content> implements Content {
     protected final List<Part<C>> parts = new ArrayList<>();
     protected String logIndent = "";
     /**
-     * Flag indicating there is a problem with the syntax of the content.
-     * If this is a changeSet, then the entire changeSet will be discarded.
+     * Flag indicating there is a problem with the syntax of the content. If
+     * this is a changeSet, then the entire changeSet will be discarded.
      */
     protected boolean parseFailed = false;
     protected final List<String> errors = new ArrayList<>();
@@ -27,7 +32,7 @@ public abstract class Batch<C extends Content> implements Content {
         this.settings = settings;
         this.isChangeSet = isChangeSet;
     }
-    
+
     public abstract boolean parse(ServiceRequest request);
 
     @Override
@@ -53,7 +58,5 @@ public abstract class Batch<C extends Content> implements Content {
         parts.add(part);
         return this;
     }
-
-
 
 }

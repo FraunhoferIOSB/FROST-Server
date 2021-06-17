@@ -5,7 +5,11 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
 public interface BatchFactory<C extends Content> {
 
-    /** Return lower-case content-type. */
+    /**
+     * Return lower-case content-type.
+     *
+     * @return the content type that this factory can handle.
+     */
     String getContentType();
 
     Batch<C> createBatch(Version version, CoreSettings settings, boolean isChangeSet);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface Content {
+
     /**
      * Flag indicating there were errors parsing the content.
      *
@@ -19,8 +20,8 @@ public interface Content {
     public List<String> getErrors();
 
     /**
-     * Sets the indentation of log messages. Since Content can be nested, this makes
-     * debug output better readable.
+     * Sets the indentation of log messages. Since Content can be nested, this
+     * makes debug output better readable.
      *
      * @param logIndent the indentation of log messages.
      */
@@ -30,8 +31,8 @@ public interface Content {
      * Get the String content for response.
      *
      * @param allHeaders flag indicating all headers should be included. If the
-     *                   content is going to be added to a HttpServletResponse, the
-     *                   headers need to be set separately.
+     * content is going to be added to a HttpServletResponse, the headers need
+     * to be set separately.
      * @return The content.
      */
     public String getContent(boolean allHeaders);

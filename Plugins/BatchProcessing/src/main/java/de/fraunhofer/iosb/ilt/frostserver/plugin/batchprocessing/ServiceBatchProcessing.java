@@ -48,6 +48,7 @@ public class ServiceBatchProcessing {
     public static final String REQUEST_TYPE_BATCH = "batchProcess";
 
     private static final Map<String, BatchFactory<?>> CONTENT_TYPE_TO_FACTORY = new HashMap<>();
+
     static {
         for (BatchFactory<?> factory : Arrays.asList(new MultipartFactory(), new JsonBatchFactory())) {
             CONTENT_TYPE_TO_FACTORY.put(factory.getContentType(), factory);
@@ -68,8 +69,7 @@ public class ServiceBatchProcessing {
         }
         Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
         batch.parse(request);
-        Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service,
-                batch);
+        Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service, batch);
         return sendResponse(resultContent);
     }
 
