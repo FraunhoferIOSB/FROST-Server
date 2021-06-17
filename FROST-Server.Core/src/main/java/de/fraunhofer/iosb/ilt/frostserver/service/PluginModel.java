@@ -42,9 +42,8 @@ public interface PluginModel extends Plugin {
 
     /**
      *
-     * @return true if both {@link #registerProperties()} and
-     * {@link #registerEntityTypes(PersistenceManager)} have successfully
-     * executed.
+     * @return true if both {@link #registerEntityTypes()} and
+     * {@link #linkEntityTypes(PersistenceManager)} have successfully executed.
      */
     public boolean isFullyInitialised();
 }

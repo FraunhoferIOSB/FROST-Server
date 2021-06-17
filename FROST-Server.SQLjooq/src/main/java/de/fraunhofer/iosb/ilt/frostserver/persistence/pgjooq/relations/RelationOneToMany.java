@@ -112,9 +112,9 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
      * targetField to sourceId on TargetTable where TargetTable.getId =
      * targetId.
      *
-     * @param pm
-     * @param sourceId
-     * @param targetId
+     * @param pm The PersistenceManager for queries.
+     * @param sourceId The source id of the link.
+     * @param targetId The target id of the link.
      */
     @Override
     public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {

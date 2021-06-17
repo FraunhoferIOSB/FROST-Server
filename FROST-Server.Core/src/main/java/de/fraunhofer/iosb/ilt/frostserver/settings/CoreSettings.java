@@ -424,7 +424,7 @@ public class CoreSettings implements ConfigDefaults {
      * Register a new liquibaseUser that wants to be called when it is time to
      * upgrade the database.
      *
-     * @param liquibaseUser
+     * @param liquibaseUser the class instance that has Liquibase jobs.
      */
     public void addLiquibaseUser(LiquibaseUser liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);

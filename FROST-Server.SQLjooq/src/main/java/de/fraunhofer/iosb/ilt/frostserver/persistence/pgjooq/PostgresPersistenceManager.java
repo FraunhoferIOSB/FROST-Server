@@ -386,6 +386,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     /**
      * Modify the entity id.
+     *
+     * @param entity the Entity to modify the Id for.
      */
     public void modifyClientSuppliedId(Entity entity) {
         // Default does nothing.

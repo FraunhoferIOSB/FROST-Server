@@ -74,7 +74,7 @@ public class StringHelper {
      * Null-Save replaces characters that might break logging output. Currently:
      * \n, \r and \t
      *
-     * @param string The string to clean.
+     * @param object The Object to clean.
      * @return The cleaned string.
      */
     public static String cleanForLogging(Object object) {

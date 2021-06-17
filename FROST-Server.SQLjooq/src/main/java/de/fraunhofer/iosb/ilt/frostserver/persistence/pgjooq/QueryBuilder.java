@@ -357,8 +357,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * Queries the given entity type, as relation to the given table reference
      * and returns a new table reference. Effectively, this generates a join.
      *
-     * @param type The type of entity to query
-     * @param targetId The id of the requested entity
+     * @param pe The path element to query.
+     * @param targetId The id of the requested entity.
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
@@ -404,8 +404,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * Queries the given entity type, as relation to the given table reference
      * and returns a new table reference. Effectively, this generates a join.
      *
-     * @param type The type of entity to query
-     * @param targetId The id of the requested entity
+     * @param np The NavigationProperty to query
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
