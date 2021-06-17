@@ -222,7 +222,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
         pfReg.addEntry(
                 NavigationPropertyMain.OBSERVEDPROPERTY,
                 AbstractTableDatastreams::getObsPropertyId,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setObservedProperty(entityFactories.observedProperyFromId(tuple, table.getSensorId())));
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setObservedProperty(entityFactories.observedProperyFromId(tuple, table.getObsPropertyId())));
         pfReg.addEntry(
                 NavigationPropertyMain.THING,
                 AbstractTableDatastreams::getThingId,

@@ -1,5 +1,11 @@
 # Changelog
 
+## Release Version 1.13.3
+
+**Internal changes & Bugfixes**
+* Fixed incorrect ObservedProperty used in Datastream notifications
+
+
 ## Release Version 1.13.2
 
 **Internal changes & Bugfixes**
