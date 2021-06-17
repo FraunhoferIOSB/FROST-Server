@@ -18,14 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class MixedContent implements Content {
+public class MixedContent extends Batch<MultipartContent> implements MultipartContent {
 
     public static final String BOUNDARY_REGEX = "boundary=[\"]?([A-Za-z0-9'()+_,-./:=?]+)[\"]?";
     public static final Pattern BOUNDARY_PATTERN = Pattern.compile(BOUNDARY_REGEX);
@@ -65,33 +65,19 @@ public class MixedContent implements Content {
     private static final Logger LOGGER = LoggerFactory.getLogger(MixedContent.class);
     private static final Random RAND = new Random();
 
-    private final CoreSettings settings;
     private String boundary;
     private String boundaryPart;
     private String boundaryEnd;
-    private final List<Part> parts = new ArrayList<>();
-    private String logIndent = "";
 
-    /**
-     * Flag indicating there is a problem with the syntax of the multipart
-     * content. If this is a changeSet, then the entire changeSet will be
-     * discarded.
-     */
-    private boolean parseFailed = false;
-    private final List<String> errors = new ArrayList<>();
-
-    private final boolean isChangeSet;
     private State state = State.PREAMBLE;
     private IsFinished finished = IsFinished.UNFINISHED;
-    private Part currentPart;
-    private final Version batchVersion;
+    private MixedPart currentPart;
 
     public MixedContent(Version batchVersion, CoreSettings settings, boolean isChangeSet) {
-        this.batchVersion = batchVersion;
-        this.settings = settings;
-        this.isChangeSet = isChangeSet;
+        super(batchVersion, settings, isChangeSet);
     }
 
+    @Override
     public boolean parse(ServiceRequest request) {
         String contentType = request.getContentType();
         Matcher matcher = BOUNDARY_PATTERN.matcher(contentType);
@@ -161,7 +147,7 @@ public class MixedContent implements Content {
     private void parsePreamble(String line) {
         if (boundaryPart.equals(line.trim())) {
             setState(State.PARTCONTENT);
-            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new MixedPart(batchVersion, settings, isChangeSet, logIndent + "  ");
         }
     }
 
@@ -177,7 +163,7 @@ public class MixedContent implements Content {
             LOGGER.debug("{}Found new part", logIndent);
             currentPart.stripLastNewline();
             parts.add(currentPart);
-            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new MixedPart(batchVersion, settings, isChangeSet, logIndent + "  ");
             setState(State.PARTCONTENT);
 
         } else if (checkBoundary && boundaryEnd.equals(line.trim())) {
@@ -201,7 +187,7 @@ public class MixedContent implements Content {
     private void parsePartDone(String line) {
         if (boundaryPart.equals(line.trim())) {
             LOGGER.debug("{}Found new part", logIndent);
-            currentPart = new Part(batchVersion, settings, isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new MixedPart(batchVersion, settings, isChangeSet, logIndent + "  ");
             setState(State.PARTCONTENT);
         } else if (boundaryEnd.equals(line.trim())) {
             LOGGER.debug("{}Found end of multipart content", logIndent);
@@ -224,16 +210,6 @@ public class MixedContent implements Content {
     }
 
     @Override
-    public boolean isParseFailed() {
-        return parseFailed;
-    }
-
-    @Override
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    @Override
     public void stripLastNewline() {
         // Do nothing.
     }
@@ -249,20 +225,6 @@ public class MixedContent implements Content {
     }
 
     @Override
-    public void setLogIndent(String logIndent) {
-        this.logIndent = logIndent;
-    }
-
-    public List<Part> getParts() {
-        return parts;
-    }
-
-    public MixedContent addPart(Part part) {
-        parts.add(part);
-        return this;
-    }
-
-    @Override
     public String getContent(boolean allHeaders) {
         if (boundary == null) {
             generateBoundary();
@@ -273,9 +235,9 @@ public class MixedContent implements Content {
             content.append('\n');
         }
 
-        for (Part part : parts) {
+        for (Part<MultipartContent> part : parts) {
             content.append(boundaryPart).append('\n');
-            Content partContent = part.getContent();
+            MultipartContent partContent = part.getContent();
             content.append(partContent.getContent(true));
             content.append('\n');
         }

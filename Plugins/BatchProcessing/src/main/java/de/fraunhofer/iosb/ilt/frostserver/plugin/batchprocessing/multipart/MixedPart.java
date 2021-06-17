@@ -18,11 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content.IsFinished;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartContent.IsFinished;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class Part {
+public class MixedPart extends Part<MultipartContent> {
 
     /**
      * The different states the parser can have.
@@ -41,24 +40,13 @@ public class Part {
         DATA,
         DONE
     }
+
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Part.class);
-
-    private final CoreSettings settings;
-
-    private final Map<String, String> headers = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(MixedPart.class);
 
     private State parseState = State.INITIAL;
-
-    private Content content;
-
-    private String logIndent = "";
-
-    private final boolean inChangeSet;
-
-    private final Version batchVersion;
 
     /**
      * Creates a new Part.
@@ -68,10 +56,8 @@ public class Part {
      * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
      * thus if the part itself can be a ChangeSet.
      */
-    public Part(Version batchVersion, CoreSettings settings, boolean inChangeSet) {
-        this.batchVersion = batchVersion;
-        this.settings = settings;
-        this.inChangeSet = inChangeSet;
+    public MixedPart(Version batchVersion, CoreSettings settings, boolean inChangeSet, String logIndent) {
+        super(batchVersion, settings, inChangeSet, logIndent);
     }
 
     /**
@@ -82,19 +68,9 @@ public class Part {
      */
     public IsFinished isFinished() {
         if (content == null) {
-            return Content.IsFinished.UNKNOWN;
+            return MultipartContent.IsFinished.UNKNOWN;
         }
         return content.isFinished();
-    }
-
-    /**
-     * Get the value of the header with the given name.
-     *
-     * @param name The name of the header to get.
-     * @return The value of the header with the given name.
-     */
-    public String getHeader(String name) {
-        return headers.get(name);
     }
 
     private void addHeader(String line) {
@@ -161,8 +137,7 @@ public class Part {
                 throw new IllegalArgumentException("ChangeSets not allowed in ChangeSets.");
             }
             LOGGER.debug("{}Found multipart content", logIndent);
-            content = new MixedContent(batchVersion, settings, true)
-                    .setBoundaryHeader(getHeader("boundary"));
+            content = new MixedContent(batchVersion, settings, true).setBoundaryHeader(getHeader("boundary"));
         } else if ("application/http".equalsIgnoreCase(contentType)) {
             LOGGER.debug("{}Found Http content", logIndent);
             content = new HttpContent(batchVersion, inChangeSet);
@@ -194,38 +169,6 @@ public class Part {
             return;
         }
         content.stripLastNewline();
-    }
-
-    /**
-     * Get the Content of this Part.
-     *
-     * @return the Content of this Part.
-     */
-    public Content getContent() {
-        return content;
-    }
-
-    /**
-     * Set the Content of this Part.
-     *
-     * @param content the Content of this Part.
-     * @return this.
-     */
-    public Part setContent(Content content) {
-        this.content = content;
-        return this;
-    }
-
-    /**
-     * Sets the indentation of log messages. Since Content can be nested, this
-     * makes debug output better readable.
-     *
-     * @param logIndent the indentation of log messages.
-     * @return this.
-     */
-    public Part setLogIndent(String logIndent) {
-        this.logIndent = logIndent;
-        return this;
     }
 
 }
