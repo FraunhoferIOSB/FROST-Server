@@ -158,8 +158,8 @@ public class PluginManager implements ConfigDefaults {
                     plugin.init(settings);
                 }
             } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.warn("Could not load given plugin class: '{}'", StringHelper.cleanForLogging(className));
-                LOGGER.debug("", ex);
+                LOGGER.warn("Could not load given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
+                LOGGER.info("Exception:", ex);
             } catch (RuntimeException ex) {
                 LOGGER.warn("Plugin caused an exception during initialisation.", ex);
             }
