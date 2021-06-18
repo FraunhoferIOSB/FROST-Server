@@ -301,9 +301,9 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * @param forInsert Flag indicating the update is for a newly inserted
      * entity, and new entities can be created.
      *
-     * @throws IncompleteEntityException
-     * @throws NoSuchEntityException
-     * @throws IllegalStateException
+     * @throws IncompleteEntityException If the given entity is not complete.
+     * @throws NoSuchEntityException If the entity to be updated does not exist.
+     * @throws IllegalStateException If something else goes wrong.
      */
     protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, OrakelPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         J entityId = (J) entity.getId().getValue();

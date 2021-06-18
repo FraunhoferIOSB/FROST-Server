@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  * @param <J> The id class.
- * @param <T>
+ * @param <T> The type of the main table for the query.
  */
 public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
 

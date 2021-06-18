@@ -31,8 +31,8 @@ public interface HookPreDelete<J extends Comparable> {
 
     /**
      *
-     * @param pm
-     * @param entityId
+     * @param pm The PersistenceManager for database access.
+     * @param entityId The entity ID that is going to be deleted.
      * @throws NoSuchEntityException if something is wrong. This will cancel the
      * action.
      */

@@ -183,7 +183,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
     /**
      * A NameFactoryPair for easier passing of a name and a factory.
      *
-     * @param <T>
+     * @param <T> the table type this NFP fetches from.
      */
     public static class NFP<T> {
 

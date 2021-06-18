@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * A relation from a source table to a target table.
  *
  * @author hylke
- * @param <J>
+ * @param <J> the ID type.
  * @param <S> The source table.
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
