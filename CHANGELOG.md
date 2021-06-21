@@ -7,6 +7,7 @@
 * Fixed double URLEncode in $select of nextLinks.
 * Fixed error returned when creating a Sensor with NULL metadata.
 * Fixed `$count` when combined with `$select=distinct:`.
+* Updated dependencies.
 
 
 ## Release Version 1.13.1
