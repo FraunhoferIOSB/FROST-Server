@@ -157,7 +157,7 @@ public class BasicAuthAnonReadTests extends AbstractTestClass {
 
     private void getDatabaseStatus(SensorThingsService service, int expectedResponse) throws IOException {
         HttpGet getUpdateDb = new HttpGet(service.getEndpoint() + "../DatabaseStatus");
-        CloseableHttpResponse response = service.getClient().execute(getUpdateDb);
+        CloseableHttpResponse response = service.getHttpClient().execute(getUpdateDb);
         int code = response.getStatusLine().getStatusCode();
         Assert.assertEquals("Unexpected return code", expectedResponse, code);
     }
@@ -376,7 +376,7 @@ public class BasicAuthAnonReadTests extends AbstractTestClass {
                 .setDefaultCredentialsProvider(credsProvider);
 
         CloseableHttpClient httpclient = clientBuilder.build();
-        service.setClient(httpclient);
+        service.setHttpClient(httpclient);
     }
 
 }
