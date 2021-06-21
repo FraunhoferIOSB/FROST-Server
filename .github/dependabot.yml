@@ -9,6 +9,13 @@ updates:
   # Maintain dependencies for Maven in the v1.13.x branch
   - package-ecosystem: "maven"
     directory: "/"
+    target-branch: v1.14.x
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for Maven in the v1.13.x branch
+  - package-ecosystem: "maven"
+    directory: "/"
     target-branch: v1.13.x
     schedule:
       interval: "daily"
