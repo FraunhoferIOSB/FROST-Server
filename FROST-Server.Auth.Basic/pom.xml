@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-ServerParent</artifactId>
-        <version>1.14.0-SNAPSHOT</version>
+        <version>1.14.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>FROST-Server.Auth.Basic</artifactId>

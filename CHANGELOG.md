@@ -2,6 +2,10 @@
 
 ## Release Version 1.14.0
 
+**New Features**
+* Added support for Batch Requests in JSON format instead of MultiPart
+  format. This makes Batch Requests much easier to create. (Thanks pbaumard)
+
 **Internal changes & Bugfixes**
 * Increased the performance of the Datastream-update triggers that run on Observation
   insert/update/delete by up to 20%.
