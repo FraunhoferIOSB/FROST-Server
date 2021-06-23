@@ -149,7 +149,7 @@ public class CustomLinksTests extends AbstractTestClass {
         LOGGER.info("  testCustomLinks1");
         Thing thing = service.things().find(THINGS.get(1).getId());
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
-        Object expected = UrlHelper.generateSelfLink(
+        String expected = UrlHelper.generateSelfLink(null,
                 getServerSettings().getServiceRootUrl(),
                 Version.forString(version.urlPart),
                 EntityType.THING,
@@ -165,7 +165,7 @@ public class CustomLinksTests extends AbstractTestClass {
                 .filter("id eq " + THINGS.get(1).getId().getUrl())
                 .expand("properties/parent.Thing")
                 .first();
-        Object expected = UrlHelper.generateSelfLink(
+        String expected = UrlHelper.generateSelfLink(null,
                 getServerSettings().getServiceRootUrl(),
                 Version.forString(version.urlPart),
                 EntityType.THING,

@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import java.util.Set;
 
 /**
  * Interface defining basic methods of an Entity.
@@ -42,6 +41,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
 
     public T setId(Id id);
 
+    /** Returns self link. Might be null.*/
     public String getSelfLink();
 
     public T setSelfLink(String selfLink);

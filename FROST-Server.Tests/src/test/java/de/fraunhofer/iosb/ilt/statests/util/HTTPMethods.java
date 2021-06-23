@@ -87,6 +87,9 @@ public class HTTPMethods {
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
+        if (connection.getInputStream().available() == 0) {
+            return "";
+        }
         try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.name())) {
             return scanner.useDelimiter("\\A").next();
         }
@@ -117,16 +120,17 @@ public class HTTPMethods {
      * @param urlString   The URL that the POST request should be sent to
      * @param postBody    The body of the POST request
      * @param contentType The POST request content type header value
-     * @return response-code and response of the HTTP POST in the MAP format. If the
-     *         response is 201, the response will contain the self-link to the
-     *         created entity. If response is 200, it will be the HTTP response body
-     *         String.
+     * @return response-code and response of the HTTP POST in the MAP format. If
+     *         the response is 201, the response will contain the self-link to
+     *         the created entity from location header if present, or the
+     *         response string. If response is 200, it will be the HTTP response
+     *         body String.
      */
     public static HttpResponse doPost(String urlString, String postBody, String contentType) {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
-            //Create connection
+            // Create connection
             URL url = new URL(urlString);
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
             int postDataLength = postData.length;

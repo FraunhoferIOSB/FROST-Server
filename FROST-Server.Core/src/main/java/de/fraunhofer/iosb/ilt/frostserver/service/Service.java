@@ -309,7 +309,8 @@ public class Service implements AutoCloseable {
             LOGGER.error("Formatter not available.", ex);
             return errorResponse(response, 500, "Failed to instantiate formatter");
         }
-        response.setResultFormatted(formatter.format(null, null, result, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
+        response.setResultFormatted(
+                formatter.format(null, null, result, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
         response.setContentType(formatter.getContentType());
         return response;
     }
@@ -434,8 +435,13 @@ public class Service implements AutoCloseable {
         if (!(path.getMainElement() instanceof PathElementEntitySet)) {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
-        if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            return errorResponse(response, 400, "Not query options allowed on POST.");
+
+        Query query;
+        try {
+            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
+            query.validate();
+        } catch (IllegalArgumentException ex) {
+            return errorResponse(response, 400, ex.getMessage());
         }
 
         if (!pm.validatePath(path)) {
@@ -464,10 +470,12 @@ public class Service implements AutoCloseable {
                 return errorResponse(response, 400, "Failed to insert entity.");
             }
             maybeCommitAndClose();
-            String url = UrlHelper.generateSelfLink(path, entity);
+            String url = UrlHelper.generateSelfLink(query, path, entity);
             response.setResult((T) entity);
             response.setCode(201);
-            response.addHeader("location", url);
+            if (url != null) {
+                response.addHeader("location", url);
+            }
             return response;
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();

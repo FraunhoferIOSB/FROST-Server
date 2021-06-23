@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.regex.Pattern;
@@ -36,6 +37,9 @@ public class UrlHelper {
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {
+        if (query == null || query.getMetadata() == Metadata.OFF) {
+            return null;
+        }
         int oldSkip = query.getSkip(0);
         int top = query.getTopOrDefault();
         int newSkip = oldSkip + top;
@@ -45,7 +49,11 @@ public class UrlHelper {
         return nextLink;
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
+            EntityType entityType, Object id) {
+        if (query != null && query.getMetadata() != Metadata.FULL) {
+            return null;
+        }
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -57,7 +65,12 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Id id) {
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
+            EntityType entityType,
+            Id id) {
+        if (query != null && query.getMetadata() != Metadata.FULL) {
+            return null;
+        }
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -69,12 +82,14 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
-        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getId());
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
+            Entity entity) {
+        return generateSelfLink(query, serviceRootUrl, version, entity.getEntityType(), entity.getId());
     }
 
-    public static String generateSelfLink(ResourcePath path, Entity entity) {
-        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
+    public static String generateSelfLink(Query query, ResourcePath path, Entity entity) {
+        return generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(),
+                entity.getId());
     }
 
     /**
@@ -86,10 +101,14 @@ public class UrlHelper {
      * @param parent The parent of the entity to generate a navlink for.
      * @param entity The entity to generate a navlink for.
      * @param absolute If true, the generated link is absolute.
-     * @return A navigation link.
+     * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
+    public static String generateNavLink(Query query, ResourcePath path, Entity parent, Entity entity,
+            boolean absolute) {
+        if (query != null && query.getMetadata() != Metadata.FULL) {
+            return null;
+        }
+        String result = generateSelfLink(query, path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);
@@ -106,10 +125,14 @@ public class UrlHelper {
      * @param parent The parent of the entity to generate a navlink for.
      * @param es The EntitySet to generate a navlink for.
      * @param absolute If true, the generated link is absolute.
-     * @return A navigation link.
+     * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
+    public static String generateNavLink(Query query, ResourcePath path, Entity parent, EntitySet es,
+            boolean absolute) {
+        if (query != null && query.getMetadata() != Metadata.FULL) {
+            return null;
+        }
+        String result = generateSelfLink(query, path, parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);

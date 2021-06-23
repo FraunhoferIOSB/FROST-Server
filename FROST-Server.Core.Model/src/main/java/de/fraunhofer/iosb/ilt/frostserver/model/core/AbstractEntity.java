@@ -20,10 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 
@@ -113,7 +113,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     @Override
     public String getSelfLink() {
         if (selfLink == null && query != null) {
-            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
+            selfLink = UrlHelper.generateSelfLink(query, query.getPath(), this);
         }
         return selfLink;
     }

@@ -51,6 +51,11 @@ public abstract class AbstractParserVisitor implements ParserVisitor {
     }
 
     @Override
+    public Object visit(ASTMetadata node, Object data) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
+    }
+
+    @Override
     public Object visit(ASTOrderBys node, Object data) {
         throw new UnsupportedOperationException(NOT_SUPPORTED_YET);
     }

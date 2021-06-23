@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
@@ -200,7 +201,11 @@ public enum NavigationPropertyMain implements NavigationProperty {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + propertyName;
+        String selfLink = parent.getSelfLink();
+        if (selfLink == null) {
+            return null;
+        }
+        String link = selfLink + '/' + propertyName;
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();

@@ -91,7 +91,7 @@ public class CsvElementSet {
     }
 
     public void initFrom(EntityPropertyMain property) {
-        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
+        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entityName, property);
         elements.add(element);
     }
 

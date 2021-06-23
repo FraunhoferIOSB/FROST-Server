@@ -62,22 +62,25 @@ public class GjElementSet {
      */
     private final Version version;
 
-    public GjElementSet(String serviceRootUrl, Version version, String name, boolean flush) {
+    private final Query query;
+
+    public GjElementSet(Query query, String serviceRootUrl, Version version, String name, boolean flush) {
+        this.query = query;
         this.serviceRootUrl = serviceRootUrl;
         this.version = version;
         this.name = name;
         this.flush = flush;
     }
 
-    public void initFrom(EntityType type, Query query) {
+    public void initFrom(EntityType type) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type.getPropertySet(), query);
+            initFrom(type.getPropertySet());
         } else {
-            initFrom(query.getSelect(), query);
+            initFrom(query.getSelect());
         }
     }
 
-    public void initFrom(Set<Property> properties, Query query) {
+    public void initFrom(Set<Property> properties) {
         initProperties(properties);
 
         if (query == null) {
@@ -93,12 +96,12 @@ public class GjElementSet {
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
             if (property == EntityPropertyMain.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, EntityPropertyMain.SELFLINK.entitiyName));
+                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, EntityPropertyMain.SELFLINK.entityName));
             }
             if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
-                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entitiyName));
+                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entityName));
             } else if (property instanceof EntityPropertyMain) {
-                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entitiyName, property));
+                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entityName, property));
             } else if (property instanceof EntityPropertyCustomSelect) {
                 elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
             }

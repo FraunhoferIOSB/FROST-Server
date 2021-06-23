@@ -230,9 +230,9 @@ public enum EntityPropertyMain implements EntityProperty {
     }
 
     /**
-     * The entitiyName of this property as used in URLs.
+     * The entityName of this property as used in URLs.
      */
-    public final String entitiyName;
+    public final String entityName;
     /**
      * The name of this property as used in json.
      */
@@ -256,15 +256,15 @@ public enum EntityPropertyMain implements EntityProperty {
     private EntityPropertyMain(String codeName, boolean hasCustomProperties, boolean serialiseNull) {
         this.aliases = new ArrayList<>();
         this.aliases.add(codeName);
-        this.entitiyName = StringHelper.deCapitalize(codeName);
-        this.jsonName = entitiyName;
+        this.entityName = StringHelper.deCapitalize(codeName);
+        this.jsonName = entityName;
         this.hasCustomProperties = hasCustomProperties;
         this.serialiseNull = serialiseNull;
     }
 
     private EntityPropertyMain(String pathName, String jsonName, String... aliases) {
         this.aliases = new ArrayList<>();
-        this.entitiyName = pathName;
+        this.entityName = pathName;
         this.jsonName = jsonName;
         this.aliases.add(name());
         this.aliases.add(jsonName);
@@ -287,7 +287,7 @@ public enum EntityPropertyMain implements EntityProperty {
 
     @Override
     public String getName() {
-        return entitiyName;
+        return entityName;
     }
 
     @Override

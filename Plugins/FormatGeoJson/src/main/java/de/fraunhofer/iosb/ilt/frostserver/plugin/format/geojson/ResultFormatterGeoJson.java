@@ -47,8 +47,8 @@ public class ResultFormatterGeoJson implements ResultFormatter {
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
-        GjElementSet elementSet = new GjElementSet(path.getServiceRootUrl(), path.getVersion(), "", true);
-        elementSet.initFrom(type, query);
+        GjElementSet elementSet = new GjElementSet(query, path.getServiceRootUrl(), path.getVersion(), "", true);
+        elementSet.initFrom(type);
 
         FeatureCollection collection = new FeatureCollection();
         GjRowCollector rowCollector = new GjRowCollector(collection);
