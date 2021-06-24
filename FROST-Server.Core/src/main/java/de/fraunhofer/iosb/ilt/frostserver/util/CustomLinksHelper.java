@@ -75,8 +75,7 @@ public class CustomLinksHelper {
     public static void expandCustomLinks(Query query, CoreSettings settings, Entity<?> e, ResourcePath path) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
-            int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH,
-                    CoreSettings.class);
+            int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
             if (e instanceof NamedEntity) {
                 CustomLinksHelper.expandCustomLinks(query, ((NamedEntity) e).getProperties(), path, recurseDepth);
             } else if (e instanceof Observation) {
@@ -85,8 +84,7 @@ public class CustomLinksHelper {
         }
     }
 
-    public static void expandCustomLinks(Query query, Map<String, Object> properties, ResourcePath path,
-            int recurseDepth) {
+    public static void expandCustomLinks(Query query, Map<String, Object> properties, ResourcePath path, int recurseDepth) {
         if (properties == null) {
             return;
         }
@@ -106,8 +104,7 @@ public class CustomLinksHelper {
                     EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName,
-                            UrlHelper.generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), type, id));
                 }
             }
         }

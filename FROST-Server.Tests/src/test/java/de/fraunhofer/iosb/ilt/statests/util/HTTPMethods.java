@@ -130,7 +130,7 @@ public class HTTPMethods {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
-            // Create connection
+            //Create connection
             URL url = new URL(urlString);
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
             int postDataLength = postData.length;
