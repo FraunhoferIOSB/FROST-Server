@@ -93,12 +93,12 @@ public class GjElementSet {
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
             if (property == EntityPropertyMain.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, EntityPropertyMain.SELFLINK.entitiyName));
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, EntityPropertyMain.SELFLINK.entityName));
             }
             if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
-                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entitiyName));
+                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entityName));
             } else if (property instanceof EntityPropertyMain) {
-                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entitiyName, property));
+                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entityName, property));
             } else if (property instanceof EntityPropertyCustomSelect) {
                 elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
             }

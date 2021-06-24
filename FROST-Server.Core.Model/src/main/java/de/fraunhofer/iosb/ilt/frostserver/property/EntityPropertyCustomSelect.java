@@ -57,7 +57,7 @@ public class EntityPropertyCustomSelect implements EntityProperty {
 
     @Override
     public String getName() {
-        return entityProperty.entitiyName + "/" + StringUtils.join(subPath, '/');
+        return entityProperty.entityName + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override

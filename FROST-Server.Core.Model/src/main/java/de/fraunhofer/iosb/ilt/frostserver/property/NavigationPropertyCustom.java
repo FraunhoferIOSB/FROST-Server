@@ -93,7 +93,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public String getName() {
-        return entityProperty.entitiyName + "/" + StringUtils.join(subPath, '/');
+        return entityProperty.entityName + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
@@ -136,7 +136,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + entityProperty.entitiyName + '/' + String.join("/", subPath);
+        String link = parent.getSelfLink() + '/' + entityProperty.entityName + '/' + String.join("/", subPath);
         if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
             Query query = parent.getQuery();
             ResourcePath path = query.getPath();

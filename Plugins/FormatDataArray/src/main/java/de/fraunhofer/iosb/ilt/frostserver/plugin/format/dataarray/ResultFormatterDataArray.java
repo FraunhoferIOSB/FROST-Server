@@ -126,25 +126,25 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityPropertyMain.ID.entitiyName);
+                components.add(EntityPropertyMain.ID.entityName);
             }
             if (phenomenonTime) {
-                components.add(EntityPropertyMain.PHENOMENONTIME.entitiyName);
+                components.add(EntityPropertyMain.PHENOMENONTIME.entityName);
             }
             if (result) {
-                components.add(EntityPropertyMain.RESULT.entitiyName);
+                components.add(EntityPropertyMain.RESULT.entityName);
             }
             if (resultTime) {
-                components.add(EntityPropertyMain.RESULTTIME.entitiyName);
+                components.add(EntityPropertyMain.RESULTTIME.entityName);
             }
             if (resultQuality) {
-                components.add(EntityPropertyMain.RESULTQUALITY.entitiyName);
+                components.add(EntityPropertyMain.RESULTQUALITY.entityName);
             }
             if (validTime) {
-                components.add(EntityPropertyMain.VALIDTIME.entitiyName);
+                components.add(EntityPropertyMain.VALIDTIME.entityName);
             }
             if (parameters) {
-                components.add(EntityPropertyMain.PARAMETERS.entitiyName);
+                components.add(EntityPropertyMain.PARAMETERS.entityName);
             }
             return components;
         }
