@@ -115,11 +115,11 @@ public enum EntityType {
     private static final Map<Class<? extends Entity>, EntityType> TYPES_BY_CLASS = new HashMap<>();
 
     /**
-     * The entitiyName of this entity type as used in URLs.
+     * The entityName of this entity type as used in URLs.
      */
     public final String entityName;
     /**
-     * The entitiyName of collections of this entity type as used in URLs.
+     * The entityName of collections of this entity type as used in URLs.
      */
     public final String plural;
     /**
