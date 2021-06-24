@@ -19,9 +19,9 @@ POST /v1.1/Things?$resultMetadata=minimal
 POST /v1.1/CreateObservations?$resultMetadata=off
 ```
 
-## metadata=full
+## resultMetadata=full
 
-The full list of control information that may appear in a metadata=full response,
+The full list of control information that may appear in a resultMetadata=full response,
 which is the same as what is defined in SensorThings standard, is as follows:
 
 - count: the total count of a collection of entities, if requested;
@@ -29,18 +29,18 @@ which is the same as what is defined in SensorThings standard, is as follows:
 - nextLink: the next link of a collection with partial results;
 - selfLink: URL of an entity.
 
-## metadata=minimal
+## resultMetadata=minimal
 
-metadata=minimal removes all control information listed in metadata=full section, except:
+resultMetadata=minimal removes all control information listed in metadata=full section, except:
 
 - count: if requested;
 - nextLink: the next link of a collection with partial results.
 
 The created entity URLs are also removed in responses, either in location header or in content.
 
-## metadata=off
+## resultMetadata=off
 
-metadata=off removes all control information listed in metadata=full section, except:
+resultMetadata=off removes all control information listed in metadata=full section, except:
 
 - count: if requested
 
