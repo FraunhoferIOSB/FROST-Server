@@ -49,8 +49,7 @@ public class UrlHelper {
         return nextLink;
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
-            EntityType entityType, Object id) {
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Object id) {
         if (query != null && query.getMetadata() != Metadata.FULL) {
             return null;
         }
@@ -65,9 +64,7 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
-            EntityType entityType,
-            Id id) {
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Id id) {
         if (query != null && query.getMetadata() != Metadata.FULL) {
             return null;
         }
@@ -82,14 +79,12 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version,
-            Entity entity) {
+    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, Entity entity) {
         return generateSelfLink(query, serviceRootUrl, version, entity.getEntityType(), entity.getId());
     }
 
     public static String generateSelfLink(Query query, ResourcePath path, Entity entity) {
-        return generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(),
-                entity.getId());
+        return generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
     }
 
     /**
@@ -103,8 +98,7 @@ public class UrlHelper {
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(Query query, ResourcePath path, Entity parent, Entity entity,
-            boolean absolute) {
+    public static String generateNavLink(Query query, ResourcePath path, Entity parent, Entity entity, boolean absolute) {
         if (query != null && query.getMetadata() != Metadata.FULL) {
             return null;
         }
@@ -127,8 +121,7 @@ public class UrlHelper {
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(Query query, ResourcePath path, Entity parent, EntitySet es,
-            boolean absolute) {
+    public static String generateNavLink(Query query, ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
         if (query != null && query.getMetadata() != Metadata.FULL) {
             return null;
         }
