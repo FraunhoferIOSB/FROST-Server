@@ -11,15 +11,18 @@ This extension allows to limit the amount of control information in responses, a
 
 The metadata can be applied to the $resultMetadata parameter of a request to influence how much control information will be included in the response.
 
-Sample request:
+Sample requests:
 
 ```
-GET /v1.1/Things(1)?$resultMetadata=off
+GET /v1.1/Things(1)?$resultMetadata=full
+POST /v1.1/Things?$resultMetadata=minimal
+POST /v1.1/CreateObservations?$resultMetadata=off
 ```
 
 ## metadata=full
 
-The full list of control information that may appear in a metadata=full response is as follows:
+The full list of control information that may appear in a metadata=full response,
+which is the same as what is defined in SensorThings standard, is as follows:
 
 - count: the total count of a collection of entities, if requested;
 - navigationLink: the link used to retrieve the values of a navigation property;
