@@ -41,7 +41,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
 
     public T setId(Id id);
 
-    /** Returns self link. Might be null.*/
+    /** @return self link. Might be null. */
     public String getSelfLink();
 
     public T setSelfLink(String selfLink);
