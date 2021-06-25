@@ -212,7 +212,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastreamObservation, npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream)
+                    k -> new DataArrayValue(query, path, obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

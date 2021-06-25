@@ -146,7 +146,11 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + entityProperty.name + '/' + String.join("/", subPath);
+        String selfLink = parent.getSelfLink();
+        if (selfLink == null) {
+            return null;
+        }
+        String link = selfLink + '/' + entityProperty.name + '/' + String.join("/", subPath);
         if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
             Query query = parent.getQuery();
             ResourcePath path = query.getPath();

@@ -72,7 +72,7 @@ public class DefaultEntity implements Entity {
     public String getSelfLink() {
         String selfLink = (String) entityProperties.get(ModelRegistry.EP_SELFLINK);
         if (selfLink == null && query != null) {
-            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
+            selfLink = UrlHelper.generateSelfLink(query, query.getPath(), this);
             entityProperties.put(ModelRegistry.EP_SELFLINK, selfLink);
         }
         return selfLink;

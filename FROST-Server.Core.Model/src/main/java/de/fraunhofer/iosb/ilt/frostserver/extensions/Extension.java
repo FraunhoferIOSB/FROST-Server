@@ -32,7 +32,8 @@ public enum Extension {
             "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html",
-            "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html"
+            "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html",
+            "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"
     ),
     MQTT(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",

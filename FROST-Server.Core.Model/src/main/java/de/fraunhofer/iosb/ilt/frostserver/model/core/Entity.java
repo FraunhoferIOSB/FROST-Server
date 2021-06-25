@@ -42,6 +42,9 @@ public interface Entity extends NavigableElement {
 
     public Entity setId(Id id);
 
+    /**
+     * @return self link. Might be null.
+     */
     public String getSelfLink();
 
     public Entity setSelfLink(String selfLink);

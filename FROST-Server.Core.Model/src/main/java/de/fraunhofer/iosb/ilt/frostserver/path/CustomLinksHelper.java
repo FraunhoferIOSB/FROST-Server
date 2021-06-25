@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,24 +73,24 @@ public class CustomLinksHelper {
         return modelRegistry.getEntityTypeForName(last);
     }
 
-    public void expandCustomLinks(Entity entity, ResourcePath path) {
+    public void expandCustomLinks(Query query, Entity entity, ResourcePath path) {
         if (enable) {
             for (EntityPropertyMain property : entity.getEntityType().getEntityProperties()) {
                 if (property.hasCustomProperties) {
-                    expandCustomLinks(property, entity, path, recurseDepth);
+                    expandCustomLinks(query, property, entity, path, recurseDepth);
                 }
             }
         }
     }
 
-    private void expandCustomLinks(EntityPropertyMain property, Entity entity, ResourcePath path, int recurseDepth) {
+    private void expandCustomLinks(Query query, EntityPropertyMain property, Entity entity, ResourcePath path, int recurseDepth) {
         final Object properties = entity.getProperty(property);
         if (properties instanceof Map) {
-            expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
+            expandCustomLinks(query, (Map<String, Object>) properties, path, recurseDepth);
         }
     }
 
-    public void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {
+    public void expandCustomLinks(Query query, Map<String, Object> properties, ResourcePath path, int recurseDepth) {
         if (properties == null) {
             return;
         }
@@ -99,7 +100,7 @@ public class CustomLinksHelper {
             if (value instanceof Map) {
                 Map<String, Object> subMap = (Map<String, Object>) value;
                 if (recurseDepth > 0) {
-                    expandCustomLinks(subMap, path, recurseDepth - 1);
+                    expandCustomLinks(query, subMap, path, recurseDepth - 1);
                 }
             } else if (value instanceof Number || value instanceof String) {
                 String key = propertyEntry.getKey();
@@ -109,7 +110,7 @@ public class CustomLinksHelper {
                     EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), type, id));
                 }
             }
         }

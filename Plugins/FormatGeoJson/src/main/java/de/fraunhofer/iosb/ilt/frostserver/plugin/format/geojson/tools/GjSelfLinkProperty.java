@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 
 /**
  *
@@ -27,11 +28,13 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
  */
 public class GjSelfLinkProperty implements GjEntityEntry {
 
+    private final Query query;
     private final String name;
     private final String serviceRootUrl;
     private final Version version;
 
-    public GjSelfLinkProperty(String serviceRootUrl, Version version, String name) {
+    public GjSelfLinkProperty(Query query, String serviceRootUrl, Version version, String name) {
+        this.query = query;
         this.name = name;
         this.serviceRootUrl = serviceRootUrl;
         this.version = version;
@@ -39,7 +42,7 @@ public class GjSelfLinkProperty implements GjEntityEntry {
 
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
-        collector.collectEntry(namePrefix + name, UrlHelper.generateSelfLink(serviceRootUrl, version, source));
+        collector.collectEntry(namePrefix + name, UrlHelper.generateSelfLink(query, serviceRootUrl, version, source));
     }
 
 }

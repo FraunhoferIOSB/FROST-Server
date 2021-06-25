@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -140,7 +141,9 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (query == null) {
             return;
         }
-        customLinksHelper.expandCustomLinks(entity, path);
+        if (query.getMetadata() == Metadata.FULL) {
+            customLinksHelper.expandCustomLinks(query, entity, path);
+        }
         for (Expand expand : query.getExpand()) {
             addExpandToEntity(entity, expand);
         }

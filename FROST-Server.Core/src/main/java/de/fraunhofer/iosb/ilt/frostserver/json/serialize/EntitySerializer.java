@@ -31,6 +31,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_CO
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
 import java.util.Collections;
@@ -60,13 +61,16 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             Set<NavigationPropertyMain> navigationProps;
             List<Expand> expand;
             Query query = entity.getQuery();
+            if (query == null || query.getMetadata() != Metadata.FULL) {
+                navigationProps = Collections.emptySet();
+            } else {
+                navigationProps = query.getSelectNavProperties(query.hasParentExpand());
+            }
             if (query == null) {
                 entityProps = entity.getEntityType().getEntityProperties();
-                navigationProps = Collections.emptySet();
                 expand = null;
             } else {
                 entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
-                navigationProps = query.getSelectNavProperties(query.hasParentExpand());
                 expand = query.getExpand();
             }
             // Ensure selfLink is initialised.
@@ -85,8 +89,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             }
             for (Iterator<NavigationPropertyMain> it = navigationProps.iterator(); it.hasNext();) {
                 NavigationPropertyMain np = it.next();
-                if (np.isEntitySet() || entity.getProperty(np) != null) {
-                    gen.writeStringField(np.getName() + AT_IOT_NAVIGATION_LINK, np.getNavigationLink(entity));
+                String navigationLink = np.getNavigationLink(entity);
+                if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
+                    gen.writeStringField(np.getName() + AT_IOT_NAVIGATION_LINK, navigationLink);
                 }
             }
 

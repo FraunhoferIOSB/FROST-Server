@@ -156,7 +156,11 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + name;
+        String selfLink = parent.getSelfLink();
+        if (selfLink == null) {
+            return null;
+        }
+        String link = selfLink + '/' + name;
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();

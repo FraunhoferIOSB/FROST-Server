@@ -87,6 +87,9 @@ public class HTTPMethods {
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
+        if (connection.getInputStream().available() == 0) {
+            return "";
+        }
         try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.name())) {
             return scanner.useDelimiter("\\A").next();
         }
@@ -119,8 +122,8 @@ public class HTTPMethods {
      * @param contentType The POST request content type header value
      * @return response-code and response of the HTTP POST in the MAP format. If
      * the response is 201, the response will contain the self-link to the
-     * created entity. If response is 200, it will be the HTTP response body
-     * String.
+     * created entity from location header if present, or the response string.
+     * If response is 200, it will be the HTTP response body String.
      */
     public static HttpResponse doPost(String urlString, String postBody, String contentType) {
         HttpURLConnection connection = null;

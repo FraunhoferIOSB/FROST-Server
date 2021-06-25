@@ -23,12 +23,15 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -68,7 +71,7 @@ public class ServiceDataArray {
     private final CoreSettings settings;
     private final PluginCoreModel pluginCoreModel;
     private final ArrayValueHandlers arrayValueHandlers;
-    private NavigationPropertyEntity npMultiDatastream;
+    private final NavigationPropertyEntity npMultiDatastream;
 
     public ServiceDataArray(CoreSettings settings) {
         this.settings = settings;
@@ -84,6 +87,7 @@ public class ServiceDataArray {
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
+            Query query = QueryParser.parseQuery(request.getUrlQuery(), settings, null);
             JsonReader entityParser = new JsonReader(settings.getModelRegistry());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
@@ -94,11 +98,11 @@ public class ServiceDataArray {
                 for (String component : daValue.getComponents()) {
                     handlers.add(arrayValueHandlers.getHandler(settings, component));
                 }
-                handleDataArrayItems(version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                handleDataArrayItems(query, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
-            response.setResultFormatted(formatter.format(null, null, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
+            response.setResultFormatted(formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
             response.setContentType(formatter.getContentType());
             return Service.successResponse(response, 201, "Created");
         } catch (IllegalArgumentException | IOException e) {
@@ -106,6 +110,7 @@ public class ServiceDataArray {
             return Service.errorResponse(response, 400, e.getMessage());
         } catch (RuntimeException e) {
             pm.rollbackAndClose();
+            LOGGER.error("CreateObservations failed.", e);
             return Service.errorResponse(response, 500, e.getMessage());
         } catch (IncorrectRequestException ex) {
             LOGGER.error("Formatter not available.", ex);
@@ -115,7 +120,7 @@ public class ServiceDataArray {
         }
     }
 
-    private void handleDataArrayItems(Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(Query query, Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         int compCount = handlers.size();
@@ -133,10 +138,13 @@ public class ServiceDataArray {
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);
                 }
-
                 pm.insert(observation);
-                String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, version, observation);
-                selfLinks.add(selfLink);
+                if (query.getMetadata() == Metadata.OFF) {
+                    selfLinks.add("");
+                } else {
+                    String selfLink = UrlHelper.generateSelfLink(null, serviceRootUrl, version, observation);
+                    selfLinks.add(selfLink);
+                }
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
                 LOGGER.debug("Failed to create entity", exc);
                 selfLinks.add("error " + exc.getMessage());

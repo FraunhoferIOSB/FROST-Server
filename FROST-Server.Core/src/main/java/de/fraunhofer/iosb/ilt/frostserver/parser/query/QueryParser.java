@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -48,6 +49,7 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_EXPAND = "expand";
     private static final String OP_FILTER = "filter";
     private static final String OP_FORMAT = "resultformat";
+    private static final String OP_METADATA = "resultmetadata";
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
@@ -137,7 +139,11 @@ public class QueryParser extends AbstractParserVisitor {
                 break;
 
             case OP_FORMAT:
-                handleFromat(node, query);
+                handleFormat(node, query);
+                break;
+
+            case OP_METADATA:
+                handleMetadata(node, query);
                 break;
 
             case OP_ORDER_BY:
@@ -156,9 +162,14 @@ public class QueryParser extends AbstractParserVisitor {
         query.setOrderBy(visit(child, data));
     }
 
-    private void handleFromat(ASTOption node, Query query) {
+    private void handleFormat(ASTOption node, Query query) {
         ASTFormat child = getChildOfType(node, 0, ASTFormat.class);
         query.setFormat(child.getValue());
+    }
+
+    private void handleMetadata(ASTOption node, Query query) {
+        ASTMetadata child = getChildOfType(node, 0, ASTMetadata.class);
+        query.setMetadata(Metadata.lookup(child.getValue()));
     }
 
     private void handleExpand(ASTOption node, Query query, Object data) {

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,17 +65,17 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
+    public DataArrayValue(Query query, ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
         this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         if (datastream != null) {
-            datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
+            datastream.setSelfLink(UrlHelper.generateSelfLink(query, path, datastream));
         } else {
             if (npMultiDatastream == null) {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
             multiDatastream = observation.getProperty(npMultiDatastream);
-            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
+            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(query, path, multiDatastream));
         }
     }
 

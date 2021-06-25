@@ -63,22 +63,25 @@ public class GjElementSet {
      */
     private final Version version;
 
-    public GjElementSet(String serviceRootUrl, Version version, String name, boolean flush) {
+    private final Query query;
+
+    public GjElementSet(Query query, String serviceRootUrl, Version version, String name, boolean flush) {
+        this.query = query;
         this.serviceRootUrl = serviceRootUrl;
         this.version = version;
         this.name = name;
         this.flush = flush;
     }
 
-    public void initFrom(EntityType type, Query query) {
+    public void initFrom(EntityType type) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type.getPropertySet(), query);
+            initFrom(type.getPropertySet());
         } else {
-            initFrom(query.getSelect(), query);
+            initFrom(query.getSelect());
         }
     }
 
-    public void initFrom(Set<Property> properties, Query query) {
+    public void initFrom(Set<Property> properties) {
         initProperties(properties);
 
         if (query == null) {
@@ -94,7 +97,7 @@ public class GjElementSet {
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
             if (property == ModelRegistry.EP_SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
+                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
             }
             if ("unitOfMeasurement".equals(property.getName())) {
                 elements.add(new GjUnitOfMeasurementProperty("unitOfMeasurement"));
