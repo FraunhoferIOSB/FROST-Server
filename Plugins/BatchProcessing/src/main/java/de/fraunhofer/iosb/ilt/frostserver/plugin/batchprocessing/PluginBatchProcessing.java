@@ -43,6 +43,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     public static final String TAG_ENABLE_BATCH_PROCESSING = "batchProcessing.enable";
 
     private static final String REQUIREMENT_BATCH_PROCESSING = "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request";
+    private static final String REQUIREMENT_JSON_BATCH_PROCESSING = "https://fraunhoferiosb.github.io/FROST-Server/extensions/JsonBatchRequest.html";
 
     private CoreSettings settings;
 
@@ -65,6 +66,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
         extensionList.add(REQUIREMENT_BATCH_PROCESSING);
+        extensionList.add(REQUIREMENT_JSON_BATCH_PROCESSING);
     }
 
     @Override
