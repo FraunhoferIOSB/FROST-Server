@@ -46,6 +46,7 @@ import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
 import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests;
+import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
@@ -103,7 +104,8 @@ import org.testcontainers.containers.GenericContainer;
     BasicAuthAnonReadTests.class,
     KeyCloakTests.class,
     KeyCloakAnonReadTests.class,
-    CustomLinksTests.class
+    CustomLinksTests.class,
+    MetadataTests.class
 })
 public class TestSuite {
 

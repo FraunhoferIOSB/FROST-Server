@@ -200,7 +200,11 @@ public enum NavigationPropertyMain implements NavigationProperty {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + propertyName;
+        String selfLink = parent.getSelfLink();
+        if (selfLink == null) {
+            return null;
+        }
+        String link = selfLink + '/' + propertyName;
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();

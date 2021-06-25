@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,15 +64,15 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(ResourcePath path, Observation observation, List<String> components) {
+    public DataArrayValue(Query query, ResourcePath path, Observation observation, List<String> components) {
         this.datastream = observation.getDatastream();
         this.multiDatastream = observation.getMultiDatastream();
         this.components = components;
         if (datastream != null) {
-            datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
+            datastream.setSelfLink(UrlHelper.generateSelfLink(query, path, datastream));
         }
         if (multiDatastream != null) {
-            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
+            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(query, path, multiDatastream));
         }
     }
 

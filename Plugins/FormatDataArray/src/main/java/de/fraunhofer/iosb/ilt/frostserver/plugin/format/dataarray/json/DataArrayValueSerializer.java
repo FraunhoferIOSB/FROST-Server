@@ -41,11 +41,11 @@ public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
     public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         Datastream datastream = value.getDatastream();
-        if (datastream != null) {
+        if (datastream != null && datastream.getSelfLink() != null) {
             gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getSelfLink());
         }
         MultiDatastream multiDatastream = value.getMultiDatastream();
-        if (multiDatastream != null) {
+        if (multiDatastream != null && multiDatastream.getSelfLink() !=null) {
             gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getSelfLink());
         }
         gen.writeObjectField("components", value.getComponents());

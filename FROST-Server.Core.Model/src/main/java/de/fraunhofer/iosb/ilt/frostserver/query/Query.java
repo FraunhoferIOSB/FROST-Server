@@ -69,6 +69,7 @@ public class Query {
     private List<Expand> expand;
     private List<OrderBy> orderBy;
     private String format;
+    private Metadata metadata = Metadata.DEFAULT;
 
     public Query(QueryDefaults settings, ResourcePath path) {
         this.path = path;
@@ -276,6 +277,10 @@ public class Query {
         return format;
     }
 
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
     public List<Expand> getExpand() {
         return expand;
     }
@@ -306,6 +311,11 @@ public class Query {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public void setMetadata(Metadata metadata) {
+        Objects.requireNonNull(metadata);
+        this.metadata = metadata;
     }
 
     public void setExpand(List<Expand> expand) {

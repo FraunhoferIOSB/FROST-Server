@@ -113,7 +113,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     @Override
     public String getSelfLink() {
         if (selfLink == null && query != null) {
-            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
+            selfLink = UrlHelper.generateSelfLink(query, query.getPath(), this);
         }
         return selfLink;
     }

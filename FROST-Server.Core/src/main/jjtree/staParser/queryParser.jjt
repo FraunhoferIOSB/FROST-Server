@@ -71,30 +71,31 @@ TOKEN [IGNORE_CASE]:
 | <#DURATIONVALUE: ( <SIGN> )? "P" ( <LONG> "Y" )? ( <LONG> "M" )? ( <LONG> "W" )? ( <LONG> "D" )? ( "T" ( <LONG> "H" )? ( <LONG> "M" )? ( <LONG> ( "." <LONG> )? "S" )? )? >
 | <#SIGN: ["+", "-"]>
 
-| <O_EQ:      "eq" >
-| <O_NE:      "ne" >
-| <O_GT:      "gt" >
-| <O_GE:      "ge" >
-| <O_LT:      "lt" >
-| <O_LE:      "le" >
-| <O_AND:     "and" >
-| <O_NOT:     "not" >
-| <O_OR:      "or" >
-| <O_ADD:     "add" >
-| <O_SUB:     "sub" >
-| <O_MUL:     "mul" >
-| <O_DIV:     "div" >
-| <O_MOD:     "mod" >
-| <O_EXPAND:  "expand" >
-| <O_ORDERBY: "orderby" >
-| <O_ASC:     "asc" >
-| <O_DESC:    "desc" >
-| <O_TOP:     "top" >
-| <O_COUNT:   "count" >
-| <O_SKIP:    "skip" >
-| <O_SELECT:  "select" >
-| <O_FILTER:  "filter" >
-| <O_FORMAT:  "resultFormat" >
+| <O_EQ:       "eq" >
+| <O_NE:       "ne" >
+| <O_GT:       "gt" >
+| <O_GE:       "ge" >
+| <O_LT:       "lt" >
+| <O_LE:       "le" >
+| <O_AND:      "and" >
+| <O_NOT:      "not" >
+| <O_OR:       "or" >
+| <O_ADD:      "add" >
+| <O_SUB:      "sub" >
+| <O_MUL:      "mul" >
+| <O_DIV:      "div" >
+| <O_MOD:      "mod" >
+| <O_EXPAND:   "expand" >
+| <O_ORDERBY:  "orderby" >
+| <O_ASC:      "asc" >
+| <O_DESC:     "desc" >
+| <O_TOP:      "top" >
+| <O_COUNT:    "count" >
+| <O_SKIP:     "skip" >
+| <O_SELECT:   "select" >
+| <O_FILTER:   "filter" >
+| <O_FORMAT:   "resultFormat" >
+| <O_METADATA: "resultMetadata" >
 
 | <QF_SUBSTRINGOF:        "substringof" <LB> >
 | <QF_ENDSWITH:           "endswith" <LB> >
@@ -176,18 +177,19 @@ void InnerOptions() #Options : {}
 void Option() #Option : {}
 {
   <QUERY_START> (
-        ( <O_EXPAND>  <EQ> FilteredPaths() {jjtThis.setType("expand");} )
-      | ( <O_ORDERBY> <EQ> OrderBys() {jjtThis.setType("orderby");} )
-      | ( <O_TOP>     <EQ> Long() {jjtThis.setType("top");} )
-      | ( <O_COUNT>   <EQ> Boolean() {jjtThis.setType("count");} )
-      | ( <O_SKIP>    <EQ> Long() {jjtThis.setType("skip");} )
+        ( <O_EXPAND>   <EQ> FilteredPaths() {jjtThis.setType("expand");} )
+      | ( <O_ORDERBY>  <EQ> OrderBys() {jjtThis.setType("orderby");} )
+      | ( <O_TOP>      <EQ> Long() {jjtThis.setType("top");} )
+      | ( <O_COUNT>    <EQ> Boolean() {jjtThis.setType("count");} )
+      | ( <O_SKIP>     <EQ> Long() {jjtThis.setType("skip");} )
       | ( <O_SELECT> (
                         ( <EQ_DISTINCT> PlainPaths() {jjtThis.setType("selectDistinct");} )
                       | ( <EQ> PlainPaths() {jjtThis.setType("select");} )
                       )
         )
-      | ( <O_FILTER>  <EQ> Filter() {jjtThis.setType("filter");} )
-      | ( <O_FORMAT>  <EQ> Format() {jjtThis.setType("resultFormat");} )
+      | ( <O_FILTER>   <EQ> Filter() {jjtThis.setType("filter");} )
+      | ( <O_FORMAT>   <EQ> Format() {jjtThis.setType("resultFormat");} )
+      | ( <O_METADATA> <EQ> Metadata() {jjtThis.setType("resultMetadata");} )
       )
 }
 
@@ -689,6 +691,11 @@ void Boolean() #Bool : {}
 
 
 void Format() #Format : {Token t;}
+{
+    (t=<CHARSEQ> {jjtThis.setValue(t.image);})
+}
+
+void Metadata() #Metadata : {Token t;}
 {
     (t=<CHARSEQ> {jjtThis.setValue(t.image);})
 }

@@ -190,7 +190,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components)
+                    k -> new DataArrayValue(query, path, obs, components)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

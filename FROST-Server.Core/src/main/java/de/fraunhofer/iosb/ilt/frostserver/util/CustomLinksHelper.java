@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.util.ArrayList;
@@ -71,19 +72,19 @@ public class CustomLinksHelper {
         return EntityType.getEntityTypeForName(last);
     }
 
-    public static void expandCustomLinks(CoreSettings settings, Entity<?> e, ResourcePath path) {
+    public static void expandCustomLinks(Query query, CoreSettings settings, Entity<?> e, ResourcePath path) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
             if (e instanceof NamedEntity) {
-                CustomLinksHelper.expandCustomLinks(((NamedEntity) e).getProperties(), path, recurseDepth);
+                CustomLinksHelper.expandCustomLinks(query, ((NamedEntity) e).getProperties(), path, recurseDepth);
             } else if (e instanceof Observation) {
-                CustomLinksHelper.expandCustomLinks(((Observation) e).getParameters(), path, recurseDepth);
+                CustomLinksHelper.expandCustomLinks(query, ((Observation) e).getParameters(), path, recurseDepth);
             }
         }
     }
 
-    public static void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {
+    public static void expandCustomLinks(Query query, Map<String, Object> properties, ResourcePath path, int recurseDepth) {
         if (properties == null) {
             return;
         }
@@ -93,7 +94,7 @@ public class CustomLinksHelper {
             if (value instanceof Map) {
                 Map<String, Object> subMap = (Map<String, Object>) value;
                 if (recurseDepth > 0) {
-                    expandCustomLinks(subMap, path, recurseDepth - 1);
+                    expandCustomLinks(query, subMap, path, recurseDepth - 1);
                 }
             } else if (value instanceof Number || value instanceof String) {
                 String key = propertyEntry.getKey();
@@ -103,7 +104,7 @@ public class CustomLinksHelper {
                     EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), type, id));
                 }
             }
         }
