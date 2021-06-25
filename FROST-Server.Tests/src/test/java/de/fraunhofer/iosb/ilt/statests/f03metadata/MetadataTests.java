@@ -251,6 +251,7 @@ public class MetadataTests extends AbstractTestClass {
         LOGGER.info("  test03MetadataInExpand");
         testMetadataInExpand("full", true, true);
         testMetadataInExpand("minimal", false, false);
+        testMetadataInExpand("none", false, false);
         testMetadataInExpand("off", false, false);
     }
 
@@ -264,11 +265,9 @@ public class MetadataTests extends AbstractTestClass {
         assertFalse(metadata + " metadata nextLink", response.has("@iot.nextLink"));
         JSONObject thing = response.getJSONArray("value").getJSONObject(0);
 
-        assertEquals(metadata + " metadata selfLink", hasSelfLink,
-                thing.has("@iot.selfLink"));
+        assertEquals(metadata + " metadata selfLink", hasSelfLink, thing.has("@iot.selfLink"));
         if (hasSelfLink) {
-            assertEquals(metadata + " metadata selfLink", generateSelfLink(1),
-                    thing.get("@iot.selfLink"));
+            assertEquals(metadata + " metadata selfLink", generateSelfLink(1), thing.get("@iot.selfLink"));
         }
         JSONObject properties = thing.getJSONObject("properties");
         assertEquals(metadata + " metadata navigationLink", hasNavigationLink,
@@ -293,7 +292,8 @@ public class MetadataTests extends AbstractTestClass {
     public void test04PostDataArray() {
         LOGGER.info("  test04PostDataArray");
         testPostDataArray("full", true);
-        testPostDataArray("minimal", false);
+        testPostDataArray("minimal", true);
+        testPostDataArray("none", true);
         testPostDataArray("off", false);
     }
 
@@ -387,7 +387,7 @@ public class MetadataTests extends AbstractTestClass {
             }
 
             if (hasLinks) {
-                Id obsId = idFromPostResult(textValue);
+                Id<?> obsId = idFromPostResult(textValue);
                 Observation obs;
                 try {
                     obs = service.observations().find(obsId);
@@ -417,7 +417,7 @@ public class MetadataTests extends AbstractTestClass {
         }
     }
 
-    private Id idFromPostResult(String postResultLine) {
+    private Id<?> idFromPostResult(String postResultLine) {
         int pos1 = postResultLine.lastIndexOf("(") + 1;
         int pos2 = postResultLine.lastIndexOf(")");
         String part = postResultLine.substring(pos1, pos2);
@@ -436,7 +436,8 @@ public class MetadataTests extends AbstractTestClass {
     public void test05PostData() {
         LOGGER.info("  test05PostData");
         testPostData("full", true);
-        testPostData("minimal", false);
+        testPostData("minimal", true);
+        testPostData("none", true);
         testPostData("off", false);
     }
 

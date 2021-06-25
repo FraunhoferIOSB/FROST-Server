@@ -14,8 +14,8 @@ The metadata can be applied to the $resultMetadata parameter of a request to inf
 Sample requests:
 
 ```
-GET /v1.1/Things(1)?$resultMetadata=full
-POST /v1.1/Things?$resultMetadata=minimal
+GET /v1.1/Things(1)?$resultMetadata=none
+POST /v1.1/Things?$resultMetadata=off
 POST /v1.1/CreateObservations?$resultMetadata=off
 ```
 
@@ -29,22 +29,41 @@ which is the same as what is defined in SensorThings standard, is as follows:
 - nextLink: the next link of a collection with partial results;
 - selfLink: URL of an entity.
 
-## resultMetadata=minimal
+## resultMetadata=minimal and resultMetadata=none
 
-resultMetadata=minimal removes all control information listed in metadata=full section, except:
+resultMetadata=minimal and resultMetadata=none remove all control information listed in resultMetadata=full section, except:
 
 - count: if requested;
 - nextLink: the next link of a collection with partial results.
 
-The created entity URLs are also removed in responses, either in location header or in content.
-
 ## resultMetadata=off
 
-resultMetadata=off removes all control information listed in metadata=full section, except:
+resultMetadata=off does not comply with OData specification and removes all control information listed in resultMetadata=full section, except:
 
 - count: if requested
 
-The created entity URLs are also removed in responses, either in location header or in content.
+The created entity URLs are also removed in POST responses, either in location header or in content.
+
+Sample Thing entity creation request and response:
+
+```
+POST /v1.1/Things?$resultMetadata=off HTTP/1.1
+201 Created
+Host: example.org
+Content-Length: 0
+```
+
+Sample CreateObservations request and response:
+
+```
+POST /v1.1/CreateObservations?$resultMetadata=off HTTP/1.1
+201 Created
+Host: example.org
+Content-Length: 15
+Content-Type: application/json
+
+["","error",""]
+```
 
 ## Conformance Class
 

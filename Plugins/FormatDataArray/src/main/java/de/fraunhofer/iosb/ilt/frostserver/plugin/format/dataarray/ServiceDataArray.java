@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -122,8 +123,12 @@ public class ServiceDataArray {
                     handlers.get(i).handle(entry.get(i), observation);
                 }
                 pm.insert(observation);
-                String selfLink = UrlHelper.generateSelfLink(query, serviceRootUrl, version, observation);
-                selfLinks.add(selfLink == null ? "" : selfLink);
+                if (query.getMetadata() == Metadata.OFF) {
+                    selfLinks.add("");
+                } else {
+                    String selfLink = UrlHelper.generateSelfLink(null, serviceRootUrl, version, observation);
+                    selfLinks.add(selfLink);
+                }
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
                 LOGGER.debug("Failed to create entity", exc);
                 selfLinks.add("error " + exc.getMessage());

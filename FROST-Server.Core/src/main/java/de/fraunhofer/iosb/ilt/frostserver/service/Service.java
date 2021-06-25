@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
@@ -469,10 +470,11 @@ public class Service implements AutoCloseable {
                 return errorResponse(response, 400, "Failed to insert entity.");
             }
             maybeCommitAndClose();
-            String url = UrlHelper.generateSelfLink(query, path, entity);
+
             response.setResult((T) entity);
             response.setCode(201);
-            if (url != null) {
+            if (query.getMetadata() != Metadata.OFF) {
+                String url = UrlHelper.generateSelfLink(null, path, entity);
                 response.addHeader("location", url);
             }
             return response;
