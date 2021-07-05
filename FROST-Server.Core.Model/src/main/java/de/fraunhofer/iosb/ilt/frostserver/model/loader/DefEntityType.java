@@ -115,9 +115,11 @@ public class DefEntityType {
      * The name of the EntityType.
      *
      * @param name the name to set
+     * @return this.
      */
-    public void setName(String name) {
+    public DefEntityType setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -133,9 +135,11 @@ public class DefEntityType {
      * The plural name of the EntityType.
      *
      * @param plural the plural to set
+     * @return this.
      */
-    public void setPlural(String plural) {
+    public DefEntityType setPlural(String plural) {
         this.plural = plural;
+        return this;
     }
 
     /**
@@ -154,6 +158,7 @@ public class DefEntityType {
      * The EntityProperties of the EntityType.
      *
      * @param entityProperties the entityProperties to set
+     * @return this.
      */
     public DefEntityType setEntityProperties(Map<String, DefEntityProperty> entityProperties) {
         this.entityProperties = entityProperties;
@@ -207,9 +212,11 @@ public class DefEntityType {
      * means depends on the PersistenceManager.
      *
      * @param table the table to set
+     * @return this.
      */
-    public void setTable(String table) {
+    public DefEntityType setTable(String table) {
         this.table = table;
+        return this;
     }
 
     /**
@@ -225,9 +232,11 @@ public class DefEntityType {
      * Validators that are used to validate entities of this type.
      *
      * @param validators the validators to set
+     * @return this.
      */
-    public void setValidators(List<EntityValidator> validators) {
+    public DefEntityType setValidators(List<EntityValidator> validators) {
         this.validators = validators;
+        return this;
     }
 
 }

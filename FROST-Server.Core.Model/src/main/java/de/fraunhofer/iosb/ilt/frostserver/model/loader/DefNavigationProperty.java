@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
@@ -134,9 +135,11 @@ public class DefNavigationProperty {
      * The name of the NavigationProperty.
      *
      * @param name the name to set
+     * @return this.
      */
-    public void setName(String name) {
+    public DefNavigationProperty setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -152,9 +155,11 @@ public class DefNavigationProperty {
      * Flag indicating the NavigationProperty points to an EntitySet.
      *
      * @param entitySet the entitySet to set
+     * @return this.
      */
-    public void setEntitySet(boolean entitySet) {
+    public DefNavigationProperty setEntitySet(boolean entitySet) {
         this.entitySet = entitySet;
+        return this;
     }
 
     /**
@@ -170,9 +175,11 @@ public class DefNavigationProperty {
      * The entity type of the entity(set) this NavigationProperty points to.
      *
      * @param entityType the entityType to set
+     * @return this.
      */
-    public void setEntityType(String entityType) {
+    public DefNavigationProperty setEntityType(String entityType) {
         this.entityType = entityType;
+        return this;
     }
 
     /**
@@ -188,9 +195,11 @@ public class DefNavigationProperty {
      * Flag indicating the property must be set.
      *
      * @param required the required to set
+     * @return this.
      */
-    public void setRequired(boolean required) {
+    public DefNavigationProperty setRequired(boolean required) {
         this.required = required;
+        return this;
     }
 
     /**
@@ -199,6 +208,9 @@ public class DefNavigationProperty {
      * @return the handlers
      */
     public List<PropertyPersistenceMapper> getHandlers() {
+        if (handlers == null) {
+            handlers = new ArrayList<>();
+        }
         return handlers;
     }
 
@@ -206,9 +218,16 @@ public class DefNavigationProperty {
      * Handlers used to map the property to a persistence manager.
      *
      * @param handlers the handlers to set
+     * @return this.
      */
-    public void setHandlers(List<PropertyPersistenceMapper> handlers) {
+    public DefNavigationProperty setHandlers(List<PropertyPersistenceMapper> handlers) {
         this.handlers = handlers;
+        return this;
+    }
+
+    public DefNavigationProperty addHandler(PropertyPersistenceMapper handler) {
+        getHandlers().add(handler);
+        return this;
     }
 
     /**
@@ -224,9 +243,11 @@ public class DefNavigationProperty {
      * Handlers used to map the property to a persistence manager.
      *
      * @param inverse the inverse to set
+     * @return this.
      */
-    public void setInverse(Inverse inverse) {
+    public DefNavigationProperty setInverse(Inverse inverse) {
         this.inverse = inverse;
+        return this;
     }
 
     /**
@@ -238,9 +259,11 @@ public class DefNavigationProperty {
 
     /**
      * @param sourceEntityType the sourceEntityType to set
+     * @return this.
      */
-    public void setSourceEntityType(EntityType sourceEntityType) {
+    public DefNavigationProperty setSourceEntityType(EntityType sourceEntityType) {
         this.sourceEntityType = sourceEntityType;
+        return this;
     }
 
     /**
@@ -252,9 +275,11 @@ public class DefNavigationProperty {
 
     /**
      * @param targetEntityType the targetEntityType to set
+     * @return this.
      */
-    public void setTargetEntityType(EntityType targetEntityType) {
+    public DefNavigationProperty setTargetEntityType(EntityType targetEntityType) {
         this.targetEntityType = targetEntityType;
+        return this;
     }
 
     public class Inverse {
