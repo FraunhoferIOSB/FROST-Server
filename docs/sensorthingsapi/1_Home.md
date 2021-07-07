@@ -43,8 +43,8 @@ Here is a quick table that lists the major functions of the API:
 | __v1.1__                    | Get index         |               |        |        |
 | __v1.1/Type__               | Get all of type   | Create        |        |        |
 | __v1.1/Type(id)__           | Get one of type   |               | Update | Delete |
-| __v1.1/Type(id)/Entity__    | Get linked entity | Create Linked |        |        |
-| __v1.1/Type(id)/EntitySet__ | Get all linked    |               |        |        |
+| __v1.1/Type(id)/Entity__    | Get linked entity |               |        |        |
+| __v1.1/Type(id)/EntitySet__ | Get all linked    | Create Linked |        |        |
 
 
 
