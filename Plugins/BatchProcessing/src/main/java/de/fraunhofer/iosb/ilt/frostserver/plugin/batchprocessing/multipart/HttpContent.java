@@ -2,6 +2,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Map;
@@ -138,6 +139,13 @@ public class HttpContent extends Request implements MultipartContent {
         }
         if (statusLine != null) {
             content.append(statusLine).append('\n');
+        }
+        if (!StringHelper.isNullOrEmpty(contentType)) {
+            content.append("Content-Type: ").append(contentType);
+            if (!contentType.contains(";")) {
+                content.append("; ").append(CHARSET_UTF8);
+            }
+            content.append("\n");
         }
         for (Map.Entry<String, String> entry : headersInner.entrySet()) {
             content.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');

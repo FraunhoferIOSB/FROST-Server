@@ -82,7 +82,7 @@ public class BatchProcessor<C extends Content> {
         String resultFormatted = serviceResponse.getResultFormatted();
         if (statusCode >= 200 && statusCode < 300) {
             if (!StringHelper.isNullOrEmpty(resultFormatted)) {
-                headers.put("Content-Type", "application/json; charset=UTF-8");
+                httpResponse.setContentType(serviceResponse.getContentType());
                 httpResponse.addData(resultFormatted);
             }
         } else {

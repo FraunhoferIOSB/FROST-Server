@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.RawValue;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import java.util.Collections;
 
 /**
  * Parser for JSON request.
@@ -109,6 +111,11 @@ public class JsonBatch extends Batch<Content> {
         }
     }
 
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE_APPLICATION_JSON;
+    }
+
     private void addResponses(List<String> responses, Batch<Content> batch) {
         for (Part<Content> part : batch.getParts()) {
             Content partContent = part.getContent();
@@ -122,8 +129,6 @@ public class JsonBatch extends Batch<Content> {
 
     @Override
     public Map<String, String> getHeaders() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        return headers;
+        return Collections.emptyMap();
     }
 }

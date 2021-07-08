@@ -76,6 +76,7 @@ public class ServiceBatchProcessing {
     private ServiceResponse<String> sendResponse(Batch batch) {
         final ServiceResponse<String> response = new ServiceResponse<>();
         response.setCode(200);
+        response.setContentType(batch.getContentType());
         batch.getHeaders().entrySet().forEach(x -> response.addHeader(x.getKey(), x.getValue()));
         response.setResultFormatted(batch.getContent(false));
         return response;

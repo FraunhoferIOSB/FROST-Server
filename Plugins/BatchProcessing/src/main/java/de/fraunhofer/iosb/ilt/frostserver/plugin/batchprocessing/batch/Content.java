@@ -38,6 +38,13 @@ public interface Content {
     public String getContent(boolean allHeaders);
 
     /**
+     * Get the type of the content.
+     *
+     * @return the content type.
+     */
+    public String getContentType();
+
+    /**
      * Get the headers. This will include the Content-Type header.
      *
      * @return the headers.
