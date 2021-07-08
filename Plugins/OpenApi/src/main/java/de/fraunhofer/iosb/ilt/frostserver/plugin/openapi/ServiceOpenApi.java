@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OpenApiGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class ServiceOpenApi {
         try {
             response.setResultFormatted(SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(oaDoc));
             response.setCode(200);
-            response.setContentType("application/json");
+            response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
             return response;
         } catch (JsonProcessingException ex) {
             LOGGER.error("Failed to encode OA Document.", ex);

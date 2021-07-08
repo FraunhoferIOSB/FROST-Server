@@ -33,6 +33,9 @@ public class Constants {
      * with the WebServlet annotations!
      */
     public static final String[] HTTP_URL_PATTERNS = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"};
+    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    public static final String CONTENT_TYPE_APPLICATION_JSONPATCH = "application/json-patch+json";
+    public static final String CHARSET_UTF8 = "charset=UTF-8";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
 

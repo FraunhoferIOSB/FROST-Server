@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import java.util.Map;
 
 /**
@@ -33,7 +34,6 @@ import java.util.Map;
  */
 public class OpenApiGenerator {
 
-    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private static final String PATH_COMPONENTS_SCHEMAS = "#/components/schemas/";
     private static final String PATH_COMPONENTS_RESPONSES = "#/components/responses/";
     private static final String PATH_PATHS = "#/paths/";

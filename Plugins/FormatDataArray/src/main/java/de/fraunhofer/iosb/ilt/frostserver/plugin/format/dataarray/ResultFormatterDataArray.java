@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     @Override
     public String getContentType() {
-        return "application/json";
+        return CONTENT_TYPE_APPLICATION_JSON;
     }
 
     public static class VisibleComponents {

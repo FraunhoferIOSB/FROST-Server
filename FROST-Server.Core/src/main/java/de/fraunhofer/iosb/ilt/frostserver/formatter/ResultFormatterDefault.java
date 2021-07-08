@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import java.io.IOException;
 import java.util.Map;
 import org.geojson.GeoJsonObject;
@@ -78,7 +79,7 @@ public class ResultFormatterDefault implements ResultFormatter {
 
     @Override
     public String getContentType() {
-        return "application/json";
+        return CONTENT_TYPE_APPLICATION_JSON;
     }
 
 }

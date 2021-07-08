@@ -26,11 +26,11 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
@@ -62,10 +62,9 @@ public class ServletV1P0 extends HttpServlet {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
     private static final String ENCODING = "UTF-8";
-    public static final String JSON_PATCH_CONTENT_TYPE = "application/json-patch+json";
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
-        response.setContentType("application/json");
+        response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
         if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
@@ -101,7 +100,7 @@ public class ServletV1P0 extends HttpServlet {
 
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
         String[] split = request.getContentType().split(";", 2);
-        if (split[0].startsWith(JSON_PATCH_CONTENT_TYPE)) {
+        if (split[0].startsWith(CONTENT_TYPE_APPLICATION_JSONPATCH)) {
             executeService(RequestTypeUtils.UPDATE_CHANGESET, request, response);
         } else {
             executeService(RequestTypeUtils.UPDATE_CHANGES, request, response);

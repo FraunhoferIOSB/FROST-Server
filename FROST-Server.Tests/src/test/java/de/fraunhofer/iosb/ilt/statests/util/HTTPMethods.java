@@ -1,5 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -27,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HTTPMethods {
 
-    public static final ContentType APPLICATION_JSON_PATCH = ContentType.create("application/json-patch+json", Consts.UTF_8);
+    public static final ContentType APPLICATION_JSON_PATCH = ContentType.create(CONTENT_TYPE_APPLICATION_JSONPATCH, Consts.UTF_8);
     /**
      * The logger for this class.
      */
@@ -106,7 +108,7 @@ public class HTTPMethods {
      * created entity. Otherwise, it will be empty String.
      */
     public static HttpResponse doPost(String urlString, String postBody) {
-        HttpResponse response = doPost(urlString, postBody, "application/json");
+        HttpResponse response = doPost(urlString, postBody, CONTENT_TYPE_APPLICATION_JSON);
         if (response != null && response.code != 201) {
             response.setResponse("");
         }
@@ -117,14 +119,13 @@ public class HTTPMethods {
      * Send HTTP POST request to the urlString with postBody and return response
      * code and response body
      *
-     * @param urlString   The URL that the POST request should be sent to
-     * @param postBody    The body of the POST request
+     * @param urlString The URL that the POST request should be sent to
+     * @param postBody The body of the POST request
      * @param contentType The POST request content type header value
      * @return response-code and response of the HTTP POST in the MAP format. If
-     *         the response is 201, the response will contain the self-link to
-     *         the created entity from location header if present, or the
-     *         response string. If response is 200, it will be the HTTP response
-     *         body String.
+     * the response is 201, the response will contain the self-link to the
+     * created entity from location header if present, or the response string.
+     * If response is 200, it will be the HTTP response body String.
      */
     public static HttpResponse doPost(String urlString, String postBody, String contentType) {
         HttpURLConnection connection = null;
