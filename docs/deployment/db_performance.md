@@ -78,6 +78,24 @@ create index "IDX_OBS_PARAM_SECONDARYID"
 
 ## Regenerating generated properties
 
+If you ever need to re-generate the phenomenonTime properties of Datastreams,
+you can use the SQL query:
+
+```sql
+update "DATASTREAMS" d
+  SET "PHENOMENON_TIME_START" = 
+        (select min("PHENOMENON_TIME_START")
+          from "OBSERVATIONS" o
+          where o."DATASTREAM_ID" = d."ID"
+          group by o."DATASTREAM_ID"),
+      "PHENOMENON_TIME_END" = 
+        (select max("PHENOMENON_TIME_END")
+          from "OBSERVATIONS" o
+          where o."DATASTREAM_ID" = d."ID"
+          group by o."DATASTREAM_ID")
+;
+```
+
 If you ever need to re-generate the ObservedArea properties of Datastreams,
 you can use the SQL query:
 
