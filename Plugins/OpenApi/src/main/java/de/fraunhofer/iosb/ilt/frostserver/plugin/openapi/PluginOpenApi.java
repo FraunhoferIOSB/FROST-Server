@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,9 +43,11 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     public static final String TAG_ENABLE_OPENAPI = "openApi.enable";
 
     private static final String REQUIREMENT_OPENAPI = "https://fraunhoferiosb.github.io/FROST-Server/extensions/OpenAPI.html";
+    private CoreSettings settings;
 
     @Override
     public void init(CoreSettings settings) {
+        this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_OPENAPI, getClass());
         if (enabled) {
@@ -84,6 +86,6 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        return new ServiceOpenApi().executeRequest(request);
+        return new ServiceOpenApi(settings).executeRequest(request);
     }
 }

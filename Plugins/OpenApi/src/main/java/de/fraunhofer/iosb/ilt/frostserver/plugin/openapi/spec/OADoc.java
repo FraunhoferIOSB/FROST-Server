@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,6 +33,7 @@ public final class OADoc {
 
     private String openapi = "3.0.2";
     private OADocInfo info;
+    private final List<OAServer> servers = new ArrayList<>();
     private final Map<String, OAPath> paths = new TreeMap<>();
     private final OAComponents components = new OAComponents();
 
@@ -69,6 +72,14 @@ public final class OADoc {
      */
     public Map<String, OAPath> getPaths() {
         return paths;
+    }
+
+    public void addServer(OAServer server) {
+        servers.add(server);
+    }
+
+    public List<OAServer> getServers() {
+        return servers;
     }
 
     /**

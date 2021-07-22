@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OpenApiGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import org.slf4j.LoggerFactory;
@@ -48,9 +49,15 @@ public class ServiceOpenApi {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServiceOpenApi.class.getName());
 
+    private final CoreSettings settings;
+
+    public ServiceOpenApi(CoreSettings settings) {
+        this.settings = settings;
+    }
+
     public ServiceResponse<String> executeRequest(final ServiceRequest request) {
         GeneratorContext context = new GeneratorContext()
-                .initFromRequest(request);
+                .initFromRequest(settings, request);
         OADoc oaDoc = OpenApiGenerator.generateOpenApiDocument(context);
         final ServiceResponse response = new ServiceResponse<>();
         try {
