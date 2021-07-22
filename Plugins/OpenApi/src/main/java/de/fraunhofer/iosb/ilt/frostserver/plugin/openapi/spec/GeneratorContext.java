@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@ public final class GeneratorContext {
     private boolean addValue = false;
     private boolean addEditing = false;
     private Version version = Version.V_1_0;
+    private String serviceRootUrl;
     private String base = "/v1.0";
 
     private final CoreSettings settings;
@@ -60,6 +61,7 @@ public final class GeneratorContext {
         addValue = ServiceOpenApi.paramValueAsBool(request, PARAM_ADD_VALUE, addValue);
         addEditing = ServiceOpenApi.paramValueAsBool(request, PARAM_ADD_EDITING, addEditing);
         version = request.getVersion();
+        serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         base = "/" + version.urlPart;
         return this;
     }
@@ -103,6 +105,10 @@ public final class GeneratorContext {
     public GeneratorContext setAddValue(boolean addValue) {
         this.addValue = addValue;
         return this;
+    }
+
+    public String getServiceRootUrl() {
+        return serviceRootUrl;
     }
 
     public String getBase() {

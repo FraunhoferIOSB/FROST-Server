@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -59,6 +59,8 @@ public class OpenApiGenerator {
                 "1.0.0",
                 "Version " + context.getVersion().urlPart + " of the OGC SensorThings API, including Part 2 - Tasking."));
         addComponents(document);
+
+        document.addServer(new OAServer(context.getServiceRootUrl(), "FROST-Server"));
 
         Map<String, OAPath> paths = document.getPaths();
         OAPath basePath = new OAPath();
