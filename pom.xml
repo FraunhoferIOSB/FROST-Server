@@ -71,7 +71,7 @@
 
         <org.json.version>20210307</org.json.version>
         <paho.version>1.2.5</paho.version>
-        <postgis.version>2.5.0</postgis.version>
+        <postgis.version>2.5.1</postgis.version>
         <postgres.version>42.2.23</postgres.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <testcontainers.version>1.16.0</testcontainers.version>
