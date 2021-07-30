@@ -82,8 +82,13 @@ public enum Requirement {
     IOT_TASKING_1_0_ACTUATOR_RELATIONS("http://www.opengis.net/spec/iot_tasking/1.0/req/actuator/relations"),
     IOT_TASKING_1_0_CREATE_TASKS_TASK_CREATION("http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks/task-creation"),
     IOT_TASKING_1_0_CREATE_TASKS_VIA_MQTT_TASK_CREATION("http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks-via-mqtt/task-creation"),
-    IOT_TASKING_1_0_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATED("http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt/receive-updated");
-
+    IOT_TASKING_1_0_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATED("http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt/receive-updated"),
+    FROST_BATCH_REQUESTS_JSON("https://fraunhoferiosb.github.io/FROST-Server/extensions/JsonBatchRequest.html"),
+    FROST_RESPONSE_METADATA("https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"),
+    FROST_RESULT_FORMAT_CSV("https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md"),
+    FROST_RESULT_FORMAT_GEOJSON("https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.html"),
+    FROST_SELECT_DEEP("https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html"),
+    FROST_SELECT_DISTINCT("https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html");
     private final String name;
 
     private Requirement(String name) {
