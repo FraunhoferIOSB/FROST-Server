@@ -1,4 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
+    <variable name="FROST_LL" value="${FROST_LL:-INFO}" />
+    <variable name="FROST_LL_parser" value="${FROST_LL_parser:-INFO}" />
+    <variable name="FROST_LL_settings" value="${FROST_LL_settings:-INFO}" />
+    <variable name="FROST_LL_queries" value="${FROST_LL_queries:-INFO}" />
+    <variable name="FROST_LL_io_moquette" value="${FROST_LL_io_moquette:-WARN}" />
+    <variable name="FROST_LL_liquibase" value="${FROST_LL_liquibase:-INFO}" />
+    <variable name="FROST_LL_org_jooq" value="${FROST_LL_org_jooq:-INFO}" />
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
@@ -23,14 +32,14 @@
         </encoder>
     </appender>
 
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
-    <logger name="org.jooq" level="INFO"/>
-    <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
-    <logger name="io.moquette.broker.PostOffice" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="${FROST_LL_parser}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.settings" level="${FROST_LL_settings}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder" level="${FROST_LL_queries}"/>
+    <logger name="io.moquette" level="${FROST_LL_io_moquette}"/>
+    <logger name="liquibase" level="${FROST_LL_liquibase}"/>
+    <logger name="org.jooq" level="${FROST_LL_org_jooq}"/>
 
-    <root level="INFO">
+    <root level="${FROST_LL}">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
