@@ -62,3 +62,15 @@ For more information see the `docker-compose.yaml` file and the https://hub.dock
 You can override all [configuration settings](../settings/settings.html) by using environment variables in the docker-compose files.
 
 
+## Logging
+
+The logging of FROST-Server components in the Docker container can be controlled in a limited way by
+the following environment variables. All take one of the values `OFF`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`.
+
+* **FROST_LL**: The root logging level. Default: `INFO`.
+* **FROST_LL_parser**: The logging level for the `d.f.i.i.frostserver.parser` package. Default: `INFO`.
+* **FROST_LL_settings**: The logging level for the `d.f.i.i.frostserver.settings` package. Default: `INFO`.
+* **FROST_LL_queries**: The logging level for the FROST query builder. Setting this to TRACE logs all queries before they are executed. Default: `INFO`.
+* **FROST_LL_io_moquette**: The logging level for the `io.moquette` package. Default: `WARN`.
+* **FROST_LL_liquibase**: The logging level for the `liquibase` package. Default: `INFO`.
+* **FROST_LL_org_jooq**: The logging level for the `org.jooq` package. Default: `INFO`.
