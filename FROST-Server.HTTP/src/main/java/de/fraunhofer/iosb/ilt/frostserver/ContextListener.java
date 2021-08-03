@@ -18,12 +18,21 @@
 package de.fraunhofer.iosb.ilt.frostserver;
 
 import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
+import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
  * @author jab, scf
  */
 @WebListener
 public class ContextListener extends AbstractContextListener {
-    // Only adds the annotation.
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+        super.contextInitialized(sce);
+    }
+
 }

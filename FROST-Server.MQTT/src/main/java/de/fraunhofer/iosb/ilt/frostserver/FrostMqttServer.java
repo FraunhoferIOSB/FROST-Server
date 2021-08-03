@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
  *
@@ -105,6 +106,8 @@ public class FrostMqttServer {
      */
     public static void main(String[] args) throws IOException {
         GitVersionInfo.logGitInfo();
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
         String configFileName = CONFIG_FILE_NAME;
         if (args.length > 0) {

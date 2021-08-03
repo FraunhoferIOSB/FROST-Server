@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
  * @author jab, scf
@@ -31,6 +32,8 @@ public class ContextListener extends AbstractContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
         super.contextInitialized(sce);
 
         if (sce != null && sce.getServletContext() != null) {
