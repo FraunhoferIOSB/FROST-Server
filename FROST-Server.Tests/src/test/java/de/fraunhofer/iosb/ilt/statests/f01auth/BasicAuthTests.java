@@ -102,7 +102,7 @@ public class BasicAuthTests extends AbstractAuthTests {
                 .setDefaultCredentialsProvider(credsProvider);
 
         CloseableHttpClient httpclient = clientBuilder.build();
-        service.setClient(httpclient);
+        service.setHttpClient(httpclient);
         return service;
     }
 
