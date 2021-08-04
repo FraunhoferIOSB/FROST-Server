@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
@@ -143,6 +144,9 @@ public class DefEntityType {
      * @return the entityProperties
      */
     public Map<String, DefEntityProperty> getEntityProperties() {
+        if (entityProperties == null) {
+            entityProperties = new TreeMap<>();
+        }
         return entityProperties;
     }
 
@@ -151,8 +155,14 @@ public class DefEntityType {
      *
      * @param entityProperties the entityProperties to set
      */
-    public void setEntityProperties(Map<String, DefEntityProperty> entityProperties) {
+    public DefEntityType setEntityProperties(Map<String, DefEntityProperty> entityProperties) {
         this.entityProperties = entityProperties;
+        return this;
+    }
+
+    public DefEntityType addEntityProperty(DefEntityProperty entityProperty) {
+        getEntityProperties().put(entityProperty.getName(), entityProperty);
+        return this;
     }
 
     /**
@@ -161,6 +171,9 @@ public class DefEntityType {
      * @return the navigationProperties
      */
     public Map<String, DefNavigationProperty> getNavigationProperties() {
+        if (navigationProperties == null) {
+            navigationProperties = new TreeMap<>();
+        }
         return navigationProperties;
     }
 
@@ -169,8 +182,14 @@ public class DefEntityType {
      *
      * @param navigationProperties the navigationProperties to set
      */
-    public void setNavigationProperties(Map<String, DefNavigationProperty> navigationProperties) {
+    public DefEntityType setNavigationProperties(Map<String, DefNavigationProperty> navigationProperties) {
         this.navigationProperties = navigationProperties;
+        return this;
+    }
+
+    public DefEntityType addNavigationProperty(DefNavigationProperty navigationProperty) {
+        getNavigationProperties().put(navigationProperty.getName(), navigationProperty);
+        return this;
     }
 
     /**

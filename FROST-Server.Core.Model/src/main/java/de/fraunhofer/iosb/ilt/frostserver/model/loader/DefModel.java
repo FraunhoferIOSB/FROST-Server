@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
@@ -53,11 +54,20 @@ public class DefModel {
     }
 
     public Map<String, DefEntityType> getEntityTypes() {
+        if (entityTypes == null) {
+            entityTypes = new TreeMap<>();
+        }
         return entityTypes;
     }
 
-    public void setEntityTypes(Map<String, DefEntityType> entityTypes) {
+    public DefModel setEntityTypes(Map<String, DefEntityType> entityTypes) {
         this.entityTypes = entityTypes;
+        return this;
+    }
+
+    public DefModel addEntityType(DefEntityType entityType) {
+        getEntityTypes().put(entityType.getName(), entityType);
+        return this;
     }
 
 }
