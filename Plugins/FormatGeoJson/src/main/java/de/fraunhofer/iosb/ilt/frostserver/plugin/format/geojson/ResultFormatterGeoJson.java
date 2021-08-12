@@ -50,12 +50,11 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         GjElementSet elementSet = new GjElementSet(query, path.getServiceRootUrl(), path.getVersion(), "", true);
         elementSet.initFrom(type);
 
-        FeatureCollection collection = new FeatureCollection();
-        GjRowCollector rowCollector = new GjRowCollector(collection);
+        GjRowCollector rowCollector = new GjRowCollector();
         elementSet.writeData(rowCollector, result, "");
 
         try {
-            return JsonWriter.writeObject(collection);
+            return JsonWriter.writeObject(rowCollector.getCollection());
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to generate GeoJSON.", ex);
         }
