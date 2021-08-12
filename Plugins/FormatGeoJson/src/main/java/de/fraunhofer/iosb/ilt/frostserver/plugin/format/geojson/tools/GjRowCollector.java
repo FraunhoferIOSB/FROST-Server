@@ -19,9 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.GeoJsonObject;
@@ -38,17 +41,34 @@ import org.geojson.GeoJsonObject;
  */
 public class GjRowCollector {
 
-    private final FeatureCollection collection;
+    private final Map<String, Object> collection = new LinkedHashMap<>();
+    private final List<Feature> features = new ArrayList<>();
     private Feature feature;
 
     /**
      * Create a new Collector.
-     *
-     * @param collection The FeatureCollection to write the new Feature to.
      */
-    public GjRowCollector(FeatureCollection collection) {
-        this.collection = collection;
+    public GjRowCollector() {
+        // Ensure type & nextLink are first, nicer for users
+        collection.put("tape", "FeatureCollection");
+        collection.put(SpecialNames.AT_IOT_NEXT_LINK, null);
+        collection.put(SpecialNames.AT_IOT_COUNT, null);
+        collection.put("features", features);
         newFeature();
+    }
+
+    public Map<String, Object> getCollection() {
+        return collection;
+    }
+
+    public void setNextLink(String nextLink) {
+        collection.put(SpecialNames.AT_IOT_NEXT_LINK, nextLink);
+    }
+
+    public void setCount(Long count) {
+        if (count >= 0) {
+            collection.put(SpecialNames.AT_IOT_COUNT, count);
+        }
     }
 
     private void newFeature() {
@@ -122,7 +142,7 @@ public class GjRowCollector {
      *
      */
     public void flush() {
-        collection.add(feature);
+        features.add(feature);
         newFeature();
     }
 

@@ -49,9 +49,10 @@ public class GjElementSet {
     private final List<GjEntityEntry> elements = new ArrayList<>();
 
     /**
-     * Should the collection be flushed after each entity.
+     * Is this the top-level collection, meaning the collection should be
+     * flushed after each entity.
      */
-    private final boolean flush;
+    private final boolean topLevel;
 
     /**
      * The serviceRootUrl for the current request.
@@ -70,7 +71,7 @@ public class GjElementSet {
         this.serviceRootUrl = serviceRootUrl;
         this.version = version;
         this.name = name;
-        this.flush = flush;
+        this.topLevel = flush;
     }
 
     public void initFrom(EntityType type) {
@@ -132,7 +133,7 @@ public class GjElementSet {
             return;
         }
         collectElements(collector, entity, namePrefix);
-        if (flush) {
+        if (topLevel) {
             collector.flush();
         }
     }
@@ -141,12 +142,15 @@ public class GjElementSet {
         if (entitySet == null) {
             return;
         }
-        List<? extends Entity> list = entitySet.asList();
         int idx = 0;
-        for (Entity entity : list) {
-            String localName = flush ? namePrefix : namePrefix + idx + "/";
+        if (topLevel) {
+            collector.setNextLink(entitySet.getNextLink());
+            collector.setCount(entitySet.getCount());
+        }
+        for (Entity entity : entitySet) {
+            String localName = topLevel ? namePrefix : namePrefix + idx + "/";
             collectElements(collector, entity, localName);
-            if (flush) {
+            if (topLevel) {
                 collector.flush();
             }
             idx++;
