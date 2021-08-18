@@ -137,8 +137,7 @@ public class CsvElementSet {
         if (entitySet == null) {
             return;
         }
-        List<? extends Entity> list = entitySet.asList();
-        for (Entity e : list) {
+        for (Entity e : entitySet) {
             for (CsvEntityEntry element : elements) {
                 element.writeData(collector, e);
             }
@@ -163,8 +162,7 @@ public class CsvElementSet {
                 }
                 if (result instanceof EntitySet) {
                     EntitySet entitySet = (EntitySet) result;
-                    List<? extends Entity> asList = entitySet.asList();
-                    return asList.isEmpty() ? null : asList.get(0);
+                    return entitySet.isEmpty() ? null : entitySet.iterator().next();
                 }
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to read element", ex);

@@ -137,15 +137,15 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         if (count >= 0) {
             gen.writeNumberField(jsonName + AT_IOT_COUNT, count);
         }
+        gen.writeArrayFieldStart(jsonName);
+        for (Object child : entitySet) {
+            gen.writeObject(child);
+        }
+        gen.writeEndArray();
         String nextLink = entitySet.getNextLink();
         if (nextLink != null) {
             gen.writeStringField(jsonName + AT_IOT_NEXT_LINK, nextLink);
         }
-        gen.writeArrayFieldStart(jsonName);
-        for (Object child : entitySet.asList()) {
-            gen.writeObject(child);
-        }
-        gen.writeEndArray();
     }
 
 }

@@ -19,11 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.EntitySetJooqCurser;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder.ALIAS_PREFIX;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.HashSet;
 import java.util.Set;
 import org.jooq.Condition;
@@ -73,21 +74,8 @@ public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
         return mainTable.entityFromQuery(tuple, this, dataSize);
     }
 
-    public EntitySet createSetFromRecords(Cursor<Record> tuples, Query query, long maxDataSize) {
-        EntitySet entitySet = mainTable.newSet();
-        int count = 0;
-        DataSize size = new DataSize();
-        int top = query.getTopOrDefault();
-        while (tuples.hasNext() && count < top) {
-            Record tuple = tuples.fetchNext();
-            entitySet.add(entityFromQuery(tuple, size));
-            count++;
-            if (size.getDataSize() > maxDataSize) {
-                LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
-                return entitySet;
-            }
-        }
-        return entitySet;
+    public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder, DataSize size) {
+        return new EntitySetJooqCurser(mainTable.getEntityType(), tuples, this, resultBuilder);
     }
 
     public String getNextAlias() {

@@ -22,7 +22,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
  */
 public class DataSize {
 
+    private final long maxSize;
     private long size;
+
+    public DataSize(long maxSize) {
+        this.maxSize = maxSize;
+    }
 
     /**
      * @return the DataSize
@@ -47,4 +52,11 @@ public class DataSize {
         size += amount;
     }
 
+    public long getMaxSize() {
+        return maxSize;
+    }
+
+    public boolean isExceeded() {
+        return size >= maxSize;
+    }
 }

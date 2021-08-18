@@ -20,21 +20,21 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Should be implemented by all collections of entities.
  *
  * @author jab
  */
-public interface EntitySet extends Collection<Entity>, NavigableElement {
+public interface EntitySet extends NavigableElement, Iterable<Entity> {
 
-    public List<Entity> asList();
+    public void add(Entity entity);
 
     public long getCount();
 
     public void setCount(long count);
+
+    public int size();
 
     public String getNextLink();
 

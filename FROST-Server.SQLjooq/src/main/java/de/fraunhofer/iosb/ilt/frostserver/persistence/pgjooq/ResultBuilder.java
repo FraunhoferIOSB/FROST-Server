@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
@@ -75,6 +74,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     private final QueryBuilder<J> sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
     private final CustomLinksHelper customLinksHelper;
+    private final DataSize dataSize;
 
     private Object resultObject;
     /**
@@ -91,15 +91,16 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
      * @param sqlQueryBuilder The configured sql query builder to use for
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder) {
+    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder, DataSize dataSize) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;
         this.sqlQueryBuilder = sqlQueryBuilder;
         this.sqlQuery = sqlQueryBuilder.buildSelect();
+        this.dataSize = dataSize;
         final CoreSettings coreSettings = pm.getCoreSettings();
         this.persistenceSettings = coreSettings.getPersistenceSettings();
-        this.customLinksHelper = pm.getCoreSettings().getCustomLinksHelper();
+        this.customLinksHelper = coreSettings.getCustomLinksHelper();
     }
 
     public Object getEntity() {
@@ -116,6 +117,14 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         return entityName;
     }
 
+    public Query getStaQuery() {
+        return staQuery;
+    }
+
+    public DataSize getDataSize() {
+        return dataSize;
+    }
+
     @Override
     public void visit(PathElementEntity element) {
         Result<Record> results = sqlQuery.fetch();
@@ -127,7 +136,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         }
 
         QueryState<J, ?> queryState = sqlQueryBuilder.getQueryState();
-        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize());
+        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize(pm.getCoreSettings().getDataSizeMax()));
 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
@@ -137,7 +146,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         resultObject = entity;
     }
 
-    private void expandEntity(Entity entity, Query query) {
+    public void expandEntity(Entity entity, Query query) {
         if (query == null) {
             return;
         }
@@ -246,32 +255,18 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     @Override
     public void visit(PathElementEntitySet element) {
         int top = staQuery.getTopOrDefault();
-        try (Cursor<Record> results = timeQuery(sqlQuery)) {
-            EntitySet entitySet = sqlQueryBuilder
-                    .getQueryState()
-                    .createSetFromRecords(results, staQuery, pm.getCoreSettings().getDataSizeMax());
+        Cursor<Record> results = timeQuery(sqlQuery);
+        EntitySet entitySet = sqlQueryBuilder
+                .getQueryState()
+                .createSetFromRecords(results, this, dataSize);
 
-            if (entitySet == null) {
-                throw new IllegalStateException("Empty set!");
-            }
-
-            fetchAndAddCount(entitySet);
-
-            int entityCount = entitySet.size();
-            boolean hasMore = results.hasNext();
-            if (entityCount < staQuery.getTopOrDefault() && hasMore) {
-                // The loading was aborted, probably due to size constraints.
-                staQuery.setTop(entityCount);
-            }
-            if (hasMore && top > 0) {
-                entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
-            }
-            for (Entity e : entitySet) {
-                e.setQuery(staQuery);
-                expandEntity(e, staQuery);
-            }
-            resultObject = entitySet;
+        if (entitySet == null) {
+            throw new IllegalStateException("Empty set!");
         }
+
+        fetchAndAddCount(entitySet);
+
+        resultObject = entitySet;
     }
 
     private void fetchAndAddCount(EntitySet entitySet) {

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
@@ -38,14 +39,17 @@ public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
         if (count >= 0) {
             gen.writeNumberField(AT_IOT_COUNT, count);
         }
+
+        gen.writeArrayFieldStart("value");
+        for (Entity child : value.getValues()) {
+            gen.writeObject(child);
+        }
+        gen.writeEndArray();
+
         String nextLink = value.getValues().getNextLink();
         if (nextLink != null) {
             gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
         }
-
-        gen.writeFieldName("value");
-        gen.writeObject(value.getValues());
-        gen.writeEndObject();
     }
 
     @Override

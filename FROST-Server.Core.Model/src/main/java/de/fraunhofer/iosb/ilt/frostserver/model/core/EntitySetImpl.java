@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -65,58 +64,13 @@ public class EntitySetImpl implements EntitySet {
     }
 
     @Override
-    public boolean contains(Object o) {
-        return data.contains(o);
-    }
-
-    @Override
     public Iterator<Entity> iterator() {
         return data.iterator();
     }
 
     @Override
-    public Object[] toArray() {
-        return data.toArray();
-    }
-
-    @Override
-    public <A> A[] toArray(A[] a) {
-        return data.toArray(a);
-    }
-
-    @Override
-    public boolean add(Entity e) {
-        return data.add(e);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        return data.remove(o);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return data.containsAll(c);
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends Entity> c) {
-        return data.addAll(c);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        return data.removeAll(c);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        return data.retainAll(c);
-    }
-
-    @Override
-    public void clear() {
-        data.clear();
+    public void add(Entity e) {
+        data.add(e);
     }
 
     @Override
@@ -137,11 +91,6 @@ public class EntitySetImpl implements EntitySet {
         }
         final EntitySetImpl other = (EntitySetImpl) obj;
         return Objects.equals(this.data, other.data);
-    }
-
-    @Override
-    public List<Entity> asList() {
-        return data;
     }
 
     @Override

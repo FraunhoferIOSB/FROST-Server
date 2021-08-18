@@ -369,6 +369,19 @@ public class Service implements AutoCloseable {
         T object;
         try {
             object = (T) pm.get(path, query);
+            if (object == null) {
+                if (path.isValue() || path.isEntityProperty()) {
+                    return successResponse(response, 204, "No Content");
+                } else {
+                    return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                }
+            } else {
+                response.setResult(object);
+                response.setResultFormatted(formatter.format(path, query, object, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
+                response.setContentType(formatter.getContentType());
+                response.setCode(200);
+                return response;
+            }
         } catch (UnsupportedOperationException e) {
             LOGGER.error("Unsupported operation.", e);
             pm.rollbackAndClose();
@@ -381,20 +394,9 @@ public class Service implements AutoCloseable {
             LOGGER.error("Result did not match expected format", e);
             pm.rollbackAndClose();
             return errorResponse(response, 500, "Illegal result type: " + e.getMessage());
-        }
-        maybeCommitAndClose();
-        if (object == null) {
-            if (path.isValue() || path.isEntityProperty()) {
-                return successResponse(response, 204, "No Content");
-            } else {
-                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
-            }
-        } else {
-            response.setResult(object);
-            response.setResultFormatted(formatter.format(path, query, object, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
-            response.setContentType(formatter.getContentType());
-            response.setCode(200);
-            return response;
+        } finally {
+            maybeCommitAndClose();
+
         }
     }
 

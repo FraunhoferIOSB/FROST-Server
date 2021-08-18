@@ -104,6 +104,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
 
+    /**
+     * Tracker for the amount of data fetched form the DB by this PM.
+     */
+    private DataSize dataSize;
+
     public PostgresPersistenceManager(IdManager idManager) {
         this.idManager = idManager;
     }
@@ -115,6 +120,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
         entityFactories = new EntityFactories(settings.getModelRegistry(), idManager, tableCollection);
+        dataSize = new DataSize(settings.getDataSizeMax());
     }
 
     private void init() {
@@ -224,7 +230,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (record == null) {
             return null;
         }
-        return psb.getQueryState().entityFromQuery(record, new DataSize());
+        return psb.getQueryState().entityFromQuery(record, dataSize);
     }
 
     @Override
@@ -246,7 +252,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb);
+        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
