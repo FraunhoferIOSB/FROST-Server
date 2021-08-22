@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.GeneratorContext;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OADoc;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OpenApiGenerator;
@@ -26,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
+import java.io.IOException;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -54,19 +56,22 @@ public class ServiceOpenApi {
         this.settings = settings;
     }
 
-    public ServiceResponse<String> executeRequest(final ServiceRequest request) {
+    public ServiceResponse executeRequest(final ServiceRequest request, ServiceResponse response) {
         GeneratorContext context = new GeneratorContext(settings)
                 .initFromRequest(request);
         OADoc oaDoc = OpenApiGenerator.generateOpenApiDocument(context);
-        final ServiceResponse response = new ServiceResponse<>();
         try {
-            response.setResultFormatted(SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(oaDoc));
+            final String jsonString = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(oaDoc);
             response.setCode(200);
             response.setContentType("application/json");
+            response.getWriter().append(new FormatWriterGeneric(jsonString).getFormatted());
             return response;
         } catch (JsonProcessingException ex) {
             LOGGER.error("Failed to encode OA Document.", ex);
             return Service.errorResponse(response, 500, "Failed to encode document");
+        } catch (IOException ex) {
+            LOGGER.error("Failed to format response", ex);
+            return Service.errorResponse(response, 500, "Failed to format document");
         }
     }
 

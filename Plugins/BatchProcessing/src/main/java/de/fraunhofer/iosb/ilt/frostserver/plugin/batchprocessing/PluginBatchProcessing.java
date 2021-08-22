@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -94,8 +94,8 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     }
 
     @Override
-    public ServiceResponse execute(Service service, ServiceRequest request) {
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
         return new ServiceBatchProcessing(settings)
-                .executeBatchOperation(service, request);
+                .executeBatchOperation(service, request, response);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -82,7 +82,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) throws IOException {
         try {
             entity.setQuery(query);
-            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, query, entity, true);
+            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, query, entity, true).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }

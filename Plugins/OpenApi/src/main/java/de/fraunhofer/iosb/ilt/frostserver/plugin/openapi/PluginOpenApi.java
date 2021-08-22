@@ -92,7 +92,7 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     }
 
     @Override
-    public ServiceResponse execute(Service service, ServiceRequest request) {
-        return new ServiceOpenApi(settings).executeRequest(request);
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
+        return new ServiceOpenApi(settings).executeRequest(request, response);
     }
 }

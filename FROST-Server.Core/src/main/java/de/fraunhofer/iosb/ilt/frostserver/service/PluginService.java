@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -59,8 +59,9 @@ public interface PluginService extends Plugin {
      * @param mainService The main service for the request. Can supply the
      * PersistenceManager.
      * @param request The request to execute.
+     * @param response The response object to put the response into.
      * @return The response to the request.
      */
-    public ServiceResponse execute(Service mainService, ServiceRequest request);
+    public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response);
 
 }

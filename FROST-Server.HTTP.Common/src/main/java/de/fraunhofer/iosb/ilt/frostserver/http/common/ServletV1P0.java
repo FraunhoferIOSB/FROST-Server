@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,20 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
@@ -61,7 +58,7 @@ public class ServletV1P0 extends HttpServlet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
-    private static final String ENCODING = "UTF-8";
+    public static final String ENCODING = "UTF-8";
     public static final String JSON_PATCH_CONTENT_TYPE = "application/json-patch+json";
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -119,10 +116,13 @@ public class ServletV1P0 extends HttpServlet {
     private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
-            sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
+            final ServiceRequest serviceRequest = serviceRequestFromHttpRequest(request, requestType);
+            final ServiceResponseHttpServlet serviceResponse = new ServiceResponseHttpServlet(response);
+            service.execute(serviceRequest, serviceResponse);
+            sendResponse(serviceResponse, response);
         } catch (Exception exc) {
             LOGGER.error("", exc);
-            sendResponse(new ServiceResponse<>(500, exc.getMessage()), response);
+            sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
         }
     }
 
@@ -157,20 +157,9 @@ public class ServletV1P0 extends HttpServlet {
                 .build();
     }
 
-    private void sendResponse(ServiceResponse<?> serviceResponse, HttpServletResponse httpResponse) {
-        httpResponse.setStatus(serviceResponse.getCode());
-        serviceResponse.getHeaders().entrySet().forEach(x -> httpResponse.setHeader(x.getKey(), x.getValue()));
+    private void sendResponse(ServiceResponseHttpServlet serviceResponse, HttpServletResponse httpResponse) {
         try {
-            if (serviceResponse.getCode() >= 200
-                    && serviceResponse.getCode() < 300
-                    && serviceResponse.getResultFormatted() != null
-                    && !serviceResponse.getResultFormatted().isEmpty()) {
-                httpResponse.setContentType(serviceResponse.getContentType());
-                httpResponse.setCharacterEncoding(ENCODING);
-                httpResponse.getWriter().write(serviceResponse.getResultFormatted());
-
-            } else if (serviceResponse.getMessage() != null
-                    && !serviceResponse.getMessage().isEmpty()) {
+            if (!serviceResponse.isSuccessful() && !StringHelper.isNullOrEmpty(serviceResponse.getMessage())) {
                 httpResponse.getWriter().write(serviceResponse.getMessage());
             }
         } catch (IOException ex) {

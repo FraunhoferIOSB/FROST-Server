@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,116 +17,51 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import java.util.HashMap;
+import java.io.Writer;
 import java.util.Map;
 
-/**
- *
- * @author jab, scf
- * @param <T> The type of the non-formatted result object.
- */
-public class ServiceResponse<T> {
-
-    /**
-     * The non-formatted result.
-     */
-    private T result;
-    /**
-     * The formatted result.
-     */
-    private String resultFormatted;
-    /**
-     * The content type of the formatted result.
-     */
-    private String contentType;
-    private int code;
-    private String message;
-    private final Map<String, String> headers;
-
-    public ServiceResponse() {
-        this.headers = new HashMap<>();
-    }
-
-    public ServiceResponse(int code, String message, T result, String resultFormatted) {
-        this.headers = new HashMap<>();
-        this.result = result;
-        this.code = code;
-        this.message = message;
-        this.resultFormatted = resultFormatted;
-    }
-
-    public ServiceResponse(int code, String message) {
-        this.headers = new HashMap<>();
-        this.code = code;
-        this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
+public interface ServiceResponse {
 
     /**
      * The content type of the formatted result.
      *
      * @return the contentType
      */
-    public String getContentType() {
-        return contentType;
-    }
+    public String getContentType();
 
     /**
      * The content type of the formatted result.
      *
      * @param contentType the contentType to set
+     * @return this
      */
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
+    public ServiceResponse setContentType(String contentType);
 
-    public T getResult() {
-        return result;
-    }
+    public Map<String, String> getHeaders();
 
-    public void setResult(T result) {
-        this.result = result;
-    }
+    public ServiceResponse addHeader(String key, String value);
 
-    public String getMessage() {
-        return message;
-    }
+    public int getCode();
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    public ServiceResponse setCode(int code);
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
+    public String getMessage();
 
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
-    }
+    public ServiceResponse setMessage(String message);
 
-    public ServiceResponse<T> setStatus(int code, String message) {
-        this.code = code;
-        this.message = message;
-        return this;
-    }
+    public ServiceResponse setStatus(int code, String message);
 
-    public String getResultFormatted() {
-        return resultFormatted;
-    }
+    public Object getResult();
 
-    public void setResultFormatted(String resultFormatted) {
-        this.resultFormatted = resultFormatted;
-    }
+    public ServiceResponse setResult(Object result);
 
-    public boolean isSuccessful() {
-        return code >= 200 && code < 300;
-    }
+    /**
+     * Get the writer that the formatted result should be written to.
+     *
+     * @return the writer that the formatted result should be written to.
+     */
+    public Writer getWriter();
+
+    public boolean isSuccessful();
 
 }

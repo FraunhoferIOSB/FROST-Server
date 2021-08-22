@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -114,8 +114,8 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     }
 
     @Override
-    public ServiceResponse execute(Service service, ServiceRequest request) {
-        return new ServiceDataArray(settings).executeCreateObservations(service, request);
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
+        return new ServiceDataArray(settings).executeCreateObservations(service, request, response);
     }
 
     public static void modifyEntityFormatter() {

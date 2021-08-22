@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -82,8 +82,7 @@ public class ServiceDataArray {
         arrayValueHandlers = new ArrayValueHandlers();
     }
 
-    public <T> ServiceResponse<T> executeCreateObservations(final Service service, final ServiceRequest request) {
-        final ServiceResponse<T> response = new ServiceResponse<>();
+    public ServiceResponse executeCreateObservations(final Service service, final ServiceRequest request, final ServiceResponse response) {
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
@@ -102,8 +101,10 @@ public class ServiceDataArray {
             }
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
-            response.setResultFormatted(formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
             response.setContentType(formatter.getContentType());
+            formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
+                    .writeFormatted(response.getWriter());
+
             return Service.successResponse(response, 201, "Created");
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
@@ -183,8 +183,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private void handleEntityCreateEvent(EntityCreateEvent e) {
         logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
-        String topic = e.getTopic();
-        Version version;
+        final String topic = e.getTopic();
+        final Version version;
         try {
             version = getVersionFromTopic(topic);
         } catch (UnknownVersionException ex) {
@@ -192,18 +192,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
 
-        String url = topic.replaceFirst(version.urlPart, "");
+        final String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
-            ServiceResponse<? extends Entity> response = service.execute(new ServiceRequestBuilder(version)
-                    .withRequestType(RequestTypeUtils.CREATE)
-                    .withContent(e.getPayload())
-                    .withUrlPath(url)
-                    .build());
-            if (response.isSuccessful()) {
-                LOGGER.debug("Entity (ID {}) created via MQTT", response.getResult().getId().getValue());
-            } else {
+            final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
+            service.execute(
+                    new ServiceRequestBuilder(version)
+                            .withRequestType(RequestTypeUtils.CREATE)
+                            .withContent(e.getPayload())
+                            .withUrlPath(url)
+                            .build(),
+                    serviceResponse);
+            if (!serviceResponse.isSuccessful()) {
                 LOGGER.error("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                        topic, e.getPayload(), response.getCode(), response.getMessage());
+                        topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
             }
         }
     }

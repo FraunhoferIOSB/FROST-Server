@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -83,21 +85,20 @@ public class ResultFormatterDataArray implements ResultFormatter {
     }
 
     @Override
-    public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
-        String entityJsonString = "";
+    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         try {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
                 final ModelRegistry modelRegistry = settings.getModelRegistry();
                 if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
-                    return formatDataArray(path, query, entitySet);
+                    return new FormatWriterGeneric(formatDataArray(path, query, entitySet));
                 }
             }
             throw new IllegalArgumentException(OBSERVATIONS_ONLY);
         } catch (IOException ex) {
             LOGGER.error("Failed to format response.", ex);
         }
-        return entityJsonString;
+        return null;
     }
 
     @Override

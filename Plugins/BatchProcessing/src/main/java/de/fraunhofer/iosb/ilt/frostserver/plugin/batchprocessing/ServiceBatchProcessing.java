@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchFactory;
@@ -25,9 +26,12 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
@@ -37,6 +41,7 @@ import java.util.Map;
  */
 public class ServiceBatchProcessing {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBatchProcessing.class.getName());
     /**
      * The path for the CreateObservations request type..
      */
@@ -57,11 +62,11 @@ public class ServiceBatchProcessing {
 
     private final CoreSettings settings;
 
-    public ServiceBatchProcessing(CoreSettings settings) {
+    public ServiceBatchProcessing(final CoreSettings settings) {
         this.settings = settings;
     }
 
-    public ServiceResponse<String> executeBatchOperation(final Service service, final ServiceRequest request) {
+    public ServiceResponse executeBatchOperation(final Service service, final ServiceRequest request, final ServiceResponse response) {
         BatchFactory<?> batchFactory = CONTENT_TYPE_TO_FACTORY
                 .get(request.getContentType().split(";", 2)[0].toLowerCase());
         if (batchFactory == null) {
@@ -70,14 +75,17 @@ public class ServiceBatchProcessing {
         Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
         batch.parse(request);
         Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service, batch);
-        return sendResponse(resultContent);
+        return sendResponse(resultContent, response);
     }
 
-    private ServiceResponse<String> sendResponse(Batch batch) {
-        final ServiceResponse<String> response = new ServiceResponse<>();
+    private ServiceResponse sendResponse(final Batch batch, final ServiceResponse response) {
         response.setCode(200);
         batch.getHeaders().entrySet().forEach(x -> response.addHeader(x.getKey(), x.getValue()));
-        response.setResultFormatted(batch.getContent(false));
+        try {
+            new FormatWriterGeneric(batch.getContent(false)).writeFormatted(response.getWriter());
+        } catch (IOException ex) {
+            LOGGER.error("Failed to format", ex);
+        }
         return response;
     }
 }
