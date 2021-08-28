@@ -1,12 +1,12 @@
-package de.fraunhofer.iosb.ilt.statests.c03filtering;
+package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
-import de.fraunhofer.iosb.ilt.sta.dao.DatastreamDao;
+import de.fraunhofer.iosb.ilt.sta.dao.MultiDatastreamDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
@@ -50,7 +51,7 @@ public class DateTimeTests extends AbstractTestClass {
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
+    private static final List<MultiDatastream> MULTI_DATASTREAMS = new ArrayList<>();
     private static final ZonedDateTime T2014 = ZonedDateTime.parse("2014-01-01T06:00:00.000Z");
     private static final ZonedDateTime T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
     private static final ZonedDateTime T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
@@ -110,7 +111,7 @@ public class DateTimeTests extends AbstractTestClass {
     private static void cleanup() throws ServiceFailureException {
         EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
-        DATASTREAMS.clear();
+        MULTI_DATASTREAMS.clear();
         OBSERVATIONS.clear();
     }
 
@@ -123,12 +124,16 @@ public class DateTimeTests extends AbstractTestClass {
 
         Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
         ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        MultiDatastream datastream = new MultiDatastream(
+                "Datastream 1",
+                "The temperature of thing 1, sensor 1.",
+                Arrays.asList("someType"),
+                Arrays.asList(new UnitOfMeasurement("degree celcius", "°C", "ucum:T")));
         datastream.setThing(thing);
         datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
+        datastream.getObservedProperties().add(obsProp);
         service.create(datastream);
-        DATASTREAMS.add(datastream);
+        MULTI_DATASTREAMS.add(datastream);
 
         createObservation(0, datastream, T600, T600, null); // 0
         createObservation(1, datastream, T659, T659, null); // 1
@@ -160,24 +165,28 @@ public class DateTimeTests extends AbstractTestClass {
         createObservation(24, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
 
         // A second Datastream, with no observations.
-        Datastream datastream2 = new Datastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        MultiDatastream datastream2 = new MultiDatastream(
+                "Datastream 2",
+                "The second temperature of thing 1, sensor 1.",
+                Arrays.asList("someType"),
+                Arrays.asList(new UnitOfMeasurement("degree celcius", "°C", "ucum:T")));
         datastream2.setThing(thing);
         datastream2.setSensor(sensor);
-        datastream2.setObservedProperty(obsProp);
+        datastream2.getObservedProperties().add(obsProp);
         service.create(datastream2);
-        DATASTREAMS.add(datastream2);
+        MULTI_DATASTREAMS.add(datastream2);
     }
 
-    private static void createObservation(double result, Datastream ds, Interval pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
+    private static void createObservation(double result, MultiDatastream ds, Interval pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
         createObservation(result, ds, new TimeObject(pt), rt, vt);
     }
 
-    private static void createObservation(double result, Datastream ds, ZonedDateTime pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
+    private static void createObservation(double result, MultiDatastream ds, ZonedDateTime pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
         createObservation(result, ds, new TimeObject(pt), rt, vt);
     }
 
-    private static void createObservation(double result, Datastream ds, TimeObject pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        Observation o = new Observation(result, ds);
+    private static void createObservation(double result, MultiDatastream ds, TimeObject pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
+        Observation o = new Observation(new double[]{result}, ds);
         o.setPhenomenonTime(pt);
         o.setResultTime(rt);
         o.setValidTime(vt);
@@ -194,19 +203,19 @@ public class DateTimeTests extends AbstractTestClass {
     }
 
     public void testDsTpl(String tpl,
-            List<Datastream> t2014,
-            List<Datastream> t2015,
-            List<Datastream> t700,
-            List<Datastream> t2017_2,
-            List<Datastream> t2018,
-            List<Datastream> i78,
-            List<Datastream> i2014_2015,
-            List<Datastream> i2014_2017_2,
-            List<Datastream> i2014_2018,
-            List<Datastream> i2015_2017_2,
-            List<Datastream> i2015_2018,
-            List<Datastream> i2017_2_2018) {
-        DatastreamDao dsDoa = service.datastreams();
+            List<MultiDatastream> t2014,
+            List<MultiDatastream> t2015,
+            List<MultiDatastream> t700,
+            List<MultiDatastream> t2017_2,
+            List<MultiDatastream> t2018,
+            List<MultiDatastream> i78,
+            List<MultiDatastream> i2014_2015,
+            List<MultiDatastream> i2014_2017_2,
+            List<MultiDatastream> i2014_2018,
+            List<MultiDatastream> i2015_2017_2,
+            List<MultiDatastream> i2015_2018,
+            List<MultiDatastream> i2017_2_2018) {
+        MultiDatastreamDao dsDoa = service.multiDatastreams();
         filterAndCheckDs(dsDoa, String.format(tpl, T2014), t2014);
         filterAndCheckDs(dsDoa, String.format(tpl, T2015), t2015);
         filterAndCheckDs(dsDoa, String.format(tpl, T700), t700);
@@ -297,18 +306,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0));
     }
 
     @Test
@@ -333,18 +342,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -369,18 +378,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0));
     }
 
     @Test
@@ -405,18 +414,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -441,18 +450,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -477,18 +486,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "before({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0));
     }
 
     @Test
@@ -513,18 +522,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "after({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -549,18 +558,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "meets({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0));
     }
 
     @Test
@@ -590,13 +599,13 @@ public class DateTimeTests extends AbstractTestClass {
                 null,
                 null,
                 null,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -621,18 +630,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "overlaps({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -657,18 +666,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "starts({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -693,18 +702,18 @@ public class DateTimeTests extends AbstractTestClass {
 
         tpl = "finishes({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS, 0),
+                getFromList(MULTI_DATASTREAMS),
+                getFromList(MULTI_DATASTREAMS));
     }
 
     @Test
@@ -757,9 +766,9 @@ public class DateTimeTests extends AbstractTestClass {
     public void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
         LOGGER.info("  test19PhenomenonTimeAfterDelete");
         EntityUtils.deleteAll(service.observations());
-        Datastream ds1 = service.datastreams().find(DATASTREAMS.get(0).getId());
+        MultiDatastream ds1 = service.multiDatastreams().find(MULTI_DATASTREAMS.get(0).getId());
         Assert.assertNull("phenomenonTime should be null", ds1.getPhenomenonTime());
-        Datastream ds2 = service.datastreams().find(DATASTREAMS.get(1).getId());
+        MultiDatastream ds2 = service.multiDatastreams().find(MULTI_DATASTREAMS.get(1).getId());
         Assert.assertNull("phenomenonTime should be null", ds2.getPhenomenonTime());
     }
 }

@@ -50,11 +50,6 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 
 
 -- ---------------------------------------
--- Trigger: datastreams_actualization_insert on OBSERVATIONS
--- ---------------------------------------
-drop trigger if exists datastreams_actualization_insert ON "OBSERVATIONS";
-
--- ---------------------------------------
 -- Function: datastreams_update_insert()
 --
 -- Updated fields are:
@@ -112,19 +107,18 @@ $BODY$
 
 
 
-create trigger datastreams_actualization_insert
-  after insert
-  on "OBSERVATIONS"
-  for each row
-  execute procedure datastreams_update_insert();
+do $$ begin
+    create trigger datastreams_actualization_insert
+        after insert
+        on "OBSERVATIONS"
+        for each row
+        execute procedure datastreams_update_insert();
+exception
+    when others then null;
+end $$;
 
 
 
-
--- ---------------------------------------
--- Trigger: datastreams_actualization_update on OBSERVATIONS
--- ---------------------------------------
-drop trigger if exists datastreams_actualization_update ON "OBSERVATIONS";
 
 -- ---------------------------------------
 -- Function: datastreams_update_update()
@@ -197,18 +191,17 @@ $BODY$
     cost 100;
 
 
-create trigger datastreams_actualization_update
-  after update
-  on "OBSERVATIONS"
-  for each row
-  execute procedure datastreams_update_update();
+do $$ begin
+    create trigger datastreams_actualization_update
+        after update
+        on "OBSERVATIONS"
+        for each row
+        execute procedure datastreams_update_update();
+exception
+    when others then null;
+end $$;
 
 
-
--- ---------------------------------------
--- Trigger: datastreams_actualization_delete on OBSERVATIONS
--- ---------------------------------------
-drop trigger if exists datastreams_actualization_delete ON "OBSERVATIONS";
 
 -- ---------------------------------------
 -- Function: datastreams_update_delete()
@@ -249,7 +242,7 @@ then
         delimitr := ',';
     end if;
     if (delimitr = ',') then
-        EXECUTE 'update "DATASTREAMS" SET ' || queryset ||  ' where "DATASTREAMS"."ID"=$1."DATASTREAM_ID"' using NEW;
+        EXECUTE 'update "DATASTREAMS" SET ' || queryset ||  ' where "DATASTREAMS"."ID"=$1."DATASTREAM_ID"' using OLD;
     end if;
 end if;    
 
@@ -260,8 +253,12 @@ $BODY$
     cost 100;
 
 
-create trigger datastreams_actualization_delete
-  after delete
-  on "OBSERVATIONS"
-  for each row
-  execute procedure datastreams_update_delete();
+do $$ begin
+    create trigger datastreams_actualization_delete
+        after delete
+        on "OBSERVATIONS"
+        for each row
+        execute procedure datastreams_update_delete();
+exception
+    when others then null;
+end $$;
