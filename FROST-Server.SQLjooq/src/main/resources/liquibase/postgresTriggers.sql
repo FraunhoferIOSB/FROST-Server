@@ -334,7 +334,7 @@ then
         delimitr := ',';
     end if;
     if (delimitr = ',') then
-        EXECUTE 'update "DATASTREAMS" SET ' || queryset ||  ' where "DATASTREAMS"."ID"=$1."DATASTREAM_ID"' using NEW;
+        EXECUTE 'update "DATASTREAMS" SET ' || queryset ||  ' where "DATASTREAMS"."ID"=$1."DATASTREAM_ID"' using OLD;
     end if;
 end if;    
 
@@ -342,7 +342,7 @@ if (OLD."MULTI_DATASTREAM_ID" is not null)
 then
     select * into "MDS_ROW" from "MULTI_DATASTREAMS" where "MULTI_DATASTREAMS"."ID"=OLD."MULTI_DATASTREAM_ID";
 
-    if (OLD."PHENOMENON_TIME_START" = "DS_ROW"."PHENOMENON_TIME_START"
+    if (OLD."PHENOMENON_TIME_START" = "MDS_ROW"."PHENOMENON_TIME_START"
         or coalesce(OLD."PHENOMENON_TIME_END", OLD."PHENOMENON_TIME_START") = "MDS_ROW"."PHENOMENON_TIME_END")
     then
         queryset := queryset || delimitr || '"PHENOMENON_TIME_START" = (select min("PHENOMENON_TIME_START") from "OBSERVATIONS" where "OBSERVATIONS"."MULTI_DATASTREAM_ID" = $1."MULTI_DATASTREAM_ID")';
@@ -361,10 +361,9 @@ then
         delimitr := ',';
     end if;
     if (delimitr = ',') then
-        EXECUTE 'update "MULTI_DATASTREAMS" SET ' || queryset ||  ' where "MULTI_DATASTREAMS"."ID"=$1."MULTI_DATASTREAM_ID"' using NEW;
+        EXECUTE 'update "MULTI_DATASTREAMS" SET ' || queryset ||  ' where "MULTI_DATASTREAMS"."ID"=$1."MULTI_DATASTREAM_ID"' using OLD;
     end if;
 end if;    
-
 
 return NULL;
 end
