@@ -59,6 +59,7 @@ public class JsonWriter {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
 
         MixinUtils.addMixins(mapper);
 
