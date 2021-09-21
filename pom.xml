@@ -44,7 +44,7 @@
         <guava.version>30.1.1-jre</guava.version>
         <httpclient.version>4.5.13</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
-        <jackson.version>2.12.4</jackson.version>
+        <jackson.version>2.12.5</jackson.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.10</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
@@ -53,21 +53,21 @@
         <jodatime.version>2.10.10</jodatime.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>4.13.2</junit.version>
-        <keycloak.version>15.0.1</keycloak.version>
+        <keycloak.version>15.0.2</keycloak.version>
         <liquibase.version>4.4.3</liquibase.version>
-        <logback.version>1.2.5</logback.version>
+        <logback.version>1.2.6</logback.version>
 
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
         <maven-gpg-plugin>3.0.1</maven-gpg-plugin>
         <maven-jacoco-plugin.version>0.8.7</maven-jacoco-plugin.version>
-        <maven-javadoc-plugin.version>3.3.0</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-nexus-staging-plugin>1.6.8</maven-nexus-staging-plugin>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
-        <owasp.version>6.2.2</owasp.version>
+        <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
+        <owasp.version>6.3.1</owasp.version>
 
         <org.json.version>20210307</org.json.version>
         <paho.version>1.2.5</paho.version>
@@ -75,7 +75,7 @@
         <postgres.version>42.2.23</postgres.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <testcontainers.version>1.16.0</testcontainers.version>
-        <testcontainers-keycloak.version>1.7.1</testcontainers-keycloak.version>
+        <testcontainers-keycloak.version>1.8.0</testcontainers-keycloak.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
