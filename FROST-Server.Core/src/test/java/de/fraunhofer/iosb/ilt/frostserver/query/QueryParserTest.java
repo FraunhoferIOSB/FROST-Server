@@ -656,6 +656,16 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testExpandSingleNavigationPropertyEmpty() {
+        String query = "$expand=Rooms()";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOMS));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
     public void testExpandDeep() {
         String query = "$expand=Rooms/House";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);

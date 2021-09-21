@@ -263,7 +263,7 @@ void FilteredPath() #FilteredPath: {}
 }
 void FilteredPathElement() #PathElement: {String name;}
 {
-  name=Identifier() ( <LB> InnerOptions() <RB> )?
+  name=Identifier() ( <LB> (InnerOptions())? <RB> )?
   {
     jjtThis.setName(name);
   }
