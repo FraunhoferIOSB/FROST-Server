@@ -86,6 +86,10 @@ public class Query {
         this.select = new LinkedHashSet<>();
     }
 
+    public boolean isEmpty() {
+        return top.isEmpty() && skip.isEmpty() && count.isEmpty() && select.isEmpty() && expand.isEmpty() && filter == null;
+    }
+
     public Query validate() {
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {

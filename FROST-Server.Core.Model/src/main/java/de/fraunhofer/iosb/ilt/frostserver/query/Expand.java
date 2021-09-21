@@ -197,7 +197,7 @@ public class Expand {
         } else {
             sb.append(validatedPath.getName());
         }
-        if (subQuery != null) {
+        if (subQuery != null && !subQuery.isEmpty()) {
             sb.append('(');
             sb.append(subQuery.toString(true));
             sb.append(')');

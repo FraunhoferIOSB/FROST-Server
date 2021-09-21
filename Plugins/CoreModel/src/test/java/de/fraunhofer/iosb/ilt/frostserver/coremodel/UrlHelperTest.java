@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -129,6 +130,14 @@ public class UrlHelperTest {
                 coreSettings,
                 "/Things?$select=distinct:properties/type&$top=2",
                 "/Things?$select=distinct:properties/type&$top=2&$skip=2");
+    }
+
+    @Test
+    public void testNextLinkExpand() {
+        testNextLink(
+                coreSettings,
+                "/Things?$expand=Locations&$top=2",
+                "/Things?$expand=Locations&$top=2&$skip=2");
     }
 
     @Test
@@ -236,6 +245,7 @@ public class UrlHelperTest {
     private static void testNextLink(CoreSettings settings, IdManager idManager, String baseUrl, String expectedNextUrl) {
         Query queryBase = ParserUtils.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
         Query queryExpected = ParserUtils.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+        probeQuery(queryBase);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase);
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
@@ -244,4 +254,9 @@ public class UrlHelperTest {
         Assert.assertEquals(queryExpected, next);
     }
 
+    private static void probeQuery(Query query) {
+        for (Expand expand : query.getExpand()) {
+            probeQuery(expand.getSubQuery());
+        }
+    }
 }
