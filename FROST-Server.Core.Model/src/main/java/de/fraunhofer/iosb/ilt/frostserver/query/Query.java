@@ -225,9 +225,7 @@ public class Query {
     }
 
     public Query addSelect(Property... properties) {
-        for (Property property : properties) {
-            select.add(property);
-        }
+        select.addAll(Arrays.asList(properties));
         return this;
     }
 

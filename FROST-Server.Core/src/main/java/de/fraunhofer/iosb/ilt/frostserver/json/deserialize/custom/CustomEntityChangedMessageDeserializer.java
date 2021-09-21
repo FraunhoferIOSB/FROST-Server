@@ -65,19 +65,19 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     break;
 
                 case "entityType":
-                    type = handleEntityType(parser, type, entity, message);
+                    type = handleEntityType(parser, entity, message);
                     break;
 
                 case "epFields":
-                    handleEpFields(parser, type, currentToken, message);
+                    handleEpFields(parser, type, message);
                     break;
 
                 case "npFields":
-                    handleNpFields(parser, type, currentToken, message);
+                    handleNpFields(parser, type, message);
                     break;
 
                 case "entity":
-                    entity = handleEntity(parser, ctxt, type, entity, message);
+                    entity = handleEntity(parser, ctxt, type, message);
                     break;
 
                 default:
@@ -93,8 +93,8 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         return message;
     }
 
-    private EntityType handleEntityType(JsonParser parser, EntityType type, Entity entity, EntityChangedMessage message) throws IOException {
-        type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
+    private EntityType handleEntityType(JsonParser parser, Entity entity, EntityChangedMessage message) throws IOException {
+        EntityType type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
         if (entity != null) {
             entity.setEntityType(type);
             entity.setQuery(queryGenerator.getQueryFor(type));
@@ -103,12 +103,12 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         return type;
     }
 
-    private void handleEpFields(JsonParser parser, EntityType type, JsonToken currentToken, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+    private void handleEpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
         String fieldName;
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
         }
-        currentToken = parser.nextToken();
+        JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.VALUE_STRING) {
             fieldName = parser.getValueAsString();
             message.addEpField((EntityPropertyMain) type.getProperty(fieldName));
@@ -116,12 +116,12 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         }
     }
 
-    private void handleNpFields(JsonParser parser, EntityType type, JsonToken currentToken, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+    private void handleNpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
         String fieldName;
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
         }
-        currentToken = parser.nextToken();
+        JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.VALUE_STRING) {
             fieldName = parser.getValueAsString();
             message.addNpField((NavigationPropertyMain) type.getProperty(fieldName));
@@ -129,11 +129,11 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         }
     }
 
-    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, Entity entity, EntityChangedMessage message) throws IOException, IllegalArgumentException {
+    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, EntityChangedMessage message) throws IOException, IllegalArgumentException {
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
         }
-        entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
+        Entity entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
                 .deserialize(parser, ctxt);
         entity.setQuery(queryGenerator.getQueryFor(type));
         message.setEntity(entity);

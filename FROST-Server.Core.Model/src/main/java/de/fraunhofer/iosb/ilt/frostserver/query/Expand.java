@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -87,10 +88,7 @@ public class Expand {
     public List<String> getRawPath() {
         if (rawPath == null) {
             final String[] items = StringUtils.split(validatedPath.getName(), '/');
-            rawPath = new ArrayList<>(items.length);
-            for (String item : items) {
-                rawPath.add(item);
-            }
+            rawPath = Arrays.asList(items);
         }
         return rawPath;
     }

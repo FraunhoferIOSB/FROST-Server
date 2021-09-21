@@ -47,7 +47,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
 
     private TableCollection<UUID> getTableCollection(CoreSettings settings) {
         return tableCollections.computeIfAbsent(settings,
-                (t) -> new TableCollection<>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID)
+                t -> new TableCollection<>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID)
         );
     }
 

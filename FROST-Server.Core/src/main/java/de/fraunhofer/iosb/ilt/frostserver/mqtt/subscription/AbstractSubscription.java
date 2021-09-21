@@ -92,36 +92,33 @@ public abstract class AbstractSubscription implements Subscription {
         boolean direct = true;
         for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
             PathElement element = path.get(i);
-            if (!(element instanceof PathElementEntity) && !(element instanceof PathElementEntitySet)) {
-                continue;
-            }
             if (element instanceof PathElementEntitySet) {
                 final PathElementEntitySet pees = (PathElementEntitySet) element;
                 final NavigationPropertyMain navProp = lastType.getNavigationProperty(pees.getEntityType());
                 properties.add(navProp);
                 lastType = pees.getEntityType();
                 direct = false;
-                continue;
-            }
 
-            final PathElementEntity epe = (PathElementEntity) element;
-            final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
+            } else if (element instanceof PathElementEntity) {
+                final PathElementEntity epe = (PathElementEntity) element;
+                final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
 
-            Id id = epe.getId();
-            if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
-                createMatcher(navProp, id);
-                assert (i <= 1);
-                return;
-            }
+                final Id id = epe.getId();
+                if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
+                    createMatcher(navProp, id);
+                    assert (i <= 1);
+                    return;
+                }
 
-            properties.add(navProp);
-            lastType = epe.getEntityType();
+                properties.add(navProp);
+                lastType = epe.getEntityType();
 
-            if (id != null) {
-                createMatchExpression(properties, epe);
-                // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
-                assert (i <= 1);
-                return;
+                if (id != null) {
+                    createMatchExpression(properties, epe);
+                    // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
+                    assert (i <= 1);
+                    return;
+                }
             }
         }
     }

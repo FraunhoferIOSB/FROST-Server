@@ -61,9 +61,7 @@ public class JsonReader {
      * @return The cached or created object mapper.
      */
     private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry) {
-        return mappers.computeIfAbsent(modelRegistry, (t) -> {
-            return createObjectMapper(t);
-        });
+        return mappers.computeIfAbsent(modelRegistry, JsonReader::createObjectMapper);
     }
 
     /**

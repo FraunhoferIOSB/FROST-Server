@@ -75,9 +75,7 @@ public class FieldMapperJson extends FieldMapperAbstract {
                                 dataSize.increase(fieldJsonValue.getStringLength());
                                 entity.setProperty(entityProperty, fieldJsonValue.getValue(entityProperty.getType()));
                             },
-                            (t, entity, insertFields) -> {
-                                insertFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty)));
-                            },
+                            (t, entity, insertFields) -> insertFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty))),
                             (t, entity, updateFields, message) -> {
                                 updateFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty)));
                                 message.addField(entityProperty);

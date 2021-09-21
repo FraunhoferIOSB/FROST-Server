@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperAbstract.getOrRegisterField;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.math.BigDecimal;
@@ -87,12 +86,8 @@ public class FieldMapperResult extends FieldMapperAbstract {
 
         pfReg.addEntry(property,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (T t, Record tuple, Entity entity, DataSize dataSize) -> {
-                            readResultFromDb(entity, property, t, tuple, dataSize, idxType, idxString, idxNumber, idxBoolean, idxJson);
-                        },
-                        (t, entity, insertFields) -> {
-                            handleResult(entity, property, t, insertFields, idxType, idxString, idxNumber, idxBoolean, idxJson);
-                        },
+                        (T t, Record tuple, Entity entity, DataSize dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize, idxType, idxString, idxNumber, idxBoolean, idxJson),
+                        (t, entity, insertFields) -> handleResult(entity, property, t, insertFields, idxType, idxString, idxNumber, idxBoolean, idxJson),
                         (t, entity, updateFields, message) -> {
                             handleResult(entity, property, t, updateFields, idxType, idxString, idxNumber, idxBoolean, idxJson);
                             message.addField(property);
@@ -106,33 +101,33 @@ public class FieldMapperResult extends FieldMapperAbstract {
 
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void handleResult(
             Entity entity, Property property,
-            T table, Map<Field, Object> record,
+            T table, Map<Field, Object> output,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
         Object result = entity.getProperty(property);
         if (result instanceof Number) {
-            record.put(table.field(idxReTy), ResultType.NUMBER.sqlValue());
-            record.put(table.field(idxReSt), result.toString());
-            record.put(table.field(idxReNu), ((Number) result).doubleValue());
-            record.put(table.field(idxReBo), null);
-            record.put(table.field(idxReJs), null);
+            output.put(table.field(idxReTy), ResultType.NUMBER.sqlValue());
+            output.put(table.field(idxReSt), result.toString());
+            output.put(table.field(idxReNu), ((Number) result).doubleValue());
+            output.put(table.field(idxReBo), null);
+            output.put(table.field(idxReJs), null);
         } else if (result instanceof Boolean) {
-            record.put(table.field(idxReTy), ResultType.BOOLEAN.sqlValue());
-            record.put(table.field(idxReSt), result.toString());
-            record.put(table.field(idxReBo), result);
-            record.put(table.field(idxReNu), null);
-            record.put(table.field(idxReJs), null);
+            output.put(table.field(idxReTy), ResultType.BOOLEAN.sqlValue());
+            output.put(table.field(idxReSt), result.toString());
+            output.put(table.field(idxReBo), result);
+            output.put(table.field(idxReNu), null);
+            output.put(table.field(idxReJs), null);
         } else if (result instanceof String) {
-            record.put(table.field(idxReTy), ResultType.STRING.sqlValue());
-            record.put(table.field(idxReSt), result.toString());
-            record.put(table.field(idxReNu), null);
-            record.put(table.field(idxReBo), null);
-            record.put(table.field(idxReJs), null);
+            output.put(table.field(idxReTy), ResultType.STRING.sqlValue());
+            output.put(table.field(idxReSt), result.toString());
+            output.put(table.field(idxReNu), null);
+            output.put(table.field(idxReBo), null);
+            output.put(table.field(idxReJs), null);
         } else {
-            record.put(table.field(idxReTy), ResultType.OBJECT_ARRAY.sqlValue());
-            record.put(table.field(idxReJs), EntityFactories.objectToJson(result));
-            record.put(table.field(idxReSt), null);
-            record.put(table.field(idxReNu), null);
-            record.put(table.field(idxReBo), null);
+            output.put(table.field(idxReTy), ResultType.OBJECT_ARRAY.sqlValue());
+            output.put(table.field(idxReJs), EntityFactories.objectToJson(result));
+            output.put(table.field(idxReSt), null);
+            output.put(table.field(idxReNu), null);
+            output.put(table.field(idxReBo), null);
         }
     }
 

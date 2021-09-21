@@ -47,42 +47,42 @@ public class ArrayValueHandlers {
     /**
      * Our default handlers.
      */
-    private final Map<String, ArrayValueHandler> HANDLERS = new HashMap<>();
+    private final Map<String, ArrayValueHandler> handlers = new HashMap<>();
 
     public ArrayValueHandler getHandler(CoreSettings settings, String component) {
-        if (HANDLERS.isEmpty()) {
+        if (handlers.isEmpty()) {
             createDefaults(settings);
         }
-        return HANDLERS.get(component);
+        return handlers.get(component);
     }
 
     private synchronized void createDefaults(CoreSettings settings) {
         PluginManager pluginManager = settings.getPluginManager();
         PluginCoreModel pluginCoreModel = pluginManager.getPlugin(PluginCoreModel.class);
-        if (!HANDLERS.isEmpty()) {
+        if (!handlers.isEmpty()) {
             return;
         }
 
         final IdManager idManager = PersistenceManagerFactory.getInstance(settings).getIdManager();
         ArrayValueHandler idHandler = (Object value, Entity target) -> target.setId(idManager.parseId(value.toString()));
-        HANDLERS.put("id", idHandler);
-        HANDLERS.put(AT_IOT_ID, idHandler);
-        HANDLERS.put(
+        handlers.put("id", idHandler);
+        handlers.put(AT_IOT_ID, idHandler);
+        handlers.put(
                 "result",
                 (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResult, value)
         );
-        HANDLERS.put(
+        handlers.put(
                 "resultQuality",
                 (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResultQuality, value)
         );
-        HANDLERS.put("parameters", (Object value, Entity target) -> {
+        handlers.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
                 target.setProperty(pluginCoreModel.epParameters, (Map) value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");
         });
-        HANDLERS.put("phenomenonTime", (Object value, Entity target) -> {
+        handlers.put("phenomenonTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
                 target.setProperty(pluginCoreModel.epPhenomenonTime, time);
@@ -99,7 +99,7 @@ public class ArrayValueHandlers {
             }
             throw new IllegalArgumentException("phenomenonTime could not be parsed as time instant or time interval.");
         });
-        HANDLERS.put("resultTime", (Object value, Entity target) -> {
+        handlers.put("resultTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
                 target.setProperty(pluginCoreModel.epResultTime, time);
@@ -107,7 +107,7 @@ public class ArrayValueHandlers {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("validTime", (Object value, Entity target) -> {
+        handlers.put("validTime", (Object value, Entity target) -> {
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
                 target.setProperty(pluginCoreModel.epValidTime, time);
@@ -115,7 +115,7 @@ public class ArrayValueHandlers {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("FeatureOfInterest/id", (Object value, Entity target) -> {
+        handlers.put("FeatureOfInterest/id", (Object value, Entity target) -> {
             Id foiId = idManager.parseId(value.toString());
             target.setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, foiId));
         });

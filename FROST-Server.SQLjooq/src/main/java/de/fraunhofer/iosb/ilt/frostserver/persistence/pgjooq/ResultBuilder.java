@@ -220,7 +220,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     }
 
     private void expandEntitySet(EntitySet entitySet, Query subQuery) {
-        for (Object subEntity : entitySet) {
+        for (Entity subEntity : entitySet) {
             if (subEntity instanceof Entity) {
                 expandEntity((Entity) subEntity, subQuery);
             }

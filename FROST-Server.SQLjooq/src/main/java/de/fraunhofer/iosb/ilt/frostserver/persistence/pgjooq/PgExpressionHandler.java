@@ -299,11 +299,10 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         }
     }
 
-    private void handleNavigationProperty(PathState<J> state, Path path, NavigationPropertyMain element) {
+    private void handleNavigationProperty(PathState<J> state, Path path, NavigationPropertyMain np) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        NavigationPropertyMain np = (NavigationPropertyMain) element;
         state.pathTableRef = queryBuilder.queryEntityType(np, state.pathTableRef);
     }
 

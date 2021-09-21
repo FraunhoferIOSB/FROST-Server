@@ -107,9 +107,11 @@ public class DefaultEntity implements Entity {
     @Override
     public <P> P getProperty(Property<P> property) {
         if (property instanceof EntityPropertyMain) {
-            return (P) entityProperties.get((EntityPropertyMain) property);
+            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
+            return (P) entityProperties.get(entityPropertyMain);
         } else if (property instanceof NavigationPropertyMain) {
-            return (P) navProperties.get((NavigationPropertyMain) property);
+            NavigationPropertyMain navigationPropertyMain = (NavigationPropertyMain) property;
+            return (P) navProperties.get(navigationPropertyMain);
         }
         return property.getFrom(this);
     }
@@ -133,9 +135,11 @@ public class DefaultEntity implements Entity {
     @Override
     public DefaultEntity unsetProperty(Property property) {
         if (property instanceof EntityPropertyMain) {
-            entityProperties.remove((EntityPropertyMain) property);
+            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
+            entityProperties.remove(entityPropertyMain);
         } else if (property instanceof NavigationPropertyMain) {
-            navProperties.remove((NavigationPropertyMain) property);
+            NavigationPropertyMain navigationPropertyMain = (NavigationPropertyMain) property;
+            navProperties.remove(navigationPropertyMain);
         }
         setProperties.add(property);
         return this;

@@ -191,21 +191,21 @@ public class Utils {
      * the Field.
      *
      * @param <T> The type of the requested Field.
-     * @param record The record to fetch the field from.
-     * @param field The field to fetch from the record.
-     * @return The value of the field, or null if the record does not have the
+     * @param input The Record to fetch the field from.
+     * @param field The field to fetch from the input.
+     * @return The value of the field, or null if the input does not have the
      * Field.
      */
-    public static <T> T getFieldOrNull(Record record, Field<T> field) {
-        if (record.field(field) != null) {
-            return record.get(field);
+    public static <T> T getFieldOrNull(Record input, Field<T> field) {
+        if (input.field(field) != null) {
+            return input.get(field);
         }
         return null;
     }
 
-    public static JsonValue getFieldJsonValue(Record record, Field<JsonValue> field) {
-        if (record.field(field) != null) {
-            return record.get(field);
+    public static JsonValue getFieldJsonValue(Record input, Field<JsonValue> field) {
+        if (input.field(field) != null) {
+            return input.get(field);
         }
         return NULL_JSON_VALUE;
     }

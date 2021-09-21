@@ -186,14 +186,10 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
         pfReg.addEntry(pluginCoreModel.epResult,
                 new ConverterRecordDeflt<>(
-                        (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            readResultFromDb(table, tuple, entity, dataSize);
-                        },
-                        (table, entity, insertFields) -> {
-                            handleResult(table, insertFields, entity);
-                        },
+                        this::readResultFromDb,
+                        this::handleResult,
                         (table, entity, updateFields, message) -> {
-                            handleResult(table, updateFields, entity);
+                            handleResult(table, entity, updateFields);
                             message.addField(pluginCoreModel.epResult);
                         }),
                 new NFP<>("n", table -> table.colResultNumber),
@@ -208,9 +204,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                             dataSize.increase(resultQuality.getStringLength());
                             entity.setProperty(pluginCoreModel.epResultQuality, resultQuality.getValue());
                         },
-                        (table, entity, insertFields) -> {
-                            insertFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.epResultQuality)));
-                        },
+                        (table, entity, insertFields) -> insertFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.epResultQuality))),
                         (table, entity, updateFields, message) -> {
                             updateFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.epResultQuality)));
                             message.addField(pluginCoreModel.epResultQuality);
@@ -267,7 +261,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         return this;
     }
 
-    public <J extends Comparable<J>> void handleResult(TableImpObservations<J> table, Map<Field, Object> output, Entity entity) {
+    public <T extends Comparable<T>> void handleResult(TableImpObservations<T> table, Entity entity, Map<Field, Object> output) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
         if (result instanceof Number) {
             output.put(table.colResultType, ResultType.NUMBER.sqlValue());
@@ -296,7 +290,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public <J extends Comparable<J>> void readResultFromDb(TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
+    public <T extends Comparable<T>> void readResultFromDb(TableImpObservations<T> table, Record tuple, Entity entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -327,7 +321,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    private <J extends Comparable> void handleNumber(TableImpObservations<J> table, Record tuple, Entity entity) {
+    private <T extends Comparable> void handleNumber(TableImpObservations<T> table, Record tuple, Entity entity) {
         try {
             entity.setProperty(pluginCoreModel.epResult, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {

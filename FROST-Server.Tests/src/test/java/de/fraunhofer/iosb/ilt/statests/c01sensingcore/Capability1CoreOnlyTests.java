@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Includes various tests of "A.1 Sensing Core" Conformance class.
  */
-public class Capability1CoreOnly extends AbstractTestClass {
+public class Capability1CoreOnlyTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Capability1CoreOnly.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Capability1CoreOnlyTests.class);
     private static final Properties properties = new Properties();
 
     static {
@@ -46,7 +46,7 @@ public class Capability1CoreOnly extends AbstractTestClass {
      */
     private final int resourcePathLevel = 4;
 
-    public Capability1CoreOnly(ServerVersion version) {
+    public Capability1CoreOnlyTests(ServerVersion version) {
         super(version, properties);
     }
 

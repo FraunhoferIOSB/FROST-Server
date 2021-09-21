@@ -57,9 +57,8 @@ public class FieldMapperStatic implements FieldMapper {
                 entityProperty,
                 null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (T table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            entity.setProperty(entityProperty, value);
-                        }, null, null));
+                        (T table, Record tuple, Entity entity, DataSize dataSize) -> entity.setProperty(entityProperty, value),
+                        null, null));
     }
 
     /**

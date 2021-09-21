@@ -49,7 +49,6 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
     private String otherField;
 
     private int fieldIdx;
-    private int fieldIdxOther;
 
     private DefNavigationProperty parent;
 
@@ -75,7 +74,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
         IdManager idManager = ppm.getIdManager();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
 
-        fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
+        final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
         staTable.registerRelation(new RelationOneToMany(navProp, staTable, staTableOther)
                 .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdx))
                 .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther))

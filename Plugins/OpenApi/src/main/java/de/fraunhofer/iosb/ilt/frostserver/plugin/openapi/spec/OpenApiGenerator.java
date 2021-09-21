@@ -144,7 +144,7 @@ public class OpenApiGenerator {
 
         OASchema properties = new OASchema(OASchema.Type.OBJECT, null);
         properties.setDescription("a set of additional properties specified for the entity in the form \"name\":\"value\" pairs");
-        properties.setAdditionalProperties((Boolean) true);
+        properties.setAdditionalProperties(true);
         document.getComponents().addSchema("properties", properties);
     }
 
@@ -174,7 +174,7 @@ public class OpenApiGenerator {
                 oaPath.setPost(new OAOperation());
                 oaPath.getPost().setRequestBody(new OARequestBody()
                         .setDescription("Creates a new entity of type " + entityType.entityName)
-                        .setRequired((Boolean) true)
+                        .setRequired(true)
                         .addContent(CONTENT_TYPE_APPLICATION_JSON, new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName)))
                 );
                 oaPath.getPost().getResponses().put("201", createEntitySetPost201Response(context, entityType));
@@ -291,14 +291,14 @@ public class OpenApiGenerator {
                 oaPath.setPatch(new OAOperation()
                         .setRequestBody(new OARequestBody()
                                 .setDescription("Patches the entity of type " + entityType.entityName)
-                                .setRequired((Boolean) true)
+                                .setRequired(true)
                                 .addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType))
                         .addResponse("201", createEntityPatch200Response(context, entityType)));
 
                 oaPath.setPut(new OAOperation()
                         .setRequestBody(new OARequestBody()
                                 .setDescription("Replaces the entity of type " + entityType.entityName)
-                                .setRequired((Boolean) true)
+                                .setRequired(true)
                                 .addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType))
                         .addResponse("201", createEntityPatch200Response(context, entityType)));
 
@@ -361,7 +361,6 @@ public class OpenApiGenerator {
     }
 
     private static void createEntitySchema(GeneratorContext context, EntityType entityType) {
-        final ModelRegistry modelRegistry = context.getSettings().getModelRegistry();
         final OAComponents components = context.getDocument().getComponents();
         final String schemaName = entityType.entityName;
         final OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
@@ -372,7 +371,7 @@ public class OpenApiGenerator {
                 OASchema propSchema;
                 if (ModelRegistry.EP_ID.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/entityId");
-                } else if (modelRegistry.EP_PROPERTIES.equals(property)) {
+                } else if (ModelRegistry.EP_PROPERTIES.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/properties");
                 } else if (ModelRegistry.EP_SELFLINK.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/selfLink");

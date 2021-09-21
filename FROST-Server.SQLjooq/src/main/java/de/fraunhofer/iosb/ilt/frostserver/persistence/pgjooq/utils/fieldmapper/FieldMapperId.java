@@ -60,7 +60,7 @@ public class FieldMapperId extends FieldMapperAbstract {
     @Override
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
         PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
-        pfReg.addEntryId(ppm.getIdManager(), t -> t.getId());
+        pfReg.addEntryId(ppm.getIdManager(), StaMainTable::getId);
     }
 
     /**

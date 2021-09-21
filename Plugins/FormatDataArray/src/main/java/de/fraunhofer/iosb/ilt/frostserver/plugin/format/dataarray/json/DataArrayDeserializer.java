@@ -125,7 +125,7 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                     break;
 
                 case "dataArray":
-                    currentToken = parser.nextToken();
+                    parser.nextToken();
                     result.setDataArray(parser.readValueAs(LIST_LIST_OBJECT));
                     break;
 

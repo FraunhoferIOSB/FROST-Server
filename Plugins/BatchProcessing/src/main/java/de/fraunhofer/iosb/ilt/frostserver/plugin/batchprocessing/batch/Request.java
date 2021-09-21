@@ -41,11 +41,11 @@ public abstract class Request implements Content {
     protected final StringBuilder data = new StringBuilder();
     protected final Version batchVersion;
 
-    public Request(Version batchVersion) {
+    protected Request(Version batchVersion) {
         this(batchVersion, false);
     }
 
-    public Request(Version batchVersion, boolean requireContentId) {
+    protected Request(Version batchVersion, boolean requireContentId) {
         this.batchVersion = batchVersion;
         this.requireContentId = requireContentId;
     }

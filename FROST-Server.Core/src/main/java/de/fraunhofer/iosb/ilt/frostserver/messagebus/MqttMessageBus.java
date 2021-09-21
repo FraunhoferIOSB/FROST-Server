@@ -152,7 +152,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .start();
         }
         maintenanceTimer = Executors.newSingleThreadScheduledExecutor();
-        maintenanceTimer.scheduleWithFixedDelay(() -> connect(), 1, 1, TimeUnit.MINUTES);
+        maintenanceTimer.scheduleWithFixedDelay(this::connect, 1, 1, TimeUnit.MINUTES);
     }
 
     private synchronized void connect() {

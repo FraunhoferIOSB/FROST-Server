@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
+import java.util.Objects;
+
 /**
  * A wrapper to sort entities that have no natural sorting order.
  *
@@ -41,7 +43,36 @@ public class SortingWrapper<O extends Comparable<O>, T> implements Comparable<So
     }
 
     @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.order);
+        hash = 31 * hash + Objects.hashCode(this.object);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SortingWrapper<?, ?> other = (SortingWrapper<?, ?>) obj;
+        if (!Objects.equals(this.order, other.order)) {
+            return false;
+        }
+        return Objects.equals(this.object, other.object);
+    }
+
+    @Override
     public int compareTo(SortingWrapper<O, T> other) {
+        if (order.equals(other.order)) {
+            return Integer.compare(object.hashCode(), other.object.hashCode());
+        }
         return order.compareTo(other.order);
     }
 

@@ -48,7 +48,7 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
 
     private TableCollection<String> getTableCollection(CoreSettings settings) {
         return tableCollections.computeIfAbsent(settings,
-                (t) -> new TableCollection<>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR)
+                t -> new TableCollection<>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR)
         );
     }
 

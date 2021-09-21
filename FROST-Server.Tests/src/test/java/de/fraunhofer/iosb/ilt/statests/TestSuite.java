@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
-import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnly;
+import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests;
@@ -91,7 +91,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    Capability1CoreOnly.class,
+    Capability1CoreOnlyTests.class,
     Capability1Tests.class,
     Capability2Tests.class,
     AdditionalTests.class,

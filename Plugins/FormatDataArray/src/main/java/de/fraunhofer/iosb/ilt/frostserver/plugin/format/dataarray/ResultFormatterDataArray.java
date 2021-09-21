@@ -51,14 +51,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDataArray.class);
     private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
-    private final CoreSettings settings;
     private final PluginCoreModel pluginCoreModel;
-    private final ModelRegistry modelRegistry;
     private NavigationPropertyEntity npMultiDatastream;
 
     public ResultFormatterDataArray(CoreSettings settings) {
-        this.settings = settings;
-        modelRegistry = settings.getModelRegistry();
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
@@ -74,7 +70,6 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
-            final ModelRegistry modelRegistry = settings.getModelRegistry();
             if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
                 query.getSelect().add(pluginCoreModel.npDatastreamObservation);
                 if (npMultiDatastream != null) {

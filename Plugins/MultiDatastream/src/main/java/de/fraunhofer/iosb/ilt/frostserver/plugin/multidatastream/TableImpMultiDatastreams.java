@@ -55,6 +55,8 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
 
     private static final long serialVersionUID = 560943996;
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpMultiDatastreams.class.getName());
+    private static final String DEF_COMPLEX_OBSERVATION = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation";
+
     /**
      * The column <code>public.MULTI_DATASTREAMS.NAME</code>.
      */
@@ -124,8 +126,8 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
      */
     public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
-    private final PluginMultiDatastream pluginMultiDatastream;
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginMultiDatastream pluginMultiDatastream;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference.
@@ -219,9 +221,8 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntry(pluginCoreModel.epObservationType, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            entity.setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
-                        }, null, null));
+                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
+                        null, null));
         pfReg.addEntry(pluginMultiDatastream.epMultiObservationDataTypes, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
@@ -230,9 +231,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                             dataSize.increase(fieldJsonValue.getStringLength());
                             entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, observationTypes);
                         },
-                        (table, entity, insertFields) -> {
-                            insertFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(pluginMultiDatastream.epMultiObservationDataTypes)));
-                        },
+                        (table, entity, insertFields) -> insertFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(pluginMultiDatastream.epMultiObservationDataTypes))),
                         (table, entity, updateFields, message) -> {
                             updateFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(pluginMultiDatastream.epMultiObservationDataTypes)));
                             message.addField(pluginMultiDatastream.epMultiObservationDataTypes);
@@ -269,9 +268,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
                             entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
                         },
-                        (table, entity, insertFields) -> {
-                            insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
-                        },
+                        (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements))),
                         (table, entity, updateFields, message) -> {
                             updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
                             message.addField(pluginMultiDatastream.epUnitOfMeasurements);

@@ -40,7 +40,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
     private static TableCollection<Long> getTableCollection(CoreSettings settings) {
         return tableCollections.computeIfAbsent(
                 settings,
-                (t) -> new TableCollection<>(IdLong.PERSISTENCE_TYPE_INTEGER, SQLDataType.BIGINT)
+                t -> new TableCollection<>(IdLong.PERSISTENCE_TYPE_INTEGER, SQLDataType.BIGINT)
         );
     }
 

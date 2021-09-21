@@ -76,10 +76,6 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
     private boolean distinctInverse = false;
 
     private int fieldIdx;
-    private int fieldIdxLinkOur;
-    private int fieldIdxLinkOther;
-    private int fieldIdxLinkRank;
-    private int fieldIdxOther;
 
     private DefNavigationProperty parent;
 
@@ -99,13 +95,13 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
     public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
-        fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
+        final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
 
         final StaLinkTable staTableLink = ppm.getOrCreateLinkTable(linkTable);
         final Table dbTableLink = ppm.getDbTable(linkTable);
-        fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
-        fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
-        fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);
+        final int fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
+        final int fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
+        final int fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);
 
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
         final PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();

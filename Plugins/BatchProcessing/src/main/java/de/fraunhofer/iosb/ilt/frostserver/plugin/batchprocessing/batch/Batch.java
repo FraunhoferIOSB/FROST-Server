@@ -27,7 +27,7 @@ public abstract class Batch<C extends Content> implements Content {
     protected final boolean isChangeSet;
     protected final Version batchVersion;
 
-    public Batch(Version batchVersion, CoreSettings settings, boolean isChangeSet) {
+    protected Batch(Version batchVersion, CoreSettings settings, boolean isChangeSet) {
         this.batchVersion = batchVersion;
         this.settings = settings;
         this.isChangeSet = isChangeSet;

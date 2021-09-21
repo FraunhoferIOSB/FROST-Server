@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import java.io.IOException;

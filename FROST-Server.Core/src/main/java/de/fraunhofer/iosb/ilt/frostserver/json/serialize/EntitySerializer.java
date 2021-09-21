@@ -106,18 +106,20 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
-            if (np instanceof NavigationPropertyCustom) {
-                continue;
+            if (!(np instanceof NavigationPropertyCustom)) {
+                writeExpand(exp, entity, np, gen);
             }
-            Object entityOrSet = np.getFrom(entity);
-            if (np.isEntitySet()) {
-                EntitySet entitySet = (EntitySet) entityOrSet;
-                writeEntitySet(np, entitySet, gen);
-            } else {
-                Entity expandedEntity = (Entity) entityOrSet;
-                if (expandedEntity == null) {
-                    continue;
-                }
+        }
+    }
+
+    private void writeExpand(Expand exp, Entity entity, NavigationProperty np, JsonGenerator gen) throws IOException {
+        Object entityOrSet = np.getFrom(entity);
+        if (np.isEntitySet()) {
+            EntitySet entitySet = (EntitySet) entityOrSet;
+            writeEntitySet(np, entitySet, gen);
+        } else {
+            Entity expandedEntity = (Entity) entityOrSet;
+            if (expandedEntity != null) {
                 if (expandedEntity.getQuery() == null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }

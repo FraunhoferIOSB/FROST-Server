@@ -231,8 +231,7 @@ public class ExpressionParser extends AbstractParserVisitor {
             }
             property = visit((ASTPathElement) child, property);
         }
-        Path path = new Path(property);
-        return path;
+        return new Path(property);
     }
 
     @Override

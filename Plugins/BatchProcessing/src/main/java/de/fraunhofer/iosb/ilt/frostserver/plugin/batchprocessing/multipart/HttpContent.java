@@ -177,6 +177,7 @@ public class HttpContent extends Request implements MultipartContent {
         LOGGER.debug("{}Using replaced path and data with content ids {}: {}, {}", logIndent, contentIds, path, data);
     }
 
+    @Override
     public HttpMethod getMethod() {
         return method;
     }
