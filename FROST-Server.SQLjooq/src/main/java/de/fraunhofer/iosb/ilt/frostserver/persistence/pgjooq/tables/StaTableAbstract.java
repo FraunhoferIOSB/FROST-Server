@@ -90,9 +90,9 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     private final DataType<J> idType;
 
-    private final SortedSet<SortingWrapper<Double, HookPreInsert<J>>> hooksPreInsert;
-    private final SortedSet<SortingWrapper<Double, HookPreUpdate<J>>> hooksPreUpdate;
-    private final SortedSet<SortingWrapper<Double, HookPreDelete<J>>> hooksPreDelete;
+    private final transient SortedSet<SortingWrapper<Double, HookPreInsert<J>>> hooksPreInsert;
+    private final transient SortedSet<SortingWrapper<Double, HookPreUpdate<J>>> hooksPreUpdate;
+    private final transient SortedSet<SortingWrapper<Double, HookPreDelete<J>>> hooksPreDelete;
 
     protected StaTableAbstract(DataType<J> idType, Name alias, StaTableAbstract<J, T> aliased) {
         super(alias, null, aliased);
@@ -117,21 +117,6 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     public DataType<J> getIdType() {
         return idType;
-    }
-
-    @Override
-    public final int registerField(String name, DataType type) {
-        return registerField(DSL.name(name), type, null);
-    }
-
-    @Override
-    public final int registerField(String name, DataType type, Binding binding) {
-        return registerField(DSL.name(name), type, binding);
-    }
-
-    @Override
-    public final int registerField(Name name, DataType type) {
-        return registerField(name, type, null);
     }
 
     @Override
@@ -363,7 +348,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(modelRegistry.EP_ID)) {
+            if (ep.equals(ModelRegistry.EP_ID)) {
                 // EP_ID can not be changed.
                 continue;
             }

@@ -228,7 +228,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     public void test06AdminRead() {
         LOGGER.info("  test06AdminRead");
-        EntityUtils.filterAndCheck(serviceAdmin.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
 
     @Test
@@ -242,7 +242,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_UPDATE, ex);
             Assert.fail(ADMIN_SHOULD_BE_ABLE_TO_UPDATE);
         }
-        EntityUtils.filterAndCheck(serviceAdmin.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
 
     @Test
@@ -256,7 +256,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_DELETE, ex);
             Assert.fail(ADMIN_SHOULD_BE_ABLE_TO_DELETE);
         }
-        EntityUtils.filterAndCheck(serviceAdmin.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
 
     @Test
@@ -275,7 +275,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     public void test10WriteRead() {
         LOGGER.info("  test10WriteRead");
-        EntityUtils.filterAndCheck(serviceWrite.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
     }
 
     @Test
@@ -289,7 +289,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error(WRITE_SHOULD_BE_ABLE_TO_UPDATE, ex);
             Assert.fail(WRITE_SHOULD_BE_ABLE_TO_UPDATE);
         }
-        EntityUtils.filterAndCheck(serviceWrite.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
     }
 
     @Test
@@ -302,7 +302,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceWrite.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
     }
 
     @Test
@@ -315,7 +315,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
@@ -330,7 +330,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error("Failed to create test entity.");
         }
 
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
@@ -344,7 +344,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
@@ -357,7 +357,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
@@ -370,14 +370,14 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
     public void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
-            EntityUtils.filterAndCheck(serviceAnon.things(), "", THINGS);
+            EntityUtils.testFilterResults(serviceAnon.things(), "", THINGS);
         } else {
             try {
                 serviceAnon.things().query().list();
@@ -399,7 +399,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
     @Test
@@ -412,7 +412,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
-        EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
     }
 
 }

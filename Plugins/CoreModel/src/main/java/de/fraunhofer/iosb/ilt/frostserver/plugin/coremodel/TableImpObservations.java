@@ -141,7 +141,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
      */
     public final TableField<Record, J> colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference.
@@ -190,10 +190,10 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                             readResultFromDb(table, tuple, entity, dataSize);
                         },
                         (table, entity, insertFields) -> {
-                            handleResult(table, insertFields, entity, true);
+                            handleResult(table, insertFields, entity);
                         },
                         (table, entity, updateFields, message) -> {
-                            handleResult(table, updateFields, entity, true);
+                            handleResult(table, updateFields, entity);
                             message.addField(pluginCoreModel.epResult);
                         }),
                 new NFP<>("n", table -> table.colResultNumber),
@@ -229,7 +229,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
             if (f == null) {
                 final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
                 if (ds != null) {
-                    f = generateFeatureOfInterest(entityFactories, pm, ds.getId());
+                    f = generateFeatureOfInterest(pm, ds.getId());
                     if (f == null) {
                         throw new IncompleteEntityException("No FeatureOfInterest provided, and none can be generated.");
                     }
@@ -267,32 +267,32 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         return this;
     }
 
-    public <J extends Comparable<J>> void handleResult(TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
+    public <J extends Comparable<J>> void handleResult(TableImpObservations<J> table, Map<Field, Object> output, Entity entity) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
         if (result instanceof Number) {
-            record.put(table.colResultType, ResultType.NUMBER.sqlValue());
-            record.put(table.colResultString, result.toString());
-            record.put(table.colResultNumber, ((Number) result).doubleValue());
-            record.put(table.colResultBoolean, null);
-            record.put(table.colResultJson, null);
+            output.put(table.colResultType, ResultType.NUMBER.sqlValue());
+            output.put(table.colResultString, result.toString());
+            output.put(table.colResultNumber, ((Number) result).doubleValue());
+            output.put(table.colResultBoolean, null);
+            output.put(table.colResultJson, null);
         } else if (result instanceof Boolean) {
-            record.put(table.colResultType, ResultType.BOOLEAN.sqlValue());
-            record.put(table.colResultString, result.toString());
-            record.put(table.colResultBoolean, result);
-            record.put(table.colResultNumber, null);
-            record.put(table.colResultJson, null);
+            output.put(table.colResultType, ResultType.BOOLEAN.sqlValue());
+            output.put(table.colResultString, result.toString());
+            output.put(table.colResultBoolean, result);
+            output.put(table.colResultNumber, null);
+            output.put(table.colResultJson, null);
         } else if (result instanceof String) {
-            record.put(table.colResultType, ResultType.STRING.sqlValue());
-            record.put(table.colResultString, result.toString());
-            record.put(table.colResultNumber, null);
-            record.put(table.colResultBoolean, null);
-            record.put(table.colResultJson, null);
+            output.put(table.colResultType, ResultType.STRING.sqlValue());
+            output.put(table.colResultString, result.toString());
+            output.put(table.colResultNumber, null);
+            output.put(table.colResultBoolean, null);
+            output.put(table.colResultJson, null);
         } else {
-            record.put(table.colResultType, ResultType.OBJECT_ARRAY.sqlValue());
-            record.put(table.colResultJson, EntityFactories.objectToJson(result));
-            record.put(table.colResultString, null);
-            record.put(table.colResultNumber, null);
-            record.put(table.colResultBoolean, null);
+            output.put(table.colResultType, ResultType.OBJECT_ARRAY.sqlValue());
+            output.put(table.colResultJson, EntityFactories.objectToJson(result));
+            output.put(table.colResultString, null);
+            output.put(table.colResultNumber, null);
+            output.put(table.colResultBoolean, null);
         }
     }
 
@@ -336,7 +336,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public Entity generateFeatureOfInterest(final EntityFactories<J> entityFactories, PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
         final J dsId = (J) datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
         TableCollection<J> tableCollection = getTables();

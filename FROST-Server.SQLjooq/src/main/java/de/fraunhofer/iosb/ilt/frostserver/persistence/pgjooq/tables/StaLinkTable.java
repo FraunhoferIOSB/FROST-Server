@@ -48,30 +48,15 @@ public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<
         }
     }
 
-    public DataType<J> getIdType() {
-        return idType;
-    }
-
-    @Override
-    public final int registerField(String name, DataType type) {
-        return registerField(DSL.name(name), type, null);
-    }
-
-    @Override
-    public final int registerField(String name, DataType type, Binding binding) {
-        return registerField(DSL.name(name), type, binding);
-    }
-
-    @Override
-    public final int registerField(Name name, DataType type) {
-        return registerField(name, type, null);
-    }
-
     @Override
     public final int registerField(Name name, DataType type, Binding binding) {
         customFields.add(new CustomField(name, type, binding));
         TableField newField = createField(name, type, "", binding);
         return fieldsRow().indexOf(newField);
+    }
+
+    public DataType<J> getIdType() {
+        return idType;
     }
 
     /**

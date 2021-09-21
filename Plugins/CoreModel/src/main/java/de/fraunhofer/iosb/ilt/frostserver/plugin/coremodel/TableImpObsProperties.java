@@ -16,8 +16,6 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TableImpObsProperties<J extends Comparable> extends StaTableAbstract<J, TableImpObsProperties<J>> {
 
@@ -27,8 +25,6 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     public static final String NAME_COL_ID = "ID";
     public static final String NAME_COL_NAME = "NAME";
     public static final String NAME_COL_PROPERTIES = "PROPERTIES";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpObsProperties.class.getName());
 
     private static final long serialVersionUID = -1873692390;
 
@@ -57,7 +53,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
      */
     public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference.
@@ -94,7 +90,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreamsObsProp, TableImpObsProperties::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsObsProp, TableImpObsProperties::getId);
     }
 
     @Override

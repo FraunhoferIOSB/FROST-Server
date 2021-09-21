@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import java.io.Serializable;
 import org.jooq.Binding;
 import org.jooq.DataType;
 import org.jooq.Name;
@@ -25,7 +26,7 @@ import org.jooq.Name;
  *
  * @author hylke
  */
-class CustomField {
+class CustomField implements Serializable {
 
     public final Name name;
     public final DataType type;

@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Collections;
@@ -81,7 +80,7 @@ public class DefEntityProperty {
         }
     }
 
-    public void registerProperties(ModelRegistry modelRegistry) {
+    public void registerProperties() {
         if (entityProperty == null) {
             TypeReference typeReference = TypeReferencesHelper.getTypeReference(type);
             if (typeReference == null) {

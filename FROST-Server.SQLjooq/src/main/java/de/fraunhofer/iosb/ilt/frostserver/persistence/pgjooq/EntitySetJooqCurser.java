@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.jooq.Cursor;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public class EntitySetJooqCurser implements EntitySet, Iterator<Entity> {
+public class EntitySetJooqCurser implements EntitySet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetJooqCurser.class.getName());
 
@@ -47,11 +48,12 @@ public class EntitySetJooqCurser implements EntitySet, Iterator<Entity> {
 
     private String nextLink;
     private long count = -1;
-    private int fetchedCount = 0;
     private int maxFetch;
 
     private final EntityType type;
     private NavigationPropertyMain.NavigationPropertyEntitySet navigationProperty;
+
+    private CursorIterator iterator;
 
     public EntitySetJooqCurser(EntityType type, Cursor<Record> results, QueryState queryState, ResultBuilder resultBuilder) {
         this.type = type;
@@ -117,35 +119,52 @@ public class EntitySetJooqCurser implements EntitySet, Iterator<Entity> {
 
     @Override
     public Iterator<Entity> iterator() {
-        return this;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return results.hasNext() && maxFetch > fetchedCount;
-    }
-
-    @Override
-    public Entity next() {
-        fetchedCount++;
-        Record tuple = results.fetchNext();
-        Entity entity = queryState.entityFromQuery(tuple, size);
-        if (size.isExceeded()) {
-            LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), size.getMaxSize());
-            maxFetch = fetchedCount;
-            if (results.hasNext()) {
-                generateNextLink();
-            }
-            results.close();
-        } else if (fetchedCount >= maxFetch) {
-            if (results.hasNext()) {
-                generateNextLink();
-            }
-            results.close();
+        if (iterator == null) {
+            iterator = new CursorIterator(this);
+            return iterator;
         }
-        entity.setQuery(staQuery);
-        resultBuilder.expandEntity(entity, staQuery);
-        return entity;
+        throw new IllegalStateException("EntitySetJooqCurser can only be iterated once.");
+    }
+
+    private static class CursorIterator implements Iterator<Entity> {
+
+        private final EntitySetJooqCurser parent;
+        private int fetchedCount = 0;
+
+        public CursorIterator(EntitySetJooqCurser parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return parent.results.hasNext() && parent.maxFetch > fetchedCount;
+        }
+
+        @Override
+        public Entity next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("Cursor is closed or empty.");
+            }
+            fetchedCount++;
+            Record tuple = parent.results.fetchNext();
+            Entity entity = parent.queryState.entityFromQuery(tuple, parent.size);
+            if (parent.size.isExceeded()) {
+                LOGGER.debug("Size limit reached: {} > {}.", parent.size.getDataSize(), parent.size.getMaxSize());
+                parent.maxFetch = fetchedCount;
+                if (parent.results.hasNext()) {
+                    parent.generateNextLink();
+                }
+                parent.results.close();
+            } else if (fetchedCount >= parent.maxFetch) {
+                if (parent.results.hasNext()) {
+                    parent.generateNextLink();
+                }
+                parent.results.close();
+            }
+            entity.setQuery(parent.staQuery);
+            parent.resultBuilder.expandEntity(entity, parent.staQuery);
+            return entity;
+        }
     }
 
 }

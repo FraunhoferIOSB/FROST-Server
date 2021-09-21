@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,13 +46,6 @@ public class ServiceResponseDefault implements ServiceResponse {
 
     public ServiceResponseDefault() {
         this.headers = new HashMap<>();
-    }
-
-    public ServiceResponseDefault(int code, String message, Object result, FormatWriter resultFormatted) {
-        this.headers = new HashMap<>();
-        this.result = result;
-        this.code = code;
-        this.message = message;
     }
 
     public ServiceResponseDefault(int code, String message) {

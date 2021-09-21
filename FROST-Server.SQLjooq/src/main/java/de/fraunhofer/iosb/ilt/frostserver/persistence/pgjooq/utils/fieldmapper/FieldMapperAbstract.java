@@ -31,6 +31,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class FieldMapperAbstract implements FieldMapper {
 
+    protected FieldMapperAbstract() {
+        // Hiding implicit public constructor.
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldMapperAbstract.class.getName());
 
     public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable) {

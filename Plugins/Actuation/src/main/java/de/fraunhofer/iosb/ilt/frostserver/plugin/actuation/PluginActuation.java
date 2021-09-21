@@ -55,22 +55,28 @@ import org.slf4j.LoggerFactory;
 public class PluginActuation implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginactuation/tables";
+    private static final String ACTUATOR = "Actuator";
+    private static final String ACTUATORS = "Actuators";
+    private static final String TASK = "Task";
+    private static final String TASKS = "Tasks";
+    private static final String TASKING_CAPABILITY = "TaskingCapability";
+    private static final String TASKING_CAPABILITIES = "TaskingCapabilities";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
     public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
 
-    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity("Actuator");
+    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR);
     public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");
-    public final NavigationPropertyEntitySet npTasksTaskCap = new NavigationPropertyEntitySet("Tasks");
+    public final NavigationPropertyEntitySet npTasksTaskCap = new NavigationPropertyEntitySet(TASKS);
 
-    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity("TaskingCapability", npTasksTaskCap);
-    public final NavigationPropertyEntitySet npTaskingCapabilitiesActuator = new NavigationPropertyEntitySet("TaskingCapabilities", npActuatorTaskCap);
-    public final NavigationPropertyEntitySet npTaskingCapabilitiesThing = new NavigationPropertyEntitySet("TaskingCapabilities", npThingTaskCap);
+    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity(TASKING_CAPABILITY, npTasksTaskCap);
+    public final NavigationPropertyEntitySet npTaskingCapabilitiesActuator = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npActuatorTaskCap);
+    public final NavigationPropertyEntitySet npTaskingCapabilitiesThing = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npThingTaskCap);
 
-    public final EntityType etActuator = new EntityType("Actuator", "Actuators");
-    public final EntityType etTask = new EntityType("Task", "Tasks");
-    public final EntityType etTaskingCapability = new EntityType("TaskingCapability", "TaskingCapabilities");
+    public final EntityType etActuator = new EntityType(ACTUATOR, ACTUATORS);
+    public final EntityType etTask = new EntityType(TASK, TASKS);
+    public final EntityType etTaskingCapability = new EntityType(TASKING_CAPABILITY, TASKING_CAPABILITIES);
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ACTUATION = "actuation.enable";
@@ -102,13 +108,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override
-    public boolean isFullyInitialised() {
-        return fullyInitialised;
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

@@ -102,9 +102,7 @@ public class PathParser implements ParserVisitor {
             PathParser v = new PathParser(modelRegistry, idmanager);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
-            LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
-            LOGGER.trace("Exception: ", ex);
-            throw new IllegalArgumentException("Path is not valid: " + ex.getMessage());
+            throw new IllegalArgumentException("Path is not valid: " + ex.getMessage(), ex);
         }
         return resourcePath;
     }
@@ -274,10 +272,7 @@ public class PathParser implements ParserVisitor {
         }
 
         final NavigationPropertyMain np = parentType.getNavigationProperty(name);
-        if (np == null) {
-            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
-        }
-        if (!np.getName().equals(name)) {
+        if (np == null || !np.getName().equals(name)) {
             throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
         }
         if (np.isEntitySet()) {

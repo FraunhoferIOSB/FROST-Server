@@ -43,8 +43,8 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
      */
     public final TableField<Record, J> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), getIdType(), this);
 
-    private final PluginActuation pluginActuation;
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginActuation pluginActuation;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.TASKS</code> table reference.

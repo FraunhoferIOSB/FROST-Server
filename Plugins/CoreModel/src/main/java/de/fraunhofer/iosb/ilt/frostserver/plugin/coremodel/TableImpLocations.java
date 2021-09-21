@@ -91,7 +91,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
      */
     public final TableField<Record, J> colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference.
@@ -160,8 +160,8 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
                 new NFP<>("j", table -> table.colLocation));
         pfReg.addEntryNoSelect(pluginCoreModel.epLocation, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId);
+        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId);
     }
 
     @Override

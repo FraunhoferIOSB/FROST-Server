@@ -58,8 +58,8 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
      */
     public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
-    private final PluginActuation pluginActuation;
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginActuation pluginActuation;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference.
@@ -85,7 +85,6 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npThingTaskCap, this, tableThings)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
@@ -123,12 +122,12 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
         pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId, idManager);
         pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId, idManager);
-        pfReg.addEntry(pluginActuation.npTasksTaskCap, TableImpTaskingCapabilities::getId, idManager);
+        pfReg.addEntry(pluginActuation.npTasksTaskCap, TableImpTaskingCapabilities::getId);
 
         // We register a navigationProperty on the Things table.
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
-                .addEntry(pluginActuation.npTaskingCapabilitiesThing, TableImpThings::getId, idManager);
+                .addEntry(pluginActuation.npTaskingCapabilitiesThing, TableImpThings::getId);
     }
 
     @Override

@@ -33,8 +33,6 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> The type of the main table for the query.
  */
 public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryState.class.getName());
 
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
@@ -74,7 +70,7 @@ public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
         return mainTable.entityFromQuery(tuple, this, dataSize);
     }
 
-    public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder, DataSize size) {
+    public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder) {
         return new EntitySetJooqCurser(mainTable.getEntityType(), tuples, this, resultBuilder);
     }
 

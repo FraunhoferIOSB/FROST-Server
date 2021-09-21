@@ -254,11 +254,10 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
     @Override
     public void visit(PathElementEntitySet element) {
-        int top = staQuery.getTopOrDefault();
         Cursor<Record> results = timeQuery(sqlQuery);
         EntitySet entitySet = sqlQueryBuilder
                 .getQueryState()
-                .createSetFromRecords(results, this, dataSize);
+                .createSetFromRecords(results, this);
 
         if (entitySet == null) {
             throw new IllegalStateException("Empty set!");

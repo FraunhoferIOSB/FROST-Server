@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -60,7 +59,6 @@ public class ArrayValueHandlers {
     private synchronized void createDefaults(CoreSettings settings) {
         PluginManager pluginManager = settings.getPluginManager();
         PluginCoreModel pluginCoreModel = pluginManager.getPlugin(PluginCoreModel.class);
-        ModelRegistry modelRegistry = settings.getModelRegistry();
         if (!HANDLERS.isEmpty()) {
             return;
         }

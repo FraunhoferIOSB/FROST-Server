@@ -143,7 +143,7 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
      */
     public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType().nullable(false), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.DATASTREAMS</code> table reference.
@@ -247,7 +247,7 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
         pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId, idManager);
         pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId, idManager);
         pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.npObservationsDatastream, TableImpDatastreams::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservationsDatastream, TableImpDatastreams::getId);
     }
 
     @Override
@@ -302,7 +302,6 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     }
 
     protected PropertyFields<TableImpDatastreams<J>> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         PropertyFields<TableImpDatastreams<J>> pfs = new PropertyFields<>(
                 epCustomSelect,
                 new ConverterRecordDeflt<>(
@@ -322,6 +321,9 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
                                     break;
                                 case "definition":
                                     uom.setSymbol(value);
+                                    break;
+                                default:
+                                // Do nothing.
                             }
                         },
                         null,

@@ -213,7 +213,6 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpMultiDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
@@ -279,19 +278,19 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                         }));
         pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId, idManager);
         pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId, idManager);
-        pfReg.addEntry(pluginMultiDatastream.npObservedPropertiesMDs, TableImpMultiDatastreams::getId, idManager);
-        pfReg.addEntry(pluginMultiDatastream.npObservationsMDs, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(pluginMultiDatastream.npObservedPropertiesMDs, TableImpMultiDatastreams::getId);
+        pfReg.addEntry(pluginMultiDatastream.npObservationsMDs, TableImpMultiDatastreams::getId);
 
         // We register a navigationProperty on the Things, Sensors, ObservedProperties and Observations tables.
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
-                .addEntry(pluginMultiDatastream.npMultiDatastreamsThing, TableImpThings::getId, idManager);
+                .addEntry(pluginMultiDatastream.npMultiDatastreamsThing, TableImpThings::getId);
         TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
         sensorsTable.getPropertyFieldRegistry()
-                .addEntry(pluginMultiDatastream.npMultiDatastreamsSensor, TableImpSensors::getId, idManager);
+                .addEntry(pluginMultiDatastream.npMultiDatastreamsSensor, TableImpSensors::getId);
         TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         obsPropsTable.getPropertyFieldRegistry()
-                .addEntry(pluginMultiDatastream.npMultiDatastreamsObsProp, TableImpObsProperties::getId, idManager);
+                .addEntry(pluginMultiDatastream.npMultiDatastreamsObsProp, TableImpObsProperties::getId);
 
         // we need to register the MULTI_DATA column on the Observations table.
         final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
@@ -350,7 +349,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 }
                 Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
                 if (f == null) {
-                    f = generateFeatureOfInterest(entityFactories, pm, mds.getId());
+                    f = generateFeatureOfInterest(pm, mds.getId());
                     if (f != null) {
                         entity.setProperty(pluginCoreModel.npFeatureOfInterestObservation, f);
                     }
@@ -398,7 +397,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         return this;
     }
 
-    public Entity generateFeatureOfInterest(final EntityFactories<J> entityFactories, PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
         final J dsId = (J) datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
         TableCollection<J> tableCollection = getTables();
@@ -435,7 +434,6 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     }
 
     private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
         if (newObservation.isSetProperty(pluginCoreModel.npDatastreamObservation)) {
             final Entity ds = newObservation.getProperty(pluginCoreModel.npDatastreamObservation);
             if (ds == null) {

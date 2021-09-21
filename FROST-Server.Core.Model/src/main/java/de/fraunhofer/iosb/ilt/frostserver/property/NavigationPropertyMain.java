@@ -131,7 +131,7 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     @Override
     public String getJsonName() {
-        return name;
+        return getName();
     }
 
     @Override

@@ -62,7 +62,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
             modifyEntityFormatter();

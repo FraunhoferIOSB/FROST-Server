@@ -94,7 +94,7 @@ public class DefEntityType {
         entityType.registerProperty(ModelRegistry.EP_SELFLINK, false);
         for (DefEntityProperty defEp : entityProperties.values()) {
             defEp.setEntityType(entityType);
-            defEp.registerProperties(modelRegistry);
+            defEp.registerProperties();
         }
         for (DefNavigationProperty defNp : navigationProperties.values()) {
             defNp.setSourceEntityType(entityType);

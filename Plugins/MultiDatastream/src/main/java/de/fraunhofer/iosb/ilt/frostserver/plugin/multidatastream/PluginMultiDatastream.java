@@ -62,25 +62,27 @@ import org.slf4j.LoggerFactory;
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginmultidatastream/tables";
+    private static final String MULTI_DATASTREAM = "MultiDatastream";
+    private static final String MULTI_DATASTREAMS = "MultiDatastreams";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
     public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING);
     public final EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements = new EntityPropertyMain<>("UnitOfMeasurements", TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM, true, false);
 
-    public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity("MultiDatastream");
+    public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
     public final NavigationPropertyEntitySet npObservationsMDs = new NavigationPropertyEntitySet("Observations", npMultiDatastreamObservation);
 
-    public final NavigationPropertyEntitySet npMultiDatastreamsObsProp = new NavigationPropertyEntitySet("MultiDatastreams");
+    public final NavigationPropertyEntitySet npMultiDatastreamsObsProp = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
     public final NavigationPropertyEntitySet npObservedPropertiesMDs = new NavigationPropertyEntitySet("ObservedProperties", npMultiDatastreamsObsProp);
 
-    public final NavigationPropertyEntitySet npMultiDatastreamsThing = new NavigationPropertyEntitySet("MultiDatastreams");
+    public final NavigationPropertyEntitySet npMultiDatastreamsThing = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
     public final NavigationPropertyEntity npThingMDs = new NavigationPropertyEntity("Thing", npMultiDatastreamsThing);
 
-    public final NavigationPropertyEntitySet npMultiDatastreamsSensor = new NavigationPropertyEntitySet("MultiDatastreams");
+    public final NavigationPropertyEntitySet npMultiDatastreamsSensor = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
     public final NavigationPropertyEntity npSensorMDs = new NavigationPropertyEntity("Sensor", npMultiDatastreamsSensor);
 
-    public final EntityType etMultiDatastream = new EntityType("MultiDatastream", "MultiDatastreams");
+    public final EntityType etMultiDatastream = new EntityType(MULTI_DATASTREAM, MULTI_DATASTREAMS);
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_MDS_MODEL = "multiDatastream.enable";

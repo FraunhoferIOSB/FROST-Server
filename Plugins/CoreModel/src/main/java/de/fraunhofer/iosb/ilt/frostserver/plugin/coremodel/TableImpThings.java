@@ -63,7 +63,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
      */
     public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.THINGS</code> table reference
@@ -112,9 +112,9 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreamsThing, TableImpThings::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsThing, TableImpThings::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.npLocationsThing, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsThing, TableImpThings::getId);
+        pfReg.addEntry(pluginCoreModel.npHistoricalLocationsThing, TableImpThings::getId);
+        pfReg.addEntry(pluginCoreModel.npLocationsThing, TableImpThings::getId);
     }
 
     @Override

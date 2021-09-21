@@ -41,6 +41,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityChangedMessageDeserializer.class);
+    private static final String TYPE_NOT_KNOW_YET = "Type not know yet.";
 
     private final ModelRegistry modelRegistry;
     private final EntityChangedMessage.QueryGenerator queryGenerator = new EntityChangedMessage.QueryGenerator();
@@ -64,46 +65,19 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     break;
 
                 case "entityType":
-                    type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
-                    if (entity != null) {
-                        entity.setEntityType(type);
-                        entity.setQuery(queryGenerator.getQueryFor(type));
-                        message.setEntity(entity);
-                    }
+                    type = handleEntityType(parser, type, entity, message);
                     break;
 
                 case "epFields":
-                    if (type == null) {
-                        throw new IllegalArgumentException("Type not know yet.");
-                    }
-                    currentToken = parser.nextToken();
-                    while (currentToken == JsonToken.VALUE_STRING) {
-                        fieldName = parser.getValueAsString();
-                        message.addEpField((EntityPropertyMain) type.getProperty(fieldName));
-                        currentToken = parser.nextToken();
-                    }
+                    handleEpFields(parser, type, currentToken, message);
                     break;
 
                 case "npFields":
-                    if (type == null) {
-                        throw new IllegalArgumentException("Type not know yet.");
-                    }
-                    currentToken = parser.nextToken();
-                    while (currentToken == JsonToken.VALUE_STRING) {
-                        fieldName = parser.getValueAsString();
-                        message.addNpField((NavigationPropertyMain) type.getProperty(fieldName));
-                        currentToken = parser.nextToken();
-                    }
+                    handleNpFields(parser, type, currentToken, message);
                     break;
 
                 case "entity":
-                    if (type == null) {
-                        throw new IllegalArgumentException("Type not know yet.");
-                    }
-                    entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
-                            .deserialize(parser, ctxt);
-                    entity.setQuery(queryGenerator.getQueryFor(type));
-                    message.setEntity(entity);
+                    entity = handleEntity(parser, ctxt, type, entity, message);
                     break;
 
                 default:
@@ -117,6 +91,53 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
             throw new IllegalArgumentException("Message json with no type or no entity.");
         }
         return message;
+    }
+
+    private EntityType handleEntityType(JsonParser parser, EntityType type, Entity entity, EntityChangedMessage message) throws IOException {
+        type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
+        if (entity != null) {
+            entity.setEntityType(type);
+            entity.setQuery(queryGenerator.getQueryFor(type));
+            message.setEntity(entity);
+        }
+        return type;
+    }
+
+    private void handleEpFields(JsonParser parser, EntityType type, JsonToken currentToken, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+        String fieldName;
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        currentToken = parser.nextToken();
+        while (currentToken == JsonToken.VALUE_STRING) {
+            fieldName = parser.getValueAsString();
+            message.addEpField((EntityPropertyMain) type.getProperty(fieldName));
+            currentToken = parser.nextToken();
+        }
+    }
+
+    private void handleNpFields(JsonParser parser, EntityType type, JsonToken currentToken, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+        String fieldName;
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        currentToken = parser.nextToken();
+        while (currentToken == JsonToken.VALUE_STRING) {
+            fieldName = parser.getValueAsString();
+            message.addNpField((NavigationPropertyMain) type.getProperty(fieldName));
+            currentToken = parser.nextToken();
+        }
+    }
+
+    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, Entity entity, EntityChangedMessage message) throws IOException, IllegalArgumentException {
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
+                .deserialize(parser, ctxt);
+        entity.setQuery(queryGenerator.getQueryFor(type));
+        message.setEntity(entity);
+        return entity;
     }
 
 }

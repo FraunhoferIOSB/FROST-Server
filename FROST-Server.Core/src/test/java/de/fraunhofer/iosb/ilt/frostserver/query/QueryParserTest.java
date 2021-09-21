@@ -191,7 +191,6 @@ public class QueryParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFilterInvalidNavPath() {
-        // Theoretical path, does not actually exist
         String query = "$filter=House/Room/id eq 1";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
@@ -199,7 +198,6 @@ public class QueryParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFilterInvalidCustomProperty() {
-        // Theoretical path, does not actually exist
         String query = "$filter=House/custom eq 1";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
@@ -207,7 +205,6 @@ public class QueryParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFilterInvalid() {
-        // Simply an invalid filter
         String query = "$filter=add and eq 1";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);

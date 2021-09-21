@@ -94,13 +94,13 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     }
 
     @Override
-    public void setOn(Entity entity, P value) {
-        entity.setProperty(this, value);
+    public boolean isSetOn(Entity entity) {
+        return entity.isSetProperty(this);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
-        return entity.isSetProperty(this);
+    public void setOn(Entity entity, P value) {
+        entity.setProperty(this, value);
     }
 
     @Override

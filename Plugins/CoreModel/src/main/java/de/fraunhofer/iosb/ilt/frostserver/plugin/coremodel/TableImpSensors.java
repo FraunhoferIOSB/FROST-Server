@@ -59,7 +59,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
      */
     public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.SENSORS</code> table reference.
@@ -97,7 +97,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npDatastreamsSensor, TableImpSensors::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreamsSensor, TableImpSensors::getId);
     }
 
     @Override

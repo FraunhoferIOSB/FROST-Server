@@ -52,8 +52,8 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
      */
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
-    private final PluginActuation pluginActuation;
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginActuation pluginActuation;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference.
@@ -95,7 +95,7 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginActuation.npTaskingCapabilitiesActuator, TableImpActuators::getId, idManager);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilitiesActuator, TableImpActuators::getId);
     }
 
     @Override

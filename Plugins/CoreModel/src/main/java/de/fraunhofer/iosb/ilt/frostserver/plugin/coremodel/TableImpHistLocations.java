@@ -52,7 +52,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
      */
     public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference.
@@ -97,7 +97,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
                 new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
         );
         pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
     }
 
     @Override

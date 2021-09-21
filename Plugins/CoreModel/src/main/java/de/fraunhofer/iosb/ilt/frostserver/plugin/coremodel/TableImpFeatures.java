@@ -75,7 +75,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
      */
     public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
-    private final PluginCoreModel pluginCoreModel;
+    private final transient PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.FEATURES</code> table reference.
@@ -133,7 +133,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
                 new NFP<>("j", table -> table.colFeature));
         pfReg.addEntryNoSelect(pluginCoreModel.epFeature, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.npObservationsFeature, TableImpFeatures::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservationsFeature, TableImpFeatures::getId);
     }
 
     @Override

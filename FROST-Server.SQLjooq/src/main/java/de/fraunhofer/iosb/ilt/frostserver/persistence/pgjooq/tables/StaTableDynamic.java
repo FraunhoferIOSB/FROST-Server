@@ -31,7 +31,7 @@ import org.jooq.impl.DSL;
 public final class StaTableDynamic<J extends Comparable> extends StaTableAbstract<J, StaTableDynamic<J>> {
 
     private final Name tableName;
-    private final EntityType entityType;
+    private final transient EntityType entityType;
     private int idFieldIdx;
 
     public StaTableDynamic(Name tableName, EntityType entityType, DataType<J> idType) {

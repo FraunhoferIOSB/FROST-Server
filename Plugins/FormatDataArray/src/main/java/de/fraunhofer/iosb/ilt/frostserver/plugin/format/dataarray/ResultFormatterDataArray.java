@@ -89,7 +89,6 @@ public class ResultFormatterDataArray implements ResultFormatter {
         try {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                final ModelRegistry modelRegistry = settings.getModelRegistry();
                 if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
                     return new FormatWriterGeneric(formatDataArray(path, query, entitySet));
                 }
@@ -115,15 +114,13 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public final boolean resultQuality;
         public final boolean validTime;
         public final boolean parameters;
-        private final ModelRegistry modelRegistry;
         private final PluginCoreModel pluginCoreModel;
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel) {
-            this(modelRegistry, pCoreModel, false);
+        public VisibleComponents(PluginCoreModel pCoreModel) {
+            this(pCoreModel, false);
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, boolean allValue) {
-            this.modelRegistry = modelRegistry;
+        public VisibleComponents(PluginCoreModel pCoreModel, boolean allValue) {
             this.pluginCoreModel = pCoreModel;
             id = allValue;
             phenomenonTime = allValue;
@@ -134,8 +131,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             parameters = allValue;
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, Set<Property> select) {
-            this.modelRegistry = modelRegistry;
+        public VisibleComponents(PluginCoreModel pCoreModel, Set<Property> select) {
             this.pluginCoreModel = pCoreModel;
             id = select.contains(ModelRegistry.EP_ID);
             phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
@@ -202,9 +198,9 @@ public class ResultFormatterDataArray implements ResultFormatter {
     public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
-            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, true);
+            visComps = new VisibleComponents(pluginCoreModel, true);
         } else {
-            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, query.getSelect());
+            visComps = new VisibleComponents(pluginCoreModel, query.getSelect());
         }
         List<String> components = visComps.getComponents();
 

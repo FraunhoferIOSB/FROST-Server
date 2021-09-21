@@ -91,11 +91,11 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
          * object.
          *
          * @param table The table used to generate the Record.
-         * @param record The record to read the data from.
+         * @param input The Record to read the data from.
          * @param entity The entity to write the data to.
          * @param dataSize The DataSize to use to register the amount of data.
          */
-        public void convert(T table, Record record, Entity entity, DataSize dataSize);
+        public void convert(T table, Record input, Entity entity, DataSize dataSize);
     }
 
     public static interface ConverterRecordInsert<T> {
@@ -131,8 +131,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            read.convert(table, record, entity, dataSize);
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            read.convert(table, input, entity, dataSize);
         }
 
         @Override
@@ -292,7 +292,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         if (property instanceof NavigationPropertyEntity) {
             addEntry((NavigationPropertyEntity) property, factory, idManager);
         } else if (property instanceof NavigationPropertyEntitySet) {
-            addEntry((NavigationPropertyEntitySet) property, factory, idManager);
+            addEntry((NavigationPropertyEntitySet) property, factory);
         } else {
             throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
         }
@@ -306,7 +306,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         addEntry(epMapAll, property, null, factory);
     }
 
-    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, ConverterRecord<T> ps, IdManager idManager) {
+    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
         PropertyFields<T> pf = new PropertyFields<>(property, ps);
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
@@ -314,7 +314,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         addEntry(epMapAll, property, null, factory);
     }
 
-    public void addEntry(NavigationPropertyEntitySet property, ExpressionFactory<T> factory, IdManager idManager) {
+    public void addEntry(NavigationPropertyEntitySet property, ExpressionFactory<T> factory) {
         PropertyFields<T> pf = new PropertyFields<>(property, new ConverterSimple<>(property, factory));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
@@ -434,8 +434,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            entity.setProperty(property, record.get(factory.get(table)));
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            entity.setProperty(property, input.get(factory.get(table)));
         }
 
         @Override
@@ -461,8 +461,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            String data = (String) record.get(factory.get(table));
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            String data = (String) input.get(factory.get(table));
             dataSize.increase(data == null ? 0 : data.length());
             entity.setProperty(property, data);
         }
@@ -492,10 +492,10 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(property, Utils.intervalFromTimes(
-                    (OffsetDateTime) record.get(factoryStart.get(table)),
-                    (OffsetDateTime) record.get(factoryEnd.get(table))));
+                    (OffsetDateTime) input.get(factoryStart.get(table)),
+                    (OffsetDateTime) input.get(factoryEnd.get(table))));
         }
 
         @Override
@@ -523,10 +523,10 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(
                     property,
-                    Utils.instantFromTime((OffsetDateTime) record.get(factory.get(table)))
+                    Utils.instantFromTime((OffsetDateTime) input.get(factory.get(table)))
             );
         }
 
@@ -557,12 +557,12 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(
                     property,
                     Utils.valueFromTimes(
-                            (OffsetDateTime) record.get(factoryStart.get(table)),
-                            (OffsetDateTime) record.get(factoryEnd.get(table))
+                            (OffsetDateTime) input.get(factoryStart.get(table)),
+                            (OffsetDateTime) input.get(factoryEnd.get(table))
                     )
             );
         }
@@ -592,8 +592,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            JsonValue data = Utils.getFieldJsonValue(record, factory.get(table));
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            JsonValue data = Utils.getFieldJsonValue(input, factory.get(table));
             if (data == null) {
                 return;
             }
@@ -626,8 +626,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            final Object rawId = getFieldOrNull(record, factory.get(table));
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            final Object rawId = getFieldOrNull(input, factory.get(table));
             Id id = idManager.fromObject(rawId);
             entity.setProperty(ModelRegistry.EP_ID, id);
         }
@@ -663,8 +663,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
 
         @Override
-        public void convert(T table, Record record, Entity entity, DataSize dataSize) {
-            final Object rawId = getFieldOrNull(record, factory.get(table));
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            final Object rawId = getFieldOrNull(input, factory.get(table));
             if (rawId == null) {
                 return;
             }

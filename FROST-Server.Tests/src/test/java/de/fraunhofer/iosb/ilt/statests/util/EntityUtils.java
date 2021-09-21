@@ -393,7 +393,7 @@ public class EntityUtils {
         return result.substring(0, result.length() - 2);
     }
 
-    public static <T extends Entity<T>> void filterAndCheck(BaseDao<T> doa, String filter, List<T> expected) {
+    public static <T extends Entity<T>> void testFilterResults(BaseDao<T> doa, String filter, List<T> expected) {
         try {
             EntityList<T> result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
