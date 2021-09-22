@@ -17,102 +17,36 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.ACTUATION;
-import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.CORE;
-import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.MULTI_DATASTREAM;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Actuator.TYPE_REFERENCE_ACTUATOR;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Datastream.TYPE_REFERENCE_DATASTREAM;
-import static de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest.TYPE_REFERENCE_FOI;
-import static de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation.TYPE_REFERENCE_HISTORICALLOCATION;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Location.TYPE_REFERENCE_LOCATION;
-import static de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream.TYPE_REFERENCE_MULTIDATASTREAM;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Observation.TYPE_REFERENCE_OBSERVATION;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty.TYPE_REFERENCE_OBSERVEDPROPERTY;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Sensor.TYPE_REFERENCE_SENSOR;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Task.TYPE_REFERENCE_TASK;
-import static de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability.TYPE_REFERENCE_TASKINGCAP;
-import static de.fraunhofer.iosb.ilt.frostserver.model.Thing.TYPE_REFERENCE_THING;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import org.geojson.GeoJsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The types of entities in STA.
  *
  * @author jab, scf
  */
-public enum EntityType {
+public class EntityType implements Comparable<EntityType> {
 
-    ACTUATOR("Actuator", "Actuators", ACTUATION, TYPE_REFERENCE_ACTUATOR, Actuator.class),
-    DATASTREAM("Datastream", "Datastreams", CORE, TYPE_REFERENCE_DATASTREAM, Datastream.class),
-    MULTIDATASTREAM("MultiDatastream", "MultiDatastreams", MULTI_DATASTREAM, TYPE_REFERENCE_MULTIDATASTREAM, MultiDatastream.class),
-    FEATUREOFINTEREST("FeatureOfInterest", "FeaturesOfInterest", CORE, TYPE_REFERENCE_FOI, FeatureOfInterest.class),
-    HISTORICALLOCATION("HistoricalLocation", "HistoricalLocations", CORE, TYPE_REFERENCE_HISTORICALLOCATION, HistoricalLocation.class),
-    LOCATION("Location", "Locations", CORE, TYPE_REFERENCE_LOCATION, Location.class),
-    OBSERVATION("Observation", "Observations", CORE, TYPE_REFERENCE_OBSERVATION, Observation.class),
-    OBSERVEDPROPERTY("ObservedProperty", "ObservedProperties", CORE, TYPE_REFERENCE_OBSERVEDPROPERTY, ObservedProperty.class),
-    SENSOR("Sensor", "Sensors", CORE, TYPE_REFERENCE_SENSOR, Sensor.class),
-    TASK("Task", "Tasks", ACTUATION, TYPE_REFERENCE_TASK, Task.class),
-    TASKINGCAPABILITY("TaskingCapability", "TaskingCapabilities", ACTUATION, TYPE_REFERENCE_TASKINGCAP, TaskingCapability.class),
-    THING("Thing", "Things", CORE, TYPE_REFERENCE_THING, Thing.class);
-
-    private static final TypeReference<Id> TYPE_REFERENCE_ID = new TypeReference<Id>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<Object> TYPE_REFERENCE_OBJECT = new TypeReference<Object>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<String> TYPE_REFERENCE_STRING = new TypeReference<String>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeInterval> TYPE_REFERENCE_TIME_INTERVAL = new TypeReference<TimeInterval>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<GeoJsonObject> TYPE_REFERENCE_GEOJSONOBJECT = new TypeReference<GeoJsonObject>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<UnitOfMeasurement> TYPE_REFERENCE_UOM = new TypeReference<UnitOfMeasurement>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<List<UnitOfMeasurement>> TYPE_REFERENCE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<List<String>> TYPE_REFERENCE_LIST_STRING = new TypeReference<List<String>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeInstant> TYPE_REFERENCE_TIMEINSTANT = new TypeReference<TimeInstant>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeValue> TYPE_REFERENCE_TIMEVALUE = new TypeReference<TimeValue>() {
-        // Empty on purpose.
-    };
-
-    /**
-     * The map of entity names to entities.
-     */
-    private static final Map<String, EntityType> TYPES_BY_NAME = new HashMap<>();
-    /**
-     * The map of implementing classes to entities.
-     */
-    private static final Map<Class<? extends Entity>, EntityType> TYPES_BY_CLASS = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntityType.class.getName());
 
     /**
      * The entityName of this entity type as used in URLs.
@@ -122,20 +56,18 @@ public enum EntityType {
      * The entityName of collections of this entity type as used in URLs.
      */
     public final String plural;
-    /**
-     * The extension that defines this Entity Type.
-     */
-    public final Extension extension;
 
+    private boolean initialised = false;
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped to the flag
      * indicating if they are required.
      */
     private final Map<Property, Boolean> propertyMap = new LinkedHashMap<>();
     /**
-     * The java types of the properties if this entity type.
+     * The Set of PROPERTIES that Entities of this type have, mapped by their
+     * name.
      */
-    private final Map<EntityPropertyMain, TypeReference> propertyTypes = new LinkedHashMap<>();
+    private final Map<String, Property> propertiesByName = new LinkedHashMap<>();
     /**
      * The set of Entity properties.
      */
@@ -147,235 +79,89 @@ public enum EntityType {
     /**
      * The set of Navigation properties pointing to single entities.
      */
-    private final Set<NavigationPropertyMain> navigationEntities = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<Entity>> navigationEntities = new LinkedHashSet<>();
     /**
      * The set of Navigation properties pointing to entity sets.
      */
-    private final Set<NavigationPropertyMain> navigationSets = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new LinkedHashSet<>();
+    /**
+     * The map of NavigationProperties by their target EntityTypes.
+     */
+    private final Map<EntityType, NavigationPropertyMain> navigationPropertiesByTarget = new HashMap<>();
 
-    private final TypeReference<? extends Entity<?>> implementingTypeRef;
-    private final Class<? extends Entity<?>> implementingClass;
+    private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
+    private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
 
-    private static synchronized void init() {
-        if (!ACTUATOR.propertyMap.isEmpty()) {
-            return;
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     */
+    private ModelRegistry modelRegistry;
+
+    public EntityType(String singular, String plural) {
+        this.entityName = singular;
+        this.plural = plural;
+    }
+
+    public EntityType registerProperty(Property property, boolean required) {
+        propertyMap.put(property, required);
+        propertiesByName.put(property.getName(), property);
+        if (property instanceof EntityPropertyMain) {
+            for (String alias : ((EntityPropertyMain<?>) property).getAliases()) {
+                propertiesByName.put(alias, property);
+            }
         }
-        initActuator();
-        initDatastream();
-        initMultiDatastream();
-        initFeatureOfInterest();
-        initHistLocation();
-        initLocation();
-        initObservation();
-        initObsProp();
-        initSensor();
-        initTask();
-        initTaskingCapability();
-        initThing();
-        initFinalise();
+        return this;
     }
 
-    private static void initActuator() {
-        ACTUATOR.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        ACTUATOR.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        ACTUATOR.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        ACTUATOR.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        ACTUATOR.init(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING);
-        ACTUATOR.init(EntityPropertyMain.METADATA, true, TYPE_REFERENCE_OBJECT);
-        ACTUATOR.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        ACTUATOR.init(NavigationPropertyMain.TASKINGCAPABILITIES, false, null);
-    }
-
-    private static void initDatastream() {
-        DATASTREAM.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        DATASTREAM.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        DATASTREAM.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        DATASTREAM.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        DATASTREAM.init(EntityPropertyMain.OBSERVATIONTYPE, true, TYPE_REFERENCE_STRING);
-        DATASTREAM.init(EntityPropertyMain.UNITOFMEASUREMENT, true, TYPE_REFERENCE_UOM);
-        DATASTREAM.init(EntityPropertyMain.OBSERVEDAREA, false, TYPE_REFERENCE_GEOJSONOBJECT);
-        DATASTREAM.init(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIME_INTERVAL);
-        DATASTREAM.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        DATASTREAM.init(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIME_INTERVAL);
-        DATASTREAM.init(NavigationPropertyMain.OBSERVEDPROPERTY, true, null);
-        DATASTREAM.init(NavigationPropertyMain.SENSOR, true, null);
-        DATASTREAM.init(NavigationPropertyMain.THING, true, null);
-        DATASTREAM.init(NavigationPropertyMain.OBSERVATIONS, false, null);
-    }
-
-    private static void initMultiDatastream() {
-        MULTIDATASTREAM.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        MULTIDATASTREAM.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        MULTIDATASTREAM.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        MULTIDATASTREAM.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        // OBSERVATIONTYPE is required, but must always be the same, thus we set it ourselves.
-        MULTIDATASTREAM.init(EntityPropertyMain.OBSERVATIONTYPE, false, TYPE_REFERENCE_STRING);
-        MULTIDATASTREAM.init(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, true, TYPE_REFERENCE_LIST_STRING);
-        MULTIDATASTREAM.init(EntityPropertyMain.UNITOFMEASUREMENTS, true, TYPE_REFERENCE_LIST_UOM);
-        MULTIDATASTREAM.init(EntityPropertyMain.OBSERVEDAREA, false, TYPE_REFERENCE_GEOJSONOBJECT);
-        MULTIDATASTREAM.init(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIME_INTERVAL);
-        MULTIDATASTREAM.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        MULTIDATASTREAM.init(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIME_INTERVAL);
-        MULTIDATASTREAM.init(NavigationPropertyMain.OBSERVEDPROPERTIES, false, null);
-        MULTIDATASTREAM.init(NavigationPropertyMain.SENSOR, true, null);
-        MULTIDATASTREAM.init(NavigationPropertyMain.THING, true, null);
-        MULTIDATASTREAM.init(NavigationPropertyMain.OBSERVATIONS, false, null);
-    }
-
-    private static void initFeatureOfInterest() {
-        FEATUREOFINTEREST.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        FEATUREOFINTEREST.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        FEATUREOFINTEREST.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        FEATUREOFINTEREST.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        FEATUREOFINTEREST.init(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING);
-        FEATUREOFINTEREST.init(EntityPropertyMain.FEATURE, true, null);
-        FEATUREOFINTEREST.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        FEATUREOFINTEREST.init(NavigationPropertyMain.OBSERVATIONS, false, null);
-    }
-
-    private static void initHistLocation() {
-        HISTORICALLOCATION.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        HISTORICALLOCATION.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        HISTORICALLOCATION.init(EntityPropertyMain.TIME, true, TYPE_REFERENCE_TIMEINSTANT);
-        HISTORICALLOCATION.init(NavigationPropertyMain.THING, true, null);
-        HISTORICALLOCATION.init(NavigationPropertyMain.LOCATIONS, false, null);
-    }
-
-    private static void initLocation() {
-        LOCATION.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        LOCATION.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        LOCATION.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        LOCATION.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        LOCATION.init(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING);
-        LOCATION.init(EntityPropertyMain.LOCATION, true, null);
-        LOCATION.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        LOCATION.init(NavigationPropertyMain.HISTORICALLOCATIONS, false, null);
-        LOCATION.init(NavigationPropertyMain.THINGS, false, null);
-    }
-
-    private static void initObservation() {
-        OBSERVATION.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        OBSERVATION.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        OBSERVATION.init(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIMEVALUE);
-        OBSERVATION.init(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIMEINSTANT);
-        OBSERVATION.init(EntityPropertyMain.RESULT, true, TYPE_REFERENCE_OBJECT);
-        OBSERVATION.init(EntityPropertyMain.RESULTQUALITY, false, TYPE_REFERENCE_OBJECT);
-        OBSERVATION.init(EntityPropertyMain.VALIDTIME, false, TYPE_REFERENCE_TIME_INTERVAL);
-        OBSERVATION.init(EntityPropertyMain.PARAMETERS, false, TYPE_REFERENCE_MAP);
-        // One of the following two is mandatory.
-        OBSERVATION.init(NavigationPropertyMain.DATASTREAM, false, null);
-        OBSERVATION.init(NavigationPropertyMain.MULTIDATASTREAM, false, null);
-        // FEATUREOFINTEREST must be generated on the fly if not present.
-        OBSERVATION.init(NavigationPropertyMain.FEATUREOFINTEREST, false, null);
-    }
-
-    private static void initObsProp() {
-        OBSERVEDPROPERTY.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        OBSERVEDPROPERTY.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        OBSERVEDPROPERTY.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        OBSERVEDPROPERTY.init(EntityPropertyMain.DEFINITION, true, TYPE_REFERENCE_STRING);
-        OBSERVEDPROPERTY.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        OBSERVEDPROPERTY.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        OBSERVEDPROPERTY.init(NavigationPropertyMain.DATASTREAMS, false, null);
-        OBSERVEDPROPERTY.init(NavigationPropertyMain.MULTIDATASTREAMS, false, null);
-    }
-
-    private static void initSensor() {
-        SENSOR.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        SENSOR.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        SENSOR.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        SENSOR.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        SENSOR.init(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING);
-        SENSOR.init(EntityPropertyMain.METADATA, true, TYPE_REFERENCE_OBJECT);
-        SENSOR.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        SENSOR.init(NavigationPropertyMain.DATASTREAMS, false, null);
-        SENSOR.init(NavigationPropertyMain.MULTIDATASTREAMS, false, null);
-    }
-
-    private static void initTask() {
-        TASK.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        TASK.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        TASK.init(EntityPropertyMain.CREATIONTIME, false, TYPE_REFERENCE_TIMEINSTANT);
-        TASK.init(EntityPropertyMain.TASKINGPARAMETERS, true, TYPE_REFERENCE_MAP);
-        TASK.init(NavigationPropertyMain.TASKINGCAPABILITY, true, null);
-    }
-
-    private static void initTaskingCapability() {
-        TASKINGCAPABILITY.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        TASKINGCAPABILITY.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        TASKINGCAPABILITY.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        TASKINGCAPABILITY.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        TASKINGCAPABILITY.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        TASKINGCAPABILITY.init(EntityPropertyMain.TASKINGPARAMETERS, true, TYPE_REFERENCE_MAP);
-        TASKINGCAPABILITY.init(NavigationPropertyMain.ACTUATOR, true, null);
-        TASKINGCAPABILITY.init(NavigationPropertyMain.TASKS, false, null);
-        TASKINGCAPABILITY.init(NavigationPropertyMain.THING, true, null);
-    }
-
-    private static void initThing() {
-        THING.init(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID);
-        THING.init(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING);
-        THING.init(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING);
-        THING.init(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING);
-        THING.init(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP);
-        THING.init(NavigationPropertyMain.LOCATIONS, false, null);
-        THING.init(NavigationPropertyMain.HISTORICALLOCATIONS, false, null);
-        THING.init(NavigationPropertyMain.DATASTREAMS, false, null);
-        THING.init(NavigationPropertyMain.MULTIDATASTREAMS, false, null);
-        THING.init(NavigationPropertyMain.TASKINGCAPABILITIES, false, null);
-    }
-
-    private static void initFinalise() {
-        for (EntityType type : EntityType.values()) {
-            TYPES_BY_NAME.put(type.entityName, type);
-            TYPES_BY_NAME.put(type.plural, type);
-            TYPES_BY_CLASS.put(type.implementingClass, type);
-            for (Property property : type.getPropertySet()) {
-                if (property instanceof EntityPropertyMain) {
-                    type.getEntityProperties().add((EntityPropertyMain) property);
-                } else if (property instanceof NavigationPropertyMain) {
-                    NavigationPropertyMain navigationProperty = (NavigationPropertyMain) property;
-                    type.getNavigationProperties().add(navigationProperty);
-                    if (navigationProperty.isEntitySet()) {
-                        type.getNavigationSets().add(navigationProperty);
-                    } else {
-                        type.getNavigationEntities().add(navigationProperty);
-                    }
+    public void init() {
+        if (initialised) {
+            LOGGER.error("Re-Init of EntityType!");
+        }
+        initialised = true;
+        for (Property property : propertyMap.keySet()) {
+            if (property instanceof EntityPropertyMain) {
+                entityProperties.add((EntityPropertyMain) property);
+            }
+            if (property instanceof NavigationPropertyMain) {
+                NavigationPropertyMain np = (NavigationPropertyMain) property;
+                if (np.getEntityType() == null) {
+                    np.setEntityType(modelRegistry.getEntityTypeForName(np.getName()));
                 }
+
+                navigationProperties.add(np);
+                if (np.isEntitySet()) {
+                    navigationSets.add(np);
+                } else {
+                    navigationEntities.add(np);
+                }
+                navigationPropertiesByTarget.put(np.getEntityType(), np);
             }
         }
     }
 
-    private <T extends Entity<T>> EntityType(String singular, String plural, Extension extension, TypeReference<T> implementingTypeRef, Class<T> implementingClass) {
-        this.entityName = singular;
-        this.plural = plural;
-        this.extension = extension;
-        this.implementingTypeRef = implementingTypeRef;
-        this.implementingClass = implementingClass;
+    public EntityType addValidator(EntityValidator validator) {
+        validatorsNewEntity.add(validator);
+        return this;
     }
 
-    private void init(Property property, boolean required, TypeReference type) {
-        propertyMap.put(property, required);
-        if (property instanceof EntityPropertyMain && type != null) {
-            propertyTypes.put((EntityPropertyMain) property, type);
+    public Property getProperty(String name) {
+        return propertiesByName.get(name);
+    }
+
+    public EntityPropertyMain getEntityProperty(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof EntityPropertyMain) {
+            return (EntityPropertyMain) property;
         }
+        return null;
     }
 
-    public TypeReference getPropertyType(EntityPropertyMain entityProperty) {
-        return propertyTypes.get(entityProperty);
-    }
-
-    /**
-     * The Map of PROPERTIES that Entities of this type have, with their
-     * required status.
-     *
-     * @return The Set of PROPERTIES that Entities of this type have.
-     */
-    public Map<Property, Boolean> getPropertyMap() {
-        if (propertyMap.isEmpty()) {
-            init();
+    public NavigationPropertyMain getNavigationProperty(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyMain) {
+            return (NavigationPropertyMain) property;
         }
-        return propertyMap;
+        return null;
     }
 
     /**
@@ -384,38 +170,47 @@ public enum EntityType {
      * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Set<Property> getPropertySet() {
-        if (propertyMap.isEmpty()) {
-            init();
-        }
         return propertyMap.keySet();
     }
 
+    /**
+     * Get the set of Entity properties.
+     *
+     * @return The set of Entity properties.
+     */
     public Set<EntityPropertyMain> getEntityProperties() {
-        if (propertyMap.isEmpty()) {
-            init();
-        }
         return entityProperties;
     }
 
+    /**
+     * Get the set of Navigation properties.
+     *
+     * @return The set of Navigation properties.
+     */
     public Set<NavigationPropertyMain> getNavigationProperties() {
-        if (propertyMap.isEmpty()) {
-            init();
-        }
         return navigationProperties;
     }
 
-    public Set<NavigationPropertyMain> getNavigationEntities() {
-        if (propertyMap.isEmpty()) {
-            init();
-        }
+    /**
+     * Get the set of Navigation properties pointing to single entities.
+     *
+     * @return The set of Navigation properties pointing to single entities.
+     */
+    public Set<NavigationPropertyMain<Entity>> getNavigationEntities() {
         return navigationEntities;
     }
 
-    public Set<NavigationPropertyMain> getNavigationSets() {
-        if (propertyMap.isEmpty()) {
-            init();
-        }
+    /**
+     * Get the set of Navigation properties pointing to entity sets.
+     *
+     * @return The set of Navigation properties pointing to entity sets.
+     */
+    public Set<NavigationPropertyMain<EntitySet>> getNavigationSets() {
         return navigationSets;
+    }
+
+    public NavigationPropertyMain getNavigationProperty(EntityType to) {
+        return navigationPropertiesByTarget.get(to);
     }
 
     /**
@@ -423,34 +218,128 @@ public enum EntityType {
      * @return True when the property is required, false otherwise.
      */
     public boolean isRequired(Property property) {
-        if (propertyMap.isEmpty()) {
-            init();
+        return propertyMap.getOrDefault(property, false);
+    }
+
+    /**
+     * Check if all required properties are non-null on the given Entity.
+     *
+     * @param entity the Entity to check.
+     * @param entityPropertiesOnly flag indicating only the EntityProperties
+     * should be checked.
+     * @throws IncompleteEntityException If any of the required properties are
+     * null.
+     * @throws IllegalStateException If any of the required properties are
+     * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
+     */
+    public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
+        for (Property property : getPropertySet()) {
+            if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
+                continue;
+            }
+            if (isRequired(property) && !entity.isSetProperty(property)) {
+                throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
+            }
         }
-        if (!propertyMap.containsKey(property)) {
+        for (EntityValidator validator : validatorsNewEntity) {
+            validator.validate(entity, entityPropertiesOnly);
+        }
+    }
+
+    public void complete(Entity entity, PathElementEntitySet containingSet) throws IncompleteEntityException {
+        EntityType type = containingSet.getEntityType();
+        if (type != entity.getEntityType()) {
+            throw new IllegalArgumentException("Set of type " + type + " can not contain a " + entity.getEntityType());
+        }
+
+        checkParent(containingSet, entity);
+
+        complete(entity, false);
+    }
+
+    public void validateUpdate(Entity entity) throws IncompleteEntityException {
+        for (EntityValidator validator : validatorsUpdateEntity) {
+            validator.validate(entity, false);
+        }
+    }
+
+    private void checkParent(PathElementEntitySet containingSet, Entity entity) throws IncompleteEntityException {
+        PathElement parent = containingSet.getParent();
+        if (parent instanceof PathElementEntity) {
+            PathElementEntity parentEntity = (PathElementEntity) parent;
+            Id parentId = parentEntity.getId();
+            if (parentId == null) {
+                return;
+            }
+            checkParent(entity, containingSet.getNavigationProperty().getInverse(), parentId);
+        }
+    }
+
+    private void checkParent(Entity entity, NavigationPropertyMain navPropToParent, Id parentId) throws IncompleteEntityException {
+        if (navPropToParent == null) {
+            LOGGER.error("Incorrect 'parent' entity type for {}: {}", entityName, navPropToParent);
+            throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + navPropToParent);
+        }
+        EntityType parentType = navPropToParent.getEntityType();
+        if (navPropToParent.isEntitySet()) {
+            entity.addNavigationEntity(new DefaultEntity(parentType).setId(parentId));
+        } else {
+            entity.setProperty(navPropToParent, new DefaultEntity(parentType).setId(parentId));
+        }
+    }
+
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     *
+     * @return the modelRegistry
+     */
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
+    }
+
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     *
+     * @param modelRegistry the modelRegistry to set
+     */
+    public void setModelRegistry(ModelRegistry modelRegistry) {
+        if (this.modelRegistry != null && this.modelRegistry != modelRegistry) {
+            throw new IllegalArgumentException("Changing the ModelRegistry on an EntityType is not allowed.");
+        }
+        this.modelRegistry = modelRegistry;
+    }
+
+    @Override
+    public String toString() {
+        return entityName;
+    }
+
+    @Override
+    public int compareTo(EntityType o) {
+        return entityName.compareTo(o.entityName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof EntityType)) {
             return false;
         }
-        return propertyMap.get(property);
-    }
-
-    public TypeReference<? extends Entity> getImplementingTypeRef() {
-        return implementingTypeRef;
-    }
-
-    public Class<? extends Entity> getImplementingClass() {
-        return implementingClass;
-    }
-
-    public static EntityType getEntityTypeForName(String name) {
-        if (TYPES_BY_NAME.isEmpty()) {
-            init();
+        EntityType other = (EntityType) obj;
+        if (entityName.equals(other.entityName)) {
+            LOGGER.error("Found other instance of {}", entityName);
+            return true;
         }
-        return TYPES_BY_NAME.get(name);
+        return false;
     }
 
-    public static EntityType getEntityTypeForClass(Class<? extends Entity> clazz) {
-        if (TYPES_BY_CLASS.isEmpty()) {
-            init();
-        }
-        return TYPES_BY_CLASS.get(clazz);
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.entityName);
+        return hash;
     }
+
 }

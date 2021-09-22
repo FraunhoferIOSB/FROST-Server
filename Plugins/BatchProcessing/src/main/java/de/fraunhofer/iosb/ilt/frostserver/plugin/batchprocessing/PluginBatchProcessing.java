@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,15 +46,21 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     private static final String REQUIREMENT_JSON_BATCH_PROCESSING = "https://fraunhoferiosb.github.io/FROST-Server/extensions/JsonBatchRequest.html";
 
     private CoreSettings settings;
+    private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override
@@ -88,8 +94,8 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     }
 
     @Override
-    public ServiceResponse execute(Service service, ServiceRequest request) {
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
         return new ServiceBatchProcessing(settings)
-                .executeBatchOperation(service, request);
+                .executeBatchOperation(service, request, response);
     }
 }

@@ -18,14 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
@@ -40,11 +39,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
+import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -54,7 +51,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -67,8 +63,13 @@ import org.slf4j.LoggerFactory;
 public class MqttManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManagerTest.class.getName());
+
     private static final int REPEAT_COUNT = 0;
     private static final int MESSAGE_COUNT = 20000;
+
+    private CoreSettings coreSettings;
+    private ModelRegistry modelRegistry;
+    private TestModel testModel;
 
     @Test
     public void testVersionParse() throws UnknownVersionException {
@@ -91,9 +92,15 @@ public class MqttManagerTest {
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, "20000");
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_THREAD_POOL_SIZE, "10");
         properties.put(CoreSettings.PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, DummyPersistenceManager.class.getName());
-        CoreSettings coreSettings = new CoreSettings(properties);
-        MqttManager.init(coreSettings);
-        MqttManager mqttManager = MqttManager.getInstance();
+
+        coreSettings = new CoreSettings(properties);
+        modelRegistry = coreSettings.getModelRegistry();
+        modelRegistry.setIdClass(IdLong.class);
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
+        modelRegistry.initFinalise();
+
+        MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
         Assert.assertEquals(1, mqttServers.size());
 
@@ -124,7 +131,7 @@ public class MqttManagerTest {
     private void testTopics(List<TestMqttServer> mqttServers, MqttManager mqttManager, int subscriptionCount, int publishCount) throws InterruptedException {
         TestMqttServer mqttServer = mqttServers.get(0);
         for (int i = 0; i < subscriptionCount; i++) {
-            String topic = "v1.1/Datastreams(" + i + ")/Observations";
+            String topic = "v1.1/Houses(" + i + ")/Rooms";
             mqttServer.subscribe(topic);
         }
 
@@ -141,10 +148,9 @@ public class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new Observation(new IdLong(pubId))
-                                    .setResult(pubId)
-                                    .setPhenomenonTime(new TimeInstant(DateTime.now()))
-                                    .setDatastream(new Datastream(new IdLong(topicId)))
+                            new DefaultEntity(testModel.ET_ROOM, new IdLong(pubId))
+                                    .setProperty(testModel.EP_NAME, "" + pubId)
+                                    .setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId)))
                     );
             topicId++;
             if (topicId >= subscriptionCount) {
@@ -355,16 +361,6 @@ public class MqttManagerTest {
 
         @Override
         public void close() {
-        }
-
-        @Override
-        public String checkForUpgrades() {
-            return "";
-        }
-
-        @Override
-        public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-            return true;
         }
 
     }

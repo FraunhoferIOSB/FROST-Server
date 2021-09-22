@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -46,7 +47,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -101,18 +101,20 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
-    private static final String NOT_A_VALID_ID = "Not a valid id";
+    private static final String NOT_A_VALID_ID = "Not a valid path";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
     private static final String NOTHING_FOUND_RESPONSE = "Nothing found.";
 
     private final CoreSettings settings;
+    private final ModelRegistry modelRegistry;
     private PersistenceManager persistenceManager;
     private boolean transactionActive = false;
 
     public Service(CoreSettings settings) {
         this.settings = settings;
+        modelRegistry = settings.getModelRegistry();
         PersistenceManagerFactory.init(settings);
     }
 
@@ -154,29 +156,41 @@ public class Service implements AutoCloseable {
         return requestType;
     }
 
-    public <T> ServiceResponse<T> execute(ServiceRequest request) {
+    /**
+     * Execute the given request, and put the result in the given response
+     * object.
+     *
+     * @param request the request to execute.
+     * @param response the response object to put the result in. If null, a new
+     * {@link ServiceResponseDefault} is created.
+     * @return the service response passed, or a new one.
+     */
+    public ServiceResponse execute(ServiceRequest request, ServiceResponse response) {
+        if (response == null) {
+            response = new ServiceResponseDefault();
+        }
         String requestType = request.getRequestType();
         switch (requestType) {
             case GET_CAPABILITIES:
-                return executeGetCapabilities(request);
+                return executeGetCapabilities(request, response);
             case CREATE:
-                return executePost(request);
+                return executePost(request, response);
             case READ:
-                return executeGet(request);
+                return executeGet(request, response);
             case DELETE:
-                return executeDelete(request);
+                return executeDelete(request, response);
             case UPDATE_ALL:
-                return executePut(request);
+                return executePut(request, response);
             case UPDATE_CHANGES:
-                return executePatch(request, false);
+                return executePatch(request, response, false);
             case UPDATE_CHANGESET:
-                return executePatch(request, true);
+                return executePatch(request, response, true);
             default:
                 PluginService plugin = settings.getPluginManager().getServiceForRequestType(requestType);
                 if (plugin == null) {
-                    return new ServiceResponse<>(500, "Illegal request type.");
+                    return new ServiceResponseDefault(500, "Illegal request type.");
                 }
-                return plugin.execute(this, request);
+                return plugin.execute(this, request, response);
         }
     }
 
@@ -262,22 +276,19 @@ public class Service implements AutoCloseable {
         return settings;
     }
 
-    private ServiceResponse executeGetCapabilities(ServiceRequest request) {
-        ServiceResponse response = new ServiceResponse();
+    private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
         Map<String, Object> result = new LinkedHashMap<>();
         Set<Extension> enabledSettings = settings.getEnabledExtensions();
 
         List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
         try {
-            for (EntityType entityType : EntityType.values()) {
-                if (enabledSettings.contains(entityType.extension)) {
-                    URL collectionUri = URI.create(
-                            settings.getQueryDefaults().getServiceRootUrl()
-                            + "/" + request.getVersion().urlPart
-                            + "/" + entityType.plural).normalize().toURL();
-                    capList.add(createCapability(entityType.plural, collectionUri));
-                }
+            for (EntityType entityType : modelRegistry.getEntityTypes()) {
+                URL collectionUri = URI.create(
+                        settings.getQueryDefaults().getServiceRootUrl()
+                        + "/" + request.getVersion().urlPart
+                        + "/" + entityType.plural).normalize().toURL();
+                capList.add(createCapability(entityType.plural, collectionUri));
             }
         } catch (MalformedURLException ex) {
             LOGGER.error("Failed to build url.", ex);
@@ -303,6 +314,10 @@ public class Service implements AutoCloseable {
 
         response.setCode(200);
         response.setResult(result);
+        return formatResponse(response, result);
+    }
+
+    private ServiceResponse formatResponse(ServiceResponse response, Object result) {
         ResultFormatter formatter;
         try {
             formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
@@ -310,8 +325,18 @@ public class Service implements AutoCloseable {
             LOGGER.error("Formatter not available.", ex);
             return errorResponse(response, 500, "Failed to instantiate formatter");
         }
-        response.setResultFormatted(formatter.format(null, null, result, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
+        return formatResponse(response, formatter, null, null, result);
+    }
+
+    private ServiceResponse formatResponse(ServiceResponse response, ResultFormatter formatter, Query query, ResourcePath path, Object result) {
         response.setContentType(formatter.getContentType());
+        try {
+            formatter.format(path, query, result, settings.getQueryDefaults().useAbsoluteNavigationLinks())
+                    .writeFormatted(response.getWriter());
+        } catch (IOException ex) {
+            LOGGER.error("Formatter not available.", ex);
+            return errorResponse(response, 500, "Failed to format");
+        }
         return response;
     }
 
@@ -322,8 +347,7 @@ public class Service implements AutoCloseable {
         return Collections.unmodifiableMap(val);
     }
 
-    private <T> ServiceResponse<T> executeGet(ServiceRequest request) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executeGet(ServiceRequest request, ServiceResponse response) {
         PersistenceManager pm = getPm();
         try {
             return handleGet(pm, request, response);
@@ -338,24 +362,24 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
+    private ServiceResponse handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         Query query;
         ResultFormatter formatter;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
-            query.validate();
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
             formatter = settings.getFormatter(query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
@@ -366,9 +390,19 @@ public class Service implements AutoCloseable {
             maybeCommitAndClose();
             return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
         }
-        T object;
         try {
-            object = (T) pm.get(path, query);
+            Object object = pm.get(path, query);
+            if (object == null) {
+                if (path.isValue() || path.isEntityProperty()) {
+                    return successResponse(response, 204, "No Content");
+                } else {
+                    return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                }
+            } else {
+                response.setResult(object);
+                response.setCode(200);
+                return formatResponse(response, formatter, query, path, object);
+            }
         } catch (UnsupportedOperationException e) {
             LOGGER.error("Unsupported operation.", e);
             pm.rollbackAndClose();
@@ -381,25 +415,12 @@ public class Service implements AutoCloseable {
             LOGGER.error("Result did not match expected format", e);
             pm.rollbackAndClose();
             return errorResponse(response, 500, "Illegal result type: " + e.getMessage());
-        }
-        maybeCommitAndClose();
-        if (object == null) {
-            if (path.isValue() || path.isEntityProperty()) {
-                return successResponse(response, 204, "No Content");
-            } else {
-                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
-            }
-        } else {
-            response.setResult(object);
-            response.setResultFormatted(formatter.format(path, query, object, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
-            response.setContentType(formatter.getContentType());
-            response.setCode(200);
-            return response;
+        } finally {
+            maybeCommitAndClose();
         }
     }
 
-    private <T> ServiceResponse<T> executePost(ServiceRequest request) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executePost(ServiceRequest request, ServiceResponse response) {
         String urlPath = request.getUrlPath();
         if (urlPath == null || urlPath.equals("/")) {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
@@ -408,6 +429,12 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handlePost(pm, urlPath, response, request);
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("User Error: {}", e.getMessage());
+            if (pm != null) {
+                pm.rollbackAndClose();
+            }
+            return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
         } catch (IOException | RuntimeException e) {
             LOGGER.error("", e);
             if (pm != null) {
@@ -419,17 +446,16 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handlePost(PersistenceManager pm, String urlPath, ServiceResponse<T> response, ServiceRequest request) throws IOException {
+    private ServiceResponse handlePost(PersistenceManager pm, String urlPath, ServiceResponse response, ServiceRequest request) throws IOException {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     urlPath);
-        } catch (IllegalArgumentException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         if (!(path.getMainElement() instanceof PathElementEntitySet)) {
@@ -451,12 +477,12 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
+        JsonReader jsonReader = new JsonReader(modelRegistry);
         Entity entity;
         try {
-            entity = entityParser.parseEntity(type.getImplementingClass(), request.getContentReader());
+            entity = jsonReader.parseEntity(type, request.getContentReader());
             entity.complete(mainSet);
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
             LOGGER.trace("Exception:", ex);
@@ -471,7 +497,7 @@ public class Service implements AutoCloseable {
             }
             maybeCommitAndClose();
 
-            response.setResult((T) entity);
+            response.setResult(entity);
             response.setCode(201);
             if (query.getMetadata() != Metadata.OFF) {
                 String url = UrlHelper.generateSelfLink(null, path, entity);
@@ -484,8 +510,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> executePatch(ServiceRequest request, boolean isChangeSet) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executePatch(ServiceRequest request, ServiceResponse response, boolean isChangeSet) {
         PersistenceManager pm = null;
         try {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
@@ -508,14 +533,15 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
         PathElementEntity mainElement;
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContentReader());
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            JsonReader entityParser = new JsonReader(modelRegistry);
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
+            entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());
@@ -542,7 +568,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
         PathElementEntity mainElement;
         JsonPatch jsonPatch;
         try {
@@ -577,14 +603,12 @@ public class Service implements AutoCloseable {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException exc) {
-            LOGGER.trace(NOT_A_VALID_ID, exc);
-            throw new NoSuchEntityException(NOT_A_VALID_ID);
-        } catch (IllegalStateException exc) {
+        } catch (IllegalArgumentException | IllegalStateException exc) {
             throw new NoSuchEntityException(NOT_A_VALID_ID + ": " + exc.getMessage());
         }
 
@@ -605,8 +629,7 @@ public class Service implements AutoCloseable {
         return mainElement;
     }
 
-    private <T> ServiceResponse<T> executePut(ServiceRequest request) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executePut(ServiceRequest request, ServiceResponse response) {
         PersistenceManager pm = null;
         try {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
@@ -626,16 +649,16 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
         PathElementEntity mainElement;
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
 
-            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContentReader());
+            JsonReader entityParser = new JsonReader(modelRegistry);
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             entity.complete(true);
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -662,35 +685,33 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> executeDelete(ServiceRequest request) {
+    private ServiceResponse executeDelete(ServiceRequest request, ServiceResponse response) {
         if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-            return new ServiceResponse<T>().setStatus(400, "DELETE only allowed on Entities and Sets.");
+            return new ServiceResponseDefault().setStatus(400, "DELETE only allowed on Entities and Sets.");
         }
 
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     getPm().getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
-        } catch (IllegalArgumentException e) {
-            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID);
-        } catch (IllegalStateException e) {
-            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException exc) {
+            return new ServiceResponseDefault().setStatus(404, NOT_A_VALID_ID + ": " + exc.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {
-            return executeDeleteEntity(request, path);
+            return executeDeleteEntity(request, response, path);
         }
         if ((path.getMainElement() instanceof PathElementEntitySet)) {
-            return executeDeleteEntitySet(request, path);
+            return executeDeleteEntitySet(request, response, path);
         }
-        return new ServiceResponse<T>().setStatus(400, "Not a valid path for DELETE.");
+        return new ServiceResponseDefault().setStatus(400, "Not a valid path for DELETE.");
     }
 
-    private <T> ServiceResponse<T> executeDeleteEntity(ServiceRequest request, ResourcePath path) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executeDeleteEntity(ServiceRequest request, ServiceResponse response, ResourcePath path) {
         PersistenceManager pm = null;
         try {
             PathElementEntity mainEntity = (PathElementEntity) path.getMainElement();
@@ -723,7 +744,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handleDelete(PersistenceManager pm, PathElementEntity mainEntity, ServiceResponse<T> response) {
+    private ServiceResponse handleDelete(PersistenceManager pm, PathElementEntity mainEntity, ServiceResponse response) {
         try {
             if (pm.delete(mainEntity)) {
                 maybeCommitAndClose();
@@ -740,8 +761,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> executeDeleteEntitySet(ServiceRequest request, ResourcePath path) {
-        ServiceResponse<T> response = new ServiceResponse<>();
+    private ServiceResponse executeDeleteEntitySet(ServiceRequest request, ServiceResponse response, ResourcePath path) {
         PersistenceManager pm = null;
         try {
             PathElementEntitySet mainEntity = (PathElementEntitySet) path.getMainElement();
@@ -768,10 +788,12 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> ServiceResponse<T> handleDeleteSet(ServiceRequest request, ServiceResponse<T> response, PersistenceManager pm, ResourcePath path) {
+    private ServiceResponse handleDeleteSet(ServiceRequest request, ServiceResponse response, PersistenceManager pm, ResourcePath path) {
         Query query;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, "Failed to parse query: " + e.getMessage());
         }
@@ -801,15 +823,15 @@ public class Service implements AutoCloseable {
         }
     }
 
-    public static <T> ServiceResponse<T> successResponse(ServiceResponse<T> response, int code, String message) {
+    public static ServiceResponse successResponse(ServiceResponse response, int code, String message) {
         return jsonResponse(response, "success", code, message);
     }
 
-    public static <T> ServiceResponse<T> errorResponse(ServiceResponse<T> response, int code, String message) {
+    public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
         return jsonResponse(response, "error", code, message);
     }
 
-    public static <T> ServiceResponse<T> jsonResponse(ServiceResponse<T> response, String type, int code, String message) {
+    public static ServiceResponse jsonResponse(ServiceResponse response, String type, int code, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("code", code);

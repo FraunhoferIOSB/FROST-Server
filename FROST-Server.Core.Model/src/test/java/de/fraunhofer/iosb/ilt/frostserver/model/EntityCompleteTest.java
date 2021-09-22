@@ -18,19 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Assert;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -38,117 +32,45 @@ import org.junit.rules.ExpectedException;
  */
 public class EntityCompleteTest {
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+    private static ModelRegistry modelRegistry;
+    private static TestModel testModel;
+
+    @BeforeClass
+    public static void beforeClass() {
+        modelRegistry = new ModelRegistry();
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
+        modelRegistry.initFinalise();
+    }
 
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
             entity.complete(containingSet);
             return true;
-        } catch (IncompleteEntityException | IllegalStateException e) {
+        } catch (IncompleteEntityException | IllegalArgumentException e) {
             return false;
         }
     }
 
     @Test
-    public void testSensorComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.SENSOR, null);
-        Sensor entity = new Sensor();
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-        entity.setName("name");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-        entity.setDescription("description");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-        entity.setEncodingType("application/text");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-        entity.setMetadata("Sensor Metadata");
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-    }
-
-    @Test
-    public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTIDATASTREAM, null);
-
-        MultiDatastream entity = new MultiDatastream();
+    public void testEntityComplete() {
+        PathElementEntitySet containingSet = new PathElementEntitySet(testModel.ET_ROOM);
+        Entity entity = new DefaultEntity(testModel.ET_ROOM);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setName("Test MultiDatastream");
+        entity.setProperty(testModel.EP_NAME, "name");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setDescription("Test Description");
+        entity.setProperty(testModel.NP_HOUSE_ROOM, new DefaultEntity(testModel.ET_HOUSE).setId(new IdLong(2)));
+        Assert.assertTrue("Entity not complete: " + entity, isEntityComplete(entity, containingSet));
+
+        entity = new DefaultEntity(testModel.ET_ROOM);
+        entity.setProperty(testModel.EP_NAME, "Name");
+        containingSet = new PathElementEntitySet(testModel.ET_ROOM);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
-        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setUnitOfMeasurements(unitOfMeasurements);
+        containingSet = new PathElementEntitySet(testModel.NP_BATHROOMS_HOUSE, new PathElementEntity(testModel.ET_ROOM, null).setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        List<String> multiObservationDataTypes = new ArrayList<>();
-        multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setMultiObservationDataTypes(multiObservationDataTypes);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setThing(new Thing().setId(new IdLong(1)));
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setSensor(new Sensor().setId(new IdLong(2)));
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        EntitySet<ObservedProperty> observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
-        entity.setObservedProperties(observedProperties);
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-
-        entity.setThing(null);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(EntityType.MULTIDATASTREAM, new PathElementEntity(new IdLong(2), EntityType.THING, null))));
-
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
-
-        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setUnitOfMeasurements(unitOfMeasurements);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setMultiObservationDataTypes(multiObservationDataTypes);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
-        entity.setObservedProperties(observedProperties);
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-    }
-
-    @Test
-    public void testObservationComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.OBSERVATION, null);
-        Observation entity = new Observation();
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setResult("result");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setDatastream(new Datastream().setId(new IdLong(2)));
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-
-        entity.setMultiDatastream(new MultiDatastream().setId(new IdLong(2)));
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
-
-        entity.setDatastream(null);
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
-
-        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.DATASTREAM, null));
-        entity = new Observation();
-        entity.setResult("result");
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-
-        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTIDATASTREAM, null));
-        entity = new Observation();
-        entity.setResult("result");
+        containingSet = new PathElementEntitySet(testModel.NP_ROOMS_HOUSE, new PathElementEntity(testModel.ET_HOUSE, null).setId(new IdLong(1)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

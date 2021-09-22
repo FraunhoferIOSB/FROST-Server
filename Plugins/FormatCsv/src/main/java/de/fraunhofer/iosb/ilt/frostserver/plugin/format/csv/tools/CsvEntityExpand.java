@@ -35,7 +35,7 @@ public class CsvEntityExpand implements CsvEntityEntry {
     public CsvEntityExpand(String namePrefix, NavigationProperty property, Query subQuery, NavigationPropertyFollower propertyFollower) {
         this.propertyFollower = propertyFollower;
         expandedElements = new CsvElementSet(namePrefix);
-        expandedElements.initFrom(property.getType(), subQuery);
+        expandedElements.initFrom(property.getEntityType(), subQuery);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CsvEntityExpand implements CsvEntityEntry {
     }
 
     @Override
-    public void writeData(CsvRowCollector collector, Entity<?> e) {
+    public void writeData(CsvRowCollector collector, Entity e) {
         expandedElements.writeData(collector, propertyFollower.fetch(e));
     }
 

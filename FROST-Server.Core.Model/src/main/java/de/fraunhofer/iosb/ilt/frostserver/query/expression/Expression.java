@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+
 /**
  *
  * @author jab
@@ -26,6 +29,8 @@ public interface Expression {
     public Expression compress();
 
     public <O> O accept(ExpressionVisitor<O> visitor);
+
+    public void validate(ParserHelper helper, EntityType type);
 
     /**
      * get the filter as it is expected to appear in a URL.

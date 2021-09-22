@@ -28,24 +28,12 @@ import java.util.Set;
  */
 public enum Extension {
     CORE(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"
-    ),
-    ACTUATION(
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/tasking-capability",
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/task",
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/actuator",
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks",
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks-via-mqtt",
-            "http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt"
-    ),
-    MULTI_DATASTREAM(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
     ),
     MQTT(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",

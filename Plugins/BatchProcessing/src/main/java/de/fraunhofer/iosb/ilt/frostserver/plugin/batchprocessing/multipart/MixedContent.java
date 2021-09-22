@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -248,16 +247,13 @@ public class MixedContent extends Batch<MultipartContent> implements MultipartCo
     }
 
     @Override
-    public String getContentType() {
+    public Map<String, String> getHeaders() {
         if (boundary == null) {
             generateBoundary();
         }
-        return "multipart/mixed; boundary=" + boundary;
-    }
-
-    @Override
-    public Map<String, String> getHeaders() {
-        return Collections.emptyMap();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "multipart/mixed; boundary=" + boundary);
+        return headers;
     }
 
     private void generateBoundary() {

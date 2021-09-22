@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -65,6 +64,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
             Entity newEntity = fetchEntity(
                     entity.getEntityType(),
                     entity.getId());
+            newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)
@@ -81,6 +81,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Entity entity = getEntityByEntityPath(pathElement);
         boolean result = doDelete(pathElement);
         if (result) {
+            entity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.DELETE)
@@ -97,7 +98,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     private Entity getEntityByEntityPath(PathElementEntity pathElement) {
         ResourcePath path = new ResourcePath();
-        path.addPathElement(new PathElementEntitySet(pathElement.getEntityType(), null), false, false);
+        path.addPathElement(new PathElementEntitySet(pathElement.getEntityType()), false, false);
         pathElement.setParent(path.getLastElement());
         path.addPathElement(pathElement, true, true);
         return (Entity) get(path, null);
@@ -112,9 +113,9 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         EntityChangedMessage result = doUpdate(pathElement, entity);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
-            Entity newEntity = fetchEntity(
-                    entity.getEntityType(),
-                    entity.getId());
+            final EntityType entityType = entity.getEntityType();
+            Entity newEntity = fetchEntity(entityType, entity.getId());
+            newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
             result.setEntity(newEntity);
             changedEntities.add(result);
         }
@@ -141,6 +142,13 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         EntityChangedMessage result = doUpdate(pathElement, patch);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
+
+            Entity entity = result.getEntity();
+            final EntityType entityType = entity.getEntityType();
+            Entity newEntity = fetchEntity(entityType, entity.getId());
+            newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
+            result.setEntity(newEntity);
+
             changedEntities.add(result);
         }
         return result != null;
@@ -163,7 +171,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * If there are changes to send, connect to bus and send them.
      */
     private void fireEntityChangeEvents() {
-        MessageBus messageBus = MessageBusFactory.getMessageBus();
+        MessageBus messageBus = getCoreSettings().getMessageBus();
         changedEntities.forEach(messageBus::sendMessage);
         clearEntityChangedEvents();
     }

@@ -28,7 +28,7 @@ public class DataArrayResult {
 
     private long count = -1;
     private String nextLink;
-    private List<DataArrayValue> value = new ArrayList<>();
+    private final List<DataArrayValue> value = new ArrayList<>();
 
     public long getCount() {
         return count;

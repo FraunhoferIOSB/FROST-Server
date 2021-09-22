@@ -18,24 +18,29 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import org.jooq.Record;
-import org.jooq.TableField;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import org.jooq.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table.
  *
  * @author hylke
- * @param <J>
+ * @param <J> the ID type.
  * @param <S> The source table.
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, L extends StaTable<J, L>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
+public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationManyToMany.class.getName());
 
     /**
      * The target entity type of the relation.
@@ -46,10 +51,6 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
      * entity type name.
      */
     private final String name;
-    /**
-     * The table that is the source side of the relation.
-     */
-    private final S source;
 
     /**
      * The field on the source side that defines the relation.
@@ -70,16 +71,19 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
      */
     private FieldAccessor<J, T> targetFieldAcc;
 
-    public RelationManyToMany(
-            S source,
-            L linkTable,
-            T target,
-            EntityType targetType) {
-        this.source = source;
+    public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target) {
+        if (source == null) {
+            // Source is only used for finding the generics...
+            LOGGER.error("NULL source");
+        }
         this.linkTable = linkTable;
         this.target = target;
-        this.targetType = targetType;
-        this.name = targetType.entityName;
+        this.targetType = navProp.getEntityType();
+        this.name = navProp.getName();
+    }
+
+    public FieldAccessor<J, S> getSourceFieldAcc() {
+        return sourceFieldAcc;
     }
 
     public RelationManyToMany<J, S, L, T> setSourceFieldAcc(FieldAccessor<J, S> sourceFieldAcc) {
@@ -87,9 +91,21 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         return this;
     }
 
+    public L getLinkTable() {
+        return linkTable;
+    }
+
+    public FieldAccessor<J, L> getSourceLinkFieldAcc() {
+        return sourceLinkFieldAcc;
+    }
+
     public RelationManyToMany<J, S, L, T> setSourceLinkFieldAcc(FieldAccessor<J, L> sourceLinkFieldAcc) {
         this.sourceLinkFieldAcc = sourceLinkFieldAcc;
         return this;
+    }
+
+    public FieldAccessor<J, L> getTargetLinkFieldAcc() {
+        return targetLinkFieldAcc;
     }
 
     public RelationManyToMany<J, S, L, T> setTargetLinkFieldAcc(FieldAccessor<J, L> targetLinkFieldAcc) {
@@ -97,23 +113,42 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         return this;
     }
 
+    public FieldAccessor<J, T> getTargetFieldAcc() {
+        return targetFieldAcc;
+    }
+
     public RelationManyToMany<J, S, L, T> setTargetFieldAcc(FieldAccessor<J, T> targetFieldAcc) {
         this.targetFieldAcc = targetFieldAcc;
         return this;
     }
 
+    public T getTarget() {
+        return target;
+    }
+
+    public EntityType getTargetType() {
+        return targetType;
+    }
+
     @Override
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        TableField<Record, J> sourceField = sourceFieldAcc.getField(source);
-        TableField<Record, J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetField = targetFieldAcc.getField(targetAliased);
+        Field<J> sourceField = sourceFieldAcc.getField(source);
+        Field<J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
+        Field<J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
+        Field<J> targetField = targetFieldAcc.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+    }
+
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+        pm.getDslContext().insertInto(linkTable)
+                .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
+                .set(targetLinkFieldAcc.getField(linkTable), targetId)
+                .execute();
     }
 
     /**

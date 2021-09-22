@@ -34,6 +34,6 @@ public interface NavigationPropertyFollower {
      * @param source The source Entity.
      * @return The linked target Entity.
      */
-    public Entity fetch(Entity<?> source);
+    public Entity fetch(Entity source);
 
 }

@@ -7,6 +7,7 @@
     </appender>
 
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
     <logger name="io.moquette" level="WARN"/>
     <logger name="liquibase" level="WARN"/>
     <logger name="org.jooq" level="WARN"/>

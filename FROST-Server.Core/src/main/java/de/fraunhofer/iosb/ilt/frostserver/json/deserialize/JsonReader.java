@@ -17,27 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomDeserializationManager;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityChangedMessageDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -47,8 +40,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
 import java.io.Reader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
@@ -58,13 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JsonReader {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonReader.class);
-
-    private static ObjectMapper mainMapper;
-    private static Class<? extends Id> mainIdClass;
+    private static final Map<ModelRegistry, ObjectMapper> mappers = new HashMap<>();
 
     /**
      * Get an object mapper for the given id Class. If the id class is the same
@@ -73,28 +60,8 @@ public class JsonReader {
      * @param idClass The id class to use for this mapper.
      * @return The cached or created object mapper.
      */
-    private static ObjectMapper getObjectMapper(Class<? extends Id> idClass) {
-        if (mainMapper == null) {
-            initMainObjectMapper(idClass);
-        }
-        if (mainIdClass != idClass) {
-            LOGGER.warn("Object Mapper requested with different id class. {} instead of {}", idClass, mainIdClass);
-            return createObjectMapper(idClass);
-        }
-        return mainMapper;
-    }
-
-    /**
-     * Initialise the main object mapper.
-     *
-     * @param idClass The id class to use for the main object mapper.
-     */
-    private static synchronized void initMainObjectMapper(Class<? extends Id> idClass) {
-        if (mainMapper != null) {
-            return;
-        }
-        mainMapper = createObjectMapper(idClass);
-        mainIdClass = idClass;
+    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry) {
+        return mappers.computeIfAbsent(modelRegistry, JsonReader::createObjectMapper);
     }
 
     /**
@@ -103,7 +70,9 @@ public class JsonReader {
      * @param idClass The id class to use for this mapper.
      * @return The created object mapper.
      */
-    private static ObjectMapper createObjectMapper(Class<? extends Id> idClass) {
+    private static ObjectMapper createObjectMapper(ModelRegistry modelRegistry) {
+        // ToDo: Allow extensions to add deserializers
+
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.getInstance().registerDeserializer(encodingType, geoJsonDeserializier);
@@ -116,12 +85,11 @@ public class JsonReader {
 
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
-        module.addAbstractTypeMapping(Id.class, idClass);
-        for (EntityType entityType : EntityType.values()) {
-            Class<? extends Entity> implementingClass = entityType.getImplementingClass();
-            module.addDeserializer(implementingClass, new CustomEntityDeserializer<>(implementingClass));
+        module.addAbstractTypeMapping(Id.class, modelRegistry.getIdClass());
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+            CustomEntityDeserializer.getInstance(modelRegistry, entityType);
         }
-        module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());
+        module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer(modelRegistry));
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
         module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
@@ -134,57 +102,33 @@ public class JsonReader {
      * The objectMapper for this instance of EntityParser.
      */
     private final ObjectMapper mapper;
+    private final ModelRegistry modelRegistry;
 
-    public JsonReader(Class<? extends Id> idClass) {
-        mapper = getObjectMapper(idClass);
+    public JsonReader(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+        mapper = getObjectMapper(modelRegistry);
     }
 
-    public Datastream parseDatastream(String value) throws IOException {
-        return mapper.readValue(value, Datastream.class);
+    public ObjectMapper getMapper() {
+        return mapper;
     }
 
-    public MultiDatastream parseMultiDatastream(String value) throws IOException {
-        return mapper.readValue(value, MultiDatastream.class);
+    public Entity parseEntity(EntityType entityType, String value) throws IOException {
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
+            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
+                    .deserializeFull(parser, dsc);
+        }
     }
 
-    public FeatureOfInterest parseFeatureOfInterest(String value) throws IOException {
-        return mapper.readValue(value, FeatureOfInterest.class);
-    }
-
-    public HistoricalLocation parseHistoricalLocation(String value) throws IOException {
-        return mapper.readValue(value, HistoricalLocation.class);
-    }
-
-    public Location parseLocation(String value) throws IOException {
-        return mapper.readValue(value, Location.class);
-    }
-
-    public Observation parseObservation(String value) throws IOException {
-        return mapper.readValue(value, Observation.class);
-    }
-
-    public ObservedProperty parseObservedProperty(String value) throws IOException {
-        return mapper.readValue(value, ObservedProperty.class);
-    }
-
-    public Sensor parseSensor(String value) throws IOException {
-        return mapper.readValue(value, Sensor.class);
-    }
-
-    public Thing parseThing(String value) throws IOException {
-        return mapper.readValue(value, Thing.class);
-    }
-
-    public <T extends Entity> T parseEntity(Class<T> clazz, String value) throws IOException {
-        return mapper.readValue(value, clazz);
-    }
-
-    public <T extends Entity> T parseEntity(Class<T> clazz, Reader value) throws IOException {
-        return mapper.readValue(value, clazz);
-    }
-
-    public <T extends Entity> T parseEntity(Class<T> clazz, JsonNode value) throws IOException {
-        return mapper.treeToValue(value, clazz);
+    public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
+            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
+                    .deserializeFull(parser, dsc);
+        }
     }
 
     public <T> T parseObject(Class<T> clazz, String value) throws IOException {

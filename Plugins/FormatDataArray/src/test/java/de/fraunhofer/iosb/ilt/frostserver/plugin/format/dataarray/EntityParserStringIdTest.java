@@ -18,15 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,11 +43,36 @@ import org.junit.Test;
  */
 public class EntityParserStringIdTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+    private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
+    private static PluginMultiDatastream pluginMultiDatastream;
+    private static EntityType etMultiDatastream;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
+            modelRegistry = coreSettings.getModelRegistry();
+            modelRegistry.setIdClass(IdString.class);
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            pluginCoreModel = new PluginCoreModel();
+            pluginCoreModel.init(coreSettings);
+            pluginMultiDatastream = new PluginMultiDatastream();
+            pluginMultiDatastream.init(coreSettings);
+            coreSettings.getPluginManager().initPlugins(null);
+            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+        }
+    }
+
     private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new JsonReader(IdString.class);
+        entityParser = new JsonReader(modelRegistry);
     }
 
     @Test
@@ -52,9 +85,9 @@ public class EntityParserStringIdTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Datastream ds1 = new Datastream().setId(new IdString("A"));
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("A"));
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(20)
@@ -64,9 +97,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(30)
                 .addItemToTail("B");
 
-        Datastream ds2 = new Datastream().setId(new IdString("B"));
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("B"));
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)
@@ -76,9 +109,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(60)
                 .addItemToTail("D");
 
-        MultiDatastream mds1 = new MultiDatastream().setId(new IdString("A"));
+        Entity mds1 = new DefaultEntity(etMultiDatastream).setId(new IdString("A"));
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)
@@ -91,7 +124,7 @@ public class EntityParserStringIdTest {
         expectedResult.add(dav1);
         expectedResult.add(dav2);
         expectedResult.add(dav3);
-        List<DataArrayValue> result = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, json);
+        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser, coreSettings);
         assertEquals(expectedResult, result);
     }
 

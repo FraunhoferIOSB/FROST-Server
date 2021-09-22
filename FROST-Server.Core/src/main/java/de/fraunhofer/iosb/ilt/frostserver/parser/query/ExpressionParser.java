@@ -17,10 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
@@ -95,7 +92,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -219,44 +216,33 @@ public class ExpressionParser extends AbstractParserVisitor {
         }
     }
 
-    public static Expression parseExpression(Node node) {
-        return new ExpressionParser().visit(node, null);
+    public Expression parseExpression(Node node) {
+        return visit(node, null);
     }
 
     @Override
     public Path visit(ASTPlainPath node, Object data) {
-        Path path = new Path();
-        Property previous = null;
+
+        PropertyPlaceholder property = null;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             Node child = node.jjtGetChild(i);
             if (!(child instanceof ASTPathElement)) {
                 throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
             }
-            Property property = visit((ASTPathElement) child, previous);
-            if (property instanceof EntityPropertyCustom || property instanceof EntityPropertyCustomLink) {
-                if (!(previous instanceof EntityPropertyMain) && !(previous instanceof EntityPropertyCustom)) {
-                    throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties or other custom properties.");
-                }
-                if (previous instanceof EntityPropertyMain && !((EntityPropertyMain) previous).hasCustomProperties) {
-                    throw new IllegalArgumentException("Entity property " + previous.getName() + " does not have custom properties (" + property.getName() + ").");
-                }
-            }
-            path.getElements().add(property);
-            previous = property;
+            property = visit((ASTPathElement) child, property);
         }
-        return path;
+        return new Path(property);
     }
 
     @Override
-    public Property visit(ASTPathElement node, Object data) {
+    public PropertyPlaceholder visit(ASTPathElement node, Object data) {
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside expressions");
         }
-        Property previous = null;
-        if (data instanceof Property) {
-            previous = (Property) data;
+        if (data instanceof PropertyPlaceholder) {
+            return ((PropertyPlaceholder) data).addToSubPath(node.getName());
         }
-        return ParserHelper.parseProperty(node.getName(), previous);
+        return new PropertyPlaceholder(node.getName());
     }
 
     @Override
@@ -429,7 +415,7 @@ public class ExpressionParser extends AbstractParserVisitor {
         if (matcher.matches()) {
             return GeoJsonConstant.fromString(matcher.group(1).trim());
         } else {
-            throw new IllegalArgumentException("invalid geography string '" + raw + "'");
+            throw new IllegalArgumentException("invalid geography string '" + StringHelper.cleanForLogging(raw) + "'");
         }
     }
 

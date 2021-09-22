@@ -17,31 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongActuators;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongFeatures;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongTaskingCapabilities;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongTasks;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.HashMap;
+import java.util.Map;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -50,70 +34,28 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
  */
 public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<Long> {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
-
     private static final IdManagerLong ID_MANAGER = new IdManagerLong();
-    private static EntityFactories<Long> entityFactories;
-    private static TableCollection<Long> tableCollection;
+    private static final Map<CoreSettings, TableCollection<Long>> tableCollections = new HashMap<>();
 
-    @Override
-    public IdManager getIdManager() {
-        return ID_MANAGER;
+    private static TableCollection<Long> getTableCollection(CoreSettings settings) {
+        return tableCollections.computeIfAbsent(
+                settings,
+                t -> new TableCollection<>(IdLong.PERSISTENCE_TYPE_INTEGER, SQLDataType.BIGINT)
+        );
+    }
+
+    public PostgresPersistenceManagerLong() {
+        super(ID_MANAGER);
     }
 
     @Override
     public void init(CoreSettings settings) {
-        super.init(settings);
-        IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
-        if (entityFactories == null) {
-            init(new TableCollection<Long>(IdLong.PERSISTENCE_TYPE_INTEGER)
-                    .setTableActuators(TableLongActuators.ACTUATORS)
-                    .setTableDatastreams(TableLongDatastreams.DATASTREAMS)
-                    .setTableFeatures(TableLongFeatures.FEATURES)
-                    .setTableHistLocations(TableLongHistLocations.HIST_LOCATIONS)
-                    .setTableLocations(TableLongLocations.LOCATIONS)
-                    .setTableLocationsHistLocations(TableLongLocationsHistLocations.LOCATIONS_HIST_LOCATIONS)
-                    .setTableMultiDatastreams(TableLongMultiDatastreams.MULTI_DATASTREAMS)
-                    .setTableMultiDatastreamsObsProperties(TableLongMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES)
-                    .setTableObservations(TableLongObservations.OBSERVATIONS)
-                    .setTableObsProperties(TableLongObsProperties.OBS_PROPERTIES)
-                    .setTableSensors(TableLongSensors.SENSORS)
-                    .setTableTasks(TableLongTasks.TASKS)
-                    .setTableTaskingCapabilities(TableLongTaskingCapabilities.TASKINGCAPABILITIES)
-                    .setTableThings(TableLongThings.THINGS)
-                    .setTableThingsLocations(TableLongThingsLocations.THINGS_LOCATIONS)
-                    .init());
-        }
-    }
-
-    private static synchronized void init(TableCollection<Long> tables) {
-        if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, tables);
-            tableCollection = tables;
-            for (StaMainTable<Long, ?, ?> table : tableCollection.getAllTables()) {
-                table.initProperties(entityFactories);
-            }
-        }
+        super.init(settings, getTableCollection(settings));
     }
 
     @Override
-    public TableCollection<Long> getTableCollection() {
-        return tableCollection;
-    }
-
-    @Override
-    public String getLiquibaseChangelogFilename() {
-        return LIQUIBASE_CHANGELOG_FILENAME;
-    }
-
-    @Override
-    public EntityFactories<Long> getEntityFactories() {
-        return entityFactories;
-    }
-
-    @Override
-    public IdGenerationHandler createIdGenerationHanlder(Entity e) {
-        return new IdGenerationHandlerLong(e);
+    protected boolean validateClientSuppliedId(Id entityId) {
+        return entityId != null && entityId.getValue() != null;
     }
 
 }

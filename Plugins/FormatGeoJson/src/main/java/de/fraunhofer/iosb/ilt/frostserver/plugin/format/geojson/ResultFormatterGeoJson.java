@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -24,9 +26,9 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjElementSet;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjRowCollector;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_GEOJSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
-import org.geojson.FeatureCollection;
 
 /**
  *
@@ -41,11 +43,11 @@ public class ResultFormatterGeoJson implements ResultFormatter {
 
     @Override
     public String getContentType() {
-        return "application/geo+json";
+        return CONTENT_TYPE_APPLICATION_GEOJSON;
     }
 
     @Override
-    public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
         GjElementSet elementSet = new GjElementSet(query, path.getServiceRootUrl(), path.getVersion(), "", true);
         elementSet.initFrom(type);
@@ -54,7 +56,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         elementSet.writeData(rowCollector, result, "");
 
         try {
-            return JsonWriter.writeObject(rowCollector.getCollection());
+            return new FormatWriterGeneric(JsonWriter.writeObject(rowCollector.getCollection()));
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to generate GeoJSON.", ex);
         }

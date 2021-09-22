@@ -18,20 +18,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,66 +41,103 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityChangedMessageDeserializer.class);
+    private static final String TYPE_NOT_KNOW_YET = "Type not know yet.";
+
+    private final ModelRegistry modelRegistry;
+    private final EntityChangedMessage.QueryGenerator queryGenerator = new EntityChangedMessage.QueryGenerator();
+
+    public CustomEntityChangedMessageDeserializer(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+    }
 
     @Override
     public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        ObjectMapper mapper = (ObjectMapper) parser.getCodec();
-        JsonNode obj = mapper.readTree(parser);
-        Iterator<Map.Entry<String, JsonNode>> i = obj.fields();
+        JsonToken currentToken = parser.nextToken();
         EntityType type = null;
-        JsonNode entityJson = null;
-        while (i.hasNext()) {
-            Map.Entry<String, JsonNode> next = i.next();
-            String name = next.getKey();
-            JsonNode value = next.getValue();
-            switch (name.toLowerCase()) {
-                case "eventtype":
-                    message.setEventType(EntityChangedMessage.Type.valueOf(value.asText()));
+        Entity entity = null;
+        while (currentToken == JsonToken.FIELD_NAME) {
+            String fieldName = parser.getCurrentName();
+            parser.nextToken();
+            switch (fieldName) {
+                case "eventType":
+                    message.setEventType(EntityChangedMessage.Type.valueOf(parser.getValueAsString()));
                     break;
 
-                case "entitytype":
-                    type = EntityType.valueOf(value.asText());
+                case "entityType":
+                    type = handleEntityType(parser, entity, message);
                     break;
 
-                case "epfields":
-                    for (JsonNode field : value) {
-                        String fieldName = field.asText();
-                        message.addEpField(EntityPropertyMain.valueOf(fieldName));
-                    }
+                case "epFields":
+                    handleEpFields(parser, type, message);
                     break;
 
-                case "npfields":
-                    for (JsonNode field : value) {
-                        String fieldName = field.asText();
-                        message.addNpField(NavigationPropertyMain.valueOf(fieldName));
-                    }
+                case "npFields":
+                    handleNpFields(parser, type, message);
                     break;
 
                 case "entity":
-                    entityJson = value;
+                    entity = handleEntity(parser, ctxt, type, message);
                     break;
 
                 default:
-                    LOGGER.warn("Unknown field in message: {}", name);
+                    LOGGER.warn("Unknown field in message: {}", fieldName);
                     break;
             }
+            currentToken = parser.nextToken();
         }
-        if (type == null || entityJson == null) {
+
+        if (type == null || entity == null) {
             throw new IllegalArgumentException("Message json with no type or no entity.");
         }
-        message.setEntity(parseEntity(mapper, entityJson, type));
         return message;
     }
 
-    private static Entity parseEntity(ObjectMapper mapper, JsonNode entityJson, EntityType entityType) {
-        Entity entity = mapper.convertValue(entityJson, entityType.getImplementingClass());
-        if (entity instanceof Observation) {
-            Observation observation = (Observation) entity;
-            if (observation.getResultTime() == null) {
-                observation.setResultTime(new TimeInstant(null));
-            }
+    private EntityType handleEntityType(JsonParser parser, Entity entity, EntityChangedMessage message) throws IOException {
+        EntityType type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
+        if (entity != null) {
+            entity.setEntityType(type);
+            entity.setQuery(queryGenerator.getQueryFor(type));
+            message.setEntity(entity);
         }
+        return type;
+    }
+
+    private void handleEpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+        String fieldName;
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        JsonToken currentToken = parser.nextToken();
+        while (currentToken == JsonToken.VALUE_STRING) {
+            fieldName = parser.getValueAsString();
+            message.addEpField((EntityPropertyMain) type.getProperty(fieldName));
+            currentToken = parser.nextToken();
+        }
+    }
+
+    private void handleNpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+        String fieldName;
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        JsonToken currentToken = parser.nextToken();
+        while (currentToken == JsonToken.VALUE_STRING) {
+            fieldName = parser.getValueAsString();
+            message.addNpField((NavigationPropertyMain) type.getProperty(fieldName));
+            currentToken = parser.nextToken();
+        }
+    }
+
+    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, EntityChangedMessage message) throws IOException, IllegalArgumentException {
+        if (type == null) {
+            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        Entity entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
+                .deserialize(parser, ctxt);
+        entity.setQuery(queryGenerator.getQueryFor(type));
+        message.setEntity(entity);
         return entity;
     }
+
 }

@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartContent.IsFinished;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.regex.Matcher;
 import org.slf4j.Logger;
@@ -138,7 +139,7 @@ public class MixedPart extends Part<MultipartContent> {
             }
             LOGGER.debug("{}Found multipart content", logIndent);
             content = new MixedContent(batchVersion, settings, true).setBoundaryHeader(getHeader("boundary"));
-        } else if ("application/http".equalsIgnoreCase(contentType)) {
+        } else if (CONTENT_TYPE_APPLICATION_HTTP.equalsIgnoreCase(contentType)) {
             LOGGER.debug("{}Found Http content", logIndent);
             content = new HttpContent(batchVersion, inChangeSet);
         } else {

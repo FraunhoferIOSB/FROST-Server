@@ -17,15 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import java.util.Objects;
 
 /**
  *
  * @author hylke
  */
-public class EntityPropertyCustomLink implements Property {
+public class EntityPropertyCustomLink implements Property<Entity> {
 
     private static final String UNSUPPORTED = "Not supported on custom properties.";
 
@@ -47,22 +49,27 @@ public class EntityPropertyCustomLink implements Property {
         return getName();
     }
 
+    @Override
+    public TypeReference<Entity> getType() {
+        return TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
+    }
+
     public EntityType getTargetEntityType() {
         return targetEntityType;
     }
 
     @Override
-    public Object getFrom(Entity<?> entity) {
+    public Entity getFrom(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public void setOn(Entity<?> entity, Object value) {
+    public void setOn(Entity entity, Entity value) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity<?> entity) {
+    public boolean isSetOn(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 

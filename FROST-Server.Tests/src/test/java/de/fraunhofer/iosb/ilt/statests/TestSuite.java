@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests;
@@ -51,10 +52,15 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -85,6 +91,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    Capability1CoreOnlyTests.class,
     Capability1Tests.class,
     Capability2Tests.class,
     AdditionalTests.class,
@@ -130,7 +137,9 @@ public class TestSuite {
     private final Map<Properties, Server> httpServers = new HashMap<>();
     private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
     private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
+
     private String pgConnectUrl;
+    private AtomicInteger nextId = new AtomicInteger(1);
 
     @Rule
     private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
@@ -173,8 +182,6 @@ public class TestSuite {
     @BeforeClass
     public static void setUpClass() throws IOException, InterruptedException {
         LOGGER.info("Starting Servers...");
-        TestSuite myInstance = getInstance();
-        myInstance.startServers(null);
     }
 
     @AfterClass
@@ -241,18 +248,19 @@ public class TestSuite {
     }
 
     private void startHttpServer(Properties parameters) {
+        // Set common properties shared by HTTP and MQTT
+        parameters.put("bus." + MqttMessageBus.TAG_TOPIC_NAME, "FROST-BUS-" + nextId.getAndIncrement());
+
+        LOGGER.info("HTTP Server starting...");
         ServerSettings serverSetting = new ServerSettings();
         serverSettings.put(parameters, serverSetting);
 
         Map<String, String> paramsMap = new HashMap<>();
-        if (parameters != null) {
-            parameters.forEach((t, u) -> paramsMap.put(t.toString(), u.toString()));
-        }
+        parameters.forEach((t, u) -> paramsMap.put(t.toString(), u.toString()));
 
         Server myServer = new Server(0);
         HandlerCollection contextHandlerCollection = new HandlerCollection(true);
         myServer.setHandler(contextHandlerCollection);
-        LOGGER.info("Server starting...");
         try {
             myServer.start();
         } catch (Exception ex) {
@@ -278,8 +286,11 @@ public class TestSuite {
         handler.setInitParameter("persistence.db.username", VAL_PG_USER);
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
-        handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+        handler.setInitParameter("bus.sendWorkerPoolSize", Integer.toString(20));
+        handler.setInitParameter("bus.sendQueueSize", Integer.toString(10000));
+        handler.setInitParameter("bus.maxInFlight", Integer.toString(10000));
 
         handler.getInitParams().putAll(paramsMap);
 
@@ -303,16 +314,17 @@ public class TestSuite {
         serverSetting.initExtensionsAndTypes();
     }
 
-    private void startMqttServer(Properties parameters) {
+    private void startMqttServer(Properties parameters) throws IOException {
+        LOGGER.info("MQTT Server starting...");
         ServerSettings serverSetting = serverSettings.get(parameters);
 
         int mqttPort = findRandomPort();
-        LOGGER.info("Generated random port {}", mqttPort);
+        int mqttWsPort = findRandomPort();
+        LOGGER.info("Generated random ports {}, {}", mqttPort, mqttWsPort);
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
-        properties.put(CoreSettings.TAG_ENABLE_ACTUATION, "false");
-        properties.put(CoreSettings.TAG_ENABLE_MULTIDATASTREAM, "true");
-        properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+        Path tempDir = Files.createTempDirectory("FROST-Tests");
+        properties.put(CoreSettings.TAG_TEMP_PATH, tempDir.toString());
 
         properties.put("mqtt." + MqttSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer");
         properties.put("mqtt." + MqttSettings.TAG_ENABLED, "true");
@@ -324,14 +336,14 @@ public class TestSuite {
         properties.put("mqtt.CreateThreadPoolSize", "10");
         properties.put("mqtt.Host", "0.0.0.0");
         properties.put("mqtt.internalHost", "localhost");
-        properties.put("mqtt.WebsocketPort", "9876");
+        properties.put("mqtt.WebsocketPort", "" + mqttWsPort);
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
         properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
-        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
         if (parameters != null) {
             properties.putAll(parameters);
@@ -341,35 +353,52 @@ public class TestSuite {
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
         serverSetting.setMqttUrl("tcp://localhost:" + mqttPort);
+        LOGGER.info("MQTT Server started on port {}", mqttPort);
         mqttServers.put(parameters, server);
     }
 
-    public synchronized void stopServer(Properties parameters) {
+    public void stopServer(Properties parameters) {
         if (!httpServers.containsKey(parameters)) {
             return;
         }
         Server httpServer = httpServers.get(parameters);
-        try {
-            httpServer.stop();
-        } catch (Exception ex) {
-            LOGGER.error("Exception stopping server!");
-            throw new IllegalStateException(ex);
+        if (httpServer != null) {
+            try {
+                httpServer.stop();
+            } catch (Exception ex) {
+                LOGGER.error("Exception stopping server!");
+                throw new IllegalStateException(ex);
+            }
         }
         httpServers.remove(parameters);
         FrostMqttServer mqttServer = mqttServers.get(parameters);
-        try {
-            mqttServer.stop();
-        } catch (Exception ex) {
-            LOGGER.error("Exception stopping server!");
-            throw new IllegalStateException(ex);
+        if (mqttServer != null) {
+            try {
+                mqttServer.stop();
+            } catch (Exception ex) {
+                LOGGER.error("Exception stopping server!");
+                throw new IllegalStateException(ex);
+            }
         }
         mqttServers.remove(parameters);
         serverSettings.remove(parameters);
     }
 
     public synchronized void stopAllServers() {
+        List<Thread> shutdownThreads = new ArrayList<>();
         for (Properties props : httpServers.keySet().toArray(new Properties[httpServers.size()])) {
-            stopServer(props);
+            Thread t = new Thread(() -> {
+                stopServer(props);
+            });
+            shutdownThreads.add(t);
+            t.start();
+        }
+        for (Thread t : shutdownThreads) {
+            try {
+                t.join();
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interrupted!", ex);
+            }
         }
         keycloak.stop();
         pgServer.stop();

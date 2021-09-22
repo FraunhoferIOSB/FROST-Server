@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
@@ -72,10 +73,10 @@ public class CsvElementSet {
 
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
-            if (property == EntityPropertyMain.SELFLINK) {
+            if (property == ModelRegistry.EP_SELFLINK) {
                 continue;
             }
-            if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
+            if ("unitOfMeasurement".equals(property.getName())) {
                 initFromUnitOfMeasurement();
             } else if (property instanceof EntityPropertyMain) {
                 initFrom((EntityPropertyMain) property);
@@ -91,7 +92,7 @@ public class CsvElementSet {
     }
 
     public void initFrom(EntityPropertyMain property) {
-        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entityName, property);
+        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.name, property);
         elements.add(element);
     }
 
@@ -123,7 +124,7 @@ public class CsvElementSet {
         }
     }
 
-    public void writeData(CsvRowCollector collector, Entity<?> entity) {
+    public void writeData(CsvRowCollector collector, Entity entity) {
         if (entity == null) {
             return;
         }
@@ -132,12 +133,11 @@ public class CsvElementSet {
         }
     }
 
-    public void writeData(CsvRowCollector collector, EntitySet<?> entitySet) throws IOException {
+    public void writeData(CsvRowCollector collector, EntitySet entitySet) throws IOException {
         if (entitySet == null) {
             return;
         }
-        List<? extends Entity> list = entitySet.asList();
-        for (Entity e : list) {
+        for (Entity e : entitySet) {
             for (CsvEntityEntry element : elements) {
                 element.writeData(collector, e);
             }
@@ -154,16 +154,15 @@ public class CsvElementSet {
         }
 
         @Override
-        public Entity<?> fetch(Entity<?> source) {
+        public Entity fetch(Entity source) {
             try {
                 Object result = property.getFrom(source);
                 if (result instanceof Entity) {
                     return (Entity) result;
                 }
                 if (result instanceof EntitySet) {
-                    EntitySet entitySet = (EntitySet<? extends Entity>) result;
-                    List<? extends Entity> asList = entitySet.asList();
-                    return asList.isEmpty() ? null : asList.get(0);
+                    EntitySet entitySet = (EntitySet) result;
+                    return entitySet.isEmpty() ? null : entitySet.iterator().next();
                 }
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to read element", ex);

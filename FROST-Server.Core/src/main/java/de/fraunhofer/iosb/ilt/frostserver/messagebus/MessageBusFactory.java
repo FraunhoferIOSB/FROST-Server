@@ -41,15 +41,14 @@ public class MessageBusFactory {
         RENAME.put("de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus", MqttMessageBus.class.getName());
     }
 
-    private static MessageBus instance;
-
-    public static synchronized void init(CoreSettings settings) {
+    public static synchronized void createMessageBus(CoreSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("settings must be non-null");
+        }
+        MessageBus instance = settings.getMessageBus();
         if (instance == null) {
-            if (settings == null) {
-                throw new IllegalArgumentException("settings must be non-null");
-            }
+            String mbClsName = settings.getBusSettings().getBusImplementationClass();
             try {
-                String mbClsName = settings.getBusSettings().getBusImplementationClass();
 
                 if (RENAME.containsKey(mbClsName)) {
                     String oldName = mbClsName;
@@ -60,17 +59,11 @@ public class MessageBusFactory {
                 Class<?> messageBusClass = Class.forName(mbClsName);
                 instance = (MessageBus) messageBusClass.getDeclaredConstructor().newInstance();
                 instance.init(settings);
+                settings.setMessageBus(instance);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
+                throw new IllegalArgumentException(ERROR_MSG + "Class '" + mbClsName + "' could not be started", ex);
             }
         }
-    }
-
-    public static MessageBus getMessageBus() {
-        if (instance == null) {
-            throw new IllegalStateException("MessageBusFactory is not initialized! Call init() before accessing the instance.");
-        }
-        return instance;
     }
 
     private MessageBusFactory() {

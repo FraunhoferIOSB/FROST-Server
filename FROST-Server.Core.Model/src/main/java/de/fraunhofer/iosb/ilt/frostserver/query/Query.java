@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
@@ -34,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,9 +51,10 @@ import java.util.Set;
  */
 public class Query {
 
-    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK)));
+    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
 
     private final QueryDefaults settings;
+    private final ModelRegistry modelRegistry;
     private ResourcePath path;
     private Expand parentExpand;
     private EntityType entityType;
@@ -63,6 +64,7 @@ public class Query {
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
+    private final List<PropertyPlaceholder> rawSelect;
     private final Set<Property> select;
     private boolean selectDistinct = false;
     private Expression filter;
@@ -71,7 +73,8 @@ public class Query {
     private String format;
     private Metadata metadata = Metadata.DEFAULT;
 
-    public Query(QueryDefaults settings, ResourcePath path) {
+    public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path) {
+        this.modelRegistry = modelRegistry;
         this.path = path;
         this.settings = settings;
         this.top = Optional.empty();
@@ -79,7 +82,12 @@ public class Query {
         this.count = Optional.empty();
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
+        this.rawSelect = new ArrayList<>();
         this.select = new LinkedHashSet<>();
+    }
+
+    public boolean isEmpty() {
+        return top.isEmpty() && skip.isEmpty() && count.isEmpty() && select.isEmpty() && expand.isEmpty() && filter == null;
     }
 
     public Query validate() {
@@ -95,29 +103,38 @@ public class Query {
         return this;
     }
 
-    protected Query validate(EntityType entityType) {
+    public Query validate(EntityType entityType) {
         if (this.entityType == null) {
             this.entityType = entityType;
         }
         selectEntityPropMain = null;
-        Set<Property> propertySet = entityType.getPropertySet();
-        Optional<Property> invalidProperty = select.stream()
-                .filter(x -> {
-                    if (x instanceof EntityPropertyMain) {
-                        return !propertySet.contains(x);
-                    }
-                    if (x instanceof EntityPropertyCustomSelect) {
-                        EntityPropertyCustomSelect csX = (EntityPropertyCustomSelect) x;
-                        EntityPropertyMain mep = csX.getMainEntityProperty();
-                        return !mep.hasCustomProperties || !propertySet.contains(mep);
-                    }
-                    return false;
-                })
-                .findAny();
-        if (invalidProperty.isPresent()) {
-            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
+        for (PropertyPlaceholder pp : rawSelect) {
+            Property property = entityType.getProperty(pp.getName());
+            if (property == null) {
+                throw new IllegalArgumentException("Invalid property '" + pp.getName() + "' found in select, for entity type " + entityType.entityName);
+            }
+            if (property instanceof NavigationProperty) {
+                select.add(property);
+            } else if (property instanceof EntityPropertyMain) {
+                if (pp.hasSubPath()) {
+                    select.add(new EntityPropertyCustomSelect(property.getName()).addToSubPath(pp.getSubPath()));
+                } else {
+                    select.add(property);
+                }
+            }
         }
-        expand.forEach(x -> x.validate(entityType));
+
+        for (Expand e : expand) {
+            e.validate(entityType);
+        }
+        reNestExpands();
+
+        if (filter != null) {
+            filter.validate(modelRegistry.getParserHelper(), entityType);
+        }
+        for (OrderBy order : orderBy) {
+            order.getExpression().validate(modelRegistry.getParserHelper(), entityType);
+        }
         return this;
     }
 
@@ -151,7 +168,6 @@ public class Query {
 
     public void setParentExpand(Expand parentExpand) {
         this.parentExpand = parentExpand;
-        entityType = parentExpand.getPath().getType();
     }
 
     public Optional<Integer> getTop() {
@@ -192,13 +208,24 @@ public class Query {
         return this;
     }
 
+    public Query addSelect(Collection<PropertyPlaceholder> properties) {
+        if (!select.isEmpty()) {
+            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+        }
+        rawSelect.addAll(properties);
+        return this;
+    }
+
     public Query addSelect(Property property) {
+        if (!rawSelect.isEmpty()) {
+            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+        }
         select.add(property);
         return this;
     }
 
-    public Query addSelect(Collection<Property> properties) {
-        select.addAll(properties);
+    public Query addSelect(Property... properties) {
+        select.addAll(Arrays.asList(properties));
         return this;
     }
 
@@ -221,7 +248,7 @@ public class Query {
      */
     public Set<EntityPropertyMain> getSelectMainEntityProperties(boolean inExpand) {
         if (selectEntityPropMain == null) {
-            initSelectedProperties(inExpand);
+            return initSelectedProperties(inExpand);
         }
         return selectEntityPropMain;
     }
@@ -238,19 +265,19 @@ public class Query {
         return selectNavProp;
     }
 
-    private void initSelectedProperties(boolean inExpand) {
+    private Set<EntityPropertyMain> initSelectedProperties(boolean inExpand) {
         if (path.isRef()) {
             selectEntityPropMain = refSelect;
             selectNavProp = new HashSet<>();
-            return;
+            return refSelect;
         }
-        selectEntityPropMain = EnumSet.noneOf(EntityPropertyMain.class);
+        Set<EntityPropertyMain> selectedEntityPropMain = new HashSet<>();
         selectNavProp = new HashSet<>();
         if (select.isEmpty()) {
             if (entityType == null) {
                 validate();
             }
-            selectEntityPropMain.addAll(entityType.getEntityProperties());
+            selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
                 selectNavProp.addAll(entityType.getNavigationEntities());
                 selectNavProp.addAll(entityType.getNavigationSets());
@@ -258,15 +285,17 @@ public class Query {
         } else {
             for (Property s : select) {
                 if (s instanceof EntityPropertyMain) {
-                    selectEntityPropMain.add((EntityPropertyMain) s);
+                    selectedEntityPropMain.add((EntityPropertyMain) s);
                 } else if (s instanceof EntityPropertyCustomSelect) {
                     EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
-                    selectEntityPropMain.add(epcs.getMainEntityProperty());
+                    selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
                 } else if (s instanceof NavigationPropertyMain) {
                     selectNavProp.add((NavigationPropertyMain) s);
                 }
             }
         }
+        selectEntityPropMain = selectedEntityPropMain;
+        return selectedEntityPropMain;
     }
 
     public Expression getFilter() {
@@ -323,7 +352,6 @@ public class Query {
         for (Expand e : expand) {
             e.setParentQuery(this);
         }
-        reNestExpands();
     }
 
     public Query addExpand(Expand expand) {
@@ -344,18 +372,19 @@ public class Query {
      */
     public void reNestExpands() {
         List<Expand> newExpands = new ArrayList<>();
-        Map<EntityType, Expand> expandMap = new EnumMap<>(EntityType.class);
+        Map<String, Expand> expandMap = new HashMap<>();
         for (Expand oldExpand : expand) {
-            final NavigationProperty oldPath = oldExpand.getPath();
-            EntityType expandEntityType = oldPath.getType();
-            if (oldPath instanceof NavigationPropertyMain && expandMap.containsKey(expandEntityType)) {
-                Expand existing = expandMap.get(expandEntityType);
+            List<String> rawPath = oldExpand.getRawPath();
+            final String first = rawPath.get(0);
+            final int rawCount = rawPath.size();
+            if (rawCount == 1 && expandMap.containsKey(first)) {
+                Expand existing = expandMap.get(first);
                 existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());
                 existing.getSubQuery().reNestExpands();
             } else {
                 newExpands.add(oldExpand);
-                if (oldPath instanceof NavigationPropertyMain) {
-                    expandMap.put(expandEntityType, oldExpand);
+                if (rawPath.size() == 1) {
+                    expandMap.put(first, oldExpand);
                 }
             }
         }

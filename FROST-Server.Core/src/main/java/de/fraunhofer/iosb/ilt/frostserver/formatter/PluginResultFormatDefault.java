@@ -39,6 +39,11 @@ public class PluginResultFormatDefault implements PluginResultFormat {
     }
 
     @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
     public Collection<String> getFormatNames() {
         return Arrays.asList(DEFAULT_FORMAT_NAME);
     }

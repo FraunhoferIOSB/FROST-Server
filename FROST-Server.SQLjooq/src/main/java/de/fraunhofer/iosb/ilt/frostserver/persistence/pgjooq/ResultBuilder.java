@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -30,16 +31,17 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * Turns the sqlQuery into the model instances to be returned to the client.
  *
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor {
 
@@ -71,6 +73,8 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     private final Query staQuery;
     private final QueryBuilder<J> sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
+    private final CustomLinksHelper customLinksHelper;
+    private final DataSize dataSize;
 
     private Object resultObject;
     /**
@@ -87,13 +91,16 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
      * @param sqlQueryBuilder The configured sql query builder to use for
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder) {
+    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder, DataSize dataSize) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;
         this.sqlQueryBuilder = sqlQueryBuilder;
         this.sqlQuery = sqlQueryBuilder.buildSelect();
-        this.persistenceSettings = pm.getCoreSettings().getPersistenceSettings();
+        this.dataSize = dataSize;
+        final CoreSettings coreSettings = pm.getCoreSettings();
+        this.persistenceSettings = coreSettings.getPersistenceSettings();
+        this.customLinksHelper = coreSettings.getCustomLinksHelper();
     }
 
     public Object getEntity() {
@@ -110,6 +117,14 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         return entityName;
     }
 
+    public Query getStaQuery() {
+        return staQuery;
+    }
+
+    public DataSize getDataSize() {
+        return dataSize;
+    }
+
     @Override
     public void visit(PathElementEntity element) {
         Result<Record> results = sqlQuery.fetch();
@@ -120,8 +135,8 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             return;
         }
 
-        QueryState<J, ? extends Entity, ?> queryState = sqlQueryBuilder.getQueryState();
-        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize());
+        QueryState<J, ?> queryState = sqlQueryBuilder.getQueryState();
+        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize(pm.getCoreSettings().getDataSizeMax()));
 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
@@ -131,12 +146,12 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         resultObject = entity;
     }
 
-    private void expandEntity(Entity entity, Query query) {
+    public void expandEntity(Entity entity, Query query) {
         if (query == null) {
             return;
         }
         if (query.getMetadata() == Metadata.FULL) {
-            CustomLinksHelper.expandCustomLinks(query, pm.getCoreSettings(), entity, path);
+            customLinksHelper.expandCustomLinks(query, entity, path);
         }
         for (Expand expand : query.getExpand()) {
             addExpandToEntity(entity, expand);
@@ -155,7 +170,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             if (id == null) {
                 return;
             }
-            existing = loadEntity(firstNp.getType(), id, expand);
+            existing = loadEntity(firstNp.getEntityType(), id, expand);
             if (existing == null) {
                 return;
             }
@@ -182,16 +197,22 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     }
 
     private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
-        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
+        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType());
         PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
+
         if (firstNp.isEntitySet()) {
-            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getType(), parent);
+            PathElementEntitySet childPe = new PathElementEntitySet((NavigationPropertyEntitySet) firstNp, parent);
             ePath.addPathElement(childPe, true, false);
         } else {
-            PathElementEntity childPe = new PathElementEntity(null, firstNp.getType(), parent);
+            PathElementEntity childPe;
+            if (firstNp instanceof NavigationPropertyEntity) {
+                childPe = new PathElementEntity((NavigationPropertyEntity) firstNp, parent);
+            } else {
+                childPe = new PathElementEntity(firstNp.getEntityType(), parent);
+            }
             ePath.addPathElement(childPe, true, false);
         }
         Object child = pm.get(ePath, subQuery);
@@ -199,7 +220,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     }
 
     private void expandEntitySet(EntitySet entitySet, Query subQuery) {
-        for (Object subEntity : entitySet) {
+        for (Entity subEntity : entitySet) {
             if (subEntity instanceof Entity) {
                 expandEntity((Entity) subEntity, subQuery);
             }
@@ -233,36 +254,21 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
     @Override
     public void visit(PathElementEntitySet element) {
-        int top = staQuery.getTopOrDefault();
-        try (Cursor<Record> results = timeQuery(sqlQuery)) {
-            EntitySet<? extends Entity> entitySet = sqlQueryBuilder
-                    .getQueryState()
-                    .createSetFromRecords(results, staQuery, pm.getCoreSettings().getDataSizeMax());
+        Cursor<Record> results = timeQuery(sqlQuery);
+        EntitySet entitySet = sqlQueryBuilder
+                .getQueryState()
+                .createSetFromRecords(results, this);
 
-            if (entitySet == null) {
-                throw new IllegalStateException("Empty set!");
-            }
-
-            fetchAndAddCount(entitySet);
-
-            int entityCount = entitySet.size();
-            boolean hasMore = results.hasNext();
-            if (entityCount < staQuery.getTopOrDefault() && hasMore) {
-                // The loading was aborted, probably due to size constraints.
-                staQuery.setTop(entityCount);
-            }
-            if (hasMore && top > 0) {
-                entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
-            }
-            for (Entity e : entitySet) {
-                e.setQuery(staQuery);
-                expandEntity(e, staQuery);
-            }
-            resultObject = entitySet;
+        if (entitySet == null) {
+            throw new IllegalStateException("Empty set!");
         }
+
+        fetchAndAddCount(entitySet);
+
+        resultObject = entitySet;
     }
 
-    private void fetchAndAddCount(EntitySet<? extends Entity> entitySet) {
+    private void fetchAndAddCount(EntitySet entitySet) {
         if (staQuery.isCountOrDefault()) {
             ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
             try (Cursor<Record1<Integer>> countCursor = timeQuery(countQuery)) {
@@ -280,7 +286,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (Entity.class.isAssignableFrom(resultObject.getClass())) {
             Object propertyValue = ((Entity) resultObject).getProperty(element.getProperty());
             Map<String, Object> entityMap = new HashMap<>();
-            entityName = element.getProperty().entityName;
+            entityName = element.getProperty().name;
             entityMap.put(entityName, propertyValue);
             resultObject = entityMap;
         }

@@ -37,12 +37,15 @@ public class UrlHelper {
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {
+        return generateNextLink(path, query, query.getTopOrDefault());
+    }
+
+    public static String generateNextLink(ResourcePath path, Query query, int resultCount) {
         if (query == null || query.getMetadata() == Metadata.OFF) {
             return null;
         }
         int oldSkip = query.getSkip(0);
-        int top = query.getTopOrDefault();
-        int newSkip = oldSkip + top;
+        int newSkip = oldSkip + resultCount;
         query.setSkip(newSkip);
         String nextLink = path.toString() + "?" + query.toString(false);
         query.setSkip(oldSkip);

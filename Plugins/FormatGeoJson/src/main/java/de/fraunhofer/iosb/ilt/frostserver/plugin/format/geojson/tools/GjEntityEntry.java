@@ -33,6 +33,6 @@ public interface GjEntityEntry {
      * @param source The source entity to collect the data from.
      * @param header The header to use for this item.
      */
-    public void writeData(GjRowCollector collector, Entity<?> source, String header);
+    public void writeData(GjRowCollector collector, Entity source, String header);
 
 }

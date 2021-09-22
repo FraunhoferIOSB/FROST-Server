@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -30,32 +30,27 @@ import java.util.Objects;
  * of entities is needed.
  *
  * @author jab
- * @param <T> Type of collection elements.
  */
-public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
+public class EntitySetImpl implements EntitySet {
 
-    protected final List<T> data;
+    protected final List<Entity> data;
     protected long count = -1;
     protected String nextLink;
-    @JsonIgnore
-    private EntityType type;
 
-    public EntitySetImpl() {
-        this.data = new ArrayList<>();
-        this.type = null;
-    }
+    @JsonIgnore
+    private final EntityType type;
+    @JsonIgnore
+    private NavigationPropertyEntitySet navigationProperty;
 
     public EntitySetImpl(EntityType type) {
         this.data = new ArrayList<>();
         this.type = type;
     }
 
-    public EntitySetImpl(EntityType type, List<T> data) {
-        if (data == null) {
-            throw new IllegalArgumentException("data must be non-null!");
-        }
-        this.data = data;
-        this.type = type;
+    public EntitySetImpl(NavigationPropertyEntitySet navigationProperty) {
+        this.data = new ArrayList<>();
+        this.type = navigationProperty.getEntityType();
+        this.navigationProperty = navigationProperty;
     }
 
     @Override
@@ -69,61 +64,13 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public boolean contains(Object o) {
-        return data.contains(o);
-    }
-
-    @Override
-    public Iterator<T> iterator() {
+    public Iterator<Entity> iterator() {
         return data.iterator();
     }
 
     @Override
-    public Object[] toArray() {
-        return data.toArray();
-    }
-
-    @Override
-    public <A> A[] toArray(A[] a) {
-        return data.toArray(a);
-    }
-
-    @Override
-    public boolean add(T e) {
-        if (type == null) {
-            type = e.getEntityType();
-        }
-        return data.add(e);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        return data.remove(o);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return data.containsAll(c);
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        return data.addAll(c);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        return data.removeAll(c);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        return data.retainAll(c);
-    }
-
-    @Override
-    public void clear() {
-        data.clear();
+    public void add(Entity e) {
+        data.add(e);
     }
 
     @Override
@@ -142,13 +89,8 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EntitySetImpl<?> other = (EntitySetImpl<?>) obj;
+        final EntitySetImpl other = (EntitySetImpl) obj;
         return Objects.equals(this.data, other.data);
-    }
-
-    @Override
-    public List<T> asList() {
-        return data;
     }
 
     @Override
@@ -174,6 +116,16 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     @Override
     public EntityType getEntityType() {
         return type;
+    }
+
+    @Override
+    public NavigationPropertyEntitySet getNavigationProperty() {
+        return navigationProperty;
+    }
+
+    public EntitySetImpl setNavigationProperty(NavigationPropertyEntitySet navigationProperty) {
+        this.navigationProperty = navigationProperty;
+        return this;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,11 +22,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Enables serialization of entities as JSON.
@@ -55,13 +59,17 @@ public class JsonWriter {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
 
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(Entity.class, new EntitySerializer());
+        module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
+        module.addSerializer(EntityType.class, new EntityTypeSerialiser());
+        module.addSerializer(Property.class, new EntityPropertySerialiser());
         mapper.registerModule(module);
         return mapper;
     }
@@ -69,12 +77,24 @@ public class JsonWriter {
     private JsonWriter() {
     }
 
+    public static <T extends Entity> void writeEntity(Writer writer, T entity) throws IOException {
+        getObjectMapper().writeValue(writer, entity);
+    }
+
     public static <T extends Entity> String writeEntity(T entity) throws IOException {
         return getObjectMapper().writeValueAsString(entity);
     }
 
+    public static void writeEntityCollection(Writer writer, EntitySet entityCollection) throws IOException {
+        getObjectMapper().writeValue(writer, new EntitySetResult(entityCollection));
+    }
+
     public static String writeEntityCollection(EntitySet entityCollection) throws IOException {
         return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection));
+    }
+
+    public static void writeObject(Writer writer, Object object) throws IOException {
+        getObjectMapper().writeValue(writer, object);
     }
 
     public static String writeObject(Object object) throws IOException {

@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
@@ -136,7 +136,7 @@ public class MqttSettings implements ConfigDefaults {
      */
     private int createMessageQueueSize;
     /**
-     * Number of threads used to process ObservationCreateEvents.
+     * Number of threads used to process EntityCreateEvents.
      */
     private int createThreadPoolSize;
     /**

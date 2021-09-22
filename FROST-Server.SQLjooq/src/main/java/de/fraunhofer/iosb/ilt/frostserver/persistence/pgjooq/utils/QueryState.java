@@ -19,11 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.EntitySetJooqCurser;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder.ALIAS_PREFIX;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.HashSet;
 import java.util.Set;
 import org.jooq.Condition;
@@ -32,20 +33,16 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  * @param <J> The id class.
- * @param <E>
- * @param <T>
+ * @param <T> The type of the main table for the query.
  */
-public class QueryState<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryState.class.getName());
-    
-    private Set<PropertyFields<T, E>> selectedProperties;
+public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
+
+    private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
     private final Field<J> sqlMainIdField;
@@ -58,7 +55,7 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
 
     private int aliasNr = 0;
 
-    public QueryState(T table, Set<PropertyFields<T, E>> sqlSelectFields) {
+    public QueryState(T table, Set<PropertyFields<T>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         mainTable = table;
@@ -69,27 +66,13 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
         return mainTable;
     }
 
-    public E entityFromQuery(Record tuple, DataSize dataSize) {
+    public Entity entityFromQuery(Record tuple, DataSize dataSize) {
         return mainTable.entityFromQuery(tuple, this, dataSize);
     }
-    
-    public EntitySet<E> createSetFromRecords(Cursor<Record> tuples, Query query, long maxDataSize) {
-        EntitySet<E> entitySet = mainTable.newSet();
-        int count = 0;
-        DataSize size = new DataSize();
-        int top = query.getTopOrDefault();
-        while (tuples.hasNext() && count < top) {
-            Record tuple = tuples.fetchNext();
-            entitySet.add(entityFromQuery(tuple, size));
-            count++;
-            if (size.getDataSize() > maxDataSize) {
-                LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
-                return entitySet;
-            }
-        }
-        return entitySet;
-    }
 
+    public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder) {
+        return new EntitySetJooqCurser(mainTable.getEntityType(), tuples, this, resultBuilder);
+    }
 
     public String getNextAlias() {
         return ALIAS_PREFIX + (++aliasNr);
@@ -115,7 +98,7 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
     public Set<Field> getSqlSelectFields() {
         if (sqlSelectFields == null) {
             sqlSelectFields = new HashSet<>();
-            for (PropertyFields<?, ?> sp : selectedProperties) {
+            for (PropertyFields<?> sp : selectedProperties) {
                 for (ExpressionFactory f : sp.fields.values()) {
                     sqlSelectFields.add(f.get(mainTable));
                 }
@@ -124,14 +107,14 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
         return sqlSelectFields;
     }
 
-    public Set<PropertyFields<T, E>> getSelectedProperties() {
+    public Set<PropertyFields<T>> getSelectedProperties() {
         return selectedProperties;
     }
 
     /**
      * @param sqlSelectFields the selectedProperties to set
      */
-    public void setSelectedProperties(Set<PropertyFields<T, E>> sqlSelectFields) {
+    public void setSelectedProperties(Set<PropertyFields<T>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         this.sqlSelectFields = null;
     }

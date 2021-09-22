@@ -13,7 +13,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.net.URI;
@@ -77,7 +77,7 @@ public class FilterTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
@@ -263,8 +263,8 @@ public class FilterTests extends AbstractTestClass {
     public void testIndirectFilter() throws ServiceFailureException {
         LOGGER.info("  testIndirectFilter");
         ThingDao doa = service.things();
-        filterAndCheck(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
-        filterAndCheck(doa, "startswith(HistoricalLocations/Location/name, 'Location 1')", getFromList(THINGS, 0));
+        testFilterResults(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
+        testFilterResults(doa, "startswith(HistoricalLocations/Locations/name, 'Location 1')", getFromList(THINGS, 0));
     }
 
     /**
@@ -277,8 +277,8 @@ public class FilterTests extends AbstractTestClass {
         LOGGER.info("  testDeepIndirection");
         ObservedPropertyDao doa = service.observedProperties();
 
-        filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
-        filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
+        testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
+        testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
     }
 
     /**

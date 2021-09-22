@@ -20,11 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,53 +46,55 @@ public class DataArrayValue {
         // Empty by design.
     };
     @JsonProperty(value = "Datastream")
-    private Datastream datastream;
+    private Entity datastream;
     @JsonProperty(value = "MultiDatastream")
-    private MultiDatastream multiDatastream;
+    private Entity multiDatastream;
     private List<String> components;
     private List<List<Object>> dataArray = new ArrayList<>();
 
     public DataArrayValue() {
+        components = new ArrayList<>();
     }
 
-    public DataArrayValue(Datastream datastream, List<String> components) {
-        this.datastream = datastream;
+    public DataArrayValue(Entity parentEntitiy, List<String> components, EntityType datastream) {
+        if (parentEntitiy.getEntityType() == datastream) {
+            this.datastream = parentEntitiy;
+        } else {
+            this.multiDatastream = parentEntitiy;
+        }
         this.components = components;
     }
 
-    public DataArrayValue(MultiDatastream multiDatastream, List<String> components) {
-        this.multiDatastream = multiDatastream;
-        this.components = components;
-    }
-
-    public DataArrayValue(Query query, ResourcePath path, Observation observation, List<String> components) {
-        this.datastream = observation.getDatastream();
-        this.multiDatastream = observation.getMultiDatastream();
+    public DataArrayValue(Query query, ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
+        this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         if (datastream != null) {
             datastream.setSelfLink(UrlHelper.generateSelfLink(query, path, datastream));
-        }
-        if (multiDatastream != null) {
+        } else {
+            if (npMultiDatastream == null) {
+                throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
+            }
+            multiDatastream = observation.getProperty(npMultiDatastream);
             multiDatastream.setSelfLink(UrlHelper.generateSelfLink(query, path, multiDatastream));
         }
     }
 
-    public Datastream getDatastream() {
+    public Entity getDatastream() {
         return datastream;
     }
 
-    public void setDatastream(Datastream datastream) {
+    public void setDatastream(Entity datastream) {
         if (multiDatastream != null) {
             throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
         }
         this.datastream = datastream;
     }
 
-    public MultiDatastream getMultiDatastream() {
+    public Entity getMultiDatastream() {
         return multiDatastream;
     }
 
-    public void setMultiDatastream(MultiDatastream multiDatastream) {
+    public void setMultiDatastream(Entity multiDatastream) {
         if (datastream != null) {
             throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
         }
@@ -155,10 +158,13 @@ public class DataArrayValue {
         return Objects.equals(this.dataArray, other.dataArray);
     }
 
-    public static String dataArrayIdFor(Observation observation) {
-        Datastream ds = observation.getDatastream();
+    public static String dataArrayIdFor(Entity observation, NavigationPropertyEntity npDatastream, NavigationPropertyEntity npMultiDatastream) {
+        Entity ds = observation.getProperty(npDatastream);
         if (ds == null) {
-            MultiDatastream mds = observation.getMultiDatastream();
+            if (npMultiDatastream == null) {
+                throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
+            }
+            Entity mds = observation.getProperty(npMultiDatastream);
             return "mds-" + mds.getId().getValue().toString();
         }
         return "ds-" + ds.getId().getValue().toString();

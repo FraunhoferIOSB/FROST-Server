@@ -20,18 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -117,7 +114,7 @@ public class Utils {
             return null;
         }
         if (encodingType == null) {
-            return locationFromEncoding(locationString);
+            return locationUnknownEncoding(locationString);
         } else {
             if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
                 try {
@@ -137,7 +134,10 @@ public class Utils {
         }
     }
 
-    private static Object locationFromEncoding(String locationString) {
+    public static Object locationUnknownEncoding(String locationString) {
+        if (locationString == null) {
+            return null;
+        }
         // We have to guess, since encodingType is not loaded.
         try {
             return new GeoJsonDeserializier().deserialize(locationString);
@@ -191,21 +191,21 @@ public class Utils {
      * the Field.
      *
      * @param <T> The type of the requested Field.
-     * @param record The record to fetch the field from.
-     * @param field The field to fetch from the record.
-     * @return The value of the field, or null if the record does not have the
+     * @param input The Record to fetch the field from.
+     * @param field The field to fetch from the input.
+     * @return The value of the field, or null if the input does not have the
      * Field.
      */
-    public static <T> T getFieldOrNull(Record record, Field<T> field) {
-        if (record.field(field) != null) {
-            return record.get(field);
+    public static <T> T getFieldOrNull(Record input, Field<T> field) {
+        if (input.field(field) != null) {
+            return input.get(field);
         }
         return null;
     }
 
-    public static JsonValue getFieldJsonValue(Record record, Field<JsonValue> field) {
-        if (record.field(field) != null) {
-            return record.get(field);
+    public static JsonValue getFieldJsonValue(Record input, Field<JsonValue> field) {
+        if (input.field(field) != null) {
+            return input.get(field);
         }
         return NULL_JSON_VALUE;
     }
@@ -230,47 +230,6 @@ public class Utils {
 
         public List<Field> getSqlSortSelectFields() {
             return sqlSortSelectFields;
-        }
-    }
-
-    public static <J extends Comparable<J>> void readResultFromDb(AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) {
-        Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
-        if (resultTypeOrd != null) {
-            ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
-            switch (resultType) {
-                case BOOLEAN:
-                    entity.setResult(Utils.getFieldOrNull(tuple, table.colResultBoolean));
-                    break;
-
-                case NUMBER:
-                    handleNumber(entity, tuple, table);
-                    break;
-
-                case OBJECT_ARRAY:
-                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, table.colResultJson);
-                    dataSize.increase(jsonData.getStringLength());
-                    entity.setResult(jsonData.getValue());
-                    break;
-
-                case STRING:
-                    String stringData = Utils.getFieldOrNull(tuple, table.colResultString);
-                    dataSize.increase(stringData == null ? 0 : stringData.length());
-                    entity.setResult(stringData);
-                    break;
-
-                default:
-                    LOGGER.error("Unhandled result type: {}", resultType);
-                    throw new IllegalStateException("Unhandled resultType: " + resultType);
-            }
-        }
-    }
-
-    private static <J extends Comparable> void handleNumber(Observation entity, Record tuple, AbstractTableObservations<J> table) {
-        try {
-            entity.setResult(new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
-        } catch (NumberFormatException | NullPointerException e) {
-            // It was not a Number? Use the double value.
-            entity.setResult(Utils.getFieldOrNull(tuple, table.colResultNumber));
         }
     }
 

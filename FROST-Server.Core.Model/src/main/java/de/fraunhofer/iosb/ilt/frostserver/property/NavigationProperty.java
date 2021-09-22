@@ -23,14 +23,38 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 /**
  *
  * @author jab
+ * @author scf
+ * @param <P> The type of the value of the property.
  */
-public interface NavigationProperty extends Property {
+public interface NavigationProperty<P> extends Property<P> {
 
-    public EntityType getType();
+    /**
+     * The entity type this property links to.
+     *
+     * @return The entity type this property links to.
+     */
+    public EntityType getEntityType();
 
+    /**
+     * flag indicating this navigation property is a Set.
+     *
+     * @return true if this navigation property is a Set.
+     */
     public boolean isEntitySet();
 
+    /**
+     * Check if the given entityType has this Property.
+     *
+     * @param entityType The EntityType to check.
+     * @return true if the given entityType has this Property.
+     */
     public boolean validFor(EntityType entityType);
 
+    /**
+     * Get the navigationLink for this property, for the given parent.
+     *
+     * @param parent The entity to get the link for.
+     * @return The navigationLink for this property, for the given parent.
+     */
     public String getNavigationLink(Entity parent);
 }

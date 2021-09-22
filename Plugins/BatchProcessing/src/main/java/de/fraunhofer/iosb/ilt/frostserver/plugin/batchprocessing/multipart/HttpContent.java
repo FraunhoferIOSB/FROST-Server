@@ -1,10 +1,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,6 +117,72 @@ public class HttpContent extends Request implements MultipartContent {
         LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, method, version, path);
     }
 
+    /**
+     * Get the path part of the http request.
+     *
+     * @return the URL part of the http request.
+     */
+    @Override
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * Get the data in the http request. This does not include the outer
+     * headers, command, nor inner headers.
+     *
+     * @return The data in http request.
+     */
+    @Override
+    public String getData() {
+        return data.toString();
+    }
+
+    @Override
+    public void addData(String data) {
+        this.data.append(data);
+    }
+
+    @Override
+    public String getContentId() {
+        return contentId;
+    }
+
+    @Override
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
+
+    @Override
+    public Id getContentIdValue() {
+        return contentIdValue;
+    }
+
+    @Override
+    public void setContentIdValue(Id contentIdValue) {
+        this.contentIdValue = contentIdValue;
+    }
+
+    @Override
+    public void updateUsingContentIds(List<ContentIdPair> contentIds) {
+        for (ContentIdPair pair : contentIds) {
+            path = path.replace(pair.key, pair.value.getUrl());
+            final String quotedKey = '"' + pair.key + '"';
+            final String valueJson = pair.value.getJson();
+            int keyIndex = 0;
+            while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
+                data.replace(keyIndex, keyIndex + quotedKey.length(), valueJson);
+                keyIndex += valueJson.length();
+            }
+        }
+        LOGGER.debug("{}Using replaced path and data with content ids {}: {}, {}", logIndent, contentIds, path, data);
+    }
+
+    @Override
+    public HttpMethod getMethod() {
+        return method;
+    }
+
     public String getStatusLine() {
         return statusLine;
     }
@@ -131,7 +200,7 @@ public class HttpContent extends Request implements MultipartContent {
     public String getContent(boolean allHeaders) {
         StringBuilder content = new StringBuilder();
         if (allHeaders) {
-            content.append("Content-Type: application/http\n");
+            content.append("Content-Type: " + CONTENT_TYPE_APPLICATION_HTTP + "\n");
             if (contentId != null) {
                 content.append("Content-ID: ").append(contentId).append('\n');
             }
@@ -139,13 +208,6 @@ public class HttpContent extends Request implements MultipartContent {
         }
         if (statusLine != null) {
             content.append(statusLine).append('\n');
-        }
-        if (!StringHelper.isNullOrEmpty(contentType)) {
-            content.append("Content-Type: ").append(contentType);
-            if (!contentType.contains(";")) {
-                content.append("; ").append(CHARSET_UTF8);
-            }
-            content.append("\n");
         }
         for (Map.Entry<String, String> entry : headersInner.entrySet()) {
             content.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');

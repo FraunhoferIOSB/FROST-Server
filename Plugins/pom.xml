@@ -4,15 +4,18 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-ServerParent</artifactId>
-        <version>1.15.0-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>FROST-Server.Plugins</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>BatchProcessing</module>
+        <module>CoreModel</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>
         <module>OpenApi</module>
+        <module>Actuation</module>
+        <module>MultiDatastream</module>
     </modules>
 </project>

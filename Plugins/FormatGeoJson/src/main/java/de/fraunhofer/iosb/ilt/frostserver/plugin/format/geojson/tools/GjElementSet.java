@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -96,13 +97,13 @@ public class GjElementSet {
 
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
-            if (property == EntityPropertyMain.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, EntityPropertyMain.SELFLINK.entityName));
+            if (property == ModelRegistry.EP_SELFLINK) {
+                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
             }
-            if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
-                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entityName));
+            if ("unitOfMeasurement".equals(property.getName())) {
+                elements.add(new GjUnitOfMeasurementProperty("unitOfMeasurement"));
             } else if (property instanceof EntityPropertyMain) {
-                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entityName, property));
+                elements.add(new GjEntityProperty(((EntityPropertyMain) property).name, property));
             } else if (property instanceof EntityPropertyCustomSelect) {
                 elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
             }
@@ -127,7 +128,7 @@ public class GjElementSet {
         }
     }
 
-    public void writeData(GjRowCollector collector, Entity<?> entity, String namePrefix) {
+    public void writeData(GjRowCollector collector, Entity entity, String namePrefix) {
         if (entity == null) {
             return;
         }
@@ -137,7 +138,7 @@ public class GjElementSet {
         }
     }
 
-    public void writeData(GjRowCollector collector, EntitySet<?> entitySet, String namePrefix) {
+    public void writeData(GjRowCollector collector, EntitySet entitySet, String namePrefix) {
         if (entitySet == null) {
             return;
         }
@@ -156,7 +157,7 @@ public class GjElementSet {
         }
     }
 
-    private void collectElements(GjRowCollector collector, Entity<?> entity, String namePrefix) {
+    private void collectElements(GjRowCollector collector, Entity entity, String namePrefix) {
         for (GjEntityEntry element : elements) {
             element.writeData(collector, entity, namePrefix);
         }

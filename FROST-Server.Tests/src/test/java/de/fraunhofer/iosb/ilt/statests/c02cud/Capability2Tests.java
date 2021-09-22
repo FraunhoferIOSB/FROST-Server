@@ -1068,16 +1068,6 @@ public class Capability2Tests extends AbstractTestClass {
                 + "      }}]}";
         invalidPatchEntity(EntityType.THING, urlParameters, thingId);
 
-//        /** Location **/
-//        Object locationId = locationIds.get(0);
-//        urlParameters = "{\"Things\":[{\"description\":\"Orange\"}]}";
-//        invalidPatchEntity(EntityType.LOCATION, urlParameters, locationId);
-//
-//        /** HistoricalLocation **/
-//        Object histLocId = historicalLocationIds.get(0);
-//        urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
-//        invalidPatchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
-//
         /**
          * Sensor *
          */
@@ -1106,12 +1096,8 @@ public class Capability2Tests extends AbstractTestClass {
                 + "      }]}";
         invalidPatchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
 
-//        /** FeatureOfInterest **/
-//        Object foiId = foiIds.get(0);
-//        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
-//        invalidPatchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
         /**
-         * Datastream *
+         * Datastream
          */
         Object datastreamId = DATASTREAM_IDS.get(0);
         urlParameters = "{\"ObservedProperty\": {\n"
@@ -1403,7 +1389,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
         int responseCode = responseMap.code;
-        String message = "The  " + entityType.name() + " should not be created due to integrity constraints.";
+        String message = "The  " + entityType.name() + " should not be created due to integrity constraints. Expected response code 400|409, got: " + responseCode;
         Assert.assertTrue(message, responseCode == 400 || responseCode == 409);
 
     }
@@ -1695,7 +1681,7 @@ public class Capability2Tests extends AbstractTestClass {
             try {
                 JSONObject result = new JSONObject(responseMap.response);
                 JSONArray array = result.getJSONArray("value");
-                String message = entityType + " is created although it shouldn't.";
+                String message = entityType + " is found although it shouldn't.";
                 Assert.assertEquals(message, 0, array.length());
             } catch (JSONException e) {
                 LOGGER.error("Exception: ", e);

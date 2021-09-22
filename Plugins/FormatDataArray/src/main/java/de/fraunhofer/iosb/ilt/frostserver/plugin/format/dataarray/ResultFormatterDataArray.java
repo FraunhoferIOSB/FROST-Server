@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
@@ -49,40 +52,48 @@ public class ResultFormatterDataArray implements ResultFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDataArray.class);
     private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
-    public ResultFormatterDataArray() {
+    private final PluginCoreModel pluginCoreModel;
+    private NavigationPropertyEntity npMultiDatastream;
+
+    public ResultFormatterDataArray(CoreSettings settings) {
+        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        if (npMultiDatastream == null) {
+            npMultiDatastream = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
+        }
         if (!(path.getLastElement() instanceof PathElementEntitySet)
                 || path.isRef()) {
             throw new IncorrectRequestException(OBSERVATIONS_ONLY);
         }
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
-            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == EntityType.OBSERVATION) {
-                query.getSelect().add(NavigationPropertyMain.DATASTREAM);
-                query.getSelect().add(NavigationPropertyMain.MULTIDATASTREAM);
+            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
+                query.getSelect().add(pluginCoreModel.npDatastreamObservation);
+                if (npMultiDatastream != null) {
+                    query.getSelect().add(npMultiDatastream);
+                }
             }
         }
     }
 
     @Override
-    public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
-        String entityJsonString = "";
+    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         try {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (entitySet.getEntityType() == EntityType.OBSERVATION) {
-                    return formatDataArray(path, query, entitySet);
+                if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
+                    return new FormatWriterGeneric(formatDataArray(path, query, entitySet));
                 }
             }
             throw new IllegalArgumentException(OBSERVATIONS_ONLY);
         } catch (IOException ex) {
             LOGGER.error("Failed to format response.", ex);
         }
-        return entityJsonString;
+        return null;
     }
 
     @Override
@@ -99,12 +110,14 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public final boolean resultQuality;
         public final boolean validTime;
         public final boolean parameters;
+        private final PluginCoreModel pluginCoreModel;
 
-        public VisibleComponents() {
-            this(false);
+        public VisibleComponents(PluginCoreModel pCoreModel) {
+            this(pCoreModel, false);
         }
 
-        public VisibleComponents(boolean allValue) {
+        public VisibleComponents(PluginCoreModel pCoreModel, boolean allValue) {
+            this.pluginCoreModel = pCoreModel;
             id = allValue;
             phenomenonTime = allValue;
             result = allValue;
@@ -114,84 +127,85 @@ public class ResultFormatterDataArray implements ResultFormatter {
             parameters = allValue;
         }
 
-        public VisibleComponents(Set<Property> select) {
-            id = select.contains(EntityPropertyMain.ID);
-            phenomenonTime = select.contains(EntityPropertyMain.PHENOMENONTIME);
-            result = select.contains(EntityPropertyMain.RESULT);
-            resultTime = select.contains(EntityPropertyMain.RESULTTIME);
-            resultQuality = select.contains(EntityPropertyMain.RESULTQUALITY);
-            validTime = select.contains(EntityPropertyMain.VALIDTIME);
-            parameters = select.contains(EntityPropertyMain.PARAMETERS);
+        public VisibleComponents(PluginCoreModel pCoreModel, Set<Property> select) {
+            this.pluginCoreModel = pCoreModel;
+            id = select.contains(ModelRegistry.EP_ID);
+            phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
+            result = select.contains(pCoreModel.epResult);
+            resultTime = select.contains(pCoreModel.epResultTime);
+            resultQuality = select.contains(pCoreModel.epResultQuality);
+            validTime = select.contains(pCoreModel.epValidTime);
+            parameters = select.contains(pCoreModel.epParameters);
         }
 
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityPropertyMain.ID.entityName);
+                components.add(ModelRegistry.EP_ID.name);
             }
             if (phenomenonTime) {
-                components.add(EntityPropertyMain.PHENOMENONTIME.entityName);
+                components.add(pluginCoreModel.epPhenomenonTime.name);
             }
             if (result) {
-                components.add(EntityPropertyMain.RESULT.entityName);
+                components.add(pluginCoreModel.epResult.name);
             }
             if (resultTime) {
-                components.add(EntityPropertyMain.RESULTTIME.entityName);
+                components.add(pluginCoreModel.epResultTime.name);
             }
             if (resultQuality) {
-                components.add(EntityPropertyMain.RESULTQUALITY.entityName);
+                components.add(pluginCoreModel.epResultQuality.name);
             }
             if (validTime) {
-                components.add(EntityPropertyMain.VALIDTIME.entityName);
+                components.add(pluginCoreModel.epValidTime.name);
             }
             if (parameters) {
-                components.add(EntityPropertyMain.PARAMETERS.entityName);
+                components.add(pluginCoreModel.epParameters.name);
             }
             return components;
         }
 
-        public List<Object> fromObservation(Observation o) {
+        public List<Object> fromObservation(Entity o) {
             List<Object> value = new ArrayList<>();
             if (id) {
                 value.add(o.getId().getValue());
             }
             if (phenomenonTime) {
-                value.add(o.getPhenomenonTime());
+                value.add(o.getProperty(pluginCoreModel.epPhenomenonTime));
             }
             if (result) {
-                value.add(o.getResult());
+                value.add(o.getProperty(pluginCoreModel.epResult));
             }
             if (resultTime) {
-                value.add(o.getResultTime());
+                value.add(o.getProperty(pluginCoreModel.epResultTime));
             }
             if (resultQuality) {
-                value.add(o.getResultQuality());
+                value.add(o.getProperty(pluginCoreModel.epResultQuality));
             }
             if (validTime) {
-                value.add(o.getValidTime());
+                value.add(o.getProperty(pluginCoreModel.epValidTime));
             }
             if (parameters) {
-                value.add(o.getParameters());
+                value.add(o.getProperty(pluginCoreModel.epParameters));
             }
             return value;
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet) throws IOException {
+    public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
-            visComps = new VisibleComponents(true);
+            visComps = new VisibleComponents(pluginCoreModel, true);
         } else {
-            visComps = new VisibleComponents(query.getSelect());
+            visComps = new VisibleComponents(pluginCoreModel, query.getSelect());
         }
         List<String> components = visComps.getComponents();
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
-        for (Observation obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
+        for (Entity obs : entitySet) {
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastreamObservation, npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(query, path, obs, components)
+                    k -> new DataArrayValue(query, path, obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

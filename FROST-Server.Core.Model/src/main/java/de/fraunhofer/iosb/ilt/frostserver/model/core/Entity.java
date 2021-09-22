@@ -18,12 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -33,24 +35,34 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
  *
  * @author jab
  * @author scf
- * @param <T> The exact type of the entity.
  */
-public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
+public interface Entity extends NavigableElement {
 
     public Id getId();
 
-    public T setId(Id id);
+    public Entity setId(Id id);
 
-    /** @return self link. Might be null. */
+    /**
+     * @return self link. Might be null.
+     */
     public String getSelfLink();
 
-    public T setSelfLink(String selfLink);
+    public Entity setSelfLink(String selfLink);
 
     /**
      * @return The type of this entity.
      */
     @JsonIgnore
     public EntityType getEntityType();
+
+    /**
+     * Sets the type of the entity if it had not been previously set. This will
+     * cause all already set properties to be validated.
+     *
+     * @param entityType The type of the entity to set.
+     * @return this;
+     */
+    public Entity setEntityType(EntityType entityType);
 
     /**
      * Returns true if the property is explicitly set to a value, even if this
@@ -61,11 +73,30 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      */
     public boolean isSetProperty(Property property);
 
-    public Object getProperty(Property property);
+    /**
+     * Get the value of the given Property as it is set on this Entity.
+     *
+     * @param <P> The type of the value of the property.
+     * @param property The property to get
+     * @return The value of the property.
+     */
+    public <P> P getProperty(Property<P> property);
 
-    public void setProperty(Property property, Object value);
+    /**
+     * Set the value of the given property.
+     *
+     * @param <P> The type of the value of the property.
+     * @param property The property to set the value for.
+     * @param value The value to set for the given property.
+     * @return This.
+     */
+    public <P> Entity setProperty(Property<P> property, P value);
 
-    public void unsetProperty(Property property);
+    public Entity unsetProperty(Property property);
+
+    public Entity addNavigationEntity(Entity linkedEntity);
+
+    public DefaultEntity addNavigationEntity(NavigationPropertyEntitySet navProperty, Entity linkedEntity);
 
     /**
      * Toggle all Entity Properties to "set". Both EntityProperties and
@@ -97,7 +128,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      * @param message the optional (can be null) message to record changes in.
      */
     @JsonIgnore
-    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message);
+    public void setEntityPropertiesSet(Entity comparedTo, EntityChangedMessage message);
 
     /**
      * Complete the element.
@@ -159,7 +190,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      * @param query the query that has resulted in this Entity.
      * @return
      */
-    public T setQuery(Query query);
+    public Entity setQuery(Query query);
 
     /**
      *
@@ -168,8 +199,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
     @JsonIgnore
     public default ResourcePath getPath() {
         EntityType type = getEntityType();
-        PathElementEntity epe = new PathElementEntity();
-        epe.setEntityType(type);
+        PathElementEntity epe = new PathElementEntity(type, null);
         epe.setId(getId());
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.addPathElement(epe, true, false);

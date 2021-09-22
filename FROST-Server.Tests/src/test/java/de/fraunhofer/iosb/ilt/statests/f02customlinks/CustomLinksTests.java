@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f02customlinks;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -92,7 +89,7 @@ public class CustomLinksTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         FEATURESOFINTEREST.clear();
         LOCATIONS.clear();
@@ -149,11 +146,9 @@ public class CustomLinksTests extends AbstractTestClass {
         LOGGER.info("  testCustomLinks1");
         Thing thing = service.things().find(THINGS.get(1).getId());
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
-        String expected = UrlHelper.generateSelfLink(null,
-                getServerSettings().getServiceRootUrl(),
-                Version.forString(version.urlPart),
-                EntityType.THING,
-                THINGS.get(0).getId().getValue());
+        String expected = getServerSettings().getServiceRootUrl()
+                + "/" + version.urlPart + "/Things("
+                + THINGS.get(0).getId().getValue() + ")";
         Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
     }
 
@@ -165,11 +160,9 @@ public class CustomLinksTests extends AbstractTestClass {
                 .filter("id eq " + THINGS.get(1).getId().getUrl())
                 .expand("properties/parent.Thing")
                 .first();
-        String expected = UrlHelper.generateSelfLink(null,
-                getServerSettings().getServiceRootUrl(),
-                Version.forString(version.urlPart),
-                EntityType.THING,
-                THINGS.get(0).getId().getValue());
+        String expected = getServerSettings().getServiceRootUrl()
+                + "/" + version.urlPart + "/Things("
+                + THINGS.get(0).getId().getValue() + ")";
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
         Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
 

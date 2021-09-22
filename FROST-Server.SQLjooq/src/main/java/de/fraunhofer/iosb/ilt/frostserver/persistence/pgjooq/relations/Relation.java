@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 
@@ -24,9 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
  * The interface for table-to-table relations.
  *
  * @author hylke
- * @param <J>
+ * @param <J> the type of the ID.
+ * @param <S> the type of the table linked from.
  */
-public interface Relation<J extends Comparable> {
+public interface Relation<J extends Comparable, S extends StaMainTable<J, S>> {
 
     /**
      * The name of the relation. For official relations, this is the (singular)
@@ -36,5 +39,17 @@ public interface Relation<J extends Comparable> {
      */
     public String getName();
 
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef);
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef);
+
+    /**
+     * Create a link between the given source and target ids. This is not
+     * necessarily supported for all implementations, in all directions. For
+     * some types of relations this means creating new entries in a link table,
+     * for other implementations it may mean existing relations are changed.
+     *
+     * @param pm The persistence manager to use for accessing the database.
+     * @param sourceId The id of the entry in the source table.
+     * @param targetId The id of the entry in the target table.
+     */
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId);
 }

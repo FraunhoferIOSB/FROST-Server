@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2021-01-01-multiDatastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="MULTI_DATASTREAMS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="MULTI_DATASTREAMS">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="MULTI_DATASTREAMS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="OBSERVATION_TYPES" type="JSONB"/>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="SENSOR_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT_OF_MEASUREMENTS" type="JSONB"/>
+            <column name="OBSERVED_AREA" type="geometry(Geometry,4326)"/>
+            <column name="LAST_FOI_ID" type="BIGINT" />
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_SENSOR_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_THING_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <createTable tableName="MULTI_DATASTREAMS_OBS_PROPERTIES">
+            <column name="MULTI_DATASTREAM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBS_PROPERTY_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RANK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="MULTI_DATASTREAM_ID, OBS_PROPERTY_ID, RANK" constraintName="MULTI_DATASTREAMS_OBS_PROPERTIES_PKEY" tableName="MULTI_DATASTREAMS_OBS_PROPERTIES"/>
+        <addForeignKeyConstraint
+            constraintName="MDOP_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="MDOP_OBS_PROPERTY_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="OBS_PROPERTY_ID"
+            referencedTableName="OBS_PROPERTIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addColumn tableName="OBSERVATIONS">
+            <column name="MULTI_DATASTREAM_ID" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <dropNotNullConstraint tableName="OBSERVATIONS" columnName="DATASTREAM_ID" columnDataType="BIGINT" />
+
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="mdsPostgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
+        <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
+    </changeSet>
+
+</databaseChangeLog>

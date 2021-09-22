@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,7 +68,7 @@ public class JsonPatchTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-        Utils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         createEntities();
     }
 
@@ -78,7 +78,7 @@ public class JsonPatchTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        Utils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

@@ -18,13 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
@@ -32,8 +33,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -66,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * Builds a path for a query. Should not be re-used.
  *
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
@@ -93,6 +94,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private Set<Property> selectedProperties;
     private TableRef<J> lastPath;
     private TableRef<J> mainTable;
+    private NavigationPropertyMain lastNavProp;
 
     private boolean forPath = false;
     private ResourcePath requestedPath;
@@ -104,7 +106,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private boolean single = false;
     private boolean parsed = false;
 
-    private QueryState<J, ?, ?> queryState;
+    private QueryState<J, ?> queryState;
 
     public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, TableCollection<J> tableCollection) {
         this.pm = pm;
@@ -113,7 +115,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         this.tableCollection = tableCollection;
     }
 
-    public QueryState<J, ? extends Entity, ?> getQueryState() {
+    public QueryState<J, ?> getQueryState() {
         return queryState;
     }
 
@@ -196,9 +198,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J, ?, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
+        final StaMainTable<J, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
-            throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
+            throw new AssertionError("Don't know how to delete" + set.getEntityType().entityName, new IllegalArgumentException("Unknown type for delete"));
         }
 
         SelectConditionStep<Record1<J>> idSelect = DSL.select(queryState.getSqlMainIdField())
@@ -277,7 +279,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     private void parseTypeAndId() {
-        lastPath = queryEntityType(requestedEntityType, requestedId, lastPath);
+        lastPath = queryEntityType(new PathElementEntity(requestedEntityType, null), requestedId, lastPath);
         single = true;
     }
 
@@ -290,9 +292,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             selectedProperties.add(property);
         }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
-            // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
+            // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(EntityPropertyMain.ID);
+            selectedProperties.add(ModelRegistry.EP_ID);
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -327,18 +329,18 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        lastPath = queryEntityType(element.getEntityType(), element.getId(), lastPath);
+        lastPath = queryEntityType(element, element.getId(), lastPath);
     }
 
     @Override
     public void visit(PathElementEntitySet element) {
-        lastPath = queryEntityType(element.getEntityType(), null, lastPath);
+        lastPath = queryEntityType(element, null, lastPath);
     }
 
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(EntityPropertyMain.ID);
+        selectedProperties.add(ModelRegistry.EP_ID);
     }
 
     @Override
@@ -355,50 +357,81 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * Queries the given entity type, as relation to the given table reference
      * and returns a new table reference. Effectively, this generates a join.
      *
-     * @param type The type of entity to query
-     * @param targetId The id of the requested entity
+     * @param pe The path element to query.
+     * @param targetId The id of the requested entity.
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef<J> queryEntityType(EntityType type, Id targetId, TableRef<J> last) {
-        TableRef<J> result = last;
-        J id = null;
-        if (targetId != null) {
-            if (!targetId.getBasicPersistenceType().equals(tableCollection.getBasicPersistenceType())) {
-                throw new IllegalArgumentException("This implementation expects " + tableCollection.getBasicPersistenceType() + " ids, not " + targetId.getBasicPersistenceType());
-            }
-            id = (J) targetId.asBasicPersistenceType();
-        }
-        if (result != null) {
-            TableRef<J> existingJoin = result.getJoin(type);
+    public TableRef<J> queryEntityType(PathElementEntityType pe, Id targetId, TableRef<J> last) {
+        final EntityType entityType = pe.getEntityType();
+        if (last != null) {
+            // TODO: fix to use navProp, not entityType
+            TableRef<J> existingJoin = last.getJoin(entityType);
             if (existingJoin != null) {
                 return existingJoin;
             }
         }
 
-        if (result == null) {
-            StaMainTable<J, ?, ?> tableForType = tableCollection.getTableForType(type).as(DEFAULT_PREFIX);
+        TableRef<J> result;
+        if (last == null) {
+            StaMainTable<J, ?> tableForType = tableCollection.getTableForType(entityType).as(DEFAULT_PREFIX);
             queryState = new QueryState(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
-            result = createJoinedRef(null, type, tableForType);
+            result = createJoinedRef(null, entityType, tableForType);
         } else {
-            if (!type.equals(result.getType())) {
-                result = result.createJoin(type.entityName, queryState);
+            if (entityType.equals(last.getType()) && lastNavProp == null) {
+                result = last;
+            } else {
+                result = last.createJoin(lastNavProp.getInverse().getName(), queryState);
             }
         }
 
-        if (id != null) {
+        if (targetId != null) {
+            if (!targetId.getBasicPersistenceType().equals(tableCollection.getBasicPersistenceType())) {
+                throw new IllegalArgumentException("This implementation expects " + tableCollection.getBasicPersistenceType() + " ids, not " + targetId.getBasicPersistenceType());
+            }
+            J id = (J) targetId.asBasicPersistenceType();
             queryState.setSqlWhere(queryState.getSqlWhere().and(result.getTable().getId().eq(id)));
         }
 
         if (mainTable == null) {
             mainTable = result;
         }
+        lastNavProp = pe.getNavigationProperty();
         return result;
     }
 
+    /**
+     * Queries the given entity type, as relation to the given table reference
+     * and returns a new table reference. Effectively, this generates a join.
+     *
+     * @param np The NavigationProperty to query
+     * @param last The table the requested entity is related to.
+     * @return The table reference of the requested entity.
+     */
+    public TableRef<J> queryEntityType(NavigationProperty np, TableRef<J> last) {
+        if (mainTable == null) {
+            throw new IllegalStateException("mainTable should not be null");
+        }
+        if (last == null) {
+            throw new IllegalStateException("last result should not be null");
+        }
+
+        final EntityType entityType = np.getEntityType();
+        TableRef<J> existingJoin = last.getJoin(entityType);
+        if (existingJoin != null) {
+            return existingJoin;
+        }
+
+        if (entityType.equals(last.getType()) && np instanceof PathElementEntity && ((PathElementEntity) np).getId() != null) {
+            return last;
+        } else {
+            return last.createJoin(np.getName(), queryState);
+        }
+    }
+
     public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
-        StaMainTable<J, ?, ?> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<J, ?, ?> targetAliased = target.as(queryState.getNextAlias());
+        StaMainTable<J, ?> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<J, ?> targetAliased = target.as(queryState.getNextAlias());
         Field<J> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
@@ -408,7 +441,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return tableCollection;
     }
 
-    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?, ?> table) {
+    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?> table) {
         TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);

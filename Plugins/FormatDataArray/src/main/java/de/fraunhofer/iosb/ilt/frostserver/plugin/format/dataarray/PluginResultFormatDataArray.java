@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -56,16 +56,22 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     private static boolean modifiedEntityFormatter = false;
 
     private CoreSettings settings;
+    private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
             modifyEntityFormatter();
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override
@@ -75,7 +81,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new ResultFormatterDataArray();
+        return new ResultFormatterDataArray(settings);
     }
 
     @Override
@@ -108,8 +114,8 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     }
 
     @Override
-    public ServiceResponse execute(Service service, ServiceRequest request) {
-        return new ServiceDataArray(settings).executeCreateObservations(service, request);
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
+        return new ServiceDataArray(settings).executeCreateObservations(service, request, response);
     }
 
     public static void modifyEntityFormatter() {

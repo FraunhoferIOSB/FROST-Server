@@ -15,7 +15,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
@@ -83,7 +83,7 @@ public class JsonPropertiesTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
@@ -367,16 +367,16 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test03StringFilter() {
         LOGGER.info("  test03StringFilter");
-        filterAndCheck(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
-        filterAndCheck(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
+        testFilterResults(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
+        testFilterResults(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
 
-        filterAndCheck(service.things(), "substringof('cdefgh', properties/string)", getFromList(THINGS, 0, 1, 2));
-        filterAndCheck(service.observations(), "substringof('cdefgh', parameters/string)", getFromList(OBSERVATIONS, 0, 1, 2));
+        testFilterResults(service.things(), "substringof('cdefgh', properties/string)", getFromList(THINGS, 0, 1, 2));
+        testFilterResults(service.observations(), "substringof('cdefgh', parameters/string)", getFromList(OBSERVATIONS, 0, 1, 2));
 
-        filterAndCheck(service.things(), "properties/objArray[0]/string eq 'jklmnopqrs'", getFromList(THINGS, 1));
-        filterAndCheck(service.observations(), "parameters/objArray[0]/string eq 'jklmnopqrs'", getFromList(OBSERVATIONS, 9));
+        testFilterResults(service.things(), "properties/objArray[0]/string eq 'jklmnopqrs'", getFromList(THINGS, 1));
+        testFilterResults(service.observations(), "parameters/objArray[0]/string eq 'jklmnopqrs'", getFromList(OBSERVATIONS, 9));
 
-        filterAndCheck(service.observations(), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
+        testFilterResults(service.observations(), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
     }
 
     /**
@@ -386,26 +386,26 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test04NumberFilter() {
         LOGGER.info("  test04NumberFilter");
-        filterAndCheck(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
-        filterAndCheck(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
+        testFilterResults(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
+        testFilterResults(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
 
-        filterAndCheck(service.things(), "properties/int gt 9", getFromList(THINGS, 2, 3));
-        filterAndCheck(service.observations(), "parameters/int gt 8", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(service.things(), "properties/int gt 9", getFromList(THINGS, 2, 3));
+        testFilterResults(service.observations(), "parameters/int gt 8", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        filterAndCheck(service.things(), "properties/int lt 9", getFromList(THINGS, 0));
-        filterAndCheck(service.observations(), "parameters/int lt 8", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
+        testFilterResults(service.things(), "properties/int lt 9", getFromList(THINGS, 0));
+        testFilterResults(service.observations(), "parameters/int lt 8", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
-        filterAndCheck(service.things(), "properties/intArray[1] gt 10", getFromList(THINGS, 2, 3));
-        filterAndCheck(service.observations(), "parameters/intArray[1] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(service.things(), "properties/intArray[1] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(service.observations(), "parameters/intArray[1] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        filterAndCheck(service.things(), "properties/intArray[1] lt 10", getFromList(THINGS, 0));
-        filterAndCheck(service.observations(), "parameters/intArray[1] lt 9", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
+        testFilterResults(service.things(), "properties/intArray[1] lt 10", getFromList(THINGS, 0));
+        testFilterResults(service.observations(), "parameters/intArray[1] lt 9", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
-        filterAndCheck(service.things(), "properties/intIntArray[1][0] gt 10", getFromList(THINGS, 2, 3));
-        filterAndCheck(service.observations(), "parameters/intIntArray[1][0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(service.things(), "properties/intIntArray[1][0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(service.observations(), "parameters/intIntArray[1][0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        filterAndCheck(service.things(), "properties/objArray[1]/intArray[0] gt 10", getFromList(THINGS, 2, 3));
-        filterAndCheck(service.observations(), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(service.things(), "properties/objArray[1]/intArray[0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(service.observations(), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
     }
 
     /**
@@ -415,17 +415,17 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test05BooleanFilter() {
         LOGGER.info("  test05BooleanFilter");
-        filterAndCheck(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
-        filterAndCheck(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
+        testFilterResults(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
-        filterAndCheck(service.things(), "properties/boolean", getFromList(THINGS, 0, 2));
-        filterAndCheck(service.observations(), "parameters/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
+        testFilterResults(service.things(), "properties/boolean", getFromList(THINGS, 0, 2));
+        testFilterResults(service.observations(), "parameters/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
 
-        filterAndCheck(service.things(), "not properties/boolean", getFromList(THINGS, 1, 3));
-        filterAndCheck(service.observations(), "not parameters/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(service.things(), "not properties/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(service.observations(), "not parameters/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
-        filterAndCheck(service.things(), "properties/objArray[1]/boolean", getFromList(THINGS, 1, 3));
-        filterAndCheck(service.observations(), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(service.things(), "properties/objArray[1]/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(service.observations(), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
     /**
@@ -434,12 +434,12 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test06UnitOfMeasurementFilter() {
         LOGGER.info("  test06UnitOfMeasurementFilter");
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 0));
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 1));
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 0));
-        filterAndCheck(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 1));
     }
 
     /**
@@ -448,9 +448,9 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test07PropertyCompare() {
         LOGGER.info("  test07PropertyCompare");
-        filterAndCheck(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
-        filterAndCheck(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
-        filterAndCheck(service.observations(), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
+        testFilterResults(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
+        testFilterResults(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
+        testFilterResults(service.observations(), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
     }
 
     /**
@@ -459,8 +459,8 @@ public class JsonPropertiesTests extends AbstractTestClass {
     @Test
     public void test20ResultQualityFilter() {
         LOGGER.info("  test20ResultQualityFilter");
-        filterAndCheck(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
-        filterAndCheck(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
+        testFilterResults(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
     private JsonNode getJsonObjectForResponse(String urlString) {

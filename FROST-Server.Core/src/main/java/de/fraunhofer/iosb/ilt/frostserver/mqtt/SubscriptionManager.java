@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +44,7 @@ class SubscriptionManager {
      * supplied directly in the changeEvent. For example:
      * /Datastreams(1)/Observations
      */
-    private final Map<NavigationPropertyMain, SubscriptionSetDirectParent> parentedSubscriptions = new EnumMap<>(NavigationPropertyMain.class);
+    private final Map<NavigationPropertyMain, SubscriptionSetDirectParent> parentedSubscriptions = new HashMap<>();
     /**
      * All other subscriptions.
      */

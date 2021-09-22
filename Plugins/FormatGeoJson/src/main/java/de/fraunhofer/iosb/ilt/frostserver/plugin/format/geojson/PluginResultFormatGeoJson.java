@@ -47,13 +47,20 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
      */
     public static final String GEOJSON_FORMAT_NAME = "GeoJSON";
 
+    private boolean enabled;
+
     @Override
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_GEOJSON, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_GEOJSON, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

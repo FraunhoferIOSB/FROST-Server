@@ -18,13 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -34,16 +35,12 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.PathHelper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -51,8 +48,6 @@ import java.util.stream.Collectors;
  * @author scf
  */
 public abstract class AbstractSubscription implements Subscription {
-
-    private static Map<EntityType, List<NavigationPropertyMain>> navigationProperties = null;
 
     protected final String topic;
     protected EntityType entityType;
@@ -71,23 +66,9 @@ public abstract class AbstractSubscription implements Subscription {
     protected CoreSettings settings;
 
     protected AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
-        initNavigationProperties();
         this.topic = topic;
         this.path = path;
         this.settings = settings;
-    }
-
-    private static void initNavigationProperties() {
-        if (navigationProperties == null) {
-            navigationProperties = new EnumMap<>(EntityType.class);
-            for (EntityType type : EntityType.values()) {
-                navigationProperties.put(type,
-                        type.getPropertySet().stream()
-                                .filter(NavigationPropertyMain.class::isInstance)
-                                .map(NavigationPropertyMain.class::cast)
-                                .collect(Collectors.toList()));
-            }
-        }
     }
 
     @Override
@@ -108,29 +89,36 @@ public abstract class AbstractSubscription implements Subscription {
     protected void generateFilter(int pathElementOffset) {
         EntityType lastType = getEntityType();
         List<Property> properties = new ArrayList<>();
+        boolean direct = true;
         for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
             PathElement element = path.get(i);
-            if (!(element instanceof PathElementEntity)) {
-                continue;
-            }
-            final PathElementEntity epe = (PathElementEntity) element;
-            final NavigationPropertyMain navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
+            if (element instanceof PathElementEntitySet) {
+                final PathElementEntitySet pees = (PathElementEntitySet) element;
+                final NavigationPropertyMain navProp = lastType.getNavigationProperty(pees.getEntityType());
+                properties.add(navProp);
+                lastType = pees.getEntityType();
+                direct = false;
 
-            Id id = epe.getId();
-            if (!navProp.isEntitySet() && id != null) {
-                createMatcher(navProp, id);
-                assert (i <= 1);
-                return;
-            }
+            } else if (element instanceof PathElementEntity) {
+                final PathElementEntity epe = (PathElementEntity) element;
+                final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
 
-            properties.add(navProp);
-            lastType = epe.getEntityType();
+                final Id id = epe.getId();
+                if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
+                    createMatcher(navProp, id);
+                    assert (i <= 1);
+                    return;
+                }
 
-            if (id != null) {
-                createMatchExpression(properties, epe);
-                // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
-                assert (i <= 1);
-                return;
+                properties.add(navProp);
+                lastType = epe.getEntityType();
+
+                if (id != null) {
+                    createMatchExpression(properties, epe);
+                    // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
+                    assert (i <= 1);
+                    return;
+                }
             }
         }
     }
@@ -152,14 +140,14 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
-        properties.add(EntityPropertyMain.ID);
+        properties.add(ModelRegistry.EP_ID);
         String epeId = epe.getId().getUrl();
         if (epeId.startsWith("'")) {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
-        query = new Query(settings.getQueryDefaults(), path);
+        query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
         query.setFilter(matchExpression);
     }
 

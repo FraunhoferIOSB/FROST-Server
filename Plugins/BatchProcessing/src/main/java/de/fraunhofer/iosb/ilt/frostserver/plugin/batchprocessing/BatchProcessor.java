@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,9 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +59,13 @@ public class BatchProcessor<C extends Content> {
     }
 
     public Request processHttpRequest(Service service, Request httpRequest, boolean inChangeSet) {
-        String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
-        Version version = Version.forString(httpRequest.getVersion());
-        ServiceRequest serviceRequest = new ServiceRequestBuilder(version).withRequestType(type)
+        final String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
+        final Version version = Version.forString(httpRequest.getVersion());
+        final ServiceRequest serviceRequest = new ServiceRequestBuilder(version).withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData()).build();
-        ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);
+        final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
+        service.execute(serviceRequest, serviceResponse);
 
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
@@ -79,10 +82,10 @@ public class BatchProcessor<C extends Content> {
         Map<String, String> headers = httpResponse.getHttpHeaders();
         serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
 
-        String resultFormatted = serviceResponse.getResultFormatted();
+        String resultFormatted = serviceResponse.getWriter().toString();
         if (statusCode >= 200 && statusCode < 300) {
             if (!StringHelper.isNullOrEmpty(resultFormatted)) {
-                httpResponse.setContentType(serviceResponse.getContentType());
+                headers.put("Content-Type", CONTENT_TYPE_APPLICATION_JSON + "; " + CHARSET_UTF8);
                 httpResponse.addData(resultFormatted);
             }
         } else {

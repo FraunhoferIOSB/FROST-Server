@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,25 +41,26 @@ public class ResultFormatterDefault implements ResultFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
 
     public ResultFormatterDefault() {
-        LOGGER.debug("Creating a new resultFormatter.");
+        LOGGER.trace("Creating a new resultFormatter.");
     }
 
     @Override
-    public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
-        String entityJsonString = "";
+    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
-                Entity<?> entity = (Entity) result;
-                LOGGER.debug("Formatting as Entity.");
-                entityJsonString = JsonWriter.writeEntity(entity);
-
-            } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                EntitySet<?> entitySet = (EntitySet) result;
-                LOGGER.debug("Formatting as EntitySet.");
-                entityJsonString = JsonWriter.writeEntityCollection(entitySet);
-
-            } else if (path != null && path.isValue()) {
-                LOGGER.debug("Formatting as $Value.");
+                final Entity entity = (Entity) result;
+                LOGGER.trace("Formatting as Entity.");
+                return target -> JsonWriter.writeEntity(target, entity);
+            }
+            if (EntitySet.class.isAssignableFrom(result.getClass())) {
+                EntitySet entitySet = (EntitySet) result;
+                LOGGER.trace("Formatting as EntitySet.");
+                return target -> JsonWriter.writeEntityCollection(target, entitySet);
+            }
+            // Not an Entity nor an EntitySet.
+            String entityJsonString = "";
+            if (path != null && path.isValue()) {
+                LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = JsonWriter.writeObject(result);
                 } else if (result instanceof Id) {
@@ -68,13 +69,14 @@ public class ResultFormatterDefault implements ResultFormatter {
                     entityJsonString = result.toString();
                 }
             } else {
-                LOGGER.debug("Formatting as Object.");
+                LOGGER.trace("Formatting as Object.");
                 entityJsonString = JsonWriter.writeObject(result);
             }
+            return new FormatWriterGeneric(entityJsonString);
         } catch (IOException ex) {
             LOGGER.error("Failed to format response.", ex);
         }
-        return entityJsonString;
+        return null;
     }
 
     @Override

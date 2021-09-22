@@ -24,21 +24,31 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -52,14 +62,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
+import org.jooq.Meta;
+import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,15 +93,48 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
     private static final String SOURCE_NAME_FROST = "FROST-Source";
 
+    private boolean initialised = false;
+
+    private final IdManager idManager;
+    private TableCollection<J> tableCollection;
+    private EntityFactories<J> entityFactories;
+
     private CoreSettings settings;
+    private IdGenerationType idGenerationMode;
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
 
-    @Override
-    public void init(CoreSettings settings) {
+    /**
+     * Tracker for the amount of data fetched form the DB by this PM.
+     */
+    private DataSize dataSize;
+
+    protected PostgresPersistenceManager(IdManager idManager) {
+        this.idManager = idManager;
+    }
+
+    public void init(CoreSettings settings, TableCollection<J> tableCollection) {
         this.settings = settings;
+        this.tableCollection = tableCollection;
+        getTableCollection().setModelRegistry(settings.getModelRegistry());
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        entityFactories = new EntityFactories(settings.getModelRegistry(), idManager, tableCollection);
+        dataSize = new DataSize(settings.getDataSizeMax());
+    }
+
+    private void init() {
+        if (initialised) {
+            return;
+        }
+        synchronized (tableCollection) {
+            if (!initialised) {
+                idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
+                tableCollection.init(entityFactories);
+                loadMapping();
+                initialised = true;
+            }
+        }
     }
 
     @Override
@@ -96,13 +142,18 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return settings;
     }
 
-    public abstract TableCollection<J> getTableCollection();
+    @Override
+    public IdManager getIdManager() {
+        return idManager;
+    }
 
-    public abstract EntityFactories<J> getEntityFactories();
+    public TableCollection<J> getTableCollection() {
+        return tableCollection;
+    }
 
-    public abstract IdGenerationHandler createIdGenerationHanlder(Entity e);
-
-    public abstract String getLiquibaseChangelogFilename();
+    public EntityFactories<J> getEntityFactories() {
+        return entityFactories;
+    }
 
     public DSLContext getDslContext() {
         if (dslContext == null) {
@@ -117,6 +168,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean validatePath(ResourcePath path) {
+        init();
         PathElement element = path.getIdentifiedElement();
         if (element == null) {
             return true;
@@ -162,26 +214,28 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * transaction quickly to release the lock.
      *
      * @param entityType The type of entity to fetch.
-     * @param id The ID of the entity to fetch.
+     * @param id The EP_ID of the entity to fetch.
      * @param forUpdate if true, lock the entities row for update.
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
+        init();
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
 
-        Record record = sqlQuery.fetchAny();
-        if (record == null) {
+        Record result = sqlQuery.fetchAny();
+        if (result == null) {
             return null;
         }
-        return psb.getQueryState().entityFromQuery(record, new DataSize());
+        return psb.getQueryState().entityFromQuery(result, dataSize);
     }
 
     @Override
     public Object get(ResourcePath path, Query query) {
+        init();
         PathElement lastElement = path.getLastElement();
         if (!(lastElement instanceof PathElementEntity) && !(lastElement instanceof PathElementEntitySet)) {
             if (!query.getExpand().isEmpty()) {
@@ -198,7 +252,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb);
+        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
@@ -218,14 +272,14 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityFactories<J> ef = getEntityFactories();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
-        factory.insert(this, entity);
-        return true;
+        init();
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        return table.insertIntoDatabase(this, entity);
     }
 
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        init();
         EntityFactories<J> ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
@@ -234,12 +288,13 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
-        return factory.update(this, entity, id);
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        return table.updateInDatabase(this, entity, id);
     }
 
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+        init();
         final EntityType entityType = pathElement.getEntityType();
         final Id id = pathElement.getId();
 
@@ -258,9 +313,10 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
         LOGGER.trace("New {}", newNode);
         Entity newEntity;
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(getIdManager().getIdClass());
-            newEntity = entityParser.parseEntity(original.getClass(), newNode);
+            JsonReader entityParser = new JsonReader(modelRegistry);
+            newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
         } catch (IOException ex) {
@@ -274,9 +330,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             LOGGER.warn("Patch did not change anything.");
             throw new IllegalArgumentException("Patch did not change anything.");
         }
-        EntityFactories<J> ef = getEntityFactories();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entityType);
-        factory.update(this, newEntity, (J) id.getValue());
+
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entityType);
+        table.updateInDatabase(this, newEntity, (J) id.getValue());
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -285,17 +341,18 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException {
-        EntityFactories<J> ef = getEntityFactories();
+        init();
         EntityType type = pathElement.getEntityType();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(type);
-        factory.delete(this, (J) pathElement.getId().getValue());
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(type);
+        table.delete(this, (J) pathElement.getId().getValue());
         return true;
     }
 
     @Override
     public void doDelete(ResourcePath path, Query query) {
+        init();
         query.clearSelect();
-        query.addSelect(Arrays.asList(EntityPropertyMain.ID));
+        query.addSelect(path.getMainElementType().getEntityProperty("id"));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
@@ -327,12 +384,73 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
     }
 
-    @Override
-    public String checkForUpgrades() {
+    public IdGenerationType getIdGenerationMode() {
+        return idGenerationMode;
+    }
+
+    protected abstract boolean validateClientSuppliedId(Id entityId);
+
+    /**
+     * Modify the entity id.
+     *
+     * @param entity the Entity to modify the Id for.
+     */
+    public void modifyClientSuppliedId(Entity entity) {
+        // Default does nothing.
+    }
+
+    /**
+     *
+     * Checks if a client generated id can/should be used with respect to the
+     * idGenerationMode.
+     *
+     * @param entity The entity to check the id for.
+     * @return true if a valid client id can be used.
+     * @throws IncompleteEntityException Will be thrown if @iot.id is missing
+     * for client generated ids.
+     * @throws IllegalArgumentException Will be thrown if idGenerationMode is
+     * not supported.
+     */
+    public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
+        Id entityId = entity.getId();
+        switch (idGenerationMode) {
+            case SERVER_GENERATED_ONLY:
+                if (entityId == null || entityId.getValue() == null) {
+                    LOGGER.trace("Using server generated id.");
+                    return false;
+                } else {
+                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", idGenerationMode, entityId);
+                    return false;
+                }
+
+            case SERVER_AND_CLIENT_GENERATED:
+                if (!validateClientSuppliedId(entityId)) {
+                    LOGGER.debug("No valid @iot.id. Using server generated id.");
+                    return false;
+                }
+                break;
+
+            case CLIENT_GENERATED_ONLY:
+                if (!validateClientSuppliedId(entityId)) {
+                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", idGenerationMode);
+                    throw new IncompleteEntityException("Error: no @iot.id");
+                }
+                break;
+
+            default:
+                // not a valid generation mode
+                LOGGER.error("idGenerationMode '{}' is not implemented.", idGenerationMode);
+                throw new IllegalArgumentException("idGenerationMode '" + idGenerationMode.toString() + "' is not implemented.");
+        }
+
+        LOGGER.info("Using client generated id.");
+        return true;
+    }
+
+    public String checkForUpgrades(String liquibaseChangelogFilename) {
         try {
             Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
             Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
-            String liquibaseChangelogFilename = getLiquibaseChangelogFilename();
             return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -342,8 +460,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
     }
 
-    @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection;
         try {
@@ -355,8 +472,130 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             out.append("\n");
             return false;
         }
-        String liquibaseChangelogFilename = getLiquibaseChangelogFilename();
         return LiquibaseHelper.doUpgrades(connection, liquibaseChangelogFilename, out);
+    }
+
+    @Override
+    public void addModelMapping(DefModel modelDefinition) {
+        tableCollection.getModelDefinitions().add(modelDefinition);
+    }
+
+    private void loadMapping() {
+        final List<DefModel> modelDefinitions = tableCollection.getModelDefinitions();
+        if (modelDefinitions.isEmpty()) {
+            return;
+        }
+
+        getDslContext();
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            LOGGER.info("Reading Database Tables.");
+            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+                final String tableName = entityTypeDef.getTable();
+                LOGGER.info("  Table: {}.", tableName);
+                getDbTable(tableName);
+                getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            }
+        }
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            registerModelFields(modelDefinition);
+        }
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            registerModelMappings(modelDefinition);
+        }
+        // Done, release the model definitions.
+        tableCollection.clearModelDefinitions();
+    }
+
+    private void registerModelFields(DefModel modelDefinition) {
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+            StaTableDynamic<J> typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerField(this, typeStaTable);
+                    }
+                }
+            }
+            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerField(this, typeStaTable);
+                    }
+                }
+            }
+        }
+    }
+
+    private void registerModelMappings(DefModel modelDefinition) {
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+            StaTableDynamic<J> orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerMapping(this, orCreateTable);
+                    }
+                }
+            }
+            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerMapping(this, orCreateTable);
+                    }
+                }
+            }
+        }
+    }
+
+    public Table<?> getDbTable(String tableName) {
+        return getDbTable(DSL.name(tableName));
+    }
+
+    public Table<?> getDbTable(Name tableName) {
+        final Meta meta = dslContext.meta();
+        final List<Table<?>> tables = meta.getTables(tableName);
+        if (tables.isEmpty()) {
+            LOGGER.error("Table {} not found. Please initialise the database!", tableName);
+            throw new IllegalArgumentException("Table " + tableName + " not found.");
+        }
+        if (tables.size() != 1) {
+            LOGGER.error("Table name {} found {} times.", tableName, tables.size());
+            throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
+        }
+        return tables.get(0);
+    }
+
+    private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, String tableName) {
+        if (entityType == null) {
+            throw new IllegalArgumentException("Not implemented yet");
+        }
+        StaMainTable<J, ?> table = tableCollection.getTableForType(entityType);
+        if (table == null) {
+            LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
+            StaTableDynamic<J> newTable = new StaTableDynamic<>(DSL.name(tableName), entityType, tableCollection.getIdType());
+            tableCollection.registerTable(entityType, newTable);
+            table = newTable;
+        }
+        if (table instanceof StaTableDynamic) {
+            return (StaTableDynamic<J>) table;
+        }
+        throw new IllegalStateException("Table already exists, but is not of type dynamic.");
+    }
+
+    public StaLinkTableDynamic<J> getOrCreateLinkTable(String tableName) {
+        StaTable<J, ?> table = tableCollection.getTableForName(tableName);
+        if (table == null) {
+            LOGGER.info("  Registering StaLinkTable {}", tableName);
+            StaLinkTableDynamic<J> newTable = new StaLinkTableDynamic<>(DSL.name(tableName), tableCollection.getIdType());
+            tableCollection.registerTable(newTable);
+            table = newTable;
+        }
+        if (table instanceof StaLinkTableDynamic) {
+            return (StaLinkTableDynamic<J>) table;
+        }
+        throw new IllegalStateException("Table already exists, but is not of type StaLinkTableDynamic.");
     }
 
 }

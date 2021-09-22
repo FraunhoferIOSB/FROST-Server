@@ -1,11 +1,17 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.RawValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Content;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
@@ -17,13 +23,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.RawValue;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import java.util.Collections;
 
 /**
  * Parser for JSON request.
@@ -111,11 +110,6 @@ public class JsonBatch extends Batch<Content> {
         }
     }
 
-    @Override
-    public String getContentType() {
-        return CONTENT_TYPE_APPLICATION_JSON;
-    }
-
     private void addResponses(List<String> responses, Batch<Content> batch) {
         for (Part<Content> part : batch.getParts()) {
             Content partContent = part.getContent();
@@ -129,6 +123,8 @@ public class JsonBatch extends Batch<Content> {
 
     @Override
     public Map<String, String> getHeaders() {
-        return Collections.emptyMap();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", CONTENT_TYPE_APPLICATION_JSON);
+        return headers;
     }
 }

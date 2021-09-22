@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -66,6 +67,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
             properties.setProperty(CoreSettings.TAG_TEMP_PATH, String.valueOf(context.getAttribute(ServletContext.TEMPDIR)));
         }
         coreSettings = new CoreSettings(properties);
+
     }
 
     @Override
@@ -82,7 +84,8 @@ public abstract class AbstractContextListener implements ServletContextListener 
             setUpCorsFilter(context, coreSettings);
 
             PersistenceManagerFactory.init(coreSettings);
-            MessageBusFactory.init(coreSettings);
+            PersistenceManagerFactory.getInstance(coreSettings);
+            MessageBusFactory.createMessageBus(coreSettings);
 
             setupAuthFilter(context, coreSettings);
         }
@@ -91,12 +94,18 @@ public abstract class AbstractContextListener implements ServletContextListener 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
-        MessageBusFactory.getMessageBus().stop();
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException ex) {
-            LOGGER.debug("Rude wakeup?", ex);
-            Thread.currentThread().interrupt();
+        if (coreSettings == null) {
+            return;
+        }
+        final MessageBus messageBus = coreSettings.getMessageBus();
+        if (messageBus != null) {
+            messageBus.stop();
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException ex) {
+                LOGGER.debug("Rude wakeup?", ex);
+                Thread.currentThread().interrupt();
+            }
         }
         LOGGER.info("Context destroyed, done shutting down threads.");
     }
@@ -151,7 +160,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
                     filterConfigurator.addFilter(servletContext, coreSettings);
 
                     // If all went well, register the filter so it can upgrade its database.
-                    coreSettings.addLiquibaseUser(filterConfigClass);
+                    coreSettings.addLiquibaseUser(filterConfigurator);
                 } else {
                     throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
                 }

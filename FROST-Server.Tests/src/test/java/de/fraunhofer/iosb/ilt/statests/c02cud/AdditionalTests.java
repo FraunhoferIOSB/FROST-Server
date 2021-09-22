@@ -22,7 +22,9 @@ import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdditionalTests extends AbstractTestClass {
 
     /**
@@ -63,7 +66,7 @@ public class AdditionalTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
@@ -76,9 +79,9 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testMultipleLocations() throws ServiceFailureException {
-        LOGGER.info("  testMultipleLocations");
-        EntityUtils.deleteAll(service);
+    public void test01MultipleLocations() throws ServiceFailureException {
+        LOGGER.info("  test01MultipleLocations");
+        EntityUtils.deleteAll(version, serverSettings, service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
 
@@ -114,6 +117,19 @@ public class AdditionalTests extends AbstractTestClass {
         Assert.assertNotNull("A FeatureOfInterest should have been generated, but got NULL.", featureOfInterest);
     }
 
+    @Test
+    public void test02GeneratePhenomenonTime() throws ServiceFailureException {
+        LOGGER.info("  test02GeneratePhenomenonTime");
+        ObservationDao doa = service.observations();
+        Observation observation = new Observation(1.0, DATASTREAMS.get(0));
+        doa.create(observation);
+        OBSERVATIONS.add(observation);
+
+        Observation found;
+        found = doa.find(observation.getId());
+        Assert.assertNotNull("phenomenonTime should be auto generated.", found.getPhenomenonTime());
+    }
+
     /**
      * Check if adding a new HistoricalLocation to a Thing changes the Location
      * of the Thing, if the new HistoricalLocation has a time that is later than
@@ -126,9 +142,9 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testHistoricalLocationThing() throws ServiceFailureException {
-        LOGGER.info("  testHistoricalLocationThing");
-        EntityUtils.deleteAll(service);
+    public void test03HistoricalLocationThing() throws ServiceFailureException {
+        LOGGER.info("  test03HistoricalLocationThing");
+        EntityUtils.deleteAll(version, serverSettings, service);
 
         // Create a thing
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -193,9 +209,9 @@ public class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testPostInvalidPath() throws ServiceFailureException {
-        LOGGER.info("  testPostInvalidPath");
-        EntityUtils.deleteAll(service);
+    public void test04PostInvalidPath() throws ServiceFailureException {
+        LOGGER.info("  test04PostInvalidPath");
+        EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
         Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
@@ -313,9 +329,9 @@ public class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    public void testRecreateAutomaticFoi() throws ServiceFailureException {
-        LOGGER.info("  testRecreateAutomaticFoi");
-        EntityUtils.deleteAll(service);
+    public void test05RecreateAutomaticFoi() throws ServiceFailureException {
+        LOGGER.info("  test05RecreateAutomaticFoi");
+        EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
         Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));

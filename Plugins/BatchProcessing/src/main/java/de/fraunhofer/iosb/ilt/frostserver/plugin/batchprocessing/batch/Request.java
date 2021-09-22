@@ -39,14 +39,13 @@ public abstract class Request implements Content {
     protected String contentId;
     protected Id contentIdValue;
     protected final StringBuilder data = new StringBuilder();
-    protected String contentType;
     protected final Version batchVersion;
 
-    public Request(Version batchVersion) {
+    protected Request(Version batchVersion) {
         this(batchVersion, false);
     }
 
-    public Request(Version batchVersion, boolean requireContentId) {
+    protected Request(Version batchVersion, boolean requireContentId) {
         this.batchVersion = batchVersion;
         this.requireContentId = requireContentId;
     }
@@ -102,15 +101,6 @@ public abstract class Request implements Content {
 
     public void addData(String appended) {
         this.data.append(appended);
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 
     public String getContentId() {

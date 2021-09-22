@@ -60,7 +60,7 @@ public class Capability7Tests extends AbstractTestClass {
         LOGGER.info("Setting up for version {}.", version.urlPart);
 
         long mqttTimeout = serverSettings.getMqttTimeOut();
-        entityHelper = new EntityHelper(serverSettings.getServiceUrl(version));
+        entityHelper = new EntityHelper(version, serverSettings);
         mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), mqttTimeout);
     }
 

@@ -34,8 +34,8 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTimeIntervalWrapper.class.getName());
 
-    public static final String KEY_TIME_INTERVAL_START = "tStart";
-    public static final String KEY_TIME_INTERVAL_END = "tEnd";
+    public static final String KEY_TIME_INTERVAL_START = "start";
+    public static final String KEY_TIME_INTERVAL_END = "end";
     private static final String INCOMPATIBLE_OP = "Incompatible operator: Interval '";
     /**
      * Flag indicating that the original time given was in UTC.

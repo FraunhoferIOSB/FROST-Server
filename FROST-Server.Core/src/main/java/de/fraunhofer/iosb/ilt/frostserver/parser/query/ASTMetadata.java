@@ -16,7 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-public class ASTMetadata extends SimpleNode {
+public class ASTMetadata extends ASTStringValueNode {
 
     public ASTMetadata(int id) {
         super(id);
@@ -29,14 +29,6 @@ public class ASTMetadata extends SimpleNode {
     @Override
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return (String) value;
     }
 
     @Override

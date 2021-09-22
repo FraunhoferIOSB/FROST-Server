@@ -6,6 +6,9 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
+import java.io.File;
+import java.io.IOException;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,131 +57,20 @@ public class TestEntityCreator {
     }
 
     private static String getEntitiesJson() {
-        String urlParameters = "{\n"
-                + "  \"description\": \"thing 1\",\n"
-                + "  \"name\": \"thing name 1\",\n"
-                + "  \"properties\": {\n"
-                + "    \"reference\": \"firstThing\"\n"
-                + "  },\n"
-                + "  \"Locations\": [{\n"
-                + "      \"description\": \"location 1\",\n"
-                + "      \"name\": \"location name 1\",\n"
-                + "      \"properties\": {\n"
-                + "        \"reference\": \"firstLocation\"\n"
-                + "      },\n"
-                + "      \"location\": {\n"
-                + "        \"type\": \"Point\",\n"
-                + "        \"coordinates\": [-117.05, 51.05]\n"
-                + "      },\n"
-                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                + "    }],\n"
-                + "  \"Datastreams\": [{\n"
-                + "      \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Lumen\",\n"
-                + "        \"symbol\": \"lm\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                + "      },\n"
-                + "      \"description\": \"datastream 1\",\n"
-                + "      \"name\": \"datastream name 1\",\n"
-                + "      \"properties\": {\n"
-                + "        \"reference\": \"firstDatastream\"\n"
-                + "      },\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "      \"ObservedProperty\": {\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\n"
-                + "        \"description\": \"observedProperty 1\"\n"
-                + "      },\n"
-                + "      \"Sensor\": {\n"
-                + "        \"description\": \"sensor 1\",\n"
-                + "        \"name\": \"sensor name 1\",\n"
-                + "        \"properties\": {\n"
-                + "          \"reference\": \"firstSensor\"\n"
-                + "        },\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "      },\n"
-                + "      \"Observations\": [{\n"
-                + "          \"phenomenonTime\": \"2015-03-03T00:00:00Z\",\n"
-                + "          \"result\": 3\n"
-                + "        }, {\n"
-                + "          \"phenomenonTime\": \"2015-03-04T00:00:00Z\",\n"
-                + "          \"result\": 4\n"
-                + "        }]\n"
-                + "    }, {\n"
-                + "      \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Centigrade\",\n"
-                + "        \"symbol\": \"C\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                + "      },\n"
-                + "      \"description\": \"datastream 2\",\n"
-                + "      \"name\": \"datastream name 2\",\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "      \"ObservedProperty\": {\n"
-                + "        \"name\": \"Tempretaure\",\n"
-                + "        \"properties\": {\n"
-                + "          \"reference\": \"firstObservedProperty\"\n"
-                + "        },\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\n"
-                + "        \"description\": \"observedProperty 2\"\n"
-                + "      },\n"
-                + "      \"Sensor\": {\n"
-                + "        \"description\": \"sensor 2\",\n"
-                + "        \"name\": \"sensor name 2\",\n"
-                + "        \"properties\": {\n"
-                + "          \"reference\": \"secondSensor\"\n"
-                + "        },\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Tempreture sensor\"\n"
-                + "      },\n"
-                + "      \"Observations\": [{\n"
-                + "          \"phenomenonTime\": \"2015-03-05T00:00:00Z\",\n"
-                + "          \"result\": 5\n"
-                + "        }, {\n"
-                + "          \"phenomenonTime\": \"2015-03-06T00:00:00Z\",\n"
-                + "          \"result\": 6\n"
-                + "        }]\n"
-                + "    }]\n"
-                + "}\n"
-                + "";
-        return urlParameters;
+        return pathToString("src/test/resources/entitiesDefault.json");
     }
 
     private static String getActuationJson() {
-        String postContent = "{\n"
-                + "	\"name\": \"TaskingCapability 1\",\n"
-                + "	\"description\": \"This is a tasking capability\",\n"
-                + "	\"properties\": {\n"
-                + "		\"cool\": true\n"
-                + "	},\n"
-                + "	\"taskingParameters\": {\n"
-                + "		\"todo\": \"yes\"\n"
-                + "	},\n"
-                + "	\"Actuator\": {\n"
-                + "		\"description\": \"actuator 1\",\n"
-                + "		\"name\": \"actuator name 1\",\n"
-                + "		\"properties\": {\n"
-                + "			\"reference\": \"firstActuator \"\n"
-                + "		},\n"
-                + "		\"encodingType\": \"application/pdf\",\n"
-                + "		\"metadata\": \"Window opener\"\n"
-                + "	},\n"
-                + "	\"Tasks\": [\n"
-                + "		{\n"
-                + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
-                + "			\"taskingParameters\": {\n"
-                + "				\"todo\": \"yes\"\n"
-                + "			}\n"
-                + "		},\n"
-                + "		{\n"
-                + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
-                + "			\"taskingParameters\": {\n"
-                + "				\"todo\": \"no\"\n"
-                + "			}\n"
-                + "		}\n"
-                + "	]\n"
-                + "}";
-        return postContent;
+        return pathToString("src/test/resources/entitiesDefaultActuation.json");
+    }
+
+    private static String pathToString(String path) throws RuntimeException {
+        File file = new File(path);
+        try {
+            return FileUtils.readFileToString(file, "UTF-8");
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**

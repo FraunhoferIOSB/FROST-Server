@@ -15,6 +15,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,8 +111,8 @@ public class Expand implements Cloneable {
         try {
             // Can't use super.clone() since that would make the path of the
             // clone a reference to our path.
-            clone = getClass().newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
+            clone = getClass().getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             // should not happen
             throw new IllegalStateException(ex);
         }

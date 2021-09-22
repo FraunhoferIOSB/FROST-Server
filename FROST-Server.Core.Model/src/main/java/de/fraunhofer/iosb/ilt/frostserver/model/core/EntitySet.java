@@ -19,22 +19,22 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import java.util.Collection;
-import java.util.List;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 
 /**
  * Should be implemented by all collections of entities.
  *
  * @author jab
- * @param <T> Type of the collection items. Must implement Entity
  */
-public interface EntitySet<T extends Entity<T>> extends Collection<T>, NavigableElement<EntitySet<T>> {
+public interface EntitySet extends NavigableElement, Iterable<Entity> {
 
-    public List<T> asList();
+    public void add(Entity entity);
 
     public long getCount();
 
     public void setCount(long count);
+
+    public int size();
 
     public String getNextLink();
 
@@ -42,4 +42,13 @@ public interface EntitySet<T extends Entity<T>> extends Collection<T>, Navigable
 
     @JsonIgnore
     public EntityType getEntityType();
+
+    /**
+     * Get the navigationProperty that manages this EntitySet. Can be null, for
+     * top-level entity sets.
+     *
+     * @return the navigationProperty that manages this EntitySet.
+     */
+    @JsonIgnore
+    public NavigationPropertyEntitySet getNavigationProperty();
 }

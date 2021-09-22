@@ -18,13 +18,21 @@
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -32,35 +40,57 @@ import java.util.Objects;
  */
 public class Expand {
 
-    private NavigationProperty path;
+    private ModelRegistry modelRegistry;
+    private List<String> rawPath;
+    private NavigationProperty validatedPath;
     private Query parentQuery;
     private Query subQuery;
 
-    public Expand() {
+    public Expand(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
     }
 
-    public Expand(NavigationProperty path) {
+    public Expand(ModelRegistry modelRegistry, Query subQuery) {
+        this.modelRegistry = modelRegistry;
+        if (subQuery != null) {
+            setSubQuery(subQuery);
+        }
+    }
+
+    public Expand(ModelRegistry modelRegistry, NavigationProperty path) {
         if (path == null) {
             throw new IllegalArgumentException("path must be non-empty");
         }
-        this.path = path;
+        this.modelRegistry = modelRegistry;
+        this.validatedPath = path;
     }
 
-    public Expand(Query subQuery, NavigationProperty path) {
+    public Expand(ModelRegistry modelRegistry, Query subQuery, NavigationProperty path) {
         if (path == null) {
             throw new IllegalArgumentException("paths must be non-empty");
         }
-        this.subQuery = subQuery;
-        this.path = path;
-        this.subQuery.setParentExpand(this);
+        this.modelRegistry = modelRegistry;
+        this.validatedPath = path;
+        setSubQuery(subQuery);
     }
 
     public NavigationProperty getPath() {
-        return path;
+        return validatedPath;
     }
 
-    public void setPath(NavigationProperty path) {
-        this.path = path;
+    public void addToRawPath(String subPath) {
+        if (rawPath == null) {
+            rawPath = new ArrayList<>();
+        }
+        this.rawPath.add(subPath);
+    }
+
+    public List<String> getRawPath() {
+        if (rawPath == null) {
+            final String[] items = StringUtils.split(validatedPath.getName(), '/');
+            rawPath = Arrays.asList(items);
+        }
+        return rawPath;
     }
 
     public boolean hasSubQuery() {
@@ -69,13 +99,12 @@ public class Expand {
 
     public Query getSubQuery() {
         if (subQuery == null) {
-            subQuery = new Query(parentQuery.getSettings(), parentQuery.getPath()).validate();
-            subQuery.setParentExpand(this);
+            setSubQuery(new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath()).validate(validatedPath.getEntityType()));
         }
         return subQuery;
     }
 
-    public Expand setSubQuery(Query subQuery) {
+    public final Expand setSubQuery(Query subQuery) {
         this.subQuery = subQuery;
         this.subQuery.setParentExpand(this);
         return this;
@@ -102,17 +131,44 @@ public class Expand {
     }
 
     protected void validate(EntityType entityType) {
-        if (!path.validFor(entityType)) {
-            throw new IllegalArgumentException("Invalid expand path '" + path.getName() + "' on entity type " + entityType.entityName);
+        if (validatedPath == null) {
+            final String firstRawPath = rawPath.get(0);
+            final Property property = entityType.getProperty(firstRawPath);
+            final int rawCount = rawPath.size();
+            if (property instanceof NavigationPropertyMain) {
+                validatedPath = (NavigationPropertyMain) property;
+                if (rawCount > 1) {
+                    // Need to re-nest this expand!
+                    Expand subExpand = new Expand(modelRegistry, subQuery);
+                    for (int i = 1; i < rawCount; i++) {
+                        subExpand.addToRawPath(rawPath.get(i));
+                    }
+                    rawPath.clear();
+                    rawPath.add(firstRawPath);
+                    subQuery = new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath());
+                    subQuery.addExpand(subExpand);
+                    subQuery.setParentExpand(this);
+                }
+            } else if (property instanceof EntityPropertyMain && ((EntityPropertyMain) property).hasCustomProperties) {
+                EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
+                NavigationPropertyCustom tempPath = new NavigationPropertyCustom(modelRegistry, entityPropertyMain);
+                for (int i = 1; i < rawCount; i++) {
+                    tempPath.addToSubPath(rawPath.get(i));
+                }
+                validatedPath = tempPath;
+            } else {
+                throw new IllegalArgumentException("Invalid custom expand path '" + firstRawPath + "' on entity type " + entityType.entityName);
+            }
+
         }
-        if (subQuery != null && path instanceof NavigationPropertyMain) {
-            subQuery.validate(path.getType());
+        if (subQuery != null && validatedPath instanceof NavigationPropertyMain) {
+            subQuery.validate(validatedPath.getEntityType());
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, subQuery);
+        return Objects.hash(validatedPath, subQuery);
     }
 
     @Override
@@ -127,15 +183,19 @@ public class Expand {
             return false;
         }
         final Expand other = (Expand) obj;
-        return Objects.equals(this.path, other.path)
+        return Objects.equals(this.getRawPath(), other.getRawPath())
                 && Objects.equals(this.subQuery, other.subQuery);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(path.getName());
-        if (subQuery != null) {
+        if (validatedPath == null) {
+            sb.append(StringUtils.join(rawPath, "/"));
+        } else {
+            sb.append(validatedPath.getName());
+        }
+        if (subQuery != null && !subQuery.isEmpty()) {
             sb.append('(');
             sb.append(subQuery.toString(true));
             sb.append(')');

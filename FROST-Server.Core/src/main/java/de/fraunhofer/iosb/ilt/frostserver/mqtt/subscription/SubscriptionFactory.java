@@ -43,23 +43,8 @@ public class SubscriptionFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
     private static final String URI_PATH_SEP = "/";
 
-    private static SubscriptionFactory instance;
-
     private final CoreSettings settings;
     private final IdManager idManager;
-
-    public static synchronized void init(CoreSettings settings) {
-        if (instance == null) {
-            instance = new SubscriptionFactory(settings);
-        }
-    }
-
-    public static synchronized SubscriptionFactory getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("SubscriptionFactory is not initialized! Call init() before accessing the instance.");
-        }
-        return instance;
-    }
 
     private static String getPathFromTopic(String topic) {
         String pathString = topic.contains("?")
@@ -77,7 +62,7 @@ public class SubscriptionFactory {
                 : "";
     }
 
-    private SubscriptionFactory(CoreSettings settings) {
+    public SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
         this.idManager = PersistenceManagerFactory.getInstance(this.settings).getIdManager();
     }
@@ -129,7 +114,7 @@ public class SubscriptionFactory {
         ResourcePath result = null;
         try {
             String pathString = URLDecoder.decode(topic, StringHelper.UTF8.name());
-            result = PathParser.parsePath(idManager, serviceRootUrl, version, pathString);
+            result = PathParser.parsePath(settings.getModelRegistry(), idManager, serviceRootUrl, version, pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);
         } catch (NumberFormatException e) {

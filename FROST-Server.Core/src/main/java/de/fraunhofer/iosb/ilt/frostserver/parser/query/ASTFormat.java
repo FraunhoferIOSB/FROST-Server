@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-public class ASTFormat extends SimpleNode {
+public class ASTFormat extends ASTStringValueNode {
 
     public ASTFormat(int id) {
         super(id);
@@ -30,14 +30,6 @@ public class ASTFormat extends SimpleNode {
     @Override
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return (String) value;
     }
 
     @Override

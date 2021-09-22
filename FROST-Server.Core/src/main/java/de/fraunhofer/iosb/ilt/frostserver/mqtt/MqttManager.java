@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
@@ -34,7 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
@@ -42,7 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -62,10 +63,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
 
-    private static MqttManager instance;
-
-    private final Map<EntityType, SubscriptionManager> subscriptions = new EnumMap<>(EntityType.class);
+    private final Map<EntityType, SubscriptionManager> subscriptions = new HashMap<>();
     private final CoreSettings settings;
+    private final SubscriptionFactory subscriptionFactory;
 
     private MqttServer server;
     private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
@@ -82,41 +82,23 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private boolean enabledMqtt = false;
     private boolean shutdown = false;
 
-    public static synchronized void init(CoreSettings settings) {
-        if (instance == null) {
-            instance = new MqttManager(settings);
-        }
-    }
-
-    public static void shutdown() {
-        if (instance != null) {
-            instance.doShutdown();
-        }
-    }
-
-    public static MqttManager getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("MqttManager is not initialized! Call init() before accessing the instance.");
-        }
-        return instance;
-    }
-
-    private MqttManager(CoreSettings settings) {
+    public MqttManager(CoreSettings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("setting must be non-null");
         }
         this.settings = settings;
+        subscriptionFactory = new SubscriptionFactory(settings);
 
         init();
     }
 
     private void init() {
-        for (EntityType entityType : EntityType.values()) {
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
             subscriptions.put(entityType, new SubscriptionManager(entityType, this, topicCount));
         }
 
         MqttSettings mqttSettings = settings.getMqttSettings();
-        SubscriptionFactory.init(settings);
         if (mqttSettings.isEnableMqtt()) {
             enabledMqtt = true;
             shutdown = false;
@@ -156,7 +138,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
     }
 
-    private void doShutdown() {
+    public void shutdown() {
         shutdown = true;
         statusLogger.stop();
         ProcessorHelper.shutdownProcessors(entityChangedExecutorService, entityChangedEventQueue, 10, TimeUnit.SECONDS);
@@ -168,17 +150,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private void handleEntityChangedEvent(EntityChangedMessage message) {
         logStatus.setEntityChangedQueueSize(entityChangedQueueSize.decrementAndGet());
-        if (message.getEventType() == EntityChangedMessage.Type.DELETE) {
+        final EntityChangedMessage.Type eventType = message.getEventType();
+        EntityType entityType = message.getEntityType();
+        LOGGER.trace("Received a {} message for a {}.", eventType, entityType);
+        if (eventType == EntityChangedMessage.Type.DELETE) {
             // v1.0 does not do delete notification.
             return;
         }
         // check if there is any subscription, if not do not publish at all
-        EntityType entityType = message.getEntityType();
         if (!subscriptions.containsKey(entityType)) {
             return;
         }
 
-        Entity<?> entity = message.getEntity();
+        Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(settings).create()) {
             subscriptions.get(entityType).handleEntityChanged(persistenceManager, entity, fields);
@@ -188,23 +172,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     public void notifySubscription(Subscription subscription, Entity entity) {
+        final String topic = subscription.getTopic();
         try {
             String payload = subscription.formatMessage(entity);
-            server.publish(subscription.getTopic(), payload, settings.getMqttSettings().getQosLevel());
+            server.publish(topic, payload, settings.getMqttSettings().getQosLevel());
         } catch (IOException ex) {
-            LOGGER.error("publishing to MQTT on topic '{}' failed", subscription.getTopic(), ex);
+            LOGGER.error("publishing to MQTT on topic '{}' failed", topic, ex);
         }
     }
 
     private void handleEntityCreateEvent(EntityCreateEvent e) {
         logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
-        String topic = e.getTopic();
-        if (!topic.endsWith(EntityType.OBSERVATION.plural) && !topic.endsWith(EntityType.TASK.plural)) {
-            LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
-            return;
-        }
-
-        Version version;
+        final String topic = e.getTopic();
+        final Version version;
         try {
             version = getVersionFromTopic(topic);
         } catch (UnknownVersionException ex) {
@@ -212,18 +192,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
 
-        String url = topic.replaceFirst(version.urlPart, "");
+        final String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
-            ServiceResponse<? extends Entity> response = service.execute(new ServiceRequestBuilder(version)
-                    .withRequestType(RequestTypeUtils.CREATE)
-                    .withContent(e.getPayload())
-                    .withUrlPath(url)
-                    .build());
-            if (response.isSuccessful()) {
-                LOGGER.debug("Entity (ID {}) created via MQTT", response.getResult().getId().getValue());
-            } else {
+            final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
+            service.execute(
+                    new ServiceRequestBuilder(version)
+                            .withRequestType(RequestTypeUtils.CREATE)
+                            .withContent(e.getPayload())
+                            .withUrlPath(url)
+                            .build(),
+                    serviceResponse);
+            if (!serviceResponse.isSuccessful()) {
                 LOGGER.error("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                        topic, e.getPayload(), response.getCode(), response.getMessage());
+                        topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
             }
         }
     }
@@ -241,7 +222,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     @Override
     public void onSubscribe(SubscriptionEvent e) {
-        Subscription subscription = SubscriptionFactory.getInstance().get(e.getTopic());
+        Subscription subscription = subscriptionFactory.get(e.getTopic());
         if (subscription == null) {
             // Not a valid topic.
             return;
@@ -254,7 +235,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     @Override
     public void onUnsubscribe(SubscriptionEvent e) {
-        Subscription subscription = SubscriptionFactory.getInstance().get(e.getTopic());
+        Subscription subscription = subscriptionFactory.get(e.getTopic());
         if (subscription == null) {
             // Not a valid topic.
             return;
@@ -277,7 +258,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (entityCreateEventQueue.offer(e)) {
             logStatus.setEntityCreateQueueSize(entityCreateQueueSize.incrementAndGet());
         } else {
-            LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
+            LOGGER.warn("EntityCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
         }
     }
 

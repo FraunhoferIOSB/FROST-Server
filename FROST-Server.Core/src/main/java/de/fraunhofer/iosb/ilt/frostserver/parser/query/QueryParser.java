@@ -17,19 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -58,13 +53,15 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
+    private final ModelRegistry modelRegistry;
+    private final ExpressionParser expressionParser;
     private final ResourcePath path;
-    private final boolean customLinksEnabled;
 
     public QueryParser(CoreSettings settings, ResourcePath path) {
         this.settings = settings;
+        this.modelRegistry = settings.getModelRegistry();
+        this.expressionParser = new ExpressionParser();
         this.path = path;
-        customLinksEnabled = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
@@ -73,7 +70,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings, ResourcePath path) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings.getQueryDefaults(), path);
+            return new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
@@ -99,7 +96,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(settings.getQueryDefaults(), path);
+        Query result = new Query(modelRegistry, settings.getQueryDefaults(), path);
         node.childrenAccept(this, result);
         return result;
     }
@@ -138,7 +135,7 @@ public class QueryParser extends AbstractParserVisitor {
                 break;
 
             case OP_FILTER:
-                query.setFilter(ExpressionParser.parseExpression(node.jjtGetChild(0)));
+                query.setFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
                 break;
 
             case OP_FORMAT:
@@ -214,55 +211,23 @@ public class QueryParser extends AbstractParserVisitor {
     @Override
     public Expand visit(ASTFilteredPath node, Object data) {
         // ASTOptions is not another child but rather a child of last ASTPathElement
-        Expand resultExpand = new Expand();
-        Expand currentExpand = null;
-        int numChildren = node.jjtGetNumChildren();
-        int i = 0;
-        while (i < numChildren) {
-            currentExpand = prepareCurrentExpand(currentExpand, resultExpand);
-            i = handleChild(node, i, currentExpand, data);
-            i++;
-        }
+        Expand resultExpand = new Expand(modelRegistry);
+        handleChild(node, 0, resultExpand, data);
         return resultExpand;
     }
 
-    private Expand prepareCurrentExpand(Expand current, Expand result) {
-        if (current == null) {
-            return result;
-        } else {
-            Expand temp = new Expand();
-            if (!current.hasSubQuery()) {
-                current.setSubQuery(new Query(settings.getQueryDefaults(), path));
-            }
-            current.getSubQuery().addExpand(temp);
-            return temp;
-        }
-    }
-
-    private int handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
+    private void handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
         int idx = start;
         ASTPathElement childNode = getChildOfType(node, idx, ASTPathElement.class);
         String name = childNode.getName();
-        NavigationProperty property;
-        try {
-            property = NavigationPropertyMain.fromString(name);
-        } catch (IllegalArgumentException ex) {
-            EntityPropertyMain entityProp = EntityPropertyMain.fromString(name);
-            if (!entityProp.hasCustomProperties) {
-                throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
-            }
-            if (!customLinksEnabled) {
-                throw new IllegalArgumentException("Custom links not allowed.");
-            }
-            NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
-            int numChildren = node.jjtGetNumChildren();
-            while (++idx < numChildren) {
-                childNode = getChildOfType(node, idx, ASTPathElement.class);
-                customProperty.addToSubPath(childNode.getName());
-            }
-            property = customProperty;
+        currentExpand.addToRawPath(name);
+
+        int numChildren = node.jjtGetNumChildren();
+        while (++idx < numChildren) {
+            childNode = getChildOfType(node, idx, ASTPathElement.class);
+            currentExpand.addToRawPath(childNode.getName());
         }
-        currentExpand.setPath(property);
+
         // look at children of child
         if (childNode.jjtGetNumChildren() > 1) {
             throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
@@ -274,28 +239,26 @@ public class QueryParser extends AbstractParserVisitor {
             ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
             currentExpand.setSubQuery(visit(subChildNode, data));
         }
-        return idx;
     }
 
-    public List<Property> visit(ASTPlainPaths node, Query data) {
-        List<Property> result = new ArrayList<>();
+    public List<PropertyPlaceholder> visit(ASTPlainPaths node, Query data) {
+        List<PropertyPlaceholder> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             ASTPlainPath child = getChildOfType(node, i, ASTPlainPath.class);
-            Property property = visit(child, data);
-            result.add(property);
+            result.add(visit(child, data));
         }
         return result;
     }
 
     @Override
-    public Property visit(ASTPlainPath node, Object data) {
+    public PropertyPlaceholder visit(ASTPlainPath node, Object data) {
         int childCount = node.jjtGetNumChildren();
         if (childCount == 1) {
             ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
             return visit(child, data);
         } else {
             ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
-            EntityPropertyCustomSelect property = new EntityPropertyCustomSelect(EntityPropertyMain.fromString(StringHelper.urlDecode(child.getName())));
+            PropertyPlaceholder property = new PropertyPlaceholder(StringHelper.urlDecode(child.getName()));
             for (int idx = 1; idx < childCount; idx++) {
                 child = getChildOfType(node, idx, ASTPathElement.class);
                 property.addToSubPath(child.getName());
@@ -305,15 +268,11 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     @Override
-    public Property visit(ASTPathElement node, Object data) {
+    public PropertyPlaceholder visit(ASTPathElement node, Object data) {
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside select");
         }
-        Property previous = null;
-        if (data instanceof Property) {
-            previous = (Property) data;
-        }
-        return ParserHelper.parseProperty(node.getName(), previous);
+        return new PropertyPlaceholder(node.getName());
     }
 
     @Override
@@ -332,7 +291,7 @@ public class QueryParser extends AbstractParserVisitor {
             throw new IllegalArgumentException("ASTOrderBy node must have exactly one child");
         }
         return new OrderBy(
-                ExpressionParser.parseExpression(node.jjtGetChild(0)),
+                expressionParser.parseExpression(node.jjtGetChild(0)),
                 node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
     }
 

@@ -17,127 +17,85 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
-import org.jooq.Record;
-import org.jooq.TableField;
+import org.jooq.DSLContext;
+import org.jooq.Field;
 
 /**
- * A relation from a source table to a target table.
+ * A relation from a source table to a target table using a link table ordered
+ * by a long value.
  *
  * @author hylke
- * @param <J>
+ * @param <J> The type of the identifiers used in the database.
  * @param <S> The source table.
  * @param <L> The link table linking source and target entities.
- * @param <K> The type of the order Field.
  * @param <T> The target table.
  */
-public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, ?, S>, L extends StaTable<J, L>, K, T extends StaMainTable<J, ?, T>> implements Relation<J> {
+public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> extends RelationManyToMany<J, S, L, T> {
 
     /**
-     * The target entity type of the relation.
+     * The field used for the ordering.
      */
-    private final EntityType targetType;
-    /**
-     * The name of the relation. For official relations, this is the (singular)
-     * entity type name.
-     */
-    private final String name;
-    /**
-     * The table that is the source side of the relation.
-     */
-    private final S source;
+    private FieldAccessor<Integer, L> orderFieldAcc;
+    private boolean alwaysDistinct = false;
 
-    /**
-     * The field on the source side that defines the relation.
-     */
-    private FieldAccessor<J, S> sourceFieldAcc;
-
-    private final L linkTable;
-    private FieldAccessor<J, L> sourceLinkFieldAcc;
-    private FieldAccessor<J, L> targetLinkFieldAcc;
-    private FieldAccessor<K, L> orderFieldAcc;
-
-    /**
-     * The table that is the target side of the relation.
-     */
-    private final T target;
-
-    /**
-     * The field on the target side that defines the relation.
-     */
-    private FieldAccessor<J, T> targetFieldAcc;
-
-    public RelationManyToManyOrdered(
-            S source,
-            L linkTable,
-            T target,
-            EntityType targetType) {
-        this.source = source;
-        this.linkTable = linkTable;
-        this.target = target;
-        this.targetType = targetType;
-        this.name = targetType.entityName;
+    public RelationManyToManyOrdered(NavigationPropertyMain navProp, S source, L linkTable, T target) {
+        super(navProp, source, linkTable, target);
     }
 
-    public RelationManyToManyOrdered<J, S, L, K, T> setSourceFieldAcc(FieldAccessor<J, S> sourceFieldAcc) {
-        this.sourceFieldAcc = sourceFieldAcc;
-        return this;
-    }
-
-    public RelationManyToManyOrdered<J, S, L, K, T> setSourceLinkFieldAcc(FieldAccessor<J, L> sourceLinkFieldAcc) {
-        this.sourceLinkFieldAcc = sourceLinkFieldAcc;
-        return this;
-    }
-
-    public RelationManyToManyOrdered<J, S, L, K, T> setTargetLinkFieldAcc(FieldAccessor<J, L> targetLinkFieldAcc) {
-        this.targetLinkFieldAcc = targetLinkFieldAcc;
-        return this;
-    }
-
-    public RelationManyToManyOrdered<J, S, L, K, T> setTargetFieldAcc(FieldAccessor<J, T> targetFieldAcc) {
-        this.targetFieldAcc = targetFieldAcc;
-        return this;
-    }
-
-    public RelationManyToManyOrdered<J, S, L, K, T> setOrderFieldAcc(FieldAccessor<K, L> orderFieldAcc) {
+    public RelationManyToManyOrdered<J, S, L, T> setOrderFieldAcc(FieldAccessor<Integer, L> orderFieldAcc) {
         this.orderFieldAcc = orderFieldAcc;
         return this;
     }
 
-    @Override
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
-        T targetAliased = (T) target.as(queryState.getNextAlias());
-        L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
-        TableField<Record, J> sourceField = sourceFieldAcc.getField(source);
-        TableField<Record, J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetField = targetFieldAcc.getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
-        if (queryState.isFilter()) {
-            queryState.setDistinctRequired(true);
-        } else {
-            TableField<Record, K> orderField = orderFieldAcc.getField(linkTableAliased);
-            queryState.getSqlSortFields().add(orderField, OrderBy.OrderType.ASCENDING);
-        }
-        return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+    public RelationManyToManyOrdered<J, S, L, T> setAlwaysDistinct(boolean alwaysDistinct) {
+        this.alwaysDistinct = alwaysDistinct;
+        return this;
     }
 
-    /**
-     * The name of the relation. For official relations, this is the (singular)
-     * entity type name.
-     *
-     * @return the name
-     */
     @Override
-    public String getName() {
-        return name;
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+        T targetAliased = (T) getTarget().as(queryState.getNextAlias());
+        L linkTableAliased = (L) getLinkTable().as(queryState.getNextAlias());
+        Field<J> sourceField = getSourceFieldAcc().getField(source);
+        Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
+        Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
+        Field<J> targetField = getTargetFieldAcc().getField(targetAliased);
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
+        if (alwaysDistinct || queryState.isFilter()) {
+            queryState.setDistinctRequired(true);
+        } else {
+            Field<Integer> orderField = orderFieldAcc.getField(linkTableAliased);
+            queryState.getSqlSortFields().add(orderField, OrderBy.OrderType.ASCENDING);
+        }
+        return QueryBuilder.createJoinedRef(sourceRef, getTargetType(), targetAliased);
+    }
+
+    @Override
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+        final DSLContext dslContext = pm.getDslContext();
+        final L linkTable = getLinkTable();
+        final Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
+        final Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
+        final Field<Integer> orderField = orderFieldAcc.getField(linkTable);
+        dslContext.insertInto(linkTable)
+                .set(sourceLinkField, sourceId)
+                .set(targetLinkField, targetId)
+                .set(
+                        orderField,
+                        dslContext.selectCount()
+                                .from(linkTable)
+                                .where(sourceLinkField.equal(sourceId))
+                )
+                .execute();
     }
 
 }

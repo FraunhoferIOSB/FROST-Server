@@ -18,25 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.geojson.LngLatAlt;
-import org.geojson.Point;
-import org.geojson.Polygon;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,129 +40,38 @@ public class EntityBuilderTest {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityBuilderTest.class);
-    private final Map<Property, Object> propertyValues = new HashMap<>();
-    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+
+    private static ModelRegistry modelRegistry;
+    private static TestModel testModel;
+
+    private Map<EntityType, Map<Property, Object>> propertyValues;
+
+    @BeforeClass
+    public static void beforeClass() {
+        modelRegistry = new ModelRegistry();
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
+        modelRegistry.initFinalise();
+    }
 
     @Before
     public void setUp() {
-        propertyValues.put(EntityPropertyMain.CREATIONTIME, TimeInstant.now());
-        propertyValues.put(EntityPropertyMain.DEFINITION, "MyDefinition");
-        propertyValues.put(EntityPropertyMain.DESCRIPTION, "My description");
-        propertyValues.put(EntityPropertyMain.ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(EntityPropertyMain.FEATURE, new Point(8, 42));
-        propertyValues.put(EntityPropertyMain.ID, new IdLong(1));
-        propertyValues.put(EntityPropertyMain.LOCATION, new Point(9, 43));
-        propertyValues.put(EntityPropertyMain.METADATA, "my meta data");
-        propertyValues.put(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, Arrays.asList("Type 1", "Type 2"));
-        propertyValues.put(EntityPropertyMain.NAME, "myName");
-        propertyValues.put(EntityPropertyMain.OBSERVATIONTYPE, "my Type");
-        propertyValues.put(EntityPropertyMain.OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("key1", "value1");
-        parameters.put("key2", 2);
-        propertyValues.put(EntityPropertyMain.PARAMETERS, parameters);
-        propertyValues.put(EntityPropertyMain.PHENOMENONTIME, TimeInstant.now());
-        propertyValuesAlternative.put(EntityPropertyMain.PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(EntityPropertyMain.PROPERTIES, parameters);
-        propertyValues.put(EntityPropertyMain.RESULT, 42);
-        propertyValues.put(EntityPropertyMain.RESULTQUALITY, "myQuality");
-        propertyValues.put(EntityPropertyMain.RESULTTIME, TimeInstant.now());
-        propertyValuesAlternative.put(EntityPropertyMain.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(EntityPropertyMain.SELFLINK, "http://my.self/link");
-        propertyValues.put(EntityPropertyMain.TASKINGPARAMETERS, parameters);
-        propertyValues.put(EntityPropertyMain.TIME, TimeInstant.now());
-        UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(EntityPropertyMain.UNITOFMEASUREMENT, unit1);
-        propertyValues.put(EntityPropertyMain.UNITOFMEASUREMENTS, Arrays.asList(unit1, unit2));
-        propertyValues.put(EntityPropertyMain.VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
-
-        for (EntityPropertyMain ep : EntityPropertyMain.values()) {
-            Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
-        }
-
-        int nextId = 100;
-        propertyValues.put(NavigationPropertyMain.ACTUATOR, new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.DATASTREAM, new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.LOCATION, new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.SENSOR, new Sensor(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASK, new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.THING, new Thing(new IdLong(nextId++)));
-
-        EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
-        actuators.add(new Actuator(new IdLong(nextId++)));
-        actuators.add(new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.ACTUATORS, actuators);
-
-        EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
-        datastreams.add(new Datastream(new IdLong(nextId++)));
-        datastreams.add(new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.DATASTREAMS, datastreams);
-
-        EntitySetImpl<HistoricalLocation> histLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.HISTORICALLOCATIONS, histLocations);
-
-        EntitySetImpl<Location> locations = new EntitySetImpl<>(EntityType.LOCATION);
-        locations.add(new Location(new IdLong(nextId++)));
-        locations.add(new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.LOCATIONS, locations);
-
-        EntitySetImpl<MultiDatastream> multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAMS, multiDatastreams);
-
-        EntitySetImpl<Observation> observations = new EntitySetImpl<>(EntityType.OBSERVATION);
-        observations.add(new Observation(new IdLong(nextId++)));
-        observations.add(new Observation(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.OBSERVATIONS, observations);
-
-        EntitySetImpl<ObservedProperty> obsProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTIES, obsProperties);
-
-        EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
-        tasks.add(new Task(new IdLong(nextId++)));
-        tasks.add(new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASKS, tasks);
-
-        EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITIES, taskingCapabilities);
-
-        EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
-        things.add(new Thing(new IdLong(nextId++)));
-        things.add(new Thing(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.THINGS, things);
-
-        for (NavigationPropertyMain np : NavigationPropertyMain.values()) {
-            Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
-        }
-
+        propertyValues = testModel.getTestPropertyValues(modelRegistry);
     }
 
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        for (EntityType type : EntityType.values()) {
+        for (EntityType type : modelRegistry.getEntityTypes()) {
             testEntityType(type, type.getPropertySet());
         }
     }
 
     private void testEntityType(EntityType type, Set<Property> collectedProperties) {
-        String pName = "";
+        String pName;
         try {
-            Class<? extends Entity> typeClass = type.getImplementingClass();
 
-            Entity entity = typeClass.getDeclaredConstructor().newInstance();
-            Entity entity2 = typeClass.getDeclaredConstructor().newInstance();
+            Entity entity = new DefaultEntity(type);
+            Entity entity2 = new DefaultEntity(type);
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
@@ -184,28 +82,21 @@ public class EntityBuilderTest {
 
                 getPropertyFromObject(entity, p);
             }
-        } catch (IllegalAccessException | NoSuchMethodException ex) {
-            LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property " + pName + " on entity of type " + type);
-        } catch (InstantiationException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (IllegalArgumentException ex) {
             LOGGER.error("Failed create entity.", ex);
             Assert.fail("Failed create entity: " + ex.getMessage());
         }
     }
 
-    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
-        try {
-            addPropertyToObject(entity, property, propertyValues);
-        } catch (IllegalArgumentException ex) {
-            addPropertyToObject(entity, property, propertyValuesAlternative);
-        }
+    private void addPropertyToObject(Entity entity, Property property) {
+        addPropertyToObject(entity, property, propertyValues.get(entity.getEntityType()));
     }
 
-    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) {
         Object value = valuesToUse.get(property);
         try {
             property.setOn(entity, value);
-        } catch (NullPointerException | SecurityException ex) {
+        } catch (NullPointerException ex) {
             LOGGER.error("Failed to set property " + property, ex);
             Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
         }
@@ -216,11 +107,10 @@ public class EntityBuilderTest {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
                 Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
-            Object value = propertyValues.get(property);
-            Object value2 = propertyValuesAlternative.get(property);
+            Object value = propertyValues.get(entity.getEntityType()).get(property);
             Object setValue = property.getFrom(entity);
 
-            if (!(Objects.equals(value, setValue) || Objects.equals(value2, setValue))) {
+            if (!Objects.equals(value, setValue)) {
                 Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {

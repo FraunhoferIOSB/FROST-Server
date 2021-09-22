@@ -19,15 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.List;
 
@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author jab
  */
-public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
+public interface PersistenceManager extends AutoCloseable {
 
     /**
      * Get an IdManager that can be used to parse Ids.
@@ -120,7 +120,6 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
      *
      * @param settings The settigns to use.
      */
-    @Override
     public void init(CoreSettings settings);
 
     /**
@@ -147,4 +146,7 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
         close();
     }
 
+    public default void addModelMapping(DefModel modelDefinition) {
+        // Optional method.
+    }
 }

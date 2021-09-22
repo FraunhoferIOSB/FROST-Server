@@ -20,8 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +46,30 @@ import org.junit.Test;
  */
 public class EntityFormatterTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+    private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
+    private static PluginMultiDatastream pluginMultiDatastream;
+    private static EntityType etMultiDatastream;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
+            modelRegistry = coreSettings.getModelRegistry();
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            pluginCoreModel = new PluginCoreModel();
+            pluginCoreModel.init(coreSettings);
+            pluginMultiDatastream = new PluginMultiDatastream();
+            pluginMultiDatastream.init(coreSettings);
+            coreSettings.getPluginManager().initPlugins(null);
+            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+        }
+    }
+
     @BeforeClass
     public static void setUp() {
         PluginResultFormatDataArray.modifyEntityFormatter();
@@ -53,21 +84,21 @@ public class EntityFormatterTest {
         components.add("phenomenonTime");
         components.add("result");
 
-        Datastream ds1 = new Datastream().setSelfLink("navLinkHere");
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
-        Datastream ds2 = new Datastream().setSelfLink("navLinkHere");
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        MultiDatastream mds1 = new MultiDatastream().setSelfLink("navLinkHere");
+        Entity mds1 = new DefaultEntity(etMultiDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
 

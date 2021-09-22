@@ -1,10 +1,12 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
+import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
@@ -54,8 +56,9 @@ public class Capability1Tests extends AbstractTestClass {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
+        EntityUtils.deleteAll(version, serverSettings, service);
     }
 
     /**
@@ -66,6 +69,7 @@ public class Capability1Tests extends AbstractTestClass {
     @Test
     public void readEntitiesAndCheckResponse() {
         LOGGER.info("  readEntitiesAndCheckResponse");
+        Assert.assertTrue("Actuation entities not registered.", serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ));
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = getEntities(entityType);
             checkEntitiesAllAspectsForResponse(entityType, response);
@@ -124,7 +128,7 @@ public class Capability1Tests extends AbstractTestClass {
                 checkGetPropertyValueOfEntity(entityType, id, property);
             }
         } catch (JSONException e) {
-            LOGGER.error("Exception:", e);
+            LOGGER.error("Exception handling " + entityType, e);
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
@@ -449,7 +453,7 @@ public class Capability1Tests extends AbstractTestClass {
 
         if (entityType != null) {
             message = "The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.";
-            Assert.assertTrue(message, response.contains("value"));
+            Assert.assertTrue(message, response.contains("\"value\""));
         } else { // GET Service Base URI
             message = "The GET entities response for service root URI does not match SensorThings API : missing \"value\" in response.";
             Assert.assertTrue(message, response.contains("value"));

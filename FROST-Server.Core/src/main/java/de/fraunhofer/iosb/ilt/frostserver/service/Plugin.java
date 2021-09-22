@@ -31,5 +31,17 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
  */
 public interface Plugin {
 
+    /**
+     * Initialise the plugin using settings from the given CoreSettings.
+     *
+     * @param settings The settings to use.
+     */
     public void init(CoreSettings settings);
+
+    /**
+     * Check if this plugin is enabled.
+     *
+     * @return true if this plugin is enabled.
+     */
+    public boolean isEnabled();
 }

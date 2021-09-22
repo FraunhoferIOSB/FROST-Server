@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -27,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.Writer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.LoggerFactory;
@@ -69,21 +70,21 @@ public class ResultFormatterCsv implements ResultFormatter {
     }
 
     @Override
-    public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
         CsvElementSet elementSet = new CsvElementSet("");
         elementSet.initFrom(type, query);
 
-        StringWriter writer = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180)) {
-            CsvRowCollector rowCollector = new CsvRowCollector(printer);
-            elementSet.writeHeader(rowCollector);
-            rowCollector.flush();
-            elementSet.writeData(rowCollector, result);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to generate CSV String.", ex);
-        }
-        return writer.toString();
+        return (Writer writer) -> {
+            try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180)) {
+                CsvRowCollector rowCollector = new CsvRowCollector(printer);
+                elementSet.writeHeader(rowCollector);
+                rowCollector.flush();
+                elementSet.writeData(rowCollector, result);
+            } catch (IOException ex) {
+                LOGGER.error("Failed to generate CSV String.", ex);
+            }
+        };
     }
 
     @Override

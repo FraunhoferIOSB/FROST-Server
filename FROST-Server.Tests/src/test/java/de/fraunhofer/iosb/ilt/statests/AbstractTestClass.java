@@ -57,16 +57,19 @@ public abstract class AbstractTestClass {
      */
     protected static SensorThingsService service;
 
+    private static final Properties defaultProperties = new Properties();
+
+    static {
+        defaultProperties.put("plugins.actuation.enable", "true");
+        defaultProperties.put("plugins.multiDatastream.enable", "true");
+    }
+
     public AbstractTestClass(ServerVersion serverVersion) {
-        init(serverVersion);
+        init(serverVersion, defaultProperties);
     }
 
     public AbstractTestClass(ServerVersion serverVersion, Properties properties) {
         init(serverVersion, properties);
-    }
-
-    private void init(ServerVersion serverVersion) {
-        init(serverVersion, null);
     }
 
     private void init(ServerVersion serverVersion, Properties properties) {

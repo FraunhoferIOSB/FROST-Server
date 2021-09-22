@@ -51,7 +51,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Capability8Tests extends AbstractTestClass {
 
     /**
@@ -92,7 +95,7 @@ public class Capability8Tests extends AbstractTestClass {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-        entityHelper = new EntityHelper(serverSettings.getServiceUrl(version));
+        entityHelper = new EntityHelper(version, serverSettings);
         mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOut());
     }
 
@@ -118,7 +121,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetInsert() {
+    public void check01SubscribeToEntitySetInsert() {
         LOGGER.info("  checkSubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -149,7 +152,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetUpdatePATCH() {
+    public void check02SubscribeToEntitySetUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -157,14 +160,14 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
     }
 
     @Test
-    public void checkSubscribeToEntitySetUpdatePUT() {
+    public void check03SubscribeToEntitySetUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -172,21 +175,21 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectInsert() {
+    public void check04SubscribeToEntitySetWithMultipleSelectInsert() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
 
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribeSelectInsert(entityType, selectedProperties);
@@ -196,7 +199,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
+    public void check05SubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -204,7 +207,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePatch(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -213,7 +216,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectUpdatePUT() {
+    public void check06SubscribeToEntitySetWithMultipleSelectUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -221,7 +224,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePut(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -230,7 +233,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithRelativeTopicUpdatePUT() {
+    public void check07SubscribeToEntitySetWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -238,7 +241,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntitySet(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -261,7 +264,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetsWithDeepInsert() {
+    public void check08SubscribeToEntitySetsWithDeepInsert() {
         LOGGER.info("  checkSubscribeToEntitySetsWithDeepInsert");
         deleteCreatedEntities();
 
@@ -269,7 +272,7 @@ public class Capability8Tests extends AbstractTestClass {
             // Give the server a second to send out all the messages created by the setup or previous call.
             waitMillis(WAIT_AFTER_CLEANUP);
 
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             DeepInsertInfo deepInsertInfo = entityHelper.getDeepInsertInfo(entityType);
             List<String> topics = new ArrayList<>(deepInsertInfo.getSubEntityTypes().size() + 1);
             topics.add(mqttHelper.getTopic(deepInsertInfo.getEntityType()));
@@ -299,7 +302,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntityUpdatePATCH() {
+    public void check09SubscribeToEntityUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntityUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -307,14 +310,14 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
 
     @Test
-    public void checkSubscribeToEntityUpdatePUT() {
+    public void check10SubscribeToEntityUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -322,14 +325,14 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
 
     @Test
-    public void checkSubscribeToEntityWithRelativeTopicUpdatePUT() {
+    public void check11SubscribeToEntityWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -337,7 +340,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntity(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -352,7 +355,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToPropertyUpdatePATCH() {
+    public void check12SubscribeToPropertyUpdatePATCH() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -360,7 +363,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);
@@ -381,7 +384,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToPropertyUpdatePUT() {
+    public void check13SubscribeToPropertyUpdatePUT() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -389,7 +392,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);
@@ -410,7 +413,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToHistoricalLocationSetUpdateThingLocations() {
+    public void check14SubscribeToHistoricalLocationSetUpdateThingLocations() {
         LOGGER.info("  checkSubscribeToHistoricalLocationSetUpdateThingLocations");
         deleteCreatedEntities();
         createEntities();

@@ -1,5 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
@@ -35,9 +37,11 @@ public class BatchTests extends AbstractTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchTests.class);
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<ObservedProperty> OBSERVED_PROPS = new ArrayList<>();
+    private ObjectMapper mapper;
 
     public BatchTests(ServerVersion version) {
         super(version);
+        mapper = new ObjectMapper();
     }
 
     @Override
@@ -62,7 +66,7 @@ public class BatchTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         OBSERVED_PROPS.clear();
     }
@@ -94,8 +98,7 @@ public class BatchTests extends AbstractTestClass {
                 "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl()
-                + ")?$select=name HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -126,7 +129,7 @@ public class BatchTests extends AbstractTestClass {
                 + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(null) HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(-9999) HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -168,7 +171,7 @@ public class BatchTests extends AbstractTestClass {
                 + "\n"
                 + "http/1.1 404 no text\n"
                 + "\n"
-                + "{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}\n"
+                + "{\"code\":404,\"type\":\"error\",\"message\":\"Nothing found.\"}\n"
                 + batchBoundary + "--", response);
     }
 
@@ -375,36 +378,45 @@ public class BatchTests extends AbstractTestClass {
         LOGGER.info("  test06JsonBatchRequest");
         String response = postBatch(null,
                 "{\"requests\":[{"
-                        + "\"id\": \"0\","
-                        + "\"method\": \"get\","
-                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
-                        + ")?$select=name\""
-                        + "},{"
-                        + "\"id\": \"1\","
-                        + "\"atomicityGroup\": \"group1\","
-                        + "\"method\": \"post\","
-                        + "\"url\": \"Things\","
-                        + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
-                        + "},{"
-                        + "\"id\": \"2\","
-                        + "\"atomicityGroup\": \"group1\","
-                        + "\"method\": \"patch\","
-                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
-                        + "\"body\": {\"name\":\"Json Patched\"}"
-                        + "},{"
-                        + "\"id\": \"3\","
-                        + "\"method\": \"get\","
-                        + "\"url\": \"Things(null)\""
-                        + "}]}");
+                + "\"id\": \"0\","
+                + "\"method\": \"get\","
+                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
+                + ")?$select=name\""
+                + "},{"
+                + "\"id\": \"1\","
+                + "\"atomicityGroup\": \"group1\","
+                + "\"method\": \"post\","
+                + "\"url\": \"Things\","
+                + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
+                + "},{"
+                + "\"id\": \"2\","
+                + "\"atomicityGroup\": \"group1\","
+                + "\"method\": \"patch\","
+                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
+                + "\"body\": {\"name\":\"Json Patched\"}"
+                + "},{"
+                + "\"id\": \"3\","
+                + "\"method\": \"get\","
+                + "\"url\": \"Things(null)\""
+                + "}]}");
         String thingId = getLastestEntityIdForPath(EntityType.THING);
 
-        Assert.assertEquals("{\"responses\":["
-                + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
-                + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
-                + thingId + ")\"},"
-                + "{\"id\":\"2\",\"status\":200},"
-                + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
-                + "]}", response);
+        try {
+            BatchResponseJson expected = mapper.readValue(
+                    "{\"responses\":["
+                    + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
+                    + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
+                    + thingId + ")\"},"
+                    + "{\"id\":\"2\",\"status\":200},"
+                    + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
+                    + "]}",
+                    BatchResponseJson.class);
+            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+            Assert.assertEquals("Response not as expected.", expected, actual);
+        } catch (JsonProcessingException ex) {
+            Assert.fail("Failed to parse response as json.");
+        }
+
     }
 
     @Test
@@ -430,28 +442,36 @@ public class BatchTests extends AbstractTestClass {
                 + "}";
         String response = postBatch(null,
                 "{\"requests\":[{"
-                        + "\"id\": \"sensor1\","
-                        + "\"atomicityGroup\": \"group1\","
-                        + "\"method\": \"post\","
-                        + "\"url\": \"Sensors\","
-                        + "\"body\":"
-                        + post1
-                        + "},{"
-                        + "\"id\": \"any\","
-                        + "\"atomicityGroup\": \"group1\","
-                        + "\"method\": \"post\","
-                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
-                        + "\"body\":"
-                        + post2
-                        + "}]}");
+                + "\"id\": \"sensor1\","
+                + "\"atomicityGroup\": \"group1\","
+                + "\"method\": \"post\","
+                + "\"url\": \"Sensors\","
+                + "\"body\":"
+                + post1
+                + "},{"
+                + "\"id\": \"any\","
+                + "\"atomicityGroup\": \"group1\","
+                + "\"method\": \"post\","
+                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
+                + "\"body\":"
+                + post2
+                + "}]}");
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
-        Assert.assertEquals("{\"responses\":["
-                + "{\"id\":\"sensor1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                + "/Sensors(" + sensorId + ")\"},"
-                + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                + "/Datastreams(" + datastreamId + ")\"}"
-                + "]}", response);
+
+        try {
+            BatchResponseJson expected = mapper.readValue("{\"responses\":["
+                    + "{\"id\":\"sensor1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                    + "/Sensors(" + sensorId + ")\"},"
+                    + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                    + "/Datastreams(" + datastreamId + ")\"}"
+                    + "]}", BatchResponseJson.class);
+            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+            Assert.assertEquals("Response not as expected.", expected, actual);
+        } catch (JsonProcessingException ex) {
+            Assert.fail("Failed to parse response as json.");
+        }
+
     }
 
     private String postBatch(String boundary, String body) {
@@ -469,7 +489,7 @@ public class BatchTests extends AbstractTestClass {
     }
 
     private String getLastestEntityIdForPath(EntityType entityType) {
-        EntityHelper entityHelper = new EntityHelper(serverSettings.getServiceUrl(version));
+        EntityHelper entityHelper = new EntityHelper(version, serverSettings);
         Object id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
         if (id instanceof Number) {
             return id.toString();

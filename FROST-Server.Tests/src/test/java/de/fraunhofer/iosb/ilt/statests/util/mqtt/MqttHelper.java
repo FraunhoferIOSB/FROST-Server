@@ -98,7 +98,7 @@ public class MqttHelper {
             client.connect(connOpts);
             client.publish(topic, message.getBytes(), qos, retained);
         } catch (MqttException ex) {
-            LOGGER.error("Exception:", ex);
+            LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             Assert.fail("error publishing message on MQTT: " + ex.getMessage());
         } finally {
             if (client != null) {
@@ -129,7 +129,7 @@ public class MqttHelper {
                 LOGGER.debug("  Calling action...");
                 result.setActionResult(action.call());
             } catch (Exception ex) {
-                LOGGER.error("Exception:", ex);
+                LOGGER.error("Exception on server {} :", mqttServerUri, ex);
                 Assert.fail("Topics: " + Arrays.toString(topics) + " Error executing : " + ex.getMessage());
             }
             executor.shutdown();
@@ -140,7 +140,7 @@ public class MqttHelper {
                 result.addMessage(entry.getKey(), entry.getValue().get());
             }
         } catch (InterruptedException | ExecutionException ex) {
-            LOGGER.error("Exception:", ex);
+            LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             Assert.fail("Topics: " + Arrays.toString(topics) + " Error subscribing to MQTT: " + ex.getMessage());
         } finally {
             executor.shutdownNow();

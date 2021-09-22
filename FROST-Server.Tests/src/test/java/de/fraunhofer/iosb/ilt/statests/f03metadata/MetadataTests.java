@@ -16,8 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f03metadata;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -57,11 +57,9 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
-
+ *
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MetadataTests extends AbstractTestClass {
@@ -104,7 +102,7 @@ public class MetadataTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         FEATURES.clear();
         LOCATIONS.clear();
@@ -231,17 +229,25 @@ public class MetadataTests extends AbstractTestClass {
         HttpResponse result = getEntity(metadata);
         assertEquals(200, result.code);
         JSONObject thing = new JSONObject(result.response);
-        assertEquals(metadata + " metadata navigationLink", hasNavigationLink,
+        assertEquals(
+                metadata + " metadata navigationLink",
+                hasNavigationLink,
                 thing.getJSONObject("properties").has("parent.Thing@iot.navigationLink"));
         if (hasNavigationLink) {
-            assertEquals(metadata + " metadata navigationLink expected", generateSelfLink(0),
+            assertEquals(
+                    metadata + " metadata navigationLink expected",
+                    generateSelfLink(0),
                     thing.getJSONObject("properties").get("parent.Thing@iot.navigationLink"));
         }
     }
 
     private HttpResponse getEntity(String metadata) {
-        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING,
-                THINGS.get(1).getId().getValue(), null, "?$resultMetadata=" + metadata);
+        String urlString = ServiceUrlHelper.buildURLString(
+                serverSettings.getServiceUrl(version),
+                EntityType.THING,
+                THINGS.get(1).getId().getValue(),
+                null,
+                "?$resultMetadata=" + metadata);
         HttpResponse result = HTTPMethods.doGet(urlString);
         return result;
     }
@@ -258,7 +264,7 @@ public class MetadataTests extends AbstractTestClass {
     private void testMetadataInExpand(String metadata, boolean hasSelfLink, boolean hasNavigationLink) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING,
                 null, null, "?$filter=id%20eq%20" + THINGS.get(1).getId().getUrl()
-                        + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata);
+                + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata);
         HttpResponse result = HTTPMethods.doGet(urlString);
         assertEquals(200, result.code);
         JSONObject response = new JSONObject(result.response);
@@ -281,11 +287,13 @@ public class MetadataTests extends AbstractTestClass {
     }
 
     private String generateSelfLink(int thingIndex) {
-        return UrlHelper.generateSelfLink(null,
-                getServerSettings().getServiceRootUrl(),
-                Version.forString(version.urlPart),
-                de.fraunhofer.iosb.ilt.frostserver.model.EntityType.THING,
-                THINGS.get(thingIndex).getId().getValue());
+        return new StringBuilder(getServerSettings().getServiceRootUrl())
+                .append('/')
+                .append(version.urlPart)
+                .append("/Things(")
+                .append(THINGS.get(thingIndex).getId().getUrl())
+                .append(')')
+                .toString();
     }
 
     @Test
@@ -387,7 +395,7 @@ public class MetadataTests extends AbstractTestClass {
             }
 
             if (hasLinks) {
-                Id<?> obsId = idFromPostResult(textValue);
+                Id obsId = idFromPostResult(textValue);
                 Observation obs;
                 try {
                     obs = service.observations().find(obsId);
@@ -417,7 +425,7 @@ public class MetadataTests extends AbstractTestClass {
         }
     }
 
-    private Id<?> idFromPostResult(String postResultLine) {
+    private Id idFromPostResult(String postResultLine) {
         int pos1 = postResultLine.lastIndexOf("(") + 1;
         int pos2 = postResultLine.lastIndexOf(")");
         String part = postResultLine.substring(pos1, pos2);

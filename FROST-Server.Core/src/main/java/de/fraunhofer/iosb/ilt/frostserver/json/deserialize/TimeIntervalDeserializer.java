@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import java.io.IOException;
@@ -37,7 +36,7 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
 
     @Override
     public TimeInterval deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        return TimeInterval.parse(((JsonNode) jp.getCodec().readTree(jp)).asText());
+        return TimeInterval.parse(jp.getValueAsString());
     }
 
 }

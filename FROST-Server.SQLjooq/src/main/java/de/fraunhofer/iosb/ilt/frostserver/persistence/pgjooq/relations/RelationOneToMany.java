@@ -18,12 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import org.jooq.Record;
-import org.jooq.TableField;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import org.jooq.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table.
@@ -33,8 +36,9 @@ import org.jooq.TableField;
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
+public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J, S> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationOneToMany.class.getName());
     /**
      * The target entity type of the relation.
      */
@@ -44,10 +48,6 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?
      * entity type name.
      */
     private final String name;
-    /**
-     * The table that is the source side of the relation.
-     */
-    private final S source;
 
     /**
      * The field on the source side that defines the relation.
@@ -70,19 +70,18 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?
      */
     private final boolean distinctRequired;
 
-    public RelationOneToMany(S source, T target, EntityType targetType) {
-        this.source = source;
-        this.target = target;
-        this.targetType = targetType;
-        this.name = targetType.entityName;
-        this.distinctRequired = false;
+    public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
+        this(navProp.getName(), source, target, navProp.getEntityType(), navProp.isEntitySet());
     }
 
-    public RelationOneToMany(S source, T target, EntityType targetType, boolean distinctRequired) {
-        this.source = source;
+    public RelationOneToMany(String name, S source, T target, EntityType targetType, boolean distinctRequired) {
+        if (source == null) {
+            // Source is only used for finding the generics...
+            LOGGER.error("NULL source");
+        }
         this.target = target;
         this.targetType = targetType;
-        this.name = targetType.entityName;
+        this.name = name;
         this.distinctRequired = distinctRequired;
     }
 
@@ -97,15 +96,38 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?
     }
 
     @Override
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
-        TableField<Record, J> sourceField = sourceFieldAccessor.getField(source);
+    public TableRef<J> join(S joinSource, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+        Field<J> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        TableField<Record, J> targetField = targetFieldAccessor.getField(targetAliased);
+        Field<J> targetField = targetFieldAccessor.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceField)));
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);
         }
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+    }
+
+    /**
+     * Re-links the one-to-many relation to a different entity. Updates the
+     * targetField to sourceId on TargetTable where TargetTable.getId =
+     * targetId.
+     *
+     * @param pm The PersistenceManager for queries.
+     * @param sourceId The source id of the link.
+     * @param targetId The target id of the link.
+     */
+    @Override
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+        if (!distinctRequired) {
+            throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
+        }
+        int count = pm.getDslContext().update(target)
+                .set(targetFieldAccessor.getField(target), sourceId)
+                .where(target.getId().eq(targetId))
+                .execute();
+        if (count != 1) {
+            LOGGER.error("Executing query did not result in an update!");
+        }
     }
 
     /**

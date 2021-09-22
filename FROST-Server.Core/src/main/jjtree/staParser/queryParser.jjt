@@ -263,7 +263,7 @@ void FilteredPath() #FilteredPath: {}
 }
 void FilteredPathElement() #PathElement: {String name;}
 {
-  name=Identifier() ( <LB> InnerOptions() <RB> )?
+  name=Identifier() ( <LB> (InnerOptions())? <RB> )?
   {
     jjtThis.setName(name);
   }
@@ -319,12 +319,11 @@ void LogicalExpression() #LogicalOr(>1): {}
 {
   ( LogicalAnd() (<O_OR> LogicalAnd() )*  )
 }
+
 void LogicalAnd() #LogicalAnd(>1): {}
 {
   ( NegationExpression() (<O_AND> NegationExpression() )*  )
 }
-
-
 
 void NegationExpression() #Not(not) : {boolean not = false;}
 {
@@ -400,8 +399,7 @@ String Compare() : {String s;}
 void MixedExpression(): {}
 {
   (
-    LOOKAHEAD(AdditiveExpression()) AdditiveExpression()
-  | ( <LB> LogicalExpression() <RB> )
+    AdditiveExpression()
   )
 }
 
@@ -440,7 +438,7 @@ void MulDiv() #Operator:{}
 void UnaryExpression() : {}
 {
     MathFunction()
-  | (<LB> AdditiveExpression() <RB>)
+  | (<LB> LogicalExpression() <RB>)
   | StringLit()
   | GeoStringLit()
   | Boolean()

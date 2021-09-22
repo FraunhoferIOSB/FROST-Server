@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -42,11 +41,11 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
     @Override
     public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
         TimeValue result;
-        JsonNode node = jp.getCodec().readTree(jp);
+        String node = jp.getValueAsString();
         try {
-            result = TimeInstant.parse(node.asText());
+            result = TimeInstant.parse(node);
         } catch (Exception e) {
-            result = TimeInterval.parse(node.asText());
+            result = TimeInterval.parse(node);
         }
         return result;
     }

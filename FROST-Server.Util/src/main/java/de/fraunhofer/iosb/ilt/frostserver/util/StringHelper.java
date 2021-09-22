@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,21 @@ public class StringHelper {
      * @return The cleaned string.
      */
     public static String cleanForLogging(String string) {
+        if (string == null) {
+            return "null";
+        }
         return string.replaceAll("[\\n\\r\\t]", "_nrt_");
+    }
+
+    /**
+     * Null-Save replaces characters that might break logging output. Currently:
+     * \n, \r and \t
+     *
+     * @param object The Object to clean.
+     * @return The cleaned string.
+     */
+    public static String cleanForLogging(Object object) {
+        return cleanForLogging(Objects.toString(object));
     }
 
     /**

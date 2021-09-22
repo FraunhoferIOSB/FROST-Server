@@ -20,6 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -68,10 +71,6 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_ACTUATION = "enableActuation";
-    @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
     @DefaultValueInt(0)
     public static final String TAG_QUEUE_LOGGING_INTERVAL = "queueLoggingInterval";
 
@@ -120,6 +119,10 @@ public class CoreSettings implements ConfigDefaults {
     @DefaultValueInt(0)
     public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
+    // Old keys
+    public static final String OLD_TAG_ENABLE_ACTUATION = "enableActuation";
+    public static final String OLD_TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
+
     /**
      * Prefixes
      */
@@ -149,14 +152,6 @@ public class CoreSettings implements ConfigDefaults {
      * Path to temp folder.
      */
     private String tempPath;
-    /**
-     * Flag indicating actuation should be enabled (entities not hidden).
-     */
-    private boolean enableActuation;
-    /**
-     * Flag indicating MultiDatastream should be enabled (entities not hidden).
-     */
-    private boolean enableMultiDatastream;
 
     /**
      * The set of enabled extensions that are defined in the standard.
@@ -203,7 +198,13 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * The extensions, or other code parts that require Liquibase.
      */
-    private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    private final Set<LiquibaseUser> liquibaseUsers = new LinkedHashSet<>();
+
+    private final ModelRegistry modelRegistry = new ModelRegistry();
+
+    private MessageBus messageBus;
+
+    private CustomLinksHelper customLinksHelper;
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -228,11 +229,12 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void init(Properties properties) {
+        migrateOldSettings(properties);
         settings = new Settings(properties);
         initLocalFields();
         initChildSettings();
         initExtensions();
-        pluginManager.init(this);
+        pluginManager.init();
     }
 
     private void initLocalFields() {
@@ -258,8 +260,6 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
 
-        enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
-        enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
         queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
@@ -269,6 +269,7 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void initChildSettings() {
+        pluginManager.setCoreSettings(this);
         mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false, logSensitiveData));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false, logSensitiveData));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false, logSensitiveData));
@@ -278,14 +279,25 @@ public class CoreSettings implements ConfigDefaults {
         extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
     }
 
+    /**
+     * Migrates old settings to new versions.
+     */
+    private void migrateOldSettings(Properties properties) {
+        migrateOldSettings(properties, OLD_TAG_ENABLE_ACTUATION, "plugins.actuation.enable");
+        migrateOldSettings(properties, OLD_TAG_ENABLE_MULTIDATASTREAM, "plugins.multiDatastream.enable");
+    }
+
+    private void migrateOldSettings(Properties properties, String oldKey, String newKey) {
+        Object oldValue = properties.get(oldKey);
+        if (oldValue != null) {
+            LOGGER.warn("Converting setting with old key: {} to new key: {} with value: {}", oldKey, newKey, oldValue);
+            properties.remove(oldKey);
+            properties.put(newKey, oldValue);
+        }
+    }
+
     private void initExtensions() {
         enabledExtensions.add(Extension.CORE);
-        if (isEnableMultiDatastream()) {
-            enabledExtensions.add(Extension.MULTI_DATASTREAM);
-        }
-        if (isEnableActuation()) {
-            enabledExtensions.add(Extension.ACTUATION);
-        }
         if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
         }
@@ -307,6 +319,15 @@ public class CoreSettings implements ConfigDefaults {
      */
     public PluginManager getPluginManager() {
         return pluginManager;
+    }
+
+    /**
+     * Get the registry of entity types currently enabled.
+     *
+     * @return the registry of entity types currently enabled.
+     */
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
     }
 
     public static CoreSettings load(String file) {
@@ -360,20 +381,6 @@ public class CoreSettings implements ConfigDefaults {
         return pluginSettings;
     }
 
-    /**
-     * @return true if actuation is enabled.
-     */
-    public boolean isEnableActuation() {
-        return enableActuation;
-    }
-
-    /**
-     * @return true if actuation is enabled.
-     */
-    public boolean isEnableMultiDatastream() {
-        return enableMultiDatastream;
-    }
-
     public String getTempPath() {
         return tempPath;
     }
@@ -409,7 +416,7 @@ public class CoreSettings implements ConfigDefaults {
      *
      * @return the unmodifiable list of liquibase users.
      */
-    public Set<Class<? extends LiquibaseUser>> getLiquibaseUsers() {
+    public Set<LiquibaseUser> getLiquibaseUsers() {
         return Collections.unmodifiableSet(liquibaseUsers);
     }
 
@@ -417,9 +424,9 @@ public class CoreSettings implements ConfigDefaults {
      * Register a new liquibaseUser that wants to be called when it is time to
      * upgrade the database.
      *
-     * @param liquibaseUser
+     * @param liquibaseUser the class instance that has Liquibase jobs.
      */
-    public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
+    public void addLiquibaseUser(LiquibaseUser liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);
     }
 
@@ -441,6 +448,24 @@ public class CoreSettings implements ConfigDefaults {
             throw new IncorrectRequestException("Unknown ResultFormatter: " + StringHelper.cleanForLogging(formatterName));
         }
         return formatter;
+    }
+
+    public MessageBus getMessageBus() {
+        return messageBus;
+    }
+
+    public void setMessageBus(MessageBus messageBus) {
+        this.messageBus = messageBus;
+    }
+
+    public CustomLinksHelper getCustomLinksHelper() {
+        if (customLinksHelper == null) {
+            final Settings experimentalSettings = getExtensionSettings();
+            boolean customLinksEnabled = experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
+            int customLinksRecurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
+            customLinksHelper = new CustomLinksHelper(modelRegistry, customLinksEnabled, customLinksRecurseDepth);
+        }
+        return customLinksHelper;
     }
 
 }
