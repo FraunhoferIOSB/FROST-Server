@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+echo "GITHUB_BASE_REF"
+echo $GITHUB_BASE_REF
+echo "GITHUB_REF"
+echo $GITHUB_REF
+
 # release version
 if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; then
   cd helm-charts
@@ -11,6 +16,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; t
   git push origin master -fq
   cd ../
   rm -rf ./helm-charts
+  echo "Helm chart pushed to release repository"
 fi
 
 # Only deploy master branch and tagged builds to snapshot repository
@@ -23,6 +29,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "/refs/heads/maste
     git push origin master -fq
     cd ../
     rm -rf ./helm-charts
+    echo "Helm chart pushed to snapshot repository"
 fi
 
-echo "Helm chart pushed"
+
