@@ -1,13 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "GITHUB_BASE_REF"
-echo $GITHUB_BASE_REF
-echo "GITHUB_REF"
-echo $GITHUB_REF
-
 # release version
-if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; then
+if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; then
   cd helm-charts
   git add .
   git remote rm origin
@@ -20,7 +15,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; t
 fi
 
 # Only deploy master branch and tagged builds to snapshot repository
-if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "/refs/heads/master" ]] || [[ "${GITHUB_REF}" == "/refs/tags"* ]]); then
+if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "refs/heads/master" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]]); then
     cd helm-charts-snapshot
     git add .
     git remote rm origin
