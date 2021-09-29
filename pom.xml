@@ -50,7 +50,7 @@
         <json-patch.version>1.13</json-patch.version>
         <junit.version>4.13.2</junit.version>
         <keycloak.version>15.0.2</keycloak.version>
-        <liquibase.version>4.4.3</liquibase.version>
+        <liquibase.version>4.5.0</liquibase.version>
         <logback.version>1.2.6</logback.version>
 
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
