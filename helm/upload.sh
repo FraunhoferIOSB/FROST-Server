@@ -1,13 +1,19 @@
 #!/bin/bash
 set -e
 
+# Setup SSH for GIT push
+mkdir -p ~/.ssh
+ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
 # release version
 if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; then
+  echo -e "${HELM_SSH_KEY}" > ~/.ssh/id_rsa
+  chmod 600 ~/.ssh/id_rsa
   cd helm-charts
   git add .
   git remote rm origin
-  git remote add origin https://phertweck:$HELM_PUSH_KEY@github.com/FraunhoferIOSB/helm-charts
-  git commit -m "Travis build ${GITHUB_RUN_NUMBER} pushed"
+  git remote add origin git@github.com:FraunhoferIOSB/helm-charts.git
+  git commit -m "Github build ${GITHUB_RUN_NUMBER} pushed"
   git push origin master -fq
   cd ../
   rm -rf ./helm-charts
@@ -16,11 +22,15 @@ fi
 
 # Only deploy master branch and tagged builds to snapshot repository
 if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "refs/heads/master" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]]); then
+
+    echo -e "${HELM_SSH_KEY_SNAPSHOT}" > ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
+
     cd helm-charts-snapshot
     git add .
     git remote rm origin
-    git remote add origin https://phertweck:$HELM_PUSH_KEY@github.com/FraunhoferIOSB/helm-charts-snapshot
-    git commit -m "Travis build ${GITHUB_RUN_NUMBER} pushed"
+    git remote add origin git@github.com:FraunhoferIOSB/helm-charts-snapshot.git
+    git commit -m "Github build ${GITHUB_RUN_NUMBER} pushed"
     git push origin master -fq
     cd ../
     rm -rf ./helm-charts
