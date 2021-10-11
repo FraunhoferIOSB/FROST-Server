@@ -371,12 +371,9 @@ public class BasicAuthAnonReadTests extends AbstractTestClass {
                 new AuthScope(url.getHost(), url.getPort()),
                 new UsernamePasswordCredentials(username, password));
 
-        HttpClientBuilder clientBuilder = HttpClients.custom()
-                .useSystemProperties()
-                .setDefaultCredentialsProvider(credsProvider);
+        service.getClientBuilder().setDefaultCredentialsProvider(credsProvider);
+        service.rebuildHttpClient();
 
-        CloseableHttpClient httpclient = clientBuilder.build();
-        service.setHttpClient(httpclient);
     }
 
 }

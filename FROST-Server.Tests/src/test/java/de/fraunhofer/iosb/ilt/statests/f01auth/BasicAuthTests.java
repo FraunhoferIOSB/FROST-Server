@@ -379,12 +379,8 @@ public class BasicAuthTests extends AbstractTestClass {
                 new AuthScope(url.getHost(), url.getPort()),
                 new UsernamePasswordCredentials(username, password));
 
-        HttpClientBuilder clientBuilder = HttpClients.custom()
-                .useSystemProperties()
-                .setDefaultCredentialsProvider(credsProvider);
-
-        CloseableHttpClient httpclient = clientBuilder.build();
-        service.setHttpClient(httpclient);
+        service.getClientBuilder().setDefaultCredentialsProvider(credsProvider);
+        service.rebuildHttpClient();
     }
 
 }
