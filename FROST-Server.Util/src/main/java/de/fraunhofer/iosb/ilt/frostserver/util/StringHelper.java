@@ -63,6 +63,9 @@ public class StringHelper {
      * @return The cleaned string.
      */
     public static String cleanForLogging(String string) {
+        if (string.length() > 200) {
+            string = string.substring(0, 200);
+        }
         return string.replaceAll("[\\n\\r\\t]", "_nrt_");
     }
 
