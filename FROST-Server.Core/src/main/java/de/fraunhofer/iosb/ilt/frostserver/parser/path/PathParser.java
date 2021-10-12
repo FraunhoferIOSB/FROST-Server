@@ -102,6 +102,8 @@ public class PathParser implements ParserVisitor {
             PathParser v = new PathParser(modelRegistry, idmanager);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
+            LOGGER.error("Failed to parse '{}' because: {}", StringHelper.cleanForLogging(path), ex.getMessage());
+            LOGGER.trace("Exception: ", ex);
             throw new IllegalArgumentException("Path is not valid: " + ex.getMessage(), ex);
         }
         return resourcePath;
