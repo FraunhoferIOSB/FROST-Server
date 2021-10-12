@@ -229,8 +229,8 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void init(Properties properties) {
-        migrateOldSettings(properties);
         settings = new Settings(properties);
+        migrateOldSettings(settings.getProperties());
         initLocalFields();
         initChildSettings();
         initExtensions();
