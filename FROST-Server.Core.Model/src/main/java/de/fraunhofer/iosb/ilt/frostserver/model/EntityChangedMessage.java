@@ -28,11 +28,11 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -182,7 +182,7 @@ public class EntityChangedMessage {
         /**
          * The queries used when serialising entities in messages.
          */
-        public final Map<EntityType, Query> messageQueries = new HashMap<>();
+        public final Map<EntityType, Query> messageQueries = new ConcurrentHashMap<>();
 
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
