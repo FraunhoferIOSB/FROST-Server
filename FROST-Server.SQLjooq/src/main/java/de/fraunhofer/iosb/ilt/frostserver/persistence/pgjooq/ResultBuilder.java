@@ -121,6 +121,10 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         return staQuery;
     }
 
+    public ResourcePath getPath() {
+        return path;
+    }
+
     public DataSize getDataSize() {
         return dataSize;
     }

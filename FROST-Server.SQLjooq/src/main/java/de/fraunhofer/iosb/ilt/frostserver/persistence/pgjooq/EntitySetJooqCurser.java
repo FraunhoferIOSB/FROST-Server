@@ -94,7 +94,7 @@ public class EntitySetJooqCurser implements EntitySet {
     }
 
     private void generateNextLink() {
-        nextLink = UrlHelper.generateNextLink(staQuery.getPath(), staQuery, maxFetch);
+        nextLink = UrlHelper.generateNextLink(resultBuilder.getPath(), staQuery, maxFetch);
     }
 
     @Override
