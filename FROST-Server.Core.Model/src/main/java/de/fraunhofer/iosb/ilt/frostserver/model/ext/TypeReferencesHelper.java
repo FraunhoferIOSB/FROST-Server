@@ -23,9 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.geojson.GeoJsonObject;
 import org.slf4j.LoggerFactory;
@@ -44,6 +47,12 @@ public class TypeReferencesHelper {
     public static final TypeReference<Boolean> TYPE_REFERENCE_BOOLEAN = new TypeReference<Boolean>() {
         // Empty on purpose.
     };
+    public static final TypeReference<Date> TYPE_REFERENCE_DATE = new TypeReference<Date>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<Duration> TYPE_REFERENCE_DURATION = new TypeReference<Duration>() {
+        // Empty on purpose.
+    };
     public static final TypeReference<Entity> TYPE_REFERENCE_ENTITY = new TypeReference<Entity>() {
         // Empty on purpose.
     };
@@ -60,6 +69,9 @@ public class TypeReferencesHelper {
         // Empty on purpose.
     };
     public static final TypeReference<List<String>> TYPE_REFERENCE_LIST_STRING = new TypeReference<List<String>>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<Long> TYPE_REFERENCE_LONG = new TypeReference<Long>() {
         // Empty on purpose.
     };
     public static final TypeReference<List<UnitOfMeasurement>> TYPE_REFERENCE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
@@ -87,6 +99,9 @@ public class TypeReferencesHelper {
         // Empty on purpose.
     };
     public static final TypeReference<UnitOfMeasurement> TYPE_REFERENCE_UOM = new TypeReference<UnitOfMeasurement>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<UUID> TYPE_REFERENCE_UUID = new TypeReference<UUID>() {
         // Empty on purpose.
     };
 

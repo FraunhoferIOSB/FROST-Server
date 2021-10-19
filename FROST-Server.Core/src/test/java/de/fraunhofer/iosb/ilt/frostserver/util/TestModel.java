@@ -24,12 +24,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_NUMBER;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,9 +37,9 @@ import java.util.Map;
  */
 public class TestModel {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TYPE_REFERENCE_NUMBER);
-    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TYPE_REFERENCE_TIMEVALUE);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING);
+    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
+    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
     public final NavigationPropertyMain.NavigationPropertyEntity NP_HOUSE = new NavigationPropertyMain.NavigationPropertyEntity("House");
     public final NavigationPropertyMain.NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyMain.NavigationPropertyEntitySet("Houses");
@@ -52,15 +50,15 @@ public class TestModel {
     public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
 
     public void initModel(ModelRegistry modelRegistry) {
-        modelRegistry.registerEntityType(ET_HOUSE)
-                .registerProperty(ModelRegistry.EP_ID, false)
+        modelRegistry.registerEntityType(ET_HOUSE);
+        ET_HOUSE.registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(NP_ROOMS, false);
-        modelRegistry.registerEntityType(ET_ROOM)
-                .registerProperty(ModelRegistry.EP_ID, false)
+        modelRegistry.registerEntityType(ET_ROOM);
+        ET_ROOM.registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
@@ -77,8 +75,8 @@ public class TestModel {
         propertyValues.put(ET_HOUSE, propertyValuesHouse);
         propertyValues.put(ET_ROOM, propertyValuesRoom);
 
-        propertyValuesHouse.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValuesRoom.put(ModelRegistry.EP_ID, new IdLong(1));
+        propertyValuesHouse.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
+        propertyValuesRoom.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
         propertyValuesHouse.put(EP_NAME, "myName");
         propertyValuesRoom.put(EP_NAME, "myName");
         propertyValuesHouse.put(EP_VALUE, 6);

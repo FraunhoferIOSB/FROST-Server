@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,6 +29,7 @@ import java.util.TreeMap;
  */
 public class DefModel {
 
+    private List<DefPropertyTypeSimple> simplePropertyTypes;
     private Map<String, DefEntityType> entityTypes;
 
     public void init() {
@@ -37,6 +40,14 @@ public class DefModel {
                 type.setName(typeName);
             }
             type.init();
+        }
+    }
+
+    public void registerPropertyTypes(ModelRegistry modelRegistry) {
+        if (simplePropertyTypes != null) {
+            for (DefPropertyTypeSimple propertyType : simplePropertyTypes) {
+                modelRegistry.registerPropertyType(propertyType.getPropertyType(modelRegistry));
+            }
         }
     }
 
@@ -67,6 +78,22 @@ public class DefModel {
 
     public DefModel addEntityType(DefEntityType entityType) {
         getEntityTypes().put(entityType.getName(), entityType);
+        return this;
+    }
+
+    public List<DefPropertyTypeSimple> getSimplePropertyTypes() {
+        if (simplePropertyTypes == null) {
+            simplePropertyTypes = new ArrayList<>();
+        }
+        return simplePropertyTypes;
+    }
+
+    public void setPropertyTypes(List<DefPropertyTypeSimple> simplePropertyTypes) {
+        this.simplePropertyTypes = simplePropertyTypes;
+    }
+
+    public DefModel addSimplePropertyType(DefPropertyTypeSimple propertyType) {
+        getSimplePropertyTypes().add(propertyType);
         return this;
     }
 

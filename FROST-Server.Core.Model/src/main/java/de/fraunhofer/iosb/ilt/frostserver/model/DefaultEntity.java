@@ -58,13 +58,13 @@ public class DefaultEntity implements Entity {
 
     @Override
     public final Id getId() {
-        return (Id) entityProperties.get(ModelRegistry.EP_ID);
+        return getProperty(entityType.getPrimaryKey());
     }
 
     @Override
     public final DefaultEntity setId(Id id) {
-        entityProperties.put(ModelRegistry.EP_ID, id);
-        setProperties.add(ModelRegistry.EP_ID);
+        entityProperties.put(entityType.getPrimaryKey(), id);
+        setProperties.add(entityType.getPrimaryKey());
         return this;
     }
 
@@ -213,7 +213,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public boolean isEmpty() {
-        return entityProperties.get(ModelRegistry.EP_ID) != null;
+        return entityProperties.get(entityType.getPrimaryKey()) != null;
     }
 
     @Override

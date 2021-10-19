@@ -17,10 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
 import java.util.Objects;
 
 /**
@@ -50,8 +49,8 @@ public class EntityPropertyCustomLink implements Property<Entity> {
     }
 
     @Override
-    public TypeReference<Entity> getType() {
-        return TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
+    public TypeEntity getType() {
+        return new TypeEntity(targetEntityType);
     }
 
     public EntityType getTargetEntityType() {

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -75,7 +74,6 @@ public class QueryParserTest {
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
-        modelRegistry.setIdClass(IdLong.class);
         queryDefaults = coreSettings.getQueryDefaults();
         queryDefaults.setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();
@@ -192,7 +190,7 @@ public class QueryParserTest {
         String query = "$filter=Datastream/id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
-                new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID),
+                new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID_LONG),
                 new IntegerConstant(1)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
@@ -528,7 +526,7 @@ public class QueryParserTest {
     public void testOrderByAlias() {
         String query = "$orderby=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID)));
+        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID_LONG)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -538,7 +536,7 @@ public class QueryParserTest {
     public void testOrderByEntityProperty() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID)));
+        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID_LONG)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -548,8 +546,8 @@ public class QueryParserTest {
     public void testOrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID)));
-        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID), OrderBy.OrderType.DESCENDING));
+        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID_LONG)));
+        expResult.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID_LONG), OrderBy.OrderType.DESCENDING));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -559,7 +557,7 @@ public class QueryParserTest {
     public void testOrderByMixedPath() {
         String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID)));
+        expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastreamObservation, ModelRegistry.EP_ID_LONG)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -582,18 +580,18 @@ public class QueryParserTest {
     public void testSelect() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
-        expResult.getSelect().add(ModelRegistry.EP_ID);
+        expResult.getSelect().add(ModelRegistry.EP_ID_LONG);
         Query result = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         result.addSelect(pluginCoreModel.npObservationsDatastream)
-                .addSelect(ModelRegistry.EP_ID);
+                .addSelect(ModelRegistry.EP_ID_LONG);
         Assert.assertEquals(expResult, result);
 
         expResult.getSelect().clear();
         expResult.getSelect().add(pluginCoreModel.npThingDatasteam);
-        expResult.getSelect().add(ModelRegistry.EP_ID);
+        expResult.getSelect().add(ModelRegistry.EP_ID_LONG);
         result.clearSelect();
         result.addSelect(pluginCoreModel.npThingDatasteam)
-                .addSelect(ModelRegistry.EP_ID);
+                .addSelect(ModelRegistry.EP_ID_LONG);
         Assert.assertEquals(expResult, result);
     }
 
@@ -601,7 +599,7 @@ public class QueryParserTest {
     public void testSelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getSelect().add(ModelRegistry.EP_ID);
+        expResult.getSelect().add(ModelRegistry.EP_ID_LONG);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         Assert.assertEquals(expResult, result);
@@ -652,7 +650,7 @@ public class QueryParserTest {
             String query = "$select=distinct:id,name,properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult
-                    .addSelect(ModelRegistry.EP_ID)
+                    .addSelect(ModelRegistry.EP_ID_LONG)
                     .addSelect(pluginCoreModel.epName)
                     .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.name)
                             .addToSubPath("my")
@@ -706,7 +704,7 @@ public class QueryParserTest {
         String query = "$select=Observations, id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.addSelect(pluginCoreModel.npObservationsDatastream)
-                .addSelect(ModelRegistry.EP_ID);
+                .addSelect(ModelRegistry.EP_ID_LONG);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         Assert.assertEquals(expResult, result);
@@ -802,7 +800,7 @@ public class QueryParserTest {
         String query = "$expand=Observations/FeatureOfInterest($select=@iot.id)";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subSubQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        subSubQuery.getSelect().add(ModelRegistry.EP_ID);
+        subSubQuery.getSelect().add(ModelRegistry.EP_ID_LONG);
         subQuery.getExpand().add(new Expand(modelRegistry, subSubQuery, pluginCoreModel.npFeatureOfInterestObservation));
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
@@ -856,8 +854,8 @@ public class QueryParserTest {
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery.setFilter(new Equal(new Path(pluginCoreModel.epResult), new IntegerConstant(1)));
         subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
-        subQuery.getSelect().add(ModelRegistry.EP_ID);
-        subQuery.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID)));
+        subQuery.getSelect().add(ModelRegistry.EP_ID_LONG);
+        subQuery.getOrderBy().add(new OrderBy(new Path(ModelRegistry.EP_ID_LONG)));
         subQuery.setSkip(5);
         subQuery.setTop(10);
         subQuery.setCount(true);
@@ -876,7 +874,7 @@ public class QueryParserTest {
         Query subQuery1 = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery1.setFilter(new Equal(new Path(pluginCoreModel.epResult), new IntegerConstant(1)));
         subQuery1.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
-        subQuery1.getSelect().add(ModelRegistry.EP_ID);
+        subQuery1.getSelect().add(ModelRegistry.EP_ID_LONG);
         expResult.getExpand().add(new Expand(modelRegistry, subQuery1, pluginCoreModel.npObservationsDatastream));
         expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream));
         expResult.setTop(10);
@@ -894,7 +892,7 @@ public class QueryParserTest {
                         new Path(pluginCoreModel.npDatastreamsThing,
                                 pluginCoreModel.npObservationsDatastream,
                                 pluginCoreModel.npFeatureOfInterestObservation,
-                                ModelRegistry.EP_ID),
+                                ModelRegistry.EP_ID_LONG),
                         new StringConstant("FOI_1")),
                 new And(
                         new GreaterEqual(

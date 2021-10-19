@@ -58,6 +58,11 @@ public class EntityType implements Comparable<EntityType> {
     public final String plural;
 
     private boolean initialised = false;
+
+    /**
+     * The Property that is the primary key of the entity.
+     */
+    private EntityPropertyMain primaryKey;
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped to the flag
      * indicating if they are required.
@@ -106,8 +111,12 @@ public class EntityType implements Comparable<EntityType> {
         propertyMap.put(property, required);
         propertiesByName.put(property.getName(), property);
         if (property instanceof EntityPropertyMain) {
-            for (String alias : ((EntityPropertyMain<?>) property).getAliases()) {
+            EntityPropertyMain<?> propertyMain = (EntityPropertyMain<?>) property;
+            for (String alias : propertyMain.getAliases()) {
                 propertiesByName.put(alias, property);
+            }
+            if (primaryKey == null) {
+                primaryKey = propertyMain;
             }
         }
         return this;
@@ -142,6 +151,10 @@ public class EntityType implements Comparable<EntityType> {
     public EntityType addValidator(EntityValidator validator) {
         validatorsNewEntity.add(validator);
         return this;
+    }
+
+    public EntityPropertyMain<Id> getPrimaryKey() {
+        return primaryKey;
     }
 
     public Property getProperty(String name) {

@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 
 /**
  *
@@ -47,7 +47,7 @@ public interface Property<P> extends Comparable<Property> {
      *
      * @return The class of the type of the value of this property.
      */
-    public TypeReference<P> getType();
+    public PropertyType getType();
 
     /**
      * Get the value of this property from the given entity.

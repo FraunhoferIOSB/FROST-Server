@@ -134,7 +134,7 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epDescription, "My description");
         propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
         propertyValues.put(pluginCoreModel.epFeature, new Point(8, 42));
-        propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
+        propertyValues.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
         propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
         propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
         propertyValues.put(pluginCoreModel.epName, "myName");

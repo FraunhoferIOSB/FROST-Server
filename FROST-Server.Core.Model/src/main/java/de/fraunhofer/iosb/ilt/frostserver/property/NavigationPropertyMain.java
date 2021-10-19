@@ -17,15 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ENTITYSET;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,11 +42,11 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
         public NavigationPropertyEntity(String propertyName) {
-            super(propertyName, false, TYPE_REFERENCE_ENTITY);
+            super(propertyName, false);
         }
 
         public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse) {
-            super(propertyName, false, TYPE_REFERENCE_ENTITY);
+            super(propertyName, false);
             setInverses(inverse);
         }
     }
@@ -54,11 +54,11 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     public static class NavigationPropertyEntitySet extends NavigationPropertyMain<EntitySet> {
 
         public NavigationPropertyEntitySet(String propertyName) {
-            super(propertyName, true, TYPE_REFERENCE_ENTITYSET);
+            super(propertyName, true);
         }
 
         public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse) {
-            super(propertyName, true, TYPE_REFERENCE_ENTITYSET);
+            super(propertyName, true);
             setInverses(inverse);
         }
     }
@@ -70,7 +70,7 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     /**
      * The type(class) of the type of the value of this property.
      */
-    private final TypeReference<P> type;
+    private PropertyType type;
     /**
      * The entityType of entity that this navigation property points to.
      */
@@ -84,8 +84,7 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     private NavigationPropertyMain inverse;
 
-    private NavigationPropertyMain(String propertyName, boolean isSet, TypeReference<P> type) {
-        this.type = type;
+    private NavigationPropertyMain(String propertyName, boolean isSet) {
         this.name = propertyName;
         this.aliases = new ArrayList<>();
         this.aliases.add(propertyName);
@@ -94,6 +93,11 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
+        if (entitySet) {
+            this.type = new TypeEntitySet(entityType);
+        } else {
+            this.type = new TypeEntity(entityType);
+        }
     }
 
     public NavigationPropertyMain getInverse() {
@@ -135,7 +139,7 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     }
 
     @Override
-    public TypeReference<P> getType() {
+    public PropertyType getType() {
         return type;
     }
 

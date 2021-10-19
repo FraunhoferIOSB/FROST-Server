@@ -121,7 +121,6 @@ public class PersistenceManagerFactory {
         if (idManager == null) {
             try (PersistenceManager pm = create()) {
                 idManager = pm.getIdManager();
-                settings.getModelRegistry().setIdClass(idManager.getIdClass());
             }
         }
         return idManager;

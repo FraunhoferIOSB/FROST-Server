@@ -85,10 +85,10 @@ public class JsonReader {
 
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
-        module.addAbstractTypeMapping(Id.class, modelRegistry.getIdClass());
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             CustomEntityDeserializer.getInstance(modelRegistry, entityType);
         }
+        module.addDeserializer(Id.class, new IdDeserializer());
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer(modelRegistry));
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());

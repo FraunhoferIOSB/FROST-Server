@@ -17,10 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.coremodel;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -50,21 +47,16 @@ public class UrlHelperTest {
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
-    private static JsonReader entityParser;
-    private static ParserHelper parserHelper;
 
     @BeforeClass
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
-        modelRegistry.setIdClass(IdLong.class);
         queryDefaults = coreSettings.getQueryDefaults();
         queryDefaults.setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
-        entityParser = new JsonReader(modelRegistry);
-        parserHelper = new ParserHelper(modelRegistry);
     }
 
     @Test

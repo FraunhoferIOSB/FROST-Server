@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -236,8 +237,9 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         entityFactories.insertUserDefinedId(pm, insertFields, this.getId(), entity);
 
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
+        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(ModelRegistry.EP_ID)) {
+            if (ep.equals(primaryKey)) {
                 // EP_ID has already been dealt with above.
                 continue;
             }
@@ -347,8 +349,9 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         }
 
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
+        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(ModelRegistry.EP_ID)) {
+            if (ep.equals(primaryKey)) {
                 // EP_ID can not be changed.
                 continue;
             }

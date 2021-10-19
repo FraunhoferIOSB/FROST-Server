@@ -340,7 +340,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     public void addEntryId(IdManager idManager, ExpressionFactory<T> factory) {
         final ConverterId<T> converterId = new ConverterId<>(factory, idManager, true);
-        addEntry(ModelRegistry.EP_ID, factory, converterId);
+        addEntry(table.getEntityType().getPrimaryKey(), factory, converterId);
         addEntry(ModelRegistry.EP_SELFLINK, factory, converterId);
     }
 
@@ -629,7 +629,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             final Object rawId = getFieldOrNull(input, factory.get(table));
             Id id = idManager.fromObject(rawId);
-            entity.setProperty(ModelRegistry.EP_ID, id);
+            entity.setProperty(entity.getEntityType().getPrimaryKey(), id);
         }
 
         @Override
@@ -637,7 +637,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
             if (!canEdit) {
                 return;
             }
-            Id id = entity.getProperty(ModelRegistry.EP_ID);
+            Id id = entity.getProperty(entity.getEntityType().getPrimaryKey());
             if (id == null) {
                 return;
             }

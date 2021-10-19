@@ -55,7 +55,6 @@ public class PathParserTest {
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
-        modelRegistry.setIdClass(IdLong.class);
         queryDefaults = coreSettings.getQueryDefaults();
         queryDefaults.setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();

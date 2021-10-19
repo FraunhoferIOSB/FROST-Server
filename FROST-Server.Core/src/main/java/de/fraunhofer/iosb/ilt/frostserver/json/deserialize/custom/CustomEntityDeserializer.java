@@ -74,7 +74,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
                         property.getJsonName(),
                         new PropertyData(
                                 property,
-                                property.getType(),
+                                property.getType().getTypeReference(),
                                 false,
                                 null));
             } else if (property instanceof NavigationPropertyMain) {

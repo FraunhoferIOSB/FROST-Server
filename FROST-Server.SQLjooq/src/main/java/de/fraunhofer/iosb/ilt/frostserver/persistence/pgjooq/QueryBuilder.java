@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
@@ -294,7 +293,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(ModelRegistry.EP_ID);
+            selectedProperties.add(requestedEntityType.getPrimaryKey());
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -340,7 +339,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(ModelRegistry.EP_ID);
+        selectedProperties.add(lastPath.getType().getPrimaryKey());
     }
 
     @Override

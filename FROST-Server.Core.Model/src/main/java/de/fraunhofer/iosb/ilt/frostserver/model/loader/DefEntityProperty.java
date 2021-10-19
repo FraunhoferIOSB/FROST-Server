@@ -18,10 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,13 +80,10 @@ public class DefEntityProperty {
         }
     }
 
-    public void registerProperties() {
+    public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
-            TypeReference typeReference = TypeReferencesHelper.getTypeReference(type);
-            if (typeReference == null) {
-                throw new IllegalArgumentException("Unknown type: " + type);
-            }
-            entityProperty = new EntityPropertyMain(name, typeReference, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new));
+            PropertyType propType = modelRegistry.getPropertyType(type);
+            entityProperty = new EntityPropertyMain(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new));
         }
         entityType.registerProperty(entityProperty, required);
     }

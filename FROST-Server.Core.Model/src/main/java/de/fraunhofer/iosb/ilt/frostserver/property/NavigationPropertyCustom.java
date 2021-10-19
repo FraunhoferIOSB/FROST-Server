@@ -17,15 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,8 +107,8 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     }
 
     @Override
-    public TypeReference<Entity> getType() {
-        return TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
+    public PropertyType getType() {
+        return new TypeEntity(type);
     }
 
     public void setElementOn(Entity entity, NavigableElement expandedElement) {

@@ -95,7 +95,6 @@ public class MqttManagerTest {
 
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
-        modelRegistry.setIdClass(IdLong.class);
         testModel = new TestModel();
         testModel.initModel(modelRegistry);
         modelRegistry.initFinalise();

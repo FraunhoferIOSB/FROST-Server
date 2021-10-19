@@ -18,17 +18,19 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ID;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
-import java.util.HashMap;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GUID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_INT64;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,27 +42,26 @@ public class ModelRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelRegistry.class.getName());
 
-    /**
-     * The global EntityProperty @iot.id.
-     */
-    public static final EntityPropertyMain<Id> EP_ID = new EntityPropertyMain<>(AT_IOT_ID, TYPE_REFERENCE_ID, "id");
+    public static final EntityPropertyMain<Id> EP_ID_LONG = new EntityPropertyMain<>(AT_IOT_ID, EDM_INT64, "id");
+    public static final EntityPropertyMain<Id> EP_ID_STRING = new EntityPropertyMain<>(AT_IOT_ID, EDM_STRING, "id");
+    public static final EntityPropertyMain<Id> EP_ID_UUID = new EntityPropertyMain<>(AT_IOT_ID, EDM_GUID, "id");
     /**
      * The global EntityProperty SelfLink.
      */
-    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "selfLink");
+    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, EDM_STRING, "selfLink");
     /**
      * The global EntityProperty properties.
      */
-    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TYPE_REFERENCE_MAP, true, false);
+    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, true, false);
     /**
      * The global EntityProperty encodingType.
      */
-    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", TYPE_REFERENCE_STRING);
+    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING);
 
-    private final Map<String, EntityType> typesByName = new HashMap<>();
-    private final Set<EntityType> types = new LinkedHashSet<>();
+    private final Map<String, EntityType> entityTypesByName = new TreeMap<>();
+    private final Set<EntityType> entityTypes = new LinkedHashSet<>();
 
-    private Class<? extends Id> idClass;
+    private final Map<String, PropertyType> propertyTypes = new TreeMap<>();
 
     private ParserHelper parserHelper;
 
@@ -69,31 +70,35 @@ public class ModelRegistry {
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
 
-    public final EntityType registerEntityType(EntityType type) {
-        if (typesByName.containsKey(type.entityName)) {
+    public ModelRegistry() {
+    }
+
+    public final ModelRegistry registerEntityType(EntityType type) {
+        if (entityTypesByName.containsKey(type.entityName)) {
             throw new IllegalArgumentException("An entity type named " + type.entityName + " is already registered");
         }
-        typesByName.put(type.entityName, type);
-        typesByName.put(type.plural, type);
-        types.add(type);
+        entityTypesByName.put(type.entityName, type);
+        entityTypesByName.put(type.plural, type);
+        entityTypes.add(type);
         type.setModelRegistry(this);
-        return type;
+        return this;
     }
 
     public final EntityType getEntityTypeForName(String typeName) {
-        return typesByName.get(typeName);
+        return entityTypesByName.get(typeName);
     }
 
     public final Set<EntityType> getEntityTypes() {
-        return types;
+        return entityTypes;
     }
 
-    public Class<? extends Id> getIdClass() {
-        return idClass;
+    public ModelRegistry registerPropertyType(PropertyType type) {
+        propertyTypes.put(type.getName(), type);
+        return this;
     }
 
-    public void setIdClass(Class<? extends Id> idClass) {
-        this.idClass = idClass;
+    public final PropertyType getPropertyType(String name) {
+        return propertyTypes.get(name);
     }
 
     public EntityChangedMessage.QueryGenerator getMessageQueryGenerator() {
@@ -101,8 +106,8 @@ public class ModelRegistry {
     }
 
     public synchronized void initFinalise() {
-        LOGGER.info("Finalising {} EntityTypes.", types.size());
-        for (EntityType type : types) {
+        LOGGER.info("Finalising {} EntityTypes.", entityTypes.size());
+        for (EntityType type : entityTypes) {
             type.init();
         }
     }

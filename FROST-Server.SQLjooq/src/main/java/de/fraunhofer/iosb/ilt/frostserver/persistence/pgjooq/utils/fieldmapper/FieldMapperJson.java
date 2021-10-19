@@ -73,7 +73,7 @@ public class FieldMapperJson extends FieldMapperAbstract {
                             (T t, Record tuple, Entity entity, DataSize dataSize) -> {
                                 final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, (Field) t.field(idx));
                                 dataSize.increase(fieldJsonValue.getStringLength());
-                                entity.setProperty(entityProperty, fieldJsonValue.getValue(entityProperty.getType()));
+                                entity.setProperty(entityProperty, fieldJsonValue.getValue(entityProperty.getType().getTypeReference()));
                             },
                             (t, entity, insertFields) -> insertFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty))),
                             (t, entity, updateFields, message) -> {

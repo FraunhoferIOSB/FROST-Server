@@ -21,14 +21,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_NUMBER;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -39,9 +37,9 @@ import org.junit.Assert;
  */
 public class TestModel {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TYPE_REFERENCE_NUMBER);
-    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TYPE_REFERENCE_TIMEVALUE);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING);
+    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
+    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
     public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House");
     public final NavigationPropertyEntitySet NP_ROOMS_HOUSE = new NavigationPropertyEntitySet("Rooms");
@@ -58,16 +56,18 @@ public class TestModel {
 
     public void initModel(ModelRegistry modelRegistry) {
         NP_BATHROOMS_HOUSE.setInverses(NP_BATHROOMFOR_ROOM);
+        NP_BATHROOMS_HOUSE.setEntityType(ET_ROOM);
+        NP_BATHROOMFOR_ROOM.setEntityType(ET_HOUSE);
         NP_HOUSE_ROOM.setInverses(NP_ROOMS_HOUSE);
         NP_STREETS_HOUSE.setInverses(NP_STREETS_HOUSE);
 
-        modelRegistry.registerEntityType(ET_STREET)
-                .registerProperty(ModelRegistry.EP_ID, false)
+        modelRegistry.registerEntityType(ET_STREET);
+        ET_STREET.registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(NP_HOUSES_STREET, false);
-        modelRegistry.registerEntityType(ET_HOUSE)
-                .registerProperty(ModelRegistry.EP_ID, false)
+        modelRegistry.registerEntityType(ET_HOUSE);
+        ET_HOUSE.registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
@@ -75,8 +75,8 @@ public class TestModel {
                 .registerProperty(NP_STREETS_HOUSE, false)
                 .registerProperty(NP_ROOMS_HOUSE, false)
                 .registerProperty(NP_BATHROOMS_HOUSE, false);
-        modelRegistry.registerEntityType(ET_ROOM)
-                .registerProperty(ModelRegistry.EP_ID, false)
+        modelRegistry.registerEntityType(ET_ROOM);
+        ET_ROOM.registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
@@ -95,9 +95,9 @@ public class TestModel {
         propertyValues.put(ET_HOUSE, propertyValuesHouse);
         propertyValues.put(ET_ROOM, propertyValuesRoom);
 
-        propertyValuesStreet.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValuesHouse.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValuesRoom.put(ModelRegistry.EP_ID, new IdLong(1));
+        propertyValuesStreet.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
+        propertyValuesHouse.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
+        propertyValuesRoom.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
         propertyValuesStreet.put(EP_NAME, "StreetName");
         propertyValuesHouse.put(EP_NAME, "HouseName");
         propertyValuesRoom.put(EP_NAME, "RoomName");

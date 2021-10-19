@@ -22,13 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINSTANT;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
@@ -38,6 +31,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -116,25 +113,25 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
-    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, null, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, null, true, false);
-    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TYPE_REFERENCE_GEOJSONOBJECT);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TYPE_REFERENCE_TIMEVALUE);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TYPE_REFERENCE_TIMEINTERVAL);
-    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TYPE_REFERENCE_MAP, true, false);
-    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TYPE_REFERENCE_OBJECT, true, true);
-    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TYPE_REFERENCE_TIMEINSTANT, false, true);
-    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TYPE_REFERENCE_TIMEINTERVAL, false, true);
-    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TYPE_REFERENCE_OBJECT, true, false);
-    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TYPE_REFERENCE_UOM, true, false);
-    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TYPE_REFERENCE_TIMEINTERVAL);
+    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
+    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING);
+    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeComplex.STA_OBJECT, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeComplex.STA_OBJECT, true, false);
+    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING);
+    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING);
+    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING);
+    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeComplex.STA_GEOJSON);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEVALUE);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEINTERVAL);
+    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, true, false);
+    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeComplex.STA_OBJECT, true, true);
+    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true);
+    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeSimpleCustom.STA_TIMEINTERVAL, false, true);
+    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, true, false);
+    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET);
+    public EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
+    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeSimpleCustom.STA_TIMEINTERVAL);
 
     public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
     public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
@@ -221,22 +218,28 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerEntityTypes() {
         LOGGER.info("Initialising Core Model Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityType(etDatastream);
-        modelRegistry.registerEntityType(etFeatureOfInterest);
-        modelRegistry.registerEntityType(etHistoricalLocation);
-        modelRegistry.registerEntityType(etLocation);
-        modelRegistry.registerEntityType(etObservation);
-        modelRegistry.registerEntityType(etObservedProperty);
-        modelRegistry.registerEntityType(etSensor);
-        modelRegistry.registerEntityType(etThing);
+        TypeComplex propertyUom = new TypeComplex("Sta.UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
+                .addProperty("name", EDM_STRING)
+                .addProperty("symbol", EDM_STRING)
+                .addProperty("definition", EDM_STRING);
+        settings.getModelRegistry()
+                .registerPropertyType(propertyUom)
+                .registerEntityType(etDatastream)
+                .registerEntityType(etFeatureOfInterest)
+                .registerEntityType(etHistoricalLocation)
+                .registerEntityType(etLocation)
+                .registerEntityType(etObservation)
+                .registerEntityType(etObservedProperty)
+                .registerEntityType(etSensor)
+                .registerEntityType(etThing);
+        epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, propertyUom, true, false);
     }
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking Core Model Types...");
         etDatastream
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -251,7 +254,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npThingDatasteam, true)
                 .registerProperty(npObservationsDatastream, false);
         etFeatureOfInterest
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -260,13 +263,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npObservationsFeature, false);
         etHistoricalLocation
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epTime, true)
                 .registerProperty(npThingHistLoc, true)
                 .registerProperty(npLocationsHistLoc, false);
         etLocation
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -276,7 +279,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npHistoricalLocationsLocation, false)
                 .registerProperty(npThingsLocation, false);
         etObservation
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epPhenomenonTime, false)
                 .registerProperty(epResultTime, false)
@@ -287,7 +290,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npDatastreamObservation, true)
                 .registerProperty(npFeatureOfInterestObservation, false);
         etObservedProperty
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDefinition, true)
@@ -295,7 +298,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreamsObsProp, false);
         etSensor
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -304,7 +307,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreamsSensor, false);
         etThing
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)

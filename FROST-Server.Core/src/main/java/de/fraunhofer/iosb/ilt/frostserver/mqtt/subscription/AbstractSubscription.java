@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -140,7 +139,7 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
-        properties.add(ModelRegistry.EP_ID);
+        properties.add(entityType.getPrimaryKey());
         String epeId = epe.getId().getUrl();
         if (epeId.startsWith("'")) {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -57,7 +56,7 @@ public class PropertySubscription extends AbstractSubscription {
         property = ((PathElementProperty) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
-            matcher = x -> x.getProperty(ModelRegistry.EP_ID).equals(id);
+            matcher = x -> x.getProperty(entityType.getPrimaryKey()).equals(id);
         }
         query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
         query.addSelect(property);

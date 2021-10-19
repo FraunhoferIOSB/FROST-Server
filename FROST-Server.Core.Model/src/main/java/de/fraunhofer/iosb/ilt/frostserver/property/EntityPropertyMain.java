@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     /**
      * The type(class) of the type of the value of this property.
      */
-    private final TypeReference<P> type;
+    private final PropertyType type;
 
     public final boolean hasCustomProperties;
     /**
@@ -51,15 +51,18 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
 
     private final Collection<String> aliases;
 
-    public EntityPropertyMain(String name, TypeReference<P> type) {
+    public EntityPropertyMain(String name, PropertyType type) {
         this(name, type, false, false);
     }
 
-    public EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
+    public EntityPropertyMain(String name, PropertyType type, String... aliases) {
         this(name, type, false, false, aliases);
     }
 
-    public EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull, String... aliases) {
+    public EntityPropertyMain(String name, PropertyType type, boolean hasCustomProperties, boolean serialiseNull, String... aliases) {
+        if (type == null) {
+            throw new IllegalArgumentException("Type must not be null");
+        }
         this.type = type;
         this.aliases = new ArrayList<>();
         this.aliases.add(name);
@@ -84,7 +87,7 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     }
 
     @Override
-    public TypeReference<P> getType() {
+    public PropertyType getType() {
         return type;
     }
 
