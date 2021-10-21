@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
@@ -76,9 +78,7 @@ public class CsvElementSet {
             if (property == ModelRegistry.EP_SELFLINK) {
                 continue;
             }
-            if ("unitOfMeasurement".equals(property.getName())) {
-                initFromUnitOfMeasurement();
-            } else if (property instanceof EntityPropertyMain) {
+            if (property instanceof EntityPropertyMain) {
                 initFrom((EntityPropertyMain) property);
             } else if (property instanceof EntityPropertyCustomSelect) {
                 initFrom((EntityPropertyCustomSelect) property);
@@ -86,13 +86,15 @@ public class CsvElementSet {
         }
     }
 
-    public void initFromUnitOfMeasurement() {
-        CsvEntityEntry element = new CsvUnitOfMeasurementProperty(namePrefix);
-        elements.add(element);
-    }
-
     public void initFrom(EntityPropertyMain property) {
-        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.name, property);
+        PropertyType type = property.getType();
+        CsvEntityEntry element;
+        if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+            element = new CsvComplexProperty(namePrefix, property);
+        } else {
+            element = new CsvEntityProperty(namePrefix + property.name, property);
+        }
+
         elements.add(element);
     }
 

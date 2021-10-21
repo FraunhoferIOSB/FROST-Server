@@ -56,7 +56,6 @@ public class EntityParserStringIdTest {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
-            modelRegistry.setIdClass(IdString.class);
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
             pluginCoreModel = new PluginCoreModel();

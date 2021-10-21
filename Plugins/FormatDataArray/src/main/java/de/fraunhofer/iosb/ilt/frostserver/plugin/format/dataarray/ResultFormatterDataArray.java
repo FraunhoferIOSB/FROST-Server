@@ -129,7 +129,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
         public VisibleComponents(PluginCoreModel pCoreModel, Set<Property> select) {
             this.pluginCoreModel = pCoreModel;
-            id = select.contains(ModelRegistry.EP_ID);
+            id = select.contains(pCoreModel.etObservation.getPrimaryKey());
             phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
             result = select.contains(pCoreModel.epResult);
             resultTime = select.contains(pCoreModel.epResultTime);
@@ -141,7 +141,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(ModelRegistry.EP_ID.name);
+                components.add(ModelRegistry.EP_ID_LONG.name);
             }
             if (phenomenonTime) {
                 components.add(pluginCoreModel.epPhenomenonTime.name);

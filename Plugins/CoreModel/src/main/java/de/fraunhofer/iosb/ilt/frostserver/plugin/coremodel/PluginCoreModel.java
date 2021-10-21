@@ -113,11 +113,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
+    public TypeComplex eptUom;
+
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeComplex.STA_OBJECT, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeComplex.STA_OBJECT, true, false);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeComplex.STA_OBJECT_UNTYPED, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeComplex.STA_OBJECT_UNTYPED, true, false);
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING);
@@ -218,12 +220,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerEntityTypes() {
         LOGGER.info("Initialising Core Model Types...");
-        TypeComplex propertyUom = new TypeComplex("Sta.UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
+        eptUom = new TypeComplex("Sta.UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
                 .addProperty("name", EDM_STRING)
                 .addProperty("symbol", EDM_STRING)
                 .addProperty("definition", EDM_STRING);
         settings.getModelRegistry()
-                .registerPropertyType(propertyUom)
+                .registerPropertyType(eptUom)
                 .registerEntityType(etDatastream)
                 .registerEntityType(etFeatureOfInterest)
                 .registerEntityType(etHistoricalLocation)
@@ -232,12 +234,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerEntityType(etObservedProperty)
                 .registerEntityType(etSensor)
                 .registerEntityType(etThing);
-        epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, propertyUom, true, false);
+        epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, eptUom, true, false);
     }
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking Core Model Types...");
+        // ToDo: Fix IDs
         etDatastream
                 .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)

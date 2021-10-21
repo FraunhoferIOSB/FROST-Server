@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -34,6 +33,8 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -67,8 +68,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
-    public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING);
-    public final EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements = new EntityPropertyMain<>("UnitOfMeasurements", TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM, true, false);
+    public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING));
+    public EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
 
     public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
     public final NavigationPropertyEntitySet npObservationsMDs = new NavigationPropertyEntitySet("Observations", npMultiDatastreamObservation);
@@ -144,8 +145,9 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
+        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.eptUom, TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM));
         etMultiDatastream
-                .registerProperty(EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)

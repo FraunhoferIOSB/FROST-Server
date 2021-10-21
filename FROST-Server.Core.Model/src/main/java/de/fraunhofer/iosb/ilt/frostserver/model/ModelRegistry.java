@@ -24,9 +24,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GUID;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_INT64;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_LONG;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_UUID;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -42,9 +43,9 @@ public class ModelRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelRegistry.class.getName());
 
-    public static final EntityPropertyMain<Id> EP_ID_LONG = new EntityPropertyMain<>(AT_IOT_ID, EDM_INT64, "id");
-    public static final EntityPropertyMain<Id> EP_ID_STRING = new EntityPropertyMain<>(AT_IOT_ID, EDM_STRING, "id");
-    public static final EntityPropertyMain<Id> EP_ID_UUID = new EntityPropertyMain<>(AT_IOT_ID, EDM_GUID, "id");
+    public static final EntityPropertyMain<Id> EP_ID_LONG = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_LONG, "id");
+    public static final EntityPropertyMain<Id> EP_ID_STRING = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_STRING, "id");
+    public static final EntityPropertyMain<Id> EP_ID_UUID = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_UUID, "id");
     /**
      * The global EntityProperty SelfLink.
      */

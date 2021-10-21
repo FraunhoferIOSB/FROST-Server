@@ -67,6 +67,10 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOLYGON = new TypeSimplePrimitive("Edm.GeometryMultiPolygon", "Collection of polygons in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYCOLLECTION = new TypeSimplePrimitive("Edm.GeometryCollection", "Collection of arbitrary Geometry values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
 
+    public static final TypeSimplePrimitive STA_ID_UUID = new TypeSimplePrimitive("Edm.Guid", "16-byte (128-bit) unique identifier", TypeReferencesHelper.TYPE_REFERENCE_ID);
+    public static final TypeSimplePrimitive STA_ID_LONG = new TypeSimplePrimitive("Edm.Int64", "Signed 64-bit integer", TypeReferencesHelper.TYPE_REFERENCE_ID);
+    public static final TypeSimplePrimitive STA_ID_STRING = new TypeSimplePrimitive("Edm.String", "Sequence of characters", TypeReferencesHelper.TYPE_REFERENCE_ID);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
     private static final Map<String, TypeSimplePrimitive> PRIMITIVES = new HashMap<>();
 

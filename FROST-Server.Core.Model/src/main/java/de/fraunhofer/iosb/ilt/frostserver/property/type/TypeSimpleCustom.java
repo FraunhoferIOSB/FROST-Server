@@ -17,17 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+
 /**
  *
  * @author hylke
  */
-public class TypeSimpleCustom extends PropertyType {
+public class TypeSimpleCustom extends TypeSimple {
 
-    public static final TypeSimpleCustom STA_TIMEINTERVAL = new TypeSimpleCustom("Sta.TimeInterval", "An ISO time interval.", TypeSimplePrimitive.EDM_STRING);
-    public static final TypeSimpleCustom STA_TIMEVALUE = new TypeSimpleCustom("Sta.TimeValue", "An ISO time instant or time interval.", TypeSimplePrimitive.EDM_STRING);
+    public static final TypeSimpleCustom STA_TIMEINTERVAL = new TypeSimpleCustom("Sta.TimeInterval", "An ISO time interval.", TypeSimplePrimitive.EDM_STRING, TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL);
+    public static final TypeSimpleCustom STA_TIMEVALUE = new TypeSimpleCustom("Sta.TimeValue", "An ISO time instant or time interval.", TypeSimplePrimitive.EDM_STRING, TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE);
 
     public TypeSimpleCustom(String name, String description, TypeSimplePrimitive underlyingType) {
-        super(name, description, underlyingType.getTypeReference());
+        super(name, description, underlyingType, underlyingType.getTypeReference());
+    }
+
+    public TypeSimpleCustom(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference) {
+        super(name, description, underlyingType, typeReference);
     }
 
 }

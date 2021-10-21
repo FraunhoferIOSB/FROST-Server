@@ -23,26 +23,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
  *
  * @author hylke
  */
-public abstract class TypeSimple extends PropertyType {
+public class TypeSimpleSet extends PropertyType {
 
-    private final TypeSimplePrimitive underlyingType;
-
-    protected TypeSimple(String name, String description, TypeReference typeReference) {
-        super(name, description, typeReference);
-        if (this instanceof TypeSimplePrimitive) {
-            this.underlyingType = (TypeSimplePrimitive) this;
-        } else {
-            throw new IllegalArgumentException("This constuctor can only be used by subclass TypeSimplePrimitive or TypeSimpleSet");
-        }
+    public TypeSimpleSet(TypeSimple containedType, TypeReference typeReference) {
+        super("Collection(" + containedType.getName() + ")", "Collection of " + containedType.getName(), typeReference);
     }
 
-    protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference) {
-        super(name, description, typeReference);
-        this.underlyingType = underlyingType;
-    }
-
-    public TypeSimplePrimitive getUnderlyingType() {
-        return underlyingType;
+    public TypeSimpleSet(TypeComplex containedType, TypeReference typeReference) {
+        super("Collection(" + containedType.getName() + ")", "Collection of " + containedType.getName(), typeReference);
     }
 
 }

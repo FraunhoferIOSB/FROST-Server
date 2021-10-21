@@ -400,7 +400,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetProperty(shouldIdBeSet, entity, ModelRegistry.EP_ID);
+        testIsSetProperty(shouldIdBeSet, entity, entity.getEntityType().getPrimaryKey());
         testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_SELFLINK);
     }
 

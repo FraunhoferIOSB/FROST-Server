@@ -352,7 +352,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        Assert.assertEquals("Failed isSet for ID", shouldIdBeSet, entity.isSetProperty(ModelRegistry.EP_ID));
+        Assert.assertEquals("Failed isSet for ID", shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey()));
         Assert.assertEquals("Failed isSet for SelfLink", shouldBeSet, entity.isSetProperty(ModelRegistry.EP_SELFLINK));
     }
 }

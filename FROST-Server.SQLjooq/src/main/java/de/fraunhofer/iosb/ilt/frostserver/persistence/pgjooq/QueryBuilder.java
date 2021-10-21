@@ -234,6 +234,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         forPath = true;
         requestedPath = path;
+        requestedEntityType = path.getMainElementType();
         return this;
     }
 
@@ -339,7 +340,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(lastPath.getType().getPrimaryKey());
     }
 
     @Override

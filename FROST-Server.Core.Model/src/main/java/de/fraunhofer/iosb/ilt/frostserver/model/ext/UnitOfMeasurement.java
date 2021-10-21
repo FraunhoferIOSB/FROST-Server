@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ import java.util.Objects;
  *
  * @author jab
  */
-public class UnitOfMeasurement {
+public class UnitOfMeasurement implements ComplexValue {
 
     private String name;
     private String symbol;
@@ -42,6 +43,20 @@ public class UnitOfMeasurement {
         this.name = name;
         this.symbol = symbol;
         this.definition = definition;
+    }
+
+    @Override
+    public Object get(String name) {
+        switch (name) {
+            case "name":
+                return getName();
+            case "symbol":
+                return getSymbol();
+            case "definition":
+                return getDefinition();
+            default:
+                return null;
+        }
     }
 
     /**

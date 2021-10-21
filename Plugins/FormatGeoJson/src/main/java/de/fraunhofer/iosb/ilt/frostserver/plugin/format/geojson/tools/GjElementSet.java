@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
@@ -100,13 +102,20 @@ public class GjElementSet {
             if (property == ModelRegistry.EP_SELFLINK) {
                 elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
             }
-            if ("unitOfMeasurement".equals(property.getName())) {
-                elements.add(new GjUnitOfMeasurementProperty("unitOfMeasurement"));
-            } else if (property instanceof EntityPropertyMain) {
-                elements.add(new GjEntityProperty(((EntityPropertyMain) property).name, property));
+            if (property instanceof EntityPropertyMain) {
+                initFrom((EntityPropertyMain) property);
             } else if (property instanceof EntityPropertyCustomSelect) {
                 elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
             }
+        }
+    }
+
+    private void initFrom(EntityPropertyMain property) {
+        PropertyType type = property.getType();
+        if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+            elements.add(new GjComplexProperty(property.name, property));
+        } else {
+            elements.add(new GjEntityProperty(property.name, property));
         }
     }
 

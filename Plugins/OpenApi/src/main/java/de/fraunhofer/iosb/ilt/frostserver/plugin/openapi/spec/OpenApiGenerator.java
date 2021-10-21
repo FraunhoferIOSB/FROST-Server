@@ -369,7 +369,7 @@ public class OpenApiGenerator {
         for (Property property : entityType.getPropertySet()) {
             if (property instanceof EntityPropertyMain) {
                 OASchema propSchema;
-                if (ModelRegistry.EP_ID.equals(property)) {
+                if (entityType.getPrimaryKey().equals(property)) {
                     propSchema = new OASchema("#/components/schemas/entityId");
                 } else if (ModelRegistry.EP_PROPERTIES.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/properties");

@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
@@ -28,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -64,7 +64,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
+    public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
 
     public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR);
     public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");
@@ -144,8 +144,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
+        // ToDo: Fix IDs
         etActuator
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
@@ -154,13 +155,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npTaskingCapabilitiesActuator, false);
         etTask
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
                 .registerProperty(npTaskingCapabilityTask, true);
         etTaskingCapability
-                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_ID_LONG, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)

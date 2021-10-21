@@ -72,7 +72,6 @@ public class EntityParserTest {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
-            modelRegistry.setIdClass(IdLong.class);
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
             pluginCoreModel = new PluginCoreModel();
@@ -118,9 +117,9 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID_LONG, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID_LONG, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID_LONG, new IdLong(Long.MAX_VALUE)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
@@ -247,7 +246,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
 
         json = "{\n"
@@ -261,7 +260,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -278,7 +277,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(14269)));
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(14269)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -307,7 +306,7 @@ public class EntityParserTest {
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
                         .setProperty(pluginCoreModel.epFeature, "tarmac")
                 )
-                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID_LONG, new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -340,7 +339,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
@@ -357,7 +356,7 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
@@ -377,10 +376,10 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 )
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
@@ -440,7 +439,7 @@ public class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
@@ -461,10 +460,10 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(ModelRegistry.EP_ID, new IdLong(100)))
+                                .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100)))
                 .addNavigationEntity(
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(ModelRegistry.EP_ID, new IdLong(101)));
+                                .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(101)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -482,7 +481,7 @@ public class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
@@ -504,10 +503,10 @@ public class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 )
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
@@ -676,7 +675,7 @@ public class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
@@ -704,7 +703,7 @@ public class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
@@ -732,7 +731,7 @@ public class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
@@ -763,10 +762,10 @@ public class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 )
                 .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(ModelRegistry.EP_ID, new IdLong(100))
+                        .setProperty(ModelRegistry.EP_ID_LONG, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
