@@ -15,17 +15,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
+package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.UuidId;
 import java.util.UUID;
 
 /**
  *
  * @author scf
  */
-class IdManagerUuid implements IdManager {
+public class IdManagerUuid implements IdManager {
 
     @Override
     public Class<? extends Id> getIdClass() {
@@ -45,7 +45,7 @@ class IdManagerUuid implements IdManager {
         if (input instanceof UUID) {
             return new UuidId((UUID) input);
         }
-        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a UUID Id");
+        throw new IllegalArgumentException("Can not use " + ((input == null) ? "null" : input.getClass().getName()) + " (" + input + ") as a UUID Id");
     }
 
 }
