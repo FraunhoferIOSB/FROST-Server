@@ -181,6 +181,9 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
+        final String nettyMaxMessageSize = customSettings.get(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME, Integer.toString(BrokerConstants.DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE));
+        config.setProperty(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME, nettyMaxMessageSize);
+
         String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
         if (VALUE_STORE_TYPE_H2.equalsIgnoreCase(persistentStoreType)) {
             String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME).toString();

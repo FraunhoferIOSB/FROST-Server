@@ -133,6 +133,8 @@ These are settings for the MQTT package.
   Default: `memory`.
 * **mqtt.maxInFlight:**  
   The maximum number of "in-flight" messages to allow when sending notifications.
+* **mqtt.netty.mqtt.message_size:**  
+  The maximum size of MQTT messages. Default: 8092 (Bytes)
 * **mqtt.WaitForEnter:**  
   When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit
   when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
