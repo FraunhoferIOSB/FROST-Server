@@ -25,6 +25,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -36,7 +37,6 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.postgresql.core.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,7 +208,7 @@ public class ConnectionUtils implements ConfigDefaults {
 
     }
 
-    public static class ConnectionWrapper implements Provider<Connection>, AutoCloseable {
+    public static class ConnectionWrapper implements Supplier<Connection>, AutoCloseable {
 
         private final Settings settings;
         private final String connectionName;
