@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
  */
 public class ServiceRequest {
 
+    public static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
+
     private String requestType;
     private String urlPath;
     private String urlQuery;
