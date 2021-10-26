@@ -30,6 +30,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
@@ -146,7 +147,15 @@ public class ServletV1P0 extends HttpServlet {
 
         // ServletPath is /vx.x
         Version version = Version.forString(servletPath.substring(1));
-        return new ServiceRequestBuilder(version)
+        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version);
+
+        Enumeration<String> attributeNames = request.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String name = attributeNames.nextElement();
+            serviceRequestBuilder.withAttribute(name, request.getAttribute(name));
+        }
+
+        return serviceRequestBuilder
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null

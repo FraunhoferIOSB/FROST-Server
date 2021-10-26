@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public class ServiceRequestBuilder {
     private Optional<InputStream> contentBinary;
     private Optional<String> contentType;
     private Optional<Map<String, String[]>> parameterMap;
+    private final Map<String, Object> attributeMap = new HashMap<>();
     private final Version version;
 
     public ServiceRequestBuilder(Version version) {
@@ -89,6 +91,11 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withAttribute(String key, Object value) {
+        attributeMap.put(key, value);
+        return this;
+    }
+
     public ServiceRequest build() {
         ServiceRequest result = new ServiceRequest();
         result.setVersion(version);
@@ -115,6 +122,7 @@ public class ServiceRequestBuilder {
         if (requestType.isPresent()) {
             result.setRequestType(requestType.get());
         }
+        result.setAttributeMap(attributeMap);
         return result;
     }
 }

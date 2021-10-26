@@ -61,9 +61,11 @@ public class BatchProcessor<C extends Content> {
     public Request processHttpRequest(Service service, Request httpRequest, boolean inChangeSet) {
         final String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
         final Version version = Version.forString(httpRequest.getVersion());
-        final ServiceRequest serviceRequest = new ServiceRequestBuilder(version).withRequestType(type)
+        final ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
+                .withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
-                .withContent(httpRequest.getData()).build();
+                .withContent(httpRequest.getData())
+                .build();
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
         service.execute(serviceRequest, serviceResponse);
 

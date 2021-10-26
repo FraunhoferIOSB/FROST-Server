@@ -42,13 +42,26 @@ public class ServiceRequest {
     private Version version;
     private String contentType;
     private Map<String, String[]> parameterMap;
+    private Map<String, Object> attributeMap;
 
     protected ServiceRequest() {
         // empty by design.
     }
 
+    public Map<String, Object> getAttributeMap() {
+        return attributeMap;
+    }
+
+    public void setAttributeMap(Map<String, Object> attributeMap) {
+        this.attributeMap = attributeMap;
+    }
+
     public String getRequestType() {
         return requestType;
+    }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
     }
 
     /**
@@ -89,20 +102,51 @@ public class ServiceRequest {
         return contentBinary;
     }
 
+    public void setContent(InputStream content) {
+        this.contentBinary = content;
+    }
+
+    public void setContent(String content) {
+        this.contentString = content;
+    }
+
     public String getContentType() {
         return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public Map<String, String[]> getParameterMap() {
         return parameterMap;
     }
 
+    public void setParameterMap(Map<String, String[]> parameterMap) {
+        this.parameterMap = parameterMap;
+    }
+
     public String getUrlPath() {
         return urlPath;
     }
 
+    public void setUrlPath(String urlPath) {
+        this.urlPath = urlPath;
+    }
+
     public String getUrlQuery() {
         return urlQuery;
+    }
+
+    public void setUrlQuery(String urlQuery) {
+        this.urlQuery = urlQuery;
+    }
+
+    public String getUrl() {
+        if (urlQuery == null || urlQuery.isEmpty()) {
+            return urlPath;
+        }
+        return urlPath + "?" + urlQuery;
     }
 
     public final void setUrl(String url) {
@@ -113,41 +157,6 @@ public class ServiceRequest {
             this.urlPath = url;
             this.urlQuery = null;
         }
-    }
-
-    public String getUrl() {
-        if (urlQuery == null || urlQuery.isEmpty()) {
-            return urlPath;
-        }
-        return urlPath + "?" + urlQuery;
-    }
-
-    public void setRequestType(String requestType) {
-        this.requestType = requestType;
-    }
-
-    public void setUrlPath(String urlPath) {
-        this.urlPath = urlPath;
-    }
-
-    public void setUrlQuery(String urlQuery) {
-        this.urlQuery = urlQuery;
-    }
-
-    public void setContent(InputStream content) {
-        this.contentBinary = content;
-    }
-
-    public void setContent(String content) {
-        this.contentString = content;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public void setParameterMap(Map<String, String[]> parameterMap) {
-        this.parameterMap = parameterMap;
     }
 
     /**
