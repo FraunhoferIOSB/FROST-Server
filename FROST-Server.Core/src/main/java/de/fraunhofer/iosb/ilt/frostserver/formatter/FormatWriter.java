@@ -27,8 +27,9 @@ import java.io.Writer;
 public interface FormatWriter {
 
     /**
-     * Get formatted data as a String. Either this, or {@link #writeFormatted(java.io.Writer) can be called, but not both.
-     * Can be called only once.
+     * Get formatted data as a String. Either this, or
+     * {@link #writeFormatted(java.io.Writer)} can be called, but not both. Can
+     * be called only once.
      *
      * @return The formatted data as a String.
      */
