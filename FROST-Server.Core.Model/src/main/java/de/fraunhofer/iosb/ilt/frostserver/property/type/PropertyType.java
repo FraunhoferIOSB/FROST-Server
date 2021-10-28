@@ -47,4 +47,8 @@ public class PropertyType {
         return typeReference;
     }
 
+    public Object parseFromUrl(String input) {
+        throw new IllegalArgumentException("Don't know how to parse for " + name);
+    }
+
 }

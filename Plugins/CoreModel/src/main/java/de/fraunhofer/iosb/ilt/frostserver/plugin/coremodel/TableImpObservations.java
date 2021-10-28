@@ -6,7 +6,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -25,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.math.BigDecimal;
@@ -46,7 +46,7 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableImpObservations<J extends Comparable> extends StaTableAbstract<J, TableImpObservations<J>> {
+public class TableImpObservations extends StaTableAbstract<TableImpObservations> {
 
     public static final String NAME_TABLE = "OBSERVATIONS";
     public static final String NAME_COL_DATASTREAMID = "DATASTREAM_ID";
@@ -129,17 +129,17 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     /**
      * The column <code>public.OBSERVATIONS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     /**
      * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
      */
-    public final TableField<Record, J> colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), getIdType(), this);
+    public final TableField<Record, ?> colDatastreamId;
 
     /**
      * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
      */
-    public final TableField<Record, J> colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), getIdType(), this);
+    public final TableField<Record, ?> colFeatureId;
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -150,25 +150,29 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpObservations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpObservations(DataType<?> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
+        colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), idTypeDs);
+        colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), idTypeFeature);
     }
 
-    private TableImpObservations(Name alias, TableImpObservations<J> aliased, PluginCoreModel pluginCoreModel) {
+    private TableImpObservations(Name alias, TableImpObservations aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
+        colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), aliased.colDatastreamId.getDataType());
+        colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), aliased.colFeatureId.getDataType());
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpDatastreams<J> datastreamsTable = tables.getTableForClass(TableImpDatastreams.class);
+        final TableCollection tables = getTables();
+        final TableImpDatastreams datastreamsTable = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamObservation, getThis(), datastreamsTable)
                 .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
                 .setTargetFieldAccessor(TableImpDatastreams::getId)
         );
-        final TableImpFeatures<J> featuresTable = tables.getTableForClass(TableImpFeatures.class);
+        final TableImpFeatures featuresTable = tables.getTableForClass(TableImpFeatures.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npFeatureOfInterestObservation, getThis(), featuresTable)
                 .setSourceFieldAccessor(TableImpObservations::getFeatureId)
                 .setTargetFieldAccessor(TableImpFeatures::getId)
@@ -176,9 +180,8 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpObservations::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpObservations::getId);
         pfReg.addEntryMap(pluginCoreModel.epParameters, table -> table.colParameters);
         pfReg.addEntry(pluginCoreModel.epPhenomenonTime,
                 new ConverterTimeValue<>(pluginCoreModel.epPhenomenonTime, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
@@ -199,7 +202,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 new NFP<>("t", table -> table.colResultType));
         pfReg.addEntry(pluginCoreModel.epResultQuality, table -> table.colResultQuality,
                 new ConverterRecordDeflt<>(
-                        (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpObservations table, Record tuple, Entity entity, DataSize dataSize) -> {
                             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
                             dataSize.increase(resultQuality.getStringLength());
                             entity.setProperty(pluginCoreModel.epResultQuality, resultQuality.getValue());
@@ -215,8 +218,8 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 new ConverterTimeInterval<>(pluginCoreModel.epValidTime, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId, idManager);
-        pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId, idManager);
+        pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId, entityFactories);
 
         registerHookPreInsert(0, (pm, entity, insertFields) -> {
             Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
@@ -239,29 +242,29 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getDatastreamId() {
+    public TableField<Record, ?> getDatastreamId() {
         return colDatastreamId;
     }
 
-    public TableField<Record, J> getFeatureId() {
+    public TableField<Record, ?> getFeatureId() {
         return colFeatureId;
     }
 
     @Override
-    public TableImpObservations<J> as(Name alias) {
-        return new TableImpObservations<>(alias, this, pluginCoreModel).initCustomFields();
+    public TableImpObservations as(Name alias) {
+        return new TableImpObservations(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpObservations<J> getThis() {
+    public TableImpObservations getThis() {
         return this;
     }
 
-    public <T extends Comparable<T>> void handleResult(TableImpObservations<T> table, Entity entity, Map<Field, Object> output) {
+    public void handleResult(TableImpObservations table, Entity entity, Map<Field, Object> output) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
         if (result instanceof Number) {
             output.put(table.colResultType, ResultType.NUMBER.sqlValue());
@@ -290,7 +293,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public <T extends Comparable<T>> void readResultFromDb(TableImpObservations<T> table, Record tuple, Entity entity, DataSize dataSize) {
+    public void readResultFromDb(TableImpObservations table, Record tuple, Entity entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -321,7 +324,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    private <T extends Comparable> void handleNumber(TableImpObservations<T> table, Record tuple, Entity entity) {
+    private void handleNumber(TableImpObservations table, Record tuple, Entity entity) {
         try {
             entity.setProperty(pluginCoreModel.epResult, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {
@@ -330,36 +333,36 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
-        final J dsId = (J) datastreamId.getValue();
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+        final Object dsId = datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
-        TableCollection<J> tableCollection = getTables();
-        TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
-        TableImpThingsLocations<J> qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
-        TableImpThings<J> qt = tableCollection.getTableForClass(TableImpThings.class);
-        TableImpDatastreams<J> qd = tableCollection.getTableForClass(TableImpDatastreams.class);
+        TableCollection tableCollection = getTables();
+        TableImpLocations ql = tableCollection.getTableForClass(TableImpLocations.class);
+        TableImpThingsLocations qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
+        TableImpThings qt = tableCollection.getTableForClass(TableImpThings.class);
+        TableImpDatastreams qd = tableCollection.getTableForClass(TableImpDatastreams.class);
 
-        SelectConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
+        SelectConditionStep<Record3<Object, Object, String>> query = dslContext.select((TableField) ql.getId(), (TableField) ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)
-                .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
-                .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()))
-                .innerJoin(qd).on(qd.getThingId().eq(qt.getId()))
-                .where(qd.getId().eq(dsId));
+                .innerJoin(qtl).on(((TableField) ql.getId()).eq(qtl.getLocationId()))
+                .innerJoin(qt).on(((TableField) qt.getId()).eq(qtl.getThingId()))
+                .innerJoin(qd).on(((TableField) qd.getThingId()).eq(qt.getId()))
+                .where(((TableField) qd.getId()).eq(dsId));
         return generateFeatureOfInterest(pm, query);
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, ResultQuery<Record3<J, J, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, ResultQuery<Record3<Object, Object, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
         final DSLContext dslContext = pm.getDslContext();
-        TableImpLocations<J> ql = getTables().getTableForClass(TableImpLocations.class);
-        Result<Record3<J, J, String>> tuples = locationQuery.fetch();
+        TableImpLocations ql = getTables().getTableForClass(TableImpLocations.class);
+        Result<Record3<Object, Object, String>> tuples = locationQuery.fetch();
         if (tuples.isEmpty()) {
             // No locations found.
             return null;
         }
         // See if any of the locations have a generated foi.
         // Also track if any of the location has a supported encoding type.
-        J genFoiId = null;
-        J locationId = null;
+        Object genFoiId = null;
+        Object locationId = null;
         for (Record tuple : tuples) {
             genFoiId = getFieldOrNull(tuple, ql.getGenFoiId());
             if (genFoiId != null) {
@@ -375,11 +378,11 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         // Or locationId will have a value if a supported encoding type was found.
         Entity foi;
         if (genFoiId != null) {
-            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, pm.getEntityFactories().idFromObject(genFoiId));
+            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, ParserUtils.idFromObject(genFoiId));
         } else if (locationId != null) {
-            SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
+            SelectConditionStep<Record3<Object, String, String>> query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)
-                    .where(ql.getId().eq(locationId));
+                    .where(((TableField) ql.getId()).eq(locationId));
             Record tuple = query2.fetchOne();
             if (tuple == null) {
                 // Can not generate foi from Thing with no locations.
@@ -395,10 +398,10 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
                     .setProperty(pluginCoreModel.epFeature, locObject);
             pm.insert(foi);
-            J foiId = (J) foi.getId().getValue();
+            Object foiId = foi.getId().getValue();
             dslContext.update(ql)
-                    .set(ql.getGenFoiId(), (J) foi.getId().getValue())
-                    .where(ql.getId().eq(locationId))
+                    .set(((TableField) ql.getGenFoiId()), foi.getId().getValue())
+                    .where(((TableField) ql.getId()).eq(locationId))
                     .execute();
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {

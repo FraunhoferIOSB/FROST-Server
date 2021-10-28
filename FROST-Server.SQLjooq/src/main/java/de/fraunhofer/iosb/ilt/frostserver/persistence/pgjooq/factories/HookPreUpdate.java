@@ -27,9 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  * update happens.
  *
  * @author hylke
- * @param <J> The type of the ID fields.
  */
-public interface HookPreUpdate<J extends Comparable> {
+public interface HookPreUpdate {
 
-    public void updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public void updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object entityId) throws NoSuchEntityException, IncompleteEntityException;
 }

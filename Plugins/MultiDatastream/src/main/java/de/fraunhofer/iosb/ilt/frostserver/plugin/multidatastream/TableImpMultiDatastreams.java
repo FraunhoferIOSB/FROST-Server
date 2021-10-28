@@ -6,7 +6,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -30,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
@@ -51,7 +51,7 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpMultiDatastreams<J>> {
+public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiDatastreams> {
 
     private static final long serialVersionUID = 560943996;
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpMultiDatastreams.class.getName());
@@ -114,17 +114,17 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name("ID"), getIdType(), this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, J> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType(), this);
+    public final TableField<Record, ?> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType(), this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+    public final TableField<Record, ?> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
     private final transient PluginMultiDatastream pluginMultiDatastream;
     private final transient PluginCoreModel pluginCoreModel;
@@ -137,13 +137,13 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
      * @param pMultiDs the multiDatastream plugin this table belongs to.
      * @param pCoreModel the coreModel plugin that this data model links to.
      */
-    public TableImpMultiDatastreams(DataType<J> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+    public TableImpMultiDatastreams(DataType<?> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
     }
 
-    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams<J> aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
@@ -151,21 +151,21 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
+        final TableCollection tables = getTables();
+        final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npThingMDs, this, thingsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
-        final TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
+        final TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npSensorMDs, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
                 .setTargetFieldAccessor(TableImpSensors::getId)
         );
-        final TableImpMultiDatastreamsObsProperties<J> tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
-        final TableImpObsProperties<J> tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
+        final TableImpMultiDatastreamsObsProperties tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+        final TableImpObsProperties tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npObservedPropertiesMDs, this, tableMdOp, tableObsProp)
-                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
+                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties table) -> table.colRank)
                 .setAlwaysDistinct(true)
                 .setSourceFieldAcc(TableImpMultiDatastreams::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
@@ -174,38 +174,38 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         );
 
         // we have registered the MULTI_DATA column on the Observations table.
-        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         final int obsMultiDsIdIdx = observationsTable.indexOf("MULTI_DATASTREAM_ID");
 
-        final TableImpObservations<J> tableObs = tables.getTableForClass(TableImpObservations.class);
+        final TableImpObservations tableObs = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npObservationsMDs, this, tableObs)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
-                .setTargetFieldAccessor(table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx))
+                .setTargetFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
         );
 
         // Now we register the inverse relation on Observations
         observationsTable.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamObservation, observationsTable, getThis())
-                .setSourceFieldAccessor(table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx))
+                .setSourceFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
                 .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
         );
         // Now we register the inverse relation on ObservedProperties
-        final TableImpMultiDatastreamsObsProperties<J> tableMDsOpsProp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
-        final TableImpObsProperties<J> tableObsProps = tables.getTableForClass(TableImpObsProperties.class);
+        final TableImpMultiDatastreamsObsProperties tableMDsOpsProp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+        final TableImpObsProperties tableObsProps = tables.getTableForClass(TableImpObsProperties.class);
         tableObsProps.registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npMultiDatastreamsObsProp, tableObsProps, tableMDsOpsProp, getThis())
-                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
+                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties table) -> table.colRank)
                 .setSourceFieldAcc(TableImpObsProperties::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
                 .setTargetFieldAcc(TableImpMultiDatastreams::getId)
         );
         // Now we register the inverse relation on Sensors
-        final TableImpSensors<J> tableSensors = tables.getTableForClass(TableImpSensors.class);
+        final TableImpSensors tableSensors = tables.getTableForClass(TableImpSensors.class);
         tableSensors.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsSensor, tableSensors, getThis())
                 .setSourceFieldAccessor(TableImpSensors::getId)
                 .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
         );
         // Now we register the inverse relation on Things
-        final TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
+        final TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         tableThings.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsThing, tableThings, getThis())
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
@@ -213,19 +213,18 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final TableCollection<J> tables = getTables();
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpMultiDatastreams::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        final TableCollection tables = getTables();
+        pfReg.addEntryId(entityFactories, TableImpMultiDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntry(pluginCoreModel.epObservationType, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
+                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
                         null, null));
         pfReg.addEntry(pluginMultiDatastream.epMultiObservationDataTypes, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
                             List<String> observationTypes = fieldJsonValue.getValue(Utils.TYPE_LIST_STRING);
                             dataSize.increase(fieldJsonValue.getStringLength());
@@ -262,7 +261,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(pluginMultiDatastream.epUnitOfMeasurements, table -> table.colUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
@@ -273,52 +272,59 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                             updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
                             message.addField(pluginMultiDatastream.epUnitOfMeasurements);
                         }));
-        pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId, idManager);
-        pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId, idManager);
+        pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId, entityFactories);
+        pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId, entityFactories);
         pfReg.addEntry(pluginMultiDatastream.npObservedPropertiesMDs, TableImpMultiDatastreams::getId);
         pfReg.addEntry(pluginMultiDatastream.npObservationsMDs, TableImpMultiDatastreams::getId);
 
         // We register a navigationProperty on the Things, Sensors, ObservedProperties and Observations tables.
-        TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
+        TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
                 .addEntry(pluginMultiDatastream.npMultiDatastreamsThing, TableImpThings::getId);
-        TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
+        TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         sensorsTable.getPropertyFieldRegistry()
                 .addEntry(pluginMultiDatastream.npMultiDatastreamsSensor, TableImpSensors::getId);
-        TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
+        TableImpObsProperties obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         obsPropsTable.getPropertyFieldRegistry()
                 .addEntry(pluginMultiDatastream.npMultiDatastreamsObsProp, TableImpObsProperties::getId);
 
         // we need to register the MULTI_DATA column on the Observations table.
-        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         final int obsMultiDsIdIdx = observationsTable.registerField(DSL.name("MULTI_DATASTREAM_ID"), getIdType());
-        observationsTable.getPropertyFieldRegistry()
-                .addEntry(pluginMultiDatastream.npMultiDatastreamObservation, table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx), idManager);
+        observationsTable.getPropertyFieldRegistry().addEntry(
+                pluginMultiDatastream.npMultiDatastreamObservation,
+                table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx),
+                entityFactories);
 
         // Register hooks to alter behaviour of other tables
-        obsPropsTable.registerHookPreInsert(-1, (pm, entity, insertFields) -> {
-            EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
-            if (mds != null && !mds.isEmpty()) {
-                throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
-            }
-        });
-        obsPropsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {
-            EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
-            if (mds != null && !mds.isEmpty()) {
-                throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
-            }
-        });
+        obsPropsTable.registerHookPreInsert(-1,
+                (pm, entity, insertFields) -> {
+                    EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
+                    if (mds != null && !mds.isEmpty()) {
+                        throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
+                    }
+                });
+        obsPropsTable.registerHookPreUpdate(-1,
+                (pm, entity, entityId) -> {
+                    EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
+                    if (mds != null && !mds.isEmpty()) {
+                        throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
+                    }
+                });
         obsPropsTable.registerHookPreDelete(-1, (pm, entityId) -> {
             // Delete all MultiDatastreams that link to this ObservedProperty.
             // Must happen first, since the links in the link table would be gone otherwise.
-            TableImpMultiDatastreams<J> tMd = tables.getTableForClass(TableImpMultiDatastreams.class);
-            TableImpMultiDatastreamsObsProperties<J> tMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+            TableImpMultiDatastreams tMd = tables.getTableForClass(TableImpMultiDatastreams.class);
+            TableImpMultiDatastreamsObsProperties tMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
             long count = pm.getDslContext()
                     .delete(tMd)
                     .where(
-                            tMd.getId().in(
-                                    DSL.select(tMdOp.getMultiDatastreamId()).from(tMdOp).where(tMdOp.getObsPropertyId().eq(entityId))
-                            ))
+                            ((TableField) tMd.getId()).in(
+                                    DSL.select(tMdOp.getMultiDatastreamId())
+                                            .from(tMdOp)
+                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))
+                            )
+                    )
                     .execute();
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
@@ -334,12 +340,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                     throw new IllegalArgumentException("Multidatastream only accepts array results.");
                 }
                 List list = (List) result;
-                J mdsId = (J) mds.getId().getValue();
-                TableImpMultiDatastreamsObsProperties<J> tableMdsOps = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+                Object mdsId = mds.getId().getValue();
+                TableImpMultiDatastreamsObsProperties tableMdsOps = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
                 Integer count = pm.getDslContext()
                         .selectCount()
                         .from(tableMdsOps)
-                        .where(tableMdsOps.getMultiDatastreamId().eq(mdsId))
+                        .where(((TableField) tableMdsOps.getMultiDatastreamId()).eq(mdsId))
                         .fetchOne().component1();
                 if (count != list.size()) {
                     throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
@@ -357,7 +363,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         });
         // On update, make sure we still have either a DS or MDS, but not both.
         observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {
-            Entity oldObservation = pm.get(pluginCoreModel.etObservation, entityFactories.idFromObject(entityId));
+            Entity oldObservation = pm.get(pluginCoreModel.etObservation, ParserUtils.idFromObject(entityId));
             boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
             boolean newHasMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);
             if (newHasDatastream == newHasMultiDatastream) {
@@ -372,48 +378,48 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getSensorId() {
+    public TableField<Record, ?> getSensorId() {
         return colSensorId;
     }
 
-    public TableField<Record, J> getThingId() {
+    public TableField<Record, ?> getThingId() {
         return colThingId;
     }
 
     @Override
-    public TableImpMultiDatastreams<J> as(Name alias) {
-        return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
+    public TableImpMultiDatastreams as(Name alias) {
+        return new TableImpMultiDatastreams(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpMultiDatastreams<J> getThis() {
+    public TableImpMultiDatastreams getThis() {
         return this;
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
-        final J dsId = (J) datastreamId.getValue();
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+        final Object dsId = datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
-        TableCollection<J> tableCollection = getTables();
-        TableImpLocations<J> tl = tableCollection.getTableForClass(TableImpLocations.class);
-        TableImpThingsLocations<J> ttl = tableCollection.getTableForClass(TableImpThingsLocations.class);
-        TableImpThings<J> tt = tableCollection.getTableForClass(TableImpThings.class);
-        TableImpMultiDatastreams<J> tmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
+        TableCollection tableCollection = getTables();
+        TableImpLocations tl = tableCollection.getTableForClass(TableImpLocations.class);
+        TableImpThingsLocations ttl = tableCollection.getTableForClass(TableImpThingsLocations.class);
+        TableImpThings tt = tableCollection.getTableForClass(TableImpThings.class);
+        TableImpMultiDatastreams tmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
 
-        SelectConditionStep<Record3<J, J, String>> query = dslContext.select(tl.getId(), tl.getGenFoiId(), tl.colEncodingType)
+        SelectConditionStep<Record3<Object, Object, String>> query = dslContext.select((TableField) tl.getId(), (TableField) tl.getGenFoiId(), tl.colEncodingType)
                 .from(tl)
-                .innerJoin(ttl).on(tl.getId().eq(ttl.getLocationId()))
-                .innerJoin(tt).on(tt.getId().eq(ttl.getThingId()))
-                .innerJoin(tmd).on(tmd.getThingId().eq(tt.getId()))
-                .where(tmd.getId().eq(dsId));
-        TableImpObservations<J> tblObs = tableCollection.getTableForClass(TableImpObservations.class);
+                .innerJoin(ttl).on(((TableField) tl.getId()).eq(ttl.getLocationId()))
+                .innerJoin(tt).on(((TableField) tt.getId()).eq(ttl.getThingId()))
+                .innerJoin(tmd).on(((TableField) tmd.getThingId()).eq(tt.getId()))
+                .where(((TableField) tmd.getId()).eq(dsId));
+        TableImpObservations tblObs = tableCollection.getTableForClass(TableImpObservations.class);
         return tblObs.generateFeatureOfInterest(pm, query);
     }
 
-    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager pm) throws IncompleteEntityException {
         if (newObservation.isSetProperty(pluginMultiDatastream.npMultiDatastreamObservation)) {
             final Entity mds = newObservation.getProperty(pluginMultiDatastream.npMultiDatastreamObservation);
             if (mds == null) {
@@ -430,7 +436,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         return mds != null;
     }
 
-    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager pm) throws IncompleteEntityException {
         if (newObservation.isSetProperty(pluginCoreModel.npDatastreamObservation)) {
             final Entity ds = newObservation.getProperty(pluginCoreModel.npDatastreamObservation);
             if (ds == null) {

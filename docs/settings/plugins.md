@@ -33,6 +33,12 @@ This plugin requires the CoreModel plugin.
 
 * **plugins.actuation.enable:**  
   Toggle indicating the Actuation plugin should be enabled. Default: `false`.
+* **plugins.actuation.idType.actuator:**  
+  The type of the primary key column of the Actuator table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.actuation.idType.task:**  
+  The type of the primary key column of the Task table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.actuation.idType.taskingCapability:**  
+  The type of the primary key column of the TaskingCapability table. Defaults to the value of **plugins.coreModel.idType**.
 
 
 ### CoreModel
@@ -43,6 +49,32 @@ It adds the entity types described in this specification and their behaviour.
 
 * **plugins.coreModel.enable:**  
   Toggle indicating the CoreModel plugin should be enabled. Default: `true`.
+* **plugins.coreModel.idType:**  
+  The default type of the primary key columns, can be overruled on a per-table basis:
+  * **`LONG`:**  
+    Default value, using Long values for entity ids, generated in sequence.
+  * **`STRING`:**  
+    Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.  
+    When using this implementation, make sure you execute the command `CREATE EXTENSION "uuid-ossp";` on the database.
+  * **`UUID`:**  
+    Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.  
+    When using this implementation, make sure you execute the command `CREATE EXTENSION "uuid-ossp";` on the database.
+* **plugins.coreModel.idType.datastream:**  
+  The type of the primary key column of the Datastream table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.feature:**  
+  The type of the primary key column of the Features table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.historicalLocation:**  
+  The type of the primary key column of the HistoricalLocation table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.location:**  
+  The type of the primary key column of the Location table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.observedProperty:**  
+  The type of the primary key column of the ObservedProperty table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.observation:**  
+  The type of the primary key column of the Observation table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.sensor:**  
+  The type of the primary key column of the Sensor table. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.coreModel.idType.thing:**  
+  The type of the primary key column of the Thing table. Defaults to the value of **plugins.coreModel.idType**.
 
 
 ### MultiDatastream
@@ -53,6 +85,8 @@ This plugin requires the CoreModel plugin.
 
 * **plugins.multiDatastream.enable:**  
   Toggle indicating the MultiDatastream plugin should be enabled. Default: `false`.
+* **plugins.multiDatastream.idType.multiDatastream:**  
+  The type of the primary key column of the Datastream table. Defaults to the value of **plugins.coreModel.idType**.
 
 
 ## Response Format Plugins

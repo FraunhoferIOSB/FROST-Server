@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -141,7 +140,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(ModelRegistry.EP_ID_LONG.name);
+                components.add("id");
             }
             if (phenomenonTime) {
                 components.add(pluginCoreModel.epPhenomenonTime.name);

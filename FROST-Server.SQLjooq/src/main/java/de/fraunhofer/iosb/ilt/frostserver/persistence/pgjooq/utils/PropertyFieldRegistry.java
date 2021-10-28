@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -53,10 +53,9 @@ import org.jooq.Record;
 /**
  *
  * @author hylke
- * @param <J> The type of the ID fields.
  * @param <T> The table type this registry has fields for.
  */
-public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<J, T>> {
+public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     private final T table;
     /**
@@ -204,7 +203,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     }
 
-    public PropertyFieldRegistry(T table, PropertyFieldRegistry<J, T> copyFrom) {
+    public PropertyFieldRegistry(T table, PropertyFieldRegistry<T> copyFrom) {
         this.table = table;
         this.epMapSelect = copyFrom.epMapSelect;
         this.epMapAll = copyFrom.epMapAll;
@@ -288,9 +287,9 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         return exprSet;
     }
 
-    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory, IdManager idManager) {
+    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory, EntityFactories ef) {
         if (property instanceof NavigationPropertyEntity) {
-            addEntry((NavigationPropertyEntity) property, factory, idManager);
+            addEntry((NavigationPropertyEntity) property, factory, ef);
         } else if (property instanceof NavigationPropertyEntitySet) {
             addEntry((NavigationPropertyEntitySet) property, factory);
         } else {
@@ -298,8 +297,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         }
     }
 
-    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, IdManager idManager) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory, idManager));
+    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, EntityFactories ef) {
+        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory, ef));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);
@@ -338,8 +337,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         addEntry(epMapAll, property, null, factory);
     }
 
-    public void addEntryId(IdManager idManager, ExpressionFactory<T> factory) {
-        final ConverterId<T> converterId = new ConverterId<>(factory, idManager, true);
+    public void addEntryId(EntityFactories ef, ExpressionFactory<T> factory) {
+        final ConverterId<T> converterId = new ConverterId<>(factory, ef, true);
         addEntry(table.getEntityType().getPrimaryKey(), factory, converterId);
         addEntry(ModelRegistry.EP_SELFLINK, factory, converterId);
     }
@@ -616,19 +615,19 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
     public static class ConverterId<T> implements ConverterRecord<T> {
 
         private final ExpressionFactory<T> factory;
-        private final IdManager idManager;
+        private final EntityFactories ef;
         private final boolean canEdit;
 
-        public ConverterId(ExpressionFactory<T> factory, IdManager idManager, boolean canEdit) {
+        public ConverterId(ExpressionFactory<T> factory, EntityFactories ef, boolean canEdit) {
             this.factory = factory;
-            this.idManager = idManager;
+            this.ef = ef;
             this.canEdit = canEdit;
         }
 
         @Override
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             final Object rawId = getFieldOrNull(input, factory.get(table));
-            Id id = idManager.fromObject(rawId);
+            Id id = ParserUtils.idFromObject(rawId);
             entity.setProperty(entity.getEntityType().getPrimaryKey(), id);
         }
 
@@ -654,12 +653,12 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
         private final NavigationPropertyMain<Entity> property;
         private final ExpressionFactory<T> factory;
-        private final IdManager idManager;
+        private final EntityFactories ef;
 
-        public ConverterEntity(NavigationPropertyMain<Entity> property, ExpressionFactory<T> factory, IdManager idManager) {
+        public ConverterEntity(NavigationPropertyMain<Entity> property, ExpressionFactory<T> factory, EntityFactories ef) {
             this.property = property;
             this.factory = factory;
-            this.idManager = idManager;
+            this.ef = ef;
         }
 
         @Override
@@ -668,7 +667,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
             if (rawId == null) {
                 return;
             }
-            DefaultEntity childEntity = new DefaultEntity(property.getEntityType(), idManager.fromObject(rawId));
+            DefaultEntity childEntity = new DefaultEntity(property.getEntityType(), ParserUtils.idFromObject(rawId));
             entity.setProperty(property, childEntity);
         }
 

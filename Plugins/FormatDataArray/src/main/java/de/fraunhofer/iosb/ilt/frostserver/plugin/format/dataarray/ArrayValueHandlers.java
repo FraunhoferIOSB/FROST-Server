@@ -22,12 +22,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -63,8 +62,7 @@ public class ArrayValueHandlers {
             return;
         }
 
-        final IdManager idManager = PersistenceManagerFactory.getInstance(settings).getIdManager();
-        ArrayValueHandler idHandler = (Object value, Entity target) -> target.setId(idManager.parseId(value.toString()));
+        ArrayValueHandler idHandler = (Object value, Entity target) -> target.setId(ParserUtils.idFromObject(value));
         handlers.put("id", idHandler);
         handlers.put(AT_IOT_ID, idHandler);
         handlers.put(
@@ -116,7 +114,7 @@ public class ArrayValueHandlers {
             }
         });
         handlers.put("FeatureOfInterest/id", (Object value, Entity target) -> {
-            Id foiId = idManager.parseId(value.toString());
+            Id foiId = ParserUtils.idFromObject(value);
             target.setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, foiId));
         });
 

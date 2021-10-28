@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdUuid;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -36,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -355,4 +359,17 @@ public class EntityType implements Comparable<EntityType> {
         return hash;
     }
 
+    public Id parsePrimaryKey(String input) {
+        Object rawId = primaryKey.getType().parseFromUrl(input);
+        if (rawId instanceof UUID) {
+            return new IdUuid((UUID) rawId);
+        }
+        if (rawId instanceof Number) {
+            return new IdLong(((Number) rawId).longValue());
+        }
+        if (rawId instanceof CharSequence) {
+            return new IdString(rawId.toString());
+        }
+        throw new IllegalArgumentException("Can not use " + ((rawId == null) ? "null" : rawId.getClass().getName()) + " (" + input + ") as an Id");
+    }
 }

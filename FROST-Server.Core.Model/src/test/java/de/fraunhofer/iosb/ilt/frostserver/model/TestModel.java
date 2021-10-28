@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class TestModel {
     public final EntityType ET_HOUSE = new EntityType("House", "Houses");
     public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
 
-    public void initModel(ModelRegistry modelRegistry) {
+    public void initModel(ModelRegistry modelRegistry, String idType) {
         NP_BATHROOMS_HOUSE.setInverses(NP_BATHROOMFOR_ROOM);
         NP_BATHROOMS_HOUSE.setEntityType(ET_ROOM);
         NP_BATHROOMFOR_ROOM.setEntityType(ET_HOUSE);
@@ -62,12 +63,12 @@ public class TestModel {
         NP_STREETS_HOUSE.setInverses(NP_STREETS_HOUSE);
 
         modelRegistry.registerEntityType(ET_STREET);
-        ET_STREET.registerProperty(ModelRegistry.EP_ID_LONG, false)
+        ET_STREET.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(NP_HOUSES_STREET, false);
         modelRegistry.registerEntityType(ET_HOUSE);
-        ET_HOUSE.registerProperty(ModelRegistry.EP_ID_LONG, false)
+        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
@@ -76,7 +77,7 @@ public class TestModel {
                 .registerProperty(NP_ROOMS_HOUSE, false)
                 .registerProperty(NP_BATHROOMS_HOUSE, false);
         modelRegistry.registerEntityType(ET_ROOM);
-        ET_ROOM.registerProperty(ModelRegistry.EP_ID_LONG, false)
+        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
@@ -95,9 +96,9 @@ public class TestModel {
         propertyValues.put(ET_HOUSE, propertyValuesHouse);
         propertyValues.put(ET_ROOM, propertyValuesRoom);
 
-        propertyValuesStreet.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
-        propertyValuesHouse.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
-        propertyValuesRoom.put(ModelRegistry.EP_ID_LONG, new IdLong(1));
+        propertyValuesStreet.put(ET_STREET.getPrimaryKey(), new IdLong(1));
+        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey(), new IdLong(1));
+        propertyValuesRoom.put(ET_ROOM.getPrimaryKey(), new IdLong(1));
         propertyValuesStreet.put(EP_NAME, "StreetName");
         propertyValuesHouse.put(EP_NAME, "HouseName");
         propertyValuesRoom.put(EP_NAME, "RoomName");

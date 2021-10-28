@@ -39,6 +39,10 @@ public class Constants {
     public static final String CONTENT_TYPE_APPLICATION_HTTP = "application/http";
     public static final String CHARSET_UTF8 = "charset=UTF-8";
 
+    public static final String VALUE_ID_TYPE_LONG = "LONG";
+    public static final String VALUE_ID_TYPE_STRING = "STRING";
+    public static final String VALUE_ID_TYPE_UUID = "UUID";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
 
     private Constants() {

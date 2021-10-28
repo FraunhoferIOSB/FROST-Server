@@ -37,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -52,6 +51,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -62,9 +62,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
+import org.jooq.DataType;
 import org.jooq.Delete;
 import org.jooq.Meta;
 import org.jooq.Name;
@@ -74,6 +76,7 @@ import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +84,7 @@ import org.slf4j.LoggerFactory;
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public abstract class PostgresPersistenceManager<J extends Comparable> extends AbstractPersistenceManager {
+public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
     public static final Instant DATETIME_MAX_INSTANT = Instant.parse("9999-12-30T23:59:59.999Z");
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
@@ -93,11 +96,16 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
     private static final String SOURCE_NAME_FROST = "FROST-Source";
 
+    private static final Map<CoreSettings, TableCollection> tableCollections = new HashMap<>();
+
+    private static TableCollection getTableCollection(CoreSettings settings) {
+        return tableCollections.computeIfAbsent(settings, t -> new TableCollection().setModelRegistry(t.getModelRegistry()));
+    }
+
     private boolean initialised = false;
 
-    private final IdManager idManager;
-    private TableCollection<J> tableCollection;
-    private EntityFactories<J> entityFactories;
+    private TableCollection tableCollection;
+    private EntityFactories entityFactories;
 
     private CoreSettings settings;
     private IdGenerationType idGenerationMode;
@@ -109,17 +117,17 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      */
     private DataSize dataSize;
 
-    protected PostgresPersistenceManager(IdManager idManager) {
-        this.idManager = idManager;
+    public PostgresPersistenceManager() {
     }
 
-    public void init(CoreSettings settings, TableCollection<J> tableCollection) {
+    @Override
+    public void init(CoreSettings settings) {
         this.settings = settings;
-        this.tableCollection = tableCollection;
+        this.tableCollection = getTableCollection(settings);
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
-        entityFactories = new EntityFactories(settings.getModelRegistry(), idManager, tableCollection);
+        entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
     }
 
@@ -142,16 +150,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return settings;
     }
 
-    @Override
-    public IdManager getIdManager() {
-        return idManager;
-    }
-
-    public TableCollection<J> getTableCollection() {
+    public TableCollection getTableCollection() {
         return tableCollection;
     }
 
-    public EntityFactories<J> getEntityFactories() {
+    public EntityFactories getEntityFactories() {
         return entityFactories;
     }
 
@@ -192,7 +195,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (idCount < 2) {
             return true;
         }
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
+        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection());
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
@@ -220,7 +223,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
         init();
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
+        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
@@ -248,11 +251,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             }
         }
 
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
+        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder<>(this, path, query, psb, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
@@ -273,22 +276,22 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         init();
-        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
         return table.insertIntoDatabase(this, entity);
     }
 
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         init();
-        EntityFactories<J> ef = getEntityFactories();
+        EntityFactories ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
-        J id = (J) pathElement.getId().getValue();
+        Object id = pathElement.getId().getValue();
         if (!ef.entityExists(this, entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
-        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
         return table.updateInDatabase(this, entity, id);
     }
 
@@ -331,8 +334,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             throw new IllegalArgumentException("Patch did not change anything.");
         }
 
-        StaMainTable<J, ?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, (J) id.getValue());
+        StaMainTable<?> table = getTableCollection().getTableForType(entityType);
+        table.updateInDatabase(this, newEntity, id.getValue());
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -343,8 +346,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException {
         init();
         EntityType type = pathElement.getEntityType();
-        StaMainTable<J, ?> table = getTableCollection().getTableForType(type);
-        table.delete(this, (J) pathElement.getId().getValue());
+        StaMainTable<?> table = getTableCollection().getTableForType(type);
+        table.delete(this, pathElement.getId().getValue());
         return true;
     }
 
@@ -353,7 +356,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         init();
         query.clearSelect();
         query.addSelect(path.getMainElementType().getEntityProperty("id"));
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
+        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
@@ -388,7 +391,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return idGenerationMode;
     }
 
-    protected abstract boolean validateClientSuppliedId(Id entityId);
+    protected boolean validateClientSuppliedId(Id entityId) {
+        return entityId != null && entityId.getValue() != null;
+    }
 
     /**
      * Modify the entity id.
@@ -511,7 +516,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     private void registerModelFields(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-            StaTableDynamic<J> typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            StaTableDynamic typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
                 for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
                     if (handler instanceof FieldMapper) {
@@ -531,7 +536,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     private void registerModelMappings(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-            StaTableDynamic<J> orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            StaTableDynamic orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
                 for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
                     if (handler instanceof FieldMapper) {
@@ -567,35 +572,50 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return tables.get(0);
     }
 
-    private StaTableDynamic<J> getOrCreateMainTable(EntityType entityType, String tableName) {
+    private StaTableDynamic getOrCreateMainTable(EntityType entityType, String tableName) {
         if (entityType == null) {
             throw new IllegalArgumentException("Not implemented yet");
         }
-        StaMainTable<J, ?> table = tableCollection.getTableForType(entityType);
+        StaMainTable<?> table = tableCollection.getTableForType(entityType);
         if (table == null) {
             LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
-            StaTableDynamic<J> newTable = new StaTableDynamic<>(DSL.name(tableName), entityType, tableCollection.getIdType());
+            StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, getDataTypeFor(entityType.getPrimaryKey().name));
             tableCollection.registerTable(entityType, newTable);
             table = newTable;
         }
         if (table instanceof StaTableDynamic) {
-            return (StaTableDynamic<J>) table;
+            return (StaTableDynamic) table;
         }
         throw new IllegalStateException("Table already exists, but is not of type dynamic.");
     }
 
-    public StaLinkTableDynamic<J> getOrCreateLinkTable(String tableName) {
-        StaTable<J, ?> table = tableCollection.getTableForName(tableName);
+    public StaLinkTableDynamic getOrCreateLinkTable(String tableName) {
+        StaTable<?> table = tableCollection.getTableForName(tableName);
         if (table == null) {
             LOGGER.info("  Registering StaLinkTable {}", tableName);
-            StaLinkTableDynamic<J> newTable = new StaLinkTableDynamic<>(DSL.name(tableName), tableCollection.getIdType());
+            StaLinkTableDynamic newTable = new StaLinkTableDynamic(DSL.name(tableName));
             tableCollection.registerTable(newTable);
             table = newTable;
         }
         if (table instanceof StaLinkTableDynamic) {
-            return (StaLinkTableDynamic<J>) table;
+            return (StaLinkTableDynamic) table;
         }
         throw new IllegalStateException("Table already exists, but is not of type StaLinkTableDynamic.");
     }
 
+    public DataType<?> getDataTypeFor(String type) {
+        switch (type.toUpperCase()) {
+            case "Edm.Int64":
+            case Constants.VALUE_ID_TYPE_LONG:
+                return SQLDataType.BIGINT;
+            case "Edm.String":
+            case Constants.VALUE_ID_TYPE_STRING:
+                return SQLDataType.VARCHAR;
+            case "Edm.Guid":
+            case Constants.VALUE_ID_TYPE_UUID:
+                return SQLDataType.UUID;
+            default:
+                throw new IllegalArgumentException("Unknown data type: " + type);
+        }
+    }
 }

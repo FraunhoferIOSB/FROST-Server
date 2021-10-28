@@ -5,7 +5,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -20,6 +19,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.time.OffsetDateTime;
@@ -28,7 +28,6 @@ import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Record1;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -36,7 +35,7 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J, TableImpLocations<J>> {
+public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
 
     public static final String NAME_TABLE = "LOCATIONS";
     public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";
@@ -84,12 +83,12 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<Record, J> colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), getIdType(), this);
+    public final TableField<Record, ?> colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), getIdType(), this);
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -100,29 +99,29 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpLocations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpLocations(DataType<?> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpLocations(Name alias, TableImpLocations<J> aliased, PluginCoreModel pluginCoreModel) {
+    private TableImpLocations(Name alias, TableImpLocations aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpThingsLocations<J> tableThingsLoc = tables.getTableForClass(TableImpThingsLocations.class);
-        final TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
+        final TableCollection tables = getTables();
+        final TableImpThingsLocations tableThingsLoc = tables.getTableForClass(TableImpThingsLocations.class);
+        final TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npThingsLocation, this, tableThingsLoc, tableThings)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getThingId)
                 .setTargetFieldAcc(TableImpThings::getId)
         );
-        final TableImpLocationsHistLocations<J> tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
-        final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
+        final TableImpLocationsHistLocations tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
+        final TableImpHistLocations tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npHistoricalLocationsLocation, this, tableLocHistLoc, tableHistLoc)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
@@ -132,15 +131,14 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpLocations::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpLocations::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epLocation,
                 new ConverterRecordDeflt<>(
-                        (TableImpLocations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpLocations table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colLocation);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
@@ -165,15 +163,15 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     }
 
     @Override
-    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         EntityType linkedEntityType = linkedSet.getEntityType();
         ModelRegistry modelRegistry = getModelRegistry();
         if (linkedEntityType.equals(pluginCoreModel.etThing)) {
-            J locationId = (J) location.getId().getValue();
+            Object locationId = location.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
-            EntityFactories<J> entityFactories = pm.getEntityFactories();
-            final TableCollection<J> tables = getTables();
-            TableImpThingsLocations<J> ttl = tables.getTableForClass(TableImpThingsLocations.class);
+            EntityFactories entityFactories = pm.getEntityFactories();
+            final TableCollection tables = getTables();
+            TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
 
             // Maybe Create new Things and link them to this Location.
             for (Entity t : linkedSet) {
@@ -183,39 +181,40 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
                     throw new NoSuchEntityException("Thing not found.");
                 }
 
-                J thingId = (J) t.getId().getValue();
+                Object thingId = t.getId().getValue();
 
                 // Unlink old Locations from Thing.
-                long delCount = dslContext.delete(ttl).where(ttl.getThingId().eq(thingId)).execute();
+                long delCount = dslContext.delete(ttl)
+                        .where(((TableField) ttl.getThingId()).eq(thingId))
+                        .execute();
                 LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, delCount, thingId);
 
                 // Link new Location to thing.
                 dslContext.insertInto(ttl)
-                        .set(ttl.getThingId(), thingId)
-                        .set(ttl.getLocationId(), locationId)
+                        .set((TableField) ttl.getThingId(), thingId)
+                        .set((TableField) ttl.getLocationId(), locationId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
 
                 // Create HistoricalLocation for Thing
-                TableImpHistLocations<J> qhl = tables.getTableForClass(TableImpHistLocations.class);
-                Record1<J> linkHistLoc = dslContext.insertInto(qhl)
-                        .set(qhl.getThingId(), thingId)
+                TableImpHistLocations qhl = tables.getTableForClass(TableImpHistLocations.class);
+                Object histLocationId = dslContext.insertInto(qhl)
+                        .set((TableField) qhl.getThingId(), thingId)
                         .set(qhl.time, OffsetDateTime.now(Constants.UTC))
                         .returningResult(qhl.getId())
-                        .fetchOne();
-                J histLocationId = linkHistLoc.component1();
+                        .fetchOne(0);
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
                 // Link Location to HistoricalLocation.
-                TableImpLocationsHistLocations<J> qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
+                TableImpLocationsHistLocations qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
                 dslContext.insertInto(qlhl)
-                        .set(qlhl.getHistLocationId(), histLocationId)
-                        .set(qlhl.getLocationId(), locationId)
+                        .set((TableField) qlhl.getHistLocationId(), histLocationId)
+                        .set((TableField) qlhl.getLocationId(), locationId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, pm.getIdManager().fromObject(histLocationId));
+                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, ParserUtils.idFromObject(histLocationId));
                 newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
@@ -229,18 +228,18 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     }
 
     @Override
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
-        final TableCollection<J> tables = getTables();
+        final TableCollection tables = getTables();
         // Also delete all historicalLocations that no longer reference any location
-        TableImpHistLocations<J> thl = tables.getTableForClass(TableImpHistLocations.class);
-        TableImpLocationsHistLocations<J> tlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
+        TableImpHistLocations thl = tables.getTableForClass(TableImpHistLocations.class);
+        TableImpLocationsHistLocations tlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
         int count = pm.getDslContext()
                 .delete(thl)
-                .where(thl.getId().in(
+                .where(((TableField) thl.getId()).in(
                         DSL.select(thl.getId())
                                 .from(thl)
-                                .leftJoin(tlhl).on(thl.getId().eq(tlhl.getHistLocationId()))
+                                .leftJoin(tlhl).on(((TableField) thl.getId()).eq(tlhl.getHistLocationId()))
                                 .where(tlhl.getLocationId().isNull())
                 ))
                 .execute();
@@ -254,21 +253,21 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getGenFoiId() {
+    public TableField<Record, ?> getGenFoiId() {
         return colGenFoiId;
     }
 
     @Override
-    public TableImpLocations<J> as(Name alias) {
-        return new TableImpLocations<>(alias, this, pluginCoreModel).initCustomFields();
+    public TableImpLocations as(Name alias) {
+        return new TableImpLocations(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpLocations<J> getThis() {
+    public TableImpLocations getThis() {
         return this;
     }
 

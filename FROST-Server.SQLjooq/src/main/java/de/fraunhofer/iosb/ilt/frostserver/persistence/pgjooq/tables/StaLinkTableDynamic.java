@@ -17,25 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import org.jooq.DataType;
 import org.jooq.Name;
 
 /**
  *
  * @author hylke
  */
-public class StaLinkTableDynamic<J extends Comparable> extends StaLinkTable<J, StaLinkTableDynamic<J>> {
+public class StaLinkTableDynamic extends StaLinkTable<StaLinkTableDynamic> {
 
     private final Name tableName;
     private int idFieldIdx;
 
-    public StaLinkTableDynamic(Name tableName, DataType<J> idType) {
-        super(idType, tableName, null);
+    public StaLinkTableDynamic(Name tableName) {
+        super(tableName, null);
         this.tableName = tableName;
     }
 
-    private StaLinkTableDynamic(Name alias, StaLinkTableDynamic<J> aliased, int idFieldIdx) {
-        super(aliased.getIdType(), alias, aliased);
+    private StaLinkTableDynamic(Name alias, StaLinkTableDynamic aliased, int idFieldIdx) {
+        super(alias, aliased);
         this.tableName = aliased.getTableName();
         this.idFieldIdx = idFieldIdx;
     }
@@ -45,12 +44,12 @@ public class StaLinkTableDynamic<J extends Comparable> extends StaLinkTable<J, S
     }
 
     @Override
-    public StaLinkTableDynamic<J> as(Name as) {
-        return new StaLinkTableDynamic<>(as, this, idFieldIdx).initCustomFields();
+    public StaLinkTableDynamic as(Name as) {
+        return new StaLinkTableDynamic(as, this, idFieldIdx).initCustomFields();
     }
 
     @Override
-    public StaLinkTableDynamic<J> getThis() {
+    public StaLinkTableDynamic getThis() {
         return this;
     }
 

@@ -66,9 +66,8 @@ import org.slf4j.LoggerFactory;
  * Builds a path for a query. Should not be re-used.
  *
  * @author scf
- * @param <J> The type of the EP_ID fields.
  */
-public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
+public class QueryBuilder implements ResourcePathVisitor {
 
     /**
      * The logger for this class.
@@ -84,15 +83,15 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public static final String ALIAS_PREFIX = "e";
     public static final String DEFAULT_PREFIX = QueryBuilder.ALIAS_PREFIX + "0";
 
-    private final PostgresPersistenceManager<J> pm;
+    private final PostgresPersistenceManager pm;
     private final CoreSettings coreSettings;
     private final PersistenceSettings settings;
-    private final TableCollection<J> tableCollection;
+    private final TableCollection tableCollection;
     private Query staQuery;
 
     private Set<Property> selectedProperties;
-    private TableRef<J> lastPath;
-    private TableRef<J> mainTable;
+    private TableRef lastPath;
+    private TableRef mainTable;
     private NavigationPropertyMain lastNavProp;
 
     private boolean forPath = false;
@@ -105,16 +104,16 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private boolean single = false;
     private boolean parsed = false;
 
-    private QueryState<J, ?> queryState;
+    private QueryState<?> queryState;
 
-    public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, TableCollection<J> tableCollection) {
+    public QueryBuilder(PostgresPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
         this.pm = pm;
         this.coreSettings = coreSettings;
         this.settings = coreSettings.getPersistenceSettings();
         this.tableCollection = tableCollection;
     }
 
-    public QueryState<J, ?> getQueryState() {
+    public QueryState<?> getQueryState() {
         return queryState;
     }
 
@@ -197,12 +196,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
+        final StaMainTable<?> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().entityName, new IllegalArgumentException("Unknown type for delete"));
         }
 
-        SelectConditionStep<Record1<J>> idSelect = DSL.select(queryState.getSqlMainIdField())
+        SelectConditionStep idSelect = DSL.select(queryState.getSqlMainIdField())
                 .from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere());
 
@@ -218,7 +217,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return delete;
     }
 
-    public QueryBuilder<J> forTypeAndId(EntityType entityType, Id id) {
+    public QueryBuilder forTypeAndId(EntityType entityType, Id id) {
         if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
@@ -228,7 +227,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return this;
     }
 
-    public QueryBuilder<J> forPath(ResourcePath path) {
+    public QueryBuilder forPath(ResourcePath path) {
         if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
@@ -238,12 +237,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return this;
     }
 
-    public QueryBuilder<J> forUpdate(boolean forUpdate) {
+    public QueryBuilder forUpdate(boolean forUpdate) {
         this.forUpdate = forUpdate;
         return this;
     }
 
-    public QueryBuilder<J> usingQuery(Query query) {
+    public QueryBuilder usingQuery(Query query) {
         this.staQuery = query;
         return this;
     }
@@ -306,7 +305,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
-            PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -321,7 +320,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             queryState.setFilter(true);
             Expression filter = query.getFilter();
             if (filter != null) {
-                PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
+                PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
         }
@@ -361,19 +360,19 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef<J> queryEntityType(PathElementEntityType pe, Id targetId, TableRef<J> last) {
+    public TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
         if (last != null) {
             // TODO: fix to use navProp, not entityType
-            TableRef<J> existingJoin = last.getJoin(entityType);
+            TableRef existingJoin = last.getJoin(entityType);
             if (existingJoin != null) {
                 return existingJoin;
             }
         }
 
-        TableRef<J> result;
+        TableRef result;
         if (last == null) {
-            StaMainTable<J, ?> tableForType = tableCollection.getTableForType(entityType).as(DEFAULT_PREFIX);
+            StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).as(DEFAULT_PREFIX);
             queryState = new QueryState(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = createJoinedRef(null, entityType, tableForType);
         } else {
@@ -385,10 +384,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (targetId != null) {
-            if (!targetId.getBasicPersistenceType().equals(tableCollection.getBasicPersistenceType())) {
-                throw new IllegalArgumentException("This implementation expects " + tableCollection.getBasicPersistenceType() + " ids, not " + targetId.getBasicPersistenceType());
-            }
-            J id = (J) targetId.asBasicPersistenceType();
+            Object id = targetId.asBasicPersistenceType();
             queryState.setSqlWhere(queryState.getSqlWhere().and(result.getTable().getId().eq(id)));
         }
 
@@ -407,7 +403,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef<J> queryEntityType(NavigationProperty np, TableRef<J> last) {
+    public TableRef queryEntityType(NavigationProperty np, TableRef last) {
         if (mainTable == null) {
             throw new IllegalStateException("mainTable should not be null");
         }
@@ -416,7 +412,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         final EntityType entityType = np.getEntityType();
-        TableRef<J> existingJoin = last.getJoin(entityType);
+        TableRef existingJoin = last.getJoin(entityType);
         if (existingJoin != null) {
             return existingJoin;
         }
@@ -428,20 +424,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
     }
 
-    public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
-        StaMainTable<J, ?> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<J, ?> targetAliased = target.as(queryState.getNextAlias());
-        Field<J> targetField = targetAliased.getId();
+    public TableRef queryEntityType(EntityType targetType, TableRef sourceRef, Field sourceIdField) {
+        StaMainTable<?> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<?> targetAliased = target.as(queryState.getNextAlias());
+        Field<?> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }
 
-    public TableCollection<J> getTableCollection() {
+    public TableCollection getTableCollection() {
         return tableCollection;
     }
 
-    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?> table) {
-        TableRef<J> newRef = new TableRef<>(type, table);
+    public static TableRef createJoinedRef(TableRef base, EntityType type, StaMainTable<?> table) {
+        TableRef newRef = new TableRef(type, table);
         if (base != null) {
             base.addJoin(type, newRef);
         }

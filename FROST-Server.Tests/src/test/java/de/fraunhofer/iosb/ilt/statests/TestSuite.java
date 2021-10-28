@@ -22,9 +22,11 @@ import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletV1P0;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests;
@@ -124,10 +126,8 @@ public class TestSuite {
     public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
     public static final String KEY_HAS_ACTUATION = "hasActuation";
 
-    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
-    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
-    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
-    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong";
+    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
+    public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_LONG;
     public static final String VAL_PG_DB = "sensorthings";
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";
@@ -278,6 +278,8 @@ public class TestSuite {
         handler.setInitParameter(CoreSettings.TAG_LOG_SENSITIVE_DATA, Boolean.TRUE.toString());
         handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+
+        handler.setInitParameter(CoreModelSettings.TAG_ID_TYPE_DEFAULT, Constants.VALUE_ID_TYPE_LONG);
 
         handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         handler.setInitParameter("persistence.autoUpdateDatabase", "true");

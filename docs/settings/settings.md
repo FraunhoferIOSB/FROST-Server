@@ -150,14 +150,8 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
 
 * **persistence.persistenceManagerImplementationClass:**  
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
-  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong`:**  
-    Default value, using Long values for entity ids, generated in sequence.
-  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString`:**  
-    Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.  
-    When using this implementation, make sure you execute the command `CREATE EXTENSION "uuid-ossp";` on the database.
-  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid`:**  
-    Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.  
-    When using this implementation, make sure you execute the command `CREATE EXTENSION "uuid-ossp";` on the database.
+  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManager`:**  
+    Default value, for PostgreSQL.
 * **persistence.alwaysOrderbyId:**  
   Always add an 'orderby=id asc' to queries to ensure consistent paging.
 * **persistence.autoUpdateDatabase:**  

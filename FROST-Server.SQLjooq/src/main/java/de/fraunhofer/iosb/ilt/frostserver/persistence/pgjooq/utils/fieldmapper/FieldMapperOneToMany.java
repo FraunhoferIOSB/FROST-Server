@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -65,14 +65,14 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
 
-        PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
-        IdManager idManager = ppm.getIdManager();
-        pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
+        PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
+        EntityFactories ef = ppm.getEntityFactories();
+        pfReg.addEntry(navProp, t -> t.field(fieldIdx), ef);
 
         final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
         staTable.registerRelation(new RelationOneToMany(navProp, staTable, staTableOther)
@@ -83,8 +83,8 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
         final DefNavigationProperty.Inverse inverse = parent.getInverse();
         if (inverse != null) {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
-            final PropertyFieldRegistry<J, T> pfRegOther = staTableOther.getPropertyFieldRegistry();
-            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
+            final PropertyFieldRegistry<T> pfRegOther = staTableOther.getPropertyFieldRegistry();
+            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ef);
             staTableOther.registerRelation(new RelationOneToMany(navPropInverse, staTableOther, staTable)
                     .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
                     .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdx))

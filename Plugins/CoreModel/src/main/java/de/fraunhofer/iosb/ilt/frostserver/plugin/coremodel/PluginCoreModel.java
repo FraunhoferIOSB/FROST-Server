@@ -28,9 +28,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
@@ -39,10 +41,8 @@ import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
+public class PluginCoreModel implements PluginRootDocument, PluginModel, LiquibaseUser {
 
     public static final String NAME_ET_DATASTREAM = "Datastream";
     public static final String NAME_NP_DATASTREAM = "Datastream";
@@ -135,6 +135,15 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     public EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeSimpleCustom.STA_TIMEINTERVAL);
 
+    public EntityPropertyMain<?> epIdDatastream;
+    public EntityPropertyMain<?> epIdFeature;
+    public EntityPropertyMain<?> epIdHistLocation;
+    public EntityPropertyMain<?> epIdLocation;
+    public EntityPropertyMain<?> epIdObsProp;
+    public EntityPropertyMain<?> epIdObservation;
+    public EntityPropertyMain<?> epIdSensor;
+    public EntityPropertyMain<?> epIdThing;
+
     public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
     public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
     public final NavigationPropertyEntitySet npDatastreamsSensor = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
@@ -172,13 +181,11 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     public final EntityType etFeatureOfInterest = new EntityType(NAME_NP_FEATUREOFINTEREST, NAME_NP_FEATURESOFINTEREST);
     public final EntityType etDatastream = new EntityType(NAME_NP_DATASTREAM, NAME_NP_DATASTREAMS);
 
-    @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_CORE_MODEL = "coreModel.enable";
-
     private static final List<String> REQUIREMENTS_CORE_MODEL = Arrays.asList(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel");
 
     private CoreSettings settings;
+    private CoreModelSettings modelSettings;
     private boolean enabled;
     private boolean fullyInitialised;
 
@@ -190,8 +197,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, CoreModelSettings.class);
         if (enabled) {
+            modelSettings = new CoreModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
     }
@@ -220,12 +228,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerEntityTypes() {
         LOGGER.info("Initialising Core Model Types...");
+        ModelRegistry mr = settings.getModelRegistry();
+
         eptUom = new TypeComplex("Sta.UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
                 .addProperty("name", EDM_STRING)
                 .addProperty("symbol", EDM_STRING)
                 .addProperty("definition", EDM_STRING);
-        settings.getModelRegistry()
-                .registerPropertyType(eptUom)
+        mr.registerPropertyType(eptUom)
                 .registerEntityType(etDatastream)
                 .registerEntityType(etFeatureOfInterest)
                 .registerEntityType(etHistoricalLocation)
@@ -234,6 +243,14 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerEntityType(etObservedProperty)
                 .registerEntityType(etSensor)
                 .registerEntityType(etThing);
+        epIdDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeDatastream), "id");
+        epIdFeature = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeFeature), "id");
+        epIdHistLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeHistLoc), "id");
+        epIdLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeLocation), "id");
+        epIdObsProp = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObsProp), "id");
+        epIdObservation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObservation), "id");
+        epIdSensor = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeSensor), "id");
+        epIdThing = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeThing), "id");
         epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, eptUom, true, false);
     }
 
@@ -242,7 +259,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
         LOGGER.info("Linking Core Model Types...");
         // ToDo: Fix IDs
         etDatastream
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdDatastream, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -257,7 +274,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npThingDatasteam, true)
                 .registerProperty(npObservationsDatastream, false);
         etFeatureOfInterest
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdFeature, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -266,13 +283,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npObservationsFeature, false);
         etHistoricalLocation
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdHistLocation, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epTime, true)
                 .registerProperty(npThingHistLoc, true)
                 .registerProperty(npLocationsHistLoc, false);
         etLocation
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdLocation, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -282,7 +299,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npHistoricalLocationsLocation, false)
                 .registerProperty(npThingsLocation, false);
         etObservation
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdObservation, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epPhenomenonTime, false)
                 .registerProperty(epResultTime, false)
@@ -293,7 +310,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npDatastreamObservation, true)
                 .registerProperty(npFeatureOfInterestObservation, false);
         etObservedProperty
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdObsProp, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDefinition, true)
@@ -301,7 +318,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreamsObsProp, false);
         etSensor
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdSensor, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -310,7 +327,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreamsSensor, false);
         etThing
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdThing, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
@@ -322,17 +339,24 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
-            DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(etDatastream, new TableImpDatastreams(idType, this));
-            tableCollection.registerTable(etFeatureOfInterest, new TableImpFeatures(idType, this));
-            tableCollection.registerTable(etHistoricalLocation, new TableImpHistLocations(idType, this));
-            tableCollection.registerTable(etLocation, new TableImpLocations(idType, this));
-            tableCollection.registerTable(new TableImpLocationsHistLocations<>(idType));
-            tableCollection.registerTable(etObservation, new TableImpObservations(idType, this));
-            tableCollection.registerTable(etObservedProperty, new TableImpObsProperties(idType, this));
-            tableCollection.registerTable(etSensor, new TableImpSensors(idType, this));
-            tableCollection.registerTable(etThing, new TableImpThings(idType, this));
-            tableCollection.registerTable(new TableImpThingsLocations<>(idType));
+            final DataType dataTypeDstr = ppm.getDataTypeFor(modelSettings.idTypeDatastream);
+            final DataType dataTypeFeat = ppm.getDataTypeFor(modelSettings.idTypeFeature);
+            final DataType dataTypeHist = ppm.getDataTypeFor(modelSettings.idTypeHistLoc);
+            final DataType dataTypeLctn = ppm.getDataTypeFor(modelSettings.idTypeLocation);
+            final DataType dataTypeObPr = ppm.getDataTypeFor(modelSettings.idTypeObsProp);
+            final DataType dataTypeObsr = ppm.getDataTypeFor(modelSettings.idTypeObservation);
+            final DataType dataTypeSnsr = ppm.getDataTypeFor(modelSettings.idTypeSensor);
+            final DataType dataTypeThng = ppm.getDataTypeFor(modelSettings.idTypeThing);
+            tableCollection.registerTable(etDatastream, new TableImpDatastreams(dataTypeDstr, dataTypeObPr, dataTypeSnsr, dataTypeThng, this));
+            tableCollection.registerTable(etFeatureOfInterest, new TableImpFeatures(dataTypeFeat, this));
+            tableCollection.registerTable(etHistoricalLocation, new TableImpHistLocations(dataTypeHist, this));
+            tableCollection.registerTable(etLocation, new TableImpLocations(dataTypeLctn, this));
+            tableCollection.registerTable(new TableImpLocationsHistLocations(dataTypeLctn, dataTypeHist));
+            tableCollection.registerTable(etObservation, new TableImpObservations(dataTypeObsr, dataTypeDstr, dataTypeFeat, this));
+            tableCollection.registerTable(etObservedProperty, new TableImpObsProperties(dataTypeObPr, this));
+            tableCollection.registerTable(etSensor, new TableImpSensors(dataTypeSnsr, this));
+            tableCollection.registerTable(etThing, new TableImpThings(dataTypeThng, this));
+            tableCollection.registerTable(new TableImpThingsLocations(dataTypeThng, dataTypeLctn));
         }
         fullyInitialised = true;
         return true;
@@ -343,7 +367,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.checkForUpgrades(fileName);
             }
             return "Unknown persistence manager class";
@@ -355,7 +379,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.doUpgrades(fileName, out);
             }
             out.append("Unknown persistence manager class");

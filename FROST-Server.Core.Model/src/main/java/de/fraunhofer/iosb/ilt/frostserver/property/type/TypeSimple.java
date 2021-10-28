@@ -25,24 +25,50 @@ import com.fasterxml.jackson.core.type.TypeReference;
  */
 public abstract class TypeSimple extends PropertyType {
 
+    private Parser parser;
     private final TypeSimplePrimitive underlyingType;
 
     protected TypeSimple(String name, String description, TypeReference typeReference) {
+        this(name, description, typeReference, null);
+    }
+
+    protected TypeSimple(String name, String description, TypeReference typeReference, Parser parser) {
         super(name, description, typeReference);
         if (this instanceof TypeSimplePrimitive) {
             this.underlyingType = (TypeSimplePrimitive) this;
         } else {
             throw new IllegalArgumentException("This constuctor can only be used by subclass TypeSimplePrimitive or TypeSimpleSet");
         }
+        this.parser = parser;
     }
 
     protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference) {
+        this(name, description, underlyingType, typeReference, null);
+    }
+
+    protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference, Parser parser) {
         super(name, description, typeReference);
         this.underlyingType = underlyingType;
+        this.parser = parser;
     }
 
     public TypeSimplePrimitive getUnderlyingType() {
         return underlyingType;
     }
 
+    @Override
+    public Object parseFromUrl(String input) {
+        if (parser != null) {
+            return parser.parseFromUrl(input);
+        }
+        if (underlyingType != this) {
+            return underlyingType.parseFromUrl(input);
+        }
+        return super.parseFromUrl(input);
+    }
+
+    public static interface Parser {
+
+        public Object parseFromUrl(String input);
+    }
 }

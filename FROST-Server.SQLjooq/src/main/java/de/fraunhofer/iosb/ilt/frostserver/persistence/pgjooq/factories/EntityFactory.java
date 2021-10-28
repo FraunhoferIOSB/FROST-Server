@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public interface EntityFactory< J extends Comparable> {
+public interface EntityFactory {
 
     /**
      * Insert the given entity into the database as a new entity.
@@ -41,7 +41,7 @@ public interface EntityFactory< J extends Comparable> {
      * @throws IncompleteEntityException If the entity is not complete and can
      * thus not be inserted.
      */
-    public boolean insert(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insert(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Update the given entity in the database.
@@ -55,7 +55,7 @@ public interface EntityFactory< J extends Comparable> {
      * @throws IncompleteEntityException If the update can not happen because
      * required properties are missing.
      */
-    public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage update(PostgresPersistenceManager pm, Entity entity, Object entityId) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Delete the entity with the given id.
@@ -64,6 +64,6 @@ public interface EntityFactory< J extends Comparable> {
      * @param entityId The id of the entity to delete.
      * @throws NoSuchEntityException If there was no entity with the given id.
      */
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException;
 
 }

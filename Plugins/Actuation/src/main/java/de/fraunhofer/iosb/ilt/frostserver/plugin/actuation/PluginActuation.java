@@ -23,10 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
@@ -35,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
@@ -65,6 +66,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
     public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
+    public EntityPropertyMain<?> epIdActuator;
+    public EntityPropertyMain<?> epIdTask;
+    public EntityPropertyMain<?> epIdTaskingCap;
 
     public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR);
     public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");
@@ -78,9 +82,6 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     public final EntityType etTask = new EntityType(TASK, TASKS);
     public final EntityType etTaskingCapability = new EntityType(TASKING_CAPABILITY, TASKING_CAPABILITIES);
 
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_ACTUATION = "actuation.enable";
-
     private static final List<String> REQUIREMENTS_ACTUATION = Arrays.asList(
             "http://www.opengis.net/spec/iot_tasking/1.0/req/tasking-capability",
             "http://www.opengis.net/spec/iot_tasking/1.0/req/task",
@@ -90,6 +91,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             "http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt");
 
     private CoreSettings settings;
+    private ActuationModelSettings modelSettings;
     private boolean enabled;
     private boolean fullyInitialised;
 
@@ -101,8 +103,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, ActuationModelSettings.class);
         if (enabled) {
+            modelSettings = new ActuationModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
     }
@@ -131,10 +134,15 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerEntityTypes() {
         LOGGER.info("Initialising Actuation Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityType(etActuator);
-        modelRegistry.registerEntityType(etTask);
-        modelRegistry.registerEntityType(etTaskingCapability);
+        ModelRegistry mr = settings.getModelRegistry();
+
+        mr.registerEntityType(etActuator);
+        mr.registerEntityType(etTask);
+        mr.registerEntityType(etTaskingCapability);
+
+        epIdActuator = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeActuator), "id");
+        epIdTask = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTask), "id");
+        epIdTaskingCap = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTaskingCap), "id");
     }
 
     @Override
@@ -146,7 +154,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         }
         // ToDo: Fix IDs
         etActuator
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdActuator, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
@@ -155,13 +163,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npTaskingCapabilitiesActuator, false);
         etTask
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdTask, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
                 .registerProperty(npTaskingCapabilityTask, true);
         etTaskingCapability
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdTaskingCap, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
@@ -175,10 +183,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
-            DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(etActuator, new TableImpActuators(idType, this, pluginCoreModel));
-            tableCollection.registerTable(etTask, new TableImpTasks(idType, this, pluginCoreModel));
-            tableCollection.registerTable(etTaskingCapability, new TableImpTaskingCapabilities(idType, this, pluginCoreModel));
+            final DataType dataTypeActr = ppm.getDataTypeFor(modelSettings.idTypeActuator);
+            final DataType dataTypeTask = ppm.getDataTypeFor(modelSettings.idTypeTask);
+            final DataType dataTypeTCap = ppm.getDataTypeFor(modelSettings.idTypeTaskingCap);
+            final DataType dataTypeThng = tableCollection.getTableForType(pluginCoreModel.etThing).getId().getDataType();
+            tableCollection.registerTable(etActuator, new TableImpActuators(dataTypeActr, this, pluginCoreModel));
+            tableCollection.registerTable(etTask, new TableImpTasks(dataTypeTask, dataTypeTCap, this, pluginCoreModel));
+            tableCollection.registerTable(etTaskingCapability, new TableImpTaskingCapabilities(dataTypeTCap, dataTypeActr, dataTypeThng, this, pluginCoreModel));
         }
         fullyInitialised = true;
         return true;
@@ -189,7 +200,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.checkForUpgrades(fileName);
             }
             return "Unknown persistence manager class";
@@ -201,7 +212,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.doUpgrades(fileName, out);
             }
             out.append("Unknown persistence manager class");

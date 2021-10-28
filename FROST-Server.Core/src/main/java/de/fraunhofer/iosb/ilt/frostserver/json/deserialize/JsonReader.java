@@ -34,7 +34,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
@@ -88,7 +87,6 @@ public class JsonReader {
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             CustomEntityDeserializer.getInstance(modelRegistry, entityType);
         }
-        module.addDeserializer(Id.class, new IdDeserializer());
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer(modelRegistry));
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());

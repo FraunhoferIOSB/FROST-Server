@@ -31,6 +31,6 @@ public interface FieldMapper extends PropertyPersistenceMapper {
 
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable);
 
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable);
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable);
 
 }

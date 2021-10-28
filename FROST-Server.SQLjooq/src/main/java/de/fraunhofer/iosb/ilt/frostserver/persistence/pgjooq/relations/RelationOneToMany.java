@@ -32,11 +32,10 @@ import org.slf4j.LoggerFactory;
  * A relation from a source table to a target table.
  *
  * @author hylke
- * @param <J> The ID type
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J, S> {
+public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable<T>> implements Relation<S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationOneToMany.class.getName());
     /**
@@ -52,7 +51,7 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
     /**
      * The field on the source side that defines the relation.
      */
-    private FieldAccessor<J, S> sourceFieldAccessor;
+    private FieldAccessor<S> sourceFieldAccessor;
 
     /**
      * The table that is the target side of the relation.
@@ -62,7 +61,7 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
     /**
      * The field on the target side that defines the relation.
      */
-    private FieldAccessor<J, T> targetFieldAccessor;
+    private FieldAccessor<T> targetFieldAccessor;
 
     /**
      * Flag indicating if following this relation means the query needs to be
@@ -85,22 +84,22 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
         this.distinctRequired = distinctRequired;
     }
 
-    public RelationOneToMany<J, S, T> setSourceFieldAccessor(FieldAccessor<J, S> sourceFieldAccessor) {
+    public RelationOneToMany<S, T> setSourceFieldAccessor(FieldAccessor<S> sourceFieldAccessor) {
         this.sourceFieldAccessor = sourceFieldAccessor;
         return this;
     }
 
-    public RelationOneToMany<J, S, T> setTargetFieldAccessor(FieldAccessor<J, T> targetFieldAccessor) {
+    public RelationOneToMany<S, T> setTargetFieldAccessor(FieldAccessor<T> targetFieldAccessor) {
         this.targetFieldAccessor = targetFieldAccessor;
         return this;
     }
 
     @Override
-    public TableRef<J> join(S joinSource, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
-        Field<J> sourceField = sourceFieldAccessor.getField(joinSource);
+    public TableRef join(S joinSource, QueryState<?> queryState, TableRef sourceRef) {
+        Field<?> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        Field<J> targetField = targetFieldAccessor.getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceField)));
+        Field<?> targetField = targetFieldAccessor.getField(targetAliased);
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(((Field) targetField).eq(sourceField)));
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);
         }
@@ -117,12 +116,12 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
      * @param targetId The target id of the link.
      */
     @Override
-    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+    public void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
         int count = pm.getDslContext().update(target)
-                .set(targetFieldAccessor.getField(target), sourceId)
+                .set((Field) targetFieldAccessor.getField(target), sourceId)
                 .where(target.getId().eq(targetId))
                 .execute();
         if (count != 1) {

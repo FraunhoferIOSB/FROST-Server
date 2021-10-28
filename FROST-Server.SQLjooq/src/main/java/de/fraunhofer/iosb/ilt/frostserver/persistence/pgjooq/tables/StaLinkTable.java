@@ -30,17 +30,14 @@ import org.jooq.impl.TableImpl;
 /**
  *
  * @author hylke
- * @param <J> The type of the ID fields.
  * @param <T> The exact type of the implementing class.
  */
-public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<J, T>> extends TableImpl<Record> implements StaTable<J, T> {
+public abstract class StaLinkTable<T extends StaLinkTable<T>> extends TableImpl<Record> implements StaTable<T> {
 
-    private final DataType<J> idType;
     private List<CustomField> customFields;
 
-    protected StaLinkTable(DataType<J> idType, Name alias, StaLinkTable<J, T> aliased) {
+    protected StaLinkTable(Name alias, StaLinkTable<T> aliased) {
         super(alias, null, aliased);
-        this.idType = idType;
         if (aliased == null) {
             customFields = new ArrayList<>();
         } else {
@@ -53,10 +50,6 @@ public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<
         customFields.add(new CustomField(name, type, binding));
         TableField newField = createField(name, type, "", binding);
         return fieldsRow().indexOf(newField);
-    }
-
-    public DataType<J> getIdType() {
-        return idType;
     }
 
     /**
@@ -72,10 +65,10 @@ public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<
     }
 
     @Override
-    public abstract StaLinkTable<J, T> as(Name as);
+    public abstract StaLinkTable<T> as(Name as);
 
     @Override
-    public final StaLinkTable<J, T> as(String alias) {
+    public final StaLinkTable<T> as(String alias) {
         return as(DSL.name(alias));
     }
 

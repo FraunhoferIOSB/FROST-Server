@@ -17,13 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdUuid;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.UUID;
 
 /**
  *
@@ -35,12 +39,25 @@ public class ParserUtils {
         // Utility class.
     }
 
-    public static Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
+    public static Query parsePathAndQuery(String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), idManager, serviceRootUrl, version, pathString);
+        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), serviceRootUrl, version, pathString);
         return QueryParser.parseQuery(queryString, settings, path).validate(path.getMainElementType());
+    }
+
+    public static Id idFromObject(Object input) {
+        if (input instanceof UUID) {
+            return new IdUuid((UUID) input);
+        }
+        if (input instanceof Number) {
+            return new IdLong(((Number) input).longValue());
+        }
+        if (input instanceof CharSequence) {
+            return new IdString(input.toString());
+        }
+        throw new IllegalArgumentException("Can not use " + ((input == null) ? "null" : input.getClass().getName()) + " (" + input + ") as an Id");
     }
 
 }

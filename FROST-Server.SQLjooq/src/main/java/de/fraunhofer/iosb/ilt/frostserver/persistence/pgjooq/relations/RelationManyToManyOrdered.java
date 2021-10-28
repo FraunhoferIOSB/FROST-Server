@@ -33,43 +33,42 @@ import org.jooq.Field;
  * by a long value.
  *
  * @author hylke
- * @param <J> The type of the identifiers used in the database.
  * @param <S> The source table.
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> extends RelationManyToMany<J, S, L, T> {
+public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaTable<L>, T extends StaMainTable<T>> extends RelationManyToMany<S, L, T> {
 
     /**
      * The field used for the ordering.
      */
-    private FieldAccessor<Integer, L> orderFieldAcc;
+    private FieldAccessor<L> orderFieldAcc;
     private boolean alwaysDistinct = false;
 
     public RelationManyToManyOrdered(NavigationPropertyMain navProp, S source, L linkTable, T target) {
         super(navProp, source, linkTable, target);
     }
 
-    public RelationManyToManyOrdered<J, S, L, T> setOrderFieldAcc(FieldAccessor<Integer, L> orderFieldAcc) {
+    public RelationManyToManyOrdered<S, L, T> setOrderFieldAcc(FieldAccessor<L> orderFieldAcc) {
         this.orderFieldAcc = orderFieldAcc;
         return this;
     }
 
-    public RelationManyToManyOrdered<J, S, L, T> setAlwaysDistinct(boolean alwaysDistinct) {
+    public RelationManyToManyOrdered<S, L, T> setAlwaysDistinct(boolean alwaysDistinct) {
         this.alwaysDistinct = alwaysDistinct;
         return this;
     }
 
     @Override
-    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
         T targetAliased = (T) getTarget().as(queryState.getNextAlias());
         L linkTableAliased = (L) getLinkTable().as(queryState.getNextAlias());
-        Field<J> sourceField = getSourceFieldAcc().getField(source);
-        Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
-        Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
-        Field<J> targetField = getTargetFieldAcc().getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
+        Field<?> sourceField = getSourceFieldAcc().getField(source);
+        Field<?> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
+        Field<?> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
+        Field<?> targetField = getTargetFieldAcc().getField(targetAliased);
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(((Field) sourceLinkField).eq(sourceField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(((Field) targetField).eq(targetLinkField)));
         if (alwaysDistinct || queryState.isFilter()) {
             queryState.setDistinctRequired(true);
         } else {
@@ -80,11 +79,11 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     }
 
     @Override
-    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+    public void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
         final DSLContext dslContext = pm.getDslContext();
         final L linkTable = getLinkTable();
-        final Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
-        final Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
+        final Field<Object> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
+        final Field<Object> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
         final Field<Integer> orderField = orderFieldAcc.getField(linkTable);
         dslContext.insertInto(linkTable)
                 .set(sourceLinkField, sourceId)

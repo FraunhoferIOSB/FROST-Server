@@ -368,7 +368,6 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
@@ -452,7 +451,6 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     urlPath);
@@ -605,7 +603,6 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());
@@ -695,7 +692,6 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    getPm().getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath());

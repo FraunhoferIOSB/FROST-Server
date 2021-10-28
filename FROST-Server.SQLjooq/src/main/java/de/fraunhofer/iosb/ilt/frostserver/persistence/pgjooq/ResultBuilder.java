@@ -42,6 +42,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +68,11 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
-    private final PostgresPersistenceManager<J> pm;
+    private final PostgresPersistenceManager pm;
     private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
     private final Query staQuery;
-    private final QueryBuilder<J> sqlQueryBuilder;
+    private final QueryBuilder sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
     private final CustomLinksHelper customLinksHelper;
     private final DataSize dataSize;
@@ -91,7 +92,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
      * @param sqlQueryBuilder The configured sql query builder to use for
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder, DataSize dataSize) {
+    public ResultBuilder(PostgresPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder, DataSize dataSize) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;
@@ -139,7 +140,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             return;
         }
 
-        QueryState<J, ?> queryState = sqlQueryBuilder.getQueryState();
+        QueryState<?> queryState = sqlQueryBuilder.getQueryState();
         Entity entity = queryState.entityFromQuery(results.get(0), new DataSize(pm.getCoreSettings().getDataSizeMax()));
 
         if (entity == null) {
@@ -193,7 +194,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
     private Entity loadEntity(EntityType type, Object id, Expand expand) {
         try {
-            return pm.get(type, pm.getIdManager().fromObject(id), expand.getSubQuery());
+            return pm.get(type, ParserUtils.idFromObject(id), expand.getSubQuery());
         } catch (IllegalArgumentException ex) {
             // not a valid id.
         }

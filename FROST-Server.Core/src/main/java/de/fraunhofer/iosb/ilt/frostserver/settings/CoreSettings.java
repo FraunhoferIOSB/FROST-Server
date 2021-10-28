@@ -119,10 +119,6 @@ public class CoreSettings implements ConfigDefaults {
     @DefaultValueInt(0)
     public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
-    // Old keys
-    public static final String OLD_TAG_ENABLE_ACTUATION = "enableActuation";
-    public static final String OLD_TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
-
     /**
      * Prefixes
      */
@@ -230,7 +226,7 @@ public class CoreSettings implements ConfigDefaults {
 
     private void init(Properties properties) {
         settings = new Settings(properties);
-        migrateOldSettings(settings.getProperties());
+        SettingsMigrator.migrate(settings.getProperties());
         initLocalFields();
         initChildSettings();
         initExtensions();
@@ -277,23 +273,6 @@ public class CoreSettings implements ConfigDefaults {
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false, logSensitiveData);
         pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false, logSensitiveData);
         extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
-    }
-
-    /**
-     * Migrates old settings to new versions.
-     */
-    private void migrateOldSettings(Properties properties) {
-        migrateOldSettings(properties, OLD_TAG_ENABLE_ACTUATION, "plugins.actuation.enable");
-        migrateOldSettings(properties, OLD_TAG_ENABLE_MULTIDATASTREAM, "plugins.multiDatastream.enable");
-    }
-
-    private void migrateOldSettings(Properties properties, String oldKey, String newKey) {
-        Object oldValue = properties.get(oldKey);
-        if (oldValue != null) {
-            LOGGER.warn("Converting setting with old key: {} to new key: {} with value: {}", oldKey, newKey, oldValue);
-            properties.remove(oldKey);
-            properties.put(newKey, oldValue);
-        }
     }
 
     private void initExtensions() {

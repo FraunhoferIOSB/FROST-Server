@@ -28,19 +28,19 @@ import org.jooq.impl.DSL;
  *
  * @author hylke
  */
-public final class StaTableDynamic<J extends Comparable> extends StaTableAbstract<J, StaTableDynamic<J>> {
+public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
 
     private final Name tableName;
     private final transient EntityType entityType;
     private int idFieldIdx;
 
-    public StaTableDynamic(Name tableName, EntityType entityType, DataType<J> idType) {
+    public StaTableDynamic(Name tableName, EntityType entityType, DataType<?> idType) {
         super(idType, tableName, null);
         this.tableName = tableName;
         this.entityType = entityType;
     }
 
-    private StaTableDynamic(Name alias, StaTableDynamic<J> aliased, int idFieldIdx) {
+    private StaTableDynamic(Name alias, StaTableDynamic aliased, int idFieldIdx) {
         super(aliased.getIdType(), alias, aliased);
         this.tableName = aliased.getTableName();
         this.idFieldIdx = idFieldIdx;
@@ -51,23 +51,23 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
         return tableName;
     }
 
-    public final int registerIdField(String name, DataType<J> type) {
+    public final int registerIdField(String name, DataType<?> type) {
         return registerIdField(DSL.name(name), type);
     }
 
-    public final int registerIdField(Name name, DataType<J> type) {
+    public final int registerIdField(Name name, DataType<?> type) {
         idFieldIdx = registerField(name, type);
         return idFieldIdx;
     }
 
     @Override
-    public StaTableDynamic<J> as(Name as) {
-        return new StaTableDynamic<>(as, this, idFieldIdx).initCustomFields();
+    public StaTableDynamic as(Name as) {
+        return new StaTableDynamic(as, this, idFieldIdx).initCustomFields();
     }
 
     @Override
-    public Field<J> getId() {
-        return field(idFieldIdx, getIdType());
+    public Field<?> getId() {
+        return field(idFieldIdx);
     }
 
     @Override
@@ -76,7 +76,7 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public void initProperties(EntityFactories<J> entityFactories) {
+    public void initProperties(EntityFactories entityFactories) {
         // Not needed for this implementation, since it happens externally.
     }
 
@@ -86,7 +86,7 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public StaTableDynamic<J> getThis() {
+    public StaTableDynamic getThis() {
         return this;
     }
 

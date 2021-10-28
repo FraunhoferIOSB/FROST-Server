@@ -31,14 +31,13 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -96,7 +95,7 @@ public class MqttManagerTest {
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
         testModel = new TestModel();
-        testModel.initModel(modelRegistry);
+        testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
 
         MqttManager mqttManager = new MqttManager(coreSettings);
@@ -289,12 +288,6 @@ public class MqttManagerTest {
     public static final class DummyPersistenceManager implements PersistenceManager {
 
         private CoreSettings coreSettings;
-        private final IdManager idManager = new IdManagerLong();
-
-        @Override
-        public IdManager getIdManager() {
-            return idManager;
-        }
 
         @Override
         public boolean validatePath(ResourcePath path) {

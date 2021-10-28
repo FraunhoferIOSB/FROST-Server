@@ -37,13 +37,6 @@ import java.util.List;
  */
 public interface PersistenceManager extends AutoCloseable {
 
-    /**
-     * Get an IdManager that can be used to parse Ids.
-     *
-     * @return an IdManager that can be used to parse Ids.
-     */
-    public IdManager getIdManager();
-
     public boolean validatePath(ResourcePath path);
 
     /**

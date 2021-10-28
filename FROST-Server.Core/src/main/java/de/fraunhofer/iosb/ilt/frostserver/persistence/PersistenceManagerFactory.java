@@ -36,22 +36,6 @@ public class PersistenceManagerFactory {
 
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
 
-    private static final Map<String, String> RENAME = new HashMap<>();
-
-    static {
-        String longIdPm = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong";
-        String stringIdPm = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString";
-        String uuidIdPm = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid";
-
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager", longIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong", longIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString", stringIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid", uuidIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong", longIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString", stringIdPm);
-        RENAME.put("de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid", uuidIdPm);
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static final Map<CoreSettings, PersistenceManagerFactory> instances = new HashMap<>();
     private boolean maybeUpdateDatabase = true;
@@ -64,7 +48,6 @@ public class PersistenceManagerFactory {
             return newInstance;
         });
         instance.maybeUpdateDatabase();
-        instance.getIdManager();
         return instance;
     }
 
@@ -78,7 +61,6 @@ public class PersistenceManagerFactory {
 
     private final Class persistenceManagerClass;
     private final CoreSettings settings;
-    private IdManager idManager;
 
     private PersistenceManagerFactory(CoreSettings settings) {
         if (settings == null) {
@@ -87,11 +69,6 @@ public class PersistenceManagerFactory {
         this.settings = settings;
         try {
             String pmiClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
-            if (RENAME.containsKey(pmiClsName)) {
-                String oldName = pmiClsName;
-                pmiClsName = RENAME.get(pmiClsName);
-                LOGGER.warn("Using persistenceManager {} instead of old name {}", pmiClsName, oldName);
-            }
             persistenceManagerClass = Class.forName(pmiClsName);
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
@@ -108,22 +85,6 @@ public class PersistenceManagerFactory {
             LOGGER.error("{} Class '{}' could not be instantiated", ERROR_MSG, settings.getPersistenceSettings().getPersistenceManagerImplementationClass(), ex);
         }
         return persistenceManager;
-    }
-
-    /**
-     * Get a shared IdManager instance. This convenience function avoids having
-     * to create a persistenceManager when all that is needed is an IdManager.
-     *
-     * @return a shared instance of the IdManager of the persistanceManager
-     * class.
-     */
-    public IdManager getIdManager() {
-        if (idManager == null) {
-            try (PersistenceManager pm = create()) {
-                idManager = pm.getIdManager();
-            }
-        }
-        return idManager;
     }
 
     public void maybeUpdateDatabase() {

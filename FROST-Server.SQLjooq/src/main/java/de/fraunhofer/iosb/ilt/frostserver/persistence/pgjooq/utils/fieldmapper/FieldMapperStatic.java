@@ -50,9 +50,9 @@ public class FieldMapperStatic implements FieldMapper {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final EntityProperty entityProperty = parent.getEntityProperty();
-        PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
+        PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         pfReg.addEntry(
                 entityProperty,
                 null,

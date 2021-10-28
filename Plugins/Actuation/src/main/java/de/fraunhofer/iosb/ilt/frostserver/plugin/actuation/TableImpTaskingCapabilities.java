@@ -2,7 +2,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -19,7 +18,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, TableImpTaskingCapabilities<J>> {
+public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskingCapabilities> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -46,17 +45,17 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     /**
      * The column <code>public.TASKINGCAPABILITIES.EP_ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name("ID"), getIdType(), this);
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
      */
-    public final TableField<Record, J> colActuatorId = createField(DSL.name("ACTUATOR_ID"), getIdType(), this);
+    public final TableField<Record, ?> colActuatorId;
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+    public final TableField<Record, ?> colThingId;
 
     private final transient PluginActuation pluginActuation;
     private final transient PluginCoreModel pluginCoreModel;
@@ -70,40 +69,44 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.
      */
-    public TableImpTaskingCapabilities(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    public TableImpTaskingCapabilities(DataType<?> idType, DataType<?> idTypeActuator, DataType<?> idTypeThing, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("TASKINGCAPABILITIES"), null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
+        colActuatorId = createField(DSL.name("ACTUATOR_ID"), idTypeActuator);
+        colThingId = createField(DSL.name("THING_ID"), idTypeThing);
     }
 
-    private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities<J> aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
+        colActuatorId = createField(DSL.name("ACTUATOR_ID"), aliased.colActuatorId.getDataType());
+        colThingId = createField(DSL.name("THING_ID"), aliased.colThingId.getDataType());
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
+        final TableCollection tables = getTables();
+        TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npThingTaskCap, this, tableThings)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
-        TableImpActuators<J> tableActuators = tables.getTableForClass(TableImpActuators.class);
+        TableImpActuators tableActuators = tables.getTableForClass(TableImpActuators.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npActuatorTaskCap, this, tableActuators)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
                 .setTargetFieldAccessor(TableImpActuators::getId)
         );
-        final TableImpTasks<J> tableTasks = tables.getTableForClass(TableImpTasks.class);
+        final TableImpTasks tableTasks = tables.getTableForClass(TableImpTasks.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTasksTaskCap, this, tableTasks)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
                 .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
         );
 
         // We add the relation to us to the Things table.
-        final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
-        final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
+        final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
+        final TableImpTaskingCapabilities tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         thingsTable.registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesThing, thingsTable, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
@@ -112,20 +115,19 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final TableCollection<J> tables = getTables();
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpTaskingCapabilities::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        final TableCollection tables = getTables();
+        pfReg.addEntryId(entityFactories, TableImpTaskingCapabilities::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId, idManager);
-        pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId, idManager);
+        pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId, entityFactories);
+        pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId, entityFactories);
         pfReg.addEntry(pluginActuation.npTasksTaskCap, TableImpTaskingCapabilities::getId);
 
         // We register a navigationProperty on the Things table.
-        TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
+        TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
                 .addEntry(pluginActuation.npTaskingCapabilitiesThing, TableImpThings::getId);
     }
@@ -136,25 +138,25 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getActuatorId() {
+    public TableField<Record, ?> getActuatorId() {
         return colActuatorId;
     }
 
-    public TableField<Record, J> getThingId() {
+    public TableField<Record, ?> getThingId() {
         return colThingId;
     }
 
     @Override
-    public TableImpTaskingCapabilities<J> as(Name alias) {
-        return new TableImpTaskingCapabilities<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
+    public TableImpTaskingCapabilities as(Name alias) {
+        return new TableImpTaskingCapabilities(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpTaskingCapabilities<J> getThis() {
+    public TableImpTaskingCapabilities getThis() {
         return this;
     }
 

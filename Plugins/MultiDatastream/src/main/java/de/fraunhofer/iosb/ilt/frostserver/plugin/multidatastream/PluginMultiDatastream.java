@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -42,7 +43,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -70,6 +70,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING));
     public EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
+    public EntityPropertyMain<?> epIdMultiDatastream;
 
     public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
     public final NavigationPropertyEntitySet npObservationsMDs = new NavigationPropertyEntitySet("Observations", npMultiDatastreamObservation);
@@ -85,14 +86,12 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     public final EntityType etMultiDatastream = new EntityType(MULTI_DATASTREAM, MULTI_DATASTREAMS);
 
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_MDS_MODEL = "multiDatastream.enable";
-
     private static final List<String> REQUIREMENTS_MDS_MODEL = Arrays.asList(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
     );
 
     private CoreSettings settings;
+    private MdsModelSettings modelSettings;
     private boolean enabled;
     private boolean fullyInitialised;
 
@@ -104,8 +103,9 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_MDS_MODEL, getClass());
+        enabled = pluginSettings.getBoolean(MdsModelSettings.TAG_ENABLE_MDS_MODEL, MdsModelSettings.class);
         if (enabled) {
+            modelSettings = new MdsModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
     }
@@ -134,8 +134,10 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     @Override
     public void registerEntityTypes() {
         LOGGER.info("Initialising MultiDatastream Types...");
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityType(etMultiDatastream);
+        ModelRegistry mr = settings.getModelRegistry();
+
+        mr.registerEntityType(etMultiDatastream);
+        epIdMultiDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeMultiDatastream), "id");
     }
 
     @Override
@@ -147,7 +149,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         }
         epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.eptUom, TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM));
         etMultiDatastream
-                .registerProperty(ModelRegistry.EP_ID_LONG, false)
+                .registerProperty(epIdMultiDatastream, false)
                 .registerProperty(EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
@@ -167,7 +169,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     EntitySet observedProperties = entity.getProperty(npObservedPropertiesMDs);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + (unitOfMeasurements == null ? "null" : unitOfMeasurements.size()) + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
                     if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
                         final int opSize = observedProperties == null ? 0 : observedProperties.size();
@@ -210,11 +212,12 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 });
 
         if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-            TableCollection tableCollection = ppm.getTableCollection();
-            DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(idType, this, pluginCoreModel));
-            tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
+            final PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            final TableCollection tableCollection = ppm.getTableCollection();
+            final DataType dataTypeMds = ppm.getDataTypeFor(modelSettings.idTypeMultiDatastream);
+            final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getId().getDataType();
+            tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(dataTypeMds, this, pluginCoreModel));
+            tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties(dataTypeMds, dataTypeObsProp));
         }
         fullyInitialised = true;
         return true;
@@ -225,7 +228,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.checkForUpgrades(fileName);
             }
             return "Unknown persistence manager class";
@@ -237,7 +240,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
                 return ppm.doUpgrades(fileName, out);
             }
             out.append("Unknown persistence manager class");

@@ -33,12 +33,11 @@ import org.slf4j.LoggerFactory;
  * A relation from a source table to a target table.
  *
  * @author hylke
- * @param <J> the ID type.
  * @param <S> The source table.
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J, S> {
+public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>, T extends StaMainTable<T>> implements Relation<S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationManyToMany.class.getName());
 
@@ -55,11 +54,11 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     /**
      * The field on the source side that defines the relation.
      */
-    private FieldAccessor<J, S> sourceFieldAcc;
+    private FieldAccessor<S> sourceFieldAcc;
 
     private final L linkTable;
-    private FieldAccessor<J, L> sourceLinkFieldAcc;
-    private FieldAccessor<J, L> targetLinkFieldAcc;
+    private FieldAccessor<L> sourceLinkFieldAcc;
+    private FieldAccessor<L> targetLinkFieldAcc;
 
     /**
      * The table that is the target side of the relation.
@@ -69,7 +68,7 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     /**
      * The field on the target side that defines the relation.
      */
-    private FieldAccessor<J, T> targetFieldAcc;
+    private FieldAccessor<T> targetFieldAcc;
 
     public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target) {
         if (source == null) {
@@ -82,11 +81,11 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         this.name = navProp.getName();
     }
 
-    public FieldAccessor<J, S> getSourceFieldAcc() {
+    public FieldAccessor<S> getSourceFieldAcc() {
         return sourceFieldAcc;
     }
 
-    public RelationManyToMany<J, S, L, T> setSourceFieldAcc(FieldAccessor<J, S> sourceFieldAcc) {
+    public RelationManyToMany<S, L, T> setSourceFieldAcc(FieldAccessor<S> sourceFieldAcc) {
         this.sourceFieldAcc = sourceFieldAcc;
         return this;
     }
@@ -95,29 +94,29 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         return linkTable;
     }
 
-    public FieldAccessor<J, L> getSourceLinkFieldAcc() {
+    public FieldAccessor<L> getSourceLinkFieldAcc() {
         return sourceLinkFieldAcc;
     }
 
-    public RelationManyToMany<J, S, L, T> setSourceLinkFieldAcc(FieldAccessor<J, L> sourceLinkFieldAcc) {
+    public RelationManyToMany<S, L, T> setSourceLinkFieldAcc(FieldAccessor<L> sourceLinkFieldAcc) {
         this.sourceLinkFieldAcc = sourceLinkFieldAcc;
         return this;
     }
 
-    public FieldAccessor<J, L> getTargetLinkFieldAcc() {
+    public FieldAccessor<L> getTargetLinkFieldAcc() {
         return targetLinkFieldAcc;
     }
 
-    public RelationManyToMany<J, S, L, T> setTargetLinkFieldAcc(FieldAccessor<J, L> targetLinkFieldAcc) {
+    public RelationManyToMany<S, L, T> setTargetLinkFieldAcc(FieldAccessor<L> targetLinkFieldAcc) {
         this.targetLinkFieldAcc = targetLinkFieldAcc;
         return this;
     }
 
-    public FieldAccessor<J, T> getTargetFieldAcc() {
+    public FieldAccessor<T> getTargetFieldAcc() {
         return targetFieldAcc;
     }
 
-    public RelationManyToMany<J, S, L, T> setTargetFieldAcc(FieldAccessor<J, T> targetFieldAcc) {
+    public RelationManyToMany<S, L, T> setTargetFieldAcc(FieldAccessor<T> targetFieldAcc) {
         this.targetFieldAcc = targetFieldAcc;
         return this;
     }
@@ -131,20 +130,21 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     }
 
     @Override
-    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        Field<J> sourceField = sourceFieldAcc.getField(source);
-        Field<J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
-        Field<J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
-        Field<J> targetField = targetFieldAcc.getField(targetAliased);
+        Field<Object> sourceField = sourceFieldAcc.getField(source);
+        Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetField = targetFieldAcc.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }
 
-    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+    @Override
+    public void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
         pm.getDslContext().insertInto(linkTable)
                 .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
                 .set(targetLinkFieldAcc.getField(linkTable), targetId)

@@ -42,32 +42,31 @@ import org.jooq.impl.DSL;
 /**
  *
  * @author Hylke van der Schaaf
- * @param <J> The type of the ID fields.
  * @param <T> The exact type of the implementing class.
  */
-public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>> extends StaTable<J, T> {
+public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
-    public abstract Field<J> getId();
+    public abstract Field getId();
 
     @Override
     public abstract T as(Name as);
 
     @Override
-    public default StaMainTable<J, T> as(String name) {
+    public default StaMainTable<T> as(String name) {
         return as(DSL.name(name));
     }
 
     public void initRelations();
 
-    public void initProperties(EntityFactories<J> entityFactories);
+    public void initProperties(EntityFactories entityFactories);
 
-    public Relation<J, T> findRelation(String name);
+    public Relation<T> findRelation(String name);
 
-    public void registerRelation(Relation<J, T> relation);
+    public void registerRelation(Relation<T> relation);
 
-    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState, TableRef<J> sourceRef);
+    public TableRef createJoin(String name, QueryState<?> queryState, TableRef sourceRef);
 
-    public PropertyFieldRegistry<J, T> getPropertyFieldRegistry();
+    public PropertyFieldRegistry<T> getPropertyFieldRegistry();
 
     public PropertyFieldRegistry.PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);
 
@@ -75,13 +74,13 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
 
     public EntitySet newSet();
 
-    public Entity entityFromQuery(Record tuple, QueryState<J, T> state, DataSize dataSize);
+    public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize);
 
-    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J dsId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object dsId) throws NoSuchEntityException, IncompleteEntityException;
 
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException;
 
     /**
      * Add a hook that runs pre-insert.
@@ -91,7 +90,7 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
      * hooks.
      * @param hook The hook
      */
-    public void registerHookPreInsert(double priority, HookPreInsert<J> hook);
+    public void registerHookPreInsert(double priority, HookPreInsert hook);
 
     /**
      * Add a hook that runs pre-update.
@@ -101,7 +100,7 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
      * hooks.
      * @param hook The hook
      */
-    public void registerHookPreUpdate(double priority, HookPreUpdate<J> hook);
+    public void registerHookPreUpdate(double priority, HookPreUpdate hook);
 
     /**
      * Add a hook that runs pre-delete.
@@ -111,6 +110,6 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
      * hooks.
      * @param hook The hook
      */
-    public void registerHookPreDelete(double priority, HookPreDelete<J> hook);
+    public void registerHookPreDelete(double priority, HookPreDelete hook);
 
 }

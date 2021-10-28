@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  * @author hylke
  * @param <J> The type of the ID fields.
  */
-public interface HookPreDelete<J extends Comparable> {
+public interface HookPreDelete {
 
     /**
      *
@@ -36,5 +36,5 @@ public interface HookPreDelete<J extends Comparable> {
      * @throws NoSuchEntityException if something is wrong. This will cancel the
      * action.
      */
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException;
 }

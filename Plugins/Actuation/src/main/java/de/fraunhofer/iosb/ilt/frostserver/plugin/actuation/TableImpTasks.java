@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -19,7 +18,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, TableImpTasks<J>> {
+public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -36,12 +35,12 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     /**
      * The column <code>public.TASKS.EP_ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name("ID"), getIdType(), this);
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, J> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), getIdType(), this);
+    public final TableField<Record, ?> colTaskingCapabilityId;
 
     private final transient PluginActuation pluginActuation;
     private final transient PluginCoreModel pluginCoreModel;
@@ -55,22 +54,24 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.
      */
-    public TableImpTasks(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    public TableImpTasks(DataType<?> idType, DataType<?> idTypeTaskingCap, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("TASKS"), null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
+        colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), idTypeTaskingCap);
     }
 
-    private TableImpTasks(Name alias, TableImpTasks<J> aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    private TableImpTasks(Name alias, TableImpTasks aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
+        colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), aliased.colTaskingCapabilityId.getDataType());
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
+        final TableCollection tables = getTables();
+        final TableImpTaskingCapabilities tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilityTask, this, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
@@ -78,13 +79,12 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpTasks::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpTasks::getId);
         pfReg.addEntry(pluginCoreModel.epCreationTime, table -> table.colCreationTime,
                 new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime));
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId, entityFactories);
     }
 
     @Override
@@ -93,21 +93,21 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getTaskingCapabilityId() {
+    public TableField<Record, ?> getTaskingCapabilityId() {
         return colTaskingCapabilityId;
     }
 
     @Override
-    public TableImpTasks<J> as(Name alias) {
-        return new TableImpTasks<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
+    public TableImpTasks as(Name alias) {
+        return new TableImpTasks(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpTasks<J> getThis() {
+    public TableImpTasks getThis() {
         return this;
     }
 

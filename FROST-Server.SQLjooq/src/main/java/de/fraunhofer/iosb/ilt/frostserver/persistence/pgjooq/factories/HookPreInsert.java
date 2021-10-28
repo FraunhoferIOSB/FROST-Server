@@ -29,10 +29,9 @@ import org.jooq.Field;
  * insert happens.
  *
  * @author hylke
- * @param <J> The type of the ID fields.
  */
-public interface HookPreInsert<J extends Comparable> {
+public interface HookPreInsert {
 
-    public void insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
+    public void insertIntoDatabase(PostgresPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
 
 }

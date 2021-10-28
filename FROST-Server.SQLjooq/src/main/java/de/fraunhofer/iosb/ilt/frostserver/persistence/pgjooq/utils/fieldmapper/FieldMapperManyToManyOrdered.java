@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
@@ -92,7 +91,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
         final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
@@ -104,9 +103,8 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
         final int fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);
 
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
-        final PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
-        final IdManager idManager = ppm.getIdManager();
-        pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
+        final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
+        pfReg.addEntry(navProp, t -> t.field(fieldIdx), ppm.getEntityFactories());
 
         staTable.registerRelation(new RelationManyToManyOrdered(navProp, staTable, staTableLink, staTableOther)
                 .setAlwaysDistinct(distinct)
@@ -120,8 +118,8 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
         final DefNavigationProperty.Inverse inverse = parent.getInverse();
         if (inverse != null) {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
-            final PropertyFieldRegistry<?, ?> pfRegOther = staTableOther.getPropertyFieldRegistry();
-            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
+            final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
+            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ppm.getEntityFactories());
             staTableOther.registerRelation(new RelationManyToManyOrdered(navPropInverse, staTableOther, staTableLink, staTable)
                     .setAlwaysDistinct(distinctInverse)
                     .setOrderFieldAcc(t -> (TableField) t.field(fieldIdxLinkRank))

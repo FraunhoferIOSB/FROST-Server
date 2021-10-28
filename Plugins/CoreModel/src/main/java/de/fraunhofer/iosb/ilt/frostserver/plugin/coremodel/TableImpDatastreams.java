@@ -4,7 +4,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurementPartial;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
@@ -36,7 +35,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpDatastreams<J>> {
+public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
 
     public static final String NAME_TABLE = "DATASTREAMS";
     public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";
@@ -126,22 +125,22 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     /**
      * The column <code>public.DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType().nullable(false), this);
+    public final TableField<Record, ?> colId = createField(DSL.name(NAME_COL_ID), getIdType().nullable(false), this);
 
     /**
      * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, J> colSensorId = createField(DSL.name(NAME_COL_SENSORID), getIdType().nullable(false), this);
+    public final TableField<Record, ?> colSensorId;
 
     /**
      * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, J> colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), getIdType().nullable(false), this);
+    public final TableField<Record, ?> colObsPropertyId;
 
     /**
      * The column <code>public.DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType().nullable(false), this);
+    public final TableField<Record, ?> colThingId;
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -152,35 +151,41 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpDatastreams(DataType<J> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpDatastreams(DataType<?> idType, DataType<?> idTypeOp, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
+        colSensorId = createField(DSL.name(NAME_COL_SENSORID), idTypeSnsr.nullable(false));
+        colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), idTypeOp.nullable(false));
+        colThingId = createField(DSL.name(NAME_COL_THINGID), idTypeTng.nullable(false));
     }
 
-    private TableImpDatastreams(Name alias, TableImpDatastreams<J> aliased, PluginCoreModel pluginCoreModel) {
+    private TableImpDatastreams(Name alias, TableImpDatastreams aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
+        colSensorId = createField(DSL.name(NAME_COL_SENSORID), aliased.colSensorId.getDataType().nullable(false));
+        colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), aliased.colObsPropertyId.getDataType().nullable(false));
+        colThingId = createField(DSL.name(NAME_COL_THINGID), aliased.colThingId.getDataType().nullable(false));
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
+        final TableCollection tables = getTables();
+        TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingDatasteam, this, thingsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
-        TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
+        TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npSensorDatastream, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
                 .setTargetFieldAccessor(TableImpSensors::getId)
         );
-        TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
+        TableImpObsProperties obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservedPropertyDatastream, this, obsPropsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
                 .setTargetFieldAccessor(TableImpObsProperties::getId)
         );
-        TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsDatastream, this, observationsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getId)
                 .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
@@ -188,9 +193,8 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpDatastreams::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epObservationType, table -> table.colObservationType);
@@ -244,9 +248,9 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId, idManager);
-        pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId, idManager);
-        pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId, entityFactories);
         pfReg.addEntry(pluginCoreModel.npObservationsDatastream, TableImpDatastreams::getId);
     }
 
@@ -256,33 +260,33 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
-    public TableField<Record, J> getSensorId() {
+    public TableField<Record, ?> getSensorId() {
         return colSensorId;
     }
 
-    public TableField<Record, J> getObsPropertyId() {
+    public TableField<Record, ?> getObsPropertyId() {
         return colObsPropertyId;
     }
 
-    public TableField<Record, J> getThingId() {
+    public TableField<Record, ?> getThingId() {
         return colThingId;
     }
 
     @Override
-    public TableImpDatastreams<J> as(Name alias) {
-        return new TableImpDatastreams<>(alias, this, pluginCoreModel).initCustomFields();
+    public TableImpDatastreams as(Name alias) {
+        return new TableImpDatastreams(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public PropertyFields<TableImpDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<TableImpDatastreams> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final String epName = epCustomSelect.getMainEntityPropertyName();
         final EntityPropertyMain mainEntityProperty = getEntityType().getEntityProperty(epName);
         if (mainEntityProperty == pluginCoreModel.epUnitOfMeasurement) {
-            PropertyFields<TableImpDatastreams<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<TableImpDatastreams> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();
             if (subPath.size() > 1) {
                 throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
@@ -297,12 +301,12 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     }
 
     @Override
-    public TableImpDatastreams<J> getThis() {
+    public TableImpDatastreams getThis() {
         return this;
     }
 
-    protected PropertyFields<TableImpDatastreams<J>> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
-        PropertyFields<TableImpDatastreams<J>> pfs = new PropertyFields<>(
+    protected PropertyFields<TableImpDatastreams> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
+        PropertyFields<TableImpDatastreams> pfs = new PropertyFields<>(
                 epCustomSelect,
                 new ConverterRecordDeflt<>(
                         (tbl, tuple, entity, dataSize) -> {

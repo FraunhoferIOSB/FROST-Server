@@ -51,9 +51,9 @@ public class FieldMapperTimeInstant extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
         final EntityProperty<TimeInstant> entityProperty = parent.getEntityProperty();
-        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
+        final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
         pfReg.addEntry(
                 entityProperty,

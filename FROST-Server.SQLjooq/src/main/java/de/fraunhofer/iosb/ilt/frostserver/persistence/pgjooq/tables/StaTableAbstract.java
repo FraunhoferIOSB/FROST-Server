@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.ArrayList;
@@ -62,7 +63,6 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Record1;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * @param <J> The type of the EP_ID fields.
  * @param <T> The exact type of the implementing class.
  */
-public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTable<J, T>> extends TableImpl<Record> implements StaMainTable<J, T> {
+public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableImpl<Record> implements StaMainTable<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTableAbstract.class.getName());
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
@@ -83,19 +83,19 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
-    private transient TableCollection<J> tables;
+    private transient TableCollection tables;
     private transient ModelRegistry modelRegistry;
-    private transient Map<String, Relation<J, T>> relations;
+    private transient Map<String, Relation<T>> relations;
     private List<CustomField> customFields;
-    protected transient PropertyFieldRegistry<J, T> pfReg;
+    protected transient PropertyFieldRegistry<T> pfReg;
 
-    private final DataType<J> idType;
+    private final DataType<?> idType;
 
-    private final transient SortedSet<SortingWrapper<Double, HookPreInsert<J>>> hooksPreInsert;
-    private final transient SortedSet<SortingWrapper<Double, HookPreUpdate<J>>> hooksPreUpdate;
-    private final transient SortedSet<SortingWrapper<Double, HookPreDelete<J>>> hooksPreDelete;
+    private final transient SortedSet<SortingWrapper<Double, HookPreInsert>> hooksPreInsert;
+    private final transient SortedSet<SortingWrapper<Double, HookPreUpdate>> hooksPreUpdate;
+    private final transient SortedSet<SortingWrapper<Double, HookPreDelete>> hooksPreDelete;
 
-    protected StaTableAbstract(DataType<J> idType, Name alias, StaTableAbstract<J, T> aliased) {
+    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliased) {
         super(alias, null, aliased);
         this.idType = idType;
         if (aliased == null) {
@@ -116,7 +116,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         }
     }
 
-    public DataType<J> getIdType() {
+    public DataType<?> getIdType() {
         return idType;
     }
 
@@ -140,7 +140,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public void registerRelation(Relation<J, T> relation) {
+    public void registerRelation(Relation<T> relation) {
         relations.put(relation.getName(), relation);
     }
 
@@ -153,7 +153,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * @param hook The hook
      */
     @Override
-    public void registerHookPreInsert(double priority, HookPreInsert<J> hook) {
+    public void registerHookPreInsert(double priority, HookPreInsert hook) {
         hooksPreInsert.add(new SortingWrapper<>(priority, hook));
     }
 
@@ -166,7 +166,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * @param hook The hook
      */
     @Override
-    public void registerHookPreUpdate(double priority, HookPreUpdate<J> hook) {
+    public void registerHookPreUpdate(double priority, HookPreUpdate hook) {
         hooksPreUpdate.add(new SortingWrapper<>(priority, hook));
     }
 
@@ -179,13 +179,13 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * @param hook The hook
      */
     @Override
-    public void registerHookPreDelete(double priority, HookPreDelete<J> hook) {
+    public void registerHookPreDelete(double priority, HookPreDelete hook) {
         hooksPreDelete.add(new SortingWrapper<>(priority, hook));
     }
 
     @Override
-    public Relation<J, T> findRelation(String name) {
-        Relation<J, T> relation = relations.get(name);
+    public Relation<T> findRelation(String name) {
+        Relation<T> relation = relations.get(name);
         if (relation == null) {
             throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + getName() + " " + getClass().getName());
         }
@@ -193,12 +193,12 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef createJoin(String name, QueryState<?> queryState, TableRef sourceRef) {
         return findRelation(name).join(getThis(), queryState, sourceRef);
     }
 
     @Override
-    public PropertyFieldRegistry<J, T> getPropertyFieldRegistry() {
+    public PropertyFieldRegistry<T> getPropertyFieldRegistry() {
         if (pfReg == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());
         }
@@ -206,7 +206,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public Entity entityFromQuery(Record tuple, QueryState<J, T> state, DataSize dataSize) {
+    public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize) {
         Entity newEntity = new DefaultEntity(getEntityType());
         for (PropertyFields<T> sp : state.getSelectedProperties()) {
             sp.converter.convert(state.getMainTable(), tuple, newEntity, dataSize);
@@ -215,13 +215,13 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
-        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> insertFields = new HashMap<>();
 
-        for (SortingWrapper<Double, HookPreInsert<J>> hookWrapper : hooksPreInsert) {
+        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
             hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields);
         }
 
@@ -249,13 +249,12 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         }
 
         DSLContext dslContext = pm.getDslContext();
-        Record1<J> result = dslContext.insertInto(thisTable)
+        Object entityId = dslContext.insertInto(thisTable)
                 .set(insertFields)
                 .returningResult(thisTable.getId())
-                .fetchOne();
-        J entityId = result.component1();
+                .fetchOne(0);
         LOGGER.debug("Inserted Entity. Created id = {}.", entityId);
-        entity.setId(entityFactories.idFromObject(entityId));
+        entity.setId(ParserUtils.idFromObject(entityId));
 
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
@@ -280,8 +279,8 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */
-    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
-        J entityId = (J) entity.getId().getValue();
+    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+        Object entityId = entity.getId().getValue();
         EntityType entityType = getEntityType();
         final EntityType linkedType = linkedSet.getEntityType();
         NavigationPropertyMain backLink = linkedType.getNavigationProperty(entityType);
@@ -302,11 +301,11 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
             // One to Many
         }
 
-        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        EntityFactories entityFactories = pm.getEntityFactories();
         for (Entity child : linkedSet) {
             if (relationManyToMany == null) {
                 if (entityFactories.entityExists(pm, child)) {
-                    ((RelationOneToMany) relation).link(pm, entityId, (J) child.getId().getValue());
+                    ((RelationOneToMany) relation).link(pm, entityId, child.getId().getValue());
                 } else if (forInsert) {
                     child.setProperty(backLink, entity);
                     child.complete();
@@ -320,20 +319,20 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
                 } else if (!entityFactories.entityExists(pm, child)) {
                     throw new NoSuchEntityException("Linked Entity with no id.");
                 }
-                relationManyToMany.link(pm, entityId, (J) child.getId().getValue());
+                relationManyToMany.link(pm, entityId, child.getId().getValue());
             }
         }
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object entityId) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
-        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> updateFields = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
-        for (SortingWrapper<Double, HookPreUpdate<J>> hookWrapper : hooksPreUpdate) {
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : hooksPreUpdate) {
             hookWrapper.getObject().updateInDatabase(pm, entity, entityId);
         }
 
@@ -382,8 +381,8 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        for (SortingWrapper<Double, HookPreDelete<J>> hookWrapper : hooksPreDelete) {
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+        for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
             hookWrapper.getObject().delete(pm, entityId);
         }
 
@@ -415,11 +414,11 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return modelRegistry;
     }
 
-    public final TableCollection<J> getTables() {
+    public final TableCollection getTables() {
         return tables;
     }
 
-    public final void init(ModelRegistry modelRegistry, TableCollection<J> tables) {
+    public final void init(ModelRegistry modelRegistry, TableCollection tables) {
         this.modelRegistry = modelRegistry;
         this.tables = tables;
     }

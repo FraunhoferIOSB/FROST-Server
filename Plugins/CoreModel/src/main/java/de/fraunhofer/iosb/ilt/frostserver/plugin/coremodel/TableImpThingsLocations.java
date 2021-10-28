@@ -7,7 +7,7 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 
-public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<J, TableImpThingsLocations<J>> {
+public class TableImpThingsLocations extends StaLinkTable<TableImpThingsLocations> {
 
     public static final String NAME_TABLE = "THINGS_LOCATIONS";
     public static final String NAME_COL_TL_LOCATIONID = "LOCATION_ID";
@@ -18,12 +18,12 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, J> colThingId = createField(DSL.name(NAME_COL_TL_THINGID), getIdType(), this);
+    public final TableField<Record, ?> colThingId;
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), getIdType(), this);
+    public final TableField<Record, ?> colLocationId;
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference.
@@ -31,29 +31,33 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      */
-    public TableImpThingsLocations(DataType<J> idType) {
-        super(idType, DSL.name(NAME_TABLE), null);
+    public TableImpThingsLocations(DataType<?> idTypeThing, DataType<?> idTypeLocation) {
+        super(DSL.name(NAME_TABLE), null);
+        colThingId = createField(DSL.name(NAME_COL_TL_THINGID), idTypeThing);
+        colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), idTypeLocation);
     }
 
-    private TableImpThingsLocations(Name alias, TableImpThingsLocations<J> aliased) {
-        super(aliased.getIdType(), alias, aliased);
+    private TableImpThingsLocations(Name alias, TableImpThingsLocations aliased) {
+        super(alias, aliased);
+        colThingId = createField(DSL.name(NAME_COL_TL_THINGID), aliased.colThingId.getDataType());
+        colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), aliased.colLocationId.getDataType());
     }
 
-    public TableField<Record, J> getLocationId() {
+    public TableField<Record, ?> getLocationId() {
         return colLocationId;
     }
 
-    public TableField<Record, J> getThingId() {
+    public TableField<Record, ?> getThingId() {
         return colThingId;
     }
 
     @Override
-    public TableImpThingsLocations<J> as(Name alias) {
-        return new TableImpThingsLocations<>(alias, this).initCustomFields();
+    public TableImpThingsLocations as(Name alias) {
+        return new TableImpThingsLocations(alias, this).initCustomFields();
     }
 
     @Override
-    public TableImpThingsLocations<J> getThis() {
+    public TableImpThingsLocations getThis() {
         return this;
     }
 

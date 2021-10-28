@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -78,7 +78,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
         final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
@@ -89,9 +89,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
         final int fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
 
         final NavigationPropertyMain navProp = parent.getNavigationProperty();
-        final PropertyFieldRegistry<J, T> pfReg = staTable.getPropertyFieldRegistry();
-        final IdManager idManager = ppm.getIdManager();
-        pfReg.addEntry(navProp, t -> t.field(fieldIdx), idManager);
+        final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
+        final EntityFactories ef = ppm.getEntityFactories();
+        pfReg.addEntry(navProp, t -> t.field(fieldIdx), ef);
 
         staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther)
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
@@ -103,8 +103,8 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
         final DefNavigationProperty.Inverse inverse = parent.getInverse();
         if (inverse != null) {
             final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
-            final PropertyFieldRegistry<?, ?> pfRegOther = staTableOther.getPropertyFieldRegistry();
-            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), idManager);
+            final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
+            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ef);
             staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable)
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))

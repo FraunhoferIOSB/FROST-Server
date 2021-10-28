@@ -17,17 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_LONG;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.STA_ID_UUID;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +39,6 @@ public class ModelRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelRegistry.class.getName());
 
-    public static final EntityPropertyMain<Id> EP_ID_LONG = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_LONG, "id");
-    public static final EntityPropertyMain<Id> EP_ID_STRING = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_STRING, "id");
-    public static final EntityPropertyMain<Id> EP_ID_UUID = new EntityPropertyMain<>(AT_IOT_ID, STA_ID_UUID, "id");
     /**
      * The global EntityProperty SelfLink.
      */
@@ -99,7 +92,15 @@ public class ModelRegistry {
     }
 
     public final PropertyType getPropertyType(String name) {
-        return propertyTypes.get(name);
+        PropertyType type = propertyTypes.get(name);
+        if (type != null) {
+            return type;
+        }
+        type = TypeSimplePrimitive.getPrimitiveType(name);
+        if (type != null) {
+            return type;
+        }
+        throw new IllegalArgumentException("unknown property type: " + name);
     }
 
     public EntityChangedMessage.QueryGenerator getMessageQueryGenerator() {

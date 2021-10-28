@@ -37,15 +37,14 @@ import org.jooq.impl.DSL;
 /**
  *
  * @author hylke
- * @param <J> The id class.
  * @param <T> The type of the main table for the query.
  */
-public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
+public class QueryState<T extends StaMainTable<T>> {
 
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
-    private final Field<J> sqlMainIdField;
+    private final Field<?> sqlMainIdField;
     private Table sqlFrom;
     private Condition sqlWhere = DSL.trueCondition();
     private Utils.SortSelectFields sqlSortFields;
@@ -122,7 +121,7 @@ public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
     /**
      * @return the sqlMainIdField
      */
-    public Field<J> getSqlMainIdField() {
+    public Field<?> getSqlMainIdField() {
         return sqlMainIdField;
     }
 

@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
+import static de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils.idFromObject;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -60,9 +60,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
- * @param <J> The type of the EP_ID fields.
  */
-public class EntityFactories<J extends Comparable> {
+public class EntityFactories {
 
     public static final String CAN_NOT_BE_NULL = " can not be null.";
     public static final String CHANGED_MULTIPLE_ROWS = "Update changed multiple rows.";
@@ -80,45 +79,35 @@ public class EntityFactories<J extends Comparable> {
 
     private static ObjectMapper formatter;
 
-    private final IdManager idManager;
     private final ModelRegistry modelRegistry;
-    private final TableCollection<J> tableCollection;
+    private final TableCollection tableCollection;
 
-    public EntityFactories(ModelRegistry modelRegistry, IdManager idManager, TableCollection<J> tableCollection) {
+    public EntityFactories(ModelRegistry modelRegistry, TableCollection tableCollection) {
         this.modelRegistry = modelRegistry;
-        this.idManager = idManager;
         this.tableCollection = tableCollection;
 
-    }
-
-    public IdManager getIdManager() {
-        return idManager;
     }
 
     public ModelRegistry getModelRegistry() {
         return modelRegistry;
     }
 
-    public TableCollection<J> getTableCollection() {
+    public TableCollection getTableCollection() {
         return tableCollection;
     }
 
-    public Id idFromObject(J id) {
-        return idManager.fromObject(id);
+    public static Entity entityFromId(EntityType entityType, Record tuple, Field<?> path) {
+        return entityFromId(entityType, getFieldOrNull(tuple, path));
     }
 
-    public Entity entityFromId(EntityType entityType, Record tuple, Field<J> path) {
-        return EntityFactories.this.entityFromId(entityType, getFieldOrNull(tuple, path));
-    }
-
-    public Entity entityFromId(EntityType entityType, J id) {
+    public static Entity entityFromId(EntityType entityType, Object id) {
         if (id == null) {
             return null;
         }
-        return new DefaultEntity(entityType, idManager.fromObject(id));
+        return new DefaultEntity(entityType, idFromObject(id));
     }
 
-    public void insertUserDefinedId(PostgresPersistenceManager<J> pm, Map<Field, Object> clause, Field<J> idField, Entity entity) throws IncompleteEntityException {
+    public void insertUserDefinedId(PostgresPersistenceManager pm, Map<Field, Object> clause, Field<?> idField, Entity entity) throws IncompleteEntityException {
         if (pm.useClientSuppliedId(entity)) {
             pm.modifyClientSuppliedId(entity);
             clause.put(idField, entity.getId().getValue());
@@ -136,7 +125,7 @@ public class EntityFactories<J extends Comparable> {
      * @throws IncompleteEntityException If the entity has no id, but is not
      * complete and can thus not be created.
      */
-    public void entityExistsOrCreate(PostgresPersistenceManager<J> pm, Entity e) throws NoSuchEntityException, IncompleteEntityException {
+    public void entityExistsOrCreate(PostgresPersistenceManager pm, Entity e) throws NoSuchEntityException, IncompleteEntityException {
         if (e == null) {
             throw new NoSuchEntityException("No entity!");
         }
@@ -164,9 +153,9 @@ public class EntityFactories<J extends Comparable> {
         pm.insert(e);
     }
 
-    public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
-        J id = (J) entityId.getValue();
-        StaMainTable<J, ?> table = tableCollection.getTableForType(type);
+    public boolean entityExists(PostgresPersistenceManager pm, EntityType type, Id entityId) {
+        Object id = entityId.getValue();
+        StaMainTable<?> table = tableCollection.getTableForType(type);
 
         DSLContext dslContext = pm.getDslContext();
 
@@ -183,7 +172,7 @@ public class EntityFactories<J extends Comparable> {
 
     }
 
-    public boolean entityExists(PostgresPersistenceManager<J> pm, Entity e) {
+    public boolean entityExists(PostgresPersistenceManager pm, Entity e) {
         if (e == null || e.getId() == null) {
             return false;
         }

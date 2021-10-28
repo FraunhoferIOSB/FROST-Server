@@ -23,10 +23,9 @@ import org.jooq.Field;
 /**
  *
  * @author hylke
- * @param <I> The returned field type.
  * @param <T> The table this FieldAccessor gets a field for.
  */
-public interface FieldAccessor<I, T extends StaTable> {
+public interface FieldAccessor<T extends StaTable> {
 
-    public Field<I> getField(T table);
+    public Field getField(T table);
 }

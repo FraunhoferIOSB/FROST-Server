@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class EntityBuilderTest {
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
-        testModel.initModel(modelRegistry);
+        testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
     }
 

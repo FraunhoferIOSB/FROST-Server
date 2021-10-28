@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -41,14 +42,14 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_DECIMAL = new TypeSimplePrimitive("Edm.Decimal", "Numeric values with decimal representation", TypeReferencesHelper.TYPE_REFERENCE_BIGDECIMAL);
     public static final TypeSimplePrimitive EDM_DOUBLE = new TypeSimplePrimitive("Edm.Double", "IEEE 754 binary64 floating-point number (15-17 decimal digits)", TypeReferencesHelper.TYPE_REFERENCE_BIGDECIMAL);
     public static final TypeSimplePrimitive EDM_DURATION = new TypeSimplePrimitive("Edm.Duration", "Signed duration in days, hours, minutes, and (sub)seconds", TypeReferencesHelper.TYPE_REFERENCE_DURATION);
-    public static final TypeSimplePrimitive EDM_GUID = new TypeSimplePrimitive("Edm.Guid", "16-byte (128-bit) unique identifier", TypeReferencesHelper.TYPE_REFERENCE_UUID);
-    public static final TypeSimplePrimitive EDM_INT16 = new TypeSimplePrimitive("Edm.Int16", "Signed 16-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER);
-    public static final TypeSimplePrimitive EDM_INT32 = new TypeSimplePrimitive("Edm.Int32", "Signed 32-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER);
-    public static final TypeSimplePrimitive EDM_INT64 = new TypeSimplePrimitive("Edm.Int64", "Signed 64-bit integer", TypeReferencesHelper.TYPE_REFERENCE_LONG);
-    public static final TypeSimplePrimitive EDM_SBYTE = new TypeSimplePrimitive("Edm.SByte", "Signed 8-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER);
+    public static final TypeSimplePrimitive EDM_GUID = new TypeSimplePrimitive("Edm.Guid", "16-byte (128-bit) unique identifier", TypeReferencesHelper.TYPE_REFERENCE_UUID, SimpleParserUtils.PARSER_UUID);
+    public static final TypeSimplePrimitive EDM_INT16 = new TypeSimplePrimitive("Edm.Int16", "Signed 16-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER, SimpleParserUtils.PARSER_LONG);
+    public static final TypeSimplePrimitive EDM_INT32 = new TypeSimplePrimitive("Edm.Int32", "Signed 32-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER, SimpleParserUtils.PARSER_LONG);
+    public static final TypeSimplePrimitive EDM_INT64 = new TypeSimplePrimitive("Edm.Int64", "Signed 64-bit integer", TypeReferencesHelper.TYPE_REFERENCE_LONG, SimpleParserUtils.PARSER_LONG);
+    public static final TypeSimplePrimitive EDM_SBYTE = new TypeSimplePrimitive("Edm.SByte", "Signed 8-bit integer", TypeReferencesHelper.TYPE_REFERENCE_INTEGER, SimpleParserUtils.PARSER_LONG);
     public static final TypeSimplePrimitive EDM_SINGLE = new TypeSimplePrimitive("Edm.Single", "IEEE 754 binary32 floating-point number (6-9 decimal digits)", TypeReferencesHelper.TYPE_REFERENCE_BIGDECIMAL);
     public static final TypeSimplePrimitive EDM_STREAM = new TypeSimplePrimitive("Edm.Stream", "Binary data stream", TypeReferencesHelper.TYPE_REFERENCE_STRING);
-    public static final TypeSimplePrimitive EDM_STRING = new TypeSimplePrimitive("Edm.String", "Sequence of characters", TypeReferencesHelper.TYPE_REFERENCE_STRING);
+    public static final TypeSimplePrimitive EDM_STRING = new TypeSimplePrimitive("Edm.String", "Sequence of characters", TypeReferencesHelper.TYPE_REFERENCE_STRING, SimpleParserUtils.PARSER_STRING);
     public static final TypeSimplePrimitive EDM_TIMEOFDAY = new TypeSimplePrimitive("Edm.TimeOfDay", "Clock time 00:00-23:59:59.999999999999", TypeReferencesHelper.TYPE_REFERENCE_DATE);
     public static final TypeSimplePrimitive EDM_GEOGRAPHY = new TypeSimplePrimitive("Edm.Geography", "Abstract base type for all Geography types", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOGRAPHYPOINT = new TypeSimplePrimitive("Edm.GeographyPoint", "A point in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
@@ -67,14 +68,17 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOLYGON = new TypeSimplePrimitive("Edm.GeometryMultiPolygon", "Collection of polygons in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYCOLLECTION = new TypeSimplePrimitive("Edm.GeometryCollection", "Collection of arbitrary Geometry values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
 
-    public static final TypeSimplePrimitive STA_ID_UUID = new TypeSimplePrimitive("Edm.Guid", "16-byte (128-bit) unique identifier", TypeReferencesHelper.TYPE_REFERENCE_ID);
-    public static final TypeSimplePrimitive STA_ID_LONG = new TypeSimplePrimitive("Edm.Int64", "Signed 64-bit integer", TypeReferencesHelper.TYPE_REFERENCE_ID);
-    public static final TypeSimplePrimitive STA_ID_STRING = new TypeSimplePrimitive("Edm.String", "Sequence of characters", TypeReferencesHelper.TYPE_REFERENCE_ID);
+    public static final TypeSimplePrimitive STA_ID_LONG = EDM_INT64;
+    public static final TypeSimplePrimitive STA_ID_STRING = EDM_STRING;
+    public static final TypeSimplePrimitive STA_ID_UUID = EDM_GUID;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
     private static final Map<String, TypeSimplePrimitive> PRIMITIVES = new HashMap<>();
 
     static {
+        PRIMITIVES.put(Constants.VALUE_ID_TYPE_LONG, STA_ID_LONG);
+        PRIMITIVES.put(Constants.VALUE_ID_TYPE_STRING, STA_ID_STRING);
+        PRIMITIVES.put(Constants.VALUE_ID_TYPE_UUID, STA_ID_UUID);
         for (Field field : FieldUtils.getAllFields(TypeSimplePrimitive.class)) {
             if (!Modifier.isStatic(field.getModifiers())) {
                 continue;
@@ -100,6 +104,10 @@ public class TypeSimplePrimitive extends TypeSimple {
 
     private TypeSimplePrimitive(String name, String description, TypeReference typeReference) {
         super(name, description, typeReference);
+    }
+
+    private TypeSimplePrimitive(String name, String description, TypeReference typeReference, Parser parser) {
+        super(name, description, typeReference, parser);
     }
 
 }

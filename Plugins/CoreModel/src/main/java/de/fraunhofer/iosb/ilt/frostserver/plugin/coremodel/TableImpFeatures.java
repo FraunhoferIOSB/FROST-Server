@@ -3,7 +3,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -27,7 +26,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, TableImpFeatures<J>> {
+public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
 
     public static final String NAME_TABLE = "FEATURES";
     public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";
@@ -73,7 +72,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     /**
      * The column <code>public.FEATURES.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -84,20 +83,20 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpFeatures(DataType<J> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpFeatures(DataType<?> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpFeatures(Name alias, TableImpFeatures<J> aliased, PluginCoreModel pluginCoreModel) {
+    private TableImpFeatures(Name alias, TableImpFeatures aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        final TableCollection tables = getTables();
+        final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsFeature, this, observationsTable)
                 .setSourceFieldAccessor(TableImpFeatures::getId)
                 .setTargetFieldAccessor(TableImpObservations::getFeatureId)
@@ -105,15 +104,14 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpFeatures::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpFeatures::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epFeature,
                 new ConverterRecordDeflt<>(
-                        (TableImpFeatures<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpFeatures table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
@@ -137,15 +135,15 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     }
 
     @Override
-    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
-        TableImpLocations<J> tLoc = getTables().getTableForClass(TableImpLocations.class);
+        TableImpLocations tLoc = getTables().getTableForClass(TableImpLocations.class);
         pm.getDslContext()
                 .update(tLoc)
-                .set(tLoc.getGenFoiId(), (J) null)
-                .where(tLoc.getGenFoiId().eq(entityId))
+                .setNull(tLoc.getGenFoiId())
+                .where(((TableField) tLoc.getGenFoiId()).eq(entityId))
                 .execute();
     }
 
@@ -155,17 +153,17 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
     @Override
-    public TableImpFeatures<J> as(Name alias) {
-        return new TableImpFeatures<>(alias, this, pluginCoreModel).initCustomFields();
+    public TableImpFeatures as(Name alias) {
+        return new TableImpFeatures(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpFeatures<J> getThis() {
+    public TableImpFeatures getThis() {
         return this;
     }
 

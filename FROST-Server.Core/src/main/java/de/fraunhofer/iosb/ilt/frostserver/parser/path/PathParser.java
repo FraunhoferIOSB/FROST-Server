@@ -27,8 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -47,11 +45,10 @@ public class PathParser implements ParserVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathParser.class);
 
-    private final IdManager idmanager;
     private final ModelRegistry modelRegistry;
 
     /**
-     * Parse the given path with an IdManagerlong and UTF-8 encoding.
+     * Parse the given path, assuming UTF-8 encoding.
      *
      * @param serviceRootUrl The root URL of the service.
      * @param version The version of the service.
@@ -59,20 +56,7 @@ public class PathParser implements ParserVisitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, new IdManagerLong(), serviceRootUrl, version, path, StringHelper.UTF8);
-    }
-
-    /**
-     * Parse the given path, assuming UTF-8 encoding.
-     *
-     * @param idmanager The IdManager to use
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, IdManager idmanager, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, idmanager, serviceRootUrl, version, path, StringHelper.UTF8);
+        return parsePath(modelRegistry, serviceRootUrl, version, path, StringHelper.UTF8);
     }
 
     /**
@@ -85,7 +69,7 @@ public class PathParser implements ParserVisitor {
      * @param encoding The character encoding to use when parsing.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, IdManager idmanager, String serviceRootUrl, Version version, String path, Charset encoding) {
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setVersion(version);
@@ -99,7 +83,7 @@ public class PathParser implements ParserVisitor {
         Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart start = t.Start();
-            PathParser v = new PathParser(modelRegistry, idmanager);
+            PathParser v = new PathParser(modelRegistry);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
             LOGGER.error("Failed to parse '{}' because: {}", StringHelper.cleanForLogging(path), ex.getMessage());
@@ -109,9 +93,8 @@ public class PathParser implements ParserVisitor {
         return resourcePath;
     }
 
-    public PathParser(ModelRegistry modelRegistry, IdManager idmanager) {
+    public PathParser(ModelRegistry modelRegistry) {
         this.modelRegistry = modelRegistry;
-        this.idmanager = idmanager;
     }
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
@@ -127,7 +110,7 @@ public class PathParser implements ParserVisitor {
     private void addAsEntity(ResourcePath rp, EntityType type, String id) {
         PathElementEntity epa = new PathElementEntity(type, rp.getLastElement());
         if (id != null) {
-            epa.setId(idmanager.parseId(id));
+            epa.setId(type.parsePrimaryKey(id));
             rp.setIdentifiedElement(epa);
         }
         rp.addPathElement(epa, true, false);
@@ -137,7 +120,7 @@ public class PathParser implements ParserVisitor {
         if (type instanceof NavigationPropertyEntity) {
             PathElementEntity epa = new PathElementEntity((NavigationPropertyEntity) type, rp.getLastElement());
             if (id != null) {
-                epa.setId(idmanager.parseId(id));
+                epa.setId(((NavigationPropertyEntity) type).getEntityType().parsePrimaryKey(id));
                 rp.setIdentifiedElement(epa);
             }
             rp.addPathElement(epa, true, false);

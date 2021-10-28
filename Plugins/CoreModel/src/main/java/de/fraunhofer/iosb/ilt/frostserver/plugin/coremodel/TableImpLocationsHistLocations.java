@@ -7,7 +7,7 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 
-public class TableImpLocationsHistLocations<J extends Comparable> extends StaLinkTable<J, TableImpLocationsHistLocations<J>> {
+public class TableImpLocationsHistLocations extends StaLinkTable<TableImpLocationsHistLocations> {
 
     public static final String NAME_TABLE = "LOCATIONS_HIST_LOCATIONS";
     public static final String NAME_COL_HISTLOCATIONID = "HIST_LOCATION_ID";
@@ -18,11 +18,11 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), getIdType(), this);
+    public final TableField<Record, ?> colLocationId;
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, J> colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), getIdType(), this);
+    public final TableField<Record, ?> colHistLocationId;
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference.
@@ -30,29 +30,33 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      */
-    public TableImpLocationsHistLocations(DataType<J> idType) {
-        super(idType, DSL.name(NAME_TABLE), null);
+    public TableImpLocationsHistLocations(DataType<?> idTypeLocation, DataType<?> idTypeHistLoc) {
+        super(DSL.name(NAME_TABLE), null);
+        colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), idTypeLocation);
+        colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), idTypeHistLoc);
     }
 
-    private TableImpLocationsHistLocations(Name alias, TableImpLocationsHistLocations<J> aliased) {
-        super(aliased.getIdType(), alias, aliased);
+    private TableImpLocationsHistLocations(Name alias, TableImpLocationsHistLocations aliased) {
+        super(alias, aliased);
+        colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), aliased.colLocationId.getDataType());
+        colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), aliased.colHistLocationId.getDataType());
     }
 
-    public TableField<Record, J> getLocationId() {
+    public TableField<Record, ?> getLocationId() {
         return colLocationId;
     }
 
-    public TableField<Record, J> getHistLocationId() {
+    public TableField<Record, ?> getHistLocationId() {
         return colHistLocationId;
     }
 
     @Override
-    public TableImpLocationsHistLocations<J> as(Name alias) {
-        return new TableImpLocationsHistLocations<>(alias, this).initCustomFields();
+    public TableImpLocationsHistLocations as(Name alias) {
+        return new TableImpLocationsHistLocations(alias, this).initCustomFields();
     }
 
     @Override
-    public TableImpLocationsHistLocations<J> getThis() {
+    public TableImpLocationsHistLocations getThis() {
         return this;
     }
 

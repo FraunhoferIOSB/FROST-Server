@@ -23,16 +23,14 @@ import java.util.Map;
 
 /**
  * A class that keeps track of the latest table that was joined.
- *
- * @param <J> The type of the ID fields.
  */
-public class TableRef<J extends Comparable> {
+public class TableRef {
 
     private final EntityType type;
-    private final StaMainTable<J, ?> table;
-    private final Map<EntityType, TableRef<J>> joins = new HashMap<>();
+    private final StaMainTable<?> table;
+    private final Map<EntityType, TableRef> joins = new HashMap<>();
 
-    public TableRef(EntityType type, StaMainTable<J, ?> table) {
+    public TableRef(EntityType type, StaMainTable<?> table) {
         this.type = type;
         this.table = table;
     }
@@ -45,15 +43,15 @@ public class TableRef<J extends Comparable> {
         return type == null && table == null;
     }
 
-    public StaMainTable<J, ?> getTable() {
+    public StaMainTable<?> getTable() {
         return table;
     }
 
-    public void addJoin(EntityType link, TableRef<J> joinedTable) {
+    public void addJoin(EntityType link, TableRef joinedTable) {
         joins.put(link, joinedTable);
     }
 
-    public TableRef<J> getJoin(EntityType link) {
+    public TableRef getJoin(EntityType link) {
         return joins.get(link);
     }
 
@@ -61,7 +59,7 @@ public class TableRef<J extends Comparable> {
         joins.clear();
     }
 
-    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState) {
+    public TableRef createJoin(String name, QueryState<?> queryState) {
         return table.createJoin(name, queryState, this);
     }
 }

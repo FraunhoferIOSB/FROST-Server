@@ -14,6 +14,10 @@
 * New plugin: MultiDatastream supplies the MultiDatastream extension.
 * New plugin: Actuation supplies the Actuation data model from the
   _OGC SensorThings API Part 2 – Tasking Core_.
+* PersistenceManagers are no longer tied to the ID type. There is now only one
+  `persistenceManagerImplementationClass`, used for all ID types. The ID type is
+  now set in the data model plugin.
+* Types of primary keys can be set on a per-table basis.
 
 
 ## Release Version 1.14.0

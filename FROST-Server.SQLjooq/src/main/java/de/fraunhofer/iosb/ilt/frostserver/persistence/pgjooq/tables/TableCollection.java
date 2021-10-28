@@ -27,16 +27,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.jooq.DataType;
 
 /**
  * @author scf
- * @param <J> The type of the ID fields.
  */
-public class TableCollection<J extends Comparable> {
+public class TableCollection {
 
-    private final String basicPersistenceType;
-    private final DataType<J> idType;
     private ModelRegistry modelRegistry;
     private boolean initialised = false;
 
@@ -46,63 +42,51 @@ public class TableCollection<J extends Comparable> {
      */
     private List<DefModel> modelDefinitions;
 
-    private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
-    private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
-    private final Map<String, StaTable<J, ?>> tablesByName = new LinkedHashMap<>();
+    private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
+    private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
+    private final Map<String, StaTable<?>> tablesByName = new LinkedHashMap<>();
 
-    public TableCollection(String basicPersistenceType, DataType<J> idType) {
-        this.basicPersistenceType = basicPersistenceType;
-        this.idType = idType;
-    }
-
-    public void setModelRegistry(ModelRegistry modelRegistry) {
+    public TableCollection setModelRegistry(ModelRegistry modelRegistry) {
         this.modelRegistry = modelRegistry;
+        return this;
     }
 
-    public String getBasicPersistenceType() {
-        return basicPersistenceType;
-    }
-
-    public DataType<J> getIdType() {
-        return idType;
-    }
-
-    public StaMainTable<J, ?> getTableForType(EntityType type) {
+    public StaMainTable<?> getTableForType(EntityType type) {
         return tablesByType.get(type);
     }
 
-    public <T extends StaTable<J, T>> T getTableForClass(Class<T> clazz) {
+    public <T extends StaTable<T>> T getTableForClass(Class<T> clazz) {
         return (T) tablesByClass.get(clazz);
     }
 
-    public StaTable<J, ?> getTableForName(String name) {
+    public StaTable<?> getTableForName(String name) {
         return tablesByName.get(name);
     }
 
-    public Collection<StaMainTable<J, ?>> getAllTables() {
+    public Collection<StaMainTable<?>> getAllTables() {
         return tablesByType.values();
     }
 
-    public void registerTable(EntityType type, StaTableAbstract<J, ?> table) {
+    public void registerTable(EntityType type, StaTableAbstract<?> table) {
         tablesByType.put(type, table);
         tablesByClass.put(table.getClass(), table);
         tablesByName.put(table.getName(), table);
         table.init(modelRegistry, this);
     }
 
-    public void registerTable(StaLinkTable<J, ?> table) {
+    public void registerTable(StaLinkTable<?> table) {
         tablesByClass.put(table.getClass(), table);
         tablesByName.put(table.getName(), table);
     }
 
-    public void init(EntityFactories<J> entityFactories) {
+    public void init(EntityFactories entityFactories) {
         if (initialised) {
             return;
         }
         synchronized (this) {
             if (!initialised) {
                 initialised = true;
-                for (StaMainTable<J, ?> table : getAllTables()) {
+                for (StaMainTable<?> table : getAllTables()) {
                     table.initProperties(entityFactories);
                     table.initRelations();
                 }
@@ -113,7 +97,7 @@ public class TableCollection<J extends Comparable> {
     /**
      * @return the tablesByType
      */
-    public Map<EntityType, StaMainTable<J, ?>> getTablesByType() {
+    public Map<EntityType, StaMainTable<?>> getTablesByType() {
         return tablesByType;
     }
 

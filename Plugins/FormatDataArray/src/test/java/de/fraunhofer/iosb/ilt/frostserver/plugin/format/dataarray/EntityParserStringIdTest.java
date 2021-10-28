@@ -23,12 +23,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream.TAG_ENABLE_MDS_MODEL;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +56,8 @@ public class EntityParserStringIdTest {
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
-            coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
+            coreSettings.getSettings().getProperties().put("plugins." + CoreModelSettings.TAG_ID_TYPE_DEFAULT, Constants.VALUE_ID_TYPE_STRING);
+            coreSettings.getSettings().getProperties().put("plugins." + MdsModelSettings.TAG_ENABLE_MDS_MODEL, "true");
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);

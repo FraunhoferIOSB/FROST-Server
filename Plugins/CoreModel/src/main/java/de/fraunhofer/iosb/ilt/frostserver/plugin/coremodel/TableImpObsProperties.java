@@ -2,7 +2,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -17,7 +16,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class TableImpObsProperties<J extends Comparable> extends StaTableAbstract<J, TableImpObsProperties<J>> {
+public class TableImpObsProperties extends StaTableAbstract<TableImpObsProperties> {
 
     public static final String NAME_TABLE = "OBS_PROPERTIES";
     public static final String NAME_COL_DEFINITION = "DEFINITION";
@@ -51,7 +50,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     /**
      * The column <code>public.OBS_PROPERTIES.ID</code>.
      */
-    public final TableField<Record, J> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name(NAME_COL_ID), getIdType(), this);
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -62,20 +61,20 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpObsProperties(DataType<J> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpObsProperties(DataType<?> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpObsProperties(Name alias, TableImpObsProperties<J> aliased, PluginCoreModel pluginCoreModel) {
+    private TableImpObsProperties(Name alias, TableImpObsProperties aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
+        final TableCollection tables = getTables();
+        final TableImpDatastreams tableDs = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsObsProp, this, tableDs)
                 .setSourceFieldAccessor(TableImpObsProperties::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
@@ -83,9 +82,8 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.getIdManager();
-        pfReg.addEntryId(idManager, TableImpObsProperties::getId);
+    public void initProperties(final EntityFactories entityFactories) {
+        pfReg.addEntryId(entityFactories, TableImpObsProperties::getId);
         pfReg.addEntryString(pluginCoreModel.epDefinition, table -> table.colDefinition);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
@@ -99,17 +97,17 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public TableField<Record, J> getId() {
+    public TableField<Record, ?> getId() {
         return colId;
     }
 
     @Override
-    public TableImpObsProperties<J> as(Name alias) {
-        return new TableImpObsProperties<>(alias, this, pluginCoreModel).initCustomFields();
+    public TableImpObsProperties as(Name alias) {
+        return new TableImpObsProperties(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
-    public TableImpObsProperties<J> getThis() {
+    public TableImpObsProperties getThis() {
         return this;
     }
 

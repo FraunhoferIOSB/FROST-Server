@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -39,7 +40,7 @@ public class EntityCompleteTest {
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
-        testModel.initModel(modelRegistry);
+        testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
     }
 

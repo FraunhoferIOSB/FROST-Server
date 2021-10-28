@@ -75,8 +75,8 @@ public class FieldMapperResult extends FieldMapperAbstract {
     }
 
     @Override
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
-        final PropertyFieldRegistry<J, T> pfReg = table.getPropertyFieldRegistry();
+    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+        final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxType = fieldTypeIdx;
         final int idxString = fieldStringIdx;
         final int idxNumber = fieldNumberIdx;
@@ -99,7 +99,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
                 new PropertyFieldRegistry.NFP<>("t", t -> t.field(idxType)));
     }
 
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void handleResult(
+    public <T extends StaMainTable<T>> void handleResult(
             Entity entity, Property property,
             T table, Map<Field, Object> output,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
@@ -131,7 +131,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
         }
     }
 
-    public <J extends Comparable<J>, T extends StaMainTable<J, T>> void readResultFromDb(
+    public <T extends StaMainTable<T>> void readResultFromDb(
             Entity entity, Property property,
             T table, Record tuple, DataSize dataSize,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
@@ -165,7 +165,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
         }
     }
 
-    private <J extends Comparable<J>, T extends StaMainTable<J, T>> void handleNumber(Entity entity, Property property, T table, Record tuple, int idxReSt, int idxReNu) {
+    private <T extends StaMainTable<T>> void handleNumber(Entity entity, Property property, T table, Record tuple, int idxReSt, int idxReNu) {
         try {
             entity.setProperty(property, new BigDecimal(Utils.getFieldOrNull(tuple, (Field<String>) table.field(idxReSt))));
         } catch (NumberFormatException | NullPointerException e) {
