@@ -49,7 +49,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     /**
      * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, ?> colThingId = createField(DSL.name(NAME_COL_THINGID), getIdType(), this);
+    public final TableField<Record, ?> colThingId;
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -60,14 +60,16 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpHistLocations(DataType<?> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpHistLocations(DataType<?> idType, DataType<?> idTypeThing, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null);
         this.pluginCoreModel = pluginCoreModel;
+        colThingId = createField(DSL.name(NAME_COL_THINGID), idTypeThing);
     }
 
     private TableImpHistLocations(Name alias, TableImpHistLocations aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginCoreModel = pluginCoreModel;
+        colThingId = createField(DSL.name(NAME_COL_THINGID), aliased.colThingId.getDataType());
     }
 
     @Override

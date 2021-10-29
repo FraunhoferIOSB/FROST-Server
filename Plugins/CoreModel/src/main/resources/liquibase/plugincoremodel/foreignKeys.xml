@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2021-01-01-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="DATASTREAMS_OBS_PROPERTY_ID_FKEY" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_OBS_PROPERTY_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="OBS_PROPERTY_ID"
+            referencedTableName="OBS_PROPERTIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_SENSOR_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_THING_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="HIST_LOCATIONS_THING_ID_FKEY"
+            baseTableName="HIST_LOCATIONS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="LOCATIONS_HIST_LOCATIONS_HIST_LOCATION_ID_FKEY"
+            baseTableName="LOCATIONS_HIST_LOCATIONS" baseColumnNames="HIST_LOCATION_ID"
+            referencedTableName="HIST_LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="LOCATIONS_HIST_LOCATIONS_LOCATION_ID_FKEY"
+            baseTableName="LOCATIONS_HIST_LOCATIONS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_DATASTREAM_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="DATASTREAM_ID"
+            referencedTableName="DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_FEATURE_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="FEATURE_ID"
+            referencedTableName="FEATURES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="THINGS_LOCATIONS_LOCATION_ID_FKEY"
+            baseTableName="THINGS_LOCATIONS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="THINGS_LOCATIONS_THING_ID_FKEY"
+            baseTableName="THINGS_LOCATIONS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

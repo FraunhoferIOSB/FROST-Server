@@ -452,11 +452,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         return true;
     }
 
-    public String checkForUpgrades(String liquibaseChangelogFilename) {
+    public String checkForUpgrades(String liquibaseChangelogFilename, Map<String, Object> params) {
         try {
             Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
             Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
-            return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename);
+            return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             return "Failed to initialise database:\n"
@@ -465,7 +465,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         }
     }
 
-    public boolean doUpgrades(String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(String liquibaseChangelogFilename, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection;
         try {
@@ -477,7 +477,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
             out.append("\n");
             return false;
         }
-        return LiquibaseHelper.doUpgrades(connection, liquibaseChangelogFilename, out);
+        return LiquibaseHelper.doUpgrades(connection, liquibaseChangelogFilename, params, out);
     }
 
     @Override
@@ -616,6 +616,28 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 return SQLDataType.UUID;
             default:
                 throw new IllegalArgumentException("Unknown data type: " + type);
+        }
+    }
+
+    public void generateLiquibaseVariables(Map<String, Object> target, String entity, String type) {
+        target.put("id-" + entity, type);
+        target.put("idTypeLong", "BIGINT");
+        switch (type) {
+            case "LONG":
+                target.put("idType-" + entity, "BIGINT");
+                break;
+
+            case "STRING":
+                target.put("idType-" + entity, "VARCHAR(36)");
+                target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
+                break;
+
+            case "UUID":
+                target.put("idType-" + entity, "uuid");
+                target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown ID type: " + type);
         }
     }
 }

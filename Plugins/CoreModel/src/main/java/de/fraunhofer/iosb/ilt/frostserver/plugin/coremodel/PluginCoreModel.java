@@ -48,6 +48,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -109,7 +110,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public static final String NAME_COL_LT_THINGID = "THING_ID";
     public static final String NAME_COL_LT_LOCATIONID = "LOCATION_ID";
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/plugincoremodel/tables";
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/plugincoremodel/tables.xml";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
@@ -349,7 +350,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             final DataType dataTypeThng = ppm.getDataTypeFor(modelSettings.idTypeThing);
             tableCollection.registerTable(etDatastream, new TableImpDatastreams(dataTypeDstr, dataTypeObPr, dataTypeSnsr, dataTypeThng, this));
             tableCollection.registerTable(etFeatureOfInterest, new TableImpFeatures(dataTypeFeat, this));
-            tableCollection.registerTable(etHistoricalLocation, new TableImpHistLocations(dataTypeHist, this));
+            tableCollection.registerTable(etHistoricalLocation, new TableImpHistLocations(dataTypeHist, dataTypeThng, this));
             tableCollection.registerTable(etLocation, new TableImpLocations(dataTypeLctn, this));
             tableCollection.registerTable(new TableImpLocationsHistLocations(dataTypeLctn, dataTypeHist));
             tableCollection.registerTable(etObservation, new TableImpObservations(dataTypeObsr, dataTypeDstr, dataTypeFeat, this));
@@ -362,13 +363,28 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         return true;
     }
 
+    public Map<String, Object> createLiqibaseParams(PostgresPersistenceManager ppm, Map<String, Object> target) {
+        if (target == null) {
+            target = new LinkedHashMap<>();
+        }
+        ppm.generateLiquibaseVariables(target, "Datastream", modelSettings.idTypeDatastream);
+        ppm.generateLiquibaseVariables(target, "Feature", modelSettings.idTypeFeature);
+        ppm.generateLiquibaseVariables(target, "HistLocation", modelSettings.idTypeHistLoc);
+        ppm.generateLiquibaseVariables(target, "Location", modelSettings.idTypeLocation);
+        ppm.generateLiquibaseVariables(target, "ObsProp", modelSettings.idTypeObsProp);
+        ppm.generateLiquibaseVariables(target, "Observation", modelSettings.idTypeObservation);
+        ppm.generateLiquibaseVariables(target, "Sensor", modelSettings.idTypeSensor);
+        ppm.generateLiquibaseVariables(target, "Thing", modelSettings.idTypeThing);
+
+        return target;
+    }
+
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.checkForUpgrades(fileName);
+                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
             }
             return "Unknown persistence manager class";
         }
@@ -379,8 +395,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.doUpgrades(fileName, out);
+                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
             }
             out.append("Unknown persistence manager class");
             return false;

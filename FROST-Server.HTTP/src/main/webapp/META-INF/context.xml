@@ -14,6 +14,8 @@
     <Parameter override="false" name="useAbsoluteNavigationLinks" value="true" />
     <Parameter override="false" name="http.cors.enable" value="false" />
     <Parameter override="false" name="plugins.plugins" value="" />
+    <Parameter override="false" name="plugins.coreModel.enable" value="true" />
+    <Parameter override="false" name="plugins.coreModel.idType" value="LONG" />
     <Parameter override="false" name="plugins.actuation.enable" value="false" />
     <Parameter override="false" name="plugins.multiDatastream.enable" value="false" />
     <Parameter override="false" name="plugins.openApi.enable" value="false" />
@@ -47,12 +49,7 @@
     <Parameter override="false" name="bus.busImplementationClass" value="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" />
     <Parameter override="false" name="bus.mqttBroker" value="tcp://mosquitto:1883" />
     <!-- persistence setting -->
-    <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong" />
-    <!-- All options:
-        de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
-        de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
-        de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
-    -->
+    <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager" />
     <Parameter override="false" name="persistence.idGenerationMode" value="ServerGeneratedOnly" />
     <!-- All options:
         "ServerGeneratedOnly"       = No client defined ids allowed.

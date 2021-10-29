@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2021-01-01-histLocations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HIST_LOCATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="HIST_LOCATIONS">
+            <column name="TIME" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="THING_ID" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-histLocations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-HistLocation" value="LONG" />
+            <not>
+                <columnExists columnName="ID" tableName="HIST_LOCATIONS" />
+            </not>
+        </preConditions>
+        <addColumn tableName="HIST_LOCATIONS">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+                <constraints primaryKey="true" primaryKeyName="HIST_LOCATIONS_PKEY" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-histLocations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-HistLocation" value="STRING" />
+                <changeLogPropertyDefined property="id-HistLocation" value="UUID" />
+            </or>
+            <not>
+                <columnExists columnName="ID" tableName="HIST_LOCATIONS" />
+            </not>
+        </preConditions>
+        <addColumn tableName="HIST_LOCATIONS">
+            <column name="ID" type="${idType-HistLocation}" defaultValueComputed="${defaultValueComputed-HistLocation}" position="1">
+                <constraints primaryKey="true" primaryKeyName="HIST_LOCATIONS_PKEY"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-histLocations-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="HIST_LOCATIONS" indexName="HIST_LOCATIONS_THING_ID" />
+            </not>
+        </preConditions>
+        <createIndex tableName="HIST_LOCATIONS" indexName="HIST_LOCATIONS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

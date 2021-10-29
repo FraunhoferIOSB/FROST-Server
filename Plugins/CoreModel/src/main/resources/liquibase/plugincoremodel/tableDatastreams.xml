@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2021-01-01-datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="DATASTREAMS" />
+            </not>
+        </preConditions>
+        <createTable tableName="DATASTREAMS">
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="OBSERVATION_TYPE" type="TEXT"/>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="OBSERVED_AREA" type="geometry(Geometry,4326)"/>
+            <column name="SENSOR_ID" type="${idType-Sensor}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBS_PROPERTY_ID" type="${idType-ObsProp}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT_NAME" type="VARCHAR(255)"/>
+            <column name="UNIT_SYMBOL" type="VARCHAR(255)"/>
+            <column name="UNIT_DEFINITION" type="VARCHAR(255)"/>
+            <column name="LAST_FOI_ID" type="${idType-Feature}" />
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-Datastream" value="LONG" />
+            <not>
+                <columnExists columnName="ID" tableName="DATASTREAMS" />
+            </not>
+        </preConditions>
+        <addColumn tableName="DATASTREAMS">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+                <constraints primaryKey="true" primaryKeyName="DATASTREAMS_PKEY" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-Datastream" value="STRING" />
+                <changeLogPropertyDefined property="id-Datastream" value="UUID" />
+            </or>
+            <not>
+                <columnExists columnName="ID" tableName="DATASTREAMS" />
+            </not>
+        </preConditions>
+        <addColumn tableName="DATASTREAMS">
+            <column name="ID" type="${idType-Datastream}" defaultValueComputed="${defaultValueComputed-Datastream}" position="1">
+                <constraints primaryKey="true" primaryKeyName="DATASTREAMS_PKEY"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="scf" id="2021-01-01-datastreams-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="DATASTREAMS" indexName="DATASTREAMS_THING_ID" />
+            </not>
+        </preConditions>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

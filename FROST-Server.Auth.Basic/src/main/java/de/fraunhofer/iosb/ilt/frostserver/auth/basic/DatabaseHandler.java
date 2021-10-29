@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SQLDialect;
@@ -158,7 +159,7 @@ public class DatabaseHandler {
     public String checkForUpgrades() {
         Settings customSettings = coreSettings.getAuthSettings();
         try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
-            return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME);
+            return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap());
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             return "Failed to initialise database:\n"
@@ -170,7 +171,7 @@ public class DatabaseHandler {
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         Settings customSettings = coreSettings.getAuthSettings();
         try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
-            return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, out);
+            return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap(), out);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");

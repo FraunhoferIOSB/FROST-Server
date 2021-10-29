@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -49,20 +50,20 @@ public class LiquibaseHelper {
         // Utility class, should not be instantiated.
     }
 
-    public static String checkForUpgrades(Connection connection, String liquibaseChangelogFilename) {
+    public static String checkForUpgrades(Connection connection, String liquibaseChangelogFilename, Map<String, Object> params) {
         StringWriter out = new StringWriter();
         try {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            runLiquibaseCheck(liquibaseChangelogFilename, database, out);
+            runLiquibaseCheck(liquibaseChangelogFilename, params, database, out);
         } catch (DatabaseException ex) {
             outputError(ex, out, "Failed to initialise database");
         }
         return out.toString();
     }
 
-    public static boolean doUpgrades(Connection connection, String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
+    public static boolean doUpgrades(Connection connection, String liquibaseChangelogFilename, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
         try {
-            runLiquibaseUpdate(liquibaseChangelogFilename, connection, out);
+            runLiquibaseUpdate(liquibaseChangelogFilename, params, connection, out);
         } catch (DatabaseException ex) {
             outputError(ex, out, "Failed to initialise database");
             return false;
@@ -70,8 +71,11 @@ public class LiquibaseHelper {
         return true;
     }
 
-    private static void runLiquibaseCheck(String liquibaseChangelogFilename, Database database, StringWriter out) {
+    private static void runLiquibaseCheck(String liquibaseChangelogFilename, Map<String, Object> params, Database database, StringWriter out) {
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
             liquibase.update(new Contexts(), out);
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
@@ -80,11 +84,14 @@ public class LiquibaseHelper {
         }
     }
 
-    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Connection connection, Writer out) throws UpgradeFailedException, IOException, DatabaseException {
+    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Map<String, Object> params, Connection connection, Writer out) throws UpgradeFailedException, IOException, DatabaseException {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
             String searchPath = getSearchPath(connection);
 
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
             liquibase.update(new Contexts());
 
             setSearchPath(connection, searchPath);

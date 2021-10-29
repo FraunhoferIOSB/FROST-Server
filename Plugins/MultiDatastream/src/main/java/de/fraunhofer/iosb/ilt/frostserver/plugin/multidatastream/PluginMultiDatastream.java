@@ -49,6 +49,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginmultidatastream/tables";
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginmultidatastream/tables.xml";
     private static final String MULTI_DATASTREAM = "MultiDatastream";
     private static final String MULTI_DATASTREAMS = "MultiDatastreams";
 
@@ -223,13 +224,23 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         return true;
     }
 
+    public Map<String, Object> createLiqibaseParams(PostgresPersistenceManager ppm, Map<String, Object> target) {
+        if (target == null) {
+            target = new LinkedHashMap<>();
+        }
+        PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
+        pCoreModel.createLiqibaseParams(ppm, target);
+        ppm.generateLiquibaseVariables(target, "MultiDatastream", modelSettings.idTypeMultiDatastream);
+
+        return target;
+    }
+
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.checkForUpgrades(fileName);
+                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
             }
             return "Unknown persistence manager class";
         }
@@ -240,8 +251,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.doUpgrades(fileName, out);
+                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
             }
             out.append("Unknown persistence manager class");
             return false;

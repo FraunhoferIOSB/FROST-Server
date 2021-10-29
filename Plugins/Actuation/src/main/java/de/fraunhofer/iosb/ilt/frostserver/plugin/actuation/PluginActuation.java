@@ -42,6 +42,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginActuation implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginactuation/tables";
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginactuation/tables.xml";
     private static final String ACTUATOR = "Actuator";
     private static final String ACTUATORS = "Actuators";
     private static final String TASK = "Task";
@@ -195,13 +196,25 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         return true;
     }
 
+    public Map<String, Object> createLiqibaseParams(PostgresPersistenceManager ppm, Map<String, Object> target) {
+        if (target == null) {
+            target = new LinkedHashMap<>();
+        }
+        PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
+        pCoreModel.createLiqibaseParams(ppm, target);
+        ppm.generateLiquibaseVariables(target, "Actuator", modelSettings.idTypeActuator);
+        ppm.generateLiquibaseVariables(target, "Task", modelSettings.idTypeTask);
+        ppm.generateLiquibaseVariables(target, "TaskingCap", modelSettings.idTypeTaskingCap);
+
+        return target;
+    }
+
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.checkForUpgrades(fileName);
+                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
             }
             return "Unknown persistence manager class";
         }
@@ -212,8 +225,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                String fileName = LIQUIBASE_CHANGELOG_FILENAME + "IdLong" + ".xml";
-                return ppm.doUpgrades(fileName, out);
+                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
             }
             out.append("Unknown persistence manager class");
             return false;

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
+    <include relativeToChangelogFile="true" file="tableFeatures.xml" />
+    <include relativeToChangelogFile="true" file="tableHistLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableLocationsHistLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableObsProperties.xml" />
+    <include relativeToChangelogFile="true" file="tableObservations.xml" />
+    <include relativeToChangelogFile="true" file="tableSensors.xml" />
+    <include relativeToChangelogFile="true" file="tableThings.xml" />
+    <include relativeToChangelogFile="true" file="tableThingsLocations.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+
+    <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
+        <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
+    </changeSet>
+
+</databaseChangeLog>
