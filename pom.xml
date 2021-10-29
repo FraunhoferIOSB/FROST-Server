@@ -75,7 +75,7 @@
         <postgres.version>42.3.0</postgres.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <testcontainers.version>1.16.2</testcontainers.version>
-        <testcontainers-keycloak.version>1.8.0</testcontainers-keycloak.version>
+        <testcontainers-keycloak.version>1.8.1</testcontainers-keycloak.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
