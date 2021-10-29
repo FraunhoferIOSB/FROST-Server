@@ -33,8 +33,10 @@ public class TableImpMultiDatastreamsObsProperties extends StaLinkTable<TableImp
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
      * reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
-     * database. to.
+     * @param idTypeMds The (SQL)DataType of the MultiDatastreamId column used
+     * in the actual database.
+     * @param idTypeObsProp The (SQL)DataType of the ObsPropertyId column used
+     * in the actual database.
      */
     public TableImpMultiDatastreamsObsProperties(DataType<?> idTypeMds, DataType<?> idTypeObsProp) {
         super(DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);

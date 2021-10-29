@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  * has happened.
  *
  * @author hylke
- * @param <J> The type of the ID fields.
  */
 public interface HookPreDelete {
 

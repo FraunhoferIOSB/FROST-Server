@@ -72,7 +72,6 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author hylke
- * @param <J> The type of the EP_ID fields.
  * @param <T> The exact type of the implementing class.
  */
 public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableImpl<Record> implements StaMainTable<T> {

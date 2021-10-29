@@ -28,8 +28,10 @@ public class TableImpThingsLocations extends StaLinkTable<TableImpThingsLocation
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
-     * database.
+     * @param idTypeThing The (SQL)DataType of the ThingId column used in the
+     * actual database.
+     * @param idTypeLocation The (SQL)DataType of the LocationId column used in
+     * the actual database.
      */
     public TableImpThingsLocations(DataType<?> idTypeThing, DataType<?> idTypeLocation) {
         super(DSL.name(NAME_TABLE), null);

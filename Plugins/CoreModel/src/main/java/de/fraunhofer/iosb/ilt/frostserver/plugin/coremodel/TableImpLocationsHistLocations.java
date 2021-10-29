@@ -27,8 +27,10 @@ public class TableImpLocationsHistLocations extends StaLinkTable<TableImpLocatio
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
-     * database.
+     * @param idTypeLocation The (SQL)DataType of the LocationId column used in
+     * the actual database.
+     * @param idTypeHistLoc The (SQL)DataType of the HistLocationId column used
+     * in the actual database.
      */
     public TableImpLocationsHistLocations(DataType<?> idTypeLocation, DataType<?> idTypeHistLoc) {
         super(DSL.name(NAME_TABLE), null);

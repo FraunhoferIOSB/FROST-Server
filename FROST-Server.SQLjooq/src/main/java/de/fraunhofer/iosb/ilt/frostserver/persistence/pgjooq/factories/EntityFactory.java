@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 /**
  *
  * @author scf
- * @param <J> The type of the ID fields.
  */
 public interface EntityFactory {
 

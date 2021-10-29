@@ -82,7 +82,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
- * @param <J> The type of the ID fields.
  */
 public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
