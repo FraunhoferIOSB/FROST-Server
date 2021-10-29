@@ -148,7 +148,7 @@ public class CustomLinksTests extends AbstractTestClass {
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
-                + THINGS.get(0).getId().getValue() + ")";
+                + THINGS.get(0).getId().getUrl() + ")";
         Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
     }
 
@@ -162,7 +162,7 @@ public class CustomLinksTests extends AbstractTestClass {
                 .first();
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
-                + THINGS.get(0).getId().getValue() + ")";
+                + THINGS.get(0).getId().getUrl() + ")";
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
         Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
 

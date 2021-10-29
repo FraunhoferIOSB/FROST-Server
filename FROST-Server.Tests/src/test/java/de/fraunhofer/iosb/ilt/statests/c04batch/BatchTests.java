@@ -12,6 +12,8 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import de.fraunhofer.iosb.ilt.statests.util.IdType;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -37,7 +39,8 @@ public class BatchTests extends AbstractTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchTests.class);
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<ObservedProperty> OBSERVED_PROPS = new ArrayList<>();
-    private ObjectMapper mapper;
+    private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
+    private final ObjectMapper mapper;
 
     public BatchTests(ServerVersion version) {
         super(version);
@@ -84,6 +87,9 @@ public class BatchTests extends AbstractTestClass {
                 "The temperature of the thing.");
         service.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
+
+        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getId().getValue()));
+        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getId().getValue()));
     }
 
     /**
@@ -129,7 +135,7 @@ public class BatchTests extends AbstractTestClass {
                 + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(-9999) HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
