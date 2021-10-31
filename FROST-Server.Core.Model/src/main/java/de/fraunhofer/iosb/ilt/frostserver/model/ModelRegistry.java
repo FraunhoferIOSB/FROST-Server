@@ -100,6 +100,10 @@ public class ModelRegistry {
         if (type != null) {
             return type;
         }
+        type = TypeComplex.getComplexType(name);
+        if (type != null) {
+            return type;
+        }
         throw new IllegalArgumentException("unknown property type: " + name);
     }
 

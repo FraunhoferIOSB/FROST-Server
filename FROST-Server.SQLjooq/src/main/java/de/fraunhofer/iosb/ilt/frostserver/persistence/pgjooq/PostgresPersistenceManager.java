@@ -578,7 +578,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         StaMainTable<?> table = tableCollection.getTableForType(entityType);
         if (table == null) {
             LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
-            StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, getDataTypeFor(entityType.getPrimaryKey().name));
+            StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, getDataTypeFor(entityType.getPrimaryKey().getType().getName()));
             tableCollection.registerTable(entityType, newTable);
             table = newTable;
         }
@@ -604,13 +604,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
     public DataType<?> getDataTypeFor(String type) {
         switch (type.toUpperCase()) {
-            case "Edm.Int64":
+            case "EDM.INT64":
             case Constants.VALUE_ID_TYPE_LONG:
                 return SQLDataType.BIGINT;
-            case "Edm.String":
+            case "EDM.STRING":
             case Constants.VALUE_ID_TYPE_STRING:
                 return SQLDataType.VARCHAR;
-            case "Edm.Guid":
+            case "EDM.GUID":
             case Constants.VALUE_ID_TYPE_UUID:
                 return SQLDataType.UUID;
             default:

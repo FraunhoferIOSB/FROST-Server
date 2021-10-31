@@ -19,8 +19,14 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,6 +38,33 @@ public class TypeComplex extends PropertyType {
     public static TypeComplex STA_MAP = new TypeComplex("Sta.Object", "A free object that can contain anything", TypeReferencesHelper.TYPE_REFERENCE_MAP, true);
     public static TypeComplex STA_OBJECT = new TypeComplex("Sta.ANY", "A free type, can be anything", TypeReferencesHelper.TYPE_REFERENCE_OBJECT, true);
     public static TypeComplex STA_OBJECT_UNTYPED = new TypeComplex("Sta.ANY", "A free type, can be anything", null, true);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
+    private static final Map<String, TypeComplex> COMPLEX_TYPES = new HashMap<>();
+
+    static {
+        for (Field field : FieldUtils.getAllFields(TypeComplex.class)) {
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            try {
+                final TypeComplex type = (TypeComplex) FieldUtils.readStaticField(field, false);
+                final String name = type.getName();
+                COMPLEX_TYPES.put(name, type);
+                LOGGER.debug("Registered type: {}", name);
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error("Failed to initialise: {}", field, ex);
+            } catch (IllegalAccessException ex) {
+                LOGGER.trace("Failed to initialise: {}", field, ex);
+            } catch (ClassCastException ex) {
+                // It's not a TypeSimplePrimitive
+            }
+        }
+    }
+
+    public static TypeComplex getComplexType(String name) {
+        return COMPLEX_TYPES.get(name);
+    }
 
     private final boolean openType;
     private final Map<String, PropertyType> properties = new LinkedHashMap<>();

@@ -46,7 +46,7 @@ public final class ActuationModelSettings implements ConfigDefaults {
 
     public ActuationModelSettings(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
-        idTypeDefault = pluginSettings.get(CoreModelSettings.TAG_ID_TYPE_DEFAULT, ActuationModelSettings.class).toUpperCase();
+        idTypeDefault = pluginSettings.get(CoreModelSettings.TAG_ID_TYPE_DEFAULT, CoreModelSettings.class).toUpperCase();
         idTypeActuator = pluginSettings.get(TAG_ID_TYPE_ACTUATOR, idTypeDefault).toUpperCase();
         idTypeTask = pluginSettings.get(TAG_ID_TYPE_TASK, idTypeDefault).toUpperCase();
         idTypeTaskingCap = pluginSettings.get(TAG_ID_TYPE_TASKINGCAP, idTypeDefault).toUpperCase();
