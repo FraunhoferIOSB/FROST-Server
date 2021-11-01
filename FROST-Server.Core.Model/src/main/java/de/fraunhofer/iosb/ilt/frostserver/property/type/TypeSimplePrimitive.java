@@ -73,12 +73,12 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive STA_ID_UUID = EDM_GUID;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
-    private static final Map<String, TypeSimplePrimitive> PRIMITIVES = new HashMap<>();
+    private static final Map<String, TypeSimplePrimitive> TYPES = new HashMap<>();
 
     static {
-        PRIMITIVES.put(Constants.VALUE_ID_TYPE_LONG, STA_ID_LONG);
-        PRIMITIVES.put(Constants.VALUE_ID_TYPE_STRING, STA_ID_STRING);
-        PRIMITIVES.put(Constants.VALUE_ID_TYPE_UUID, STA_ID_UUID);
+        TYPES.put(Constants.VALUE_ID_TYPE_LONG, STA_ID_LONG);
+        TYPES.put(Constants.VALUE_ID_TYPE_STRING, STA_ID_STRING);
+        TYPES.put(Constants.VALUE_ID_TYPE_UUID, STA_ID_UUID);
         for (Field field : FieldUtils.getAllFields(TypeSimplePrimitive.class)) {
             if (!Modifier.isStatic(field.getModifiers())) {
                 continue;
@@ -86,7 +86,7 @@ public class TypeSimplePrimitive extends TypeSimple {
             try {
                 final TypeSimplePrimitive primitive = (TypeSimplePrimitive) FieldUtils.readStaticField(field, false);
                 final String name = primitive.getName();
-                PRIMITIVES.put(name, primitive);
+                TYPES.put(name, primitive);
                 LOGGER.debug("Registered type: {}", name);
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to initialise: {}", field, ex);
@@ -98,8 +98,8 @@ public class TypeSimplePrimitive extends TypeSimple {
         }
     }
 
-    public static TypeSimplePrimitive getPrimitiveType(String name) {
-        return PRIMITIVES.get(name);
+    public static TypeSimplePrimitive getType(String name) {
+        return TYPES.get(name);
     }
 
     private TypeSimplePrimitive(String name, String description, TypeReference typeReference) {

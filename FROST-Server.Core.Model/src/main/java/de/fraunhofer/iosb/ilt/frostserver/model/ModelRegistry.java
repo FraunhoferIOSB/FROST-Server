@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import java.util.LinkedHashSet;
@@ -96,11 +97,15 @@ public class ModelRegistry {
         if (type != null) {
             return type;
         }
-        type = TypeSimplePrimitive.getPrimitiveType(name);
+        type = TypeSimplePrimitive.getType(name);
         if (type != null) {
             return type;
         }
-        type = TypeComplex.getComplexType(name);
+        type = TypeSimpleCustom.getType(name);
+        if (type != null) {
+            return type;
+        }
+        type = TypeComplex.getType(name);
         if (type != null) {
             return type;
         }

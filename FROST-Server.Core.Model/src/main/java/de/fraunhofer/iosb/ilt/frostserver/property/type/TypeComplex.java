@@ -40,7 +40,7 @@ public class TypeComplex extends PropertyType {
     public static TypeComplex STA_OBJECT_UNTYPED = new TypeComplex("Sta.ANY", "A free type, can be anything", null, true);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
-    private static final Map<String, TypeComplex> COMPLEX_TYPES = new HashMap<>();
+    private static final Map<String, TypeComplex> TYPES = new HashMap<>();
 
     static {
         for (Field field : FieldUtils.getAllFields(TypeComplex.class)) {
@@ -50,7 +50,7 @@ public class TypeComplex extends PropertyType {
             try {
                 final TypeComplex type = (TypeComplex) FieldUtils.readStaticField(field, false);
                 final String name = type.getName();
-                COMPLEX_TYPES.put(name, type);
+                TYPES.put(name, type);
                 LOGGER.debug("Registered type: {}", name);
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to initialise: {}", field, ex);
@@ -62,8 +62,8 @@ public class TypeComplex extends PropertyType {
         }
     }
 
-    public static TypeComplex getComplexType(String name) {
-        return COMPLEX_TYPES.get(name);
+    public static TypeComplex getType(String name) {
+        return TYPES.get(name);
     }
 
     private final boolean openType;

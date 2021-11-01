@@ -33,6 +33,6 @@ public class DefPropertyTypeSimple {
     private String baseType;
 
     public PropertyType getPropertyType(ModelRegistry modelRegistry) {
-        return new TypeSimpleCustom(name, description, TypeSimplePrimitive.getPrimitiveType(baseType));
+        return new TypeSimpleCustom(name, description, TypeSimplePrimitive.getType(baseType));
     }
 }
