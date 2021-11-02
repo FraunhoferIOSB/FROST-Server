@@ -233,6 +233,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                     entity.setProperty(pluginCoreModel.npFeatureOfInterestObservation, f);
                 }
             }
+            return true;
         });
     }
 

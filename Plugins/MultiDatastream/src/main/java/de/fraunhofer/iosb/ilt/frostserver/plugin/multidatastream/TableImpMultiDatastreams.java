@@ -303,6 +303,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                     if (mds != null && !mds.isEmpty()) {
                         throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
                     }
+                    return true;
                 });
         obsPropsTable.registerHookPreUpdate(-1,
                 (pm, entity, entityId) -> {
@@ -360,6 +361,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             } else if (ds == null) {
                 throw new IncompleteEntityException("Missing Datastream or MultiDatastream.");
             }
+            return true;
         });
         // On update, make sure we still have either a DS or MDS, but not both.
         observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {

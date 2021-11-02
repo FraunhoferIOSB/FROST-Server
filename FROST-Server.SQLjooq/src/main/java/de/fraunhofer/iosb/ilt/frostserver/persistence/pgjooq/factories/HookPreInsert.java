@@ -32,6 +32,16 @@ import org.jooq.Field;
  */
 public interface HookPreInsert {
 
-    public void insertIntoDatabase(PostgresPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
+    /**
+     *
+     * @param pm The Persistence Manager to use for database queries.
+     * @param entity The entity that is being inserted.
+     * @param insertFields The fields being inserted.
+     * @return true if the insert can continue, false if the insert should be
+     * skipped without error.
+     * @throws NoSuchEntityException If a related entity does not exist.
+     * @throws IncompleteEntityException If the entity is not complete.
+     */
+    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
 
 }

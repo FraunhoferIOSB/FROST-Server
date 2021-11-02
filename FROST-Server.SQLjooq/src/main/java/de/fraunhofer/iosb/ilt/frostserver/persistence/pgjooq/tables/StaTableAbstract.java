@@ -221,7 +221,9 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         Map<Field, Object> insertFields = new HashMap<>();
 
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields);
+            if (!hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields)) {
+                return false;
+            }
         }
 
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
