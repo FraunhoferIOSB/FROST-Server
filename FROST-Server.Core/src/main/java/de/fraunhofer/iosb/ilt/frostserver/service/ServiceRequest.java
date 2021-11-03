@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class ServiceRequest {
     private String contentType;
     private Map<String, String[]> parameterMap;
     private Map<String, Object> attributeMap;
+    private Principal userPrincipal;
 
     protected ServiceRequest() {
         // empty by design.
@@ -159,6 +161,14 @@ public class ServiceRequest {
             this.urlPath = url;
             this.urlQuery = null;
         }
+    }
+
+    public Principal getUserPrincipal() {
+        return userPrincipal;
+    }
+
+    public void setUserPrincipal(Principal userPrincipal) {
+        this.userPrincipal = userPrincipal;
     }
 
     /**

@@ -90,47 +90,53 @@ public class BasicAuthFilter implements Filter {
         String realmName = authSettings.get(TAG_AUTH_REALM_NAME, BasicAuthProvider.class);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 
-        final AuthChecker allAllowed = (request, response) -> true;
+        final AuthChecker allAllowed = (userData, response) -> true;
         methodCheckers.put(HttpMethod.OPTIONS, allAllowed);
         methodCheckers.put(HttpMethod.HEAD, allAllowed);
 
         if ("T".equals(anonRead)) {
             methodCheckers.put(HttpMethod.GET, allAllowed);
         } else {
-            methodCheckers.put(HttpMethod.GET, (request, response) -> requireRole(roleGet, request, response));
+            methodCheckers.put(HttpMethod.GET, (userData, response) -> requireRole(roleGet, userData, response));
         }
 
-        methodCheckers.put(HttpMethod.POST, (request, response) -> requireRole(rolePost, request, response));
-        methodCheckers.put(HttpMethod.PATCH, (request, response) -> requireRole(rolePatch, request, response));
-        methodCheckers.put(HttpMethod.PUT, (request, response) -> requireRole(rolePut, request, response));
-        methodCheckers.put(HttpMethod.DELETE, (request, response) -> requireRole(roleDelete, request, response));
+        methodCheckers.put(HttpMethod.POST, (userData, response) -> requireRole(rolePost, userData, response));
+        methodCheckers.put(HttpMethod.PATCH, (userData, response) -> requireRole(rolePatch, userData, response));
+        methodCheckers.put(HttpMethod.PUT, (userData, response) -> requireRole(rolePut, userData, response));
+        methodCheckers.put(HttpMethod.DELETE, (userData, response) -> requireRole(roleDelete, userData, response));
     }
 
-    private boolean requireRole(String roleName, HttpServletRequest request, HttpServletResponse response) {
+    private UserNamePass findCredentials(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader == null || !authHeader.startsWith(BASIC_PREFIX)) {
-            LOGGER.debug("Rejecting request: no basic auth header.");
-            throwAuthRequired(response);
-            return false;
+            LOGGER.debug("No basic auth header.");
+            return new UserNamePass(null, null);
         }
 
         String userPassBase64 = authHeader.substring(BASIC_PREFIX.length());
         String userPassDecoded = new String(Base64.getDecoder().decode(userPassBase64), StringHelper.UTF8);
         if (!userPassDecoded.contains(":")) {
-            LOGGER.debug("Rejecting request: no username:password in basic auth header.");
+            LOGGER.debug("No username:password in basic auth header.");
+            return new UserNamePass(null, null);
+        }
+
+        String[] split = userPassDecoded.split(":", 2);
+        return new UserNamePass(split[0], split[1]);
+    }
+
+    private boolean requireRole(String roleName, UserNamePass userData, HttpServletResponse response) {
+        if (userData.isEmpty()) {
+            LOGGER.debug("Rejecting request: No user data.");
             throwAuthRequired(response);
             return false;
         }
 
-        String[] split = userPassDecoded.split(":", 2);
-        String userName = split[0];
-        String userPass = split[1];
-        if (!databaseHandler.userHasRole(userName, userPass, roleName)) {
-            LOGGER.debug("Rejecting request: User {} does not have role {}.", userName, roleName);
+        if (!databaseHandler.userHasRole(userData.userName, userData.userPass, roleName)) {
+            LOGGER.debug("Rejecting request: User {} does not have role {}.", userData.userName, roleName);
             throwAuthRequired(response);
             return false;
         }
-        LOGGER.debug("Accepting request: User {} has role {}.", userName, roleName);
+        LOGGER.debug("Accepting request: User {} has role {}.", userData.userName, roleName);
         return true;
     }
 
@@ -149,6 +155,8 @@ public class BasicAuthFilter implements Filter {
             return;
         }
 
+        UserNamePass userData = findCredentials(request);
+
         AuthChecker checker = methodCheckers.get(method);
         if (checker == null) {
             LOGGER.debug("Rejecting request: No checker for method: {}.", request.getMethod());
@@ -156,8 +164,8 @@ public class BasicAuthFilter implements Filter {
             return;
         }
 
-        if (checker.isAllowed(request, response)) {
-            chain.doFilter(request, response);
+        if (checker.isAllowed(userData, response)) {
+            chain.doFilter(new RequestWrapper(request, userData::getUserName), response);
         }
     }
 
@@ -197,11 +205,30 @@ public class BasicAuthFilter implements Filter {
         /**
          * Check if the request is allowed.
          *
-         * @param request The request to check.
+         * @param userData The request to check.
          * @param response The response to use for sending errors back.
          * @return False if the request is not allowed.
          */
-        public boolean isAllowed(HttpServletRequest request, HttpServletResponse response);
+        public boolean isAllowed(UserNamePass userData, HttpServletResponse response);
     }
 
+    private static class UserNamePass {
+
+        public final String userName;
+        public final String userPass;
+
+        public UserNamePass(String userName, String userPass) {
+            this.userName = userName;
+            this.userPass = userPass;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public boolean isEmpty() {
+            return userName == null;
+        }
+
+    }
 }

@@ -166,6 +166,7 @@ public class ServletV1P0 extends HttpServlet {
                 .withContent(request.getInputStream())
                 .withContentType(request.getContentType())
                 .withParameterMap(request.getParameterMap())
+                .withUserPrincipal(request.getUserPrincipal())
                 .build();
     }
 

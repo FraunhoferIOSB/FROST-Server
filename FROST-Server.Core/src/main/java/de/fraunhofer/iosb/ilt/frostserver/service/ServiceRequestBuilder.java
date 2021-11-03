@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ public class ServiceRequestBuilder {
     private Optional<Map<String, String[]>> parameterMap;
     private final Map<String, Object> attributeMap = new HashMap<>();
     private final Version version;
+    private Principal userPrincipal;
 
     public ServiceRequestBuilder(Version version) {
         this.version = version;
@@ -96,6 +98,11 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withUserPrincipal(Principal userPrincipal) {
+        this.userPrincipal = userPrincipal;
+        return this;
+    }
+
     public ServiceRequest build() {
         ServiceRequest result = new ServiceRequest();
         result.setVersion(version);
@@ -123,6 +130,7 @@ public class ServiceRequestBuilder {
             result.setRequestType(requestType.get());
         }
         result.setAttributeMap(attributeMap);
+        result.setUserPrincipal(userPrincipal);
         return result;
     }
 }
