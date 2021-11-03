@@ -157,6 +157,11 @@ public class EntityType implements Comparable<EntityType> {
         return this;
     }
 
+    public EntityType addValidatorForUpdate(EntityValidator validator) {
+        validatorsUpdateEntity.add(validator);
+        return this;
+    }
+
     public EntityPropertyMain<Id> getPrimaryKey() {
         return primaryKey;
     }
