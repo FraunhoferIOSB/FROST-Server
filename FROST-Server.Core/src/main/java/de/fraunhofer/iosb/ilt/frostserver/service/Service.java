@@ -490,9 +490,7 @@ public class Service implements AutoCloseable {
 
         try {
             if (!pm.insert(entity)) {
-                LOGGER.debug("Failed to insert entity.");
-                pm.rollbackAndClose();
-                return errorResponse(response, 400, "Failed to insert entity.");
+                LOGGER.debug("No need to insert entity.");
             }
             maybeCommitAndClose();
 
