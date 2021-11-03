@@ -17,7 +17,9 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTH_REALM_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_GET;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
@@ -32,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Base64;
 import java.util.EnumMap;
 import java.util.Map;
@@ -68,9 +71,12 @@ public class BasicAuthFilter implements Filter {
 
     private String authHeaderValue;
 
+    private String roleAdmin;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("Turning on Basic authentication.");
+        roleAdmin = getInitParamWithDefault(filterConfig, TAG_ROLE_ADMIN, BasicAuthProvider.class);
         String roleGet = getInitParamWithDefault(filterConfig, TAG_ROLE_GET, BasicAuthProvider.class);
         String rolePost = getInitParamWithDefault(filterConfig, TAG_ROLE_POST, BasicAuthProvider.class);
         String rolePatch = getInitParamWithDefault(filterConfig, TAG_ROLE_PATCH, BasicAuthProvider.class);
@@ -121,7 +127,12 @@ public class BasicAuthFilter implements Filter {
         }
 
         String[] split = userPassDecoded.split(":", 2);
-        return new UserNamePass(split[0], split[1]);
+        final UserNamePass userData = new UserNamePass(split[0], split[1]);
+        if (databaseHandler.isValidUser(userData.userName, userData.userPass)) {
+            return userData;
+        } else {
+            return new UserNamePass(null, null);
+        }
     }
 
     private boolean requireRole(String roleName, UserNamePass userData, HttpServletResponse response) {
@@ -131,7 +142,7 @@ public class BasicAuthFilter implements Filter {
             return false;
         }
 
-        if (!databaseHandler.userHasRole(userData.userName, userData.userPass, roleName)) {
+        if (!databaseHandler.userHasRole(userData.userName, roleName)) {
             LOGGER.debug("Rejecting request: User {} does not have role {}.", userData.userName, roleName);
             throwAuthRequired(response);
             return false;
@@ -165,7 +176,13 @@ public class BasicAuthFilter implements Filter {
         }
 
         if (checker.isAllowed(userData, response)) {
-            chain.doFilter(new RequestWrapper(request, userData::getUserName), response);
+
+            boolean admin = databaseHandler.userHasRole(userData.userName, roleAdmin);
+            if (admin) {
+                chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin)), response);
+            } else {
+                chain.doFilter(new RequestWrapper(request, userData::getUserName), response);
+            }
         }
     }
 
@@ -229,6 +246,6 @@ public class BasicAuthFilter implements Filter {
         public boolean isEmpty() {
             return userName == null;
         }
-
     }
+
 }

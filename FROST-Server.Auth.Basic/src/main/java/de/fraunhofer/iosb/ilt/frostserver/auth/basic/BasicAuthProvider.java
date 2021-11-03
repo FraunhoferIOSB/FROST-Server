@@ -51,6 +51,8 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     public static final String TAG_ROLE_PUT = "rolePut";
     @DefaultValue("delete")
     public static final String TAG_ROLE_DELETE = "roleDelete";
+    @DefaultValue("admin")
+    public static final String TAG_ROLE_ADMIN = "roleAdmin";
 
     @Override
     public void init(CoreSettings coreSettings) {

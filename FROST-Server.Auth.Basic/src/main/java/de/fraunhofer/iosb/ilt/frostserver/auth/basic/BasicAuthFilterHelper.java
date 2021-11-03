@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_GET;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
@@ -53,6 +54,7 @@ public class BasicAuthFilterHelper {
         Settings authSettings = coreSettings.getAuthSettings();
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
         String filterClass = BasicAuthFilter.class.getName();
+
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
         boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
@@ -62,6 +64,7 @@ public class BasicAuthFilterHelper {
         authFilterSta.setInitParameter(TAG_ROLE_POST, roleMapping.get(Role.CREATE));
         authFilterSta.setInitParameter(TAG_ROLE_PUT, roleMapping.get(Role.UPDATE));
         authFilterSta.setInitParameter(TAG_ROLE_DELETE, roleMapping.get(Role.DELETE));
+        authFilterSta.setInitParameter(TAG_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
         String[] urlPatterns = Arrays.copyOf(Constants.HTTP_URL_PATTERNS, Constants.HTTP_URL_PATTERNS.length);
         authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns);
 
@@ -74,6 +77,7 @@ public class BasicAuthFilterHelper {
         authFilterAdmin.setInitParameter(TAG_ROLE_POST, adminRoleString);
         authFilterAdmin.setInitParameter(TAG_ROLE_PUT, adminRoleString);
         authFilterAdmin.setInitParameter(TAG_ROLE_DELETE, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
         authFilterAdmin.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/DatabaseStatus");
     }
 }

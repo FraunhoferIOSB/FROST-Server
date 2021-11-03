@@ -102,7 +102,8 @@ public class DatabaseHandler {
     }
 
     /**
-     * This method checks if the given user exists and has the given role.
+     * This method checks if the given user exists with the given password and
+     * has the given role.
      *
      * @param userName The username of the user to check the role for.
      * @param userPass The password of the user to check the role for.
@@ -131,6 +132,14 @@ public class DatabaseHandler {
         }
     }
 
+    /**
+     * This method checks if the given user exists and has the given role.
+     *
+     * @param userName The username of the user to check the role for.
+     * @param roleName The role to check.
+     * @return true if the user exists AND has the given password AND has the
+     * given role.
+     */
     public boolean userHasRole(String userName, String roleName) {
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
