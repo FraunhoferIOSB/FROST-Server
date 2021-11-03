@@ -530,7 +530,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException {
         PathElementEntity mainElement;
         Entity entity;
         try {
@@ -545,7 +545,7 @@ public class Service implements AutoCloseable {
         } catch (JsonParseException | JsonMappingException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
-        } catch (NoSuchEntityException exc) {
+        } catch (IncompleteEntityException | NoSuchEntityException exc) {
             return errorResponse(response, 404, exc.getMessage());
         }
 
@@ -559,7 +559,7 @@ public class Service implements AutoCloseable {
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, "Failed to patch entity.");
             }
-        } catch (IllegalArgumentException | NoSuchEntityException e) {
+        } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
         }
