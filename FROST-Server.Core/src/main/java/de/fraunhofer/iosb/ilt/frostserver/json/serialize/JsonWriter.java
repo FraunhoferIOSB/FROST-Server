@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 
 /**
  * Enables serialization of entities as JSON.
@@ -70,6 +71,7 @@ public class JsonWriter {
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
+        module.addSerializer(Date.class, new DateSerialiser());
         mapper.registerModule(module);
         return mapper;
     }

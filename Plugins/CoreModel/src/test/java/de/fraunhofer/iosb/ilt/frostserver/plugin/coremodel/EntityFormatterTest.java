@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -39,12 +38,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -52,6 +50,8 @@ import org.junit.Test;
  * @author scf
  */
 public class EntityFormatterTest {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntityFormatterTest.class.getName());
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;
@@ -844,7 +844,7 @@ public class EntityFormatterTest {
             JsonNode json2 = mapper.readTree(string2);
             return json1.equals(json2);
         } catch (IOException ex) {
-            Logger.getLogger(EntityFormatterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error("Failed", ex);
         }
         return false;
     }
