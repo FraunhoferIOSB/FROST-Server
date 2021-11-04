@@ -48,8 +48,8 @@ PARSER_END(Parser)
 | < RB: ")" >
 | <LONG:   ("-")?(["0"]|["1"-"9"](["0"-"9"])*) >
 | <DOUBLE: <LONG> ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
-| <ENTITY_TYPE:     ["A"-"Z"](["A"-"Z", "a"-"z"])+ >
-| <ENTITY_PROPERTY: ["a"-"z"](["A"-"Z", "a"-"z"])+ | "@iot.id" | "@iot.selfLink" > : SUB_PROPS
+| <ENTITY_TYPE:     ["A"-"Z"](["A"-"Z", "a"-"z", "0"-"9", ".", "_", "-"])+ >
+| <ENTITY_PROPERTY: ["a"-"z"](["A"-"Z", "a"-"z", "0"-"9", ".", "_", "-"])+ | "@iot.id" | "@iot.selfLink" > : SUB_PROPS
 | <CP_REF:   "$ref" >
 | <DOUBLESQUOTE: "''" >
 | <STR_LIT: "'" (~["'"] | <DOUBLESQUOTE> )* "'" >
