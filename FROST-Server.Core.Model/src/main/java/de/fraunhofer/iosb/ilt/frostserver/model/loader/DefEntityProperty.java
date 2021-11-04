@@ -37,6 +37,10 @@ public class DefEntityProperty {
      */
     private String name;
     /**
+     * The description of the EntityProperty.
+     */
+    private String description;
+    /**
      * Aliases for the name of the Property.
      */
     private List<String> aliases;
@@ -111,6 +115,24 @@ public class DefEntityProperty {
     public DefEntityProperty setName(String name) {
         this.name = name;
         return this;
+    }
+
+    /**
+     * The description of the EntityProperty.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * The description of the EntityProperty.
+     *
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
