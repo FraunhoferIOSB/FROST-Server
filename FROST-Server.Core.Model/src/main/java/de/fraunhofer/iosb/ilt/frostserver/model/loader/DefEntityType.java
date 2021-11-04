@@ -62,7 +62,7 @@ public class DefEntityType {
     private EntityType entityType;
 
     public void init() {
-        for (Map.Entry<String, DefEntityProperty> entry : entityProperties.entrySet()) {
+        for (Map.Entry<String, DefEntityProperty> entry : getEntityProperties().entrySet()) {
             String typeName = entry.getKey();
             DefEntityProperty property = entry.getValue();
             if (property.getName() == null) {
@@ -70,7 +70,7 @@ public class DefEntityType {
             }
             property.init();
         }
-        for (Map.Entry<String, DefNavigationProperty> entry : navigationProperties.entrySet()) {
+        for (Map.Entry<String, DefNavigationProperty> entry : getNavigationProperties().entrySet()) {
             String typeName = entry.getKey();
             DefNavigationProperty property = entry.getValue();
             if (property.getName() == null) {
