@@ -129,7 +129,8 @@ public class DefEntityProperty {
     /**
      * The description of the EntityProperty.
      *
-     * @param description the description to set
+     * @param description the description to set.
+     * @return this.
      */
     public DefEntityProperty setDescription(String description) {
         this.description = description;

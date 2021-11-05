@@ -271,8 +271,8 @@ public class Query {
             selectNavProp = new HashSet<>();
             return refSelect;
         }
-        Set<EntityPropertyMain> selectedEntityPropMain = new HashSet<>();
-        selectNavProp = new HashSet<>();
+        Set<EntityPropertyMain> selectedEntityPropMain = new LinkedHashSet<>();
+        selectNavProp = new LinkedHashSet<>();
         if (select.isEmpty()) {
             if (entityType == null) {
                 validate();
