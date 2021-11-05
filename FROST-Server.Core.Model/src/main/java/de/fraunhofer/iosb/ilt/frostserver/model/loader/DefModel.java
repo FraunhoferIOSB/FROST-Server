@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  *
@@ -66,7 +66,7 @@ public class DefModel {
 
     public Map<String, DefEntityType> getEntityTypes() {
         if (entityTypes == null) {
-            entityTypes = new TreeMap<>();
+            entityTypes = new LinkedHashMap<>();
         }
         return entityTypes;
     }

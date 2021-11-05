@@ -22,9 +22,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  *
@@ -149,7 +149,7 @@ public class DefEntityType {
      */
     public Map<String, DefEntityProperty> getEntityProperties() {
         if (entityProperties == null) {
-            entityProperties = new TreeMap<>();
+            entityProperties = new LinkedHashMap<>();
         }
         return entityProperties;
     }
@@ -177,7 +177,7 @@ public class DefEntityType {
      */
     public Map<String, DefNavigationProperty> getNavigationProperties() {
         if (navigationProperties == null) {
-            navigationProperties = new TreeMap<>();
+            navigationProperties = new LinkedHashMap<>();
         }
         return navigationProperties;
     }
