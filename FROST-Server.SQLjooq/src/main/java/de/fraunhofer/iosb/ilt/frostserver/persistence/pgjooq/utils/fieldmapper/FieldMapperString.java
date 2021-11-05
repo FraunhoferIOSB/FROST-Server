@@ -67,8 +67,9 @@ public class FieldMapperString extends FieldMapperAbstract {
     /**
      * @param field the field to set
      */
-    public void setField(String field) {
+    public FieldMapperString setField(String field) {
         this.field = field;
+        return this;
     }
 
 }

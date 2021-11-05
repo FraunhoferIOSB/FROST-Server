@@ -146,8 +146,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param field the field to set
      */
-    public void setField(String field) {
+    public FieldMapperManyToManyOrdered setField(String field) {
         this.field = field;
+        return this;
     }
 
     /**
@@ -164,8 +165,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param linkTable the linkTable to set
      */
-    public void setLinkTable(String linkTable) {
+    public FieldMapperManyToManyOrdered setLinkTable(String linkTable) {
         this.linkTable = linkTable;
+        return this;
     }
 
     /**
@@ -182,8 +184,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param linkOurField the linkOurField to set
      */
-    public void setLinkOurField(String linkOurField) {
+    public FieldMapperManyToManyOrdered setLinkOurField(String linkOurField) {
         this.linkOurField = linkOurField;
+        return this;
     }
 
     /**
@@ -200,8 +203,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param linkOtherField the linkOtherField to set
      */
-    public void setLinkOtherField(String linkOtherField) {
+    public FieldMapperManyToManyOrdered setLinkOtherField(String linkOtherField) {
         this.linkOtherField = linkOtherField;
+        return this;
     }
 
     /**
@@ -218,8 +222,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param linkRankField the linkOrderField to set
      */
-    public void setLinkRankField(String linkRankField) {
+    public FieldMapperManyToManyOrdered setLinkRankField(String linkRankField) {
         this.linkRankField = linkRankField;
+        return this;
     }
 
     /**
@@ -236,8 +241,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param otherTable the otherTable to set
      */
-    public void setOtherTable(String otherTable) {
+    public FieldMapperManyToManyOrdered setOtherTable(String otherTable) {
         this.otherTable = otherTable;
+        return this;
     }
 
     /**
@@ -254,8 +260,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param otherField the otherField to set
      */
-    public void setOtherField(String otherField) {
+    public FieldMapperManyToManyOrdered setOtherField(String otherField) {
         this.otherField = otherField;
+        return this;
     }
 
     /**
@@ -274,8 +281,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param distinct the distinct to set
      */
-    public void setDistinct(boolean distinct) {
+    public FieldMapperManyToManyOrdered setDistinct(boolean distinct) {
         this.distinct = distinct;
+        return this;
     }
 
     /**
@@ -294,8 +302,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
      *
      * @param distinctInverse the distinctInverse to set
      */
-    public void setDistinctInverse(boolean distinctInverse) {
+    public FieldMapperManyToManyOrdered setDistinctInverse(boolean distinctInverse) {
         this.distinctInverse = distinctInverse;
+        return this;
     }
 
 }

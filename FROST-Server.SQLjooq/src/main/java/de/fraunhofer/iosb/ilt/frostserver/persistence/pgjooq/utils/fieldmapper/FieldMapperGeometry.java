@@ -113,8 +113,9 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
     /**
      * @param fieldSource the fieldSource to set
      */
-    public void setFieldSource(String fieldSource) {
+    public FieldMapperGeometry setFieldSource(String fieldSource) {
         this.fieldSource = fieldSource;
+        return this;
     }
 
     /**
@@ -127,8 +128,9 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
     /**
      * @param fieldGeom the fieldGeom to set
      */
-    public void setFieldGeom(String fieldGeom) {
+    public FieldMapperGeometry setFieldGeom(String fieldGeom) {
         this.fieldGeom = fieldGeom;
+        return this;
     }
 
 }

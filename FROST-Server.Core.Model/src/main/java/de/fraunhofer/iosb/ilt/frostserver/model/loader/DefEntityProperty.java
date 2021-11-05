@@ -131,8 +131,9 @@ public class DefEntityProperty {
      *
      * @param description the description to set
      */
-    public void setDescription(String description) {
+    public DefEntityProperty setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     /**

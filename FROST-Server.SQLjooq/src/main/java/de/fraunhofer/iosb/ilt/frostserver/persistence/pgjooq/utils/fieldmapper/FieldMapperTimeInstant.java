@@ -71,8 +71,9 @@ public class FieldMapperTimeInstant extends FieldMapperAbstract {
     /**
      * @param field the field to set
      */
-    public void setField(String field) {
+    public FieldMapperTimeInstant setField(String field) {
         this.field = field;
+        return this;
     }
 
 }

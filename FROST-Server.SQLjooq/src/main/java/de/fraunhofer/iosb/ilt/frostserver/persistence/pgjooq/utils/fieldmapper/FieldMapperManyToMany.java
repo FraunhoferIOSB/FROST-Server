@@ -129,8 +129,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param field the field to set
      */
-    public void setField(String field) {
+    public FieldMapperManyToMany setField(String field) {
         this.field = field;
+        return this;
     }
 
     /**
@@ -147,8 +148,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param linkTable the linkTable to set
      */
-    public void setLinkTable(String linkTable) {
+    public FieldMapperManyToMany setLinkTable(String linkTable) {
         this.linkTable = linkTable;
+        return this;
     }
 
     /**
@@ -165,8 +167,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param linkOurField the linkOurField to set
      */
-    public void setLinkOurField(String linkOurField) {
+    public FieldMapperManyToMany setLinkOurField(String linkOurField) {
         this.linkOurField = linkOurField;
+        return this;
     }
 
     /**
@@ -183,8 +186,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param linkOtherField the linkOtherField to set
      */
-    public void setLinkOtherField(String linkOtherField) {
+    public FieldMapperManyToMany setLinkOtherField(String linkOtherField) {
         this.linkOtherField = linkOtherField;
+        return this;
     }
 
     /**
@@ -201,8 +205,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param otherTable the otherTable to set
      */
-    public void setOtherTable(String otherTable) {
+    public FieldMapperManyToMany setOtherTable(String otherTable) {
         this.otherTable = otherTable;
+        return this;
     }
 
     /**
@@ -219,8 +224,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
      *
      * @param otherField the otherField to set
      */
-    public void setOtherField(String otherField) {
+    public FieldMapperManyToMany setOtherField(String otherField) {
         this.otherField = otherField;
+        return this;
     }
 
 }

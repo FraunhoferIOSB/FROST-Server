@@ -106,8 +106,9 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
      *
      * @param field the field to set
      */
-    public void setField(String field) {
+    public FieldMapperOneToMany setField(String field) {
         this.field = field;
+        return this;
     }
 
     /**
@@ -124,8 +125,9 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
      *
      * @param otherTable the otherTable to set
      */
-    public void setOtherTable(String otherTable) {
+    public FieldMapperOneToMany setOtherTable(String otherTable) {
         this.otherTable = otherTable;
+        return this;
     }
 
     /**
@@ -142,7 +144,8 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
      *
      * @param otherField the otherField to set
      */
-    public void setOtherField(String otherField) {
+    public FieldMapperOneToMany setOtherField(String otherField) {
         this.otherField = otherField;
+        return this;
     }
 }
