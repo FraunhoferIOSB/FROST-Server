@@ -105,7 +105,7 @@ public class DefEntityType {
     /**
      * The name of the EntityType.
      *
-     * @return the name
+     * @return the name.
      */
     public String getName() {
         return name;
@@ -114,7 +114,7 @@ public class DefEntityType {
     /**
      * The name of the EntityType.
      *
-     * @param name the name to set
+     * @param name the name to set.
      * @return this.
      */
     public DefEntityType setName(String name) {
@@ -125,7 +125,7 @@ public class DefEntityType {
     /**
      * The plural name of the EntityType.
      *
-     * @return the plural
+     * @return the plural.
      */
     public String getPlural() {
         return plural;
@@ -134,7 +134,7 @@ public class DefEntityType {
     /**
      * The plural name of the EntityType.
      *
-     * @param plural the plural to set
+     * @param plural the plural to set.
      * @return this.
      */
     public DefEntityType setPlural(String plural) {
@@ -145,7 +145,7 @@ public class DefEntityType {
     /**
      * The EntityProperties of the EntityType.
      *
-     * @return the entityProperties
+     * @return the entityProperties.
      */
     public Map<String, DefEntityProperty> getEntityProperties() {
         if (entityProperties == null) {
@@ -157,7 +157,7 @@ public class DefEntityType {
     /**
      * The EntityProperties of the EntityType.
      *
-     * @param entityProperties the entityProperties to set
+     * @param entityProperties the entityProperties to set.
      * @return this.
      */
     public DefEntityType setEntityProperties(Map<String, DefEntityProperty> entityProperties) {
@@ -173,7 +173,7 @@ public class DefEntityType {
     /**
      * The NavigationProperties of the EntityType.
      *
-     * @return the navigationProperties
+     * @return the navigationProperties.
      */
     public Map<String, DefNavigationProperty> getNavigationProperties() {
         if (navigationProperties == null) {
@@ -185,7 +185,8 @@ public class DefEntityType {
     /**
      * The NavigationProperties of the EntityType.
      *
-     * @param navigationProperties the navigationProperties to set
+     * @param navigationProperties the navigationProperties to set.
+     * @return this.
      */
     public DefEntityType setNavigationProperties(Map<String, DefNavigationProperty> navigationProperties) {
         this.navigationProperties = navigationProperties;

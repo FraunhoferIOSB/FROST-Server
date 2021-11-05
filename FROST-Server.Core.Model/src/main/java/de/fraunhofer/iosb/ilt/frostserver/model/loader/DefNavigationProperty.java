@@ -125,7 +125,7 @@ public class DefNavigationProperty {
     /**
      * The name of the NavigationProperty.
      *
-     * @return the name
+     * @return the name.
      */
     public String getName() {
         return name;
@@ -134,7 +134,7 @@ public class DefNavigationProperty {
     /**
      * The name of the NavigationProperty.
      *
-     * @param name the name to set
+     * @param name the name to set.
      * @return this.
      */
     public DefNavigationProperty setName(String name) {
@@ -145,7 +145,7 @@ public class DefNavigationProperty {
     /**
      * Flag indicating the NavigationProperty points to an EntitySet.
      *
-     * @return the entitySet
+     * @return the entitySet.
      */
     public boolean isEntitySet() {
         return entitySet;
@@ -165,7 +165,7 @@ public class DefNavigationProperty {
     /**
      * The entity type of the entity(set) this NavigationProperty points to.
      *
-     * @return the entityType
+     * @return the entityType.
      */
     public String getEntityType() {
         return entityType;
@@ -174,7 +174,7 @@ public class DefNavigationProperty {
     /**
      * The entity type of the entity(set) this NavigationProperty points to.
      *
-     * @param entityType the entityType to set
+     * @param entityType the entityType to set.
      * @return this.
      */
     public DefNavigationProperty setEntityType(String entityType) {
@@ -185,7 +185,7 @@ public class DefNavigationProperty {
     /**
      * Flag indicating the property must be set.
      *
-     * @return the required
+     * @return the required.
      */
     public boolean isRequired() {
         return required;
@@ -194,7 +194,7 @@ public class DefNavigationProperty {
     /**
      * Flag indicating the property must be set.
      *
-     * @param required the required to set
+     * @param required the required to set.
      * @return this.
      */
     public DefNavigationProperty setRequired(boolean required) {
@@ -217,7 +217,7 @@ public class DefNavigationProperty {
     /**
      * Handlers used to map the property to a persistence manager.
      *
-     * @param handlers the handlers to set
+     * @param handlers the handlers to set.
      * @return this.
      */
     public DefNavigationProperty setHandlers(List<PropertyPersistenceMapper> handlers) {
@@ -233,7 +233,7 @@ public class DefNavigationProperty {
     /**
      * Handlers used to map the property to a persistence manager.
      *
-     * @return the inverse
+     * @return the inverse.
      */
     public Inverse getInverse() {
         return inverse;
@@ -242,7 +242,7 @@ public class DefNavigationProperty {
     /**
      * Handlers used to map the property to a persistence manager.
      *
-     * @param inverse the inverse to set
+     * @param inverse the inverse to set.
      * @return this.
      */
     public DefNavigationProperty setInverse(Inverse inverse) {
@@ -258,7 +258,7 @@ public class DefNavigationProperty {
     }
 
     /**
-     * @param sourceEntityType the sourceEntityType to set
+     * @param sourceEntityType the sourceEntityType to set.
      * @return this.
      */
     public DefNavigationProperty setSourceEntityType(EntityType sourceEntityType) {
@@ -274,7 +274,7 @@ public class DefNavigationProperty {
     }
 
     /**
-     * @param targetEntityType the targetEntityType to set
+     * @param targetEntityType the targetEntityType to set.
      * @return this.
      */
     public DefNavigationProperty setTargetEntityType(EntityType targetEntityType) {
@@ -282,7 +282,7 @@ public class DefNavigationProperty {
         return this;
     }
 
-    public class Inverse {
+    public static class Inverse {
 
         /**
          * The name of the NavigationProperty.
@@ -309,10 +309,12 @@ public class DefNavigationProperty {
         /**
          * The name of the NavigationProperty.
          *
-         * @param name the name to set
+         * @param name the name to set.
+         * @return this.
          */
-        public void setName(String name) {
+        public Inverse setName(String name) {
             this.name = name;
+            return this;
         }
 
         /**
@@ -327,10 +329,12 @@ public class DefNavigationProperty {
         /**
          * Flag indicating the NavigationProperty points to an EntitySet.
          *
-         * @param entitySet the entitySet to set
+         * @param entitySet the entitySet to set.
+         * @return this.
          */
-        public void setEntitySet(boolean entitySet) {
+        public Inverse setEntitySet(boolean entitySet) {
             this.entitySet = entitySet;
+            return this;
         }
 
         /**
@@ -345,10 +349,12 @@ public class DefNavigationProperty {
         /**
          * Flag indicating the property must be set.
          *
-         * @param required the required to set
+         * @param required the required to set.
+         * @return this.
          */
-        public void setRequired(boolean required) {
+        public Inverse setRequired(boolean required) {
             this.required = required;
+            return this;
         }
 
     }
