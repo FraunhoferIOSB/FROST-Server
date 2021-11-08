@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.statests;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
-import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletV1P0;
+import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletMain;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
@@ -303,7 +303,7 @@ public class TestSuite {
 
         handler.addEventListener(new HttpContextListener());
         handler.addServlet(DatabaseStatus.class, "/DatabaseStatus");
-        handler.addServlet(ServletV1P0.class, "/*");
+        handler.addServlet(ServletMain.class, "/*");
         contextHandlerCollection.addHandler(handler);
         try {
             handler.start();

@@ -41,14 +41,14 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
 
     public ServiceResponseHttpServlet(HttpServletResponse httpResponse, int code, String message) {
         this.httpResponse = httpResponse;
-        this.httpResponse.setCharacterEncoding(ServletV1P0.ENCODING);
+        this.httpResponse.setCharacterEncoding(ServletMain.ENCODING);
         this.code = code;
         this.message = message;
     }
 
     public ServiceResponseHttpServlet(HttpServletResponse httpResponse) {
         this.httpResponse = httpResponse;
-        this.httpResponse.setCharacterEncoding(ServletV1P0.ENCODING);
+        this.httpResponse.setCharacterEncoding(ServletMain.ENCODING);
     }
 
     @Override

@@ -48,19 +48,19 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 @WebServlet(
-        name = "STA1.0",
+        name = "CoreServlet",
         urlPatterns = {"/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
         }
 )
 @MultipartConfig()
-public class ServletV1P0 extends HttpServlet {
+public class ServletMain extends HttpServlet {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
     public static final String ENCODING = "UTF-8";
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
