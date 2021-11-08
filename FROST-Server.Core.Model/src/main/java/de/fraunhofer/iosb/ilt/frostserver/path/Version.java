@@ -25,9 +25,10 @@ import java.util.Map;
  *
  * @author scf
  */
-public enum Version {
-    V_1_0("v1.0"),
-    V_1_1("v1.1");
+public class Version {
+
+    public static Version V_1_0 = new Version("v1.0");
+    public static Version V_1_1 = new Version("v1.1");
 
     private static final Map<String, Version> URL_MAP = new HashMap<>();
 
@@ -37,24 +38,9 @@ public enum Version {
         this.urlPart = urlPart;
     }
 
-    private static void init() {
-        if (!URL_MAP.isEmpty()) {
-            return;
-        }
-        for (Version version : values()) {
-            URL_MAP.put(version.urlPart, version);
-        }
+    @Override
+    public String toString() {
+        return urlPart;
     }
 
-    /**
-     * Finds the Version instance that matches the given version String, or null
-     * if the string does not match any version.
-     *
-     * @param versionString The String that appears in a url.
-     * @return The Version that matches the given String.
-     */
-    public static Version forString(String versionString) {
-        init();
-        return URL_MAP.get(versionString);
-    }
 }

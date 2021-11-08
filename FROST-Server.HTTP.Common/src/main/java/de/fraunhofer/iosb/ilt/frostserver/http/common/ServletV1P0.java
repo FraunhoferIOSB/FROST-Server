@@ -19,19 +19,21 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
@@ -47,9 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(
         name = "STA1.0",
-        // This annotation MUST be kept aligned with the constant
-        // de.fraunhofer.iosb.ilt.frostserver.util.Contants.HTTP_URL_PATTERNS!
-        urlPatterns = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"},
+        urlPatterns = {"/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
         }
@@ -63,62 +63,46 @@ public class ServletV1P0 extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
     public static final String ENCODING = "UTF-8";
 
-    private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
-        response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+    private void processRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
-        if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
-            executeService(RequestTypeUtils.GET_CAPABILITIES, request, response);
-        } else {
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(pathInfo);
-            if (plugin == null) {
-                executeService(RequestTypeUtils.READ, request, response);
-            } else {
-                String requestType = plugin.getRequestTypeFor(pathInfo, HttpMethod.fromString(request.getMethod()));
-                executeService(requestType, request, response);
-            }
-
-        }
-    }
-
-    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-        String pathInfo = request.getPathInfo();
-        if (null == pathInfo) {
-            executeService(RequestTypeUtils.CREATE, request, response);
-        } else {
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(pathInfo);
-            if (plugin == null) {
-                executeService(RequestTypeUtils.CREATE, request, response);
-            } else {
-                String requestType = plugin.getRequestTypeFor(pathInfo, HttpMethod.fromString(request.getMethod()));
-                executeService(requestType, request, response);
+        final CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+        if (StringHelper.isNullOrEmpty(pathInfo)) {
+            try {
+                response.sendRedirect(coreSettings.getQueryDefaults().getServiceRootUrl() + "/");
+                return;
+            } catch (IOException ex) {
+                sendResponse(Service.errorResponse(null, 500, "Not Found"), response);
+                return;
             }
         }
-    }
-
-    private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        String[] split = request.getContentType().split(";", 2);
-        if (split[0].startsWith(CONTENT_TYPE_APPLICATION_JSONPATCH)) {
-            executeService(RequestTypeUtils.UPDATE_CHANGESET, request, response);
-        } else {
-            executeService(RequestTypeUtils.UPDATE_CHANGES, request, response);
+        if (pathInfo.equals("/")) {
+            try (InputStream in = getServletContext().getResourceAsStream("/index.html")) {
+                response.setContentType(CONTENT_TYPE_TEXT_HTML);
+                ServletOutputStream out = response.getOutputStream();
+                in.transferTo(out);
+                return;
+            } catch (IOException exc) {
+                sendResponse(Service.errorResponse(null, 500, "Not Found"), response);
+                return;
+            }
+        }
+        response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+        try {
+            ServiceRequest serviceRequest = serviceRequestFromHttpRequest(coreSettings, request);
+            if (serviceRequest == null) {
+                sendResponse(new ServiceResponseHttpServlet(response, 404, "Not Found"), response);
+                return;
+            }
+            executeService(serviceRequest, request, response);
+        } catch (IOException exc) {
+            sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
         }
     }
 
-    private void processPutRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestTypeUtils.UPDATE_ALL, request, response);
-    }
-
-    private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestTypeUtils.DELETE, request, response);
-    }
-
-    private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {
+    private void executeService(final ServiceRequest serviceRequest, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
-            final ServiceRequest serviceRequest = serviceRequestFromHttpRequest(request, requestType);
             ServiceRequest.LOCAL_REQUEST.set(serviceRequest);
             final ServiceResponseHttpServlet serviceResponse = new ServiceResponseHttpServlet(response);
             service.execute(serviceRequest, serviceResponse);
@@ -130,26 +114,54 @@ public class ServletV1P0 extends HttpServlet {
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, String requestType) throws IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request) throws IOException {
         if (request.getCharacterEncoding() == null) {
             request.setCharacterEncoding(ENCODING);
         }
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
-        String requestURI = request.getRequestURI();
-        String contextPath = request.getContextPath();
-        String servletPath = request.getServletPath();
-        String fullPath = contextPath + servletPath;
-        String pathInfo;
+        final String requestURI = request.getRequestURI();
+        final String contextPath = request.getContextPath();
+        final String servletPath = request.getServletPath();
+        final String fullPath = contextPath + servletPath;
+        final String pathInfo;
         if (requestURI.startsWith(fullPath)) {
             pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
+        final int idxSlash2 = pathInfo.indexOf('/', 1);
+        final String path;
+        final Version version;
+        if (idxSlash2 > 0) {
+            path = pathInfo.substring(idxSlash2);
+            version = coreSettings.getPluginManager().getVersion(pathInfo.substring(1, idxSlash2));
+        } else {
+            path = "";
+            version = coreSettings.getPluginManager().getVersion(pathInfo.substring(1));
+        }
 
-        // ServletPath is /vx.x
-        Version version = Version.forString(servletPath.substring(1));
-        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version);
+        if (version == null) {
+            return null;
+        }
+
+        final PluginService plugin = coreSettings.getPluginManager().getServiceForPath(version, path);
+        if (plugin == null) {
+            return null;
+        }
+
+        final String requestType = plugin.getRequestTypeFor(version, path, HttpMethod.fromString(request.getMethod()), request.getContentType());
+
+        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)
+                .withRequestType(requestType)
+                .withUrlPath(path)
+                .withUrlQuery(request.getQueryString() != null
+                        ? StringHelper.urlDecode(request.getQueryString())
+                        : null)
+                .withContent(request.getInputStream())
+                .withContentType(request.getContentType())
+                .withParameterMap(request.getParameterMap())
+                .withUserPrincipal(request.getUserPrincipal());
 
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
@@ -158,19 +170,10 @@ public class ServletV1P0 extends HttpServlet {
         }
 
         return serviceRequestBuilder
-                .withRequestType(requestType)
-                .withUrlPath(pathInfo)
-                .withUrlQuery(request.getQueryString() != null
-                        ? StringHelper.urlDecode(request.getQueryString())
-                        : null)
-                .withContent(request.getInputStream())
-                .withContentType(request.getContentType())
-                .withParameterMap(request.getParameterMap())
-                .withUserPrincipal(request.getUserPrincipal())
                 .build();
     }
 
-    private void sendResponse(ServiceResponseHttpServlet serviceResponse, HttpServletResponse httpResponse) {
+    private void sendResponse(ServiceResponse serviceResponse, HttpServletResponse httpResponse) {
         try {
             if (!serviceResponse.isSuccessful() && !StringHelper.isNullOrEmpty(serviceResponse.getMessage())) {
                 httpResponse.getWriter().write(serviceResponse.getMessage());
@@ -183,26 +186,26 @@ public class ServletV1P0 extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        processGetRequest(request, response);
+        processRequest(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        processPostRequest(request, response);
+        processRequest(request, response);
     }
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
-        processPutRequest(request, response);
+        processRequest(request, response);
     }
 
     protected void doPatch(HttpServletRequest request, HttpServletResponse response) {
-        processPatchRequest(request, response);
+        processRequest(request, response);
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
-        processDeleteRequest(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -212,7 +215,7 @@ public class ServletV1P0 extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "SensorThingsApi v1.0 and v1.1 servlet";
+        return "FROST-Server Main Servlet";
     }
 
     @Override

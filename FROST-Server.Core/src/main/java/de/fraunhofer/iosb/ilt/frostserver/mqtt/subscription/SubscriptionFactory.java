@@ -73,7 +73,7 @@ public class SubscriptionFactory {
         }
         Version version;
         try {
-            version = MqttManager.getVersionFromTopic(topic);
+            version = MqttManager.getVersionFromTopic(settings, topic);
         } catch (UnknownVersionException ex) {
             throw new IllegalArgumentException(errorMsg + "topic must start with a version number.");
         }

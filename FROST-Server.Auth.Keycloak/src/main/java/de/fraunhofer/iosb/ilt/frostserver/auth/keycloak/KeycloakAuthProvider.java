@@ -99,7 +99,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
 
     @Override
     public void addFilter(Object context, CoreSettings coreSettings) {
-        KeycloakFilterHelper.createFilters(context);
+        KeycloakFilterHelper.createFilters(context, coreSettings);
     }
 
     @Override

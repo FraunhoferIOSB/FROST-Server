@@ -26,12 +26,14 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Content;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
@@ -59,8 +61,13 @@ public class BatchProcessor<C extends Content> {
     }
 
     public Request processHttpRequest(Service service, Request httpRequest, boolean inChangeSet) {
-        final String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
-        final Version version = Version.forString(httpRequest.getVersion());
+        PluginManager pluginManager = service.getSettings().getPluginManager();
+        final Version version = pluginManager.getVersion(httpRequest.getVersion());
+        final String type = service.getRequestType(
+                httpRequest.getMethod(),
+                version,
+                httpRequest.getPath(),
+                httpRequest.getHttpHeaders().get(CONTENT_TYPE));
         final ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
                 .withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))

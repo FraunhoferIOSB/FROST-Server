@@ -119,8 +119,10 @@ public class KeycloakFilter implements Filter {
                     return Role.ERROR;
             }
         };
-        roleMappersByPath.put("/v1.0", roleMapperSta);
-        roleMappersByPath.put("/v1.1", roleMapperSta);
+        for (String version : coreSettings.getPluginManager().getVersions().keySet()) {
+            roleMappersByPath.put("/" + version, roleMapperSta);
+        }
+
         try {
             deploymentContext = new AdapterDeploymentContext(Utils.resolveDeployment(coreSettings));
         } catch (RuntimeException exc) {
@@ -230,8 +232,20 @@ public class KeycloakFilter implements Filter {
             LOGGER.debug("Rejecting request: Unknown method: {}.", httpRequest.getMethod());
             return Role.ERROR;
         }
-        String servletPath = httpRequest.getServletPath();
-        Utils.MethodRoleMapper mapper = roleMappersByPath.get(servletPath.substring(0, 5));
+        final String requestURI = httpRequest.getRequestURI();
+        final String contextPath = httpRequest.getContextPath();
+        final String servletPath = httpRequest.getServletPath();
+        final String preVersionPath = contextPath + servletPath;
+        final String pathInfo;
+        if (requestURI.startsWith(preVersionPath)) {
+            pathInfo = StringHelper.urlDecode(requestURI.substring(preVersionPath.length()));
+        } else if (!servletPath.isEmpty()) {
+            pathInfo = servletPath;
+        } else {
+            throw new IllegalArgumentException("Path oddness!");
+        }
+        LOGGER.trace("\nrequestURI: {}\ncontextPath: {}\nservletPath: {}\nfullPath: {}\npathInfo: {}", requestURI, contextPath, servletPath, preVersionPath, pathInfo);
+        Utils.MethodRoleMapper mapper = roleMappersByPath.get(pathInfo.substring(0, 5));
         if (mapper == null) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));

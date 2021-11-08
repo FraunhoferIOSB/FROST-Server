@@ -51,6 +51,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,19 +71,8 @@ public class MqttManagerTest {
     private ModelRegistry modelRegistry;
     private TestModel testModel;
 
-    @Test
-    public void testVersionParse() throws UnknownVersionException {
-        Assert.assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic("v1.0/Observations"));
-        Assert.assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic("v1.1/Observations"));
-    }
-
-    @Test(expected = UnknownVersionException.class)
-    public void testVersionParseFail() throws UnknownVersionException {
-        MqttManager.getVersionFromTopic("v1.9/Observations");
-    }
-
-    @Test
-    public void testMqttManager() throws InterruptedException {
+    @Before
+    public void init() {
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, "http://localhost/");
         properties.put(CoreSettings.TAG_TEMP_PATH, "/tmp/");
@@ -95,9 +85,24 @@ public class MqttManagerTest {
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
         testModel = new TestModel();
+        testModel.init(coreSettings);
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
+    }
 
+    @Test
+    public void testVersionParse() throws UnknownVersionException {
+        Assert.assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic(coreSettings, "v1.0/Observations"));
+        Assert.assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic(coreSettings, "v1.1/Observations"));
+    }
+
+    @Test(expected = UnknownVersionException.class)
+    public void testVersionParseFail() throws UnknownVersionException {
+        MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
+    }
+
+    @Test
+    public void testMqttManager() throws InterruptedException {
         MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
         Assert.assertEquals(1, mqttServers.size());

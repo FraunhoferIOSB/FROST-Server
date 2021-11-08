@@ -195,6 +195,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
                 return;
             }
         }
+        LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
         Assert.fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
     }
 

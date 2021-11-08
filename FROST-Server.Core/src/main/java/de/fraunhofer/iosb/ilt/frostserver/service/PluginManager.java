@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -29,10 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -47,7 +50,8 @@ public class PluginManager implements ConfigDefaults {
      * check the docker-compose and helm files.
      */
     @DefaultValue(
-            "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
+            "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
             + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
@@ -65,6 +69,7 @@ public class PluginManager implements ConfigDefaults {
     @DefaultValue("")
     public static final String TAG_PLUGINS = "plugins";
 
+    public static final String PATH_WILDCARD = "*";
     /**
      * The logger for this class.
      */
@@ -78,12 +83,12 @@ public class PluginManager implements ConfigDefaults {
     /**
      * The plugins that can handle registered paths.
      */
-    private final Map<String, PluginService> pathHandlers = new HashMap<>();
+    private final Map<Version, Map<String, PluginService>> pathHandlers = new HashMap<>();
 
     /**
      * The plugins that can handle registered request types.
      */
-    private final Map<String, PluginService> requestTypeHandlers = new HashMap<>();
+    private final Map<Version, Map<String, PluginService>> requestTypeHandlers = new HashMap<>();
 
     /**
      * The plugins that want to modify the service document.
@@ -99,6 +104,11 @@ public class PluginManager implements ConfigDefaults {
      * All plugins, by their class.
      */
     private final Map<Class<? extends Plugin>, Object> plugins = new HashMap<>();
+
+    /**
+     * All versions defined by service plugins.
+     */
+    private final Map<String, Version> versions = new TreeMap<>();
 
     private CoreSettings settings;
 
@@ -192,11 +202,19 @@ public class PluginManager implements ConfigDefaults {
     }
 
     private void registerPlugin(PluginService plugin) {
-        for (String path : plugin.getUrlPaths()) {
-            pathHandlers.put(path, plugin);
+        final Collection<Version> pluginVersions = plugin.getVersions();
+        for (Version version : pluginVersions) {
+            versions.put(version.urlPart, version);
         }
-        for (String path : plugin.getRequestTypes()) {
-            requestTypeHandlers.put(path, plugin);
+        for (String path : plugin.getVersionedUrlPaths()) {
+            for (Version version : pluginVersions) {
+                pathHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(path, plugin);
+            }
+            for (String type : plugin.getRequestTypes()) {
+                for (Version version : pluginVersions) {
+                    requestTypeHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(type, plugin);
+                }
+            }
         }
     }
 
@@ -210,12 +228,24 @@ public class PluginManager implements ConfigDefaults {
         }
     }
 
-    public PluginService getServiceForRequestType(String requestType) {
-        return requestTypeHandlers.get(requestType);
+    public PluginService getServiceForRequestType(Version version, String requestType) {
+        Map<String, PluginService> types = requestTypeHandlers.get(version);
+        if (types == null) {
+            return null;
+        }
+        return types.get(requestType);
     }
 
-    public PluginService getServiceForPath(String path) {
-        return pathHandlers.get(path);
+    public PluginService getServiceForPath(Version version, String path) {
+        Map<String, PluginService> paths = pathHandlers.get(version);
+        if (paths == null) {
+            return null;
+        }
+        final PluginService service = paths.get(path);
+        if (service == null) {
+            return paths.get(PATH_WILDCARD);
+        }
+        return service;
     }
 
     public ResultFormatter getFormatter(String formatName) {
@@ -225,4 +255,20 @@ public class PluginManager implements ConfigDefaults {
         }
         return plugin.getResultFormatter();
     }
+
+    /**
+     * Finds the Version instance that matches the given version String, or null
+     * if the string does not match any version.
+     *
+     * @param versionString The String that appears in a url.
+     * @return The Version that matches the given String.
+     */
+    public Version getVersion(String versionString) {
+        return versions.get(versionString);
+    }
+
+    public Map<String, Version> getVersions() {
+        return versions;
+    }
+
 }

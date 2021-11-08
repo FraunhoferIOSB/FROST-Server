@@ -17,9 +17,12 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import java.util.Arrays;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -34,19 +37,25 @@ public class KeycloakFilterHelper {
         // Utility class.
     }
 
-    public static void createFilters(Object context) {
+    public static void createFilters(Object context, CoreSettings coreSettings) {
         if (!(context instanceof ServletContext)) {
             throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
         }
         ServletContext servletContext = (ServletContext) context;
 
+        Map<String, Version> versions = coreSettings.getPluginManager().getVersions();
+        List<String> urlPatterns = new ArrayList<>();
+        for (Version version : versions.values()) {
+            urlPatterns.add("/" + version.urlPart);
+            urlPatterns.add("/" + version.urlPart + "/*");
+        }
+        urlPatterns.add("/DatabaseStatus");
+        urlPatterns.add("/keycloak/*");
+
         String filterClass = KeycloakFilter.class.getName();
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        String[] urlPatterns = Arrays.copyOf(Constants.HTTP_URL_PATTERNS, Constants.HTTP_URL_PATTERNS.length + 2);
-        urlPatterns[urlPatterns.length - 2] = "/DatabaseStatus";
-        urlPatterns[urlPatterns.length - 1] = "/keycloak/*";
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns);
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns.toArray(String[]::new));
     }
 
 }

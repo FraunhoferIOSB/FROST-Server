@@ -23,14 +23,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
-import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -55,6 +56,13 @@ public class BasicAuthFilterHelper {
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
         String filterClass = BasicAuthFilter.class.getName();
 
+        Map<String, Version> versions = coreSettings.getPluginManager().getVersions();
+        List<String> urlPatterns = new ArrayList<>();
+        for (Version version : versions.values()) {
+            urlPatterns.add("/" + version.urlPart);
+            urlPatterns.add("/" + version.urlPart + "/*");
+        }
+
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
         boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
@@ -65,8 +73,8 @@ public class BasicAuthFilterHelper {
         authFilterSta.setInitParameter(TAG_ROLE_PUT, roleMapping.get(Role.UPDATE));
         authFilterSta.setInitParameter(TAG_ROLE_DELETE, roleMapping.get(Role.DELETE));
         authFilterSta.setInitParameter(TAG_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
-        String[] urlPatterns = Arrays.copyOf(Constants.HTTP_URL_PATTERNS, Constants.HTTP_URL_PATTERNS.length);
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns);
+
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns.toArray(String[]::new));
 
         filterName = "AuthFilterAdmin";
         FilterRegistration.Dynamic authFilterAdmin = servletContext.addFilter(filterName, filterClass);

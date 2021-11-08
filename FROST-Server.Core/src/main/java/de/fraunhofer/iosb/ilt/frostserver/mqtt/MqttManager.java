@@ -187,7 +187,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         final String topic = e.getTopic();
         final Version version;
         try {
-            version = getVersionFromTopic(topic);
+            version = getVersionFromTopic(settings, topic);
         } catch (UnknownVersionException ex) {
             LOGGER.info("received message on topic '{}' which contains no version info.", topic);
             return;
@@ -264,13 +264,13 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
     }
 
-    public static Version getVersionFromTopic(String topic) throws UnknownVersionException {
+    public static Version getVersionFromTopic(CoreSettings settings, String topic) throws UnknownVersionException {
         int pos = topic.indexOf('/');
         if (pos == -1) {
             throw new UnknownVersionException("Could not find version in topic " + topic);
         }
         String versionString = topic.substring(0, pos);
-        Version version = Version.forString(versionString);
+        Version version = settings.getPluginManager().getVersion(versionString);
         if (version == null) {
             throw new UnknownVersionException("Could not find version in topic " + topic);
         }

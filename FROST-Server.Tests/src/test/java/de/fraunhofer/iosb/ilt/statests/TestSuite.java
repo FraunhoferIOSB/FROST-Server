@@ -303,8 +303,7 @@ public class TestSuite {
 
         handler.addEventListener(new HttpContextListener());
         handler.addServlet(DatabaseStatus.class, "/DatabaseStatus");
-        handler.addServlet(ServletV1P0.class, "/v1.0/*");
-        handler.addServlet(ServletV1P0.class, "/v1.1/*");
+        handler.addServlet(ServletV1P0.class, "/*");
         contextHandlerCollection.addHandler(handler);
         try {
             handler.start();

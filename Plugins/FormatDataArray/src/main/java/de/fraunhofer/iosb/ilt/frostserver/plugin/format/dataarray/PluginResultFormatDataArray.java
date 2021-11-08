@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayResultSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayValueSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
@@ -96,7 +97,12 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     }
 
     @Override
-    public Collection<String> getUrlPaths() {
+    public Collection<Version> getVersions() {
+        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+    }
+
+    @Override
+    public Collection<String> getVersionedUrlPaths() {
         return Arrays.asList(ServiceDataArray.PATH_CREATE_OBSERVATIONS);
     }
 
@@ -106,7 +112,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     }
 
     @Override
-    public String getRequestTypeFor(String path, HttpMethod method) {
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
         if (HttpMethod.POST.equals(method) && ServiceDataArray.PATH_CREATE_OBSERVATIONS.equals(path)) {
             return ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS;
         }

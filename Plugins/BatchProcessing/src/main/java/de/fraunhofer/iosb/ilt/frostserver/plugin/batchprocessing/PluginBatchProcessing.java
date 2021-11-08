@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -76,7 +77,12 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     }
 
     @Override
-    public Collection<String> getUrlPaths() {
+    public Collection<Version> getVersions() {
+        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+    }
+
+    @Override
+    public Collection<String> getVersionedUrlPaths() {
         return Arrays.asList(ServiceBatchProcessing.PATH_POST_BATCH);
     }
 
@@ -86,7 +92,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     }
 
     @Override
-    public String getRequestTypeFor(String path, HttpMethod method) {
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
         if (method.equals(POST) && path.equals(ServiceBatchProcessing.PATH_POST_BATCH)) {
             return ServiceBatchProcessing.REQUEST_TYPE_BATCH;
         }

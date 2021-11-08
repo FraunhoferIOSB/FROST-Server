@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The interface that plugins must implement that want to make a service
@@ -28,13 +30,19 @@ import java.util.Collection;
  */
 public interface PluginService extends Plugin {
 
+    public default Collection<Version> getVersions() {
+        return Collections.emptyList();
+    }
+
     /**
      * Get the URL paths that this service handles. These must start with a
-     * slash (/).
+     * slash (/) and will be resolved after the version in the URL. If this
+     * returns "/$batch" then the service will receive requests starting with
+     * "/[version]/$batch".
      *
      * @return The URL paths that this service handles.
      */
-    public Collection<String> getUrlPaths();
+    public Collection<String> getVersionedUrlPaths();
 
     /**
      * Get the request types this service handles.
@@ -47,11 +55,13 @@ public interface PluginService extends Plugin {
      * Get the request method to be used for a request on the given path with
      * the given method.
      *
+     * @param version The Version info of the request.
      * @param path The path of the request.
      * @param method The method of the request.
+     * @param contentType The content type of the request, may be null.
      * @return The requestType.
      */
-    public String getRequestTypeFor(String path, HttpMethod method);
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType);
 
     /**
      * Execute the request, using the given main Service.

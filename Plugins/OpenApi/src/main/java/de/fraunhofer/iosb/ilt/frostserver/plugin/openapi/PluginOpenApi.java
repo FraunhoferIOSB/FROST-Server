@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -74,7 +75,12 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     }
 
     @Override
-    public Collection<String> getUrlPaths() {
+    public Collection<Version> getVersions() {
+        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+    }
+
+    @Override
+    public Collection<String> getVersionedUrlPaths() {
         return Arrays.asList(ServiceOpenApi.PATH_GET_OPENAPI_SPEC);
     }
 
@@ -84,7 +90,7 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     }
 
     @Override
-    public String getRequestTypeFor(String path, HttpMethod method) {
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
         if (GET.equals(method) && path.equals(ServiceOpenApi.PATH_GET_OPENAPI_SPEC)) {
             return ServiceOpenApi.REQUEST_TYPE_GET_OPENAPI_SPEC;
         }

@@ -28,15 +28,13 @@ import org.slf4j.LoggerFactory;
 public class Constants {
 
     public static final ZoneOffset UTC = ZoneOffset.UTC;
-    /**
-     * This semi-constant (arrays are not real constants) MUST be kept aligned
-     * with the WebServlet annotations!
-     */
-    public static final String[] HTTP_URL_PATTERNS = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"};
+
+    public static final String CONTENT_TYPE = "content-type";
     public static final String CONTENT_TYPE_APPLICATION_GEOJSON = "application/geo+json";
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE_APPLICATION_JSONPATCH = "application/json-patch+json";
     public static final String CONTENT_TYPE_APPLICATION_HTTP = "application/http";
+    public static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     public static final String CHARSET_UTF8 = "charset=UTF-8";
 
     public static final String VALUE_ID_TYPE_LONG = "LONG";

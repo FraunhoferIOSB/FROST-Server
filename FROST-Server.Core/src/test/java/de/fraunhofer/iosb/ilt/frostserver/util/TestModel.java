@@ -24,12 +24,21 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
+import de.fraunhofer.iosb.ilt.frostserver.service.Service;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +46,7 @@ import java.util.Map;
  *
  * @author hylke
  */
-public class TestModel {
+public class TestModel implements PluginService {
 
     public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING);
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
@@ -107,5 +116,40 @@ public class TestModel {
         houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
         propertyValuesRoom.put(NP_ROOMS, houses);
         return propertyValues;
+    }
+
+    @Override
+    public Collection<Version> getVersions() {
+        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+    }
+
+    @Override
+    public Collection<String> getVersionedUrlPaths() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> getRequestTypes() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void init(CoreSettings settings) {
+        settings.getPluginManager().registerPlugin(this);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

@@ -118,35 +118,13 @@ public class Service implements AutoCloseable {
         PersistenceManagerFactory.init(settings);
     }
 
-    public String getRequestType(HttpMethod method, String path) {
-        PluginService plugin = settings.getPluginManager().getServiceForPath(path);
+    public String getRequestType(HttpMethod method, Version version, String path, String contentType) {
+        PluginService plugin = settings.getPluginManager().getServiceForPath(version, path);
         String requestType = null;
         if (plugin == null) {
-            switch (method) {
-                case GET:
-                    if (path.length() <= 6) {
-                        // Only the version number in the path (/v1.0)
-                        return GET_CAPABILITIES;
-                    }
-                    return READ;
-
-                case PATCH:
-                    return UPDATE_CHANGES;
-
-                case POST:
-                    return CREATE;
-
-                case PUT:
-                    return UPDATE_ALL;
-
-                case DELETE:
-                    return DELETE;
-
-                default:
-                    LOGGER.warn("Unknown method found: {}", method);
-            }
+            return null;
         } else {
-            requestType = plugin.getRequestTypeFor(path, method);
+            requestType = plugin.getRequestTypeFor(version, path, method, contentType);
         }
         if (requestType == null) {
             final String cleanedPath = StringHelper.cleanForLogging(path);
@@ -186,7 +164,7 @@ public class Service implements AutoCloseable {
             case UPDATE_CHANGESET:
                 return executePatch(request, response, true);
             default:
-                PluginService plugin = settings.getPluginManager().getServiceForRequestType(requestType);
+                PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
                 if (plugin == null) {
                     return new ServiceResponseDefault(500, "Illegal request type.");
                 }
@@ -823,6 +801,9 @@ public class Service implements AutoCloseable {
     }
 
     public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
+        if (response == null) {
+            response = new ServiceResponseDefault();
+        }
         return jsonResponse(response, "error", code, message);
     }
 
