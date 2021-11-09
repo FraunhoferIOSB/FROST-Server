@@ -60,6 +60,11 @@ public class PluginCoreService implements PluginService, PluginRootDocument {
     }
 
     @Override
+    public boolean definesVersions() {
+        return true;
+    }
+
+    @Override
     public Collection<String> getVersionedUrlPaths() {
         return Arrays.asList(PATH_WILDCARD);
     }

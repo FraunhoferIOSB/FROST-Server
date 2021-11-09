@@ -124,6 +124,11 @@ public class TestModel implements PluginService {
     }
 
     @Override
+    public boolean definesVersions() {
+        return true;
+    }
+
+    @Override
     public Collection<String> getVersionedUrlPaths() {
         return Collections.emptyList();
     }

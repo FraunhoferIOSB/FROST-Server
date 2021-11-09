@@ -203,16 +203,22 @@ public class PluginManager implements ConfigDefaults {
 
     private void registerPlugin(PluginService plugin) {
         final Collection<Version> pluginVersions = plugin.getVersions();
-        for (Version version : pluginVersions) {
-            versions.put(version.urlPart, version);
+        if (plugin.definesVersions()) {
+            for (Version version : pluginVersions) {
+                versions.put(version.urlPart, version);
+            }
         }
         for (String path : plugin.getVersionedUrlPaths()) {
             for (Version version : pluginVersions) {
-                pathHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(path, plugin);
+                if (versions.containsKey(version.urlPart)) {
+                    pathHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(path, plugin);
+                }
             }
             for (String type : plugin.getRequestTypes()) {
                 for (Version version : pluginVersions) {
-                    requestTypeHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(type, plugin);
+                    if (versions.containsKey(version.urlPart)) {
+                        requestTypeHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(type, plugin);
+                    }
                 }
             }
         }

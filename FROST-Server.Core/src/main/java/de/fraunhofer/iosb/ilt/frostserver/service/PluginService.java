@@ -35,6 +35,17 @@ public interface PluginService extends Plugin {
     }
 
     /**
+     * Flag indicating the versions returned by getVersions should be added to
+     * the service (true), or are only the versions the service supports.
+     *
+     * @return if true, the Versions returned by getVersions should be created
+     * even if they do not exist yet.
+     */
+    public default boolean definesVersions() {
+        return false;
+    }
+
+    /**
      * Get the URL paths that this service handles. These must start with a
      * slash (/) and will be resolved after the version in the URL. If this
      * returns "/$batch" then the service will receive requests starting with
