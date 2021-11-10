@@ -87,7 +87,7 @@ public class PluginCoreService implements PluginService, PluginRootDocument {
             case DELETE:
                 return RequestTypeUtils.DELETE;
             case GET:
-                if (path.isEmpty()) {
+                if (path.isEmpty() || "/".equals(path)) {
                     return RequestTypeUtils.GET_CAPABILITIES;
                 }
                 return RequestTypeUtils.READ;
