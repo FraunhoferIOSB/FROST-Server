@@ -166,7 +166,7 @@ public class Service implements AutoCloseable {
             default:
                 PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
                 if (plugin == null) {
-                    return new ServiceResponseDefault(500, "Illegal request type.");
+                    return errorResponse(response, 500, "Illegal request type.");
                 }
                 return plugin.execute(this, request, response);
         }
@@ -661,7 +661,7 @@ public class Service implements AutoCloseable {
 
     private ServiceResponse executeDelete(ServiceRequest request, ServiceResponse response) {
         if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-            return new ServiceResponseDefault().setStatus(400, "DELETE only allowed on Entities and Sets.");
+            return errorResponse(response, 400, "DELETE only allowed on Entities and Sets.");
         }
 
         ResourcePath path;
@@ -672,7 +672,7 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     request.getUrlPath());
         } catch (IllegalArgumentException | IllegalStateException exc) {
-            return new ServiceResponseDefault().setStatus(404, NOT_A_VALID_ID + ": " + exc.getMessage());
+            return errorResponse(response, 404, NOT_A_VALID_ID + ": " + exc.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {
@@ -683,7 +683,7 @@ public class Service implements AutoCloseable {
                 return executeDeleteEntitySet(request, response, path);
             }
         }
-        return new ServiceResponseDefault().setStatus(400, "Not a valid path for DELETE.");
+        return errorResponse(response, 400, "Not a valid path for DELETE.");
     }
 
     private ServiceResponse executeDeleteEntity(ServiceRequest request, ServiceResponse response, ResourcePath path) {
