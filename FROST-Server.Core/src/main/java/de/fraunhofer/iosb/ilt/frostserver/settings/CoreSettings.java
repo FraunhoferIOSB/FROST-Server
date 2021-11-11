@@ -53,6 +53,17 @@ public class CoreSettings implements ConfigDefaults {
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreSettings.class);
 
     /**
+     * Prefixes
+     */
+    public static final String PREFIX_BUS = "bus.";
+    public static final String PREFIX_MQTT = "mqtt.";
+    public static final String PREFIX_HTTP = "http.";
+    public static final String PREFIX_AUTH = "auth.";
+    public static final String PREFIX_EXTENSION = "extension.";
+    public static final String PREFIX_PERSISTENCE = "persistence.";
+    public static final String PREFIX_PLUGINS = "plugins.";
+
+    /**
      * Tags
      */
     @DefaultValueBoolean(false)
@@ -115,20 +126,11 @@ public class CoreSettings implements ConfigDefaults {
 
     // Experimental settings
     @DefaultValueBoolean(false)
+    public static final String TAG_FILTER_DELETE_ENABLE = PREFIX_EXTENSION + "filterDelete.enable";
+    @DefaultValueBoolean(false)
     public static final String TAG_CUSTOM_LINKS_ENABLE = "customLinks.enable";
     @DefaultValueInt(0)
     public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
-
-    /**
-     * Prefixes
-     */
-    public static final String PREFIX_BUS = "bus.";
-    public static final String PREFIX_MQTT = "mqtt.";
-    public static final String PREFIX_HTTP = "http.";
-    public static final String PREFIX_AUTH = "auth.";
-    public static final String PREFIX_EXTENSION = "extension.";
-    public static final String PREFIX_PERSISTENCE = "persistence.";
-    public static final String PREFIX_PLUGINS = "plugins.";
 
     /**
      * The core plugin manager. All plugins should register themselves here.
@@ -148,7 +150,10 @@ public class CoreSettings implements ConfigDefaults {
      * Path to temp folder.
      */
     private String tempPath;
-
+    /**
+     * Flag indicating if delete on entity sets is allowed.
+     */
+    private boolean filterDeleteEnabled;
     /**
      * The set of enabled extensions that are defined in the standard.
      */
@@ -262,6 +267,7 @@ public class CoreSettings implements ConfigDefaults {
         queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
         queryDefaults.setTopMax(settings.getInt(TAG_MAX_TOP, getClass()));
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
+        filterDeleteEnabled = settings.getBoolean(TAG_FILTER_DELETE_ENABLE, getClass());
     }
 
     private void initChildSettings() {
@@ -388,6 +394,10 @@ public class CoreSettings implements ConfigDefaults {
      */
     public void setDataSizeMax(long dataSizeMax) {
         this.dataSizeMax = dataSizeMax;
+    }
+
+    public boolean isFilterDeleteEnabled() {
+        return filterDeleteEnabled;
     }
 
     /**

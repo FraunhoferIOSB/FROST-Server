@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_FILTER_DELETE_ENABLE;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import java.io.IOException;
@@ -60,8 +64,9 @@ public abstract class AbstractTestClass {
     private static final Properties defaultProperties = new Properties();
 
     static {
-        defaultProperties.put("plugins.actuation.enable", "true");
-        defaultProperties.put("plugins.multiDatastream.enable", "true");
+        defaultProperties.put(PREFIX_PLUGINS + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
+        defaultProperties.put(PREFIX_PLUGINS + MdsModelSettings.TAG_ENABLE_MDS_MODEL, "true");
+        defaultProperties.put(TAG_FILTER_DELETE_ENABLE, "true");
     }
 
     public AbstractTestClass(ServerVersion serverVersion) {

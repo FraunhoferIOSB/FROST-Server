@@ -241,5 +241,7 @@ These settings control various non-standard extensions.
    Default: `false`.
 * **extension.customLinks.recurseDepth:**  
   The depth to search for custom links in properties. Default: 0 (only top level)
+* **extension.filterDelete.enable:**  
+  Enables DELETE on EntitySets, with filters. By default only individual Entities can be deleted. Default: false.
 
 

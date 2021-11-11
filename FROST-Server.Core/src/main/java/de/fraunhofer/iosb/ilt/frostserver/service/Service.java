@@ -678,8 +678,10 @@ public class Service implements AutoCloseable {
         if ((path.getMainElement() instanceof PathElementEntity)) {
             return executeDeleteEntity(request, response, path);
         }
-        if ((path.getMainElement() instanceof PathElementEntitySet)) {
-            return executeDeleteEntitySet(request, response, path);
+        if (settings.isFilterDeleteEnabled()) {
+            if ((path.getMainElement() instanceof PathElementEntitySet)) {
+                return executeDeleteEntitySet(request, response, path);
+            }
         }
         return new ServiceResponseDefault().setStatus(400, "Not a valid path for DELETE.");
     }
