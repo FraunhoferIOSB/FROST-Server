@@ -112,6 +112,10 @@ public class ModelRegistry {
         throw new IllegalArgumentException("unknown property type: " + name);
     }
 
+    public Map<String, PropertyType> getPropertyTypes() {
+        return propertyTypes;
+    }
+
     public EntityChangedMessage.QueryGenerator getMessageQueryGenerator() {
         return messageQueryGenerator;
     }

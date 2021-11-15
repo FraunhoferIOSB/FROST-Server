@@ -15,25 +15,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.property.type;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
-/**
- *
- * @author hylke
- */
-public class TypeEntitySet extends TypeComplex {
+public class CsdlItemTypeDefinition implements CsdlSchemaItem {
 
-    private EntityType entityType;
+    @JsonProperty("$Kind")
+    public String kind = "TypeDefinition";
 
-    public TypeEntitySet(EntityType entityType) {
-        super(entityType.entityName, "Collection of " + entityType.entityName, TypeReferencesHelper.TYPE_REFERENCE_ENTITYSET, false);
-    }
+    @JsonProperty("$UnderlyingType")
+    public String underlyingType;
 
-    public EntityType getEntityType() {
-        return entityType;
+    @JsonProperty("@Core.Description")
+    public String description;
+
+    public CsdlItemTypeDefinition generateFrom(String nameSpace, CoreSettings settings, TypeSimpleCustom tc) {
+        underlyingType = tc.getUnderlyingType().getName();
+        description = tc.getDescription();
+        return this;
     }
 
 }

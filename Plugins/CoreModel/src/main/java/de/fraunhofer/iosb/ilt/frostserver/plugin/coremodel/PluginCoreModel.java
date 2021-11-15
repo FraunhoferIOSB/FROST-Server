@@ -231,11 +231,16 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        eptUom = new TypeComplex("Sta.UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
+        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
                 .addProperty("name", EDM_STRING)
                 .addProperty("symbol", EDM_STRING)
                 .addProperty("definition", EDM_STRING);
         mr.registerPropertyType(eptUom)
+                .registerPropertyType(TypeComplex.STA_GEOJSON)
+                .registerPropertyType(TypeComplex.STA_MAP)
+                .registerPropertyType(TypeComplex.STA_OBJECT_UNTYPED)
+                .registerPropertyType(TypeSimpleCustom.STA_TIMEINTERVAL)
+                .registerPropertyType(TypeSimpleCustom.STA_TIMEVALUE)
                 .registerEntityType(etDatastream)
                 .registerEntityType(etFeatureOfInterest)
                 .registerEntityType(etHistoricalLocation)

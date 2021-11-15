@@ -26,11 +26,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class TypeSimpleSet extends PropertyType {
 
     public TypeSimpleSet(TypeSimple containedType, TypeReference typeReference) {
-        super("Collection(" + containedType.getName() + ")", "Collection of " + containedType.getName(), typeReference);
+        super(containedType.getName(), "Collection of " + containedType.getName(), typeReference);
     }
 
     public TypeSimpleSet(TypeComplex containedType, TypeReference typeReference) {
-        super("Collection(" + containedType.getName() + ")", "Collection of " + containedType.getName(), typeReference);
+        super(containedType.getName(), "Collection of " + containedType.getName(), typeReference);
     }
 
 }

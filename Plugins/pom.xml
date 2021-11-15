@@ -9,13 +9,14 @@
     <artifactId>FROST-Server.Plugins</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>Actuation</module>
         <module>BatchProcessing</module>
         <module>CoreModel</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>
-        <module>OpenApi</module>
-        <module>Actuation</module>
         <module>MultiDatastream</module>
+        <module>OData</module>
+        <module>OpenApi</module>
     </modules>
 </project>

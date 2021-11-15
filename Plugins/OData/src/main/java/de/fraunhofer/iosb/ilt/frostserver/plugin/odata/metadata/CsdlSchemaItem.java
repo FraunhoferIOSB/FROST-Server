@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,29 +13,13 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.path;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
 /**
- * The versions that FROST supports.
  *
- * @author scf
+ * @author hylke
  */
-public class Version {
-
-    public static Version V_1_0 = new Version("v1.0");
-    public static Version V_1_1 = new Version("v1.1");
-
-    public final String urlPart;
-
-    public Version(String urlPart) {
-        this.urlPart = urlPart;
-    }
-
-    @Override
-    public String toString() {
-        return urlPart;
-    }
-
+public interface CsdlSchemaItem {
 }
