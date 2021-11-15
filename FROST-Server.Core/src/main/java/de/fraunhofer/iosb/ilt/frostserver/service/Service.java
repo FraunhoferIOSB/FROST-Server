@@ -121,9 +121,7 @@ public class Service implements AutoCloseable {
     public String getRequestType(HttpMethod method, Version version, String path, String contentType) {
         PluginService plugin = settings.getPluginManager().getServiceForPath(version, path);
         String requestType = null;
-        if (plugin == null) {
-            return null;
-        } else {
+        if (plugin != null) {
             requestType = plugin.getRequestTypeFor(version, path, method, contentType);
         }
         if (requestType == null) {

@@ -95,6 +95,8 @@ public class ServletMain extends HttpServlet {
                 return;
             }
             executeService(serviceRequest, request, response);
+        } catch (IllegalArgumentException exc) {
+            sendResponse(new ServiceResponseHttpServlet(response, 400, exc.getMessage()), response);
         } catch (IOException exc) {
             sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
         }
@@ -150,7 +152,13 @@ public class ServletMain extends HttpServlet {
             return null;
         }
 
-        final String requestType = plugin.getRequestTypeFor(version, path, HttpMethod.fromString(request.getMethod()), request.getContentType());
+        final String method = request.getMethod();
+        final String requestType = plugin.getRequestTypeFor(version, path, HttpMethod.fromString(method), request.getContentType());
+        if (requestType == null) {
+            final String cleanedPath = StringHelper.cleanForLogging(path);
+            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
+            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
+        }
 
         final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)
                 .withRequestType(requestType)

@@ -47,7 +47,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUti
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -511,6 +513,18 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
+
+        // Validate
+        for (EntityType entityType : settings.getModelRegistry().getEntityTypes()) {
+            final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
+            final PropertyFieldRegistry<?> pfReg = tableForType.getPropertyFieldRegistry();
+            for (Property property : entityType.getPropertySet()) {
+                PropertyFieldRegistry.PropertyFields<?> pf = pfReg.getSelectFieldsForProperty(property);
+                if (pf == null || pf.converter == null) {
+                    LOGGER.error("Property {} is not backed by table {}.", property.getName(), tableForType.getName());
+                }
+            }
+        }
     }
 
     private void registerModelFields(DefModel modelDefinition) {
