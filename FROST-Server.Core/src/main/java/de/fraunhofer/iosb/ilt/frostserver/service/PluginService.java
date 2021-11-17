@@ -30,6 +30,11 @@ import java.util.Collections;
  */
 public interface PluginService extends Plugin {
 
+    /**
+     * Lists the Versions for which this plugin is relevant.
+     *
+     * @return The Versions for which this plugin is relevant.
+     */
     public default Collection<Version> getVersions() {
         return Collections.emptyList();
     }

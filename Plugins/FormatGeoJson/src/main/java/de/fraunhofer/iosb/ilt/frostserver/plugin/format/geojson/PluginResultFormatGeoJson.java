@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -47,10 +48,12 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
      */
     public static final String GEOJSON_FORMAT_NAME = "GeoJSON";
 
+    private CoreSettings settings;
     private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
+        this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_GEOJSON, getClass());
         if (enabled) {
@@ -61,6 +64,11 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public Collection<Version> getVersions() {
+        return settings.getPluginManager().getVersions().values();
     }
 
     @Override

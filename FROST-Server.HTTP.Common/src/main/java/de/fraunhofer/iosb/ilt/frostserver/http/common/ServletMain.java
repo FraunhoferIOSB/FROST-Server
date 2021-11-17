@@ -104,10 +104,15 @@ public class ServletMain extends HttpServlet {
 
     private void executeService(final ServiceRequest serviceRequest, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+        PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
+        if (plugin == null) {
+            sendResponse(Service.errorResponse(null, 500, "Illegal request type."), response);
+            return;
+        }
         try (Service service = new Service(coreSettings)) {
             ServiceRequest.LOCAL_REQUEST.set(serviceRequest);
             final ServiceResponseHttpServlet serviceResponse = new ServiceResponseHttpServlet(response);
-            service.execute(serviceRequest, serviceResponse);
+            plugin.execute(service, serviceRequest, serviceResponse);
             sendResponse(serviceResponse, response);
             ServiceRequest.LOCAL_REQUEST.remove();
         } catch (Exception exc) {

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -26,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class EntitySubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) throws IOException {
         try {
             entity.setQuery(emptyQuery);
-            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true).getFormatted();
+            return settings.getFormatter(emptyQuery.getVersion(), DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }

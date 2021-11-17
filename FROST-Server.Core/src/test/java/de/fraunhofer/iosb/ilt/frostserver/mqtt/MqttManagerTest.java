@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -81,11 +82,11 @@ public class MqttManagerTest {
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, "20000");
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_THREAD_POOL_SIZE, "10");
         properties.put(CoreSettings.PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, DummyPersistenceManager.class.getName());
+        properties.put(CoreSettings.PREFIX_PLUGINS + PluginManager.TAG_PROVIDED_PLUGINS, TestModel.class.getName() + "," + PluginManager.VALUE_PROVIDED_PLUGINS);
 
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
-        testModel = new TestModel();
-        testModel.init(coreSettings);
+        testModel = coreSettings.getPluginManager().getPlugin(TestModel.class);
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
     }

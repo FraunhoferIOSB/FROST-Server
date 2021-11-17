@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
-import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -42,10 +41,9 @@ public class MetaDataGenerator {
     public ServiceResponse generateMetaData(ServiceResponse response) {
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(settings);
-            final String jsonString = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(doc);
+            SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
             response.setCode(200);
             response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
-            response.getWriter().append(new FormatWriterGeneric(jsonString).getFormatted());
         } catch (IOException ex) {
             LOGGER.error("Failed to generate metadata document", ex);
         }

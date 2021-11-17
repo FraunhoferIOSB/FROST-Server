@@ -45,12 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginManager implements ConfigDefaults {
 
-    /**
-     * The plugins provided with FROST by default. When editing these, also
-     * check the docker-compose and helm files.
-     */
-    @DefaultValue(
-            "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
+    public static final String VALUE_PROVIDED_PLUGINS = "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
             + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
@@ -60,8 +55,13 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
-    )
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData";
+
+    /**
+     * The plugins provided with FROST by default. When editing these, also
+     * check the docker-compose and helm files.
+     */
+    @DefaultValue(VALUE_PROVIDED_PLUGINS)
     public static final String TAG_PROVIDED_PLUGINS = "providedPlugins";
 
     /**
@@ -79,7 +79,7 @@ public class PluginManager implements ConfigDefaults {
     /**
      * The plugins that supply resultFormatters.
      */
-    private final Map<String, PluginResultFormat> resultFormatters = new HashMap<>();
+    private final Map<Version, Map<String, PluginResultFormat>> resultFormatters = new HashMap<>();
 
     /**
      * The plugins that can handle registered paths.
@@ -197,8 +197,13 @@ public class PluginManager implements ConfigDefaults {
     }
 
     private void registerPlugin(PluginResultFormat plugin) {
+        final Collection<Version> pluginVersions = plugin.getVersions();
         for (String format : plugin.getFormatNames()) {
-            resultFormatters.put(format.toLowerCase(), plugin);
+            for (Version version : pluginVersions) {
+                if (versions.containsKey(version.urlPart)) {
+                    resultFormatters.computeIfAbsent(version, v -> new TreeMap<>()).put(format.toLowerCase(), plugin);
+                }
+            }
         }
     }
 
@@ -212,7 +217,7 @@ public class PluginManager implements ConfigDefaults {
         for (String path : plugin.getVersionedUrlPaths()) {
             for (Version version : pluginVersions) {
                 if (versions.containsKey(version.urlPart)) {
-                    pathHandlers.computeIfAbsent(version, t -> new TreeMap<>()).put(path, plugin);
+                    pathHandlers.computeIfAbsent(version, v -> new TreeMap<>()).put(path, plugin);
                 }
             }
             for (String type : plugin.getRequestTypes()) {
@@ -255,8 +260,12 @@ public class PluginManager implements ConfigDefaults {
         return service;
     }
 
-    public ResultFormatter getFormatter(String formatName) {
-        PluginResultFormat plugin = resultFormatters.get(formatName.toLowerCase());
+    public ResultFormatter getFormatter(Version version, String formatName) {
+        final Map<String, PluginResultFormat> formatters = resultFormatters.get(version);
+        if (formatters == null) {
+            return null;
+        }
+        final PluginResultFormat plugin = formatters.get(formatName.toLowerCase());
         if (plugin == null) {
             return null;
         }

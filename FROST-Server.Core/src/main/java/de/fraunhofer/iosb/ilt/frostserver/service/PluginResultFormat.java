@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.util.Collection;
 
 /**
@@ -26,6 +27,18 @@ import java.util.Collection;
  * @author scf
  */
 public interface PluginResultFormat extends Plugin {
+
+    /**
+     * The "name" of the default resultFormatter.
+     */
+    public static final String DEFAULT_FORMAT_NAME = "default";
+
+    /**
+     * Lists the Versions for which this plugin is relevant.
+     *
+     * @return The Versions for which this plugin is relevant.
+     */
+    public Collection<Version> getVersions();
 
     /**
      * Get the names of the formats this formatter plugin supports.

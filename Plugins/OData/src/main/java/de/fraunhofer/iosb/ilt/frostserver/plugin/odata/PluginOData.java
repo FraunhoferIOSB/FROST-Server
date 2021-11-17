@@ -17,10 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -30,9 +33,17 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -40,14 +51,14 @@ import java.util.Collection;
  */
 public class PluginOData implements PluginService, ConfigDefaults {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginOData.class.getName());
+
     public static final Version VERSION_ODATA_401 = new Version("ODATA_4.01");
     public static final String PATH_METADATA = "/$metadata";
     public static final String REQUEST_TYPE_METADATA = PATH_METADATA;
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ODATA = "odata.enable";
-
-    private static final String REQUIREMENT_ODATA = "https://fraunhoferiosb.github.io/FROST-Server/extensions/OData.html";
 
     private CoreSettings settings;
     private boolean enabled;
@@ -59,6 +70,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         enabled = pluginSettings.getBoolean(TAG_ENABLE_ODATA, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
+            settings.getPluginManager().registerPlugin(new PluginResultFormatOData());
         }
 
     }
@@ -85,7 +97,16 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public Collection<String> getRequestTypes() {
-        return Arrays.asList(REQUEST_TYPE_METADATA);
+        return Arrays.asList(
+                RequestTypeUtils.GET_CAPABILITIES,
+                RequestTypeUtils.CREATE,
+                RequestTypeUtils.DELETE,
+                RequestTypeUtils.READ,
+                RequestTypeUtils.UPDATE_ALL,
+                RequestTypeUtils.UPDATE_CHANGES,
+                RequestTypeUtils.UPDATE_CHANGESET,
+                REQUEST_TYPE_METADATA
+        );
     }
 
     @Override
@@ -124,9 +145,39 @@ public class PluginOData implements PluginService, ConfigDefaults {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(settings).generateMetaData(response);
 
+            case GET_CAPABILITIES:
+                return executeGetCapabilities(request, response);
+
             default:
                 return mainService.execute(request, response);
         }
+    }
+
+    private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+
+        String path = settings.getQueryDefaults().getServiceRootUrl()
+                + "/" + request.getVersion().urlPart
+                + "/";
+
+        List<LandingPageItem> entitySetList = new ArrayList<>();
+        result.put("value", entitySetList);
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+            entitySetList.add(new LandingPageItem().generateFrom(entityType, path));
+        }
+
+        settings.getPluginManager().modifyServiceDocument(request, result);
+        try {
+            SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), entitySetList);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to generate index document", ex);
+        }
+
+        response.setCode(200);
+        response.setResult(result);
+
+        return response;
     }
 
 }

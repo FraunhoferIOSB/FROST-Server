@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
@@ -39,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
@@ -254,16 +254,16 @@ public class Service implements AutoCloseable {
     }
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        Set<Extension> enabledSettings = settings.getEnabledExtensions();
+        final Map<String, Object> result = new LinkedHashMap<>();
+        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
+        final Version version = request.getVersion();
 
-        List<Map<String, String>> capList = new ArrayList<>();
+        final List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
         try {
             for (EntityType entityType : modelRegistry.getEntityTypes()) {
-                URL collectionUri = URI.create(
-                        settings.getQueryDefaults().getServiceRootUrl()
-                        + "/" + request.getVersion().urlPart
+                URL collectionUri = URI.create(settings.getQueryDefaults().getServiceRootUrl()
+                        + "/" + version.urlPart
                         + "/" + entityType.plural).normalize().toURL();
                 capList.add(createCapability(entityType.plural, collectionUri));
             }
@@ -272,7 +272,7 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 500, ex.getMessage());
         }
 
-        if (request.getVersion() == Version.V_1_1) {
+        if (version == Version.V_1_1) {
             Map<String, Object> serverSettings = new LinkedHashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 
@@ -291,13 +291,13 @@ public class Service implements AutoCloseable {
 
         response.setCode(200);
         response.setResult(result);
-        return formatResponse(response, result);
+        return formatResponse(version, response, result);
     }
 
-    private ServiceResponse formatResponse(ServiceResponse response, Object result) {
+    private ServiceResponse formatResponse(Version version, ServiceResponse response, Object result) {
         ResultFormatter formatter;
         try {
-            formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
+            formatter = settings.getFormatter(version, DEFAULT_FORMAT_NAME);
         } catch (IncorrectRequestException ex) {
             LOGGER.error("Formatter not available.", ex);
             return errorResponse(response, 500, "Failed to instantiate formatter");
@@ -340,12 +340,11 @@ public class Service implements AutoCloseable {
     }
 
     private ServiceResponse handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
-        ResourcePath path;
+        final ResourcePath path;
+        final Version version = request.getVersion();
         try {
-            path = PathParser.parsePath(
-                    modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(),
-                    request.getVersion(),
+            path = PathParser.parsePath(modelRegistry,
+                    settings.getQueryDefaults().getServiceRootUrl(), version,
                     request.getUrlPath());
         } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
@@ -356,7 +355,7 @@ public class Service implements AutoCloseable {
             query = QueryParser
                     .parseQuery(request.getUrlQuery(), settings, path)
                     .validate();
-            formatter = settings.getFormatter(query.getFormat());
+            formatter = settings.getFormatter(version, query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
             return errorResponse(response, 400, ex.getMessage());

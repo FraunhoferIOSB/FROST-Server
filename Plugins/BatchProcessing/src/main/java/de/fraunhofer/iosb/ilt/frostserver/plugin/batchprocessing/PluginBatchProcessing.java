@@ -78,7 +78,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+        return settings.getPluginManager().getVersions().values();
     }
 
     @Override

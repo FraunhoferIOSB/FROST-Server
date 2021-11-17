@@ -18,13 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -428,11 +429,11 @@ public class CoreSettings implements ConfigDefaults {
      * @throws IncorrectRequestException if there is no formatter for the given
      * name.
      */
-    public ResultFormatter getFormatter(String formatterName) throws IncorrectRequestException {
+    public ResultFormatter getFormatter(Version version, String formatterName) throws IncorrectRequestException {
         if (formatterName == null) {
-            return pluginManager.getFormatter(DEFAULT_FORMAT_NAME);
+            return pluginManager.getFormatter(version, DEFAULT_FORMAT_NAME);
         }
-        ResultFormatter formatter = pluginManager.getFormatter(formatterName);
+        ResultFormatter formatter = pluginManager.getFormatter(version, formatterName);
         if (formatter == null) {
             throw new IncorrectRequestException("Unknown ResultFormatter: " + StringHelper.cleanForLogging(formatterName));
         }

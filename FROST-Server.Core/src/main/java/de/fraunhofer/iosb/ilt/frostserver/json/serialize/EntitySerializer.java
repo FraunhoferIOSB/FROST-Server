@@ -53,6 +53,16 @@ public class EntitySerializer extends JsonSerializer<Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class.getName());
 
+    private final String navLinkPostFix;
+
+    public EntitySerializer() {
+        this(AT_IOT_NAVIGATION_LINK);
+    }
+
+    public EntitySerializer(String navLinkPostFix) {
+        this.navLinkPostFix = navLinkPostFix;
+    }
+
     @Override
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
@@ -91,7 +101,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 NavigationPropertyMain np = it.next();
                 String navigationLink = np.getNavigationLink(entity);
                 if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
-                    gen.writeStringField(np.getName() + AT_IOT_NAVIGATION_LINK, navigationLink);
+                    gen.writeStringField(np.getName() + navLinkPostFix, navigationLink);
                 }
             }
 

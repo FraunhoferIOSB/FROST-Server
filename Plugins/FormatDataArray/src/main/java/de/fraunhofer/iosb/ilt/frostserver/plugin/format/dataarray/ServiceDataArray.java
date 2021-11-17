@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -31,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArray
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -99,7 +99,7 @@ public class ServiceDataArray {
                 handleDataArrayItems(query, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
-            ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
+            ResultFormatter formatter = settings.getFormatter(version, DEFAULT_FORMAT_NAME);
             response.setContentType(formatter.getContentType());
             formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
                     .writeFormatted(response.getWriter());

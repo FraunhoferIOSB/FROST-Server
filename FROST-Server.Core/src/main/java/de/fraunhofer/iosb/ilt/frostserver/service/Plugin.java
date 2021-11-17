@@ -44,4 +44,5 @@ public interface Plugin {
      * @return true if this plugin is enabled.
      */
     public boolean isEnabled();
+
 }

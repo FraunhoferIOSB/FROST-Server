@@ -67,6 +67,7 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_GEOMETRYMULTILINESTRING = new TypeSimplePrimitive("Edm.GeometryMultiLineString", "Collection of line strings in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOLYGON = new TypeSimplePrimitive("Edm.GeometryMultiPolygon", "Collection of polygons in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYCOLLECTION = new TypeSimplePrimitive("Edm.GeometryCollection", "Collection of arbitrary Geometry values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
+    public static final TypeSimplePrimitive EDM_UNTYPED = new TypeSimplePrimitive("Edm.Untyped", "Can be any valid JSON.", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
 
     public static final TypeSimplePrimitive STA_ID_LONG = EDM_INT64;
     public static final TypeSimplePrimitive STA_ID_STRING = EDM_STRING;

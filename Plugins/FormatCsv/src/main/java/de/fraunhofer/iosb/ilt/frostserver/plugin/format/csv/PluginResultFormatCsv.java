@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -47,10 +48,12 @@ public class PluginResultFormatCsv implements PluginResultFormat, PluginRootDocu
      */
     public static final String CSV_FORMAT_NAME = "CSV";
 
+    private CoreSettings settings;
     private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
+        this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_CSV, getClass());
         if (enabled) {
@@ -61,6 +64,11 @@ public class PluginResultFormatCsv implements PluginResultFormat, PluginRootDocu
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public Collection<Version> getVersions() {
+        return settings.getPluginManager().getVersions().values();
     }
 
     @Override

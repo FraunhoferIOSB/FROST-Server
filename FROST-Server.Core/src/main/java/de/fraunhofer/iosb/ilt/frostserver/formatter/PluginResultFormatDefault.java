@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Arrays;
@@ -28,11 +29,6 @@ import java.util.Collection;
  */
 public class PluginResultFormatDefault implements PluginResultFormat {
 
-    /**
-     * The "name" of the default resultFormatter.
-     */
-    public static final String DEFAULT_FORMAT_NAME = "default";
-
     @Override
     public void init(CoreSettings settings) {
         settings.getPluginManager().registerPlugin(this);
@@ -41,6 +37,11 @@ public class PluginResultFormatDefault implements PluginResultFormat {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public Collection<Version> getVersions() {
+        return Arrays.asList(Version.V_1_0, Version.V_1_1);
     }
 
     @Override
