@@ -189,9 +189,7 @@ public class EntityChangedMessage {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
                 Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
-                    if (ep != ModelRegistry.EP_SELFLINK) {
-                        query.addSelect(ep);
-                    }
+                    query.addSelect(ep);
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
                     Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))

@@ -49,6 +49,7 @@ import java.util.Date;
 public class JsonWriterOdata {
 
     public static final String AT_NAVIGATION_LINK = "@navigationLink";
+    public static final String AT_ID = "@id";
 
     private static ObjectMapper objectMapperInstance;
 
@@ -74,7 +75,7 @@ public class JsonWriterOdata {
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
-        module.addSerializer(Entity.class, new EntitySerializer(AT_NAVIGATION_LINK));
+        module.addSerializer(Entity.class, new EntitySerializer(AT_NAVIGATION_LINK, AT_ID));
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());

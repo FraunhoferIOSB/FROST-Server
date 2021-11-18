@@ -64,14 +64,12 @@ public class TestModel implements PluginService {
     public void initModel(ModelRegistry modelRegistry, String idType) {
         modelRegistry.registerEntityType(ET_HOUSE);
         ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(NP_ROOMS, false);
         modelRegistry.registerEntityType(ET_ROOM);
         ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(EP_TIME, false)

@@ -102,10 +102,12 @@ public class EntityBuilderTest {
     private void testEntityType(EntityType type, Set<Property> collectedProperties) {
         String pName;
         try {
-
             Entity entity = new DefaultEntity(type);
             Entity entity2 = new DefaultEntity(type);
             for (Property p : collectedProperties) {
+                if (p == ModelRegistry.EP_SELFLINK) {
+                    continue;
+                }
                 pName = p.toString();
                 addPropertyToObject(entity, p);
                 Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, entity2);

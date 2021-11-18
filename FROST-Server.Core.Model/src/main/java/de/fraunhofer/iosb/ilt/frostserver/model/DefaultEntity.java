@@ -45,7 +45,14 @@ public class DefaultEntity implements Entity {
     private final Map<EntityPropertyMain, Object> entityProperties = new HashMap<>();
     private final Map<NavigationPropertyMain, Object> navProperties = new HashMap<>();
     private final Set<Property> setProperties = new HashSet<>();
+    /**
+     * The query used to load this entity.
+     */
     private Query query;
+    /**
+     * The selfLink or @id of this entity.
+     */
+    private String selfLink;
 
     public DefaultEntity(EntityType entityType) {
         this.entityType = entityType;
@@ -70,18 +77,15 @@ public class DefaultEntity implements Entity {
 
     @Override
     public String getSelfLink() {
-        String selfLink = (String) entityProperties.get(ModelRegistry.EP_SELFLINK);
         if (selfLink == null && query != null) {
             selfLink = UrlHelper.generateSelfLink(query, query.getPath(), this);
-            entityProperties.put(ModelRegistry.EP_SELFLINK, selfLink);
         }
         return selfLink;
     }
 
     @Override
     public DefaultEntity setSelfLink(String selfLink) {
-        entityProperties.put(ModelRegistry.EP_SELFLINK, selfLink);
-        setProperties.add(ModelRegistry.EP_SELFLINK);
+        this.selfLink = selfLink;
         return this;
     }
 
@@ -101,12 +105,17 @@ public class DefaultEntity implements Entity {
 
     @Override
     public boolean isSetProperty(Property property) {
+        if (property == ModelRegistry.EP_SELFLINK) {
+            return true;
+        }
         return setProperties.contains(property);
     }
 
     @Override
     public <P> P getProperty(Property<P> property) {
-        if (property instanceof EntityPropertyMain) {
+        if (property == ModelRegistry.EP_SELFLINK) {
+            return (P) getSelfLink();
+        } else if (property instanceof EntityPropertyMain) {
             EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
             return (P) entityProperties.get(entityPropertyMain);
         } else if (property instanceof NavigationPropertyMain) {
@@ -118,7 +127,9 @@ public class DefaultEntity implements Entity {
 
     @Override
     public DefaultEntity setProperty(Property property, Object value) {
-        if (property instanceof EntityPropertyMain) {
+        if (property == ModelRegistry.EP_SELFLINK) {
+            setSelfLink(String.valueOf(value));
+        } else if (property instanceof EntityPropertyMain) {
             entityProperties.put((EntityPropertyMain) property, value);
             setProperties.add(property);
         } else if (property instanceof NavigationPropertyMain) {

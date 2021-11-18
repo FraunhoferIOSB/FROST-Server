@@ -99,7 +99,6 @@ public class DefEntityType {
             defNp.setSourceEntityType(entityType);
             defNp.registerProperties(modelRegistry);
         }
-        entityType.registerProperty(ModelRegistry.EP_SELFLINK, false);
     }
 
     /**

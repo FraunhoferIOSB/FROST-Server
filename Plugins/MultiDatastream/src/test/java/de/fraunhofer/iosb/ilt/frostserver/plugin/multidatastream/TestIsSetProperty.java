@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings.TAG_ENABLE_MDS_MODEL;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -120,6 +119,9 @@ public class TestIsSetProperty {
         }
         entity.setEntityPropertiesSet(false, false);
         for (Property p : collectedProperties) {
+            if (p == ModelRegistry.EP_SELFLINK) {
+                continue;
+            }
             isSetPropertyOnObject(entity, p, false);
         }
         entity.setEntityPropertiesSet(true, false);
@@ -154,6 +156,9 @@ public class TestIsSetProperty {
     private void testPropertiesChanged(EntityChangedMessage message, Set<Property> collectedProperties, Entity entity, boolean shouldBeChanged) {
         Set<Property> changedFields = message.getFields();
         for (Property p : collectedProperties) {
+            if (p == ModelRegistry.EP_SELFLINK) {
+                continue;
+            }
             if (p instanceof NavigationPropertyMain) {
                 NavigationPropertyMain nProp = (NavigationPropertyMain) p;
                 if (nProp.isEntitySet()) {
@@ -405,7 +410,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetProperty(shouldIdBeSet, entity, entity.getEntityType().getPrimaryKey());
-        testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_SELFLINK);
+        testIsSetProperty(true, entity, ModelRegistry.EP_SELFLINK);
     }
 
     private void testIsSetProperty(boolean shouldBeSet, Entity entity, Property property) {

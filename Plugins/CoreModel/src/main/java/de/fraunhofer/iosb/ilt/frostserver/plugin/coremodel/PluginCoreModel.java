@@ -267,7 +267,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         // ToDo: Fix IDs
         etDatastream
                 .registerProperty(epIdDatastream, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(epObservationType, true)
@@ -282,7 +281,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npObservationsDatastream, false);
         etFeatureOfInterest
                 .registerProperty(epIdFeature, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
@@ -291,13 +289,11 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npObservationsFeature, false);
         etHistoricalLocation
                 .registerProperty(epIdHistLocation, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epTime, true)
                 .registerProperty(npThingHistLoc, true)
                 .registerProperty(npLocationsHistLoc, false);
         etLocation
                 .registerProperty(epIdLocation, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
@@ -307,7 +303,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npThingsLocation, false);
         etObservation
                 .registerProperty(epIdObservation, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epPhenomenonTime, false)
                 .registerProperty(epResultTime, false)
                 .registerProperty(epResult, true)
@@ -318,7 +313,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npFeatureOfInterestObservation, false);
         etObservedProperty
                 .registerProperty(epIdObsProp, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDefinition, true)
                 .registerProperty(epDescription, true)
@@ -326,7 +320,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npDatastreamsObsProp, false);
         etSensor
                 .registerProperty(epIdSensor, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
@@ -335,7 +328,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npDatastreamsSensor, false);
         etThing
                 .registerProperty(epIdThing, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)

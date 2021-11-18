@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -54,13 +55,15 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class.getName());
 
     private final String navLinkPostFix;
+    private final String selfLinkField;
 
     public EntitySerializer() {
-        this(AT_IOT_NAVIGATION_LINK);
+        this(AT_IOT_NAVIGATION_LINK, AT_IOT_SELF_LINK);
     }
 
-    public EntitySerializer(String navLinkPostFix) {
+    public EntitySerializer(String navLinkPostFix, String selfLinkField) {
         this.navLinkPostFix = navLinkPostFix;
+        this.selfLinkField = selfLinkField;
     }
 
     @Override
@@ -78,21 +81,15 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             }
             if (query == null) {
                 entityProps = entity.getEntityType().getEntityProperties();
+                entityProps.add(ModelRegistry.EP_SELFLINK);
                 expand = null;
             } else {
                 entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
                 expand = query.getExpand();
             }
-            // Ensure selfLink is initialised.
-            if (entityProps.contains(ModelRegistry.EP_SELFLINK)) {
-                entity.getSelfLink();
-            }
             for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {
                 EntityPropertyMain ep = it.next();
-                Object value = entity.getProperty(ep);
-                if (value != null || ep.serialiseNull) {
-                    gen.writeObjectField(ep.name, value);
-                }
+                writeProperty(ep, entity, gen);
             }
             if (expand != null) {
                 writeExpand(expand, entity, gen);
@@ -110,6 +107,20 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             throw new IOException("could not serialize Entity");
         } finally {
             gen.writeEndObject();
+        }
+    }
+
+    public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException {
+        if (ep == ModelRegistry.EP_SELFLINK) {
+            final String value = entity.getSelfLink();
+            if (value != null) {
+                gen.writeObjectField(selfLinkField, value);
+            }
+        } else {
+            final Object value = entity.getProperty(ep);
+            if (value != null || ep.serialiseNull) {
+                gen.writeObjectField(ep.name, value);
+            }
         }
     }
 

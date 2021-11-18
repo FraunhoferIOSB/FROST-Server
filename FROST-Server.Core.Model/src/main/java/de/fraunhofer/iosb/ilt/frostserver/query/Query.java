@@ -111,6 +111,9 @@ public class Query {
         for (PropertyPlaceholder pp : rawSelect) {
             Property property = entityType.getProperty(pp.getName());
             if (property == null) {
+                property = path.getVersion().syntheticPropertyRegistry.getProperty(pp.getName());
+            }
+            if (property == null) {
                 throw new IllegalArgumentException("Invalid property '" + pp.getName() + "' found in select, for entity type " + entityType.entityName);
             }
             if (property instanceof NavigationProperty) {
@@ -277,6 +280,7 @@ public class Query {
             if (entityType == null) {
                 validate();
             }
+            selectedEntityPropMain.add(ModelRegistry.EP_SELFLINK);
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
                 selectNavProp.addAll(entityType.getNavigationEntities());

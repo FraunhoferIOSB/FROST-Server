@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -352,6 +351,6 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         Assert.assertEquals("Failed isSet for ID", shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey()));
-        Assert.assertEquals("Failed isSet for SelfLink", shouldBeSet, entity.isSetProperty(ModelRegistry.EP_SELFLINK));
+        Assert.assertEquals("Failed isSet for SelfLink", true, entity.isSetProperty(ModelRegistry.EP_SELFLINK));
     }
 }

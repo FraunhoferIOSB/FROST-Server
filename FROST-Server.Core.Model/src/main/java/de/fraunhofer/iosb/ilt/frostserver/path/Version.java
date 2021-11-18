@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+
 /**
  * The versions that FROST supports.
  *
@@ -24,13 +26,25 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
  */
 public class Version {
 
-    public static Version V_1_0 = new Version("v1.0");
-    public static Version V_1_1 = new Version("v1.1");
+    private static final SyntheticPropertyRegistry spr = new SyntheticPropertyRegistry();
+    public static final Version V_1_0 = new Version("v1.0", spr);
+    public static final Version V_1_1 = new Version("v1.1", spr);
+
+    static {
+        spr.registerProperty(ModelRegistry.EP_SELFLINK);
+    }
 
     public final String urlPart;
+    public final SyntheticPropertyRegistry syntheticPropertyRegistry;
 
     public Version(String urlPart) {
         this.urlPart = urlPart;
+        syntheticPropertyRegistry = new SyntheticPropertyRegistry();
+    }
+
+    public Version(String urlPart, SyntheticPropertyRegistry syntheticPropertyRegistry) {
+        this.urlPart = urlPart;
+        this.syntheticPropertyRegistry = syntheticPropertyRegistry;
     }
 
     @Override

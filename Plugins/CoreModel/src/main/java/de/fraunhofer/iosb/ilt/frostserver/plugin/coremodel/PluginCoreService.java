@@ -25,28 +25,48 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
-public class PluginCoreService implements PluginService, PluginRootDocument {
+public class PluginCoreService implements PluginService, PluginRootDocument, ConfigDefaults {
+
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLE_CORE_SERVICE = "coreService.enable";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreService.class.getName());
+
+    private boolean enabled;
+
+    public PluginCoreService() {
+        LOGGER.info("Creating new Core Service Plugin.");
+    }
 
     @Override
     public void init(CoreSettings settings) {
-        settings.getPluginManager().registerPlugin(this);
+        final Settings pluginSettings = settings.getPluginSettings();
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_SERVICE, PluginCoreService.class);
+        if (enabled) {
+            settings.getPluginManager().registerPlugin(this);
+        }
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
     @Override

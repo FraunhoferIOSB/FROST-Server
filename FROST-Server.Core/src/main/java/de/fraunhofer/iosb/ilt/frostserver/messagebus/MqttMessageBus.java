@@ -288,8 +288,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
     @Override
     public void connectionLost(Throwable cause) {
-        LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", cause.getMessage());
-        LOGGER.debug("", cause);
+        if (listening) {
+            LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", cause.getMessage());
+            LOGGER.debug("", cause);
+        }
     }
 
     @Override

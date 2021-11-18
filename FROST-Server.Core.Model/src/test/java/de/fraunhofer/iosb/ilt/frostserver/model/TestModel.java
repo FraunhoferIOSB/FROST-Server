@@ -64,12 +64,10 @@ public class TestModel {
 
         modelRegistry.registerEntityType(ET_STREET);
         ET_STREET.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(NP_HOUSES_STREET, false);
         modelRegistry.registerEntityType(ET_HOUSE);
         ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
@@ -78,7 +76,6 @@ public class TestModel {
                 .registerProperty(NP_BATHROOMS_HOUSE, false);
         modelRegistry.registerEntityType(ET_ROOM);
         ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(EP_NAME, true)
                 .registerProperty(EP_VALUE, false)
                 .registerProperty(EP_TIME, false)

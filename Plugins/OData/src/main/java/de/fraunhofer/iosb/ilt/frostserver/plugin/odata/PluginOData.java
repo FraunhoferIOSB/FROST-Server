@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -59,6 +60,10 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ODATA = "odata.enable";
+
+    static {
+        VERSION_ODATA_401.syntheticPropertyRegistry.registerProperty(JsonWriterOdata.AT_ID, ModelRegistry.EP_SELFLINK);
+    }
 
     private CoreSettings settings;
     private boolean enabled;

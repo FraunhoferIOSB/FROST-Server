@@ -156,7 +156,6 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         // ToDo: Fix IDs
         etActuator
                 .registerProperty(epIdActuator, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
@@ -165,13 +164,11 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npTaskingCapabilitiesActuator, false);
         etTask
                 .registerProperty(epIdTask, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
                 .registerProperty(npTaskingCapabilityTask, true);
         etTaskingCapability
                 .registerProperty(epIdTaskingCap, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
                 .registerProperty(pluginCoreModel.epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
