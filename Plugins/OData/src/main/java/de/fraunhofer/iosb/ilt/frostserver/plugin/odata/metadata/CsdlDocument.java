@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -51,5 +53,16 @@ public class CsdlDocument {
         nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(nameSpace, settings));
 
         return this;
+    }
+
+    public void writeXml(Writer writer) throws IOException {
+        writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.01\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices>");
+        for (Map.Entry<String, CsdlSchema> entry : nameSpaces.entrySet()) {
+            String name = entry.getKey();
+            CsdlSchema schema = entry.getValue();
+            schema.writeXml(name, writer);
+        }
+
+        writer.write("</edmx:DataServices></edmx:Edmx>");
     }
 }

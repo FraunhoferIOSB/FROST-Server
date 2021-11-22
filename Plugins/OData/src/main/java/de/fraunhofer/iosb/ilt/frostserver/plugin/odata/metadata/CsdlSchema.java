@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -63,5 +65,15 @@ public class CsdlSchema {
         schemaItems.put("FrostService", new CsdlItemEntityContainer().generateFrom(nameSpace, settings));
 
         return this;
+    }
+
+    public void writeXml(String nameSpace, Writer writer) throws IOException {
+        writer.write("<Schema Namespace=\"" + nameSpace + "\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">");
+        for (Map.Entry<String, CsdlSchemaItem> entry : schemaItems.entrySet()) {
+            String name = entry.getKey();
+            CsdlSchemaItem item = entry.getValue();
+            item.writeXml(nameSpace, name, writer);
+        }
+        writer.write("</Schema>");
     }
 }

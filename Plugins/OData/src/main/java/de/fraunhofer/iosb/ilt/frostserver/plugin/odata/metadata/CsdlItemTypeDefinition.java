@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 
 public class CsdlItemTypeDefinition implements CsdlSchemaItem {
 
@@ -36,6 +38,11 @@ public class CsdlItemTypeDefinition implements CsdlSchemaItem {
         underlyingType = tc.getUnderlyingType().getName();
         description = tc.getDescription();
         return this;
+    }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        writer.write("<TypeDefinition Name=\"" + name + "\" UnderlyingType=\"" + underlyingType + "\" />");
     }
 
 }

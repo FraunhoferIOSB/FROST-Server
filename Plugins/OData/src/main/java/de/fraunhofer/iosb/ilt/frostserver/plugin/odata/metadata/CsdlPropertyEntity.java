@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 
 public class CsdlPropertyEntity implements CsdlProperty {
 
@@ -60,4 +62,11 @@ public class CsdlPropertyEntity implements CsdlProperty {
         }
         return this;
     }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        String typeString = type == null ? "String" : type;
+        writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\" Nullable=\"" + Boolean.toString(nullable) + "\" />");
+    }
+
 }

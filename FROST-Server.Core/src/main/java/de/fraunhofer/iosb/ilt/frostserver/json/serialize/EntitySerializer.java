@@ -70,43 +70,46 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         try {
-            Set<EntityPropertyMain> entityProps;
-            Set<NavigationPropertyMain> navigationProps;
-            List<Expand> expand;
-            Query query = entity.getQuery();
-            if (query == null || query.getMetadata() != Metadata.FULL) {
-                navigationProps = Collections.emptySet();
-            } else {
-                navigationProps = query.getSelectNavProperties(query.hasParentExpand());
-            }
-            if (query == null) {
-                entityProps = entity.getEntityType().getEntityProperties();
-                entityProps.add(ModelRegistry.EP_SELFLINK);
-                expand = null;
-            } else {
-                entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
-                expand = query.getExpand();
-            }
-            for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {
-                EntityPropertyMain ep = it.next();
-                writeProperty(ep, entity, gen);
-            }
-            if (expand != null) {
-                writeExpand(expand, entity, gen);
-            }
-            for (Iterator<NavigationPropertyMain> it = navigationProps.iterator(); it.hasNext();) {
-                NavigationPropertyMain np = it.next();
-                String navigationLink = np.getNavigationLink(entity);
-                if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
-                    gen.writeStringField(np.getName() + navLinkPostFix, navigationLink);
-                }
-            }
-
+            writeContent(entity, gen);
         } catch (IOException | RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);
             throw new IOException("could not serialize Entity");
         } finally {
             gen.writeEndObject();
+        }
+    }
+
+    public void writeContent(Entity entity, JsonGenerator gen) throws IOException {
+        Set<EntityPropertyMain> entityProps;
+        Set<NavigationPropertyMain> navigationProps;
+        List<Expand> expand;
+        Query query = entity.getQuery();
+        if (query == null || query.getMetadata() != Metadata.FULL) {
+            navigationProps = Collections.emptySet();
+        } else {
+            navigationProps = query.getSelectNavProperties(query.hasParentExpand());
+        }
+        if (query == null) {
+            entityProps = entity.getEntityType().getEntityProperties();
+            entityProps.add(ModelRegistry.EP_SELFLINK);
+            expand = null;
+        } else {
+            entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
+            expand = query.getExpand();
+        }
+        for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {
+            EntityPropertyMain ep = it.next();
+            writeProperty(ep, entity, gen);
+        }
+        if (expand != null) {
+            writeExpand(expand, entity, gen);
+        }
+        for (Iterator<NavigationPropertyMain> it = navigationProps.iterator(); it.hasNext();) {
+            NavigationPropertyMain np = it.next();
+            String navigationLink = np.getNavigationLink(entity);
+            if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
+                gen.writeStringField(np.getName() + navLinkPostFix, navigationLink);
+            }
         }
     }
 

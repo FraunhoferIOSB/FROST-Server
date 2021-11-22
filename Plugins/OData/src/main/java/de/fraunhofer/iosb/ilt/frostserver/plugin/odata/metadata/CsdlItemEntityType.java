@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,4 +60,21 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
 
         return this;
     }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        writer.write("<EntityType Name=\"" + name + "\">");
+        writer.write("<Key>");
+        for (String keyName : key) {
+            writer.write("<PropertyRef Name=\"" + keyName + "\" />");
+        }
+        writer.write("</Key>");
+        for (Map.Entry<String, CsdlProperty> entry : properties.entrySet()) {
+            String propName = entry.getKey();
+            CsdlProperty property = entry.getValue();
+            property.writeXml(nameSpace, propName, writer);
+        }
+        writer.write("</EntityType>");
+    }
+
 }

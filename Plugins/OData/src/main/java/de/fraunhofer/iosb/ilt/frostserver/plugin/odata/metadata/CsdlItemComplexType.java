@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -53,4 +55,16 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
         }
         return this;
     }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        writer.write("<ComplexType Name=\"" + name + "\" OpenType=\"" + Boolean.toString(openType) + "\">");
+        for (Map.Entry<String, CsdlProperty> entry : properties.entrySet()) {
+            String propName = entry.getKey();
+            CsdlProperty property = entry.getValue();
+            property.writeXml(nameSpace, propName, writer);
+        }
+        writer.write("</ComplexType>");
+    }
+
 }

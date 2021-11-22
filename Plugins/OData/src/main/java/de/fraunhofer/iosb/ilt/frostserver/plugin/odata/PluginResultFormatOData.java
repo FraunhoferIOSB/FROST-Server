@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
@@ -51,8 +53,11 @@ public class PluginResultFormatOData implements PluginResultFormat {
      */
     public static final String FORMAT_NAME_ODATA = "ODATA-JSON";
 
+    private CoreSettings settings;
+
     @Override
     public void init(CoreSettings settings) {
+        this.settings = settings;
         settings.getPluginManager().registerPlugin(this);
     }
 
@@ -73,29 +78,40 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new ResultFormatterOData();
+        return new ResultFormatterOData(settings);
     }
 
     public static class ResultFormatterOData implements ResultFormatter {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
 
-        public ResultFormatterOData() {
+        public final CoreSettings settings;
+
+        public ResultFormatterOData(CoreSettings settings) {
             LOGGER.trace("Creating a new resultFormatter.");
+            this.settings = settings;
         }
 
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
             try {
+                final String contextBase = settings.getQueryDefaults().getServiceRootUrl()
+                        + '/' + path.getVersion().urlPart
+                        + "/$metadata";
                 if (Entity.class.isAssignableFrom(result.getClass())) {
-                    final Entity entity = (Entity) result;
                     LOGGER.trace("Formatting as Entity.");
-                    return target -> JsonWriterOdata.writeEntity(target, entity);
+                    final Entity entity = (Entity) result;
+                    final EntityWrapper wrappedEntity = new EntityWrapper()
+                            .setEntity(entity)
+                            .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
+                    return target -> JsonWriterOdata.writeEntity(target, wrappedEntity);
                 }
                 if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                    EntitySet entitySet = (EntitySet) result;
                     LOGGER.trace("Formatting as EntitySet.");
-                    return target -> JsonWriterOdata.writeEntityCollection(target, entitySet);
+                    EntitySet entitySet = (EntitySet) result;
+                    EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet)
+                            .setContext(contextBase + '#' + entitySet.getEntityType().plural);
+                    return target -> JsonWriterOdata.writeEntityCollection(target, wrappedSet);
                 }
                 // Not an Entity nor an EntitySet.
                 String entityJsonString = "";

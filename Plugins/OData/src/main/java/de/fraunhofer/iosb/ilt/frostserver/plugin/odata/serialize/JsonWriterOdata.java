@@ -26,14 +26,11 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.DateSerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityChangedMessageSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityPropertySerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySetResultSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityTypeSerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.TimeValueSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
@@ -48,8 +45,9 @@ import java.util.Date;
  */
 public class JsonWriterOdata {
 
-    public static final String AT_NAVIGATION_LINK = "@navigationLink";
+    public static final String AT_CONTEXT = "@context";
     public static final String AT_ID = "@id";
+    public static final String AT_NAVIGATION_LINK = "@navigationLink";
 
     private static ObjectMapper objectMapperInstance;
 
@@ -75,9 +73,10 @@ public class JsonWriterOdata {
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
+        module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_NAVIGATION_LINK, AT_ID));
         module.addSerializer(Entity.class, new EntitySerializer(AT_NAVIGATION_LINK, AT_ID));
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
-        module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
+        module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
@@ -89,20 +88,12 @@ public class JsonWriterOdata {
     private JsonWriterOdata() {
     }
 
-    public static <T extends Entity> void writeEntity(Writer writer, T entity) throws IOException {
+    public static void writeEntity(Writer writer, EntityWrapper entity) throws IOException {
         getObjectMapper().writeValue(writer, entity);
     }
 
-    public static <T extends Entity> String writeEntity(T entity) throws IOException {
-        return getObjectMapper().writeValueAsString(entity);
-    }
-
-    public static void writeEntityCollection(Writer writer, EntitySet entityCollection) throws IOException {
-        getObjectMapper().writeValue(writer, new EntitySetResult(entityCollection));
-    }
-
-    public static String writeEntityCollection(EntitySet entityCollection) throws IOException {
-        return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection));
+    public static void writeEntityCollection(Writer writer, EntitySetResultOdata entityCollection) throws IOException {
+        getObjectMapper().writeValue(writer, entityCollection);
     }
 
     public static void writeObject(Writer writer, Object object) throws IOException {

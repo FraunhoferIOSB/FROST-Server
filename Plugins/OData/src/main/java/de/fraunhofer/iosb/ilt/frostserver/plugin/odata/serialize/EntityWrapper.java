@@ -15,17 +15,47 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import java.io.IOException;
-import java.io.Writer;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 
 /**
- * A property in an entity type.
  *
  * @author hylke
  */
-public interface CsdlProperty {
+public class EntityWrapper {
 
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException;
+    private String context;
+    private Entity entity;
+
+    /**
+     * @return the context
+     */
+    public String getContext() {
+        return context;
+    }
+
+    /**
+     * @param context the context to set
+     */
+    public EntityWrapper setContext(String context) {
+        this.context = context;
+        return this;
+    }
+
+    /**
+     * @return the entity
+     */
+    public Entity getEntity() {
+        return entity;
+    }
+
+    /**
+     * @param entity the entity to set
+     */
+    public EntityWrapper setEntity(Entity entity) {
+        this.entity = entity;
+        return this;
+    }
+
 }

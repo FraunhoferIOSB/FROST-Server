@@ -94,7 +94,7 @@ TOKEN [IGNORE_CASE]:
 | <O_SKIP:     "skip" >
 | <O_SELECT:   "select" >
 | <O_FILTER:   "filter" >
-| <O_FORMAT:   "resultFormat" >
+| <O_FORMAT:   ("result")? "Format" >
 | <O_METADATA: "resultMetadata" >
 
 | <QF_SUBSTRINGOF:        "substringof" <LB> >

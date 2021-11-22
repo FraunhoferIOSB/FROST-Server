@@ -31,9 +31,10 @@ public class Constants {
 
     public static final String CONTENT_TYPE = "content-type";
     public static final String CONTENT_TYPE_APPLICATION_GEOJSON = "application/geo+json";
+    public static final String CONTENT_TYPE_APPLICATION_HTTP = "application/http";
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE_APPLICATION_JSONPATCH = "application/json-patch+json";
-    public static final String CONTENT_TYPE_APPLICATION_HTTP = "application/http";
+    public static final String CONTENT_TYPE_APPLICATION_XML = "application/xml";
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     public static final String CHARSET_UTF8 = "charset=UTF-8";
 

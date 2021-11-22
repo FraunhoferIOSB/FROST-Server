@@ -17,9 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
+import java.io.IOException;
+import java.io.Writer;
+
 /**
  *
  * @author hylke
  */
 public interface CsdlSchemaItem {
+
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException;
 }

@@ -75,7 +75,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         enabled = pluginSettings.getBoolean(TAG_ENABLE_ODATA, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
-            settings.getPluginManager().registerPlugin(new PluginResultFormatOData());
+            new PluginResultFormatOData().init(settings);
         }
 
     }
@@ -146,9 +146,10 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
+        response.addHeader("OData-Version", "4.01");
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
-                return new MetaDataGenerator(settings).generateMetaData(response);
+                return new MetaDataGenerator(settings).generateMetaData(request, response);
 
             case GET_CAPABILITIES:
                 return executeGetCapabilities(request, response);
@@ -165,6 +166,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         String path = settings.getQueryDefaults().getServiceRootUrl()
                 + "/" + request.getVersion().urlPart
                 + "/";
+        result.put("@context", path + "$metadata");
 
         List<LandingPageItem> entitySetList = new ArrayList<>();
         result.put("value", entitySetList);
@@ -174,7 +176,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
         settings.getPluginManager().modifyServiceDocument(request, result);
         try {
-            SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), entitySetList);
+            SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), result);
         } catch (IOException ex) {
             LOGGER.error("Failed to generate index document", ex);
         }

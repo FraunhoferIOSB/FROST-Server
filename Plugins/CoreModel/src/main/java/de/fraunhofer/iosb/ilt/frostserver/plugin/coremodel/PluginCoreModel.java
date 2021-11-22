@@ -239,7 +239,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         mr.registerPropertyType(eptUom)
                 .registerPropertyType(TypeComplex.STA_GEOJSON)
                 .registerPropertyType(TypeComplex.STA_MAP)
-                .registerPropertyType(TypeComplex.STA_OBJECT_UNTYPED)
                 .registerPropertyType(TypeSimpleCustom.STA_TIMEINTERVAL)
                 .registerPropertyType(TypeSimpleCustom.STA_TIMEVALUE)
                 .registerEntityType(etDatastream)

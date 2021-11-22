@@ -15,24 +15,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.model.ext;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 
 /**
  *
  * @author jab
  */
-public class EntitySetResult {
+public class EntitySetResultOdata extends EntitySetResult {
 
-    private final EntitySet values;
+    private String context;
 
-    public EntitySetResult(EntitySet values) {
-        this.values = values;
+    public EntitySetResultOdata(EntitySet values) {
+        super(values);
     }
 
-    public EntitySet getValues() {
-        return values;
+    /**
+     * @return the context
+     */
+    public String getContext() {
+        return context;
+    }
+
+    public EntitySetResultOdata setContext(String context) {
+        this.context = context;
+        return this;
     }
 
 }

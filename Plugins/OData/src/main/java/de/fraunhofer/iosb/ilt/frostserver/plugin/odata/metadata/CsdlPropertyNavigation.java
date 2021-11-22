@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.io.IOException;
+import java.io.Writer;
 
 public class CsdlPropertyNavigation implements CsdlProperty {
 
@@ -57,6 +60,23 @@ public class CsdlPropertyNavigation implements CsdlProperty {
             nullable = false;
         }
         return this;
+    }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        String finalType = type;
+        if (collection != null && collection) {
+            finalType = "Collection(" + type + ")";
+        }
+        String nullableString = "";
+        if (nullable != null && nullable) {
+            nullableString = " Nullable=\"" + Boolean.toString(nullable) + "\"";
+        }
+        String partnerString = "";
+        if (!StringHelper.isNullOrEmpty(partner)) {
+            partnerString = " Partner=\"" + partner + "\"";
+        }
+        writer.write("<NavigationProperty Name=\"" + name + "\" Type=\"" + finalType + "\"" + nullableString + partnerString + " />");
     }
 
 }

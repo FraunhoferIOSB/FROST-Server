@@ -18,9 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_XML;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import org.slf4j.LoggerFactory;
@@ -38,12 +40,23 @@ public class MetaDataGenerator {
         this.settings = settings;
     }
 
-    public ServiceResponse generateMetaData(ServiceResponse response) {
+    public ServiceResponse generateMetaData(ServiceRequest request, ServiceResponse response) {
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(settings);
-            SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
-            response.setCode(200);
-            response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+            String[] formats = request.getParameterMap().get("$format");
+            String format = "json";
+            if (formats != null && formats[0] != null) {
+                format = formats[0];
+            }
+            if (format.contains(CONTENT_TYPE_APPLICATION_XML) || "xml".equalsIgnoreCase(format)) {
+                doc.writeXml(response.getWriter());
+                response.setCode(200);
+                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
+            } else {
+                SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
+                response.setCode(200);
+                response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+            }
         } catch (IOException ex) {
             LOGGER.error("Failed to generate metadata document", ex);
         }

@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +44,18 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
             properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, settings, et));
         }
         return this;
+    }
+
+    @Override
+    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        writer.write("<EntityContainer Name=\"" + name + "\">");
+        for (Map.Entry<String, ContainerItem> entry : properties.entrySet()) {
+            String propName = entry.getKey();
+            ContainerItem property = entry.getValue();
+            property.writeXml(nameSpace, propName, writer);
+        }
+
+        writer.write("</EntityContainer>");
     }
 
     public static class ContainerItem {
@@ -64,6 +78,15 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
             }
             return this;
         }
+
+        public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+            writer.write("<EntitySet Name=\"" + name + "\" EntityType=\"" + type + "\">");
+            for (Map.Entry<String, String> entry : navPropBinding.entrySet()) {
+                writer.write("<NavigationPropertyBinding Path=\"" + entry.getKey() + "\" Target=\"" + entry.getValue() + "\" />");
+            }
+            writer.write("</EntitySet>");
+        }
+
     }
 
 }

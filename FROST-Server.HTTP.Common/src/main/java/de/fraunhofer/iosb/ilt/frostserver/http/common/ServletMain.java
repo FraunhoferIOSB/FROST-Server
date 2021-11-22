@@ -32,6 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.MultipartConfig;
@@ -165,6 +167,12 @@ public class ServletMain extends HttpServlet {
             throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
         }
 
+        final Map<String, String[]> parameterMap = new LinkedHashMap<>(request.getParameterMap());
+        String accept = request.getHeader("Accept");
+        if (accept != null && !parameterMap.containsKey("$format")) {
+            parameterMap.put("$format", new String[]{accept.toLowerCase()});
+        }
+
         final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)
                 .withRequestType(requestType)
                 .withUrlPath(path)
@@ -173,7 +181,7 @@ public class ServletMain extends HttpServlet {
                         : null)
                 .withContent(request.getInputStream())
                 .withContentType(request.getContentType())
-                .withParameterMap(request.getParameterMap())
+                .withParameterMap(parameterMap)
                 .withUserPrincipal(request.getUserPrincipal());
 
         Enumeration<String> attributeNames = request.getAttributeNames();
