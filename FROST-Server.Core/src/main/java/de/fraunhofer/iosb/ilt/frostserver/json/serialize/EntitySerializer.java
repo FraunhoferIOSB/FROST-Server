@@ -54,15 +54,19 @@ public class EntitySerializer extends JsonSerializer<Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class.getName());
 
-    private final String navLinkPostFix;
+    private final String countField;
+    private final String navLinkField;
+    private final String nextLinkField;
     private final String selfLinkField;
 
     public EntitySerializer() {
-        this(AT_IOT_NAVIGATION_LINK, AT_IOT_SELF_LINK);
+        this(AT_IOT_COUNT, AT_IOT_NAVIGATION_LINK, AT_IOT_NEXT_LINK, AT_IOT_SELF_LINK);
     }
 
-    public EntitySerializer(String navLinkPostFix, String selfLinkField) {
-        this.navLinkPostFix = navLinkPostFix;
+    public EntitySerializer(String countField, String navLinkField, String nextLinkField, String selfLinkField) {
+        this.countField = countField;
+        this.navLinkField = navLinkField;
+        this.nextLinkField = nextLinkField;
         this.selfLinkField = selfLinkField;
     }
 
@@ -108,7 +112,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             NavigationPropertyMain np = it.next();
             String navigationLink = np.getNavigationLink(entity);
             if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
-                gen.writeStringField(np.getName() + navLinkPostFix, navigationLink);
+                gen.writeStringField(np.getName() + navLinkField, navigationLink);
             }
         }
     }
@@ -161,7 +165,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
         long count = entitySet.getCount();
         if (count >= 0) {
-            gen.writeNumberField(jsonName + AT_IOT_COUNT, count);
+            gen.writeNumberField(jsonName + countField, count);
         }
         gen.writeArrayFieldStart(jsonName);
         for (Object child : entitySet) {
@@ -170,7 +174,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         gen.writeEndArray();
         String nextLink = entitySet.getNextLink();
         if (nextLink != null) {
-            gen.writeStringField(jsonName + AT_IOT_NEXT_LINK, nextLink);
+            gen.writeStringField(jsonName + nextLinkField, nextLink);
         }
     }
 

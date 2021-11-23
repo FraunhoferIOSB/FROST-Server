@@ -72,7 +72,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
 
         public ContainerItem generateFrom(String nameSpace, CoreSettings settings, EntityType et) {
             collection = true;
-            type = nameSpace + "." + et.plural;
+            type = nameSpace + "." + et.entityName;
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
                 navPropBinding.put(np.getName(), np.getEntityType().plural);
             }

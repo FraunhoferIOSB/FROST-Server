@@ -46,8 +46,8 @@ public class CsdlPropertyEntity implements CsdlProperty {
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
         }
-        if (et.isRequired(ep)) {
-            nullable = false;
+        if (et.getPrimaryKey() != ep && !et.isRequired(ep)) {
+            nullable = true;
         }
         return this;
     }
@@ -66,7 +66,8 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
         String typeString = type == null ? "String" : type;
-        writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\" Nullable=\"" + Boolean.toString(nullable) + "\" />");
+        String nullableString = (nullable) ? " Nullable=\"" + Boolean.toString(nullable) + "\"" : "";
+        writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString + " />");
     }
 
 }

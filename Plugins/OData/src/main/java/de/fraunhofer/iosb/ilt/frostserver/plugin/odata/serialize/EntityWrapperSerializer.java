@@ -21,8 +21,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,21 +37,19 @@ public class EntityWrapperSerializer extends JsonSerializer<EntityWrapper> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityWrapperSerializer.class.getName());
 
-    private EntitySerializer innerSerialiser;
+    private final EntitySerializer innerSerialiser;
+    private final String contextField;
 
-    public EntityWrapperSerializer() {
-        this(AT_IOT_NAVIGATION_LINK, AT_IOT_SELF_LINK);
-    }
-
-    public EntityWrapperSerializer(String navLinkPostFix, String selfLinkField) {
-        this.innerSerialiser = new EntitySerializer(navLinkPostFix, selfLinkField);
+    public EntityWrapperSerializer(String contextField, String countField, String navLinkField, String nextLinkField, String selfLinkField) {
+        this.contextField = contextField;
+        this.innerSerialiser = new EntitySerializer(countField, navLinkField, nextLinkField, selfLinkField);
     }
 
     @Override
     public void serialize(EntityWrapper wrapper, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         try {
-            gen.writeStringField(JsonWriterOdata.AT_CONTEXT, wrapper.getContext());
+            gen.writeStringField(contextField, wrapper.getContext());
             innerSerialiser.writeContent(wrapper.getEntity(), gen);
         } catch (IOException | RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);

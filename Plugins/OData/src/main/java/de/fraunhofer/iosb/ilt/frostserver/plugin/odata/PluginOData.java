@@ -20,7 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -54,6 +55,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginOData.class.getName());
 
+    public static final Version VERSION_ODATA_40 = new Version("ODATA_4.0");
     public static final Version VERSION_ODATA_401 = new Version("ODATA_4.01");
     public static final String PATH_METADATA = "/$metadata";
     public static final String REQUEST_TYPE_METADATA = PATH_METADATA;
@@ -62,7 +64,8 @@ public class PluginOData implements PluginService, ConfigDefaults {
     public static final String TAG_ENABLE_ODATA = "odata.enable";
 
     static {
-        VERSION_ODATA_401.syntheticPropertyRegistry.registerProperty(JsonWriterOdata.AT_ID, ModelRegistry.EP_SELFLINK);
+        VERSION_ODATA_40.syntheticPropertyRegistry.registerProperty(JsonWriterOdata40.AT_ID, ModelRegistry.EP_SELFLINK);
+        VERSION_ODATA_401.syntheticPropertyRegistry.registerProperty(JsonWriterOdata401.AT_ID, ModelRegistry.EP_SELFLINK);
     }
 
     private CoreSettings settings;
@@ -87,7 +90,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(VERSION_ODATA_401);
+        return Arrays.asList(VERSION_ODATA_40, VERSION_ODATA_401);
     }
 
     @Override
@@ -116,7 +119,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
-        if (version != VERSION_ODATA_401) {
+        if (version != VERSION_ODATA_40 && version != VERSION_ODATA_401) {
             return null;
         }
         if (path.startsWith(PATH_METADATA)) {
@@ -146,7 +149,11 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
-        response.addHeader("OData-Version", "4.01");
+        if (request.getVersion() == VERSION_ODATA_40) {
+            response.addHeader("OData-Version", "4.0");
+        } else {
+            response.addHeader("OData-Version", "4.01");
+        }
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(settings).generateMetaData(request, response);
@@ -166,7 +173,11 @@ public class PluginOData implements PluginService, ConfigDefaults {
         String path = settings.getQueryDefaults().getServiceRootUrl()
                 + "/" + request.getVersion().urlPart
                 + "/";
-        result.put("@context", path + "$metadata");
+        if (request.getVersion() == VERSION_ODATA_40) {
+            result.put(JsonWriterOdata40.AT_CONTEXT, path + "$metadata");
+        } else {
+            result.put(JsonWriterOdata401.AT_CONTEXT, path + "$metadata");
+        }
 
         List<LandingPageItem> entitySetList = new ArrayList<>();
         result.put("value", entitySetList);

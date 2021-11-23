@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
@@ -48,15 +50,20 @@ public class CsdlDocument {
      * @param settings the CoreSettings to use.
      * @return this.
      */
-    public CsdlDocument generateFrom(CoreSettings settings) {
+    public CsdlDocument generateFrom(Version version, CoreSettings settings) {
+        this.version = version == VERSION_ODATA_40 ? "4.0" : "4.01";
         String nameSpace = "de.FROST";
         nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(nameSpace, settings));
 
         return this;
     }
 
-    public void writeXml(Writer writer) throws IOException {
-        writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.01\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices>");
+    public void writeXml(Version version, Writer writer) throws IOException {
+        if (version == VERSION_ODATA_40) {
+            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices>");
+        } else {
+            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.01\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices>");
+        }
         for (Map.Entry<String, CsdlSchema> entry : nameSpaces.entrySet()) {
             String name = entry.getKey();
             CsdlSchema schema = entry.getValue();

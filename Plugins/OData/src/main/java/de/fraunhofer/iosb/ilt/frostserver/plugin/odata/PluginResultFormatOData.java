@@ -29,7 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -41,6 +42,7 @@ import java.util.Map;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
 
 /**
  *
@@ -68,7 +70,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(VERSION_ODATA_401);
+        return Arrays.asList(VERSION_ODATA_40, VERSION_ODATA_401);
     }
 
     @Override
@@ -95,8 +97,9 @@ public class PluginResultFormatOData implements PluginResultFormat {
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
             try {
+                final Version version = path.getVersion();
                 final String contextBase = settings.getQueryDefaults().getServiceRootUrl()
-                        + '/' + path.getVersion().urlPart
+                        + '/' + version.urlPart
                         + "/$metadata";
                 if (Entity.class.isAssignableFrom(result.getClass())) {
                     LOGGER.trace("Formatting as Entity.");
@@ -104,21 +107,29 @@ public class PluginResultFormatOData implements PluginResultFormat {
                     final EntityWrapper wrappedEntity = new EntityWrapper()
                             .setEntity(entity)
                             .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
-                    return target -> JsonWriterOdata.writeEntity(target, wrappedEntity);
+                    if (version == PluginOData.VERSION_ODATA_40) {
+                        return target -> JsonWriterOdata40.writeEntity(target, wrappedEntity);
+                    } else {
+                        return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
+                    }
                 }
                 if (EntitySet.class.isAssignableFrom(result.getClass())) {
                     LOGGER.trace("Formatting as EntitySet.");
                     EntitySet entitySet = (EntitySet) result;
                     EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet)
                             .setContext(contextBase + '#' + entitySet.getEntityType().plural);
-                    return target -> JsonWriterOdata.writeEntityCollection(target, wrappedSet);
+                    if (version == PluginOData.VERSION_ODATA_40) {
+                        return target -> JsonWriterOdata40.writeEntityCollection(target, wrappedSet);
+                    } else {
+                        return target -> JsonWriterOdata401.writeEntityCollection(target, wrappedSet);
+                    }
                 }
                 // Not an Entity nor an EntitySet.
                 String entityJsonString = "";
-                if (path != null && path.isValue()) {
+                if (path.isValue()) {
                     LOGGER.trace("Formatting as $Value.");
                     if (result instanceof Map || result instanceof GeoJsonObject) {
-                        entityJsonString = JsonWriterOdata.writeObject(result);
+                        entityJsonString = JsonWriterOdata401.writeObject(result);
                     } else if (result instanceof Id) {
                         entityJsonString = ((Id) result).getValue().toString();
                     } else {
@@ -126,7 +137,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
                     }
                 } else {
                     LOGGER.trace("Formatting as Object.");
-                    entityJsonString = JsonWriterOdata.writeObject(result);
+                    entityJsonString = JsonWriterOdata401.writeObject(result);
                 }
                 return new FormatWriterGeneric(entityJsonString);
             } catch (IOException ex) {

@@ -21,8 +21,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import java.io.IOException;
 
 /**
@@ -31,14 +29,24 @@ import java.io.IOException;
  */
 public class EntitySetResultOdataSerializer extends JsonSerializer<EntitySetResultOdata> {
 
+    private final String contextField;
+    private final String countField;
+    private final String nextLinkField;
+
+    public EntitySetResultOdataSerializer(String contextField, String countField, String nextLinkField) {
+        this.contextField = contextField;
+        this.countField = countField;
+        this.nextLinkField = nextLinkField;
+    }
+
     @Override
     public void serialize(EntitySetResultOdata value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        gen.writeStringField(JsonWriterOdata.AT_CONTEXT, value.getContext());
+        gen.writeStringField(contextField, value.getContext());
 
         long count = value.getValues().getCount();
         if (count >= 0) {
-            gen.writeNumberField(AT_IOT_COUNT, count);
+            gen.writeNumberField(countField, count);
         }
 
         gen.writeArrayFieldStart("value");
@@ -49,7 +57,7 @@ public class EntitySetResultOdataSerializer extends JsonSerializer<EntitySetResu
 
         String nextLink = value.getValues().getNextLink();
         if (nextLink != null) {
-            gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
+            gen.writeStringField(nextLinkField, nextLink);
         }
     }
 

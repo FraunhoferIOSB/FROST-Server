@@ -43,13 +43,18 @@ import java.util.Date;
  * @author jab
  * @author scf
  */
-public class JsonWriterOdata {
+public class JsonWriterOdata40 {
 
-    public static final String AT_CONTEXT = "@context";
-    public static final String AT_ID = "@id";
-    public static final String AT_NAVIGATION_LINK = "@navigationLink";
+    public static final String AT_CONTEXT = "@odata.context";
+    public static final String AT_COUNT = "@odata.count";
+    public static final String AT_ID = "@odata.id";
+    public static final String AT_NAVIGATION_LINK = "@odata.navigationLink";
+    public static final String AT_NEXT_LINK = "@odata.nextLink";
 
     private static ObjectMapper objectMapperInstance;
+
+    private JsonWriterOdata40() {
+    }
 
     public static ObjectMapper getObjectMapper() {
         if (objectMapperInstance == null) {
@@ -73,19 +78,16 @@ public class JsonWriterOdata {
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
-        module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_NAVIGATION_LINK, AT_ID));
-        module.addSerializer(Entity.class, new EntitySerializer(AT_NAVIGATION_LINK, AT_ID));
+        module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_CONTEXT, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
+        module.addSerializer(Entity.class, new EntitySerializer(AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
-        module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer());
+        module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK));
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
         module.addSerializer(Date.class, new DateSerialiser());
         mapper.registerModule(module);
         return mapper;
-    }
-
-    private JsonWriterOdata() {
     }
 
     public static void writeEntity(Writer writer, EntityWrapper entity) throws IOException {

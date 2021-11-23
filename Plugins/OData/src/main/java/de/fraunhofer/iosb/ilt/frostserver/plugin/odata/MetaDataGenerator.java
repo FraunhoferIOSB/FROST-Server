@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -41,15 +42,24 @@ public class MetaDataGenerator {
     }
 
     public ServiceResponse generateMetaData(ServiceRequest request, ServiceResponse response) {
+        final Version version = request.getVersion();
         try {
-            final CsdlDocument doc = new CsdlDocument().generateFrom(settings);
+            final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
             String[] formats = request.getParameterMap().get("$format");
             String format = "json";
             if (formats != null && formats[0] != null) {
                 format = formats[0];
             }
-            if (format.contains(CONTENT_TYPE_APPLICATION_XML) || "xml".equalsIgnoreCase(format)) {
-                doc.writeXml(response.getWriter());
+            int idxXml = format.indexOf(CONTENT_TYPE_APPLICATION_XML);
+            int idxJson = format.indexOf(CONTENT_TYPE_APPLICATION_JSON);
+            if (idxXml == -1) {
+                idxXml = Integer.MAX_VALUE;
+            }
+            if (idxJson == -1) {
+                idxJson = Integer.MAX_VALUE - 1;
+            }
+            if (idxXml < idxJson || "xml".equalsIgnoreCase(format)) {
+                doc.writeXml(version, response.getWriter());
                 response.setCode(200);
                 response.setContentType(CONTENT_TYPE_APPLICATION_XML);
             } else {
