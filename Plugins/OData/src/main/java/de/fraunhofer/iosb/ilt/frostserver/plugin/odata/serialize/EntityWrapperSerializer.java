@@ -42,7 +42,7 @@ public class EntityWrapperSerializer extends JsonSerializer<EntityWrapper> {
 
     public EntityWrapperSerializer(String contextField, String countField, String navLinkField, String nextLinkField, String selfLinkField) {
         this.contextField = contextField;
-        this.innerSerialiser = new EntitySerializer(countField, navLinkField, nextLinkField, selfLinkField);
+        this.innerSerialiser = new EntitySerializer(true, countField, navLinkField, nextLinkField, selfLinkField);
     }
 
     @Override

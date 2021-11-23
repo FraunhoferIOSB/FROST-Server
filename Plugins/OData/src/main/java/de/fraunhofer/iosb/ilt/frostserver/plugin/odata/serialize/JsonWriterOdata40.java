@@ -79,7 +79,7 @@ public class JsonWriterOdata40 {
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_CONTEXT, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
-        module.addSerializer(Entity.class, new EntitySerializer(AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
+        module.addSerializer(Entity.class, new EntitySerializer(true, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK));
         module.addSerializer(TimeValue.class, new TimeValueSerializer());

@@ -58,16 +58,18 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private final String navLinkField;
     private final String nextLinkField;
     private final String selfLinkField;
+    private final boolean serialiseAllNulls;
 
     public EntitySerializer() {
-        this(AT_IOT_COUNT, AT_IOT_NAVIGATION_LINK, AT_IOT_NEXT_LINK, AT_IOT_SELF_LINK);
+        this(false, AT_IOT_COUNT, AT_IOT_NAVIGATION_LINK, AT_IOT_NEXT_LINK, AT_IOT_SELF_LINK);
     }
 
-    public EntitySerializer(String countField, String navLinkField, String nextLinkField, String selfLinkField) {
+    public EntitySerializer(boolean nulls, String countField, String navLinkField, String nextLinkField, String selfLinkField) {
         this.countField = countField;
         this.navLinkField = navLinkField;
         this.nextLinkField = nextLinkField;
         this.selfLinkField = selfLinkField;
+        this.serialiseAllNulls = nulls;
     }
 
     @Override
@@ -125,7 +127,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             }
         } else {
             final Object value = entity.getProperty(ep);
-            if (value != null || ep.serialiseNull) {
+            if (serialiseAllNulls || value != null || ep.serialiseNull) {
                 gen.writeObjectField(ep.name, value);
             }
         }
