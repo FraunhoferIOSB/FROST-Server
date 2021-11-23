@@ -22,7 +22,7 @@ jobs:
         ref: ${{ matrix.refs }}
 
     - name: Cache maven repository
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v2.1.7
       with:
         path: |
           ~/.m2/repository
