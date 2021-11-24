@@ -53,7 +53,7 @@ public class CsdlDocument {
     public CsdlDocument generateFrom(Version version, CoreSettings settings) {
         this.version = version == VERSION_ODATA_40 ? "4.0" : "4.01";
         String nameSpace = "de.FROST";
-        nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(nameSpace, settings));
+        nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(version, nameSpace, settings));
 
         return this;
     }

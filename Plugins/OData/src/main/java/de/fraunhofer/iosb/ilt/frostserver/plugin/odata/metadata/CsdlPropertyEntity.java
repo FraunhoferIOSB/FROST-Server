@@ -20,8 +20,11 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
@@ -38,13 +41,17 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public boolean nullable;
 
-    public CsdlPropertyEntity generateFrom(String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain ep) {
-        type = ep.getType().getName();
+    public CsdlPropertyEntity generateFrom(Version version, String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain ep) {
+        final PropertyType propertyType = ep.getType();
+        type = propertyType.getName();
         if (!type.startsWith("Edm.")) {
             type = nameSpace + "." + type;
         }
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
+        }
+        if (TypeSimplePrimitive.EDM_UNTYPED == propertyType && version == PluginOData.VERSION_ODATA_40) {
+            type = TypeSimplePrimitive.EDM_DECIMAL.getName();
         }
         if (et.getPrimaryKey() != ep && !et.isRequired(ep)) {
             nullable = true;

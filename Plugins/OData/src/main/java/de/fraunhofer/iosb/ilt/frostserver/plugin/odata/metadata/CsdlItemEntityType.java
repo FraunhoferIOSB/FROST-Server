@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -44,7 +45,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
 
-    public CsdlItemEntityType generateFrom(String nameSpace, CoreSettings settings, EntityType et) {
+    public CsdlItemEntityType generateFrom(Version version, String nameSpace, CoreSettings settings, EntityType et) {
         ModelRegistry mr = settings.getModelRegistry();
         String keyName = et.getPrimaryKey().name;
         if ("@iot.id".equals(keyName)) {
@@ -60,7 +61,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             if ("@iot.id".equals(propertyName)) {
                 propertyName = "id";
             }
-            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(nameSpace, settings, et, ep));
+            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(version, nameSpace, settings, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
             properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(nameSpace, settings, et, np));

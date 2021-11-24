@@ -238,6 +238,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .addProperty("definition", EDM_STRING);
         mr.registerPropertyType(eptUom)
                 .registerPropertyType(TypeComplex.STA_GEOJSON)
+                .registerPropertyType(TypeComplex.STA_OBJECT)
                 .registerPropertyType(TypeComplex.STA_MAP)
                 .registerPropertyType(TypeSimpleCustom.STA_TIMEINTERVAL)
                 .registerPropertyType(TypeSimpleCustom.STA_TIMEVALUE)
