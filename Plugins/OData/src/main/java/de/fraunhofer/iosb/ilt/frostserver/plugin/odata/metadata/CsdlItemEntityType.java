@@ -46,13 +46,21 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
 
     public CsdlItemEntityType generateFrom(String nameSpace, CoreSettings settings, EntityType et) {
         ModelRegistry mr = settings.getModelRegistry();
-        key.add(et.getPrimaryKey().name);
+        String keyName = et.getPrimaryKey().name;
+        if ("@iot.id".equals(keyName)) {
+            keyName = "id";
+        }
+        key.add(keyName);
 
         for (EntityPropertyMain ep : et.getEntityProperties()) {
             if (ep == ModelRegistry.EP_SELFLINK) {
                 continue;
             }
-            properties.put(ep.getJsonName(), new CsdlPropertyEntity().generateFrom(nameSpace, settings, et, ep));
+            String propertyName = ep.getJsonName();
+            if ("@iot.id".equals(propertyName)) {
+                propertyName = "id";
+            }
+            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(nameSpace, settings, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
             properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(nameSpace, settings, et, np));
