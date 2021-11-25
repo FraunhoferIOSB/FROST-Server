@@ -65,7 +65,9 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     static {
         VERSION_ODATA_40.syntheticPropertyRegistry.registerProperty(JsonWriterOdata40.AT_ID, ModelRegistry.EP_SELFLINK);
+        VERSION_ODATA_40.responses.put(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"));
         VERSION_ODATA_401.syntheticPropertyRegistry.registerProperty(JsonWriterOdata401.AT_ID, ModelRegistry.EP_SELFLINK);
+        VERSION_ODATA_401.responses.put(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"));
     }
 
     private CoreSettings settings;

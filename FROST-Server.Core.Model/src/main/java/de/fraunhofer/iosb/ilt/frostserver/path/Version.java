@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The versions that FROST supports.
@@ -36,6 +38,7 @@ public class Version {
 
     public final String urlPart;
     public final SyntheticPropertyRegistry syntheticPropertyRegistry;
+    public final Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
 
     public Version(String urlPart) {
         this.urlPart = urlPart;
@@ -50,6 +53,31 @@ public class Version {
     @Override
     public String toString() {
         return urlPart;
+    }
+
+    public CannedResponse getCannedResponse(CannedResponseType type) {
+        return responses.getOrDefault(type, type.dflt);
+    }
+
+    public enum CannedResponseType {
+        NOTHING_FOUND(new CannedResponse(404, "Not Found"));
+
+        public final CannedResponse dflt;
+
+        private CannedResponseType(CannedResponse dflt) {
+            this.dflt = dflt;
+        }
+    }
+
+    public static class CannedResponse {
+
+        public final int code;
+        public final String message;
+
+        public CannedResponse(int code, String message) {
+            this.code = code;
+            this.message = message;
+        }
     }
 
 }

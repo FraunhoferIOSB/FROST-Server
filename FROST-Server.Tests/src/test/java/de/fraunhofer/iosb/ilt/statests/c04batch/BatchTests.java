@@ -177,7 +177,7 @@ public class BatchTests extends AbstractTestClass {
                 + "\n"
                 + "http/1.1 404 no text\n"
                 + "\n"
-                + "{\"code\":404,\"type\":\"error\",\"message\":\"Nothing found.\"}\n"
+                + "{\"code\":404,\"type\":\"error\",\"message\":\"Not Found\"}\n"
                 + batchBoundary + "--", response);
     }
 

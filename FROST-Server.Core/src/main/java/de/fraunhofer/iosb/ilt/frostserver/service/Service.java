@@ -101,7 +101,7 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
-    private static final String NOT_A_VALID_ID = "Not a valid path";
+    private static final String NOT_A_VALID_PATH = "Not a valid path";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
@@ -347,7 +347,7 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(), version,
                     request.getUrlPath());
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
+            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
         }
         Query query;
         ResultFormatter formatter;
@@ -363,7 +363,7 @@ public class Service implements AutoCloseable {
 
         if (!pm.validatePath(path)) {
             maybeCommitAndClose();
-            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+            return errorResponse(response, version.getCannedResponse(Version.CannedResponseType.NOTHING_FOUND));
         }
         try {
             Object object = pm.get(path, query);
@@ -371,7 +371,7 @@ public class Service implements AutoCloseable {
                 if (path.isValue() || path.isEntityProperty()) {
                     return successResponse(response, 204, "No Content");
                 } else {
-                    return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                    return errorResponse(response, version.getCannedResponse(Version.CannedResponseType.NOTHING_FOUND));
                 }
             } else {
                 response.setResult(object);
@@ -430,7 +430,7 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     urlPath);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
+            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
         }
         if (!(path.getMainElement() instanceof PathElementEntitySet)) {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
@@ -580,7 +580,7 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     request.getUrlPath());
         } catch (IllegalArgumentException | IllegalStateException exc) {
-            throw new NoSuchEntityException(NOT_A_VALID_ID + ": " + exc.getMessage());
+            throw new NoSuchEntityException(NOT_A_VALID_PATH + ": " + exc.getMessage());
         }
 
         if (!pm.validatePath(path)) {
@@ -669,7 +669,7 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     request.getUrlPath());
         } catch (IllegalArgumentException | IllegalStateException exc) {
-            return errorResponse(response, 404, NOT_A_VALID_ID + ": " + exc.getMessage());
+            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + exc.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {
@@ -795,8 +795,16 @@ public class Service implements AutoCloseable {
         }
     }
 
+    public static ServiceResponse successResponse(ServiceResponse response, Version.CannedResponse cr) {
+        return successResponse(response, cr.code, cr.message);
+    }
+
     public static ServiceResponse successResponse(ServiceResponse response, int code, String message) {
         return jsonResponse(response, "success", code, message);
+    }
+
+    public static ServiceResponse errorResponse(ServiceResponse response, Version.CannedResponse cr) {
+        return errorResponse(response, cr.code, cr.message);
     }
 
     public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
