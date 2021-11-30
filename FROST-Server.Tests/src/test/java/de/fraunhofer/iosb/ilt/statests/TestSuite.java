@@ -194,6 +194,11 @@ public class TestSuite {
     }
 
     public String getPgConnectUrl() {
+        try {
+            maybeStartPostgres();
+        } catch (InterruptedException | UnsupportedOperationException | IOException ex) {
+            LOGGER.error("Failed to start database", ex);
+        }
         return pgConnectUrl;
     }
 
@@ -214,6 +219,18 @@ public class TestSuite {
         return keycloak;
     }
 
+    private synchronized void maybeStartPostgres() throws InterruptedException, UnsupportedOperationException, IOException {
+        if (!pgServer.isRunning()) {
+            pgServer.start();
+            // To log pg output: pgServer.followOutput(new Slf4jLogConsumer(LOGGER));
+            mqttBus.start();
+
+            Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
+            LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
+            pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
+        }
+    }
+
     private synchronized void maybeStartServers(Properties parameters) throws IOException, InterruptedException {
         if (!serverSettings.containsKey(parameters)) {
             startServers(parameters);
@@ -224,15 +241,7 @@ public class TestSuite {
         if (serverSettings.containsKey(parameters)) {
             return;
         }
-        if (!pgServer.isRunning()) {
-            pgServer.start();
-            // To log pg output: pgServer.followOutput(new Slf4jLogConsumer(LOGGER));
-            mqttBus.start();
-
-            Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
-            LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
-            pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
-        }
+        maybeStartPostgres();
         try {
             LOGGER.info("Testing if Mosquitto works...");
             MqttClient client = new MqttClient(
