@@ -59,7 +59,7 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTILINESTRING = new TypeSimplePrimitive("Edm.GeographyMultiLineString", "Collection of line strings in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTIPOLYGON = new TypeSimplePrimitive("Edm.GeographyMultiPolygon", "Collection of polygons in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOGRAPHYCOLLECTION = new TypeSimplePrimitive("Edm.GeographyCollection", "Collection of arbitrary Geography values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRY = new TypeSimplePrimitive("Edm.Geometry", "Abstract base type for all Geometry types", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
+    public static final TypeSimplePrimitive EDM_GEOMETRY = new TypeSimplePrimitive("Edm.Geometry", "Abstract base type for all Geometry types", TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYPOINT = new TypeSimplePrimitive("Edm.GeometryPoint", "Point in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYLINESTRING = new TypeSimplePrimitive("Edm.GeometryLineString", "Line string in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
     public static final TypeSimplePrimitive EDM_GEOMETRYPOLYGON = new TypeSimplePrimitive("Edm.GeometryPolygon", "Polygon in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);

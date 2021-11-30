@@ -17,7 +17,6 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTH_REALM_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
@@ -32,9 +31,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Base64;
 import java.util.EnumMap;
 import java.util.Map;
@@ -176,7 +175,6 @@ public class BasicAuthFilter implements Filter {
         }
 
         if (checker.isAllowed(userData, response)) {
-
             boolean admin = databaseHandler.userHasRole(userData.userName, roleAdmin);
             if (admin) {
                 chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin)), response);

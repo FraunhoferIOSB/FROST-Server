@@ -120,22 +120,22 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeComplex.STA_OBJECT_UNTYPED, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeComplex.STA_OBJECT_UNTYPED, true, false);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_GEOJSON, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_GEOJSON, true, false);
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING);
-    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeComplex.STA_GEOJSON);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEVALUE, true, false);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEINTERVAL, true, false);
+    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, true, false);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, true, false);
     public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, true, false);
     public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true);
-    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeSimpleCustom.STA_TIMEINTERVAL, false, true);
+    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, true);
     public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, true, false);
     public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET);
     public EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
-    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeSimpleCustom.STA_TIMEINTERVAL);
+    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
 
     public EntityPropertyMain<?> epIdDatastream;
     public EntityPropertyMain<?> epIdFeature;
@@ -237,11 +237,11 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .addProperty("symbol", EDM_STRING)
                 .addProperty("definition", EDM_STRING);
         mr.registerPropertyType(eptUom)
-                .registerPropertyType(TypeComplex.STA_GEOJSON)
+                .registerPropertyType(TypeSimpleCustom.STA_GEOJSON)
                 .registerPropertyType(TypeComplex.STA_OBJECT)
                 .registerPropertyType(TypeComplex.STA_MAP)
-                .registerPropertyType(TypeSimpleCustom.STA_TIMEINTERVAL)
-                .registerPropertyType(TypeSimpleCustom.STA_TIMEVALUE)
+                .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)
+                .registerPropertyType(TypeComplex.STA_TIMEVALUE)
                 .registerEntityType(etDatastream)
                 .registerEntityType(etFeatureOfInterest)
                 .registerEntityType(etHistoricalLocation)

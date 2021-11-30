@@ -34,10 +34,15 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeComplex extends PropertyType {
 
-    public static TypeComplex STA_GEOJSON = new TypeComplex("GeoJson", "A GeoJSON Object", TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT, true);
-    public static TypeComplex STA_MAP = new TypeComplex("Object", "A free object that can contain anything", TypeReferencesHelper.TYPE_REFERENCE_MAP, true);
-    public static TypeComplex STA_OBJECT = new TypeComplex("ANY", "A free type, can be anything", TypeReferencesHelper.TYPE_REFERENCE_OBJECT, true);
-    public static TypeComplex STA_OBJECT_UNTYPED = new TypeComplex("ANY", "A free type, can be anything", null, true);
+    public static final TypeComplex STA_MAP = new TypeComplex("Object", "A free object that can contain anything", TypeReferencesHelper.TYPE_REFERENCE_MAP, true);
+    public static final TypeComplex STA_OBJECT = new TypeComplex("ANY", "A free type, can be anything", TypeReferencesHelper.TYPE_REFERENCE_OBJECT, true);
+    public static final TypeComplex STA_OBJECT_UNTYPED = new TypeComplex("ANY", "A free type, can be anything", null, true);
+    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex("TimeInterval", "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+    public static final TypeComplex STA_TIMEVALUE = new TypeComplex("TimeValue", "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
     private static final Map<String, TypeComplex> TYPES = new HashMap<>();

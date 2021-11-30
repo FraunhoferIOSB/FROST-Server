@@ -149,7 +149,7 @@ public class EntityParserTest {
 
     @Test
     public void readDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
-        String json = "{\n"
+        final String json = "{\n"
                 + "	\"unitOfMeasurement\": \n"
                 + "	{\n"
                 + "		\"symbol\": \"%\",\n"
@@ -167,7 +167,7 @@ public class EntityParserTest {
                 + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
                 + "	}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
+        final Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
@@ -177,7 +177,8 @@ public class EntityParserTest {
                 .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(pluginCoreModel.etObservedProperty.getPrimaryKey(), new IdLong(5394816)))
                 .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(pluginCoreModel.etSensor.getPrimaryKey(), new IdLong(5394815)))
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
+        final Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
+        assertEquals(expectedResult, result);
     }
 
     @Test

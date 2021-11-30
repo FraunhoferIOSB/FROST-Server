@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -33,12 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeSimpleCustom extends TypeSimple {
 
-    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex("TimeInterval", "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
-            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
-            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
-    public static final TypeComplex STA_TIMEVALUE = new TypeComplex("TimeValue", "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
-            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
-            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+    public static TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom("GeoJson", "A GeoJSON Object", TypeSimplePrimitive.EDM_GEOMETRY, null);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
     private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();
