@@ -77,6 +77,7 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
         }
         pfReg.addEntry(
                 property,
+                true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (T t, Record tuple, Entity entity, DataSize dataSize) -> {
                             String locationString;

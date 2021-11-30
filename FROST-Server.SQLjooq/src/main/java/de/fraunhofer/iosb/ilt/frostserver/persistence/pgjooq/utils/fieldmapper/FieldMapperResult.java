@@ -85,6 +85,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
         final EntityPropertyMain property = parent.getEntityProperty();
 
         pfReg.addEntry(property,
+                true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (T t, Record tuple, Entity entity, DataSize dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize, idxType, idxString, idxNumber, idxBoolean, idxJson),
                         (t, entity, insertFields) -> handleResult(entity, property, t, insertFields, idxType, idxString, idxNumber, idxBoolean, idxJson),

@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 /**
@@ -69,6 +70,7 @@ public class JsonWriter {
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
+        module.addSerializer(OffsetDateTime.class, new OffsetDateTimeSerializer());
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
         module.addSerializer(Date.class, new DateSerialiser());

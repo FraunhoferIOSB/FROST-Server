@@ -126,8 +126,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING);
     public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeComplex.STA_GEOJSON);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEVALUE);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEINTERVAL);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEVALUE, true, false);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeSimpleCustom.STA_TIMEINTERVAL, true, false);
     public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, true, false);
     public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true);

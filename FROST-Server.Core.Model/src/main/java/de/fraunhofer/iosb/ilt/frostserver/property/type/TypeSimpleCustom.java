@@ -33,8 +33,12 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeSimpleCustom extends TypeSimple {
 
-    public static final TypeSimpleCustom STA_TIMEINTERVAL = new TypeSimpleCustom("TimeInterval", "An ISO time interval.", TypeSimplePrimitive.EDM_STRING, TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL);
-    public static final TypeSimpleCustom STA_TIMEVALUE = new TypeSimpleCustom("TimeValue", "An ISO time instant or time interval.", TypeSimplePrimitive.EDM_STRING, TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE);
+    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex("TimeInterval", "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+    public static final TypeComplex STA_TIMEVALUE = new TypeComplex("TimeValue", "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
     private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();

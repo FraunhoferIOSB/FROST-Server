@@ -149,12 +149,18 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class PropertyFields<T> {
 
         public final Property property;
+        public final boolean jsonType;
         public final Map<String, ExpressionFactory<T>> fields = new LinkedHashMap<>();
         public final ConverterRecord<T> converter;
 
         public PropertyFields(Property property, ConverterRecord<T> converter) {
+            this(property, false, converter);
+        }
+
+        public PropertyFields(Property property, boolean jsonType, ConverterRecord<T> converter) {
             this.property = property;
             this.converter = converter;
+            this.jsonType = jsonType;
         }
 
         public PropertyFields<T> addField(String name, ExpressionFactory<T> field) {
@@ -344,7 +350,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntryMap(EntityProperty<Map<String, Object>> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterMap<>(property, factory));
+        PropertyFields<T> pf = new PropertyFields<>(property, true, new ConverterMap<>(property, factory));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);
@@ -368,7 +374,11 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * a record and set it on an Entity.
      */
     public void addEntry(Property property, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        PropertyFields<T> pf = new PropertyFields(property, ps);
+        addEntry(property, false, factory, ps);
+    }
+
+    public void addEntry(Property property, boolean isJson, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
+        PropertyFields<T> pf = new PropertyFields(property, isJson, ps);
         if (factory != null) {
             pf.addField(null, factory);
             addEntry(epMapAll, property, null, factory);
@@ -387,7 +397,11 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * for filter and orderby.
      */
     public void addEntry(Property property, ConverterRecord<T> ps, NFP<T>... factories) {
-        PropertyFields<T> pf = new PropertyFields(property, ps);
+        addEntry(property, false, ps, factories);
+    }
+
+    public void addEntry(Property property, boolean isJson, ConverterRecord<T> ps, NFP<T>... factories) {
+        PropertyFields<T> pf = new PropertyFields(property, isJson, ps);
         for (NFP<T> nfp : factories) {
             pf.addField(nfp.name, nfp.factory);
             addEntry(epMapAll, property, nfp.name, nfp.factory);

@@ -68,7 +68,7 @@ public class FieldMapperJson extends FieldMapperAbstract {
         if (isMap) {
             pfReg.addEntryMap(entityProperty, t -> t.field(idx));
         } else {
-            pfReg.addEntry(entityProperty, t -> t.field(idx),
+            pfReg.addEntry(entityProperty, true, t -> t.field(idx),
                     new PropertyFieldRegistry.ConverterRecordDeflt<>(
                             (T t, Record tuple, Entity entity, DataSize dataSize) -> {
                                 final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, (Field) t.field(idx));

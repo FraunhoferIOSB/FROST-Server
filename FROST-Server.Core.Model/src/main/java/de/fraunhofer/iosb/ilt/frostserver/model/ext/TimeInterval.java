@@ -86,12 +86,17 @@ public class TimeInterval implements TimeValue {
 
     @Override
     public String asISO8601() {
-        DateTimeFormatter printer = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
-        printer = printer.withChronology(interval.getChronology());
-        StringBuilder timeString = new StringBuilder(48);
-        printer.printTo(timeString, interval.getStartMillis());
-        timeString.append('/');
-        printer.printTo(timeString, interval.getEndMillis());
+        final DateTimeFormatter printer = ISODateTimeFormat.dateTime()
+                .withZone(DateTimeZone.UTC)
+                .withChronology(interval.getChronology());
+        final StringBuilder timeString = new StringBuilder(48);
+        final long startMillis = interval.getStartMillis();
+        printer.printTo(timeString, startMillis);
+        final long endMillis = interval.getEndMillis();
+        if (endMillis != startMillis) {
+            timeString.append('/');
+            printer.printTo(timeString, endMillis);
+        }
         return timeString.toString();
     }
 

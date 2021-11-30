@@ -137,6 +137,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epLocation,
+                true,
                 new ConverterRecordDeflt<>(
                         (TableImpLocations table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);

@@ -188,6 +188,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
         pfReg.addEntry(pluginCoreModel.epResult,
+                true,
                 new ConverterRecordDeflt<>(
                         this::readResultFromDb,
                         this::handleResult,

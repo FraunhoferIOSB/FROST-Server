@@ -16,6 +16,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
@@ -56,6 +57,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     public static final String NAME_COL_UNITSYMBOL = "UNIT_SYMBOL";
 
     private static final long serialVersionUID = -1460005950;
+    private static final String UOM_NO_PATH = "UnitOfMeasurement does not have the path ";
 
     /**
      * The column <code>public.DATASTREAMS.DESCRIPTION</code>.
@@ -288,13 +290,14 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         if (mainEntityProperty == pluginCoreModel.epUnitOfMeasurement) {
             PropertyFields<TableImpDatastreams> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();
-            if (subPath.size() > 1) {
-                throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
+            if (subPath.isEmpty() || subPath.size() > 1) {
+                throw new IllegalArgumentException(UOM_NO_PATH + epCustomSelect);
             }
-            final Field field = mainPropertyFields.fields.get(subPath.get(0)).get(getThis());
-            if (field == null) {
-                throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
+            final ExpressionFactory<TableImpDatastreams> factory = mainPropertyFields.fields.get(subPath.get(0));
+            if (factory == null) {
+                throw new IllegalArgumentException(UOM_NO_PATH + epCustomSelect);
             }
+            final Field field = factory.get(getThis());
             return propertyFieldForUoM(field, epCustomSelect);
         }
         return super.handleEntityPropertyCustomSelect(epCustomSelect);

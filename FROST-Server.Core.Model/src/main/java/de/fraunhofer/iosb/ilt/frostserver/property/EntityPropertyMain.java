@@ -42,7 +42,11 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
      */
     private final PropertyType type;
 
+    /**
+     * Flag indicating the property has sub-properties.
+     */
     public final boolean hasCustomProperties;
+
     /**
      * Flag indicating a null value should not be ignored, but serialised as
      * Json NULL.

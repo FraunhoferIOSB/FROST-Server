@@ -110,6 +110,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epFeature,
+                true,
                 new ConverterRecordDeflt<>(
                         (TableImpFeatures table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);

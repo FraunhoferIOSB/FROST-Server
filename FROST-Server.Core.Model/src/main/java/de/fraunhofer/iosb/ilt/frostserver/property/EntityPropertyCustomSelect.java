@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,7 +98,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
         }
         Object baseProperty = entity.getProperty(entityProperty);
         if (baseProperty == null) {
-            Map<String, Object> basePropertyMap = new HashMap<>();
+            Map<String, Object> basePropertyMap = new LinkedHashMap<>();
             baseProperty = basePropertyMap;
             entity.setProperty(entityProperty, baseProperty);
         }

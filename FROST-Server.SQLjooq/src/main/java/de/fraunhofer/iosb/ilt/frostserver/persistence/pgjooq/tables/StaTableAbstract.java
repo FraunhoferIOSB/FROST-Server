@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationM
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
@@ -431,10 +432,22 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         if (mainEntityProperty.hasCustomProperties) {
             PropertyFields<T> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
 
-            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
-            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
-
-            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
+            if (mainPropertyFields.jsonType) {
+                ExpressionFactory<T> factory = mainPropertyFields.fields.get("j");
+                if (factory == null) {
+                    factory = mainPropertyFields.fields.values().iterator().next();
+                }
+                final Field mainField = factory.get(getThis());
+                final JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
+                return propertyFieldForJsonField(jsonFactory, epCustomSelect);
+            } else {
+                final ExpressionFactory<T> factory = mainPropertyFields.fields.get(epCustomSelect.getSubPath().get(0));
+                if (factory == null) {
+                    throw new IllegalArgumentException("No path: " + epCustomSelect);
+                }
+                final Field field = factory.get(getThis());
+                return propertyFieldForCustom(field, epCustomSelect);
+            }
         }
         return null;
     }
@@ -459,6 +472,17 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                             epCustomSelect.setOn(entity, value);
                         }, null, null));
         pfs.addField("1", t -> deepField);
+        return pfs;
+    }
+
+    protected PropertyFields<T> propertyFieldForCustom(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
+        PropertyFields<T> pfs = new PropertyFields<>(
+                epCustomSelect,
+                new PropertyFieldRegistry.ConverterRecordDeflt<>(
+                        (tbl, tuple, entity, dataSize) -> epCustomSelect.setOn(entity, tuple.get(field)),
+                        null,
+                        null));
+        pfs.addField("1", t -> field);
         return pfs;
     }
 }
