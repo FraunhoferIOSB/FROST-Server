@@ -141,6 +141,7 @@ public class DatabaseHandler {
      * given role.
      */
     public boolean userHasRole(String userName, String roleName) {
+        maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
