@@ -50,9 +50,11 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -232,6 +234,12 @@ public class Service implements AutoCloseable {
         }
     }
 
+    public void rollbackAndClose(PersistenceManager pm) {
+        if (pm != null) {
+            pm.rollbackAndClose();
+        }
+    }
+
     public void maybeRollbackAndClose() {
         if (!transactionActive) {
             getPm().rollbackAndClose();
@@ -328,11 +336,15 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handleGet(pm, request, response);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (Exception e) {
             LOGGER.error("", e);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to execute query. See logs for details.");
         } finally {
             maybeRollbackAndClose();
@@ -404,17 +416,19 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handlePost(pm, urlPath, response, request);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (IllegalArgumentException e) {
             LOGGER.debug("User Error: {}", e.getMessage());
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
         } catch (IOException | RuntimeException e) {
             LOGGER.error("", e);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
@@ -494,11 +508,15 @@ public class Service implements AutoCloseable {
                 return handleChangeSet(pm, request, response);
             }
             return handlePatch(pm, request, response);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException exc) {
             LOGGER.error("", exc);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
@@ -609,11 +627,15 @@ public class Service implements AutoCloseable {
 
             pm = getPm();
             return handlePut(pm, request, response);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException e) {
             LOGGER.error("", e);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
@@ -705,11 +727,15 @@ public class Service implements AutoCloseable {
             }
 
             return handleDelete(pm, mainEntity, response);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (Exception e) {
             LOGGER.error("", e);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
@@ -749,11 +775,15 @@ public class Service implements AutoCloseable {
             }
 
             return handleDeleteSet(request, response, pm, path);
+        } catch (UnauthorizedException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 401, e.getMessage());
+        } catch (ForbiddenException e) {
+            rollbackAndClose(pm);
+            return errorResponse(response, 403, e.getMessage());
         } catch (Exception e) {
             LOGGER.error("", e);
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
