@@ -10,6 +10,7 @@ order: 14
 If your database grows large, you will probably notice that things start to become
 slower. This page has some general hints on how to make your database faster.
 
+
 ## Finding problem queries
 
 The start of making thing faster is figuring out exactly what is slow. To help with
@@ -25,6 +26,19 @@ it on your database.
 
 A tutorial on how to read `explain analyze` output can be found on
 [postgresqltutorial.com](https://www.postgresqltutorial.com/postgresql-explain/)
+
+
+## Limiting problem queries
+
+It is trivial to write a query that will not give a result in a reasonable time.
+Therefore FROST has the option to limit query duration to a resonable time.
+If a database query takes more time, it is stopped and an error is returned.
+The option controlling how long this timeout is, is:
+
+* **persistence.queryTimeout:**  
+  The maximum duration, in seconds, that a query is allowed to take. Default 0 (no timeout). If
+  your FROST instance is behind a reverse proxy that will abort the connection after a certain time, set this to the
+  same duration.
 
 
 ## Adding Indices
