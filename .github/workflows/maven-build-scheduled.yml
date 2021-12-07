@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@v2.4.0
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
         ref: ${{ matrix.refs }}
 
     - name: Cache maven repository
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v2.1.7
       with:
         path: |
           ~/.m2/repository
