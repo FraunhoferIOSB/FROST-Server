@@ -38,6 +38,8 @@ public class Constants {
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     public static final String CHARSET_UTF8 = "charset=UTF-8";
 
+    public static final String HEADER_LOCATION = "Location";
+
     public static final String VALUE_ID_TYPE_LONG = "LONG";
     public static final String VALUE_ID_TYPE_STRING = "STRING";
     public static final String VALUE_ID_TYPE_UUID = "UUID";

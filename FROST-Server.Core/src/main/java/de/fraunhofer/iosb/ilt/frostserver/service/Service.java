@@ -47,6 +47,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -487,7 +488,7 @@ public class Service implements AutoCloseable {
             response.setCode(201);
             if (query.getMetadata() != Metadata.OFF) {
                 String url = UrlHelper.generateSelfLink(null, path, entity);
-                response.addHeader("location", url);
+                response.addHeader(Constants.HEADER_LOCATION, url);
             }
             return response;
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
