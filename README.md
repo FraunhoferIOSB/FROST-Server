@@ -8,6 +8,11 @@ is the first complete, open-source implementation of the OGC SensorThings API Pa
 preliminary actuation support.
 
 
+| FROST & the Log4J2 Log4Shell vulnerability |
+| --- |
+| FROST-Server is *not* vulnerable to the Log4J2 zero day vulnerability [CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228). See [Issue 671](https://github.com/FraunhoferIOSB/FROST-Server/issues/671) for details.  |
+
+
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
