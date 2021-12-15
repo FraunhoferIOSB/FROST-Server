@@ -56,12 +56,17 @@ public abstract class AbstractContextListener implements ServletContextListener 
         if (coreSettings != null) {
             return;
         }
-        Properties properties = new Properties();
-        Enumeration<String> names = context.getInitParameterNames();
+        final Properties properties = new Properties();
+        final Enumeration<String> names = context.getInitParameterNames();
         while (names.hasMoreElements()) {
-            String name = names.nextElement();
-            String targetName = name.replace("_", ".");
-            properties.put(targetName, context.getInitParameter(name));
+            final String name = names.nextElement();
+            final String targetName = name.replace("_", ".");
+            final String value = context.getInitParameter(name);
+            if (value == null) {
+                LOGGER.error("NULL value for {}", name);
+            } else {
+                properties.put(targetName, value);
+            }
         }
         if (!properties.containsKey(CoreSettings.TAG_TEMP_PATH)) {
             properties.setProperty(CoreSettings.TAG_TEMP_PATH, String.valueOf(context.getAttribute(ServletContext.TEMPDIR)));
