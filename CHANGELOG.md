@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Fixed incorrect ObservedProperty used in Datastream notifications
+* Updated dependencies.
 
 
 ## Release Version 1.13.2

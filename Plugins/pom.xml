@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-ServerParent</artifactId>
-        <version>1.13.3-SNAPSHOT</version>
+        <version>1.13.3</version>
     </parent>
     <artifactId>FROST-Server.Plugins</artifactId>
     <packaging>pom</packaging>
