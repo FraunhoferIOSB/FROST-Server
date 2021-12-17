@@ -1,5 +1,11 @@
 # Changelog
 
+## Release Version 1.14.1
+
+**Internal changes & Bugfixes**
+* Updated dependencies
+
+
 ## Release Version 1.14.0
 
 **New Features**
