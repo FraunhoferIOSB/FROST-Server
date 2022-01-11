@@ -125,6 +125,15 @@ in the SensorThings API standard.
   Toggle indicating the BatchProcessing plugin should be enabled. Default: `true`.
 
 
+### OData
+
+The OData plugin makes the data in your FROST-Server available as OData 4.0 and 4.01
+API. The endpoint for these are on `[service root URL]/ODATA_4.0/` and `[service root URL]/ODATA_4.01/`.
+
+* **plugins.odata.enable:**  
+  Toggle indicating the OData plugin should be enabled. Default: `false`.
+
+
 ### OpenAPI
 
 The OpenAPI plugin makes an OpenAPI description of the SensorThings service available
