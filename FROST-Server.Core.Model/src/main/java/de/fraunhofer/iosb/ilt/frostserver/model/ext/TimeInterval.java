@@ -31,12 +31,9 @@ import org.joda.time.format.ISODateTimeFormat;
 public class TimeInterval implements TimeValue {
 
     /**
-     * TODO: Convert to java.time.Period
+     * TODO: Convert to Time4J
      */
-    private Interval interval;
-
-    private TimeInterval() {
-    }
+    private final Interval interval;
 
     private TimeInterval(Interval interval) {
         assert (interval != null);
@@ -93,10 +90,8 @@ public class TimeInterval implements TimeValue {
         final long startMillis = interval.getStartMillis();
         printer.printTo(timeString, startMillis);
         final long endMillis = interval.getEndMillis();
-        if (endMillis != startMillis) {
-            timeString.append('/');
-            printer.printTo(timeString, endMillis);
-        }
+        timeString.append('/');
+        printer.printTo(timeString, endMillis);
         return timeString.toString();
     }
 

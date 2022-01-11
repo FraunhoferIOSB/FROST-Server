@@ -104,7 +104,7 @@ public class Utils {
 
     public static TimeValue valueFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {
         if (timeEnd == null || timeEnd.equals(timeStart)) {
-            return intervalFromTimes(timeStart, timeStart);
+            return instantFromTime(timeStart);
         }
         return intervalFromTimes(timeStart, timeEnd);
     }
