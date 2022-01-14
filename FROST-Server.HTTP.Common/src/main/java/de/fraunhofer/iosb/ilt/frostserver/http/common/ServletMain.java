@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -31,8 +32,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -167,10 +169,10 @@ public class ServletMain extends HttpServlet {
             throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
         }
 
-        final Map<String, String[]> parameterMap = new LinkedHashMap<>(request.getParameterMap());
+        final Map<String, List<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
         String accept = request.getHeader("Accept");
         if (accept != null && !parameterMap.containsKey("$format")) {
-            parameterMap.put("$format", new String[]{accept.toLowerCase()});
+            parameterMap.computeIfAbsent("$format", t -> new ArrayList<>()).add(accept.toLowerCase());
         }
 
         final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)

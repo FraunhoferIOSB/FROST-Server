@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public class ServiceRequestBuilder {
     private Optional<String> contentString;
     private Optional<InputStream> contentBinary;
     private Optional<String> contentType;
-    private Optional<Map<String, String[]>> parameterMap;
+    private Optional<Map<String, List<String>>> parameterMap;
     private final Map<String, Object> attributeMap = new HashMap<>();
     private final Version version;
     private Principal userPrincipal;
@@ -83,7 +84,7 @@ public class ServiceRequestBuilder {
         return this;
     }
 
-    public ServiceRequestBuilder withParameterMap(Map<String, String[]> parameterMap) {
+    public ServiceRequestBuilder withParameterMap(Map<String, List<String>> parameterMap) {
         this.parameterMap = Optional.ofNullable(parameterMap);
         return this;
     }

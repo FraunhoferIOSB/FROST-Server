@@ -24,7 +24,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.net.URLDecoder;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -194,4 +201,27 @@ public class UrlHelper {
         }
         return "'" + StringHelper.escapeForStringConstant(in.toString()) + "'";
     }
+
+    public static Map<String, List<String>> splitQuery(String queryString) {
+        if (StringHelper.isNullOrEmpty(queryString)) {
+            return new LinkedHashMap<>();
+        }
+        return Arrays.stream(queryString.split("&"))
+                .map(UrlHelper::splitQueryParameter)
+                .collect(Collectors.groupingBy(
+                        AbstractMap.SimpleImmutableEntry::getKey,
+                        LinkedHashMap::new,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+    }
+
+    private static AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameter(String it) {
+        final int idx = it.indexOf('=');
+        final String key = idx > 0 ? it.substring(0, idx) : it;
+        final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
+        return new AbstractMap.SimpleImmutableEntry<>(
+                key == null ? null : URLDecoder.decode(key, StringHelper.UTF8),
+                value == null ? null : URLDecoder.decode(value, StringHelper.UTF8)
+        );
+    }
+
 }

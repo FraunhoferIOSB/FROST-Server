@@ -26,6 +26,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_XML;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
+import java.util.List;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -45,10 +46,13 @@ public class MetaDataGenerator {
         final Version version = request.getVersion();
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
-            String[] formats = request.getParameterMap().get("$format");
-            String format = "json";
-            if (formats != null && formats[0] != null) {
-                format = formats[0];
+            List<String> formats = request.getParameterMap().get("$format");
+            String format = null;
+            if (formats != null && !formats.isEmpty()) {
+                format = formats.get(0);
+            }
+            if (format == null) {
+                format = "json";
             }
             int idxXml = format.indexOf(CONTENT_TYPE_APPLICATION_XML);
             int idxJson = format.indexOf(CONTENT_TYPE_APPLICATION_JSON);

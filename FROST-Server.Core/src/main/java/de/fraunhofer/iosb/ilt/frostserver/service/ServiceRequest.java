@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class ServiceRequest {
     private InputStream contentBinary;
     private Version version;
     private String contentType;
-    private Map<String, String[]> parameterMap;
+    private Map<String, List<String>> parameterMap;
     private Map<String, Object> attributeMap;
     private Principal userPrincipal;
 
@@ -122,11 +123,11 @@ public class ServiceRequest {
         this.contentType = contentType;
     }
 
-    public Map<String, String[]> getParameterMap() {
+    public Map<String, List<String>> getParameterMap() {
         return parameterMap;
     }
 
-    public void setParameterMap(Map<String, String[]> parameterMap) {
+    public void setParameterMap(Map<String, List<String>> parameterMap) {
         this.parameterMap = parameterMap;
     }
 

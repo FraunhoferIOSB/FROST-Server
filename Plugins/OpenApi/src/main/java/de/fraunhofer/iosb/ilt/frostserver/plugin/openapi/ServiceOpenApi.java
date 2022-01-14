@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
+import java.util.List;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -77,11 +78,11 @@ public class ServiceOpenApi {
     }
 
     public static boolean paramValueAsBool(ServiceRequest request, String name, boolean dflt) {
-        String[] values = request.getParameterMap().get(name);
-        if (values == null || values.length == 0) {
+        List<String> values = request.getParameterMap().get(name);
+        if (values == null || values.isEmpty()) {
             return dflt;
         }
-        String value = values[0];
+        String value = values.get(0);
         if (value == null) {
             return dflt;
         }
@@ -89,11 +90,11 @@ public class ServiceOpenApi {
     }
 
     public static int paramValueAsInt(ServiceRequest request, String name, int dflt) {
-        String[] values = request.getParameterMap().get(name);
-        if (values == null || values.length == 0) {
+        List<String> values = request.getParameterMap().get(name);
+        if (values == null || values.isEmpty()) {
             return dflt;
         }
-        String value = values[0];
+        String value = values.get(0);
         if (value == null) {
             return dflt;
         }
