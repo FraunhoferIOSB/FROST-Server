@@ -17,12 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.FeatureMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializer;
-import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
 /**
@@ -34,9 +31,7 @@ public class GeoJsonSerializer implements CustomSerializer {
 
     private static ObjectMapper getMapper() {
         if (mapper == null) {
-            mapper = new ObjectMapper()
-                    .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-                    .addMixIn(Feature.class, FeatureMixIn.class);
+            mapper = new ObjectMapper();
         }
         return mapper;
     }

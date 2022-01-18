@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.json.mixin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import org.geojson.Feature;
 
 /**
  *
@@ -33,7 +32,6 @@ public class MixinUtils {
 
     public static void addMixins(ObjectMapper mapper) {
         mapper.addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class);
-        mapper.addMixIn(Feature.class, FeatureMixIn.class);
     }
 
 }
