@@ -48,7 +48,7 @@ public class GjRowCollector {
      */
     public GjRowCollector() {
         // Ensure type & nextLink are first, nicer for users
-        collection.put("tape", "FeatureCollection");
+        collection.put("type", "FeatureCollection");
         collection.put(SpecialNames.AT_IOT_NEXT_LINK, null);
         collection.put(SpecialNames.AT_IOT_COUNT, null);
         collection.put("features", features);
