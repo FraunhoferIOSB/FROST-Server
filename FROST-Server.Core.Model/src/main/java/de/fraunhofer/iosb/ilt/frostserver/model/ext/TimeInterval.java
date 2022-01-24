@@ -28,14 +28,14 @@ import org.joda.time.format.ISODateTimeFormat;
  *
  * @author jab
  */
-public class TimeInterval implements TimeValue {
+public class TimeInterval implements TimeObject {
 
     /**
      * TODO: Convert to Time4J
      */
     private final Interval interval;
 
-    private TimeInterval(Interval interval) {
+    public TimeInterval(Interval interval) {
         assert (interval != null);
         this.interval = interval;
     }

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -269,8 +270,8 @@ public class EntityFormatterTest {
                         )
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                        .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                        .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 )
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
@@ -536,8 +537,8 @@ public class EntityFormatterTest {
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -576,8 +577,8 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -626,8 +627,8 @@ public class EntityFormatterTest {
                 )
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -721,7 +722,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
@@ -749,7 +750,7 @@ public class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
@@ -775,7 +776,7 @@ public class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
-                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));

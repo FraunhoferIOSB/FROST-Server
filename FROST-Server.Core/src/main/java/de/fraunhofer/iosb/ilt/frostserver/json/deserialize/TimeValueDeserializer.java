@@ -43,9 +43,9 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         TimeValue result;
         String node = jp.getValueAsString();
         try {
-            result = TimeInstant.parse(node);
+            result = new TimeValue(TimeInstant.parse(node));
         } catch (Exception e) {
-            result = TimeInterval.parse(node);
+            result = new TimeValue(TimeInterval.parse(node));
         }
         return result;
     }

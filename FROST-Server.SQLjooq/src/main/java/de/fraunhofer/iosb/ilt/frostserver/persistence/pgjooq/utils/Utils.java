@@ -104,9 +104,9 @@ public class Utils {
 
     public static TimeValue valueFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {
         if (timeEnd == null || timeEnd.equals(timeStart)) {
-            return instantFromTime(timeStart);
+            return new TimeValue(instantFromTime(timeStart));
         }
-        return intervalFromTimes(timeStart, timeEnd);
+        return new TimeValue(intervalFromTimes(timeStart, timeEnd));
     }
 
     public static Object locationFromEncoding(String encodingType, String locationString) {

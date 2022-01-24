@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
@@ -43,9 +42,11 @@ public class TimeValueSerializer extends JsonSerializer<TimeValue> {
             gen.writeNull();
         } else {
             gen.writeStartObject();
-            if (value instanceof TimeInterval) {
+            if (value.isInstant()) {
+                gen.writeObjectField("start", value.asISO8601());
+            } else {
                 final DateTimeFormatter timePrinter = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
-                final TimeInterval timeInterval = (TimeInterval) value;
+                final TimeInterval timeInterval = value.getInterval();
                 final Interval interval = timeInterval.getInterval();
                 final DateTime start = interval.getStart();
                 final DateTime end = interval.getEnd();
@@ -53,8 +54,6 @@ public class TimeValueSerializer extends JsonSerializer<TimeValue> {
                 if (!start.equals(end)) {
                     gen.writeObjectField("end", timePrinter.print(end));
                 }
-            } else if (value instanceof TimeInstant) {
-                gen.writeObjectField("start", value.asISO8601());
             }
             gen.writeEndObject();
         }

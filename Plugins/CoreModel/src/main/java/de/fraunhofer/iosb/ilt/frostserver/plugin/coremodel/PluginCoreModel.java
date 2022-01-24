@@ -175,7 +175,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityType etObservedProperty = new EntityType(NAME_NP_OBSERVEDPROPERTY, NAME_NP_OBSERVEDPROPERTIES);
     public final EntityType etObservation = new EntityType(NAME_NP_OBSERVATION, NAME_NP_OBSERVATIONS).addValidator((entity, entityPropertiesOnly) -> {
         if (entity.getProperty(epPhenomenonTime) == null) {
-            entity.setProperty(epPhenomenonTime, TimeInstant.now());
+            entity.setProperty(epPhenomenonTime, new TimeValue(TimeInstant.now()));
         }
     });
     public final EntityType etLocation = new EntityType(NAME_NP_LOCATION, NAME_NP_LOCATIONS);

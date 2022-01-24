@@ -31,15 +31,12 @@ import org.joda.time.format.ISODateTimeFormat;
  *
  * @author jab
  */
-public class TimeInstant implements TimeValue {
+public class TimeInstant implements TimeObject {
 
     /**
      * TODO: Convert to java.time.OffsetDateTime
      */
-    private DateTime dateTime;
-
-    private TimeInstant() {
-    }
+    private final DateTime dateTime;
 
     public TimeInstant(DateTime dateTime) {
         this.dateTime = dateTime;

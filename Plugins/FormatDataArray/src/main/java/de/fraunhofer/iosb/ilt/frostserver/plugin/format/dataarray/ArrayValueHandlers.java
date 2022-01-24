@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
@@ -83,14 +84,14 @@ public class ArrayValueHandlers {
         handlers.put("phenomenonTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setProperty(pluginCoreModel.epPhenomenonTime, time);
+                target.setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(time));
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time instant: {}.", value);
             }
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setProperty(pluginCoreModel.epPhenomenonTime, time);
+                target.setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(time));
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time interval: {}.", value);

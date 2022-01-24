@@ -56,7 +56,8 @@ public class JsonReader {
      * Get an object mapper for the given id Class. If the id class is the same
      * as for the first call, the cached mapper is returned.
      *
-     * @param idClass The id class to use for this mapper.
+     * @param modelRegistry The modelRegistry holding the data model to get a
+     * mapper for.
      * @return The cached or created object mapper.
      */
     private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry) {
@@ -64,9 +65,10 @@ public class JsonReader {
     }
 
     /**
-     * Create a new object mapper for the given id Class.
+     * Create a new object mapper for the given model Registry.
      *
-     * @param idClass The id class to use for this mapper.
+     * @param modelRegistry The modelRegistry holding the data model to create a
+     * mapper for.
      * @return The created object mapper.
      */
     private static ObjectMapper createObjectMapper(ModelRegistry modelRegistry) {

@@ -180,12 +180,12 @@ public class EntityFactories {
     }
 
     public static void insertTimeValue(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeValue time) {
-        if (time instanceof TimeInstant) {
-            TimeInstant timeInstant = (TimeInstant) time;
+        if (time.isInstant()) {
+            TimeInstant timeInstant = time.getInstant();
             insertTimeInstant(clause, endField, timeInstant);
             insertTimeInstant(clause, startField, timeInstant);
-        } else if (time instanceof TimeInterval) {
-            TimeInterval timeInterval = (TimeInterval) time;
+        } else if (time.isInterval()) {
+            TimeInterval timeInterval = time.getInterval();
             insertTimeInterval(clause, startField, endField, timeInterval);
         }
     }
