@@ -233,9 +233,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         ModelRegistry mr = settings.getModelRegistry();
 
         eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
-                .addProperty("name", EDM_STRING)
-                .addProperty("symbol", EDM_STRING)
-                .addProperty("definition", EDM_STRING);
+                .addProperty("name", EDM_STRING, false)
+                .addProperty("symbol", EDM_STRING, false)
+                .addProperty("definition", EDM_STRING, false);
         mr.registerPropertyType(eptUom)
                 .registerPropertyType(TypeSimpleCustom.STA_GEOJSON)
                 .registerPropertyType(TypeComplex.STA_OBJECT)

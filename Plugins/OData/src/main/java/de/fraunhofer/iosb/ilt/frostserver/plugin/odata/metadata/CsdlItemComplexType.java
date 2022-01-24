@@ -49,9 +49,10 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
         description = tc.getDescription();
         openType = tc.isOpenType();
         for (Map.Entry<String, PropertyType> entry : tc.getProperties().entrySet()) {
-            String name = entry.getKey();
-            PropertyType value = entry.getValue();
-            properties.put(name, new CsdlPropertyEntity().generateFrom(nameSpace, settings, value));
+            final String name = entry.getKey();
+            final PropertyType type = entry.getValue();
+            final boolean nullable = !tc.isRequired(name);
+            properties.put(name, new CsdlPropertyEntity().generateFrom(nameSpace, settings, type, nullable));
         }
         return this;
     }

@@ -38,11 +38,11 @@ public class TypeComplex extends PropertyType {
     public static final TypeComplex STA_OBJECT = new TypeComplex("ANY", "A free type, can be anything", TypeReferencesHelper.TYPE_REFERENCE_OBJECT, true);
     public static final TypeComplex STA_OBJECT_UNTYPED = new TypeComplex("ANY", "A free type, can be anything", null, true);
     public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex("TimeInterval", "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
-            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
-            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET, true)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET, true);
     public static final TypeComplex STA_TIMEVALUE = new TypeComplex("TimeValue", "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
-            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET)
-            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+            .addProperty("start", TypeSimplePrimitive.EDM_DATETIMEOFFSET, true)
+            .addProperty("end", TypeSimplePrimitive.EDM_DATETIMEOFFSET, false);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
     private static final Map<String, TypeComplex> TYPES = new HashMap<>();
@@ -73,6 +73,7 @@ public class TypeComplex extends PropertyType {
 
     private final boolean openType;
     private final Map<String, PropertyType> properties = new LinkedHashMap<>();
+    private final Map<String, Boolean> propertiesRequired = new LinkedHashMap<>();
 
     public TypeComplex(String name, String description, TypeReference typeReference) {
         this(name, description, typeReference, false);
@@ -91,8 +92,15 @@ public class TypeComplex extends PropertyType {
         return properties;
     }
 
-    public TypeComplex addProperty(String name, PropertyType property) {
+    public boolean isRequired(String property) {
+        return propertiesRequired.getOrDefault(property, false);
+    }
+
+    public TypeComplex addProperty(String name, PropertyType property, boolean required) {
         properties.put(name, property);
+        if (required) {
+            propertiesRequired.put(name, required);
+        }
         return this;
     }
 

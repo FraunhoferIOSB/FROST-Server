@@ -59,7 +59,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         return this;
     }
 
-    public CsdlPropertyEntity generateFrom(String nameSpace, CoreSettings settings, PropertyType value) {
+    public CsdlPropertyEntity generateFrom(String nameSpace, CoreSettings settings, PropertyType value, boolean nullable) {
         type = value.getName();
         if (!type.startsWith("Edm.")) {
             type = nameSpace + "." + type;
@@ -67,6 +67,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
         }
+        this.nullable = nullable;
         return this;
     }
 
