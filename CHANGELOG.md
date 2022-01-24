@@ -7,17 +7,21 @@
   This means it is possible to use FROST-Server with a totally different data
   model, or to create plugins that extend the existing core SensorThings API
   data model.
-* Data is directly streamed from the database to the http response instead of
-  to a full intermediate model and String, greatly improving memory use.
-* New plugin: CoreModel supplies the core data model from the
-  _OGC SensorThings API Part 1: Sensing_ version 1.0 and 1.1.
-* New plugin: MultiDatastream supplies the MultiDatastream extension.
-* New plugin: Actuation supplies the Actuation data model from the
+* API endpoints are defined by plugins.
+* New plugin: _CoreModel_ supplies the core data model from the _OGC SensorThings
+  API Part 1: Sensing_ version 1.0 and 1.1 and supplies the `/v1.0` and `/v1.1`
+  end points.
+* New plugin: _MultiDatastream_ supplies the MultiDatastream extension.
+* New plugin: _Actuation_ supplies the Actuation data model from the
   _OGC SensorThings API Part 2 – Tasking Core_.
+* New experimental plugin: _OData_ adds the OData 4.0 compatible end point `/ODATA_4.0` and
+  the OData 4.01 end point `/ODATA_4.01`.
 * PersistenceManagers are no longer tied to the ID type. There is now only one
   `persistenceManagerImplementationClass`, used for all ID types. The ID type is
   now set in the data model plugin.
 * Types of primary keys can be set on a per-table basis.
+* Data is directly streamed from the database to the http response instead of
+  to a full intermediate model and String, greatly improving memory use.
 
 
 ## Release Version 1.14.0
