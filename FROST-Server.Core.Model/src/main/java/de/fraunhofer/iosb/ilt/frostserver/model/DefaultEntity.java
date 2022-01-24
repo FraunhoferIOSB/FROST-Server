@@ -126,7 +126,7 @@ public class DefaultEntity implements Entity {
     }
 
     @Override
-    public DefaultEntity setProperty(Property property, Object value) {
+    public <P> DefaultEntity setProperty(Property<P> property, P value) {
         if (property == ModelRegistry.EP_SELFLINK) {
             setSelfLink(String.valueOf(value));
         } else if (property instanceof EntityPropertyMain) {
