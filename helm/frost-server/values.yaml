@@ -27,6 +27,14 @@ frost:
       rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
       rewriteTraget: /FROST-Server/$1
       path: /(.*)
+    resources:
+      # limits:
+      #   cpu: 1000m
+      #   memory: 1Gi
+      # requests:
+      #   cpu: 500m
+      #   memory: 512Mi
+
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
