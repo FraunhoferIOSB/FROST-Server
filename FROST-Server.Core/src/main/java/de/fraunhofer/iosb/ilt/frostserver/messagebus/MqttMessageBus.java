@@ -45,7 +45,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -181,11 +183,15 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 LOGGER.error("Failed to connect to broker: {}", broker);
                 LOGGER.error("", ex);
             }
+            if (!listening) {
+                startListening();
+            }
         }
 
     }
 
     private synchronized void disconnect() {
+        listening = false;
         if (client == null) {
             return;
         }
@@ -212,8 +218,19 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             if (client == null || !client.isConnected()) {
                 connect();
             }
-            client.subscribe(topicName, qosLevel);
-            listening = true;
+            if (!listening) {
+                client.subscribeWithResponse(topicName, qosLevel).setActionCallback(new IMqttActionListener() {
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken) {
+                        listening = true;
+                    }
+
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                        listening = false;
+                    }
+                });
+            }
         } catch (MqttException ex) {
             LOGGER.error("Failed to start listening.", ex);
         }
@@ -291,6 +308,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         if (listening) {
             LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", cause.getMessage());
             LOGGER.debug("", cause);
+            listening = false;
         }
     }
 
