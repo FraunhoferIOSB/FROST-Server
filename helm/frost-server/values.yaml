@@ -27,7 +27,9 @@ frost:
       rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
       rewriteTraget: /FROST-Server/$1
       path: /(.*)
-    resources:
+    # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace. 
+    resources: {}
+      # Uncomment below to use minimal limits able to bring up FROST-Server http deployment. 
       # limits:
       #   cpu: 1000m
       #   memory: 1Gi
