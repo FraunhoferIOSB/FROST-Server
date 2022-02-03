@@ -73,7 +73,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
 
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
-        String typeString = type == null ? "String" : type;
+        String typeString = type == null ? "Edm.String" : type;
         String nullableString = (nullable) ? " Nullable=\"" + Boolean.toString(nullable) + "\"" : "";
         writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString + " />");
     }
