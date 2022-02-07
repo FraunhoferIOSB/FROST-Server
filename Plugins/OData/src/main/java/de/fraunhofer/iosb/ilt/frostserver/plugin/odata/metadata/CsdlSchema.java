@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEnumeration;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
@@ -59,6 +60,9 @@ public class CsdlSchema {
             } else if (value instanceof TypeSimpleCustom) {
                 TypeSimpleCustom tc = (TypeSimpleCustom) value;
                 schemaItems.put(name, new CsdlItemTypeDefinition().generateFrom(nameSpace, settings, tc));
+            } else if (value instanceof TypeEnumeration) {
+                TypeEnumeration te = (TypeEnumeration) value;
+                schemaItems.put(name, new CsdlItemEnumType().generateFrom(nameSpace, settings, te));
             } else {
                 LOGGER.debug("Unknown PropertyType {}", value);
             }
