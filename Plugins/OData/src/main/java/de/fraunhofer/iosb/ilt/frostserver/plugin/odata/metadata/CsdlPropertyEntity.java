@@ -51,7 +51,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
             type = null;
         }
         if (TypeSimplePrimitive.EDM_UNTYPED == propertyType && version == PluginOData.VERSION_ODATA_40) {
-            type = TypeSimplePrimitive.EDM_DECIMAL.getName();
+            type = TypeSimplePrimitive.EDM_STRING.getName();
         }
         if (et.getPrimaryKey() != ep && !et.isRequired(ep)) {
             nullable = true;

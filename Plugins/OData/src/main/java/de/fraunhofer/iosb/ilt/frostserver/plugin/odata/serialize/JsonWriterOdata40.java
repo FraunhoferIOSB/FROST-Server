@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
@@ -80,7 +81,14 @@ public class JsonWriterOdata40 {
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_CONTEXT, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
-        module.addSerializer(Entity.class, new EntitySerializer(true, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
+        final EntitySerializer entitySerializer = new EntitySerializer(true, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID);
+        entitySerializer.addPropertyTypeSerializer(TypeSimplePrimitive.EDM_UNTYPED, (ep, entity, gen) -> {
+            final Object value = entity.getProperty(ep);
+            if (value != null || ep.serialiseNull) {
+                gen.writeStringField(ep.name, mapper.writeValueAsString(value));
+            }
+        });
+        module.addSerializer(Entity.class, entitySerializer);
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK));
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
