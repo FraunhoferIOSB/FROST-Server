@@ -31,13 +31,16 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_CO
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +60,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private final String countField;
     private final String navLinkField;
     private final String nextLinkField;
-    private final String selfLinkField;
     private final boolean serialiseAllNulls;
+    private final Map<EntityPropertyMain, SimplePropertySerializer> propertySerializers = new HashMap<>();
+    private final Map<PropertyType, SimplePropertySerializer> propertyTypeSerializers = new HashMap<>();
 
     public EntitySerializer() {
         this(false, AT_IOT_COUNT, AT_IOT_NAVIGATION_LINK, AT_IOT_NEXT_LINK, AT_IOT_SELF_LINK);
@@ -68,8 +72,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         this.countField = countField;
         this.navLinkField = navLinkField;
         this.nextLinkField = nextLinkField;
-        this.selfLinkField = selfLinkField;
         this.serialiseAllNulls = nulls;
+        propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, entity, gen) -> {
+            final String value = entity.getSelfLink();
+            if (value != null) {
+                gen.writeStringField(selfLinkField, value);
+            }
+        });
     }
 
     @Override
@@ -120,22 +129,19 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     }
 
     public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException {
-        if (ep == ModelRegistry.EP_SELFLINK) {
-            final String value = entity.getSelfLink();
-            if (value != null) {
-                gen.writeObjectField(selfLinkField, value);
-            }
-        } else {
-            final Object value = entity.getProperty(ep);
-            if (serialiseAllNulls || value != null || ep.serialiseNull) {
-                final String name = ep.name;
-                if (serialiseAllNulls && "@iot.id".equals(name)) {
-                    gen.writeObjectField("id", value);
-                } else {
-                    gen.writeObjectField(name, value);
+        propertySerializers.getOrDefault(ep, (inEp, inEntity, inGen) -> {
+            propertyTypeSerializers.getOrDefault(inEp.getType(), (inInEp, inInEntity, inInGen) -> {
+                final Object value = inInEntity.getProperty(inInEp);
+                if (serialiseAllNulls || value != null || inInEp.serialiseNull) {
+                    final String name = inInEp.name;
+                    if (serialiseAllNulls && "@iot.id".equals(name)) {
+                        inInGen.writeObjectField("id", value);
+                    } else {
+                        inInGen.writeObjectField(name, value);
+                    }
                 }
-            }
-        }
+            }).writeProperty(inEp, inEntity, inGen);
+        }).writeProperty(ep, entity, gen);
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
@@ -185,4 +191,18 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
     }
 
+    public <P> EntitySerializer addPropertySerializer(EntityPropertyMain<P> property, SimplePropertySerializer serializer) {
+        propertySerializers.put(property, serializer);
+        return this;
+    }
+
+    public EntitySerializer addPropertyTypeSerializer(PropertyType propertyType, SimplePropertySerializer serializer) {
+        propertyTypeSerializers.put(propertyType, serializer);
+        return this;
+    }
+
+    public static interface SimplePropertySerializer {
+
+        public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException;
+    }
 }
