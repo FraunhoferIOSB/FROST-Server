@@ -63,13 +63,13 @@ public class MetaDataGenerator {
                 idxJson = Integer.MAX_VALUE - 1;
             }
             if (idxXml < idxJson || "xml".equalsIgnoreCase(format)) {
+                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
                 doc.writeXml(version, response.getWriter());
                 response.setCode(200);
-                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
             } else {
+                response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
                 SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
                 response.setCode(200);
-                response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
             }
         } catch (IOException ex) {
             LOGGER.error("Failed to generate metadata document", ex);
