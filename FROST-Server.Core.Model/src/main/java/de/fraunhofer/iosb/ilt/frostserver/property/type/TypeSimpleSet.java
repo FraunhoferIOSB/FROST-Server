@@ -33,4 +33,9 @@ public class TypeSimpleSet extends PropertyType {
         super(containedType.getName(), "Collection of " + containedType.getName(), typeReference);
     }
 
+    @Override
+    public boolean isCollection() {
+        return true;
+    }
+
 }

@@ -51,4 +51,7 @@ public class PropertyType {
         throw new IllegalArgumentException("Don't know how to parse for " + name);
     }
 
+    public boolean isCollection() {
+        return false;
+    }
 }

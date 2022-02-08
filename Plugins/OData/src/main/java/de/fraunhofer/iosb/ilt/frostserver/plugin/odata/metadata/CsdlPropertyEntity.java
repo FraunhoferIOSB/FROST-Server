@@ -41,9 +41,14 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public boolean nullable;
 
+    @JsonProperty("$Collection")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    public boolean collection;
+
     public CsdlPropertyEntity generateFrom(Version version, String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain ep) {
         final PropertyType propertyType = ep.getType();
         type = propertyType.getName();
+        collection = propertyType.isCollection();
         if (!type.startsWith("Edm.")) {
             type = nameSpace + "." + type;
         }
@@ -74,6 +79,9 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
         String typeString = type == null ? "Edm.String" : type;
+        if (collection) {
+            typeString = "Collection(" + typeString + ")";
+        }
         String nullableString = (nullable) ? " Nullable=\"" + Boolean.toString(nullable) + "\"" : "";
         writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString + " />");
     }
