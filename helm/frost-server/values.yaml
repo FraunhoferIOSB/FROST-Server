@@ -28,14 +28,13 @@ frost:
       rewriteTraget: /FROST-Server/$1
       path: /(.*)
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace. 
-    resources: {}
-      # Uncomment below to use minimal limits able to bring up FROST-Server http deployment. 
+    resources:
       # limits:
       #   cpu: 1000m
       #   memory: 1Gi
-      # requests:
-      #   cpu: 500m
-      #   memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 1Gi
 
 
     # FROST-Server HTTP business settings
