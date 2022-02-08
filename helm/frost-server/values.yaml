@@ -47,6 +47,7 @@ frost:
     maxTop: 1000
     maxDataSize: 25000000
     useAbsoluteNavigationLinks: true
+    enableCors: false
 
     # FROST-Server Database related settings to the FROST-Server HTTP
     db:
