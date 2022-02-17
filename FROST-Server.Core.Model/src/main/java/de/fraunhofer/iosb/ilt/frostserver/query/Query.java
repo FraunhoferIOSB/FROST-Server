@@ -322,40 +322,47 @@ public class Query {
         return orderBy;
     }
 
-    public void setTop(int top) {
+    public Query setTop(int top) {
         if (top <= settings.getTopMax()) {
             this.top = Optional.of(top);
         } else {
             this.top = Optional.of(settings.getTopMax());
         }
+        return this;
     }
 
-    public void setSkip(int skip) {
+    public Query setSkip(int skip) {
         this.skip = Optional.of(skip);
+        return this;
     }
 
-    public void setCount(boolean count) {
+    public Query setCount(boolean count) {
         this.count = Optional.of(count);
+        return this;
     }
 
-    public void setFilter(Expression filter) {
+    public Query setFilter(Expression filter) {
         this.filter = filter;
+        return this;
     }
 
-    public void setFormat(String format) {
+    public Query setFormat(String format) {
         this.format = format;
+        return this;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public Query setMetadata(Metadata metadata) {
         Objects.requireNonNull(metadata);
         this.metadata = metadata;
+        return this;
     }
 
-    public void setExpand(List<Expand> expand) {
+    public Query setExpand(List<Expand> expand) {
         this.expand = expand;
         for (Expand e : expand) {
             e.setParentQuery(this);
         }
+        return this;
     }
 
     public Query addExpand(Expand expand) {
@@ -396,8 +403,9 @@ public class Query {
         expand.addAll(newExpands);
     }
 
-    public void setOrderBy(List<OrderBy> orderBy) {
+    public Query setOrderBy(List<OrderBy> orderBy) {
         this.orderBy = orderBy;
+        return this;
     }
 
     @Override
