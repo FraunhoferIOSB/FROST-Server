@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
@@ -99,16 +98,19 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         Set<NavigationPropertyMain> navigationProps;
         List<Expand> expand;
         Query query = entity.getQuery();
-        if (query == null || query.getMetadata() != Metadata.FULL) {
-            navigationProps = Collections.emptySet();
-        } else {
-            navigationProps = query.getSelectNavProperties(query.hasParentExpand());
-        }
+        Metadata metadata = Metadata.DEFAULT;
         if (query == null) {
+            navigationProps = Collections.emptySet();
             entityProps = entity.getEntityType().getEntityProperties();
             entityProps.add(ModelRegistry.EP_SELFLINK);
             expand = null;
         } else {
+            metadata = query.getMetadata();
+            if (metadata == Metadata.OFF || metadata == Metadata.NONE || metadata == Metadata.MINIMAL) {
+                navigationProps = Collections.emptySet();
+            } else {
+                navigationProps = query.getSelectNavProperties(query.hasParentExpand());
+            }
             entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
             expand = query.getExpand();
         }
@@ -124,6 +126,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             String navigationLink = np.getNavigationLink(entity);
             if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
                 gen.writeStringField(np.getName() + navLinkField, navigationLink);
+            }
+            if (metadata == Metadata.INTERNAL_COMPARE) {
+                writeExpand(null, entity, np, gen);
             }
         }
     }
@@ -147,13 +152,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
-            if (!(np instanceof NavigationPropertyCustom)) {
-                writeExpand(exp, entity, np, gen);
+            if (np instanceof NavigationPropertyMain) {
+                writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
             }
         }
     }
 
-    private void writeExpand(Expand exp, Entity entity, NavigationProperty np, JsonGenerator gen) throws IOException {
+    private void writeExpand(Expand exp, Entity entity, NavigationPropertyMain np, JsonGenerator gen) throws IOException {
         Object entityOrSet = np.getFrom(entity);
         if (np.isEntitySet()) {
             EntitySet entitySet = (EntitySet) entityOrSet;
@@ -161,7 +166,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         } else {
             Entity expandedEntity = (Entity) entityOrSet;
             if (expandedEntity != null) {
-                if (expandedEntity.getQuery() == null) {
+                if (expandedEntity.getQuery() == null && exp != null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }
                 gen.writeObjectField(np.getJsonName(), entityOrSet);

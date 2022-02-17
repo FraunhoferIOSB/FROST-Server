@@ -149,15 +149,15 @@ public class JsonPatchTests extends AbstractTestClass {
     }
 
     /**
-     * Tests if JSON-Patch is working.
+     * Tests if JSON-Patch is working on Things.
      *
      * @throws ServiceFailureException if the service connection fails.
      * @throws JsonPointerException if the patch is invalid.
      * @throws IOException if the patch is invalid.
      */
     @Test
-    public void jsonPatchTest() throws ServiceFailureException, JsonPointerException, IOException {
-        LOGGER.info("  jsonPatchTest");
+    public void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  jsonPatchThingTest");
         Thing thingOnlyId = THINGS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
@@ -179,7 +179,39 @@ public class JsonPatchTests extends AbstractTestClass {
         Assert.assertEquals(message, null, updatedThing.getProperties().get("key1"));
         message = "properties/key2 does not exist after move.";
         Assert.assertEquals(message, (Integer) 1, (Integer) updatedThing.getProperties().get("key2"));
+    }
 
+    /**
+     * Tests if JSON-Patch is working on Datastreams.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     * @throws JsonPointerException if the patch is invalid.
+     * @throws IOException if the patch is invalid.
+     */
+    @Test
+    public void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  jsonPatchDatastreamTest");
+        Datastream dsOnlyId = DATASTREAMS.get(0).withOnlyId();
+        List<JsonPatchOperation> operations = new ArrayList<>();
+        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
+        service.patch(dsOnlyId, operations);
+        Datastream updatedDs = service.datastreams().find(dsOnlyId.getId());
+
+        String message = "properties/key1 was not added correctly.";
+        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("key1"));
+
+        operations.clear();
+        operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
+        operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
+        service.patch(dsOnlyId, operations);
+        updatedDs = service.datastreams().find(dsOnlyId.getId());
+
+        message = "properties/keyCopy1 does not exist after copy.";
+        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("keyCopy1"));
+        message = "properties/key1 still exists after move.";
+        Assert.assertEquals(message, null, updatedDs.getProperties().get("key1"));
+        message = "properties/key2 does not exist after move.";
+        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("key2"));
     }
 
 }

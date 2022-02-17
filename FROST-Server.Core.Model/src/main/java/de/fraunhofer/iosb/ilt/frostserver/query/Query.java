@@ -269,7 +269,7 @@ public class Query {
     }
 
     private Set<EntityPropertyMain> initSelectedProperties(boolean inExpand) {
-        if (path.isRef()) {
+        if (path != null && path.isRef()) {
             selectEntityPropMain = refSelect;
             selectNavProp = new HashSet<>();
             return refSelect;
@@ -280,7 +280,9 @@ public class Query {
             if (entityType == null) {
                 validate();
             }
-            selectedEntityPropMain.add(ModelRegistry.EP_SELFLINK);
+            if (metadata != Metadata.INTERNAL_COMPARE) {
+                selectedEntityPropMain.add(ModelRegistry.EP_SELFLINK);
+            }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
                 selectNavProp.addAll(entityType.getNavigationEntities());
