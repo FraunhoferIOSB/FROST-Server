@@ -320,7 +320,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(NavigationPropertyEntitySet property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterSimple<>(property, factory));
+        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntitySet<>());
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);
@@ -696,6 +696,24 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             Entity child = entity.getProperty(property);
             updateFields.put(factory.get(table), child.getId().getValue());
             message.addField(property);
+        }
+    }
+
+    public static class ConverterEntitySet<T> implements ConverterRecord<T> {
+
+        public ConverterEntitySet() {
+        }
+
+        @Override
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+        }
+
+        @Override
+        public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
+        }
+
+        @Override
+        public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
         }
     }
 
