@@ -47,12 +47,9 @@ public class MetaDataGenerator {
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
             List<String> formats = request.getParameterMap().get("$format");
-            String format = null;
+            String format = "";
             if (formats != null && !formats.isEmpty()) {
                 format = formats.get(0);
-            }
-            if (format == null) {
-                format = "json";
             }
             int idxXml = format.indexOf(CONTENT_TYPE_APPLICATION_XML);
             int idxJson = format.indexOf(CONTENT_TYPE_APPLICATION_JSON);
@@ -60,15 +57,15 @@ public class MetaDataGenerator {
                 idxXml = Integer.MAX_VALUE;
             }
             if (idxJson == -1) {
-                idxJson = Integer.MAX_VALUE - 1;
+                idxJson = Integer.MAX_VALUE;
             }
-            if (idxXml < idxJson || "xml".equalsIgnoreCase(format)) {
-                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
-                doc.writeXml(version, response.getWriter());
-                response.setCode(200);
-            } else {
+            if (idxJson < idxXml || "json".equalsIgnoreCase(format)) {
                 response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
                 SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
+                response.setCode(200);
+            } else {
+                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
+                doc.writeXml(version, response.getWriter());
                 response.setCode(200);
             }
         } catch (IOException ex) {
