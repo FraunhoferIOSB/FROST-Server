@@ -41,36 +41,89 @@ public class JsonFieldFactory {
     public static final String KEY_NUMBER = "n";
     public static final String KEY_STRING = "s";
     public static final String KEY_BOOLEAN = "b";
-    private final Field<String> jsonField;
-    private final List<String> path = new ArrayList<>();
 
     public static class JsonFieldWrapper extends FieldListWrapper {
 
-        private final Field<Object> jsonExpression;
+        private final Field<String> wrappedField;
+        private final List<String> path = new ArrayList<>();
+        private final Map<String, Field> expressions;
+        private final Map<String, Field> expressionsForOrder;
+        Field<Object> jsonExpression;
 
-        public JsonFieldWrapper(Map<String, Field> expressions, Map<String, Field> expressionsForOrder, Field<Object> jsonExpression) {
-            super(expressions, expressionsForOrder);
-            this.jsonExpression = jsonExpression;
+        public JsonFieldWrapper(Field<String> wrappedField) {
+            super(new HashMap<>(), new HashMap<>());
+            expressions = getExpressions();
+            expressionsForOrder = getExpressionsForOrder();
+            this.wrappedField = wrappedField;
+        }
+
+        public JsonFieldWrapper(FieldWrapper fieldWrapper) {
+            this(fieldWrapper.getDefaultField());
+        }
+
+        public JsonFieldWrapper addToPath(String key) {
+            path.add(key);
+            return this;
+        }
+
+        public JsonFieldWrapper materialise() {
+            if (jsonExpression != null) {
+                return this;
+            }
+            StringBuilder templateCore = new StringBuilder();
+            boolean firstDone = false;
+            for (String key : path) {
+                if (firstDone) {
+                    templateCore.append(",");
+                } else {
+                    firstDone = true;
+                }
+                templateCore.append(key);
+            }
+            String templateCoreString = templateCore.toString();
+            String templateJsonb = "?::jsonb#>'{ " + templateCoreString + " }'";
+            String templateString = "?::jsonb#>>'{ " + templateCoreString + " }'";
+            String templateNumber = "safe_cast_to_numeric(?::jsonb#>'{ " + templateCoreString + " }')";
+            String templateBoolean = "safe_cast_to_boolean(?::jsonb#>'{ " + templateCoreString + " }')";
+
+            expressions.put(KEY_STRING, DSL.field(templateString, String.class, wrappedField));
+            expressions.put(KEY_NUMBER, DSL.field(templateNumber, Double.class, wrappedField));
+            expressions.put(KEY_BOOLEAN, DSL.field(templateBoolean, Boolean.class, wrappedField));
+            jsonExpression = DSL.field(templateJsonb, Object.class, wrappedField);
+            expressions.put(KEY_JSONB, jsonExpression);
+            expressionsForOrder.put(KEY_JSONB, jsonExpression);
+            return this;
         }
 
         public Field<Object> getJsonExpression() {
+            materialise();
             return jsonExpression;
         }
 
         @Override
         public Field getDefaultField() {
+            materialise();
             return getExpression(KEY_STRING);
         }
 
+        @Override
+        public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
+            materialise();
+            return super.getFieldAsType(expectedClazz, canCast);
+        }
+
         public Field<Object> otherToJson(FieldWrapper other) {
+            materialise();
             return otherToJson(other.getDefaultField());
         }
 
         public Field<Object> otherToJson(Field<?> other) {
+            materialise();
             return DSL.field("to_jsonb(?)", Object.class, other);
         }
 
         public FieldWrapper eq(FieldWrapper other) {
+            materialise();
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
@@ -83,10 +136,12 @@ public class JsonFieldFactory {
         }
 
         public FieldWrapper ne(FieldWrapper other) {
+            materialise();
             return new SimpleFieldWrapper(jsonExpression.ne(otherToJson(other)));
         }
 
         public FieldWrapper lt(FieldWrapper other) {
+            materialise();
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
@@ -104,6 +159,7 @@ public class JsonFieldFactory {
         }
 
         public FieldWrapper loe(FieldWrapper other) {
+            materialise();
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
@@ -121,6 +177,7 @@ public class JsonFieldFactory {
         }
 
         public FieldWrapper gt(FieldWrapper other) {
+            materialise();
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
@@ -138,6 +195,7 @@ public class JsonFieldFactory {
         }
 
         public FieldWrapper goe(FieldWrapper other) {
+            materialise();
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
@@ -155,6 +213,7 @@ public class JsonFieldFactory {
         }
 
         private CompareType getOtherType(FieldWrapper other) {
+            materialise();
             if (other instanceof JsonFieldWrapper) {
                 return CompareType.JSON;
             }
@@ -168,6 +227,7 @@ public class JsonFieldFactory {
          * @return
          */
         private CompareType getOtherType(Field<?> other) {
+            materialise();
             if (Number.class.isAssignableFrom(other.getType())) {
                 return CompareType.NUMBER;
             }
@@ -186,6 +246,7 @@ public class JsonFieldFactory {
          * @return the extra predicate to enforce the type with.
          */
         private Condition createTypePredicate(CompareType other) {
+            materialise();
             switch (other) {
                 case NUMBER:
                     return DSL.field("jsonb_typeof(?)", jsonExpression).eq("number");
@@ -195,49 +256,6 @@ public class JsonFieldFactory {
                     return null;
             }
         }
-    }
-
-    public JsonFieldFactory(Field<String> jsonField) {
-        this.jsonField = jsonField;
-    }
-
-    public JsonFieldFactory(FieldWrapper fieldWrapper) {
-        this.jsonField = fieldWrapper.getDefaultField();
-    }
-
-    public JsonFieldFactory addToPath(String key) {
-        path.add(key);
-        return this;
-    }
-
-    public JsonFieldWrapper build() {
-        StringBuilder templateCore = new StringBuilder();
-        boolean firstDone = false;
-        for (String key : path) {
-            if (firstDone) {
-                templateCore.append(",");
-            } else {
-                firstDone = true;
-            }
-            templateCore.append(key);
-        }
-        String templateCoreString = templateCore.toString();
-        String templateJsonb = "?::jsonb#>'{ " + templateCoreString + " }'";
-        String templateString = "?::jsonb#>>'{ " + templateCoreString + " }'";
-        String templateNumber = "safe_cast_to_numeric(?::jsonb#>'{ " + templateCoreString + " }')";
-        String templateBoolean = "safe_cast_to_boolean(?::jsonb#>'{ " + templateCoreString + " }')";
-
-        Map<String, Field> expressions = new HashMap<>();
-        Map<String, Field> expressionsForOrder = new HashMap<>();
-
-        expressions.put(KEY_STRING, DSL.field(templateString, String.class, jsonField));
-        expressions.put(KEY_NUMBER, DSL.field(templateNumber, Double.class, jsonField));
-        expressions.put(KEY_BOOLEAN, DSL.field(templateBoolean, Boolean.class, jsonField));
-        Field<Object> jsonExpression = DSL.field(templateJsonb, Object.class, jsonField);
-        expressions.put(KEY_JSONB, jsonExpression);
-        expressionsForOrder.put(KEY_JSONB, jsonExpression);
-
-        return new JsonFieldWrapper(expressions, expressionsForOrder, jsonExpression);
     }
 
 }

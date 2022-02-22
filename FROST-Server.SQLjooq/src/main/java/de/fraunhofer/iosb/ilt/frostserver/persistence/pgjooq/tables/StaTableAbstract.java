@@ -33,7 +33,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
@@ -438,7 +438,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                     factory = mainPropertyFields.fields.values().iterator().next();
                 }
                 final Field mainField = factory.get(getThis());
-                final JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
+                final JsonFieldWrapper jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
                 return propertyFieldForJsonField(jsonFactory, epCustomSelect);
             } else {
                 final ExpressionFactory<T> factory = mainPropertyFields.fields.get(epCustomSelect.getSubPath().get(0));
@@ -452,16 +452,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         return null;
     }
 
-    public static JsonFieldFactory jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
-        JsonFieldFactory jsonFactory = new JsonFieldFactory(mainField);
+    public static JsonFieldWrapper jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
+        JsonFieldWrapper jsonFactory = new JsonFieldWrapper(mainField);
         for (String pathItem : epCustomSelect.getSubPath()) {
             jsonFactory.addToPath(pathItem);
         }
         return jsonFactory;
     }
 
-    protected PropertyFields<T> propertyFieldForJsonField(final JsonFieldFactory jsonFactory, final EntityPropertyCustomSelect epCustomSelect) {
-        final Field deepField = jsonFactory.build().getJsonExpression();
+    protected PropertyFields<T> propertyFieldForJsonField(final JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epCustomSelect) {
+        final Field deepField = jsonFactory.materialise().getJsonExpression();
         PropertyFields<T> pfs = new PropertyFields<>(
                 epCustomSelect,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(

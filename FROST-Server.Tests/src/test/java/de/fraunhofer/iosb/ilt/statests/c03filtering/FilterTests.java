@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservedPropertyDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ThingDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -249,6 +250,11 @@ public class FilterTests extends AbstractTestClass {
         obs.setPhenomenonTimeFrom(phenomenonTime);
         obs.setValidTime(validTime);
         obs.setParameters(parameters);
+        if (idx % 2 == 0) {
+            obs.setResultQuality(idx);
+        } else {
+            obs.setResultQuality("number-" + idx);
+        }
         service.create(obs);
         OBSERVATIONS.add(obs);
         return obs;
@@ -305,6 +311,26 @@ public class FilterTests extends AbstractTestClass {
         if (result.code != 204) {
             Assert.fail("Expected response code 204 on request " + requestUrl);
         }
+    }
+
+    /**
+     * Test if filtering works on requltQuality values that are Strings.
+     */
+    @Test
+    public void testStringResultQualityValue() {
+        LOGGER.info("  testStringResultQualityValue");
+        ObservationDao doa = service.observations();
+        testFilterResults(doa, "resultQuality eq 'number-1'", getFromList(OBSERVATIONS, 1));
+    }
+
+    /**
+     * Test if filtering works on requltQuality values that are Numbers.
+     */
+    @Test
+    public void testNumericResultQualityValue() {
+        LOGGER.info("  testNumericResultQualityValue");
+        ObservationDao doa = service.observations();
+        testFilterResults(doa, "resultQuality eq 2", getFromList(OBSERVATIONS, 2));
     }
 
 }

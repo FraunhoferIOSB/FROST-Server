@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
@@ -255,7 +256,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
         }
         // generate finalExpression::jsonb#>>'{x,y,z}'
-        JsonFieldFactory jsonFactory = new JsonFieldFactory(state.finalExpression);
+        JsonFieldWrapper jsonFactory;
+        if (state.finalExpression instanceof JsonFieldWrapper) {
+            jsonFactory = (JsonFieldWrapper) state.finalExpression;
+        } else {
+            jsonFactory = new JsonFieldWrapper(state.finalExpression);
+        }
         for (; state.curIndex < state.elements.size(); state.curIndex++) {
             final Property property = state.elements.get(state.curIndex);
             String name = property.getName();
@@ -271,13 +277,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
                 jsonFactory.addToPath(name);
             }
         }
-        state.finalExpression = jsonFactory.build();
+        state.finalExpression = jsonFactory.materialise();
         state.finished = true;
     }
 
-    private void handleCustomLink(final Property property, JsonFieldFactory jsonFactory, String name, PathState state) {
+    private void handleCustomLink(final Property property, JsonFieldWrapper jsonFactory, String name, PathState state) {
         EntityType targetEntityType = ((EntityPropertyCustomLink) property).getTargetEntityType();
-        JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).build();
+        JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).materialise();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
         state.pathTableRef = queryBuilder.queryEntityType(targetEntityType, state.pathTableRef, sourceIdField);
         state.finalExpression = null;

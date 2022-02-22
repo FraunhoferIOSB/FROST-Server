@@ -101,11 +101,11 @@ public class FieldListWrapper implements FieldWrapper {
         return null;
     }
 
-    public Map<String, Field> getExpressions() {
+    public final Map<String, Field> getExpressions() {
         return expressions;
     }
 
-    public Map<String, Field> getExpressionsForOrder() {
+    public final Map<String, Field> getExpressionsForOrder() {
         return expressionsForOrder;
     }
 
