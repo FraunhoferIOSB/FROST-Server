@@ -125,7 +125,7 @@ public class Utils {
                 return locationString;
             } else {
                 try {
-                    return jsonToObject(locationString, Map.class);
+                    return jsonToObject(locationString, Object.class);
                 } catch (Exception ex) {
                     LOGGER.trace("Not a map.", ex);
                 }
