@@ -30,10 +30,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +59,7 @@ public class EntityBuilderTest {
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -72,7 +75,7 @@ public class EntityBuilderTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, pluginActuation, modelRegistry);
     }
@@ -80,7 +83,7 @@ public class EntityBuilderTest {
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final Set<EntityType> entityTypes = modelRegistry.getEntityTypes();
-        Assert.assertTrue("Actuation entities not registered.", entityTypes.contains(pluginActuation.etActuator));
+        assertTrue(entityTypes.contains(pluginActuation.etActuator), "Actuation entities not registered.");
         for (EntityType type : entityTypes) {
             testEntityType(type, type.getPropertySet());
         }
@@ -95,16 +98,16 @@ public class EntityBuilderTest {
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
-                Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, entity2);
+                assertNotEquals(entity, entity2, "Property " + pName + " should influence equals.");
 
                 addPropertyToObject(entity2, p);
-                Assert.assertEquals("Entities should be the same after adding " + pName + " to both.", entity, entity2);
+                assertEquals(entity, entity2, "Entities should be the same after adding " + pName + " to both.");
 
                 getPropertyFromObject(entity, p);
             }
         } catch (IllegalArgumentException ex) {
             LOGGER.error("Failed create entity.", ex);
-            Assert.fail("Failed create entity: " + ex.getMessage());
+            fail("Failed create entity: " + ex.getMessage());
         }
     }
 
@@ -118,24 +121,24 @@ public class EntityBuilderTest {
             property.setOn(entity, value);
         } catch (NullPointerException ex) {
             LOGGER.error("Failed to set property " + property, ex);
-            Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
+            fail("Failed to set property " + property + ": " + ex.getMessage());
         }
     }
 
     private void getPropertyFromObject(Entity entity, Property property) {
         try {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
-                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
             Object value = propertyValues.get(property);
             Object setValue = property.getFrom(entity);
 
             if (!Objects.equals(value, setValue)) {
-                Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
+                fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
-            Assert.fail("Failed to set property: " + ex.getMessage());
+            fail("Failed to set property: " + ex.getMessage());
         }
     }
 

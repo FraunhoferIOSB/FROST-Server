@@ -49,20 +49,38 @@ import java.util.Map;
 import java.util.Properties;
 import org.geojson.Point;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MetadataTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class MetadataTests extends AbstractTestClass {
+
+    public static class Implementation10 extends MetadataTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends MetadataTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataTests.class.getName());
 
@@ -95,7 +113,7 @@ public class MetadataTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -230,14 +248,14 @@ public class MetadataTests extends AbstractTestClass {
         assertEquals(200, result.code);
         JSONObject thing = new JSONObject(result.response);
         assertEquals(
-                metadata + " metadata navigationLink",
                 hasNavigationLink,
-                thing.getJSONObject("properties").has("parent.Thing@iot.navigationLink"));
+                thing.getJSONObject("properties").has("parent.Thing@iot.navigationLink"),
+                metadata + " metadata navigationLink");
         if (hasNavigationLink) {
             assertEquals(
-                    metadata + " metadata navigationLink expected",
                     generateSelfLink(0),
-                    thing.getJSONObject("properties").get("parent.Thing@iot.navigationLink"));
+                    thing.getJSONObject("properties").get("parent.Thing@iot.navigationLink"),
+                    metadata + " metadata navigationLink expected");
         }
     }
 
@@ -268,22 +286,24 @@ public class MetadataTests extends AbstractTestClass {
         HttpResponse result = HTTPMethods.doGet(urlString);
         assertEquals(200, result.code);
         JSONObject response = new JSONObject(result.response);
-        assertFalse(metadata + " metadata nextLink", response.has("@iot.nextLink"));
+        assertFalse(response.has("@iot.nextLink"), metadata + " metadata nextLink");
         JSONObject thing = response.getJSONArray("value").getJSONObject(0);
 
-        assertEquals(metadata + " metadata selfLink", hasSelfLink, thing.has("@iot.selfLink"));
+        assertEquals(hasSelfLink, thing.has("@iot.selfLink"), metadata + " metadata selfLink");
         if (hasSelfLink) {
-            assertEquals(metadata + " metadata selfLink", generateSelfLink(1), thing.get("@iot.selfLink"));
+            assertEquals(generateSelfLink(1), thing.get("@iot.selfLink"), metadata + " metadata selfLink");
         }
         JSONObject properties = thing.getJSONObject("properties");
-        assertEquals(metadata + " metadata navigationLink", hasNavigationLink,
-                properties.has("parent.Thing@iot.navigationLink"));
+        assertEquals(hasNavigationLink,
+                properties.has("parent.Thing@iot.navigationLink"),
+                metadata + " metadata navigationLink");
         if (hasNavigationLink) {
-            assertEquals(metadata + " metadata navigationLink", generateSelfLink(0),
-                    properties.get("parent.Thing@iot.navigationLink"));
+            assertEquals(generateSelfLink(0),
+                    properties.get("parent.Thing@iot.navigationLink"),
+                    metadata + " metadata navigationLink");
         }
         JSONObject parent = thing.getJSONObject("properties").getJSONObject("parent.Thing");
-        assertEquals("parent.Thing should have expanded", THINGS.get(0).getName(), parent.get("name"));
+        assertEquals(THINGS.get(0).getName(), parent.get("name"), "parent.Thing should have expanded");
     }
 
     private String generateSelfLink(int thingIndex) {
@@ -361,7 +381,7 @@ public class MetadataTests extends AbstractTestClass {
         String response = responseMap.response;
         int responseCode = responseMap.code;
         String message = "Error posting Observations using Data Array: Code " + responseCode;
-        assertEquals(message, 201, responseCode);
+        assertEquals(201, responseCode, message);
 
         JsonNode json;
         try {
@@ -405,7 +425,7 @@ public class MetadataTests extends AbstractTestClass {
                 }
                 OBSERVATIONS.add(obs);
             } else {
-                assertEquals(metadata + " metadata should remove links", "", textValue);
+                assertEquals("", textValue, metadata + " metadata should remove links");
             }
         }
         if (hasLinks) {
@@ -421,7 +441,7 @@ public class MetadataTests extends AbstractTestClass {
                 return;
             }
             message = "Autogenerated Features of interest should be equal.";
-            assertEquals(message, foiObs8.getId(), foiObs7.getId());
+            assertEquals(foiObs8.getId(), foiObs7.getId(), message);
         }
     }
 
@@ -455,11 +475,11 @@ public class MetadataTests extends AbstractTestClass {
         HttpResponse responseMap = HTTPMethods.doPost(urlString,
                 "{\"description\": \"thing description\",\"name\": \"thing name\"}");
         String response = responseMap.response;
-        Assert.assertEquals("HTTP code should be 201", 201, responseMap.code);
+        assertEquals(201, responseMap.code, "HTTP code should be 201");
         if (hasLinks) {
-            Assert.assertNotNull(HTTPMethods.idFromSelfLink(response));
+            assertNotNull(HTTPMethods.idFromSelfLink(response));
         } else {
-            Assert.assertEquals("", response);
+            assertEquals("", response);
         }
 
     }

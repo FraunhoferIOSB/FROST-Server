@@ -32,11 +32,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +46,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class DataArrayTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class DataArrayTests extends AbstractTestClass {
+
+    public static class Implementation10 extends DataArrayTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends DataArrayTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -70,7 +87,7 @@ public class DataArrayTests extends AbstractTestClass {
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
     private static final List<FeatureOfInterest> FEATURES = new ArrayList<>();
 
-    public DataArrayTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public DataArrayTests(ServerVersion version) {
         super(version);
     }
 
@@ -85,7 +102,7 @@ public class DataArrayTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -97,7 +114,7 @@ public class DataArrayTests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
-        Assert.assertEquals(message, 200, responseMap.code);
+        assertEquals(200, responseMap.code, message);
 
         validateGetDataArrayResponse(responseMap.response, urlString, new HashSet<>(Arrays.asList(OBSERVATION_PROPERTIES)));
     }
@@ -108,7 +125,7 @@ public class DataArrayTests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
-        Assert.assertEquals(message, 200, responseMap.code);
+        assertEquals(200, responseMap.code, message);
 
         validateGetDataArrayResponse(responseMap.response, urlString, new HashSet<>(Arrays.asList("result", "phenomenonTime")));
     }
@@ -171,34 +188,34 @@ public class DataArrayTests extends AbstractTestClass {
         String response = responseMap.response;
         int responseCode = responseMap.code;
         String message = "Error posting Observations using Data Array: Code " + responseCode;
-        Assert.assertEquals(message, 201, responseCode);
+        assertEquals(201, responseCode, message);
 
         JsonNode json;
         try {
             json = new ObjectMapper().readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
+            fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return;
         }
 
         if (!json.isArray()) {
-            Assert.fail("Server did not return a JSON array for request: " + urlString);
+            fail("Server did not return a JSON array for request: " + urlString);
         }
 
         int i = 0;
         for (JsonNode resultLine : json) {
             i++;
             if (!resultLine.isTextual()) {
-                Assert.fail("Server returned a non-text result line for request: " + urlString);
+                fail("Server returned a non-text result line for request: " + urlString);
                 return;
             }
             String textValue = resultLine.textValue();
             if (textValue.toLowerCase().startsWith("error") && i != 2) {
-                Assert.fail("Server returned an error for request: " + urlString);
+                fail("Server returned an error for request: " + urlString);
             }
             if (!textValue.toLowerCase().startsWith("error") && i == 2) {
-                Assert.fail("Server should have returned an error for non-valid id for request: " + urlString);
+                fail("Server should have returned an error for non-valid id for request: " + urlString);
             }
             if (i == 2) {
                 continue;
@@ -209,7 +226,7 @@ public class DataArrayTests extends AbstractTestClass {
             try {
                 obs = service.observations().find(obsId);
             } catch (ServiceFailureException ex) {
-                Assert.fail("Failed to retrieve created observation for request: " + urlString);
+                fail("Failed to retrieve created observation for request: " + urlString);
                 return;
             }
 
@@ -223,11 +240,11 @@ public class DataArrayTests extends AbstractTestClass {
             foiObs7 = obs7.getFeatureOfInterest();
             foiObs8 = obs8.getFeatureOfInterest();
         } catch (ServiceFailureException ex) {
-            Assert.fail("Failed to retrieve feature of interest for created observation for request: " + urlString);
+            fail("Failed to retrieve feature of interest for created observation for request: " + urlString);
             return;
         }
         message = "Autogenerated Features of interest should be equal.";
-        Assert.assertEquals(message, foiObs8.getId(), foiObs7.getId());
+        assertEquals(foiObs8.getId(), foiObs7.getId(), message);
     }
 
     @Test
@@ -267,34 +284,34 @@ public class DataArrayTests extends AbstractTestClass {
         String response = responseMap.response;
         int responseCode = responseMap.code;
         String message = "Error posting Observations using Data Array: Code " + responseCode;
-        Assert.assertEquals(message, 201, responseCode);
+        assertEquals(201, responseCode, message);
 
         JsonNode json;
         try {
             json = new ObjectMapper().readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
+            fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return;
         }
 
         if (!json.isArray()) {
-            Assert.fail("Server did not return a JSON array for request: " + urlString);
+            fail("Server did not return a JSON array for request: " + urlString);
         }
 
         int i = 0;
         for (JsonNode resultLine : json) {
             i++;
             if (!resultLine.isTextual()) {
-                Assert.fail("Server returned a non-text result line for request: " + urlString);
+                fail("Server returned a non-text result line for request: " + urlString);
                 return;
             }
             String textValue = resultLine.textValue();
             if (textValue.toLowerCase().startsWith("error") && i != 2) {
-                Assert.fail("Server returned an error for request: " + urlString);
+                fail("Server returned an error for request: " + urlString);
             }
             if (!textValue.toLowerCase().startsWith("error") && i == 2) {
-                Assert.fail("Server should have returned an error for non-valid id for request: " + urlString);
+                fail("Server should have returned an error for non-valid id for request: " + urlString);
             }
             if (i == 2) {
                 continue;
@@ -305,7 +322,7 @@ public class DataArrayTests extends AbstractTestClass {
             try {
                 obs = service.observations().find(obsId);
             } catch (ServiceFailureException ex) {
-                Assert.fail("Failed to retrieve created observation for request: " + urlString);
+                fail("Failed to retrieve created observation for request: " + urlString);
                 return;
             }
 
@@ -319,40 +336,40 @@ public class DataArrayTests extends AbstractTestClass {
             json = new ObjectMapper().readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
+            fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
             return;
         }
         if (!json.isObject()) {
-            Assert.fail("Server did not return a JSON object for request: " + urlString);
+            fail("Server did not return a JSON object for request: " + urlString);
         }
         if (!json.has("@iot.count")) {
-            Assert.fail("Object did not contain a @iot.count field for request: " + urlString);
+            fail("Object did not contain a @iot.count field for request: " + urlString);
         }
         if (!json.has("@iot.nextLink")) {
-            Assert.fail("Object did not contain a @iot.nextLink field for request: " + urlString);
+            fail("Object did not contain a @iot.nextLink field for request: " + urlString);
         }
         JsonNode value = json.get("value");
         if (value == null || !value.isArray()) {
-            Assert.fail("value field is not an array for request: " + urlString);
+            fail("value field is not an array for request: " + urlString);
             return;
         }
         for (JsonNode valueItem : value) {
             if (!valueItem.isObject()) {
-                Assert.fail("item in value array is not an object for request: " + urlString);
+                fail("item in value array is not an object for request: " + urlString);
                 return;
             }
             if (!valueItem.has("Datastream@iot.navigationLink") && !valueItem.has("MultiDatastream@iot.navigationLink")) {
-                Assert.fail("item in value array does not contain (Multi)Datastream@navigationLink for request: " + urlString);
+                fail("item in value array does not contain (Multi)Datastream@navigationLink for request: " + urlString);
             }
             JsonNode components = valueItem.get("components");
             if (components == null || !components.isArray()) {
-                Assert.fail("components field is not an array for request: " + urlString);
+                fail("components field is not an array for request: " + urlString);
                 return;
             }
             Set<String> foundComponents = new HashSet<>();
             for (JsonNode component : components) {
                 if (!component.isTextual()) {
-                    Assert.fail("components field contains a non-string for request: " + urlString);
+                    fail("components field contains a non-string for request: " + urlString);
                     return;
                 }
                 String componentName = component.textValue();
@@ -361,37 +378,37 @@ public class DataArrayTests extends AbstractTestClass {
                     if (componentName.equals("@iot.id") && requestedProperties.contains("id")) {
                         // It's ok, id with a different name
                     } else {
-                        Assert.fail("Found non-requested component '" + componentName + "' for request: " + urlString);
+                        fail("Found non-requested component '" + componentName + "' for request: " + urlString);
                     }
                 }
             }
             if (components.size() != foundComponents.size()) {
-                Assert.fail("components field contains duplicates for request: " + urlString);
+                fail("components field contains duplicates for request: " + urlString);
             }
             for (String component : requestedProperties) {
                 if (!foundComponents.contains(component)) {
                     if (component.equals("id") && foundComponents.contains("@iot.id")) {
                         continue;
                     }
-                    Assert.fail("components field does not contain entry '" + component + "' for request: " + urlString);
+                    fail("components field does not contain entry '" + component + "' for request: " + urlString);
                 }
             }
             long claimedCount = valueItem.get("dataArray@iot.count").longValue();
             JsonNode dataArray = valueItem.get("dataArray");
             if (!dataArray.isArray()) {
-                Assert.fail("dataArray field is not an array for request: " + urlString);
+                fail("dataArray field is not an array for request: " + urlString);
                 return;
             }
             if (claimedCount != dataArray.size()) {
-                Assert.fail("dataArray contains " + dataArray.size() + " entities. dataArray@iot.count claims '" + claimedCount + "'. Request: " + urlString);
+                fail("dataArray contains " + dataArray.size() + " entities. dataArray@iot.count claims '" + claimedCount + "'. Request: " + urlString);
             }
             for (JsonNode dataField : dataArray) {
                 if (!dataField.isArray()) {
-                    Assert.fail("dataArray contains a non-array entry for request: " + urlString);
+                    fail("dataArray contains a non-array entry for request: " + urlString);
                     return;
                 }
                 if (dataField.size() != components.size()) {
-                    Assert.fail("dataArray contains an array entry with invalid length " + dataField.size() + " for request: " + urlString);
+                    fail("dataArray contains an array entry with invalid length " + dataField.size() + " for request: " + urlString);
                     return;
                 }
             }

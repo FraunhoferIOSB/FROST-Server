@@ -40,9 +40,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -57,7 +57,7 @@ public class EntityFormatterTest {
     private static PluginCoreModel pluginCoreModel;
     private static PluginActuation pluginActuation;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -101,7 +101,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -193,7 +193,7 @@ public class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.add(entity);
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     @Test
@@ -212,7 +212,7 @@ public class EntityFormatterTest {
                         .addProperty("color", "Silver")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -290,7 +290,7 @@ public class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     private boolean jsonEqual(String string1, String string2) {

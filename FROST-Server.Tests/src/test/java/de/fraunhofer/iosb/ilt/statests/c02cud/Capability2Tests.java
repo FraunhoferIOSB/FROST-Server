@@ -22,19 +22,39 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Includes various tests of "A.3 Create Update Delete" Conformance class.
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Capability2Tests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class Capability2Tests extends AbstractTestClass {
+
+    public static class Implementation10 extends Capability2Tests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends Capability2Tests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -116,7 +136,7 @@ public class Capability2Tests extends AbstractTestClass {
         ID_TYPES.clear();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         deleteEverything();
@@ -514,7 +534,7 @@ public class Capability2Tests extends AbstractTestClass {
                 Object automatedFOI2Id = checkAutomaticInsertionOfFOI(obsId4, location2Entity, null);
                 FOI_IDS.add(automatedFOI2Id);
                 String message = "A new FoI should have been created, since the Thing moved.";
-                Assert.assertNotEquals(message, automatedFOI2Id, FOI_IDS.get(1));
+                assertNotEquals(automatedFOI2Id, FOI_IDS.get(1), message);
             }
 
             final Object thing2Id;
@@ -566,7 +586,7 @@ public class Capability2Tests extends AbstractTestClass {
                 OBSERVATION_IDS.add(obsId5);
                 Object automatedFOI3Id = checkAutomaticInsertionOfFOI(obsId5, locationEntity, null);
                 String message = "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location.";
-                Assert.assertEquals(message, automatedFOI3Id, FOI_IDS.get(1));
+                assertEquals(automatedFOI3Id, FOI_IDS.get(1), message);
             }
 
             {
@@ -624,7 +644,7 @@ public class Capability2Tests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -809,7 +829,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -905,7 +925,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
 
     }
@@ -1004,7 +1024,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1134,7 +1154,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1440,7 +1460,7 @@ public class Capability2Tests extends AbstractTestClass {
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
             LOGGER.error("Failed input: {}", response);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1458,7 +1478,7 @@ public class Capability2Tests extends AbstractTestClass {
         try {
             HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
             String message = "Error during creation of entity " + entityType.name();
-            Assert.assertEquals(message, 201, httpResponse.code);
+            assertEquals(201, httpResponse.code, message);
 
             Object id = httpResponse.response.substring(httpResponse.response.indexOf("(") + 1, httpResponse.response.indexOf(")"));
 
@@ -1466,13 +1486,13 @@ public class Capability2Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
             message = "The POSTed entity is not created.";
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             JSONObject result = new JSONObject(responseMap.response);
             return result;
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1490,7 +1510,7 @@ public class Capability2Tests extends AbstractTestClass {
         HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
         int responseCode = responseMap.code;
         String message = "The  " + entityType.name() + " should not be created due to integrity constraints. Expected response code 400|409, got: " + responseCode;
-        Assert.assertTrue(message, responseCode == 400 || responseCode == 409);
+        assertTrue(responseCode == 400 || responseCode == 409, message);
 
     }
 
@@ -1506,12 +1526,12 @@ public class Capability2Tests extends AbstractTestClass {
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
-        Assert.assertEquals(message, 200, responseCode);
+        assertEquals(200, responseCode, message);
 
         responseMap = HTTPMethods.doGet(urlString);
         responseCode = responseMap.code;
         message = "Deleted entity was not actually deleted : " + entityType + "(" + id + ").";
-        Assert.assertEquals(message, 404, responseCode);
+        assertEquals(404, responseCode, message);
     }
 
     /**
@@ -1532,7 +1552,7 @@ public class Capability2Tests extends AbstractTestClass {
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for nonexistent " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
-        Assert.assertEquals(message, 404, responseCode);
+        assertEquals(404, responseCode, message);
 
     }
 
@@ -1551,7 +1571,7 @@ public class Capability2Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
             int responseCode = responseMap.code;
             String message = "Error during updating(PUT) of entity " + entityType.name();
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             responseMap = HTTPMethods.doGet(urlString);
             JSONObject result = new JSONObject(responseMap.response);
@@ -1559,7 +1579,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1580,14 +1600,14 @@ public class Capability2Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
             int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
             JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1607,7 +1627,7 @@ public class Capability2Tests extends AbstractTestClass {
         HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
         int responseCode = responseMap.code;
         String message = "Error: Patching related entities inline must be illegal for entity " + entityType.name();
-        Assert.assertEquals(message, 400, responseCode);
+        assertEquals(400, responseCode, message);
 
     }
 
@@ -1625,18 +1645,18 @@ public class Capability2Tests extends AbstractTestClass {
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 if (diffs.containsKey(property.name)) {
                     String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    Assert.assertEquals(message, diffs.get(property.name).toString(), newEntity.get(property.name).toString());
+                    assertEquals(diffs.get(property.name).toString(), newEntity.get(property.name).toString(), message);
                 } else if (newEntity.has(property.name) && oldEntity.has(property.name)) {
                     String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    Assert.assertEquals(message, oldEntity.get(property.name).toString(), newEntity.get(property.name).toString());
+                    assertEquals(oldEntity.get(property.name).toString(), newEntity.get(property.name).toString(), message);
                 } else {
                     String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    Assert.assertEquals(message, oldEntity.has(property.name), newEntity.has(property.name));
+                    assertEquals(oldEntity.has(property.name), newEntity.has(property.name), message);
                 }
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1654,20 +1674,20 @@ public class Capability2Tests extends AbstractTestClass {
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 if (diffs.containsKey(property.name)) {
                     String message = "PUT was not applied correctly for " + entityType + ".";
-                    Assert.assertEquals(message, diffs.get(property.name).toString(), newEntity.get(property.name).toString());
+                    assertEquals(diffs.get(property.name).toString(), newEntity.get(property.name).toString(), message);
                 } else {
                     String message = "PUT was not applied correctly for " + entityType + ".";
                     if (oldEntity.has(property.name)) {
-                        Assert.assertTrue(message, equalsFixJson(oldEntity.get(property.name), newEntity.get(property.name)));
+                        assertTrue(equalsFixJson(oldEntity.get(property.name), newEntity.get(property.name)), message);
                     } else {
-                        Assert.assertFalse(message, newEntity.has(property.name));
+                        assertFalse(newEntity.has(property.name), message);
                     }
                 }
             }
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1696,19 +1716,19 @@ public class Capability2Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
             String message = "ERROR: FeatureOfInterest was not automatically created.";
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
             JSONObject result = new JSONObject(responseMap.response);
             Object id = result.get(ControlInformation.ID);
             if (expectedFOIId != null) {
                 message = "ERROR: the Observation should have linked to FeatureOfInterest with ID: " + expectedFOIId + ", but it is linked for FeatureOfInterest with Id: " + id + ".";
-                Assert.assertEquals(message, expectedFOIId, id);
+                assertEquals(expectedFOIId, id, message);
             }
             message = "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.";
-            Assert.assertEquals(message, locationObj.getJSONObject("location").toString(), result.getJSONObject("feature").toString());
+            assertEquals(locationObj.getJSONObject("location").toString(), result.getJSONObject("feature").toString(), message);
             return id;
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
         return -1;
     }
@@ -1733,7 +1753,7 @@ public class Capability2Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
             String message = "ERROR: Deep inserted " + relationEntityType + " was not created or linked to " + parentEntityType;
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             JSONObject result = new JSONObject(responseMap.response);
             if (isCollection == true) {
@@ -1743,12 +1763,12 @@ public class Capability2Tests extends AbstractTestClass {
             while (iterator.hasNext()) {
                 String key = iterator.next().toString();
                 message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
-                Assert.assertEquals(message, relationObj.get(key).toString(), result.get(key).toString());
+                assertEquals(relationObj.get(key).toString(), result.get(key).toString(), message);
             }
             return result.get(ControlInformation.ID);
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
         return -1;
     }
@@ -1763,14 +1783,14 @@ public class Capability2Tests extends AbstractTestClass {
         try {
             if (resultTimeValue == null) {
                 String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been null but it is now \"" + observation.get("resultTime").toString() + "\".";
-                Assert.assertEquals(message, "null", observation.get("resultTime").toString());
+                assertEquals("null", observation.get("resultTime").toString(), message);
             } else {
                 String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been \"" + resultTimeValue + "\" but it is now \"" + observation.get("resultTime").toString() + "\".";
-                Assert.assertEquals(message, resultTimeValue, observation.get("resultTime").toString());
+                assertEquals(resultTimeValue, observation.get("resultTime").toString(), message);
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1787,10 +1807,10 @@ public class Capability2Tests extends AbstractTestClass {
                 JSONObject result = new JSONObject(responseMap.response);
                 JSONArray array = result.getJSONArray("value");
                 String message = entityType + " is found although it shouldn't.";
-                Assert.assertEquals(message, 0, array.length());
+                assertEquals(0, array.length(), message);
             } catch (JSONException e) {
                 LOGGER.error("Exception: ", e);
-                Assert.fail("An Exception occurred during testing: " + e.getMessage());
+                fail("An Exception occurred during testing: " + e.getMessage());
             }
         }
     }
@@ -1808,10 +1828,10 @@ public class Capability2Tests extends AbstractTestClass {
                 JSONObject result = new JSONObject(responseMap.response);
                 JSONArray array = result.getJSONArray("value");
                 String message = entityType + " is created although it shouldn't.";
-                Assert.assertTrue(message, array.length() > 0);
+                assertTrue(array.length() > 0, message);
             } catch (JSONException e) {
                 LOGGER.error("Exception: ", e);
-                Assert.fail("An Exception occurred during testing: " + e.getMessage());
+                fail("An Exception occurred during testing: " + e.getMessage());
             }
         }
     }
@@ -1867,7 +1887,7 @@ public class Capability2Tests extends AbstractTestClass {
                 }
             } catch (JSONException e) {
                 LOGGER.error("Exception: ", e);
-                Assert.fail("An Exception occurred during testing: " + e.getMessage());
+                fail("An Exception occurred during testing: " + e.getMessage());
             }
         } while (array.length() > 0);
     }
@@ -1975,7 +1995,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
         }
 
     }

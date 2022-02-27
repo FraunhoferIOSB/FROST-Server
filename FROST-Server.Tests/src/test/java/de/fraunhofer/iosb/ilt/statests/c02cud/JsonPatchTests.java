@@ -39,16 +39,32 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
  */
-public class JsonPatchTests extends AbstractTestClass {
+public abstract class JsonPatchTests extends AbstractTestClass {
+
+    public static class Implementation10 extends JsonPatchTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends JsonPatchTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -61,7 +77,7 @@ public class JsonPatchTests extends AbstractTestClass {
     private static final List<ObservedProperty> OPROPS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
 
-    public JsonPatchTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public JsonPatchTests(ServerVersion version) {
         super(version);
     }
 
@@ -92,7 +108,7 @@ public class JsonPatchTests extends AbstractTestClass {
      *
      * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
      */
-    @AfterClass
+    @AfterAll
     public static void deleteEverything() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -165,7 +181,7 @@ public class JsonPatchTests extends AbstractTestClass {
         Thing updatedThing = service.things().find(thingOnlyId.getId());
 
         String message = "properties/key1 was not added correctly.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedThing.getProperties().get("key1"));
+        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
@@ -174,11 +190,11 @@ public class JsonPatchTests extends AbstractTestClass {
         updatedThing = service.things().find(thingOnlyId.getId());
 
         message = "properties/keyCopy1 does not exist after copy.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedThing.getProperties().get("keyCopy1"));
+        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
-        Assert.assertEquals(message, null, updatedThing.getProperties().get("key1"));
+        assertEquals(null, updatedThing.getProperties().get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedThing.getProperties().get("key2"));
+        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("key2"), message);
     }
 
     /**
@@ -198,7 +214,7 @@ public class JsonPatchTests extends AbstractTestClass {
         Datastream updatedDs = service.datastreams().find(dsOnlyId.getId());
 
         String message = "properties/key1 was not added correctly.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("key1"));
+        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
@@ -207,11 +223,11 @@ public class JsonPatchTests extends AbstractTestClass {
         updatedDs = service.datastreams().find(dsOnlyId.getId());
 
         message = "properties/keyCopy1 does not exist after copy.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("keyCopy1"));
+        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
-        Assert.assertEquals(message, null, updatedDs.getProperties().get("key1"));
+        assertEquals(null, updatedDs.getProperties().get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        Assert.assertEquals(message, (Integer) 1, (Integer) updatedDs.getProperties().get("key2"));
+        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("key2"), message);
     }
 
 }

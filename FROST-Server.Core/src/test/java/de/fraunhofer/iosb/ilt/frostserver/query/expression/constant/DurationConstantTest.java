@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -36,7 +36,7 @@ public class DurationConstantTest {
                 .withMinutes(59)
                 .withSeconds(59)
                 .withMillis(999);
-        Assert.assertEquals(expectedResult, result.getValue());
+        assertEquals(expectedResult, result.getValue());
     }
 
 }

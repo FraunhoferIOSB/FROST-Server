@@ -26,16 +26,35 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Includes various tests of "A.2 Filtering Extension" Conformance class.
  */
-public class Capability3Tests extends AbstractTestClass {
+public abstract class Capability3Tests extends AbstractTestClass {
+
+    public static class Implementation10 extends Capability3Tests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends Capability3Tests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -75,7 +94,7 @@ public class Capability3Tests extends AbstractTestClass {
      *
      * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
      */
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         EntityUtils.deleteAll(version, serverSettings, service);
@@ -307,22 +326,22 @@ public class Capability3Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
             String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.code;
-            Assert.assertEquals(message, 200, responseMap.code);
+            assertEquals(200, responseMap.code, message);
 
             String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
 
             message = "The query order of execution is not correct. The expected count is 6. The service returned " + new JSONObject(response).getLong("@iot.count");
-            Assert.assertEquals(message, 6, new JSONObject(response).getLong("@iot.count"));
+            assertEquals(6, new JSONObject(response).getLong("@iot.count"), message);
 
             message = "The query asked for top 1. The service rerurned " + array.length() + " entities.";
-            Assert.assertEquals(message, 1, array.length());
+            assertEquals(1, array.length(), message);
 
             message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.getJSONObject(0).get("result").toString();
-            Assert.assertEquals(message, "6", array.getJSONObject(0).get("result").toString());
+            assertEquals("6", array.getJSONObject(0).get("result").toString(), message);
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -411,24 +430,24 @@ public class Capability3Tests extends AbstractTestClass {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
             String message = fetchError + ": " + responseMap.code;
-            Assert.assertEquals(message, 200, responseMap.code);
+            assertEquals(200, responseMap.code, message);
 
             String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             int length = array.length();
 
             message = resultError + " Expected " + expectedCount + " Observations. got " + length + ".";
-            Assert.assertEquals(message, expectedCount, length);
+            assertEquals(expectedCount, length, message);
 
             for (int i = 0; i < length; i++) {
                 JSONObject obs = array.getJSONObject(i);
                 String result = obs.get("result").toString();
                 String msg = resultError + " The expected Observation result is " + expectedResult + ", but the given result is " + result;
-                Assert.assertEquals(msg, expectedResult, result);
+                assertEquals(expectedResult, result, msg);
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -466,7 +485,7 @@ public class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
-                        Assert.assertTrue(message, compareWithPrevious(i, array, property.name) <= 0);
+                        assertTrue(compareWithPrevious(i, array, property.name) <= 0, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                     responseMap = HTTPMethods.doGet(urlString);
@@ -474,7 +493,7 @@ public class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
-                        Assert.assertTrue(message, compareWithPrevious(i, array, property.name) <= 0);
+                        assertTrue(compareWithPrevious(i, array, property.name) <= 0, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
                     responseMap = HTTPMethods.doGet(urlString);
@@ -482,7 +501,7 @@ public class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
-                        Assert.assertTrue(message, compareWithPrevious(i, array, property.name) >= 0);
+                        assertTrue(compareWithPrevious(i, array, property.name) >= 0, message);
                     }
                 }
 
@@ -508,7 +527,7 @@ public class Capability3Tests extends AbstractTestClass {
                         for (String orderProperty : orderbyPropeties) {
                             int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                            Assert.assertTrue(message, compare <= 0);
+                            assertTrue(compare <= 0, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -526,7 +545,7 @@ public class Capability3Tests extends AbstractTestClass {
                         for (String orderProperty : orderbyPropeties) {
                             int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                            Assert.assertTrue(message, compare <= 0);
+                            assertTrue(compare <= 0, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -544,7 +563,7 @@ public class Capability3Tests extends AbstractTestClass {
                         for (String orderProperty : orderbyPropeties) {
                             int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                            Assert.assertTrue(message, compare >= 0);
+                            assertTrue(compare >= 0, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -554,7 +573,7 @@ public class Capability3Tests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }
@@ -578,7 +597,7 @@ public class Capability3Tests extends AbstractTestClass {
                 JSONArray array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
-                    Assert.assertTrue(msg, compareWithPrevious(i, array, property.name) <= 0);
+                    assertTrue(compareWithPrevious(i, array, property.name) <= 0, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
@@ -586,7 +605,7 @@ public class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
-                    Assert.assertTrue(msg, compareWithPrevious(i, array, property.name) <= 0);
+                    assertTrue(compareWithPrevious(i, array, property.name) <= 0, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
                 responseMap = HTTPMethods.doGet(urlString);
@@ -594,7 +613,7 @@ public class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
-                    Assert.assertTrue(msg, compareWithPrevious(i, array, property.name) >= 0);
+                    assertTrue(compareWithPrevious(i, array, property.name) >= 0, msg);
                 }
             }
 
@@ -620,7 +639,7 @@ public class Capability3Tests extends AbstractTestClass {
                     for (String orderProperty : orderbyPropeties) {
                         int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                        Assert.assertTrue(message, compare <= 0);
+                        assertTrue(compare <= 0, message);
                         if (compare != 0) {
                             break;
                         }
@@ -638,7 +657,7 @@ public class Capability3Tests extends AbstractTestClass {
                     for (String orderProperty : orderbyPropeties) {
                         int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                        Assert.assertTrue(message, compare <= 0);
+                        assertTrue(compare <= 0, message);
                         if (compare != 0) {
                             break;
                         }
@@ -656,7 +675,7 @@ public class Capability3Tests extends AbstractTestClass {
                     for (String orderProperty : orderbyPropeties) {
                         int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                        Assert.assertTrue(message, compare >= 0);
+                        assertTrue(compare >= 0, message);
                         if (compare != 0) {
                             break;
                         }
@@ -665,7 +684,7 @@ public class Capability3Tests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing " + entityType + ":\n" + e.getMessage());
+            fail("An Exception occurred during testing " + entityType + ":\n" + e.getMessage());
         }
 
     }
@@ -1229,7 +1248,7 @@ public class Capability3Tests extends AbstractTestClass {
             array = new JSONObject(response).getJSONArray("value");
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         if (array.length() == 0) {
             return;
@@ -1239,7 +1258,7 @@ public class Capability3Tests extends AbstractTestClass {
             id = array.getJSONObject(0).get(ControlInformation.ID);
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
         for (String relation : relations) {
@@ -1318,10 +1337,10 @@ public class Capability3Tests extends AbstractTestClass {
                     try {
                         propertyValue = entity.get(properties.get(j));
                     } catch (JSONException e) {
-                        Assert.fail("The entity does not have property " + properties.get(j));
+                        fail("The entity does not have property " + properties.get(j));
                     }
                     if (propertyValue == null) {
-                        Assert.fail("The entity has null value for property " + properties.get(j));
+                        fail("The entity has null value for property " + properties.get(j));
                     }
                     Comparable value = values.get(j);
                     if (value instanceof String && ((String) value).charAt(0) == '\'') {
@@ -1338,34 +1357,34 @@ public class Capability3Tests extends AbstractTestClass {
                     switch (operator) {
                         case -3:
                             String message = properties.get(j) + " should not be equal to " + value + ". But the property value is " + propertyValue;
-                            Assert.assertNotEquals(message, 0, result);
+                            assertNotEquals(0, result, message);
                             break;
                         case -2:
                             message = properties.get(j) + " should be less than " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result > 0);
+                            assertTrue(result > 0, message);
                             break;
                         case -1:
                             message = properties.get(j) + " should be less than or equal to " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result >= 0);
+                            assertTrue(result >= 0, message);
                             break;
                         case 0:
                             message = properties.get(j) + " should be equal to than " + value + ". But the property value is " + propertyValue;
-                            Assert.assertEquals(message, 0, result);
+                            assertEquals(0, result, message);
                             break;
                         case 1:
                             message = properties.get(j) + " should be greate than or equal to " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result <= 0);
+                            assertTrue(result <= 0, message);
                             break;
                         case 2:
                             message = properties.get(j) + " should be greater than " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result < 0);
+                            assertTrue(result < 0, message);
                             break;
                     }
                 }
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing " + properties + ":\n" + e.getMessage());
+            fail("An Exception occurred during testing " + properties + ":\n" + e.getMessage());
         }
     }
 
@@ -1734,7 +1753,7 @@ public class Capability3Tests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }

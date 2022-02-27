@@ -36,9 +36,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -53,7 +53,7 @@ public class EntityFormatterTest {
     private static PluginMultiDatastream pluginMultiDatastream;
     private static EntityType etMultiDatastream;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -70,7 +70,7 @@ public class EntityFormatterTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         PluginResultFormatDataArray.modifyEntityFormatter();
     }
@@ -109,7 +109,7 @@ public class EntityFormatterTest {
         source.getValue().add(dav2);
         source.getValue().add(dav3);
 
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeObject(source)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeObject(source)));
     }
 
     private String createDataJson() {

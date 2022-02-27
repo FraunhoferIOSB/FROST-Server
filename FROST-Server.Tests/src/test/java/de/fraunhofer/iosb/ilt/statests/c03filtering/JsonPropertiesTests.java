@@ -29,11 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +43,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class JsonPropertiesTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class JsonPropertiesTests extends AbstractTestClass {
+
+    public static class Implementation10 extends JsonPropertiesTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends JsonPropertiesTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -57,7 +74,7 @@ public class JsonPropertiesTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public JsonPropertiesTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException {
+    public JsonPropertiesTests(ServerVersion version) {
         super(version);
     }
 
@@ -76,7 +93,7 @@ public class JsonPropertiesTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -468,17 +485,17 @@ public class JsonPropertiesTests extends AbstractTestClass {
         urlString = urlString.replaceAll(Pattern.quote("["), "%5B").replaceAll(Pattern.quote("]"), "%5D");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Incorrect response code (" + responseMap.code + ") for url: " + urlString;
-        Assert.assertEquals(message, 200, responseMap.code);
+        assertEquals(200, responseMap.code, message);
         JsonNode json;
         try {
             json = new ObjectMapper().readTree(responseMap.response);
         } catch (IOException ex) {
-            Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
+            fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
             return null;
         }
 
         if (!json.isObject()) {
-            Assert.fail("Server did not return a JSON object for request: " + urlString);
+            fail("Server did not return a JSON object for request: " + urlString);
         }
         return json;
     }
@@ -486,50 +503,50 @@ public class JsonPropertiesTests extends AbstractTestClass {
     private void testResponseProperty(JsonNode response, String propertyName, String expectedValue, String urlForError) {
         JsonNode value = response.get(propertyName);
         if (value == null || !value.isTextual()) {
-            Assert.fail("field '" + propertyName + "' is not an string for request: " + urlForError);
+            fail("field '" + propertyName + "' is not an string for request: " + urlForError);
             return;
         }
         String message = "field '" + propertyName + "' does not have the correct value for request: " + urlForError;
-        Assert.assertEquals(message, expectedValue, value.textValue());
+        assertEquals(expectedValue, value.textValue(), message);
     }
 
     private void testResponseProperty(JsonNode response, String propertyName, Boolean expectedValue, String urlForError) {
         JsonNode value = response.get(propertyName);
         if (value == null || !value.isBoolean()) {
-            Assert.fail("field '" + propertyName + "' is not an boolean for request: " + urlForError);
+            fail("field '" + propertyName + "' is not an boolean for request: " + urlForError);
             return;
         }
         String message = "field '" + propertyName + "' does not have the correct value for request: " + urlForError;
-        Assert.assertEquals(message, expectedValue, value.booleanValue());
+        assertEquals(expectedValue, value.booleanValue(), message);
     }
 
     private void testResponseProperty(JsonNode response, String propertyName, Integer expectedValue, String urlForError) {
         JsonNode value = response.get(propertyName);
         if (value == null || !value.isInt()) {
-            Assert.fail("field '" + propertyName + "' is not an integer for request: " + urlForError);
+            fail("field '" + propertyName + "' is not an integer for request: " + urlForError);
             return;
         }
         String message = "field '" + propertyName + "' does not have the correct value for request: " + urlForError;
-        Assert.assertEquals(message, expectedValue.intValue(), value.intValue());
+        assertEquals(expectedValue.intValue(), value.intValue(), message);
     }
 
     private void testResponseProperty(JsonNode response, String propertyName, int[] expectedValue, String urlForError) {
         JsonNode value = response.get(propertyName);
         if (value == null || !value.isArray()) {
-            Assert.fail("field '" + propertyName + "' is not an array for request: " + urlForError);
+            fail("field '" + propertyName + "' is not an array for request: " + urlForError);
             return;
         }
         String message = "array '" + propertyName + "' does not have the correct size for request: " + urlForError;
-        Assert.assertEquals(message, expectedValue.length, value.size());
+        assertEquals(expectedValue.length, value.size(), message);
 
         int i = 0;
         for (Iterator<JsonNode> it = value.elements(); it.hasNext();) {
             JsonNode element = it.next();
             if (!element.isInt()) {
-                Assert.fail("array '" + propertyName + "' contains non-integer element '" + element.toString() + "' for request: " + urlForError);
+                fail("array '" + propertyName + "' contains non-integer element '" + element.toString() + "' for request: " + urlForError);
             }
             message = "array '" + propertyName + "' contains incorrect value at position " + i + " for request: " + urlForError;
-            Assert.assertEquals(message, expectedValue[i], element.intValue());
+            assertEquals(expectedValue[i], element.intValue(), message);
             i++;
         }
     }

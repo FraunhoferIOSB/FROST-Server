@@ -53,7 +53,8 @@
         <jetty.version>10.0.6</jetty.version>
         <jodatime.version>2.10.10</jodatime.version>
         <json-patch.version>1.13</json-patch.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.version>5.8.2</junit.version>
+        <junit.platform.version>1.8.2</junit.platform.version>
         <keycloak.version>15.0.2</keycloak.version>
         <liquibase.version>4.4.3</liquibase.version>
         <logback.version>1.2.6</logback.version>
@@ -68,6 +69,7 @@
         <maven-nexus-staging-plugin>1.6.8</maven-nexus-staging-plugin>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <owasp.version>6.3.1</owasp.version>
 
@@ -76,7 +78,7 @@
         <postgis.version>2.5.1</postgis.version>
         <postgres.version>42.2.23</postgres.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
-        <testcontainers.version>1.16.0</testcontainers.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
         <testcontainers-keycloak.version>1.8.0</testcontainers-keycloak.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
@@ -291,6 +293,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

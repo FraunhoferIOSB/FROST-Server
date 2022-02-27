@@ -18,7 +18,8 @@ package de.fraunhofer.iosb.ilt.statests.util;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,14 +90,14 @@ public class Request extends Expand {
         HttpResponse responseMap = HTTPMethods.doGet(fetchUrl);
         if (responseMap.code != 200) {
             String message = "Error during request: " + fetchUrl;
-            Assert.assertEquals(message, 200, responseMap.code);
+            assertEquals(200, responseMap.code, message);
         }
         JSONObject jsonResponse = null;
         try {
             jsonResponse = new JSONObject(responseMap.response);
         } catch (JSONException ex) {
             LOGGER.error("Failed to parse response for request: " + fetchUrl, ex);
-            Assert.fail("Failed to parse response for request: " + fetchUrl);
+            fail("Failed to parse response for request: " + fetchUrl);
         }
         return jsonResponse;
     }

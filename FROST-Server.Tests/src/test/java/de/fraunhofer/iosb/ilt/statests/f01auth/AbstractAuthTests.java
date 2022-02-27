@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class AbstractAuthTests extends AbstractTestClass {
 
     /**
@@ -146,7 +146,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -196,7 +196,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             }
         }
         LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
-        Assert.fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
+        fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
     }
 
     private void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
@@ -210,7 +210,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             }
         }
         LOGGER.error(failMessage, ex);
-        Assert.fail(failMessage);
+        fail(failMessage);
     }
 
     @Test
@@ -222,7 +222,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             serviceAdmin.create(thing);
         } catch (ServiceFailureException ex) {
             LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_CREATE, ex);
-            Assert.fail(ADMIN_SHOULD_BE_ABLE_TO_CREATE);
+            fail(ADMIN_SHOULD_BE_ABLE_TO_CREATE);
         }
     }
 
@@ -241,7 +241,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             serviceAdmin.update(thing);
         } catch (ServiceFailureException ex) {
             LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_UPDATE, ex);
-            Assert.fail(ADMIN_SHOULD_BE_ABLE_TO_UPDATE);
+            fail(ADMIN_SHOULD_BE_ABLE_TO_UPDATE);
         }
         EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
@@ -255,7 +255,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             serviceAdmin.delete(thing);
         } catch (ServiceFailureException ex) {
             LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_DELETE, ex);
-            Assert.fail(ADMIN_SHOULD_BE_ABLE_TO_DELETE);
+            fail(ADMIN_SHOULD_BE_ABLE_TO_DELETE);
         }
         EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
@@ -269,7 +269,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             serviceWrite.create(thing);
         } catch (ServiceFailureException ex) {
             LOGGER.error(WRITE_SHOULD_BE_ABLE_TO_CREATE, ex);
-            Assert.fail(WRITE_SHOULD_BE_ABLE_TO_CREATE);
+            fail(WRITE_SHOULD_BE_ABLE_TO_CREATE);
         }
     }
 
@@ -288,7 +288,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             serviceWrite.update(thing);
         } catch (ServiceFailureException ex) {
             LOGGER.error(WRITE_SHOULD_BE_ABLE_TO_UPDATE, ex);
-            Assert.fail(WRITE_SHOULD_BE_ABLE_TO_UPDATE);
+            fail(WRITE_SHOULD_BE_ABLE_TO_UPDATE);
         }
         EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
     }
@@ -299,7 +299,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         Thing thing = THINGS.get(0);
         try {
             serviceWrite.delete(thing);
-            Assert.fail(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE);
+            fail(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -312,7 +312,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         Thing thing = new Thing("ReadThing", "The Thing made by read.");
         try {
             serviceRead.create(thing);
-            Assert.fail(READ_SHOULD_NOT_BE_ABLE_TO_CREATE);
+            fail(READ_SHOULD_NOT_BE_ABLE_TO_CREATE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -341,7 +341,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         thing.setDescription("Read Updated Thing made by Admin.");
         try {
             serviceRead.update(thing);
-            Assert.fail(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE);
+            fail(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -354,7 +354,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         Thing thing = THINGS.get(0);
         try {
             serviceRead.delete(thing);
-            Assert.fail(READ_SHOULD_NOT_BE_ABLE_TO_DELETE);
+            fail(READ_SHOULD_NOT_BE_ABLE_TO_DELETE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -367,7 +367,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         Thing thing = new Thing("AnonThing", "The Thing made by anonymous.");
         try {
             serviceAnon.create(thing);
-            Assert.fail(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE);
+            fail(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -382,7 +382,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         } else {
             try {
                 serviceAnon.things().query().list();
-                Assert.fail(ANON_SHOULD_NOT_BE_ABLE_TO_READ);
+                fail(ANON_SHOULD_NOT_BE_ABLE_TO_READ);
             } catch (ServiceFailureException ex) {
                 expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
             }
@@ -396,7 +396,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         thing.setDescription("Anon Updated Thing made by Admin.");
         try {
             serviceAnon.update(thing);
-            Assert.fail(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE);
+            fail(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
@@ -409,7 +409,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         Thing thing = THINGS.get(0);
         try {
             serviceAnon.delete(thing);
-            Assert.fail(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE);
+            fail(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE);
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }

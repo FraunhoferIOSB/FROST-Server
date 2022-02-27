@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -28,7 +28,7 @@ public class GitCommitIdTest {
 
     @Test
     public void testGitDescription() {
-        Assert.assertNotNull("Git Commit Info must be non-null", GitVersionInfo.getGitDescription());
+        assertNotNull(GitVersionInfo.getGitDescription(), "Git Commit Info must be non-null");
     }
 
 }

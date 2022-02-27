@@ -40,9 +40,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -59,7 +59,7 @@ public class EntityFormatterTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -97,7 +97,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.add(entity);
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     @Test
@@ -206,7 +206,7 @@ public class EntityFormatterTest {
                         .addProperty("color", "Silver")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -283,7 +283,7 @@ public class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     @Test
@@ -320,7 +320,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -347,7 +347,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -376,7 +376,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -400,7 +400,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -423,7 +423,7 @@ public class EntityFormatterTest {
                     .setProperty(pluginCoreModel.npThingsLocation, new EntitySetImpl(pluginCoreModel.etThing))
                     .setProperty(pluginCoreModel.npHistoricalLocationsLocation, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
-            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+            assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
         {
             String expResult
@@ -441,7 +441,7 @@ public class EntityFormatterTest {
                     .setQuery(query)
                     .setId(new IdLong(1))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
-            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+            assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
     }
 
@@ -474,7 +474,7 @@ public class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -495,7 +495,7 @@ public class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npThingHistLoc, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
                 .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -539,7 +539,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -579,7 +579,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -629,7 +629,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                 .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -654,7 +654,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -678,7 +678,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -701,7 +701,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
                 .setProperty(pluginCoreModel.epName, "DewPoint Temperature")
                 .setProperty(pluginCoreModel.epDefinition, "http://dbpedia.org/page/Dew_point");
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -727,7 +727,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -753,7 +753,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -779,7 +779,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -802,7 +802,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -837,7 +837,7 @@ public class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
                 .setProperty(pluginCoreModel.epFeature, TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     private boolean jsonEqual(String string1, String string2) {

@@ -34,9 +34,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -54,7 +55,7 @@ public class PathParserTest {
     private static ModelRegistry modelRegistryString;
     private static PluginCoreModel pluginCoreModelString;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -84,13 +85,15 @@ public class PathParserTest {
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPathThing() {
-        String path = "/Thing";
-        PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        assertThrows(IllegalArgumentException.class, () -> {
+            String path = "/Thing";
+            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        });
     }
 
     @Test
@@ -104,7 +107,7 @@ public class PathParserTest {
         expResult.setMainElement(espe);
         expResult.setRef(true);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -134,7 +137,7 @@ public class PathParserTest {
                     PathElementProperty ppe = new PathElementProperty(entityProperty, epe);
                     expResult.addPathElement(ppe, false, false);
 
-                    Assert.assertEquals("Failed on " + entityType + " - " + property, expResult, result);
+                    assertEquals(expResult, result, "Failed on " + entityType + " - " + property);
                 }
             }
         }
@@ -154,7 +157,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         expResult.setValue(true);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -171,7 +174,7 @@ public class PathParserTest {
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/name_two";
@@ -185,7 +188,7 @@ public class PathParserTest {
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("name_two", ppe);
             expResult.addPathElement(cppe, false, false);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2]";
@@ -201,7 +204,7 @@ public class PathParserTest {
             expResult.addPathElement(cppe, false, false);
             PathElementArrayIndex cpai = new PathElementArrayIndex(2, cppe);
             expResult.addPathElement(cpai, false, false);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2][3]";
@@ -219,7 +222,7 @@ public class PathParserTest {
             expResult.addPathElement(cpai, false, false);
             cpai = new PathElementArrayIndex(3, cpai);
             expResult.addPathElement(cpai, false, false);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2]/deep[3]";
@@ -239,7 +242,7 @@ public class PathParserTest {
             expResult.addPathElement(cppe, false, false);
             cpai = new PathElementArrayIndex(3, cppe);
             expResult.addPathElement(cpai, false, false);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -257,7 +260,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -272,7 +275,7 @@ public class PathParserTest {
         expResult.addPathElement(cppe, false, false);
         PathElementArrayIndex cpai = new PathElementArrayIndex(2, cppe);
         expResult.addPathElement(cpai, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2][3]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -289,7 +292,7 @@ public class PathParserTest {
         expResult.addPathElement(cpai, false, false);
         cpai = new PathElementArrayIndex(3, cpai);
         expResult.addPathElement(cpai, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]/deep[3]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -308,7 +311,7 @@ public class PathParserTest {
         expResult.addPathElement(cppe, false, false);
         cpai = new PathElementArrayIndex(3, cppe);
         expResult.addPathElement(cpai, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         path = "/Observations(1)/result/property1";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -322,7 +325,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         path = "/Observations(1)/result[2]";
         result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -335,7 +338,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         cpai = new PathElementArrayIndex(2, ppe);
         expResult.addPathElement(cpai, false, false);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
     }
 
@@ -354,7 +357,7 @@ public class PathParserTest {
         espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, espe);
         expResult.addPathElement(espe, false, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -411,7 +414,7 @@ public class PathParserTest {
         epe = new PathElementEntity(pluginCoreModel.npFeatureOfInterestObservation, epe);
         expResult.addPathElement(epe, true, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -456,7 +459,7 @@ public class PathParserTest {
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -513,7 +516,7 @@ public class PathParserTest {
         epe = new PathElementEntity(pluginCoreModel.npFeatureOfInterestObservation, epe);
         expResult.addPathElement(epe, true, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -560,13 +563,15 @@ public class PathParserTest {
         cppe = new PathElementCustomProperty("subproperty2", cppe);
         expResult.addPathElement(cppe, false, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPathdeep5() {
-        String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperties/Datastreams(8)/Observations(9)/FeatureOfInterest";
-        PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        assertThrows(IllegalArgumentException.class, () -> {
+            String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperties/Datastreams(8)/Observations(9)/FeatureOfInterest";
+            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        });
     }
 
     @Test
@@ -587,7 +592,7 @@ public class PathParserTest {
         epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, true, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -608,7 +613,7 @@ public class PathParserTest {
         epe = new PathElementEntity(pluginCoreModel.npThingDatasteam, epe);
         expResult.addPathElement(epe, true, false);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     private void testThing(long id) {
@@ -621,7 +626,7 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdLong(id), pluginCoreModel.etThing, espe);
         expResult.addPathElement(epe, true, true);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     private void testThing(String id) {
@@ -634,7 +639,7 @@ public class PathParserTest {
         PathElementEntity epe = new PathElementEntity(new IdString(id), pluginCoreModelString.etThing, espe);
         expResult.addPathElement(epe, true, true);
 
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
 }

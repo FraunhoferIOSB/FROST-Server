@@ -28,14 +28,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.internal.ArrayComparisonFailure;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +46,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MultiDatastreamTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class MultiDatastreamTests extends AbstractTestClass {
+
+    public static class Implementation10 extends MultiDatastreamTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends MultiDatastreamTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -60,23 +78,23 @@ public class MultiDatastreamTests extends AbstractTestClass {
     private static final List<MultiDatastream> MULTIDATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public MultiDatastreamTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public MultiDatastreamTests(ServerVersion version) {
         super(version);
     }
 
-    @Before
+    @BeforeEach
     public void before() {
-        Assume.assumeTrue(
-                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.",
-                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ));
+        assumeTrue(
+                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ),
+                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.");
     }
 
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-        Assume.assumeTrue(
-                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.",
-                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ));
+        assumeTrue(
+                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ),
+                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.");
         createEntities();
     }
 
@@ -85,7 +103,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -175,17 +193,17 @@ public class MultiDatastreamTests extends AbstractTestClass {
         } catch (ServiceFailureException ex) {
             return;
         }
-        Assert.fail(test + " Update did not respond with 400 Bad Request.");
+        fail(test + " Update did not respond with 400 Bad Request.");
     }
 
     private void checkResult(String test, EntityUtils.ResultTestResult result) {
-        Assert.assertTrue(test + " " + result.message, result.testOk);
+        assertTrue(result.testOk, test + " " + result.message);
     }
 
-    private void checkObservedPropertiesFor(MultiDatastream md, ObservedProperty... expectedObservedProps) throws ArrayComparisonFailure, ServiceFailureException {
+    private void checkObservedPropertiesFor(MultiDatastream md, ObservedProperty... expectedObservedProps) throws ServiceFailureException {
         ObservedProperty[] fetchedObservedProps2 = md.observedProperties().query().list().toArray(new ObservedProperty[0]);
         String message = "Incorrect Observed Properties returned.";
-        Assert.assertArrayEquals(message, expectedObservedProps, fetchedObservedProps2);
+        assertArrayEquals(expectedObservedProps, fetchedObservedProps2, message);
     }
 
     @Test
@@ -279,7 +297,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
 
         service.create(md4);
         MULTIDATASTREAMS.add(md4);
-        Assert.assertEquals(4, MULTIDATASTREAMS.size());
+        assertEquals(4, MULTIDATASTREAMS.size());
     }
 
     @Test
@@ -300,7 +318,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 10, 7);
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 11, 8);
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 12, 9);
-        Assert.assertEquals(14, OBSERVATIONS.size());
+        assertEquals(14, OBSERVATIONS.size());
     }
 
     @Test
@@ -309,18 +327,18 @@ public class MultiDatastreamTests extends AbstractTestClass {
         try {
             Observation o = new Observation(1, MULTIDATASTREAMS.get(1).withOnlyId());
             service.create(o);
-            Assert.fail("Service should have rejected posting non-array result to a multidatastream.");
+            fail("Service should have rejected posting non-array result to a multidatastream.");
         } catch (ServiceFailureException e) {
         }
 
         try {
             createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 1, 2);
-            Assert.fail("Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
+            fail("Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
         } catch (ServiceFailureException e) {
         }
         try {
             createObservation(MULTIDATASTREAMS.get(1).withOnlyId(), 1);
-            Assert.fail("Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
+            fail("Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
         } catch (ServiceFailureException e) {
         }
     }
@@ -329,17 +347,17 @@ public class MultiDatastreamTests extends AbstractTestClass {
         urlString = urlString.replaceAll(Pattern.quote("["), "%5B").replaceAll(Pattern.quote("]"), "%5D");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.code;
-        Assert.assertEquals(message, 200, responseMap.code);
+        assertEquals(200, responseMap.code, message);
 
         JsonNode json;
         try {
             json = new ObjectMapper().readTree(responseMap.response);
         } catch (IOException ex) {
-            Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
+            fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return null;
         }
         if (!json.isObject()) {
-            Assert.fail("Server did not return a JSON object for request: " + urlString);
+            fail("Server did not return a JSON object for request: " + urlString);
         }
         return json;
     }
@@ -348,7 +366,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
         JsonNode json = getJsonObject(urlString);
         JsonNode value = json.get("value");
         if (value == null || !value.isArray()) {
-            Assert.fail("value field is not an array for request: " + urlString);
+            fail("value field is not an array for request: " + urlString);
         }
         return value;
     }
@@ -356,7 +374,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
     private void entitiesHaveOneOf(JsonNode value, String EntityName, String... properties) {
         for (JsonNode valueItem : value) {
             if (!valueItem.isObject()) {
-                Assert.fail("item in " + EntityName + " array is not an object.");
+                fail("item in " + EntityName + " array is not an object.");
                 return;
             }
             for (String property : properties) {
@@ -364,7 +382,7 @@ public class MultiDatastreamTests extends AbstractTestClass {
                     return;
                 }
             }
-            Assert.fail("item in " + EntityName + " array does not contain any of " + Arrays.toString(properties));
+            fail("item in " + EntityName + " array does not contain any of " + Arrays.toString(properties));
         }
     }
 
@@ -391,10 +409,10 @@ public class MultiDatastreamTests extends AbstractTestClass {
         json = getJsonObject(urlString);
         JsonNode value = json.get("result[0]");
         if (value == null || !value.isNumber()) {
-            Assert.fail("Did not get a numeric value for result[0] for url: " + urlString);
+            fail("Did not get a numeric value for result[0] for url: " + urlString);
         } else {
             String message = "Did not get correct value for url: " + urlString;
-            Assert.assertEquals(message, 4, value.asInt());
+            assertEquals(4, value.asInt(), message);
         }
     }
 
@@ -460,12 +478,12 @@ public class MultiDatastreamTests extends AbstractTestClass {
         Datastream fetchedDatastream = fetchedObservation.getDatastream();
 
         String message = "Observation has wrong or no Datastream";
-        Assert.assertEquals(message, DATASTREAMS.get(0), fetchedDatastream);
+        assertEquals(DATASTREAMS.get(0), fetchedDatastream, message);
 
         MultiDatastream fetchedMultiDatastream = fetchedObservation.getMultiDatastream();
 
         message = "Observation should not have a MultiDatastream";
-        Assert.assertEquals(message, null, fetchedMultiDatastream);
+        assertEquals(null, fetchedMultiDatastream, message);
     }
 
     @Test
@@ -476,12 +494,12 @@ public class MultiDatastreamTests extends AbstractTestClass {
         Datastream fetchedDatastream = fetchedObservation.getDatastream();
 
         String message = "Observation should not have a Datastream";
-        Assert.assertEquals(message, null, fetchedDatastream);
+        assertEquals(null, fetchedDatastream, message);
 
         MultiDatastream fetchedMultiDatastream = fetchedObservation.getMultiDatastream();
 
         message = "Observation has wrong or no MultiDatastream";
-        Assert.assertEquals(message, MULTIDATASTREAMS.get(0), fetchedMultiDatastream);
+        assertEquals(MULTIDATASTREAMS.get(0), fetchedMultiDatastream, message);
     }
 
     @Test

@@ -23,9 +23,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
@@ -35,7 +36,23 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class DeleteFilterTests extends AbstractTestClass {
+public abstract class DeleteFilterTests extends AbstractTestClass {
+
+    public static class Implementation10 extends DeleteFilterTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends DeleteFilterTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -87,7 +104,7 @@ public class DeleteFilterTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         try {
@@ -186,10 +203,10 @@ public class DeleteFilterTests extends AbstractTestClass {
             EntityList<Observation> result = service.observations().query().list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
-            Assert.assertTrue(message, check.testOk);
+            assertTrue(check.testOk, message);
         } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to call service.", ex);
-            Assert.fail("Failed to call service." + ex.getMessage());
+            fail("Failed to call service." + ex.getMessage());
         }
     }
 

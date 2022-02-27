@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchTests;
+import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MdDateTimeTests;
 import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests;
 import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
@@ -75,51 +76,87 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  *
  * @author scf
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    Capability1CoreOnlyTests.class,
-    Capability1Tests.class,
-    Capability2Tests.class,
-    AdditionalTests.class,
-    DeleteFilterTests.class,
-    JsonPatchTests.class,
-    ResultTypesTests.class,
-    Capability3Tests.class,
-    DateTimeTests.class,
-    FilterTests.class,
-    GeoTests.class,
-    JsonPropertiesTests.class,
-    BatchTests.class,
-    MultiDatastreamTests.class,
-    DataArrayTests.class,
-    Capability7Tests.class,
-    Capability8Tests.class,
-    BasicAuthTests.class,
-    BasicAuthAnonReadTests.class,
-    KeyCloakTests.class,
-    KeyCloakAnonReadTests.class,
-    CustomLinksTests.class,
-    MetadataTests.class
+@SelectClasses({
+    Capability1CoreOnlyTests.Implementation10.class,
+    Capability1CoreOnlyTests.Implementation11.class,
+    Capability1Tests.Implementation10.class,
+    Capability1Tests.Implementation11.class,
+    Capability2Tests.Implementation10.class,
+    Capability2Tests.Implementation11.class,
+    AdditionalTests.Implementation10.class,
+    AdditionalTests.Implementation11.class,
+    DeleteFilterTests.Implementation10.class,
+    DeleteFilterTests.Implementation11.class,
+    JsonPatchTests.Implementation10.class,
+    JsonPatchTests.Implementation11.class,
+    ResultTypesTests.Implementation10.class,
+    ResultTypesTests.Implementation11.class,
+    Capability3Tests.Implementation10.class,
+    Capability3Tests.Implementation11.class,
+    DateTimeTests.Implementation10.class,
+    DateTimeTests.Implementation11.class,
+    FilterTests.Implementation10.class,
+    FilterTests.Implementation11.class,
+    GeoTests.Implementation10.class,
+    GeoTests.Implementation11.class,
+    JsonPropertiesTests.Implementation10.class,
+    JsonPropertiesTests.Implementation11.class,
+    BatchTests.Implementation10.class,
+    BatchTests.Implementation11.class,
+    MultiDatastreamTests.Implementation10.class,
+    MultiDatastreamTests.Implementation11.class,
+    MdDateTimeTests.Implementation10.class,
+    MdDateTimeTests.Implementation11.class,
+    DataArrayTests.Implementation10.class,
+    DataArrayTests.Implementation11.class,
+    Capability7Tests.Implementation10.class,
+    Capability7Tests.Implementation11.class,
+    Capability8Tests.Implementation10.class,
+    Capability8Tests.Implementation11.class,
+    BasicAuthTests.Implementation10.class,
+    BasicAuthTests.Implementation11.class,
+    BasicAuthAnonReadTests.Implementation10.class,
+    BasicAuthAnonReadTests.Implementation11.class,
+    KeyCloakTests.Implementation10.class,
+    KeyCloakTests.Implementation11.class,
+    KeyCloakAnonReadTests.Implementation10.class,
+    KeyCloakAnonReadTests.Implementation11.class,
+    CustomLinksTests.Implementation10.class,
+    CustomLinksTests.Implementation11.class,
+    MetadataTests.Implementation10.class,
+    MetadataTests.Implementation11.class,
+    TestSuite.SuiteFinaliser.class
 })
+@Suite
+@Testcontainers
 public class TestSuite {
 
+    public static class SuiteFinaliser {
+
+        @Test
+        public void finalTest() {
+            LOGGER.info("Stopping Servers...");
+            getInstance().stopAllServers();
+        }
+    }
     /**
      * The logger for this class.
      */
@@ -144,19 +181,19 @@ public class TestSuite {
     private String pgConnectUrl;
     private final AtomicInteger nextId = new AtomicInteger(1);
 
-    @Rule
+    @Container
     private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
             .withEnv("POSTGRES_DB", VAL_PG_DB)
             .withEnv("POSTGRES_USER", VAL_PG_USER)
             .withEnv("POSTGRES_PASSWORD", VAL_PG_PASS)
             .withExposedPorts(5432);
 
-    @Rule
+    @Container
     private final GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
             .withExposedPorts(1883)
             .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
 
-    @Rule
+    @Container
     private final KeycloakContainer keycloak = new KeycloakContainer()
             .withRealmImportFile("keycloak/FROST-Test.json");
 
@@ -182,13 +219,14 @@ public class TestSuite {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws IOException, InterruptedException {
         LOGGER.info("Starting Servers...");
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
+        HTTPMethods.logStats();
         LOGGER.info("Stopping Servers...");
         getInstance().stopAllServers();
     }
@@ -225,7 +263,7 @@ public class TestSuite {
             // To log pg output: pgServer.followOutput(new Slf4jLogConsumer(LOGGER));
             mqttBus.start();
 
-            Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
+            org.testcontainers.containers.Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
         }
@@ -480,7 +518,7 @@ public class TestSuite {
         HttpResponse response = HTTPMethods.doGet(rootUri);
 
         if (response == null || response.code != 200) {
-            Assert.fail("Cannot fetch service root url from " + rootUri + ".");
+            fail("Cannot fetch service root url from " + rootUri + ".");
             return;
         }
 
@@ -491,7 +529,7 @@ public class TestSuite {
             entities = jsonResponse.getJSONArray("value");
         } catch (JSONException e) {
             LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
-            Assert.fail("The service response for the root URI '" + rootUri + "' is not JSON.");
+            fail("The service response for the root URI '" + rootUri + "' is not JSON.");
             return;
         }
         boolean hasActuation = false;
@@ -502,13 +540,13 @@ public class TestSuite {
             try {
                 entity = entities.getJSONObject(i);
                 if (!entity.has("name")) {
-                    Assert.fail("The name component of Service root URI response is not available.");
+                    fail("The name component of Service root URI response is not available.");
                     return;
                 }
                 name = entity.getString("name");
             } catch (JSONException e) {
                 LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
-                Assert.fail("The service response for the root URI '" + rootUri + "' is not JSON.");
+                fail("The service response for the root URI '" + rootUri + "' is not JSON.");
                 return;
             }
             switch (name) {
@@ -545,10 +583,10 @@ public class TestSuite {
                 serverSettings.addImplementedRequirements(version, allMatching);
             }
             if (hasActuation && !serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
-                Assert.fail("Server lists Actuation entities, but does not claim reqirement " + ServerSettings.TASKING_REQ.getName());
+                fail("Server lists Actuation entities, but does not claim reqirement " + ServerSettings.TASKING_REQ.getName());
             }
             if (hasMultiDatastream && !serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
-                Assert.fail("Server lists the MultiDatastream entity, but does not claim reqirement " + ServerSettings.MULTIDATA_REQ.getName());
+                fail("Server lists the MultiDatastream entity, but does not claim reqirement " + ServerSettings.MULTIDATA_REQ.getName());
             }
         }
     }

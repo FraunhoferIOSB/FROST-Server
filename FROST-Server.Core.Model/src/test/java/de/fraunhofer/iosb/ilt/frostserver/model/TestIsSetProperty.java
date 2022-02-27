@@ -24,10 +24,11 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class TestIsSetProperty {
 
     private Map<EntityType, Map<Property, Object>> propertyValues;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
@@ -54,21 +55,20 @@ public class TestIsSetProperty {
         modelRegistry.initFinalise();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         propertyValues = testModel.getTestPropertyValues(modelRegistry);
 
         for (EntityType et : modelRegistry.getEntityTypes()) {
-            Assert.assertTrue("Missing values for " + et, propertyValues.containsKey(et));
+            assertTrue(propertyValues.containsKey(et), "Missing values for " + et);
             final Map<Property, Object> propertValuesEt = propertyValues.get(et);
             for (EntityPropertyMain ep : et.getEntityProperties()) {
-                Assert.assertTrue("Missing value for " + ep, propertValuesEt.containsKey(ep));
+                assertTrue(propertValuesEt.containsKey(ep), "Missing value for " + ep);
             }
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
-                Assert.assertTrue("Missing value for " + np, propertValuesEt.containsKey(np));
+                assertTrue(propertValuesEt.containsKey(np), "Missing value for " + np);
             }
         }
-
     }
 
     @Test
@@ -114,7 +114,7 @@ public class TestIsSetProperty {
 
         } catch (NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property: " + ex.getMessage());
+            fail("Failed to access property: " + ex.getMessage());
         }
     }
 
@@ -128,10 +128,10 @@ public class TestIsSetProperty {
                 }
             }
             if (shouldBeChanged && !changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
             }
             if (!shouldBeChanged && changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
             }
             isSetPropertyOnObject(entity, p, shouldBeChanged);
         }
@@ -152,11 +152,11 @@ public class TestIsSetProperty {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {
-                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
-            Assert.fail("Failed to set property: " + ex.getMessage());
+            fail("Failed to set property: " + ex.getMessage());
         }
     }
 

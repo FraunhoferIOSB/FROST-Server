@@ -1,5 +1,3 @@
-package de.fraunhofer.iosb.ilt.frostserver.util;
-
 /*
  * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
@@ -17,12 +15,14 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+package de.fraunhofer.iosb.ilt.frostserver.util;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -33,33 +33,33 @@ public class StringHelperTest {
     public StringHelperTest() {
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
     }
 
     @Test
     public void testEscapeForStringConstant() {
-        Assert.assertEquals("abcdefg", StringHelper.escapeForStringConstant("abcdefg"));
-        Assert.assertEquals("''", StringHelper.escapeForStringConstant("'"));
-        Assert.assertEquals("''''", StringHelper.escapeForStringConstant("''"));
+        assertEquals("abcdefg", StringHelper.escapeForStringConstant("abcdefg"));
+        assertEquals("''", StringHelper.escapeForStringConstant("'"));
+        assertEquals("''''", StringHelper.escapeForStringConstant("''"));
     }
 
     @Test
     public void testUrlEncode() {
-        Assert.assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
-        Assert.assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
+        assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
+        assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
     }
 
 }

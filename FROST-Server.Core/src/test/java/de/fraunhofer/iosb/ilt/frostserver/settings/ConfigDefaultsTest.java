@@ -12,32 +12,32 @@ import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_T
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ConfigDefaultsTest {
 
     public ConfigDefaultsTest() {
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
     }
 
@@ -99,19 +99,19 @@ public class ConfigDefaultsTest {
         // Test invalid properties
         try {
             b.defaultValueInt("NOT_A_VALID_INT_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }
         try {
             b.defaultValue("NOT_A_VALID_STR_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }
         try {
             b.defaultValueBoolean("NOT_A_VALID_BOOL_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }
@@ -207,19 +207,19 @@ public class ConfigDefaultsTest {
         // Test invalid properties
         try {
             ConfigUtils.getDefaultValueInt(c, "NOT_A_VALID_INT_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }
         try {
             ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }
         try {
             ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY");
-            Assert.fail("Should have thrown an exception for a non-existing default value.");
+            fail("Should have thrown an exception for a non-existing default value.");
         } catch (IllegalArgumentException exc) {
             // This should happen.
         }

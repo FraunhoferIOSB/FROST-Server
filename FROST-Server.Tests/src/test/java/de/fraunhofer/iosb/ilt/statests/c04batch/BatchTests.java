@@ -21,11 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +34,24 @@ import org.slf4j.LoggerFactory;
  * Includes various tests of "A.4. SensorThings API Batch Request Extension
  * Tests" conformance class.
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class BatchTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class BatchTests extends AbstractTestClass {
+
+    public static class Implementation10 extends BatchTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends BatchTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchTests.class);
     private static final List<Thing> THINGS = new ArrayList<>();
@@ -62,7 +79,7 @@ public class BatchTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -146,7 +163,7 @@ public class BatchTests extends AbstractTestClass {
         String mixedBoundary = response.substring(mixedBoundaryStart, mixedBoundaryStart + 40);
         // Note: using LF line terminator instead of recommended CRLF, see
         // https://datatracker.ietf.org/doc/html/rfc7230#section-3.5
-        Assert.assertEquals(batchBoundary + "\n"
+        assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
                 + "\n"
                 + "http/1.1 200 no text\n"
@@ -244,7 +261,7 @@ public class BatchTests extends AbstractTestClass {
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
         String mixedBoundary = response.substring(mixedBoundaryStart, mixedBoundaryStart + 40);
-        Assert.assertEquals(batchBoundary + "\n" + "Content-Type: multipart/mixed; boundary=" + mixedBoundary + "\n"
+        assertEquals(batchBoundary + "\n" + "Content-Type: multipart/mixed; boundary=" + mixedBoundary + "\n"
                 + "\n"
                 + "--" + mixedBoundary + "\n"
                 + "Content-Type: application/http\n"
@@ -278,7 +295,7 @@ public class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + "--batch_test--");
         String batchBoundary = response.split("\n", 2)[0];
-        Assert.assertEquals(batchBoundary + "\n"
+        assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
                 + "\n"
                 + "http/1.1 200 no text\n"
@@ -318,7 +335,7 @@ public class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + "--batch_test--");
         String batchBoundary = response.split("\n", 2)[0];
-        Assert.assertEquals(batchBoundary + "\n"
+        assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
                 + "\n"
                 + "http/1.1 200 no text\n"
@@ -362,7 +379,7 @@ public class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + "--batch_test--");
         String batchBoundary = response.split("\n", 2)[0];
-        Assert.assertEquals(batchBoundary + "\n"
+        assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
                 + "\n"
                 + "http/1.1 200 no text\n"
@@ -418,9 +435,9 @@ public class BatchTests extends AbstractTestClass {
                     + "]}",
                     BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
-            Assert.assertEquals("Response not as expected.", expected, actual);
+            assertEquals(expected, actual, "Response not as expected.");
         } catch (JsonProcessingException ex) {
-            Assert.fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.");
         }
 
     }
@@ -473,9 +490,9 @@ public class BatchTests extends AbstractTestClass {
                     + "/Datastreams(" + datastreamId + ")\"}"
                     + "]}", BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
-            Assert.assertEquals("Response not as expected.", expected, actual);
+            assertEquals(expected, actual, "Response not as expected.");
         } catch (JsonProcessingException ex) {
-            Assert.fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.");
         }
 
     }
@@ -485,11 +502,11 @@ public class BatchTests extends AbstractTestClass {
         try {
             HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
                     boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary);
-            Assert.assertEquals("Batch response should be 200", 200, httpResponse.code);
+            assertEquals(200, httpResponse.code, "Batch response should be 200");
             return httpResponse.response;
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing: " + e.getMessage());
+            fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }

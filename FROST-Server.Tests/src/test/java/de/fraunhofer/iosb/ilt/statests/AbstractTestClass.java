@@ -27,12 +27,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Properties;
-import org.junit.AfterClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +36,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-@RunWith(Parameterized.class)
 public abstract class AbstractTestClass {
 
     /**
@@ -106,17 +101,7 @@ public abstract class AbstractTestClass {
         // Empty by design.
     }
 
-    /**
-     * The collection of parameters for testing.
-     *
-     * @return The collection of parameters for testing.
-     */
-    @Parameterized.Parameters
-    public static Collection versions() {
-        return Arrays.asList(ServerVersion.values());
-    }
-
-    @AfterClass
+    @AfterAll
     public static final void cleanupAbstractClass() {
         version = null;
         serverSettings = null;

@@ -36,11 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CustomLinksTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class CustomLinksTests extends AbstractTestClass {
+
+    public static class Implementation10 extends CustomLinksTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends CustomLinksTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomLinksTests.class.getName());
 
@@ -82,7 +99,7 @@ public class CustomLinksTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -149,7 +166,7 @@ public class CustomLinksTests extends AbstractTestClass {
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
                 + THINGS.get(0).getId().getUrl() + ")";
-        Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
+        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
     }
 
     @Test
@@ -164,15 +181,15 @@ public class CustomLinksTests extends AbstractTestClass {
                 + "/" + version.urlPart + "/Things("
                 + THINGS.get(0).getId().getUrl() + ")";
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
-        Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, navLink);
+        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
 
         expected = THINGS.get(0).getName();
         Object parent = thing.getProperties().get("parent.Thing");
         if (!(parent instanceof Map)) {
-            Assert.fail("parent.Thing did not expand.");
+            fail("parent.Thing did not expand.");
         }
         Object name = ((Map) parent).get("name");
-        Assert.assertEquals("Custom link does not have (correct) navigationLink.", expected, name);
+        assertEquals(expected, name, "Custom link does not have (correct) navigationLink.");
     }
 
 }

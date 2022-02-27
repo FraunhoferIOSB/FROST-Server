@@ -18,13 +18,10 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.sta.service.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class KeyCloakTests extends AbstractAuthTests {
+public abstract class KeyCloakTests extends AbstractAuthTests {
+
+    public static class Implementation10 extends KeyCloakTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends KeyCloakTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -54,7 +67,7 @@ public class KeyCloakTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth_allowAnonymousRead", "false");
     }
 
-    public KeyCloakTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException {
+    public KeyCloakTests(ServerVersion version) {
         super(version, SERVER_PROPERTIES, false);
     }
 

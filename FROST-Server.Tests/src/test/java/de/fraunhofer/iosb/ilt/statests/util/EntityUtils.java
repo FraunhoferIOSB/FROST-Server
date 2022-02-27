@@ -19,7 +19,10 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,10 +188,10 @@ public class EntityUtils {
                 if (count != null) {
                     if (count) {
                         String message = "Response should have property " + countProperty + " for request: '" + request.toString() + "'";
-                        Assert.assertTrue(message, response.has(countProperty));
+                        assertTrue(response.has(countProperty), message);
                     } else {
                         String message = "Response should not have property " + countProperty + " for request: '" + request.toString() + "'";
-                        Assert.assertFalse(message, response.has(countProperty));
+                        assertFalse(response.has(countProperty), message);
                     }
                 }
 
@@ -196,7 +199,7 @@ public class EntityUtils {
                 if (response.has(countProperty) && expectedCount != -1) {
                     long foundCount = response.getLong(countProperty);
                     String message = "Incorrect count for collection of " + request.getEntityType() + " for request: '" + request.toString() + "'";
-                    Assert.assertEquals(message, expectedCount, foundCount);
+                    assertEquals(expectedCount, foundCount, message);
                 }
                 Long top = expandQuery.getTop();
                 if (top != null && expectedCount != -1) {
@@ -205,18 +208,18 @@ public class EntityUtils {
 
                     long expectedNumber = Math.max(0, Math.min(expectedCount - skip, top));
                     if (foundNumber != expectedNumber) {
-                        Assert.fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
+                        fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
                     }
 
                     String nextLinkProperty = "@iot.nextLink";
                     if (foundNumber + skip < expectedCount) {
                         // should have nextLink
                         String message = "Entity should have " + nextLinkProperty + " for request: '" + request.toString() + "'";
-                        Assert.assertTrue(message, response.has(nextLinkProperty));
+                        assertTrue(response.has(nextLinkProperty), message);
                     } else {
                         // should not have nextLink
                         String message = "Entity should not have " + nextLinkProperty + " for request: '" + request.toString() + "'";
-                        Assert.assertFalse(message, response.has(nextLinkProperty));
+                        assertFalse(response.has(nextLinkProperty), message);
                     }
 
                 }
@@ -227,7 +230,7 @@ public class EntityUtils {
         } catch (JSONException ex) {
             String message = "Failure when checking response of query '" + request.getLastUrl() + "'";
             LOGGER.error(message, ex);
-            Assert.fail(message);
+            fail(message);
         }
     }
 
@@ -274,30 +277,28 @@ public class EntityUtils {
         }
         if (select.contains("id")) {
             String message = "Entity should have property @iot.id for request: '" + expand.toString() + "'";
-            Assert.assertTrue(message, entity.has("@iot.id"));
+            assertTrue(entity.has("@iot.id"), message);
         } else {
             String message = "Entity should not have property @iot.id for request: '" + expand.toString() + "'";
-            Assert.assertFalse(message, entity.has("@iot.id"));
+            assertFalse(entity.has("@iot.id"), message);
         }
         for (EntityType.EntityProperty property : entityType.getProperties()) {
             if (select.contains(property.name)) {
-                String message
-                        = "Entity should have property " + property.name + " for request: '" + expand.toString() + "'";
-                Assert.assertTrue(message,
-                        entity.has(property.name) || property.optional);
+                String message = "Entity should have property " + property.name + " for request: '" + expand.toString() + "'";
+                assertTrue(entity.has(property.name) || property.optional, message);
             } else {
                 String message = "Entity should not have property " + property.name + " for request: '" + expand.toString() + "'";
-                Assert.assertFalse(message, entity.has(property.name));
+                assertFalse(entity.has(property.name), message);
             }
         }
         for (String relationName : entityType.getRelations(extensions)) {
             String propertyName = relationName + "@iot.navigationLink";
             if (select.contains(relationName)) {
                 String message = "Entity should have property " + propertyName + " for request: '" + expand.toString() + "'";
-                Assert.assertTrue(message, entity.has(propertyName));
+                assertTrue(entity.has(propertyName), message);
             } else {
                 String message = "Entity should not have property " + propertyName + " for request: '" + expand.toString() + "'";
-                Assert.assertFalse(message, entity.has(propertyName));
+                assertFalse(entity.has(propertyName), message);
             }
         }
 
@@ -310,7 +311,7 @@ public class EntityUtils {
             PathElement path = subExpand.getPath().get(0);
             String propertyName = path.getPropertyName();
             if (!entity.has(propertyName)) {
-                Assert.fail("Entity should have expanded " + propertyName + " for request: '" + expand.toString() + "'");
+                fail("Entity should have expanded " + propertyName + " for request: '" + expand.toString() + "'");
             }
 
             // Check the expanded items
@@ -331,10 +332,10 @@ public class EntityUtils {
                 if (count != null) {
                     if (count) {
                         String message = "Entity should have property " + countProperty + " for request: '" + expand.toString() + "'";
-                        Assert.assertTrue(message, hasCountProperty);
+                        assertTrue(hasCountProperty, message);
                     } else {
                         String message = "Entity should not have property " + countProperty + " for request: '" + expand.toString() + "'";
-                        Assert.assertFalse(message, hasCountProperty);
+                        assertFalse(hasCountProperty, message);
                     }
                 }
 
@@ -342,7 +343,7 @@ public class EntityUtils {
                 if (hasCountProperty && expectedCount != -1) {
                     long foundCount = entity.getLong(countProperty);
                     String message = "Found incorrect count for " + countProperty;
-                    Assert.assertEquals(message, expectedCount, foundCount);
+                    assertEquals(expectedCount, foundCount, message);
                 }
 
                 Long top = expandQuery.getTop();
@@ -352,18 +353,18 @@ public class EntityUtils {
 
                     long expectedNumber = Math.min(expectedCount - skip, top);
                     if (foundNumber != expectedNumber) {
-                        Assert.fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
+                        fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
                     }
 
                     String nextLinkProperty = propertyName + "@iot.nextLink";
                     if (foundNumber + skip < expectedCount) {
                         // should have nextLink
                         String message = "Entity should have " + nextLinkProperty + " for expand " + subExpand.toString();
-                        Assert.assertTrue(message, entity.has(nextLinkProperty));
+                        assertTrue(entity.has(nextLinkProperty), message);
                     } else {
                         // should not have nextLink
                         String message = "Entity should have " + nextLinkProperty + " for expand " + subExpand.toString();
-                        Assert.assertFalse(message, entity.has(nextLinkProperty));
+                        assertFalse(entity.has(nextLinkProperty), message);
                     }
 
                 }
@@ -372,7 +373,7 @@ public class EntityUtils {
         }
         for (String propertyName : relations) {
             if (entity.has(propertyName)) {
-                Assert.fail("Entity should not have expanded " + propertyName + " for request: '" + expand.toString() + "'");
+                fail("Entity should not have expanded " + propertyName + " for request: '" + expand.toString() + "'");
             }
         }
     }
@@ -397,17 +398,17 @@ public class EntityUtils {
         try {
             EntityList<T> result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String msg = "Failed on filter: " + filter + " Cause: " + check.message;
+            String message = "Failed on filter: " + filter + " Cause: " + check.message;
             if (!check.testOk) {
                 LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
                         filter,
                         EntityUtils.listEntities(expected),
                         EntityUtils.listEntities(result.toList()));
             }
-            Assert.assertTrue(msg, check.testOk);
+            assertTrue(check.testOk, message);
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception filtering doa {} using {} :", doa, filter, ex);
-            Assert.fail("Failed to call service: " + ex.getMessage());
+            fail("Failed to call service: " + ex.getMessage());
         }
     }
 
@@ -415,13 +416,13 @@ public class EntityUtils {
         try {
             doa.query().filter(filter).list();
         } catch (StatusCodeException e) {
-            String msg = "Filter " + filter + " did not respond with " + expectedCode + ", but with " + e.getStatusCode() + ".";
-            Assert.assertEquals(msg, expectedCode, e.getStatusCode());
+            String message = "Filter " + filter + " did not respond with " + expectedCode + ", but with " + e.getStatusCode() + ".";
+            assertEquals(expectedCode, e.getStatusCode(), message);
             return;
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Failed to call service for filter " + filter + " " + ex);
+            fail("Failed to call service for filter " + filter + " " + ex);
         }
-        Assert.fail("Filter " + filter + " did not respond with " + expectedCode + ".");
+        fail("Filter " + filter + " did not respond with " + expectedCode + ".");
     }
 }

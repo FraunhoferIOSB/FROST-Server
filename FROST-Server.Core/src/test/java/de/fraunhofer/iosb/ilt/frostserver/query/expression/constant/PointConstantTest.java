@@ -18,8 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -31,35 +32,37 @@ public class PointConstantTest {
     public void testparseFromStringSpaces() {
         String text = "POINT                     (      30                                              10    )";
         PointConstant result = new PointConstant(text);
-        Assert.assertEquals(TestHelper.getPoint(30, 10), result.getValue());
+        assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
     public void testparseFromString2D() {
         String text = "POINT (30 10)";
         PointConstant result = new PointConstant(text);
-        Assert.assertEquals(TestHelper.getPoint(30, 10), result.getValue());
+        assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
     public void testparseFromString3D() {
         String text = "POINT (30 10 10)";
         PointConstant result = new PointConstant(text);
-        Assert.assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
+        assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testparseFromStringWithWrongDimension1D() {
-        String text = "POINT (10)";
-        PointConstant pointConstant = new PointConstant(text);
-        Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
+        assertThrows(IllegalArgumentException.class, () -> {
+            String text = "POINT (10)";
+            PointConstant pointConstant = new PointConstant(text);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testparseFromStringWithWrongDimension4D() {
-        String text = "POINT (10 10 10 10)";
-        PointConstant pointConstant = new PointConstant(text);
-        Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
+        assertThrows(IllegalArgumentException.class, () -> {
+            String text = "POINT (10 10 10 10)";
+            PointConstant pointConstant = new PointConstant(text);
+        });
     }
 
 }

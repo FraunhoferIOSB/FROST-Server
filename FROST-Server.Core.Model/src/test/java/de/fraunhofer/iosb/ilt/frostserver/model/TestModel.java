@@ -30,7 +30,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -133,13 +133,13 @@ public class TestModel {
         propertyValuesHouse.put(NP_STREETS_HOUSE, streets);
 
         for (EntityType et : modelRegistry.getEntityTypes()) {
-            Assert.assertTrue("Missing values for " + et, propertyValues.containsKey(et));
+            assertTrue(propertyValues.containsKey(et), "Missing values for " + et);
             final Map<Property, Object> propertValuesEt = propertyValues.get(et);
             for (EntityPropertyMain ep : et.getEntityProperties()) {
-                Assert.assertTrue("Missing value for " + et + "/" + ep, propertValuesEt.containsKey(ep));
+                assertTrue(propertValuesEt.containsKey(ep), "Missing value for " + et + "/" + ep);
             }
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
-                Assert.assertTrue("Missing value for " + et + "/" + np, propertValuesEt.containsKey(np));
+                assertTrue(propertValuesEt.containsKey(np), "Missing value for " + et + "/" + np);
             }
         }
 

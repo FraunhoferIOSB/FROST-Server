@@ -34,10 +34,10 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -52,7 +52,7 @@ public class EntityParserStringIdTest {
     private static PluginMultiDatastream pluginMultiDatastream;
     private static EntityType etMultiDatastream;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -72,7 +72,7 @@ public class EntityParserStringIdTest {
 
     private JsonReader entityParser;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         entityParser = new JsonReader(modelRegistry);
     }

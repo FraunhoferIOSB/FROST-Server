@@ -24,10 +24,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,7 @@ public class EntityBuilderTest {
 
     private Map<EntityType, Map<Property, Object>> propertyValues;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
@@ -55,7 +57,7 @@ public class EntityBuilderTest {
         modelRegistry.initFinalise();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         propertyValues = testModel.getTestPropertyValues(modelRegistry);
     }
@@ -76,16 +78,16 @@ public class EntityBuilderTest {
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
-                Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, entity2);
+                assertNotEquals(entity, entity2, "Property " + pName + " should influence equals.");
 
                 addPropertyToObject(entity2, p);
-                Assert.assertEquals("Entities should be the same after adding " + pName + " to both.", entity, entity2);
+                assertEquals(entity, entity2, "Entities should be the same after adding " + pName + " to both.");
 
                 getPropertyFromObject(entity, p);
             }
         } catch (IllegalArgumentException ex) {
             LOGGER.error("Failed create entity.", ex);
-            Assert.fail("Failed create entity: " + ex.getMessage());
+            fail("Failed create entity: " + ex.getMessage());
         }
     }
 
@@ -99,24 +101,24 @@ public class EntityBuilderTest {
             property.setOn(entity, value);
         } catch (NullPointerException ex) {
             LOGGER.error("Failed to set property " + property, ex);
-            Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
+            fail("Failed to set property " + property + ": " + ex.getMessage());
         }
     }
 
     private void getPropertyFromObject(Entity entity, Property property) {
         try {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
-                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
             Object value = propertyValues.get(entity.getEntityType()).get(property);
             Object setValue = property.getFrom(entity);
 
             if (!Objects.equals(value, setValue)) {
-                Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
+                fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
-            Assert.fail("Failed to set property: " + ex.getMessage());
+            fail("Failed to set property: " + ex.getMessage());
         }
     }
 

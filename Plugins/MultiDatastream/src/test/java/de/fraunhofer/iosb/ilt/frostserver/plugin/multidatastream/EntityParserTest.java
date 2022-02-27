@@ -41,10 +41,10 @@ import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -69,7 +69,7 @@ public class EntityParserTest {
     private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
     private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -210,7 +210,7 @@ public class EntityParserTest {
                 + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+        assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime)
                 && result.isSetProperty(pluginCoreModel.epResult)
                 && result.isSetProperty(pluginCoreModel.npDatastreamObservation)
@@ -225,7 +225,7 @@ public class EntityParserTest {
     public void readObservationWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultTime)
                 && !result.isSetProperty(pluginCoreModel.epResult)
                 && !result.isSetProperty(pluginCoreModel.npDatastreamObservation)
@@ -395,7 +395,7 @@ public class EntityParserTest {
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epDefinition));
     }
@@ -404,7 +404,7 @@ public class EntityParserTest {
     public void readObservedPropertyWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epDefinition));
     }
@@ -523,7 +523,7 @@ public class EntityParserTest {
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && result.isSetProperty(pluginCoreModel.epMetadata));
@@ -533,7 +533,7 @@ public class EntityParserTest {
     public void readSensorWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && !result.isSetProperty(pluginCoreModel.epMetadata));
@@ -573,7 +573,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
@@ -582,7 +582,7 @@ public class EntityParserTest {
     public void readThingWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }

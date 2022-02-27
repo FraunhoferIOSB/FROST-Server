@@ -27,9 +27,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -50,7 +50,7 @@ public class UrlHelperTest {
     private static ModelRegistry modelRegistryString;
     private static PluginCoreModel pluginCoreModelString;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -204,17 +204,17 @@ public class UrlHelperTest {
         {
             String gotten = UrlHelper.getRelativePath("/a/b/c/e", "/a/b/c/d");
             String expected = "e";
-            Assert.assertEquals(expected, gotten);
+            assertEquals(expected, gotten);
         }
         {
             String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams(1)/Sensor", "/SensorThingsService/v0.0/Datastreams");
             String expected = "Datastreams(1)/Sensor";
-            Assert.assertEquals(expected, gotten);
+            assertEquals(expected, gotten);
         }
         {
             String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams('a String id')/Sensor", "/SensorThingsService/v0.0/Datastreams");
             String expected = "Datastreams('a String id')/Sensor";
-            Assert.assertEquals(expected, gotten);
+            assertEquals(expected, gotten);
         }
     }
 
@@ -243,7 +243,7 @@ public class UrlHelperTest {
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
         Query next = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
 
-        Assert.assertEquals(queryExpected, next);
+        assertEquals(queryExpected, next);
     }
 
     private static void probeQuery(Query query) {

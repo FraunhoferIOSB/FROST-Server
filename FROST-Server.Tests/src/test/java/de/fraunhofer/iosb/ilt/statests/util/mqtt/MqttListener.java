@@ -30,7 +30,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -70,7 +70,7 @@ public class MqttListener implements Callable<JSONObject> {
                         @Override
                         public void connectionLost(Throwable thrwbl) {
                             LOGGER.error("Exception:", thrwbl);
-                            Assert.fail("MQTT connection lost.");
+                            fail("MQTT connection lost.");
                         }
 
                         @Override
@@ -100,19 +100,19 @@ public class MqttListener implements Callable<JSONObject> {
                             @Override
                             public void onFailure(IMqttToken imt, Throwable thrwbl) {
                                 LOGGER.error("Exception:", thrwbl);
-                                Assert.fail("MQTT subscribe failed: " + thrwbl.getMessage());
+                                fail("MQTT subscribe failed: " + thrwbl.getMessage());
                             }
                         });
                     } catch (MqttException ex) {
                         LOGGER.error("Exception:", ex);
-                        Assert.fail("Error MQTT subscribe: " + ex.getMessage());
+                        fail("Error MQTT subscribe: " + ex.getMessage());
                     }
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     LOGGER.error("Exception:", exception);
-                    Assert.fail("MQTT connect failed: " + exception.getMessage());
+                    fail("MQTT connect failed: " + exception.getMessage());
                 }
             });
             try {
@@ -122,7 +122,7 @@ public class MqttListener implements Callable<JSONObject> {
             }
         } catch (MqttException | IllegalArgumentException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Could not connect to MQTT server: " + ex.getMessage());
+            fail("Could not connect to MQTT server: " + ex.getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public class MqttListener implements Callable<JSONObject> {
         } catch (InterruptedException ex) {
             LOGGER.error("waiting for MQTT events on {} timed out.", topic);
             LOGGER.error("Exception:", ex);
-            Assert.fail("waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
+            fail("waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
         } finally {
             if (mqttClient != null) {
                 LOGGER.trace("        Closing client: unsubscribing...");

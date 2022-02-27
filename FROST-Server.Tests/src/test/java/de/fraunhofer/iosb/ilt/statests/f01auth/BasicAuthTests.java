@@ -17,12 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.http.auth.AuthScope;
@@ -40,7 +37,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class BasicAuthTests extends AbstractAuthTests {
+public abstract class BasicAuthTests extends AbstractAuthTests {
+
+    public static class Implementation10 extends BasicAuthTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends BasicAuthTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -59,7 +72,7 @@ public class BasicAuthTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth_db_password", TestSuite.VAL_PG_PASS);
     }
 
-    public BasicAuthTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException {
+    public BasicAuthTests(ServerVersion version) {
         super(version, SERVER_PROPERTIES, false);
     }
 

@@ -22,9 +22,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORS_
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_MAX_TOP;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_SERVICE_ROOT_URL;
 import java.util.Properties;
-import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -52,44 +54,54 @@ public class SettingsTest {
         assertEquals("value5", prefix2.get("property1"));
         assertEquals("value6", prefix2.get("property4"));
 
-        Assert.assertTrue(base.containsName("property1"));
-        Assert.assertFalse(base.containsName("property3"));
-        Assert.assertTrue(prefix1.containsName("property1"));
-        Assert.assertFalse(prefix1.containsName("property2"));
-        Assert.assertTrue(prefix1.containsName("property3"));
-        Assert.assertTrue(prefix2.containsName("property1"));
-        Assert.assertFalse(prefix2.containsName("property3"));
-        Assert.assertTrue(prefix2.containsName("property4"));
+        assertTrue(base.containsName("property1"));
+        assertFalse(base.containsName("property3"));
+        assertTrue(prefix1.containsName("property1"));
+        assertFalse(prefix1.containsName("property2"));
+        assertTrue(prefix1.containsName("property3"));
+        assertTrue(prefix2.containsName("property1"));
+        assertFalse(prefix2.containsName("property3"));
+        assertTrue(prefix2.containsName("property4"));
     }
 
-    @Test(expected = PropertyMissingException.class)
+    @Test
     public void testSettingsGetThere() {
-        Settings settings = new Settings();
-        settings.get(TAG_SERVICE_ROOT_URL);
+        assertThrows(PropertyMissingException.class, () -> {
+            Settings settings = new Settings();
+            settings.get(TAG_SERVICE_ROOT_URL);
+        });
     }
 
-    @Test(expected = PropertyMissingException.class)
+    @Test
     public void testSettingsGetIntThere() {
-        Settings settings = new Settings();
-        settings.getInt(TAG_SERVICE_ROOT_URL);
+        assertThrows(PropertyMissingException.class, () -> {
+            Settings settings = new Settings();
+            settings.getInt(TAG_SERVICE_ROOT_URL);
+        });
     }
 
-    @Test(expected = PropertyMissingException.class)
+    @Test
     public void testSettingsGetBooleanThere() {
-        Settings settings = new Settings();
-        settings.getBoolean(TAG_SERVICE_ROOT_URL);
+        assertThrows(PropertyMissingException.class, () -> {
+            Settings settings = new Settings();
+            settings.getBoolean(TAG_SERVICE_ROOT_URL);
+        });
     }
 
-    @Test(expected = PropertyMissingException.class)
+    @Test
     public void testSettingsGetDoubleThere() {
-        Settings settings = new Settings();
-        settings.getDouble(TAG_SERVICE_ROOT_URL);
+        assertThrows(PropertyMissingException.class, () -> {
+            Settings settings = new Settings();
+            settings.getDouble(TAG_SERVICE_ROOT_URL);
+        });
     }
 
-    @Test(expected = PropertyMissingException.class)
+    @Test
     public void testSettingsGetLongThere() {
-        Settings settings = new Settings();
-        settings.getLong(TAG_SERVICE_ROOT_URL);
+        assertThrows(PropertyMissingException.class, () -> {
+            Settings settings = new Settings();
+            settings.getLong(TAG_SERVICE_ROOT_URL);
+        });
     }
 
     @Test
@@ -114,33 +126,25 @@ public class SettingsTest {
         Properties properties = createValues();
         Settings settings = new Settings(properties);
 
-        try {
+        assertThrows(PropertyTypeException.class, () -> {
             settings.getInt(TAG_SERVICE_ROOT_URL);
-            Assert.fail("getInt should have thrown an exception.");
-        } catch (PropertyTypeException exc) {
-            // This is expected.
-        }
-        assertEquals(123, settings.getInt(TAG_MAX_TOP));
-        try {
-            settings.getInt(TAG_AUTH_ALLOW_ANON_READ);
-            Assert.fail("getInt should have thrown an exception.");
-        } catch (PropertyTypeException exc) {
-            // This is expected.
-        }
+        });
 
-        try {
+        assertEquals(123, settings.getInt(TAG_MAX_TOP));
+
+        assertThrows(PropertyTypeException.class, () -> {
+            settings.getInt(TAG_AUTH_ALLOW_ANON_READ);
+        });
+
+        assertThrows(PropertyTypeException.class, () -> {
             settings.getLong(TAG_SERVICE_ROOT_URL);
-            Assert.fail("getInt should have thrown an exception.");
-        } catch (PropertyTypeException exc) {
-            // This is expected.
-        }
+        });
+
         assertEquals(123L, settings.getLong(TAG_MAX_TOP));
-        try {
+
+        assertThrows(PropertyTypeException.class, () -> {
             settings.getLong(TAG_AUTH_ALLOW_ANON_READ);
-            Assert.fail("getInt should have thrown an exception.");
-        } catch (PropertyTypeException exc) {
-            // This is expected.
-        }
+        });
     }
 
     @Test

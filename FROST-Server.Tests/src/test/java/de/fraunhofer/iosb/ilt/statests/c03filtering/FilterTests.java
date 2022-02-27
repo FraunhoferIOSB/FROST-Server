@@ -30,9 +30,9 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
@@ -42,7 +42,23 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class FilterTests extends AbstractTestClass {
+public abstract class FilterTests extends AbstractTestClass {
+
+    public static class Implementation10 extends FilterTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends FilterTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -56,7 +72,7 @@ public class FilterTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public FilterTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public FilterTests(ServerVersion version) {
         super(version);
     }
 
@@ -71,7 +87,7 @@ public class FilterTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -296,7 +312,7 @@ public class FilterTests extends AbstractTestClass {
         String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {
-            Assert.fail("Expected response code 204 on request " + requestUrl);
+            fail("Expected response code 204 on request " + requestUrl);
         }
     }
 
@@ -309,7 +325,7 @@ public class FilterTests extends AbstractTestClass {
         String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {
-            Assert.fail("Expected response code 204 on request " + requestUrl);
+            fail("Expected response code 204 on request " + requestUrl);
         }
     }
 

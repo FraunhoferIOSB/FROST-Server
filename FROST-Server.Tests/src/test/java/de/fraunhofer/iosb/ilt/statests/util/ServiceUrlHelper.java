@@ -1,7 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
 import java.util.List;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Utility class that helps preparing the URL string for the targeted entity.
@@ -35,7 +35,7 @@ public class ServiceUrlHelper {
             } else if (parentEntityType.getRelations(relationEntityType.extension).contains(relationEntityType.plural)) {
                 urlString += "/" + relationEntityType.plural;
             } else {
-                Assert.fail("Entity type relation is not recognized in SensorThings API : " + parentEntityType + " and " + relationEntityType);
+                fail("Entity type relation is not recognized in SensorThings API : " + parentEntityType + " and " + relationEntityType);
             }
         }
 
@@ -62,7 +62,7 @@ public class ServiceUrlHelper {
     public static String buildURLString(String rootURI, List<String> entityTypes, List<Object> ids, String property) {
         String urlString = rootURI;
         if (entityTypes.size() != ids.size() && entityTypes.size() != ids.size() + 1) {
-            Assert.fail("There is problem with the path of entities!!!");
+            fail("There is problem with the path of entities!!!");
         }
         if (urlString.charAt(urlString.length() - 1) != '/') {
             urlString += '/';

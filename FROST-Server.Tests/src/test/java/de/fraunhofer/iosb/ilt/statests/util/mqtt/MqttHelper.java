@@ -42,7 +42,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +99,7 @@ public class MqttHelper {
             client.publish(topic, message.getBytes(), qos, retained);
         } catch (MqttException ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
-            Assert.fail("error publishing message on MQTT: " + ex.getMessage());
+            fail("error publishing message on MQTT: " + ex.getMessage());
         } finally {
             if (client != null) {
                 try {
@@ -130,7 +130,7 @@ public class MqttHelper {
                 result.setActionResult(action.call());
             } catch (Exception ex) {
                 LOGGER.error("Exception on server {} :", mqttServerUri, ex);
-                Assert.fail("Topics: " + Arrays.toString(topics) + " Error executing : " + ex.getMessage());
+                fail("Topics: " + Arrays.toString(topics) + " Error executing : " + ex.getMessage());
             }
             executor.shutdown();
             if (!executor.awaitTermination(mqttTimeout, TimeUnit.MILLISECONDS)) {
@@ -141,7 +141,7 @@ public class MqttHelper {
             }
         } catch (InterruptedException | ExecutionException ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
-            Assert.fail("Topics: " + Arrays.toString(topics) + " Error subscribing to MQTT: " + ex.getMessage());
+            fail("Topics: " + Arrays.toString(topics) + " Error subscribing to MQTT: " + ex.getMessage());
         } finally {
             executor.shutdownNow();
         }

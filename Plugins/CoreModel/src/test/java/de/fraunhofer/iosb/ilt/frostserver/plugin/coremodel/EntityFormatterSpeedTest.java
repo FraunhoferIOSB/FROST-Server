@@ -36,8 +36,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 //import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 //import java.io.IOException;
 //import java.math.BigDecimal;
-//import org.junit.BeforeClass;
-//import org.junit.Test;
+//
+//
 //import org.slf4j.LoggerFactory;
 //
 ///**
@@ -51,7 +51,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 //    private static CoreSettings coreSettings;
 //    private static QueryDefaults queryDefaults;
 //
-//    @BeforeClass
+//    @BeforeAll
 //    public static void initClass() {
 //        if (queryDefaults == null) {
 //            coreSettings = new CoreSettings();

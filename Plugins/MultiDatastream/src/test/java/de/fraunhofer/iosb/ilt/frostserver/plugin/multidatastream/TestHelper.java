@@ -42,7 +42,7 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Helper class for testing JSON de-/serialization.
@@ -227,13 +227,13 @@ public class TestHelper {
 
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             for (EntityPropertyMain ep : entityType.getEntityProperties()) {
-                Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
+                assertTrue(propertyValues.containsKey(ep), "Missing value for " + ep);
             }
         }
 
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
+                assertTrue(propertyValues.containsKey(np), "Missing value for " + np);
             }
         }
     }

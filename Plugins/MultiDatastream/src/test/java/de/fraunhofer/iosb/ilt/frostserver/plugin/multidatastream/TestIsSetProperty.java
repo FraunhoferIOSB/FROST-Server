@@ -34,10 +34,11 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ public class TestIsSetProperty {
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -98,7 +99,7 @@ public class TestIsSetProperty {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, modelRegistry);
     }
@@ -149,7 +150,7 @@ public class TestIsSetProperty {
 
         } catch (NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property: " + ex.getMessage());
+            fail("Failed to access property: " + ex.getMessage());
         }
     }
 
@@ -166,10 +167,10 @@ public class TestIsSetProperty {
                 }
             }
             if (shouldBeChanged && !changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
             }
             if (!shouldBeChanged && changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
             }
             isSetPropertyOnObject(entity, p, shouldBeChanged);
         }
@@ -190,11 +191,11 @@ public class TestIsSetProperty {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {
-                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
-            Assert.fail("Failed to set property: " + ex.getMessage());
+            fail("Failed to set property: " + ex.getMessage());
         }
     }
 
@@ -256,7 +257,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npThingHistLoc);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epTime);
     }
@@ -329,7 +330,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npDatastreamObservation);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npFeatureOfInterestObservation);
         testIsSetProperty(shouldBeSet, entity, npMultiDatastreamObservation);
@@ -402,18 +403,18 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epDescription);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epName);
         testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_PROPERTIES);
     }
 
-    private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+    private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
         testIsSetProperty(shouldIdBeSet, entity, entity.getEntityType().getPrimaryKey());
         testIsSetProperty(true, entity, ModelRegistry.EP_SELFLINK);
     }
 
     private void testIsSetProperty(boolean shouldBeSet, Entity entity, Property property) {
-        Assert.assertEquals(property + " incorrect status on " + entity.getEntityType() + ": " + shouldBeSet, shouldBeSet, entity.isSetProperty(property));
+        assertEquals(shouldBeSet, entity.isSetProperty(property), property + " incorrect status on " + entity.getEntityType() + ": " + shouldBeSet);
     }
 }

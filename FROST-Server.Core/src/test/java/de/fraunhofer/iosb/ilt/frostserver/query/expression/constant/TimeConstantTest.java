@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import org.joda.time.LocalTime;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -35,7 +35,7 @@ public class TimeConstantTest {
                 .withMinuteOfHour(59)
                 .withSecondOfMinute(59)
                 .withMillisOfSecond(999);
-        Assert.assertEquals(expectedResult, result.getValue());
+        assertEquals(expectedResult, result.getValue());
     }
 
 }

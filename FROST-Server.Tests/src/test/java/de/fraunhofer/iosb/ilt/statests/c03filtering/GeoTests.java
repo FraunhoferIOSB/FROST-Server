@@ -24,8 +24,8 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
@@ -35,7 +35,23 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class GeoTests extends AbstractTestClass {
+public abstract class GeoTests extends AbstractTestClass {
+
+    public static class Implementation10 extends GeoTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends GeoTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -50,7 +66,7 @@ public class GeoTests extends AbstractTestClass {
     private static final List<Sensor> SENSORS = new ArrayList<>();
     private static final List<Thing> THINGS = new ArrayList<>();
 
-    public GeoTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public GeoTests(ServerVersion version) {
         super(version);
     }
 
@@ -65,7 +81,7 @@ public class GeoTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();

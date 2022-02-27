@@ -20,7 +20,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +34,12 @@ public class HTTPMethods {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPMethods.class);
+
+    private static int countDelete = 0;
+    private static int countGet = 0;
+    private static int countPost = 0;
+    private static int countPatch = 0;
+    private static int countPut = 0;
 
     public static class HttpResponse {
 
@@ -59,6 +65,18 @@ public class HTTPMethods {
         }
     }
 
+    public static void resetStats() {
+        countDelete = 0;
+        countGet = 0;
+        countPatch = 0;
+        countPost = 0;
+        countPut = 0;
+    }
+
+    public static void logStats() {
+        LOGGER.info("Calls: {} Get, {} Post, {} Patch, {} Put, {} Delete", countGet, countPost, countPatch, countPut, countDelete);
+    }
+
     /**
      * Send HTTP GET request to the urlString and return response code and
      * response body
@@ -71,6 +89,7 @@ public class HTTPMethods {
     public static HttpResponse doGet(String urlString) {
         HttpResponse result = null;
         LOGGER.debug("Getting: {}", urlString);
+        countGet++;
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(urlString);
@@ -131,6 +150,7 @@ public class HTTPMethods {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
+            countPost++;
             //Create connection
             URL url = new URL(urlString);
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
@@ -185,6 +205,7 @@ public class HTTPMethods {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Putting: {}", urlString);
+            countPut++;
             //Create connection
             URI uri = new URI(urlString);
 
@@ -221,6 +242,7 @@ public class HTTPMethods {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Deleting: {}", urlString);
+            countDelete++;
             //Create connection
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
@@ -258,6 +280,7 @@ public class HTTPMethods {
         URI uri = null;
         try {
             LOGGER.debug("Patching: {}", urlString);
+            countPatch++;
             uri = new URI(urlString);
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -289,6 +312,7 @@ public class HTTPMethods {
     public static HttpResponse doJsonPatch(String urlString, String patchBody) {
         URI uri;
         LOGGER.debug("Patching: {}", urlString);
+        countPatch++;
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             uri = new URI(urlString);
@@ -320,7 +344,7 @@ public class HTTPMethods {
         try {
             return Long.parseLong(idString);
         } catch (NumberFormatException ex) {
-            Assert.fail("Failed to parse returned ID (" + idString + "). String IDs must start and end with a single quote (').");
+            fail("Failed to parse returned ID (" + idString + "). String IDs must start and end with a single quote (').");
         }
         return idString;
     }

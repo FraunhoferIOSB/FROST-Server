@@ -26,11 +26,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
@@ -40,8 +40,24 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class DateTimeTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class DateTimeTests extends AbstractTestClass {
+
+    public static class Implementation10 extends DateTimeTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends DateTimeTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -86,7 +102,7 @@ public class DateTimeTests extends AbstractTestClass {
     private static final Interval I2015_2018 = Interval.of(T2015.toInstant(), T2018.toInstant());
     private static final Interval I2017_2_2018 = Interval.of(T2017_2.toInstant(), T2018.toInstant());
 
-    public DateTimeTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public DateTimeTests(ServerVersion version) {
         super(version);
     }
 
@@ -101,7 +117,7 @@ public class DateTimeTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -758,8 +774,8 @@ public class DateTimeTests extends AbstractTestClass {
         LOGGER.info("  test19PhenomenonTimeAfterDelete");
         EntityUtils.deleteAll(service.observations());
         Datastream ds1 = service.datastreams().find(DATASTREAMS.get(0).getId());
-        Assert.assertNull("phenomenonTime should be null", ds1.getPhenomenonTime());
+        assertNull(ds1.getPhenomenonTime(), "phenomenonTime should be null");
         Datastream ds2 = service.datastreams().find(DATASTREAMS.get(1).getId());
-        Assert.assertNull("phenomenonTime should be null", ds2.getPhenomenonTime());
+        assertNull(ds2.getPhenomenonTime(), "phenomenonTime should be null");
     }
 }

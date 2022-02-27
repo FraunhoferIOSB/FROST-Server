@@ -29,10 +29,11 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class TestIsSetProperty {
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
@@ -67,7 +68,7 @@ public class TestIsSetProperty {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, modelRegistry);
     }
@@ -115,7 +116,7 @@ public class TestIsSetProperty {
 
         } catch (NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property: " + ex.getMessage());
+            fail("Failed to access property: " + ex.getMessage());
         }
     }
 
@@ -129,10 +130,10 @@ public class TestIsSetProperty {
                 }
             }
             if (shouldBeChanged && !changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
             }
             if (!shouldBeChanged && changedFields.contains(p)) {
-                Assert.fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
+                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
             }
             isSetPropertyOnObject(entity, p, shouldBeChanged);
         }
@@ -153,11 +154,11 @@ public class TestIsSetProperty {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {
-                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
-            Assert.fail("Failed to set property: " + ex.getMessage());
+            fail("Failed to set property: " + ex.getMessage());
         }
     }
 
@@ -178,8 +179,8 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity datastream) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, datastream);
-        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.npObservedPropertyDatastream));
-        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.epUnitOfMeasurement));
+        assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.npObservedPropertyDatastream));
+        assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.epUnitOfMeasurement));
     }
 
     @Test
@@ -199,8 +200,8 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity featureOfInterest) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, featureOfInterest);
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(pluginCoreModel.epFeature));
+        assertEquals(shouldBeSet, featureOfInterest.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, featureOfInterest.isSetProperty(pluginCoreModel.epFeature));
     }
 
     @Test
@@ -219,9 +220,9 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity hl) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, hl);
-        Assert.assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.npThingHistLoc));
-        Assert.assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.epTime));
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, hl);
+        assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.npThingHistLoc));
+        assertEquals(shouldBeSet, hl.isSetProperty(pluginCoreModel.epTime));
     }
 
     @Test
@@ -241,18 +242,18 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity location) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, location);
-        Assert.assertEquals(shouldBeSet, location.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, location.isSetProperty(pluginCoreModel.epLocation));
+        assertEquals(shouldBeSet, location.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, location.isSetProperty(pluginCoreModel.epLocation));
     }
 
     private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity ds) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, ds);
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservationType));
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservedArea));
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epPhenomenonTime));
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epResultTime));
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npSensorDatastream));
-        Assert.assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npThingDatasteam));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservationType));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epObservedArea));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epPhenomenonTime));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.epResultTime));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npSensorDatastream));
+        assertEquals(shouldBeSet, ds.isSetProperty(pluginCoreModel.npThingDatasteam));
     }
 
     @Test
@@ -271,15 +272,15 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity o) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, o);
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npDatastreamObservation));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epParameters));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epPhenomenonTime));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResult));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResultQuality));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResultTime));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epValidTime));
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, o);
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npDatastreamObservation));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.npFeatureOfInterestObservation));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epParameters));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epPhenomenonTime));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResult));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResultQuality));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epResultTime));
+        assertEquals(shouldBeSet, o.isSetProperty(pluginCoreModel.epValidTime));
     }
 
     @Test
@@ -299,7 +300,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, Entity op) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, op);
-        Assert.assertEquals(shouldBeSet, op.isSetProperty(pluginCoreModel.epDefinition));
+        assertEquals(shouldBeSet, op.isSetProperty(pluginCoreModel.epDefinition));
     }
 
     @Test
@@ -319,8 +320,8 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity sensor) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, sensor);
-        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(pluginCoreModel.epMetadata));
+        assertEquals(shouldBeSet, sensor.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, sensor.isSetProperty(pluginCoreModel.epMetadata));
     }
 
     @Test
@@ -343,14 +344,14 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epDescription));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epName));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(ModelRegistry.EP_PROPERTIES));
+        testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
+        assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epDescription));
+        assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epName));
+        assertEquals(shouldBeSet, entity.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
 
-    private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        Assert.assertEquals("Failed isSet for ID", shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey()));
-        Assert.assertEquals("Failed isSet for SelfLink", true, entity.isSetProperty(ModelRegistry.EP_SELFLINK));
+    private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
+        assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey()), "Failed isSet for ID");
+        assertEquals(true, entity.isSetProperty(ModelRegistry.EP_SELFLINK), "Failed isSet for SelfLink");
     }
 }

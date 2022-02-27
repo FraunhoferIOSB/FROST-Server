@@ -23,9 +23,10 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -36,7 +37,7 @@ public class EntityCompleteTest {
     private static ModelRegistry modelRegistry;
     private static TestModel testModel;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
@@ -57,22 +58,22 @@ public class EntityCompleteTest {
     public void testEntityComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(testModel.ET_ROOM);
         Entity entity = new DefaultEntity(testModel.ET_ROOM);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(testModel.EP_NAME, "name");
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(testModel.NP_HOUSE_ROOM, new DefaultEntity(testModel.ET_HOUSE).setId(new IdLong(2)));
-        Assert.assertTrue("Entity not complete: " + entity, isEntityComplete(entity, containingSet));
+        assertTrue(isEntityComplete(entity, containingSet), "Entity not complete: " + entity);
 
         entity = new DefaultEntity(testModel.ET_ROOM);
         entity.setProperty(testModel.EP_NAME, "Name");
         containingSet = new PathElementEntitySet(testModel.ET_ROOM);
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        assertFalse(isEntityComplete(entity, containingSet));
         containingSet = new PathElementEntitySet(testModel.NP_BATHROOMS_HOUSE, new PathElementEntity(testModel.ET_ROOM, null).setId(new IdLong(1)));
-        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        assertFalse(isEntityComplete(entity, containingSet));
         containingSet = new PathElementEntitySet(testModel.NP_ROOMS_HOUSE, new PathElementEntity(testModel.ET_HOUSE, null).setId(new IdLong(1)));
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
+        assertTrue(isEntityComplete(entity, containingSet));
 
     }
 }

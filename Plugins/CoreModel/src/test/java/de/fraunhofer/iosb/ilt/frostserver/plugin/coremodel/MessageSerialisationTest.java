@@ -25,14 +25,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.io.IOException;
-import static org.junit.Assert.assertEquals;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -46,7 +45,7 @@ public class MessageSerialisationTest {
     private static PluginCoreModel pluginCoreModel;
     private static JsonReader entityParser;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -73,7 +72,7 @@ public class MessageSerialisationTest {
 
         EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
-        assertEquals(message, deserialisedMessage);
+        assertEquals(deserialisedMessage, message);
     }
 
     @Test
@@ -93,7 +92,7 @@ public class MessageSerialisationTest {
 
         EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
-        assertEquals(message, deserialisedMessage);
+        assertEquals(deserialisedMessage, message);
     }
 
     @Test
@@ -114,7 +113,7 @@ public class MessageSerialisationTest {
 
         EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
-        assertEquals(message, deserialisedMessage);
+        assertEquals(deserialisedMessage, message);
     }
 
     @Test
@@ -136,7 +135,7 @@ public class MessageSerialisationTest {
 
         EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
-        assertEquals(message, deserialisedMessage);
+        assertEquals(deserialisedMessage, message);
     }
 
 }

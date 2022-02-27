@@ -26,10 +26,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.Date;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -42,7 +43,7 @@ public class SerialisationTest {
     private static ModelRegistry modelRegistry;
     private static TestModel testModel;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
@@ -50,7 +51,7 @@ public class SerialisationTest {
         modelRegistry.initFinalise();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
     }
 
@@ -58,7 +59,7 @@ public class SerialisationTest {
     public void serialiseDate() throws IOException {
         String expResult = "\"1987-06-05\"";
         final String result = JsonWriter.writeObject(new Date(87, 5, 5));
-        Assert.assertTrue("Date not serialised correctly.", jsonEqual(expResult, result));
+        assertTrue(jsonEqual(expResult, result), "Date not serialised correctly.");
     }
 
     @Test
@@ -72,7 +73,7 @@ public class SerialisationTest {
         result.setHours(0);
         result.setMinutes(0);
         result.setSeconds(0);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     private boolean jsonEqual(String string1, String string2) {

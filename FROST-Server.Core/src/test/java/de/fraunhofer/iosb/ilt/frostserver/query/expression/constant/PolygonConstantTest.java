@@ -19,8 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import org.geojson.Polygon;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -32,7 +33,7 @@ public class PolygonConstantTest {
     public void testParseFromString2DOnlyExterior() {
         String text = "POLYGON ((30 10, 10 30, 40 40))";
         PolygonConstant result = new PolygonConstant(text);
-        Assert.assertEquals(
+        assertEquals(
                 TestHelper.getPolygon(
                         2,
                         30, 10,
@@ -55,7 +56,7 @@ public class PolygonConstantTest {
                 29, 29,
                 29, 30,
                 30, 29));
-        Assert.assertEquals(polygon, result.getValue());
+        assertEquals(polygon, result.getValue());
     }
 
     @Test
@@ -77,14 +78,14 @@ public class PolygonConstantTest {
                 21, 21,
                 21, 22,
                 22, 21));
-        Assert.assertEquals(polygon, result.getValue());
+        assertEquals(polygon, result.getValue());
     }
 
     @Test
     public void testParseFromString3DOnlyExterior() {
         String text = "POLYGON ((30 10 1, 10 30 1, 40 40 1))";
         PolygonConstant result = new PolygonConstant(text);
-        Assert.assertEquals(
+        assertEquals(
                 TestHelper.getPolygon(
                         3,
                         30, 10, 1,
@@ -107,7 +108,7 @@ public class PolygonConstantTest {
                 29, 29, 1,
                 29, 30, 1,
                 30, 29, 1));
-        Assert.assertEquals(polygon, result.getValue());
+        assertEquals(polygon, result.getValue());
     }
 
     @Test
@@ -129,13 +130,14 @@ public class PolygonConstantTest {
                 21, 21, 1,
                 21, 22, 1,
                 22, 21, 1));
-        Assert.assertEquals(polygon, result.getValue());
+        assertEquals(polygon, result.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseFromStringWithMixedDimensions() {
-        String text = "POLYGON ((30 10, 10 30 40))";
-        PolygonConstant polygonConstant = new PolygonConstant(text);
-        Assert.fail("Should have thrown an exception, but got a value: " + polygonConstant.toString());
+        assertThrows(IllegalArgumentException.class, () -> {
+            String text = "POLYGON ((30 10, 10 30 40))";
+            PolygonConstant polygonConstant = new PolygonConstant(text);
+        });
     }
 }

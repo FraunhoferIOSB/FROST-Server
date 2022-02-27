@@ -40,10 +40,11 @@ import java.util.Map;
 import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -57,7 +58,7 @@ public class EntityParserTest {
     private static PluginCoreModel pluginCoreModel;
     private static JsonReader entityParser;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -120,7 +121,7 @@ public class EntityParserTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+        assertTrue(result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
                 && result.isSetProperty(pluginCoreModel.epObservationType)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
@@ -136,7 +137,7 @@ public class EntityParserTest {
     public void readDatastreamWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
                 && !result.isSetProperty(pluginCoreModel.epObservationType)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
@@ -275,7 +276,7 @@ public class EntityParserTest {
                 + "      }\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && result.isSetProperty(pluginCoreModel.epFeature));
@@ -285,7 +286,7 @@ public class EntityParserTest {
     public void readFeatureOfInterstWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && !result.isSetProperty(pluginCoreModel.epFeature));
@@ -324,7 +325,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && result.isSetProperty(pluginCoreModel.epLocation));
@@ -334,7 +335,7 @@ public class EntityParserTest {
     public void readLocationWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && !result.isSetProperty(pluginCoreModel.epLocation));
@@ -379,7 +380,7 @@ public class EntityParserTest {
                 + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+        assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime)
                 && result.isSetProperty(pluginCoreModel.epResult)
                 && result.isSetProperty(pluginCoreModel.npDatastreamObservation)
@@ -394,7 +395,7 @@ public class EntityParserTest {
     public void readObservationWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && !result.isSetProperty(pluginCoreModel.epResultTime)
                 && !result.isSetProperty(pluginCoreModel.epResult)
                 && !result.isSetProperty(pluginCoreModel.npDatastreamObservation)
@@ -530,7 +531,7 @@ public class EntityParserTest {
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epDefinition));
     }
@@ -539,7 +540,7 @@ public class EntityParserTest {
     public void readObservedPropertyWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epDefinition));
     }
@@ -614,7 +615,7 @@ public class EntityParserTest {
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && result.isSetProperty(pluginCoreModel.epMetadata));
@@ -624,7 +625,7 @@ public class EntityParserTest {
     public void readSensorWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
                 && !result.isSetProperty(pluginCoreModel.epMetadata));
@@ -664,7 +665,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
@@ -673,7 +674,7 @@ public class EntityParserTest {
     public void readThingWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+        assertTrue(!result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
@@ -882,52 +883,68 @@ public class EntityParserTest {
         assertEquals(expectedResult, result);
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readThingWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etThing, json);
+    @Test
+    public void readThingWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etThing, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readSensorWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etSensor, json);
+    @Test
+    public void readSensorWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etSensor, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readDatastreamWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etDatastream, json);
+    @Test
+    public void readDatastreamWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etDatastream, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readLocationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etLocation, json);
+    @Test
+    public void readLocationWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etLocation, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readFeatureOfInterestWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
+    @Test
+    public void readFeatureOfInterestWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readHistoricalLocationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etHistoricalLocation, json);
+    @Test
+    public void readHistoricalLocationWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etHistoricalLocation, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readObservedPropertyWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
+    @Test
+    public void readObservedPropertyWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
+        });
     }
 
-    @Test(expected = UnrecognizedPropertyException.class)
-    public void readObservationWithUnknownField() throws IOException {
-        String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.etObservation, json);
+    @Test
+    public void readObservationWithUnknownField() {
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            String json = "{ \"someField\": 123}";
+            entityParser.parseEntity(pluginCoreModel.etObservation, json);
+        });
     }
 
     @Test

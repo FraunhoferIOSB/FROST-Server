@@ -51,9 +51,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,7 @@ public class MqttManagerTest {
     private ModelRegistry modelRegistry;
     private TestModel testModel;
 
-    @Before
+    @BeforeEach
     public void init() {
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, "http://localhost/");
@@ -93,20 +94,22 @@ public class MqttManagerTest {
 
     @Test
     public void testVersionParse() throws UnknownVersionException {
-        Assert.assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic(coreSettings, "v1.0/Observations"));
-        Assert.assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic(coreSettings, "v1.1/Observations"));
+        assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic(coreSettings, "v1.0/Observations"));
+        assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic(coreSettings, "v1.1/Observations"));
     }
 
-    @Test(expected = UnknownVersionException.class)
-    public void testVersionParseFail() throws UnknownVersionException {
-        MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
+    @Test
+    public void testVersionParseFail() {
+        assertThrows(UnknownVersionException.class, () -> {
+            MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
+        });
     }
 
     @Test
     public void testMqttManager() throws InterruptedException {
         MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
-        Assert.assertEquals(1, mqttServers.size());
+        assertEquals(1, mqttServers.size());
 
         testTopics(mqttServers, mqttManager, 100, MESSAGE_COUNT);
 

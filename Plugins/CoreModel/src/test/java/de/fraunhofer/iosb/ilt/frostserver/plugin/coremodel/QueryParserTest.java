@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
@@ -54,9 +53,12 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -70,7 +72,7 @@ public class QueryParserTest {
     private static PluginCoreModel pluginCoreModel;
     private static ResourcePath path;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
@@ -85,52 +87,52 @@ public class QueryParserTest {
     @Test
     public void testTop() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        Assert.assertFalse(expResult.getTop().isPresent());
-        Assert.assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, CoreSettings.TAG_DEFAULT_TOP), expResult.getTopOrDefault());
+        assertFalse(expResult.getTop().isPresent());
+        assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, CoreSettings.TAG_DEFAULT_TOP), expResult.getTopOrDefault());
         expResult.setTop(10);
 
         String query = "$top=10";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
-        Assert.assertTrue(result.getTop().isPresent());
-        Assert.assertEquals(10, result.getTopOrDefault());
+        assertEquals(expResult, result);
+        assertTrue(result.getTop().isPresent());
+        assertEquals(10, result.getTopOrDefault());
     }
 
     @Test
     public void testSkip() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        Assert.assertFalse(expResult.getSkip().isPresent());
-        Assert.assertEquals(11, expResult.getSkip(11));
+        assertFalse(expResult.getSkip().isPresent());
+        assertEquals(11, expResult.getSkip(11));
         expResult.setSkip(10);
 
         String query = "$skip=10";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
-        Assert.assertTrue(result.getSkip().isPresent());
-        Assert.assertEquals(10, result.getSkip(11));
+        assertEquals(expResult, result);
+        assertTrue(result.getSkip().isPresent());
+        assertEquals(10, result.getSkip(11));
     }
 
     @Test
     public void testCount() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        Assert.assertFalse(expResult.getCount().isPresent());
-        Assert.assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_DEFAULT_COUNT), expResult.isCountOrDefault());
+        assertFalse(expResult.getCount().isPresent());
+        assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_DEFAULT_COUNT), expResult.isCountOrDefault());
 
         expResult.setCount(true);
         String query = "$count=true";
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertTrue(result.getCount().isPresent());
-        Assert.assertTrue(result.isCountOrDefault());
-        Assert.assertEquals(expResult, result);
+        assertTrue(result.getCount().isPresent());
+        assertTrue(result.isCountOrDefault());
+        assertEquals(expResult, result);
 
         expResult.setCount(false);
         query = "$count=false";
         result = QueryParser.parseQuery(query, coreSettings, path);
-        Assert.assertEquals(expResult, result);
-        Assert.assertFalse(result.isCountOrDefault());
+        assertEquals(expResult, result);
+        assertFalse(result.isCountOrDefault());
     }
 
     @Test
@@ -143,7 +145,7 @@ public class QueryParserTest {
                         new IntegerConstant(800000113797L)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -158,7 +160,7 @@ public class QueryParserTest {
                         new IntegerConstant(10)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=14 div (result add 1) mod 3 mul 3 eq 3";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -182,7 +184,7 @@ public class QueryParserTest {
         );
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -194,7 +196,7 @@ public class QueryParserTest {
                 new IntegerConstant(1)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         // Theoretical path, does not actually exist
         query = "$filter=Thing/Locations/location eq 1";
@@ -204,15 +206,17 @@ public class QueryParserTest {
                 new IntegerConstant(1)));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFilterInvalidCustomProperty() {
-        // Theoretical path, does not actually exist
-        String query = "$filter=Thing/custom eq 1";
-        Query result = QueryParser.parseQuery(query, coreSettings, path);
-        result.validate(pluginCoreModel.etDatastream);
+        assertThrows(IllegalArgumentException.class, () -> {
+            // Theoretical path, does not actually exist
+            String query = "$filter=Thing/custom eq 1";
+            Query result = QueryParser.parseQuery(query, coreSettings, path);
+            result.validate(pluginCoreModel.etDatastream);
+        });
     }
 
     @Test
@@ -225,7 +229,7 @@ public class QueryParserTest {
                         new StringConstant("3")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=result eq '3'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -235,7 +239,7 @@ public class QueryParserTest {
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=result ne '3'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -245,7 +249,7 @@ public class QueryParserTest {
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=result eq 'it''s a quote'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -255,7 +259,7 @@ public class QueryParserTest {
                         new StringConstant("it's a quote")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=result eq 'it''''s two quotes'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -265,7 +269,7 @@ public class QueryParserTest {
                         new StringConstant("it''''s two quotes")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=description eq 'utf-8: 水位高度'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -275,7 +279,7 @@ public class QueryParserTest {
                         new StringConstant("utf-8: 水位高度")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -293,7 +297,7 @@ public class QueryParserTest {
                     ));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -311,7 +315,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/test_name gt 3";
@@ -324,7 +328,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/array[1][2] gt 3";
@@ -339,7 +343,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/array[1]/deeper[2] gt 3";
@@ -355,7 +359,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/array/1/deeper/2 gt 3";
@@ -371,7 +375,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=location/properties/priority eq 3";
@@ -385,7 +389,7 @@ public class QueryParserTest {
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=location/properties/4frost eq 3";
@@ -400,7 +404,7 @@ public class QueryParserTest {
                     ));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$filter=location/properties/4 eq 3";
@@ -415,7 +419,7 @@ public class QueryParserTest {
                     ));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -432,7 +436,7 @@ public class QueryParserTest {
                             new StringConstant("metre")));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etDatastream);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -446,7 +450,7 @@ public class QueryParserTest {
                         new DateTimeConstant("2015-10-14T23:30:00.104+02:00")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etHistoricalLocation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=time gt 2015-10-14T23:30:00.104+02:00 add duration'P1D'";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -460,7 +464,7 @@ public class QueryParserTest {
                 ));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etHistoricalLocation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=time gt 2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -470,7 +474,7 @@ public class QueryParserTest {
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etHistoricalLocation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=overlaps(phenomenonTime,2015-10-14T01:01:01.000+02:00/P1D)";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -480,7 +484,7 @@ public class QueryParserTest {
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1D")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$filter=overlaps(phenomenonTime,2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S)";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -500,7 +504,7 @@ public class QueryParserTest {
                         new IntervalConstant("P1D/2015-10-14T01:01:01.000+02:00")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -519,7 +523,7 @@ public class QueryParserTest {
                 ));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -529,7 +533,7 @@ public class QueryParserTest {
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey())));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -539,7 +543,7 @@ public class QueryParserTest {
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey())));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -550,7 +554,7 @@ public class QueryParserTest {
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey()), OrderBy.OrderType.DESCENDING));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -560,7 +564,7 @@ public class QueryParserTest {
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastreamObservation, pluginCoreModel.etDatastream.getPrimaryKey())));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         query = "$orderby=properties/subprop/name";
         expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -573,7 +577,7 @@ public class QueryParserTest {
                         )));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -584,7 +588,7 @@ public class QueryParserTest {
         Query result = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         result.addSelect(pluginCoreModel.npObservationsDatastream)
                 .addSelect(pluginCoreModel.etObservation.getPrimaryKey());
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         expResult.getSelect().clear();
         expResult.getSelect().add(pluginCoreModel.npThingDatasteam);
@@ -592,7 +596,7 @@ public class QueryParserTest {
         result.clearSelect();
         result.addSelect(pluginCoreModel.npThingDatasteam)
                 .addSelect(pluginCoreModel.etThing.getPrimaryKey());
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -602,7 +606,7 @@ public class QueryParserTest {
         expResult.getSelect().add(pluginCoreModel.etObservation.getPrimaryKey());
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -616,7 +620,7 @@ public class QueryParserTest {
                             .addToSubPath("type"));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$select=properties/my[5]/type";
@@ -628,7 +632,7 @@ public class QueryParserTest {
                             .addToSubPath("type"));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$select=properties/my/5/type";
@@ -640,7 +644,7 @@ public class QueryParserTest {
                             .addToSubPath("type"));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -658,7 +662,7 @@ public class QueryParserTest {
             expResult.setSelectDistinct(true);
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$select=distinct:name,properties/my[5]/type";
@@ -672,7 +676,7 @@ public class QueryParserTest {
             expResult.setSelectDistinct(true);
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$select=distinct:properties/my/5/type";
@@ -685,7 +689,7 @@ public class QueryParserTest {
             expResult.setSelectDistinct(true);
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
     }
 
@@ -696,7 +700,7 @@ public class QueryParserTest {
         expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -707,7 +711,7 @@ public class QueryParserTest {
                 .addSelect(pluginCoreModel.etDatastream.getPrimaryKey());
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -717,7 +721,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -729,7 +733,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -749,10 +753,10 @@ public class QueryParserTest {
                 );
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
 
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, old);
-        Assert.assertEquals(old, coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
+        assertEquals(old, coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
     }
 
     @Test
@@ -773,7 +777,7 @@ public class QueryParserTest {
                     );
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
         {
             String query = "$expand=properties/link.Thing,Things";
@@ -788,11 +792,11 @@ public class QueryParserTest {
                     .addExpand(new Expand(modelRegistry, pluginCoreModel.npThingsLocation));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
-            Assert.assertEquals(expResult, result);
+            assertEquals(expResult, result);
         }
 
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, old);
-        Assert.assertEquals(old, coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
+        assertEquals(old, coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
     }
 
     @Test
@@ -806,7 +810,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(modelRegistry, subQuery, pluginCoreModel.npObservationsDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -817,7 +821,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -830,7 +834,7 @@ public class QueryParserTest {
                                 .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -844,7 +848,7 @@ public class QueryParserTest {
                         ));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -864,7 +868,7 @@ public class QueryParserTest {
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -880,7 +884,7 @@ public class QueryParserTest {
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     @Test
@@ -907,7 +911,7 @@ public class QueryParserTest {
                                 new DateTimeConstant(new DateTime(2010, 07, 01, 0, 0, DateTimeZone.UTC))))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 
     // TODO add tests for all functions
@@ -918,6 +922,6 @@ public class QueryParserTest {
         expResult.setFormat("dataArray");
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
-        Assert.assertEquals(expResult, result);
+        assertEquals(expResult, result);
     }
 }

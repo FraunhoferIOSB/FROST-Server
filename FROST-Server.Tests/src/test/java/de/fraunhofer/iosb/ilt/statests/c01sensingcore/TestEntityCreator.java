@@ -12,7 +12,9 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,11 +89,11 @@ public class TestEntityCreator {
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
         int responseCode = responseMap.code;
-        Assert.assertEquals("Error during getting entities: " + ((entityType != null) ? entityType.name() : "root URI"), 200, responseCode);
+        assertEquals(200, responseCode, "Error during getting entities: " + ((entityType != null) ? entityType.name() : "root URI"));
         if (entityType != null) {
-            Assert.assertTrue("The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.", response.contains("value"));
+            assertTrue(response.contains("value"), "The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.");
         } else { // GET Service Base URI
-            Assert.assertTrue("The GET entities response for service root URI does not match SensorThings API : missing \"value\" in response.", response.contains("value"));
+            assertTrue(response.contains("value"), "The GET entities response for service root URI does not match SensorThings API : missing \"value\" in response.");
         }
         return response;
     }
@@ -103,7 +105,7 @@ public class TestEntityCreator {
             return entities.length();
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return 0;
     }

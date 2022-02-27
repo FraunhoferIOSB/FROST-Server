@@ -18,17 +18,36 @@ import java.util.Properties;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Includes various tests of "A.1 Sensing Core" Conformance class.
  */
-public class Capability1CoreOnlyTests extends AbstractTestClass {
+public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
+
+    public static class Implementation10 extends Capability1CoreOnlyTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends Capability1CoreOnlyTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -56,12 +75,12 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
         TestEntityCreator.maybeCreateTestEntities(getServerSettings(), version);
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         LOGGER.info("Setting up.");
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         EntityUtils.deleteAll(version, serverSettings, service);
@@ -134,7 +153,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception handling " + entityType, e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -155,21 +174,21 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
                 return;
             }
             String message = "Reading property \"" + property.name + "\" of the existing " + entityType.name() + " with id " + id + " failed.";
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
             String response = responseMap.response;
             JSONObject entity;
             entity = new JSONObject(response);
             try {
                 message = "Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.";
-                Assert.assertNotNull(message, entity.get(property.name));
+                assertNotNull(entity.get(property.name), message);
             } catch (JSONException e) {
-                Assert.fail("Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.");
+                fail("Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.");
             }
             message = "The response for getting property " + property.name + " of a " + entityType + " returns more properties!";
-            Assert.assertEquals(message, 1, entity.length());
+            assertEquals(1, entity.length(), message);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -193,14 +212,14 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             return;
         }
         String message = "Reading property value of \"" + property + "\" of the exitixting " + entityType.name() + " with id " + id + " failed.";
-        Assert.assertEquals(message, 200, responseCode);
+        assertEquals(200, responseCode, message);
         String response = responseMap.response;
         if ("object".equalsIgnoreCase(property.jsonType)) {
             message = "Reading property value of \"" + property + "\" of \"" + entityType + "\" fails.";
-            Assert.assertEquals(message, 0, response.indexOf("{"));
+            assertEquals(0, response.indexOf("{"), message);
         } else {
             message = "Reading property value of \"" + property + "\" of \"" + entityType + "\" fails.";
-            Assert.assertEquals(message, -1, response.indexOf("{"));
+            assertEquals(-1, response.indexOf("{"), message);
         }
     }
 
@@ -252,7 +271,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             int code = responseMap.code;
 
             String message = "Reading relation of the entity failed: " + entityTypes.toString();
-            Assert.assertEquals(message, 200, code);
+            assertEquals(200, code, message);
 
             String response = responseMap.response;
             Object id;
@@ -268,7 +287,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             code = responseMap.code;
 
             message = "Reading relation of the entity failed: " + entityTypes.toString();
-            Assert.assertEquals(message, 200, code);
+            assertEquals(200, code, message);
             response = responseMap.response;
             checkAssociationLinks(response, entityTypes, ids);
 
@@ -288,7 +307,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             ids.remove(ids.size() - 1);
         } catch (JSONException e) {
             LOGGER.error("Failed to parse response for " + urlString, e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }
@@ -307,7 +326,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
         try {
             if (EntityType.isPlural(entityTypes.get(entityTypes.size() - 1))) {
                 String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
-                Assert.assertTrue(message, response.contains("value"));
+                assertTrue(response.contains("value"), message);
                 JSONArray value = new JSONObject(response).getJSONArray("value");
                 int count = 0;
                 for (int i = 0; i < value.length() && count < 2; i++) {
@@ -315,27 +334,27 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
                     JSONObject obj = value.getJSONObject(i);
                     try {
                         message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
-                        Assert.assertNotNull(message, obj.get(ControlInformation.SELF_LINK));
+                        assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
                     } catch (JSONException e) {
-                        Assert.fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
+                        fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
                     }
                     message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
-                    Assert.assertEquals(message, 1, obj.length());
+                    assertEquals(1, obj.length(), message);
                 }
             } else {
                 JSONObject obj = new JSONObject(response);
                 try {
                     String message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
-                    Assert.assertNotNull(message, obj.get(ControlInformation.SELF_LINK));
+                    assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
                 } catch (JSONException e) {
-                    Assert.fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
+                    fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
                 }
                 String message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
-                Assert.assertEquals(message, 1, obj.length());
+                assertEquals(1, obj.length(), message);
             }
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -353,13 +372,13 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             int responseCode = responseMap.code;
 
             String message = "Reading existing " + entityType.name() + " with id " + id + " failed.";
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             response = responseMap.response;
             return response;
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }
     }
@@ -374,7 +393,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
         long id = Long.MAX_VALUE;
         int responseCode = getEntity(entityType, id, null).code;
         String message = "Reading non-existing " + entityType.name() + " with id " + id + " failed.";
-        Assert.assertEquals(message, 404, responseCode);
+        assertEquals(404, responseCode, message);
     }
 
     /**
@@ -408,7 +427,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             for (int i = 0; i < entities.length(); i++) {
                 JSONObject entity = entities.getJSONObject(i);
                 if (!entity.has("name") || !entity.has("url")) {
-                    Assert.fail("Service root URI component does not have proper JSON keys: name and value.");
+                    fail("Service root URI component does not have proper JSON keys: name and value.");
                 }
                 String name = entity.getString("name");
                 String nameUrl = entity.getString("url");
@@ -416,25 +435,25 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
                 if ("MultiDatastreams".equals(name)) {
                     // TODO: MultiDatastreams are not in the entity list yet.
                     String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
-                    Assert.assertEquals(message, serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl);
+                    assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
                 } else {
                     try {
                         EntityType entityType = EntityType.getForRelation(name);
                         String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
-                        Assert.assertEquals(message, serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl);
+                        assertEquals(serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl, message);
                     } catch (IllegalArgumentException exc) {
-                        Assert.fail("There is a component in Service Root URI response that is not in SensorThings API : " + name);
+                        fail("There is a component in Service Root URI response that is not in SensorThings API : " + name);
                     }
                 }
             }
             for (String key : addedLinks.keySet()) {
                 String message = "The Service Root URI response does not contain " + key;
-                Assert.assertTrue(message, addedLinks.get(key));
+                assertTrue(addedLinks.get(key), message);
             }
 
         } catch (Exception e) {
             LOGGER.error("An Exception occurred during testing!", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -454,14 +473,14 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
         int responseCode = responseMap.code;
 
         String message = "Error during getting entities: " + ((entityType != null) ? entityType.name() : "root URI");
-        Assert.assertEquals(message, 200, responseCode);
+        assertEquals(200, responseCode, message);
 
         if (entityType != null) {
             message = "The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.";
-            Assert.assertTrue(message, response.contains("\"value\""));
+            assertTrue(response.contains("\"value\""), message);
         } else { // GET Service Base URI
             message = "The GET entities response for service root URI does not match SensorThings API : missing \"value\" in response.";
-            Assert.assertTrue(message, response.contains("value"));
+            assertTrue(response.contains("value"), message);
         }
         return response;
     }
@@ -527,7 +546,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -542,19 +561,19 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             JSONObject entity = new JSONObject(response.toString());
             try {
                 String message = "The entity does not have mandatory control information : " + ControlInformation.ID;
-                Assert.assertNotNull(message, entity.get(ControlInformation.ID));
+                assertNotNull(entity.get(ControlInformation.ID), message);
             } catch (JSONException e) {
-                Assert.fail("The entity does not have mandatory control information : " + ControlInformation.ID);
+                fail("The entity does not have mandatory control information : " + ControlInformation.ID);
             }
             try {
                 String message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
-                Assert.assertNotNull(message, entity.get(ControlInformation.SELF_LINK));
+                assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
             } catch (JSONException e) {
-                Assert.fail("The entity does not have mandatory control information : " + ControlInformation.SELF_LINK);
+                fail("The entity does not have mandatory control information : " + ControlInformation.SELF_LINK);
             }
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 
@@ -578,7 +597,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
 
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }
@@ -599,15 +618,15 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
                 }
                 try {
                     String message = "Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".";
-                    Assert.assertNotNull(message, entity.get(property.name));
+                    assertNotNull(entity.get(property.name), message);
                 } catch (JSONException e) {
-                    Assert.fail("Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".");
+                    fail("Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".");
                 }
             }
 
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }
@@ -631,7 +650,7 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             }
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
     }
@@ -649,14 +668,14 @@ public class Capability1CoreOnlyTests extends AbstractTestClass {
             for (String relation : entityType.getRelations(serverSettings.getExtensions())) {
                 try {
                     String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
-                    Assert.assertNotNull(message, entity.get(relation + ControlInformation.NAVIGATION_LINK));
+                    assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
                 } catch (JSONException e) {
-                    Assert.fail("Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".");
+                    fail("Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".");
                 }
             }
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
 

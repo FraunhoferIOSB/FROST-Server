@@ -20,11 +20,13 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +35,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AdditionalTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class AdditionalTests extends AbstractTestClass {
+
+    public static class Implementation10 extends AdditionalTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends AdditionalTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -59,7 +77,7 @@ public class AdditionalTests extends AbstractTestClass {
         cleanup();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
@@ -114,7 +132,7 @@ public class AdditionalTests extends AbstractTestClass {
         found = doa.find(observation.getId());
         FeatureOfInterest featureOfInterest = found.getFeatureOfInterest();
 
-        Assert.assertNotNull("A FeatureOfInterest should have been generated, but got NULL.", featureOfInterest);
+        assertNotNull(featureOfInterest, "A FeatureOfInterest should have been generated, but got NULL.");
     }
 
     @Test
@@ -127,7 +145,7 @@ public class AdditionalTests extends AbstractTestClass {
 
         Observation found;
         found = doa.find(observation.getId());
-        Assert.assertNotNull("phenomenonTime should be auto generated.", found.getPhenomenonTime());
+        assertNotNull(found.getPhenomenonTime(), "phenomenonTime should be auto generated.");
     }
 
     /**
@@ -165,7 +183,7 @@ public class AdditionalTests extends AbstractTestClass {
         // Get the generated HistoricalLocation and change the time to a known value.
         List<HistoricalLocation> histLocations = thing.historicalLocations().query().list().toList();
 
-        Assert.assertEquals("Incorrect number of HistoricalLocations for Thing.", 1, histLocations.size());
+        assertEquals(1, histLocations.size(), "Incorrect number of HistoricalLocations for Thing.");
 
         HistoricalLocation histLocation = histLocations.get(0);
         histLocation.setTime(ZonedDateTime.parse("2016-01-01T06:00:00.000Z"));
@@ -182,9 +200,9 @@ public class AdditionalTests extends AbstractTestClass {
         // Check if the Location of the Thing is now Location 2.
         List<Location> thingLocations = thing.locations().query().list().toList();
 
-        Assert.assertEquals("Incorrect number of Locations for Thing.", 1, thingLocations.size());
+        assertEquals(1, thingLocations.size(), "Incorrect number of Locations for Thing.");
 
-        Assert.assertEquals(location2, thingLocations.get(0));
+        assertEquals(location2, thingLocations.get(0));
 
         // Now create a new HistoricalLocation for the Thing, with an earlier time.
         HistoricalLocation histLocation3 = HistoricalLocationBuilder.builder()
@@ -197,9 +215,9 @@ public class AdditionalTests extends AbstractTestClass {
         // Check if the Location of the Thing is still Location 2.
         thingLocations = thing.locations().query().list().toList();
 
-        Assert.assertEquals("Incorrect number of Locations for Thing.", 1, thingLocations.size());
+        assertEquals(1, thingLocations.size(), "Incorrect number of Locations for Thing.");
 
-        Assert.assertEquals(location2, thingLocations.get(0));
+        assertEquals(location2, thingLocations.get(0));
     }
 
     /**
@@ -262,11 +280,11 @@ public class AdditionalTests extends AbstractTestClass {
         HTTPMethods.HttpResponse response;
         String url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doGet(url);
-        Assert.assertEquals("Get should return 201 Created for url " + url, 200, response.code);
+        assertEquals(200, response.code, "Get should return 201 Created for url " + url);
 
         url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doGet(url);
-        Assert.assertEquals("Get should return 404 Not Found for url " + url, 404, response.code);
+        assertEquals(404, response.code, "Get should return 404 Not Found for url " + url);
 
         // POST tests
         url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
@@ -275,11 +293,11 @@ public class AdditionalTests extends AbstractTestClass {
                 + "  \"result\": 300\n"
                 + "}";
         response = HTTPMethods.doPost(url, observationJson);
-        Assert.assertEquals("Post should return 201 Created for url " + url, 201, response.code);
+        assertEquals(201, response.code, "Post should return 201 Created for url " + url);
 
         url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
-        Assert.assertNotEquals("Post should not return 201 Created for url " + url, 201, response.code);
+        assertNotEquals(201, response.code, "Post should not return 201 Created for url " + url);
     }
 
     private void testPut(String urlObsGood, String urlObsBad) {
@@ -290,13 +308,13 @@ public class AdditionalTests extends AbstractTestClass {
                 + "  \"result\": 301\n"
                 + "}";
         response = HTTPMethods.doPut(urlObsGood, observationJson);
-        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+        assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood);
         observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 302\n"
                 + "}";
         response = HTTPMethods.doPut(urlObsBad, observationJson);
-        Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
+        assertEquals(404, response.code, "Post should return 404 Not Found for url " + urlObsBad);
     }
 
     private void testPatch(String urlObsGood, String urlObsBad) {
@@ -307,25 +325,25 @@ public class AdditionalTests extends AbstractTestClass {
                 + "  \"result\": 303\n"
                 + "}";
         response = HTTPMethods.doPatch(urlObsGood, observationJson);
-        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+        assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood);
         observationJson = "{\n"
                 + "  \"result\": 304\n"
                 + "}";
         response = HTTPMethods.doPatch(urlObsBad, observationJson);
-        Assert.assertNotEquals("Post should not return 200 Ok for url " + urlObsBad, 200, response.code);
+        assertNotEquals(200, response.code, "Post should not return 200 Ok for url " + urlObsBad);
     }
 
     private void testDelete(String urlObsBad, String urlObsGood) {
         HTTPMethods.HttpResponse response;
         // DELETE tests
         response = HTTPMethods.doDelete(urlObsBad);
-        Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
+        assertEquals(404, response.code, "Post should return 404 Not Found for url " + urlObsBad);
         response = HTTPMethods.doGet(urlObsGood);
-        Assert.assertEquals("Get should return 200 Ok for url " + urlObsGood, 200, response.code);
+        assertEquals(200, response.code, "Get should return 200 Ok for url " + urlObsGood);
         response = HTTPMethods.doDelete(urlObsGood);
-        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+        assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood);
         response = HTTPMethods.doGet(urlObsGood);
-        Assert.assertEquals("Get should return 404 Not Found for url " + urlObsGood, 404, response.code);
+        assertEquals(404, response.code, "Get should return 404 Not Found for url " + urlObsGood);
     }
 
     @Test
@@ -357,7 +375,7 @@ public class AdditionalTests extends AbstractTestClass {
         service.create(obs1);
 
         FeatureOfInterest foiGenerated1 = service.observations().find(obs1.getId()).getFeatureOfInterest();
-        Assert.assertNotNull(foiGenerated1);
+        assertNotNull(foiGenerated1);
 
         service.delete(foiGenerated1);
 
@@ -365,8 +383,8 @@ public class AdditionalTests extends AbstractTestClass {
         service.create(obs2);
 
         FeatureOfInterest foiGenerated2 = service.observations().find(obs2.getId()).getFeatureOfInterest();
-        Assert.assertNotNull(foiGenerated2);
+        assertNotNull(foiGenerated2);
 
-        Assert.assertNotEquals(foiGenerated1, foiGenerated2);
+        assertNotEquals(foiGenerated1, foiGenerated2);
     }
 }

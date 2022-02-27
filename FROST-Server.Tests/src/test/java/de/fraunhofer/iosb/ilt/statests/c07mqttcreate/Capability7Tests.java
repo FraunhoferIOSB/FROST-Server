@@ -31,9 +31,10 @@ import org.joda.time.Interval;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class Capability7Tests extends AbstractTestClass {
+public abstract class Capability7Tests extends AbstractTestClass {
+
+    public static class Implementation10 extends Capability7Tests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends Capability7Tests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -71,7 +88,7 @@ public class Capability7Tests extends AbstractTestClass {
         mqttHelper = null;
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         entityHelper.deleteEverything();
@@ -90,7 +107,7 @@ public class Capability7Tests extends AbstractTestClass {
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
@@ -103,7 +120,7 @@ public class Capability7Tests extends AbstractTestClass {
             datastreamId = createdObservation.getJSONObject("Datastream").get(ControlInformation.ID);
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Datastream of created observation does not contain @iot.id: " + ex.getMessage());
+            fail("Datastream of created observation does not contain @iot.id: " + ex.getMessage());
         }
         mqttHelper.publish(mqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
 
@@ -111,7 +128,7 @@ public class Capability7Tests extends AbstractTestClass {
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
@@ -124,7 +141,7 @@ public class Capability7Tests extends AbstractTestClass {
             featureOfInterestId = createdObservation.getJSONObject("FeatureOfInterest").get(ControlInformation.ID);
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("created observation does not contain @iot.id: " + ex.getMessage());
+            fail("created observation does not contain @iot.id: " + ex.getMessage());
         }
         mqttHelper.publish(mqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
 
@@ -132,7 +149,7 @@ public class Capability7Tests extends AbstractTestClass {
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
@@ -146,7 +163,7 @@ public class Capability7Tests extends AbstractTestClass {
                 EntityType.OBSERVATION,
                 expandQueryFromJsonObject(createdObservation),
                 10);
-        Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
     private String expandQueryFromJsonObject(JSONObject expectedResult) {
@@ -172,7 +189,7 @@ public class Capability7Tests extends AbstractTestClass {
                     expands.add(key + "(" + expandQueryFromJsonObject(expectedResult.getJSONObject(key), ";") + ")");
                 } catch (JSONException ex) {
                     LOGGER.error("Exception:", ex);
-                    Assert.fail("JSON element addressed by navigationLink is no valid JSON object: " + ex.getMessage());
+                    fail("JSON element addressed by navigationLink is no valid JSON object: " + ex.getMessage());
                 }
             } else {
                 selects.add(key);
@@ -270,7 +287,7 @@ public class Capability7Tests extends AbstractTestClass {
             Interval interval2 = Interval.parse(val2);
             return interval1.isEqual(interval2);
         } catch (Exception ex) {
-            Assert.fail("time properies could neither be parsed as time nor as interval");
+            fail("time properies could neither be parsed as time nor as interval");
         }
         return false;
     }
@@ -293,7 +310,7 @@ public class Capability7Tests extends AbstractTestClass {
                     + "}");
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("error converting obsveration to JSON: " + ex.getMessage());
+            fail("error converting obsveration to JSON: " + ex.getMessage());
         }
         return null;
     }
@@ -345,7 +362,7 @@ public class Capability7Tests extends AbstractTestClass {
                     + "");
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("error converting obsveration to JSON: " + ex.getMessage());
+            fail("error converting obsveration to JSON: " + ex.getMessage());
         }
         return null;
     }

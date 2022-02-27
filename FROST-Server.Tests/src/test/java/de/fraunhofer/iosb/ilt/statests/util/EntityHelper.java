@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +107,7 @@ public class EntityHelper {
                 }
             } catch (JSONException e) {
                 LOGGER.error("Exception: ", e);
-                Assert.fail("An Exception occurred during testing: " + e.getMessage());
+                fail("An Exception occurred during testing: " + e.getMessage());
             }
         } while (array.length() > 0);
     }
@@ -131,7 +132,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -170,7 +171,7 @@ public class EntityHelper {
             return entity.get(ControlInformation.ID);
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("An Exception occurred during testing: " + ex);
+            fail("An Exception occurred during testing: " + ex);
         }
         return -1l;
     }
@@ -192,7 +193,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -207,7 +208,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -224,7 +225,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.LOCATION, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -242,7 +243,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -259,7 +260,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -286,7 +287,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException ex) {
-            Assert.fail("An Exception occurred during testing: " + ex);
+            fail("An Exception occurred during testing: " + ex);
         }
         return -1l;
     }
@@ -301,7 +302,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -317,7 +318,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.SENSOR, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -331,7 +332,7 @@ public class EntityHelper {
             JSONObject entity = postEntity(EntityType.THING, urlParameters);
             return entity.get(ControlInformation.ID);
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return -1;
     }
@@ -380,7 +381,7 @@ public class EntityHelper {
             return entity.get(ControlInformation.ID);
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("An Exception occurred during testing: " + ex.getMessage());
+            fail("An Exception occurred during testing: " + ex.getMessage());
         }
         return -1l;
     }
@@ -390,12 +391,12 @@ public class EntityHelper {
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
-        Assert.assertEquals(message, 200, responseCode);
+        assertEquals(200, responseCode, message);
 
         responseMap = HTTPMethods.doGet(urlString);
         responseCode = responseMap.code;
         message = "Deleted entity was not actually deleted : " + entityType + "(" + id + ").";
-        Assert.assertEquals(message, 404, responseCode);
+        assertEquals(404, responseCode, message);
     }
 
     public DeepInsertInfo getDeepInsertInfo(EntityType entityType) {
@@ -433,7 +434,7 @@ public class EntityHelper {
             return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!: " + e.getMessage());
+            fail("An Exception occurred during testing!: " + e.getMessage());
             return null;
         }
     }
@@ -444,7 +445,7 @@ public class EntityHelper {
             return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!: " + e.getMessage());
+            fail("An Exception occurred during testing!: " + e.getMessage());
             return null;
         }
     }
@@ -486,7 +487,7 @@ public class EntityHelper {
         } catch (JSONException e) {
             LOGGER.error("Failed while reading from url {}", urlString);
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!: " + e.getMessage());
+            fail("An Exception occurred during testing!: " + e.getMessage());
             return null;
         }
     }
@@ -525,7 +526,7 @@ public class EntityHelper {
             responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
             int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             responseMap = HTTPMethods.doGet(urlString);
             JSONObject result = new JSONObject(responseMap.response);
@@ -534,7 +535,7 @@ public class EntityHelper {
         } catch (JSONException e) {
             LOGGER.error("Response: {}", responseMap);
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }
     }
@@ -550,14 +551,14 @@ public class EntityHelper {
             HttpResponse responseMap = HTTPMethods.doPut(urlString, entity.toString());
             int responseCode = responseMap.code;
             String message = "Error during updating(PUT) of entity " + entityType.name() + ": " + responseMap.response;
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
             JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }
     }
@@ -595,7 +596,7 @@ public class EntityHelper {
                         }
                     }
                 } catch (JSONException ex) {
-                    Assert.fail();
+                    fail();
                 }
             }
         }
@@ -611,7 +612,7 @@ public class EntityHelper {
             return changes;
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Generating Datastream changes failed: " + ex.getMessage());
+            fail("Generating Datastream changes failed: " + ex.getMessage());
         }
         throw new IllegalStateException();
     }
@@ -626,7 +627,7 @@ public class EntityHelper {
             return changes;
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Generating FeatureOfInterest changes failed: " + ex.getMessage());
+            fail("Generating FeatureOfInterest changes failed: " + ex.getMessage());
         }
         throw new IllegalStateException();
     }
@@ -647,7 +648,7 @@ public class EntityHelper {
             return changes;
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Generating Location changes failed: " + ex.getMessage());
+            fail("Generating Location changes failed: " + ex.getMessage());
         }
         throw new IllegalStateException();
     }
@@ -664,7 +665,7 @@ public class EntityHelper {
             return changes;
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Generating Observation changes failed: " + ex.getMessage());
+            fail("Generating Observation changes failed: " + ex.getMessage());
         }
         throw new IllegalStateException();
     }
@@ -710,7 +711,7 @@ public class EntityHelper {
             int responseCode = responseMap.code;
 
             String message = "Error during creation of entity " + entityType.name();
-            Assert.assertEquals(message, 201, responseCode);
+            assertEquals(201, responseCode, message);
 
             String response = responseMap.response;
             Object id = response.substring(response.indexOf("(") + 1, response.indexOf(")"));
@@ -719,12 +720,12 @@ public class EntityHelper {
             responseCode = responseMap.code;
 
             message = "The POSTed entity is not created.";
-            Assert.assertEquals(message, 200, responseCode);
+            assertEquals(200, responseCode, message);
 
             JSONObject result = new JSONObject(responseMap.response);
             return result;
         } catch (JSONException e) {
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }
     }

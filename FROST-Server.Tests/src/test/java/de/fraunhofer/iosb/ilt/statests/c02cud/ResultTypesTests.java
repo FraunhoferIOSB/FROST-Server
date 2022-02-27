@@ -23,9 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Point;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class ResultTypesTests extends AbstractTestClass {
+public abstract class ResultTypesTests extends AbstractTestClass {
+
+    public static class Implementation10 extends ResultTypesTests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends ResultTypesTests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -45,7 +61,7 @@ public class ResultTypesTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public ResultTypesTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
+    public ResultTypesTests(ServerVersion version) {
         super(version);
     }
 
@@ -67,7 +83,7 @@ public class ResultTypesTests extends AbstractTestClass {
         DATASTREAMS.clear();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         try {
@@ -114,10 +130,10 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(b1.getId());
         String message = "Expected result to be a Boolean.";
-        Assert.assertEquals(message, b1.getResult(), found.getResult());
+        assertEquals(b1.getResult(), found.getResult(), message);
         found = doa.find(b2.getId());
         message = "Expected result to be a Boolean.";
-        Assert.assertEquals(message, b2.getResult(), found.getResult());
+        assertEquals(b2.getResult(), found.getResult(), message);
     }
 
     /**
@@ -136,7 +152,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(b1.getId());
         String message = "Expected result to be a String.";
-        Assert.assertEquals(message, b1.getResult(), found.getResult());
+        assertEquals(b1.getResult(), found.getResult(), message);
     }
 
     /**
@@ -155,7 +171,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(b1.getId());
         String message = "Expected result to be a Number.";
-        Assert.assertEquals(message, b1.getResult(), found.getResult());
+        assertEquals(b1.getResult(), found.getResult(), message);
 
         Observation b2 = new Observation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
         doa.create(b2);
@@ -163,7 +179,7 @@ public class ResultTypesTests extends AbstractTestClass {
 
         found = doa.find(b2.getId());
         message = "Expected result to be a Number.";
-        Assert.assertEquals(message, b2.getResult(), found.getResult());
+        assertEquals(b2.getResult(), found.getResult(), message);
     }
 
     /**
@@ -186,7 +202,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(o1.getId());
         String message = "Expected result Maps are not equal.";
-        Assert.assertEquals(message, o1.getResult(), found.getResult());
+        assertEquals(o1.getResult(), found.getResult(), message);
     }
 
     /**
@@ -209,7 +225,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(o1.getId());
         String message = "Expected result Arrays are not equal.";
-        Assert.assertEquals(message, o1.getResult(), found.getResult());
+        assertEquals(o1.getResult(), found.getResult(), message);
     }
 
     /**
@@ -228,7 +244,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(o1.getId());
         String message = "Expected result to be Null.";
-        Assert.assertEquals(message, o1.getResult(), found.getResult());
+        assertEquals(o1.getResult(), found.getResult(), message);
 
         Observation o2 = new Observation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
         doa.create(o2);
@@ -240,7 +256,7 @@ public class ResultTypesTests extends AbstractTestClass {
 
         found = doa.find(o2.getId());
         message = "Expected result to be Null.";
-        Assert.assertEquals(message, o2.getResult(), found.getResult());
+        assertEquals(o2.getResult(), found.getResult(), message);
     }
 
     /**
@@ -267,7 +283,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(o1.getId());
         String message = "resultQuality not stored correctly.";
-        Assert.assertEquals(message, o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()));
+        assertEquals(o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()), message);
     }
 
     /**
@@ -307,7 +323,7 @@ public class ResultTypesTests extends AbstractTestClass {
         Observation found;
         found = doa.find(o1.getId());
         String message = "resultQuality not stored correctly.";
-        Assert.assertEquals(message, o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()));
+        assertEquals(o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()), message);
     }
 
 }

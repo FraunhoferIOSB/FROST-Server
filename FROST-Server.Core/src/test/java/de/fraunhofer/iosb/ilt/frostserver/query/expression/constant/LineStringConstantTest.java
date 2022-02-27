@@ -19,8 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import org.geojson.LineString;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -33,19 +34,19 @@ public class LineStringConstantTest {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10}, new Integer[]{10, 30}, new Integer[]{40, 40});
         String text = "LINESTRING (30 10, 10 30, 40 40)";
         LineStringConstant result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
 
         text = "LINESTRING(30 10,10 30,40 40)";
         result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
 
         text = "LINESTRING  (30 10 , 10 30 , 40 40)";
         result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
 
         text = "LINESTRING      (30             10                 ,                    10                 30                ,           40             40        )         ";
         result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class LineStringConstantTest {
         final LineString expected = TestHelper.getLine(new Double[]{30.1, 10.2}, new Double[]{0.1, .1}, new Double[]{40.0, 40.0});
         String text = "LINESTRING (30.1 10.2, 0.1 .1, 40.0 40.0)";
         LineStringConstant result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
     }
 
     @Test
@@ -61,22 +62,23 @@ public class LineStringConstantTest {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10, 10}, new Integer[]{10, 30, 10}, new Integer[]{40, 40, 40});
         String text = "LINESTRING (30 10 10, 10 30 10, 40 40 40)";
         LineStringConstant result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
 
         text = "LINESTRING(30 10 10,10 30 10,40 40 40)";
         result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
 
         text = "LINESTRING  (30 10 10 , 10 30 10 , 40 40 40)";
         result = new LineStringConstant(text);
-        Assert.assertEquals(expected, result.getValue());
+        assertEquals(expected, result.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParseFromStringWithMixedDimensions() {
-        String text = "LINESTRING (30 10, 10 30 40)";
-        LineStringConstant lineStringConstant = new LineStringConstant(text);
-        Assert.fail("Should have thrown an exception but got a value: " + lineStringConstant.toString());
+        assertThrows(IllegalArgumentException.class, () -> {
+            String text = "LINESTRING (30 10, 10 30 40)";
+            LineStringConstant lineStringConstant = new LineStringConstant(text);
+        });
     }
 
 }

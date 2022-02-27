@@ -49,11 +49,12 @@ import org.joda.time.Interval;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +62,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Capability8Tests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public abstract class Capability8Tests extends AbstractTestClass {
+
+    public static class Implementation10 extends Capability8Tests {
+
+        public Implementation10() {
+            super(ServerVersion.v_1_0);
+        }
+
+    }
+
+    public static class Implementation11 extends Capability8Tests {
+
+        public Implementation11() {
+            super(ServerVersion.v_1_1);
+        }
+
+    }
 
     /**
      * The logger for this class.
@@ -111,7 +128,7 @@ public class Capability8Tests extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      */
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         entityHelper.deleteEverything();
@@ -256,7 +273,7 @@ public class Capability8Tests extends AbstractTestClass {
                         assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
                     } catch (JSONException ex) {
                         LOGGER.error("Exception:", ex);
-                        Assert.fail("Could not get expected result for MQTT subscription from server: " + ex.getMessage());
+                        fail("Could not get expected result for MQTT subscription from server: " + ex.getMessage());
                     }
                 });
             }
@@ -287,14 +304,14 @@ public class Capability8Tests extends AbstractTestClass {
             JSONObject entity = entityHelper.getEntity(deepInsertInfo.getEntityType(), result.getActionResult());
             Optional<JSONObject> rootResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(deepInsertInfo.getEntityType()))).map(x -> x.getValue()).findFirst();
             if (!rootResult.isPresent()) {
-                Assert.fail("Deep insert MQTT result is missing root entity");
+                fail("Deep insert MQTT result is missing root entity");
             }
             assertJsonEqualsWithLinkResolving(entity, rootResult.get(), mqttHelper.getTopic(deepInsertInfo.getEntityType()));
             deepInsertInfo.getSubEntityTypes().stream().forEach((subType) -> {
                 JSONObject subEntity = getSubEntityByRoot(deepInsertInfo.getEntityType(), result.getActionResult(), subType);
                 Optional<JSONObject> subResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(subType))).map(x -> x.getValue()).findFirst();
                 if (!subResult.isPresent()) {
-                    Assert.fail("Deep insert MQTT result is missing entity " + subEntity.toString());
+                    fail("Deep insert MQTT result is missing entity " + subEntity.toString());
                 }
                 assertJsonEqualsWithLinkResolving(subEntity, subResult.get(), mqttHelper.getTopic(subType));
             });
@@ -435,7 +452,7 @@ public class Capability8Tests extends AbstractTestClass {
             JSONObject lastHistLoc = entityHelper.getAnyEntity(HISTORICAL_LOCATION, "$orderby=time%20desc", 10);
             assertJsonEqualsWithLinkResolving(lastHistLoc, result.getMessages().values().iterator().next(), mqttHelper.getTopic(HISTORICAL_LOCATION));
         } catch (Exception ex) {
-            Assert.fail("Could not create second Location: " + ex.getMessage());
+            fail("Could not create second Location: " + ex.getMessage());
         }
 
     }
@@ -445,7 +462,7 @@ public class Capability8Tests extends AbstractTestClass {
             try {
                 IDS.put(entityType, getInsertEntityAction(entityType).call());
             } catch (Exception ex) {
-                Assert.fail("Could not create entities");
+                fail("Could not create entities");
             }
         });
     }
@@ -607,14 +624,14 @@ public class Capability8Tests extends AbstractTestClass {
             path = "/" + subtEntityType.getRootEntitySet() + "?$count=true&$filter=" + path + "/id%20eq%20" + Utils.quoteIdForUrl(rootId);
             JSONObject result = entityHelper.getEntity(path);
             if (result.getInt("@iot.count") != 1) {
-                Assert.fail("Invalid result with size != 1");
+                fail("Invalid result with size != 1");
             }
             JSONObject subEntity = result.getJSONArray("value").getJSONObject(0);
             //helper.clearLinks(subEntity);
             return subEntity;
         } catch (JSONException ex) {
             LOGGER.error("Exception:", ex);
-            Assert.fail("Invalid JSON: " + ex.getMessage());
+            fail("Invalid JSON: " + ex.getMessage());
         }
         throw new IllegalStateException();
     }
@@ -637,7 +654,7 @@ public class Capability8Tests extends AbstractTestClass {
         if (!equals) {
             message = "Expected " + expected.toString() + " got " + received.toString() + " for topic " + topic;
         }
-        Assert.assertTrue(message, equals);
+        assertTrue(equals, message);
     }
 
     private static boolean jsonEqualsWithLinkResolving(JSONArray arr1, JSONArray arr2, String topic) {
@@ -741,7 +758,7 @@ public class Capability8Tests extends AbstractTestClass {
             Interval interval2 = Interval.parse(val2);
             return interval1.isEqual(interval2);
         } catch (Exception ex) {
-            Assert.fail("time properies could neither be parsed as time nor as interval");
+            fail("time properies could neither be parsed as time nor as interval");
         }
 
         return false;
