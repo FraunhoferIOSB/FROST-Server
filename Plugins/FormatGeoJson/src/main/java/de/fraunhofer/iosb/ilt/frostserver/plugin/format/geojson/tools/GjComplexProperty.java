@@ -31,10 +31,12 @@ import java.util.TreeMap;
  */
 public class GjComplexProperty implements GjEntityEntry {
 
+    private final String name;
     private final EntityProperty property;
     private final Map<String, String> subProperties = new TreeMap<>();
 
     public GjComplexProperty(String name, EntityProperty property) {
+        this.name = name;
         this.property = property;
         final TypeComplex type = (TypeComplex) property.getType();
         for (Map.Entry<String, PropertyType> subProperty : type.getProperties().entrySet()) {
@@ -56,6 +58,8 @@ public class GjComplexProperty implements GjEntityEntry {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
                 collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()));
             }
+        } else {
+            collector.collectEntry(namePrefix + name, property.getFrom(source));
         }
     }
 
