@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -41,26 +43,43 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperResult extends FieldMapperAbstract {
+public class FieldMapperResult extends FieldMapperAbstractEp {
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "TypeField", description = "The database field to store the type in.")
+    @EditorString.EdOptsString()
     private String fieldType;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "StringField", description = "The database field to use for String values.")
+    @EditorString.EdOptsString()
     private String fieldString;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "NumberField", description = "The database field to use for Number values.")
+    @EditorString.EdOptsString()
     private String fieldNumber;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "JsonField", description = "The database field to use for JSON values.")
+    @EditorString.EdOptsString()
     private String fieldJson;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "BooleanField", description = "The database field to use for Boolean fields.")
+    @EditorString.EdOptsString()
     private String fieldBoolean;
 
+    @JsonIgnore
     private int fieldTypeIdx;
+    @JsonIgnore
     private int fieldStringIdx;
+    @JsonIgnore
     private int fieldNumberIdx;
+    @JsonIgnore
     private int fieldJsonIdx;
+    @JsonIgnore
     private int fieldBooleanIdx;
-
-    private DefEntityProperty parent;
-
-    @Override
-    public void setParent(DefEntityProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -82,7 +101,7 @@ public class FieldMapperResult extends FieldMapperAbstract {
         final int idxNumber = fieldNumberIdx;
         final int idxJson = fieldJsonIdx;
         final int idxBoolean = fieldBooleanIdx;
-        final EntityPropertyMain property = parent.getEntityProperty();
+        final EntityPropertyMain property = getParent().getEntityProperty();
 
         pfReg.addEntry(property,
                 true,

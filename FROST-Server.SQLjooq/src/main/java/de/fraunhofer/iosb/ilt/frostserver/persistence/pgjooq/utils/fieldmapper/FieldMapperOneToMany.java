@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -33,29 +36,34 @@ import org.jooq.TableField;
  *
  * @author hylke
  */
-public class FieldMapperOneToMany extends FieldMapperAbstract {
+public class FieldMapperOneToMany extends FieldMapperAbstractNp {
 
     /**
      * The name of the field in "my" table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use in 'my' table.")
+    @EditorString.EdOptsString()
     private String field;
+
     /**
      * The name of the other table we link to.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherTable", description = "The name of the other table we link to.")
+    @EditorString.EdOptsString()
     private String otherTable;
+
     /**
      * The field in the other table that is the key in the relation.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherField", description = "The field in the other table that is the key in the relation.")
+    @EditorString.EdOptsString()
     private String otherField;
 
+    @JsonIgnore
     private int fieldIdx;
-
-    private DefNavigationProperty parent;
-
-    @Override
-    public void setParent(DefNavigationProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -68,7 +76,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
     public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
-        final NavigationPropertyMain navProp = parent.getNavigationProperty();
+        final NavigationPropertyMain navProp = getParent().getNavigationProperty();
 
         PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         EntityFactories ef = ppm.getEntityFactories();
@@ -80,9 +88,9 @@ public class FieldMapperOneToMany extends FieldMapperAbstract {
                 .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
         );
 
-        final DefNavigationProperty.Inverse inverse = parent.getInverse();
+        final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
-            final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
+            final NavigationPropertyMain navPropInverse = getParent().getNavigationPropertyInverse();
             final PropertyFieldRegistry<T> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ef);
             staTableOther.registerRelation(new RelationOneToMany(navPropInverse, staTableOther, staTable)

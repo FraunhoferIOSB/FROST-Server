@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -38,20 +40,22 @@ import org.jooq.impl.SQLDataType;
  *
  * @author hylke
  */
-public class FieldMapperGeometry extends FieldMapperAbstract {
+public class FieldMapperGeometry extends FieldMapperAbstractEp {
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "SourceField", description = "The database field to for source data.")
+    @EditorString.EdOptsString()
     private String fieldSource;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "GeoField", description = "The database field to use for parsed geometry.")
+    @EditorString.EdOptsString()
     private String fieldGeom;
 
+    @JsonIgnore
     private int fieldSourceIdx = -1;
+    @JsonIgnore
     private int fieldGeomIdx;
-
-    private DefEntityProperty parent;
-
-    @Override
-    public void setParent(DefEntityProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -65,7 +69,7 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
 
     @Override
     public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
-        final EntityPropertyMain property = parent.getEntityProperty();
+        final EntityPropertyMain property = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxLocation = fieldSourceIdx;
         final int idxGeom = fieldGeomIdx;

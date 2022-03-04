@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
@@ -35,8 +38,12 @@ public class FieldMapperStatic implements FieldMapper {
     /**
      * The value for the static field. Can be any type.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Value", description = "The value of the static property.")
+    @EditorString.EdOptsString()
     private Object value;
 
+    @JsonIgnore
     private DefEntityProperty parent;
 
     @Override

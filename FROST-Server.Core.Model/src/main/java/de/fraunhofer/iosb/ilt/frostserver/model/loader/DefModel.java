@@ -17,28 +17,43 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  * @author hylke
  */
-public class DefModel {
+@ConfigurableClass
+public class DefModel implements AnnotatedConfigurable<Void, Void> {
 
+    @ConfigurableField(editor = EditorList.class,
+            label = "Conformance", description = "The conformance classes this model implements.")
+    @EditorList.EdOptsList(editor = EditorString.class)
+    @EditorString.EdOptsString()
+    private List<String> conformance;
+
+    @ConfigurableField(editor = EditorList.class,
+            label = "Property Types", description = "Custom property types.")
+    @EditorList.EdOptsList(editor = EditorClass.class)
+    @EditorClass.EdOptsClass(clazz = DefPropertyTypeSimple.class)
     private List<DefPropertyTypeSimple> simplePropertyTypes;
-    private Map<String, DefEntityType> entityTypes;
+
+    @ConfigurableField(editor = EditorList.class,
+            label = "Entity Types", description = "The entity types of the model.")
+    @EditorList.EdOptsList(editor = EditorClass.class)
+    @EditorClass.EdOptsClass(clazz = DefEntityType.class)
+    private List<DefEntityType> entityTypes;
 
     public void init() {
-        for (Map.Entry<String, DefEntityType> entry : entityTypes.entrySet()) {
-            String typeName = entry.getKey();
-            DefEntityType type = entry.getValue();
-            if (type.getName() == null) {
-                type.setName(typeName);
-            }
+        for (DefEntityType type : entityTypes) {
             type.init();
         }
     }
@@ -52,32 +67,32 @@ public class DefModel {
     }
 
     public void registerEntityTypes(ModelRegistry modelRegistry) {
-        for (DefEntityType defType : entityTypes.values()) {
+        for (DefEntityType defType : entityTypes) {
             modelRegistry.registerEntityType(defType.getEntityType());
         }
     }
 
     public boolean linkEntityTypes(ModelRegistry modelRegistry) {
-        for (DefEntityType defType : entityTypes.values()) {
+        for (DefEntityType defType : entityTypes) {
             defType.linkProperties(modelRegistry);
         }
         return true;
     }
 
-    public Map<String, DefEntityType> getEntityTypes() {
+    public List<DefEntityType> getEntityTypes() {
         if (entityTypes == null) {
-            entityTypes = new LinkedHashMap<>();
+            entityTypes = new ArrayList<>();
         }
         return entityTypes;
     }
 
-    public DefModel setEntityTypes(Map<String, DefEntityType> entityTypes) {
+    public DefModel setEntityTypes(List<DefEntityType> entityTypes) {
         this.entityTypes = entityTypes;
         return this;
     }
 
     public DefModel addEntityType(DefEntityType entityType) {
-        getEntityTypes().put(entityType.getName(), entityType);
+        getEntityTypes().add(entityType);
         return this;
     }
 
@@ -97,4 +112,14 @@ public class DefModel {
         return this;
     }
 
+    public List<String> getConformance() {
+        if (conformance == null) {
+            conformance = new ArrayList<>();
+        }
+        return conformance;
+    }
+
+    public void addConformance(String conformanceClass) {
+        getConformance().add(conformanceClass);
+    }
 }

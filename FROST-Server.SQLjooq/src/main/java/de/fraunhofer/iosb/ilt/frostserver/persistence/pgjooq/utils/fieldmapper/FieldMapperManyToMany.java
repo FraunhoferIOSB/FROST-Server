@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -34,41 +37,58 @@ import org.jooq.TableField;
  *
  * @author hylke
  */
-public class FieldMapperManyToMany extends FieldMapperAbstract {
+public class FieldMapperManyToMany extends FieldMapperAbstractNp {
 
     /**
      * The name of the field in "my" table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use in 'my' table.")
+    @EditorString.EdOptsString()
     private String field;
+
     /**
      * Name of the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "LinkTable", description = "Name of the link table.")
+    @EditorString.EdOptsString()
     private String linkTable;
+
     /**
      * Name of "my" field in the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OurLinkField", description = "Name of 'my' field in the link table.")
+    @EditorString.EdOptsString()
     private String linkOurField;
+
     /**
      * Name of the other table's field in the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherLinkField", description = "Name of the other table's field in the link table.")
+    @EditorString.EdOptsString()
     private String linkOtherField;
+
     /**
      * The name of the other table we link to.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherTable", description = "The name of the other table we link to.")
+    @EditorString.EdOptsString()
     private String otherTable;
+
     /**
      * The field in the other table that is the key in the relation.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherField", description = "The field in the other table that is the key in the relation.")
+    @EditorString.EdOptsString()
     private String otherField;
 
+    @JsonIgnore
     private int fieldIdx;
-
-    private DefNavigationProperty parent;
-
-    @Override
-    public void setParent(DefNavigationProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -88,7 +108,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
         final int fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
         final int fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
 
-        final NavigationPropertyMain navProp = parent.getNavigationProperty();
+        final NavigationPropertyMain navProp = getParent().getNavigationProperty();
         final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         final EntityFactories ef = ppm.getEntityFactories();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), ef);
@@ -100,9 +120,9 @@ public class FieldMapperManyToMany extends FieldMapperAbstract {
                 .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther))
         );
 
-        final DefNavigationProperty.Inverse inverse = parent.getInverse();
+        final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
-            final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
+            final NavigationPropertyMain navPropInverse = getParent().getNavigationPropertyInverse();
             final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ef);
             staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable)

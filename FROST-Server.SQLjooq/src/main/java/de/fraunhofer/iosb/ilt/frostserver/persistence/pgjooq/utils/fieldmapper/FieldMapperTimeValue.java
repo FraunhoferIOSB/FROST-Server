@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -32,20 +34,22 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperTimeValue extends FieldMapperAbstract {
+public class FieldMapperTimeValue extends FieldMapperAbstractEp {
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "Start Field", description = "The database field to use for the start DateTime.")
+    @EditorString.EdOptsString()
     private String fieldStart;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "End Field", description = "The database field to use for the end DateTime.")
+    @EditorString.EdOptsString()
     private String fieldEnd;
 
+    @JsonIgnore
     private int fieldStartIdx;
+    @JsonIgnore
     private int fieldEndIdx;
-
-    private DefEntityProperty parent;
-
-    @Override
-    public void setParent(DefEntityProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -58,7 +62,7 @@ public class FieldMapperTimeValue extends FieldMapperAbstract {
 
     @Override
     public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
-        final EntityProperty<TimeValue> property = parent.getEntityProperty();
+        final EntityProperty<TimeValue> property = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxStart = fieldStartIdx;
         final int idxEnd = fieldEndIdx;

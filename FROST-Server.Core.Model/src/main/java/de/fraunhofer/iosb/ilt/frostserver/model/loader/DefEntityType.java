@@ -18,64 +18,90 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
-public class DefEntityType {
+@ConfigurableClass
+public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefEntityType.class.getName());
 
     /**
      * The name of the EntityType.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Name", description = "The name of the Entity Type.")
+    @EditorString.EdOptsString()
     private String name;
+
     /**
      * The plural name of the EntityType.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Plural", description = "The name to use for for sets of this entity type.")
+    @EditorString.EdOptsString()
     private String plural;
-    /**
-     * The EntityProperties of the EntityType.
-     */
-    private Map<String, DefEntityProperty> entityProperties;
-    /**
-     * The NavigationProperties of the EntityType.
-     */
-    private Map<String, DefNavigationProperty> navigationProperties;
+
     /**
      * The "table" that data for this EntityType is stored in. What this exactly
      * means depends on the PersistenceManager.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Name", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
+    @EditorString.EdOptsString()
     private String table;
+
+    /**
+     * The EntityProperties of the EntityType.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "EntityProps")
+    @EditorList.EdOptsList(editor = EditorClass.class)
+    @EditorClass.EdOptsClass(clazz = DefEntityProperty.class)
+    private List<DefEntityProperty> entityProperties;
+
+    /**
+     * The NavigationProperties of the EntityType.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "NavProps")
+    @EditorList.EdOptsList(editor = EditorClass.class)
+    @EditorClass.EdOptsClass(clazz = DefNavigationProperty.class)
+    private List<DefNavigationProperty> navigationProperties;
+
     /**
      * Validators that are used to validate entities of this type.
      */
+    @ConfigurableField(editor = EditorList.class, optional = true,
+            label = "NavProps")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = EntityValidator.class, merge = true, nameField = "@class")
     private List<EntityValidator> validators = new ArrayList<>();
 
     @JsonIgnore
     private EntityType entityType;
 
     public void init() {
-        for (Map.Entry<String, DefEntityProperty> entry : getEntityProperties().entrySet()) {
-            String typeName = entry.getKey();
-            DefEntityProperty property = entry.getValue();
-            if (property.getName() == null) {
-                property.setName(typeName);
-            }
+        for (DefEntityProperty property : getEntityProperties()) {
             property.init();
         }
-        for (Map.Entry<String, DefNavigationProperty> entry : getNavigationProperties().entrySet()) {
-            String typeName = entry.getKey();
-            DefNavigationProperty property = entry.getValue();
-            if (property.getName() == null) {
-                property.setName(typeName);
-            }
+        for (DefNavigationProperty property : getNavigationProperties()) {
             property.init();
         }
     }
@@ -91,11 +117,11 @@ public class DefEntityType {
     }
 
     public void linkProperties(ModelRegistry modelRegistry) {
-        for (DefEntityProperty defEp : entityProperties.values()) {
+        for (DefEntityProperty defEp : entityProperties) {
             defEp.setEntityType(entityType);
             defEp.registerProperties(modelRegistry);
         }
-        for (DefNavigationProperty defNp : navigationProperties.values()) {
+        for (DefNavigationProperty defNp : navigationProperties) {
             defNp.setSourceEntityType(entityType);
             defNp.registerProperties(modelRegistry);
         }
@@ -146,9 +172,9 @@ public class DefEntityType {
      *
      * @return the entityProperties.
      */
-    public Map<String, DefEntityProperty> getEntityProperties() {
+    public List<DefEntityProperty> getEntityProperties() {
         if (entityProperties == null) {
-            entityProperties = new LinkedHashMap<>();
+            entityProperties = new ArrayList<>();
         }
         return entityProperties;
     }
@@ -159,14 +185,24 @@ public class DefEntityType {
      * @param entityProperties the entityProperties to set.
      * @return this.
      */
-    public DefEntityType setEntityProperties(Map<String, DefEntityProperty> entityProperties) {
+    public DefEntityType setEntityProperties(List<DefEntityProperty> entityProperties) {
         this.entityProperties = entityProperties;
         return this;
     }
 
     public DefEntityType addEntityProperty(DefEntityProperty entityProperty) {
-        getEntityProperties().put(entityProperty.getName(), entityProperty);
+        getEntityProperties().add(entityProperty);
         return this;
+    }
+
+    public DefEntityProperty getPrimaryKey() {
+        for (DefEntityProperty property : getEntityProperties()) {
+            if ("id".equalsIgnoreCase(property.getType())) {
+                return property;
+            }
+        }
+        LOGGER.warn("No primary key defined for {}", getName());
+        return null;
     }
 
     /**
@@ -174,9 +210,9 @@ public class DefEntityType {
      *
      * @return the navigationProperties.
      */
-    public Map<String, DefNavigationProperty> getNavigationProperties() {
+    public List<DefNavigationProperty> getNavigationProperties() {
         if (navigationProperties == null) {
-            navigationProperties = new LinkedHashMap<>();
+            navigationProperties = new ArrayList<>();
         }
         return navigationProperties;
     }
@@ -187,13 +223,13 @@ public class DefEntityType {
      * @param navigationProperties the navigationProperties to set.
      * @return this.
      */
-    public DefEntityType setNavigationProperties(Map<String, DefNavigationProperty> navigationProperties) {
+    public DefEntityType setNavigationProperties(List<DefNavigationProperty> navigationProperties) {
         this.navigationProperties = navigationProperties;
         return this;
     }
 
     public DefEntityType addNavigationProperty(DefNavigationProperty navigationProperty) {
-        getNavigationProperties().put(navigationProperty.getName(), navigationProperty);
+        getNavigationProperties().add(navigationProperty);
         return this;
     }
 

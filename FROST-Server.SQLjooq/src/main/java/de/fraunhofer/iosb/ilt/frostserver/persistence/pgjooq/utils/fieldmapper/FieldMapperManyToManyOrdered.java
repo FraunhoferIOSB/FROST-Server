@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
@@ -33,55 +37,84 @@ import org.jooq.TableField;
  *
  * @author hylke
  */
-public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
+public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
 
     /**
      * The name of the field in "my" table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use in 'my' table.")
+    @EditorString.EdOptsString()
     private String field;
+
     /**
      * Name of the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "LinkTable", description = "Name of the link table.")
+    @EditorString.EdOptsString()
     private String linkTable;
+
     /**
      * Name of "my" field in the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OurLinkField", description = "Name of 'my' field in the link table.")
+    @EditorString.EdOptsString()
     private String linkOurField;
+
     /**
      * Name of the other table's field in the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherLinkField", description = "Name of the other table's field in the link table.")
+    @EditorString.EdOptsString()
     private String linkOtherField;
+
     /**
      * Name of the sorting field in the link table.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "RankLinkField", description = "Name of the rank field in the link table.")
+    @EditorString.EdOptsString()
     private String linkRankField;
+
     /**
      * The name of the other table we link to.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherTable", description = "The name of the other table we link to.")
+    @EditorString.EdOptsString()
     private String otherTable;
+
     /**
      * The field in the other table that is the key in the relation.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "OtherField", description = "The field in the other table that is the key in the relation.")
+    @EditorString.EdOptsString()
     private String otherField;
+
     /**
      * Flag indicating duplicates should be removed when following the relation
      * over a navigationLink.
      */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Distinct", description = "Flag indicating duplicates should be removed when following the relation over a navigationLink.")
+    @EditorBoolean.EdOptsBool()
     private boolean distinct = false;
+
     /**
      * Flag indicating duplicates should be removed when following the inverse
      * relation over a navigationLink.
      */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "DistinctInverse", description = "Flag indicating duplicates should be removed when following the inverse relation over a navigationLink.")
+    @EditorBoolean.EdOptsBool()
     private boolean distinctInverse = false;
 
+    @JsonIgnore
     private int fieldIdx;
-
-    private DefNavigationProperty parent;
-
-    @Override
-    public void setParent(DefNavigationProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -102,7 +135,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
         final int fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
         final int fieldIdxLinkRank = getOrRegisterField(linkRankField, dbTableLink, staTableLink);
 
-        final NavigationPropertyMain navProp = parent.getNavigationProperty();
+        final NavigationPropertyMain navProp = getParent().getNavigationProperty();
         final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx), ppm.getEntityFactories());
 
@@ -115,9 +148,9 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstract {
                 .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther))
         );
 
-        final DefNavigationProperty.Inverse inverse = parent.getInverse();
+        final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
-            final NavigationPropertyMain navPropInverse = parent.getNavigationPropertyInverse();
+            final NavigationPropertyMain navPropInverse = getParent().getNavigationPropertyInverse();
             final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ppm.getEntityFactories());
             staTableOther.registerRelation(new RelationManyToManyOrdered(navPropInverse, staTableOther, staTableLink, staTable)

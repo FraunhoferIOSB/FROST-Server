@@ -18,6 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -31,31 +39,58 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public class DefNavigationProperty {
+@ConfigurableClass
+public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefNavigationProperty.class.getName());
 
     /**
      * The name of the NavigationProperty.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Name", description = "The name of the Entity Type.")
+    @EditorString.EdOptsString()
     private String name;
+
     /**
      * Flag indicating the NavigationProperty points to an EntitySet.
      */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Is A Set", description = "Flag indicating the NavigationProperty points to an EntitySet.")
+    @EditorBoolean.EdOptsBool()
     private boolean entitySet;
+
     /**
      * The entity type of the entity(set) this NavigationProperty points to.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Target Type", description = "The entity type of the entity(set) this NavigationProperty points to.")
+    @EditorString.EdOptsString()
     private String entityType;
+
     /**
      * Flag indicating the property must be set.
      */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Required", description = "Flag indicating the property must be set.")
+    @EditorBoolean.EdOptsBool()
     private boolean required;
+
+    /**
+     * The inverse of this relation.
+     */
+    @ConfigurableField(editor = EditorClass.class,
+            label = "Inverse", description = "The inverse of this relation.")
+    @EditorClass.EdOptsClass(clazz = Inverse.class)
+    private Inverse inverse;
+
     /**
      * Handlers used to map the property to a persistence manager.
      */
-    private Inverse inverse;
-
+    @ConfigurableField(editor = EditorList.class,
+            label = "Handlers")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
     private List<PropertyPersistenceMapper> handlers;
 
     @JsonIgnore
@@ -287,14 +322,25 @@ public class DefNavigationProperty {
         /**
          * The name of the NavigationProperty.
          */
+        @ConfigurableField(editor = EditorString.class,
+                label = "Name", description = "The name of the Entity Type.")
+        @EditorString.EdOptsString()
         private String name;
+
         /**
          * Flag indicating the NavigationProperty points to an EntitySet.
          */
+        @ConfigurableField(editor = EditorBoolean.class,
+                label = "Is A Set", description = "Flag indicating the NavigationProperty points to an EntitySet.")
+        @EditorBoolean.EdOptsBool()
         private boolean entitySet;
+
         /**
          * Flag indicating the property must be set.
          */
+        @ConfigurableField(editor = EditorBoolean.class,
+                label = "Required", description = "Flag indicating the property must be set.")
+        @EditorBoolean.EdOptsBool()
         private boolean required;
 
         /**

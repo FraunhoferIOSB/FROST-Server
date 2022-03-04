@@ -17,8 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -36,22 +39,23 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperJson extends FieldMapperAbstract {
+public class FieldMapperJson extends FieldMapperAbstractEp {
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use.")
+    @EditorString.EdOptsString()
     private String field;
+
     /**
      * Flag indicating the data type is a Map, not a raw json type.
      */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Is Map", description = "Flag indicating the data type is a Map, not a raw json type.")
+    @EditorBoolean.EdOptsBool(dflt = true)
     private boolean isMap = true;
 
+    @JsonIgnore
     private int fieldIdx;
-
-    private DefEntityProperty parent;
-
-    @Override
-    public void setParent(DefEntityProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -62,7 +66,7 @@ public class FieldMapperJson extends FieldMapperAbstract {
 
     @Override
     public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
-        final EntityProperty entityProperty = parent.getEntityProperty();
+        final EntityProperty entityProperty = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
         if (isMap) {

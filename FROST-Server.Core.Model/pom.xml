@@ -71,6 +71,11 @@
             <version>${logback.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iosb.ilt</groupId>
+            <artifactId>Configurable</artifactId>
+            <version>${configurable.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

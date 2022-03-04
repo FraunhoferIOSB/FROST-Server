@@ -18,6 +18,12 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -30,42 +36,74 @@ import java.util.List;
  *
  * @author hylke
  */
-public class DefEntityProperty {
+public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
 
     /**
      * The name of the EntityProperty.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Name", description = "The name of the EntityProperty.")
+    @EditorString.EdOptsString()
     private String name;
+
     /**
      * The description of the EntityProperty.
      */
+    @ConfigurableField(editor = EditorString.class, optional = true,
+            label = "Description", description = "The description of the EntityProperty.")
+    @EditorString.EdOptsString()
     private String description;
+
     /**
      * Aliases for the name of the Property.
      */
+    @ConfigurableField(editor = EditorList.class, optional = true,
+            label = "Aliases", description = "Aliases for the name of the Property.")
+    @EditorList.EdOptsList(editor = EditorString.class)
+    @EditorString.EdOptsString()
     private List<String> aliases;
+
     /**
      * The java type (Class) of the Property.
      */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Type", description = "The java type (Class) of the Property.")
+    @EditorString.EdOptsString(dflt = "String")
     private String type;
+
     /**
      * Flag indicating the property must be set.
      */
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "Required", description = "Flag indicating the property must be set.")
+    @EditorBoolean.EdOptsBool()
     private boolean required;
+
     /**
      * Flag indicating this property must always be serialised, even if it is
      * null.
      */
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "Serialise NULL", description = "Flag indicating this property must always be serialised, even if it is null.")
+    @EditorBoolean.EdOptsBool()
     private boolean serialiseNull;
+
     /**
      * Flag indicating this property is a complex property with sub-properties
      * that can be queried.
      */
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "HasCustomProps", description = "Flag indicating this property is a complex property with sub-properties that can be queried.")
+    @EditorBoolean.EdOptsBool()
     private boolean hasCustomProperties;
 
     /**
      * Handlers used to map the property to a persistence manager.
      */
+    @ConfigurableField(editor = EditorList.class,
+            label = "Handlers", description = "The handler(s) defining the database access.")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
     private List<PropertyPersistenceMapper> handlers;
 
     @JsonIgnore

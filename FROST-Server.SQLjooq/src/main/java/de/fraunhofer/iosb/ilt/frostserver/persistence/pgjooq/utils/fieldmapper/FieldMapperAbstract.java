@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import org.jooq.Binding;
 import org.jooq.DataType;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public abstract class FieldMapperAbstract implements FieldMapper {
+public abstract class FieldMapperAbstract implements FieldMapper, AnnotatedConfigurable<Void, Void> {
 
     protected FieldMapperAbstract() {
         // Hiding implicit public constructor.

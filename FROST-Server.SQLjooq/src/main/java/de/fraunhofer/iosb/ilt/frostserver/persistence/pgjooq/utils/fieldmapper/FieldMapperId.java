@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
@@ -37,6 +39,9 @@ public class FieldMapperId extends FieldMapperAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldMapperId.class.getName());
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use.")
+    @EditorString.EdOptsString()
     private String field;
 
     @Override

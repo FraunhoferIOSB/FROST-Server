@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -29,18 +31,15 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperString extends FieldMapperAbstract {
+public class FieldMapperString extends FieldMapperAbstractEp {
 
+    @ConfigurableField(editor = EditorString.class,
+            label = "Field", description = "The database field to use.")
+    @EditorString.EdOptsString()
     private String field;
 
+    @JsonIgnore
     private int fieldIdx;
-
-    private DefEntityProperty parent;
-
-    @Override
-    public void setParent(DefEntityProperty parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
@@ -51,7 +50,7 @@ public class FieldMapperString extends FieldMapperAbstract {
 
     @Override
     public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
-        final EntityProperty entityProperty = parent.getEntityProperty();
+        final EntityProperty entityProperty = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
         pfReg.addEntryString(entityProperty, t -> t.field(idx));
