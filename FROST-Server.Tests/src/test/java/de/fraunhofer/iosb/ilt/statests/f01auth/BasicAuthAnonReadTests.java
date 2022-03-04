@@ -26,9 +26,6 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,12 +108,10 @@ public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
                 new AuthScope(url.getHost(), url.getPort()),
                 new UsernamePasswordCredentials(username, password));
 
-        HttpClientBuilder clientBuilder = HttpClients.custom()
-                .useSystemProperties()
+        service.getClientBuilder()
                 .setDefaultCredentialsProvider(credsProvider);
 
-        CloseableHttpClient httpclient = clientBuilder.build();
-        service.setHttpClient(httpclient);
+        service.rebuildHttpClient();
         return service;
     }
 
