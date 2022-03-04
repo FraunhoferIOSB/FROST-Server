@@ -18,9 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  *
@@ -30,11 +27,6 @@ public class MainApp {
 
     /**
      * @param args the command line arguments
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws java.net.MalformedURLException
-     * @throws ServiceFailureException
-     * @throws org.quartz.SchedulerException
      */
     public static void main(String[] args) {
         GitVersionInfo.logGitInfo();

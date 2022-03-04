@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -50,9 +47,6 @@ public class EditorGui extends Application {
      * support. NetBeans ignores main().
      *
      * @param args the command line arguments
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws ServiceFailureException
      */
     public static void main(String[] args) {
         Application.launch(args);

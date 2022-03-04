@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -116,15 +117,15 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         }
         String data;
         try {
-            data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to read model file: {}", fullPath, ex);
-            return;
-        }
-
-        try {
             ObjectMapper objectMapper = new ObjectMapper();
-            DefModel modelDefinition = objectMapper.readValue(data, DefModel.class);
+            DefModel modelDefinition;
+            if (fullPath.toFile().exists()) {
+                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+                modelDefinition = objectMapper.readValue(data, DefModel.class);
+            } else {
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                modelDefinition = objectMapper.readValue(stream, DefModel.class);
+            }
             modelDefinition.init();
             modelDefinitions.add(modelDefinition);
             for (DefEntityType type : modelDefinition.getEntityTypes()) {
