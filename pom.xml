@@ -25,6 +25,7 @@
         <module>FROST-Server.Auth.Keycloak</module>
         <module>FROST-Server.Util</module>
         <module>Plugins</module>
+        <module>Tools</module>
         <module>FROST-Server.Tests</module>
     </modules>
 
