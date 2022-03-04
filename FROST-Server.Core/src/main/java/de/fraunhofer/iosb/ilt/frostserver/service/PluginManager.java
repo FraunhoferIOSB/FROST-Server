@@ -169,7 +169,9 @@ public class PluginManager implements ConfigDefaults {
                     Plugin plugin = (Plugin) newInstance;
                     plugin.init(settings);
                 }
-            } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            } catch (NoClassDefFoundError | ClassNotFoundException ex) {
+                LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
+            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 LOGGER.warn("Could not load given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
                 LOGGER.info("Exception:", ex);
             } catch (RuntimeException ex) {
@@ -233,6 +235,10 @@ public class PluginManager implements ConfigDefaults {
 
     public <P extends Plugin> P getPlugin(Class<P> plugin) {
         return (P) plugins.get(plugin);
+    }
+
+    public List<PluginModel> getModelPlugins() {
+        return modelModifiers;
     }
 
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {

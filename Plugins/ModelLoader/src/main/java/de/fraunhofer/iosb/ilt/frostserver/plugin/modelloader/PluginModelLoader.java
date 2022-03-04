@@ -191,7 +191,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             target = new LinkedHashMap<>();
         }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        pCoreModel.createLiqibaseParams(ppm, target);
+        if (pCoreModel != null) {
+            pCoreModel.createLiqibaseParams(ppm, target);
+        }
         for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
             String typeName = entry.getKey();
             ppm.generateLiquibaseVariables(target, typeName, getTypeFor(settings, typeName));
