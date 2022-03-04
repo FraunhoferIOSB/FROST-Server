@@ -36,7 +36,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
@@ -48,24 +52,61 @@ public class FXMLController implements Initializable {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FXMLController.class);
     @FXML
+    private AnchorPane paneRoot;
+    @FXML
     private ScrollPane paneConfig;
     @FXML
     private Button buttonLoad;
     @FXML
     private Button buttonSave;
+    @FXML
+    private Label labelFile;
 
     private ConfigEditor<?> configEditorModel;
     private final FileChooser fileChooser = new FileChooser();
+    private File currentFile = null;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
-    @FXML
-    private void actionLoad(ActionEvent event) throws ConfigurationException {
-        loadModel();
+    private void setCurrentFile(File file) {
+        currentFile = file;
+        if (currentFile != null) {
+            labelFile.setText(currentFile.getAbsolutePath());
+            fileChooser.setInitialDirectory(currentFile.getParentFile());
+            fileChooser.setInitialFileName(currentFile.getName());
+        }
     }
 
-    private void loadModel() {
-        JsonElement json = loadFromFile("Load Model");
+    @FXML
+    private void actionLoad(ActionEvent event) throws ConfigurationException {
+        loadFromFile("Load Model");
+    }
+
+    private void loadFromFile(String title) {
+        fileChooser.setTitle(title);
+        File file = fileChooser.showOpenDialog(paneConfig.getScene().getWindow());
+        loadFromFile(file);
+    }
+
+    private void loadFromFile(File file) {
+        if (file == null) {
+            return;
+        }
+        try {
+            String config = FileUtils.readFileToString(file, "UTF-8");
+            loadJson(config);
+            setCurrentFile(file);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to read file", ex);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("failed to read file");
+            alert.setContentText(ex.getLocalizedMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private void loadJson(String config) {
+        JsonElement json = JsonParser.parseString(config);
         if (json == null) {
             return;
         }
@@ -74,25 +115,6 @@ public class FXMLController implements Initializable {
                 .get();
         configEditorModel.setConfig(json);
         replaceEditor();
-    }
-
-    private JsonElement loadFromFile(String title) {
-        try {
-            fileChooser.setTitle(title);
-            File file = fileChooser.showOpenDialog(paneConfig.getScene().getWindow());
-            if (file == null) {
-                return null;
-            }
-            String config = FileUtils.readFileToString(file, "UTF-8");
-            return JsonParser.parseString(config);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to read file", ex);
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("failed to read file");
-            alert.setContentText(ex.getLocalizedMessage());
-            alert.showAndWait();
-        }
-        return null;
     }
 
     @FXML
@@ -112,6 +134,7 @@ public class FXMLController implements Initializable {
         if (file == null) {
             return;
         }
+        setCurrentFile(file);
         try {
             FileUtils.writeStringToFile(file, config, "UTF-8");
         } catch (IOException ex) {
@@ -132,7 +155,23 @@ public class FXMLController implements Initializable {
         configEditorModel = ConfigEditors
                 .buildEditorFromClass(DefModel.class, null, null)
                 .get();
-
+        paneRoot.setOnDragOver(event -> {
+            if (event.getGestureSource() != paneRoot && event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY);
+            }
+            event.consume();
+        });
+        paneRoot.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                List<File> files = db.getFiles();
+                loadFromFile(files.get(0));
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
         replaceEditor();
     }
 
