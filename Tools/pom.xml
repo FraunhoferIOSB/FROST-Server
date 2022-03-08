@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>ModelEditor</module>
+        <module>ModelExtractor</module>
     </modules>
 </project>
 

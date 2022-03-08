@@ -195,6 +195,14 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
         return this;
     }
 
+    public DefEntityProperty addAlias(String alias) {
+        if (aliases == null) {
+            aliases = new ArrayList<>();
+        }
+        aliases.add(alias);
+        return this;
+    }
+
     /**
      * The java type (Class) of the Property.
      *

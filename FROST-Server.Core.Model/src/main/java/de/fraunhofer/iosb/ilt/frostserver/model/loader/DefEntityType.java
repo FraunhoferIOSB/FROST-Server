@@ -63,7 +63,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      * means depends on the PersistenceManager.
      */
     @ConfigurableField(editor = EditorString.class,
-            label = "Name", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
+            label = "Table", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
     @EditorString.EdOptsString()
     private String table;
 

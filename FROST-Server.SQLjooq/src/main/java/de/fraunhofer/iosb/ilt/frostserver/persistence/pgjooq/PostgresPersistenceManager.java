@@ -119,9 +119,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
      */
     private DataSize dataSize;
 
-    public PostgresPersistenceManager() {
-    }
-
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;

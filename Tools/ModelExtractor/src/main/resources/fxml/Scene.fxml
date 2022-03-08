@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane id="AnchorPane" fx:id="paneRoot" prefHeight="541.0" prefWidth="545.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.fraunhofer.iosb.ilt.frostserver.modelextractor.FXMLController">
+   <children>
+      <BorderPane layoutX="123.0" layoutY="124.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+              </columnConstraints>
+              <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Database URL" GridPane.hgrow="NEVER" />
+                  <TextField fx:id="textFieldDbUrl" text="jdbc:postgresql://localhost:5432/sensorthings" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                  <TextField fx:id="textFieldDriver" text="org.postgresql.Driver" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                  <TextField fx:id="textFieldUsername" text="sensorthings" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                  <Label text="Driver" GridPane.rowIndex="1" />
+                  <Label text="Username" GridPane.rowIndex="2" />
+                  <Label text="Password" GridPane.rowIndex="3" />
+                  <PasswordField fx:id="textFieldPassword" text="ChangeMe" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                     <children>
+                        <Button fx:id="buttonRead" mnemonicParsing="false" onAction="#actionRead" text="Read Database" />
+                        <Button fx:id="buttonGenerate" disable="true" mnemonicParsing="false" onAction="#actionGenerate" text="Generate Model" />
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </GridPane>
+         </top>
+         <bottom>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Button fx:id="buttonSave" disable="true" mnemonicParsing="false" onAction="#actionSave" text="Save" GridPane.columnIndex="3" GridPane.hgrow="NEVER" />
+                  <Label fx:id="labelFile" text="No File/Directory Selected" GridPane.columnSpan="2" GridPane.hgrow="NEVER" />
+                  <Button fx:id="buttonSelectFile" mnemonicParsing="false" onAction="#actionSelectFile" text="Select File" GridPane.columnIndex="1" GridPane.hgrow="NEVER" />
+                  <Button fx:id="buttonSelectDir" mnemonicParsing="false" onAction="#actionSelectDir" text="Select Directory" GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+         </bottom>
+         <center>
+            <SplitPane dividerPositions="0.5" BorderPane.alignment="CENTER">
+               <items>
+                  <ListView fx:id="listViewFound" />
+                  <ScrollPane fx:id="paneConfig" prefHeight="200.0" prefWidth="200.0" />
+               </items>
+            </SplitPane>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>
