@@ -22,11 +22,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditor;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditors;
-import de.fraunhofer.iosb.ilt.configurable.ConfigurationException;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorNull;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -62,14 +63,14 @@ public class FXMLController implements Initializable {
     @FXML
     private Label labelFile;
 
+    private final EditorNull editorNull = new EditorNull();
     private ConfigEditor<?> configEditorModel;
     private final FileChooser fileChooser = new FileChooser();
-    private File currentFile = null;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private void setCurrentFile(File file) {
-        currentFile = file;
+        File currentFile = file;
         if (currentFile != null) {
             labelFile.setText(currentFile.getAbsolutePath());
             fileChooser.setInitialDirectory(currentFile.getParentFile());
@@ -78,7 +79,7 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
-    private void actionLoad(ActionEvent event) throws ConfigurationException {
+    private void actionLoad(ActionEvent event) {
         loadFromFile("Load Model");
     }
 
@@ -93,7 +94,7 @@ public class FXMLController implements Initializable {
             return;
         }
         try {
-            String config = FileUtils.readFileToString(file, "UTF-8");
+            String config = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             loadJson(config);
             setCurrentFile(file);
         } catch (IOException ex) {
@@ -112,7 +113,7 @@ public class FXMLController implements Initializable {
         }
         configEditorModel = ConfigEditors
                 .buildEditorFromClass(DefModel.class, null, null)
-                .get();
+                .orElse(editorNull);
         configEditorModel.setConfig(json);
         replaceEditor();
     }
@@ -136,7 +137,7 @@ public class FXMLController implements Initializable {
         }
         setCurrentFile(file);
         try {
-            FileUtils.writeStringToFile(file, config, "UTF-8");
+            FileUtils.writeStringToFile(file, config, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             LOGGER.error("Failed to write file.", ex);
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -154,7 +155,7 @@ public class FXMLController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         configEditorModel = ConfigEditors
                 .buildEditorFromClass(DefModel.class, null, null)
-                .get();
+                .orElse(editorNull);
         paneRoot.setOnDragOver(event -> {
             if (event.getGestureSource() != paneRoot && event.getDragboard().hasFiles()) {
                 event.acceptTransferModes(TransferMode.COPY);

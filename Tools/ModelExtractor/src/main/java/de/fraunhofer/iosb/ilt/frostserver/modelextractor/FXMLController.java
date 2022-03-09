@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.configurable.ConfigEditor;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditors;
 import de.fraunhofer.iosb.ilt.configurable.ConfigurationException;
 import de.fraunhofer.iosb.ilt.configurable.ContentConfigEditor;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorNull;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
@@ -44,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -102,10 +104,17 @@ public class FXMLController implements Initializable {
         }
 
     }
+
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FXMLController.class);
+    private static final String FAILED_TO_GENERATE_JSON = "Failed to generate JSON.";
+    private static final String FAILED_TO_LOAD_DB_DRIVER = "Failed to load DB driver.";
+    private static final String FAILED_TO_LOAD_JSON = "Failed to load JSON.";
+    private static final String FAILED_TO_WRITE_FILE = "Failed to write file.";
+    private static final String SELECT_TARGET_FILE_OR_DIRECTORY = "Select target file or directory";
+
     @FXML
     private AnchorPane paneRoot;
     @FXML
@@ -133,6 +142,8 @@ public class FXMLController implements Initializable {
     private ObservableList<TableData> tableList;
     @FXML
     private Label labelFile;
+
+    private final EditorNull editorNull = new EditorNull();
 
     private final FileChooser fileChooser = new FileChooser();
     private final DirectoryChooser dirChooser = new DirectoryChooser();
@@ -382,8 +393,8 @@ public class FXMLController implements Initializable {
         }
 
         Meta meta = dslContext.meta();
-        List<Table<?>> tableList = meta.getTables();
-        for (Table<?> table : tableList) {
+        List<Table<?>> dbTableList = meta.getTables();
+        for (Table<?> table : dbTableList) {
             TableData tableData = getTable(table.getName());
             final UniqueKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null) {
@@ -442,8 +453,8 @@ public class FXMLController implements Initializable {
         try {
             Class.forName(textFieldDriver.getText());
         } catch (ClassNotFoundException ex) {
-            LOGGER.error("Failed to load DB driver.");
-            alertError("Failed to load DB driver.", ex);
+            LOGGER.error(FAILED_TO_LOAD_DB_DRIVER);
+            alertError(FAILED_TO_LOAD_DB_DRIVER, ex);
             return null;
         }
         BasicDataSource ds = new BasicDataSource();
@@ -548,12 +559,12 @@ public class FXMLController implements Initializable {
             }
             ConfigEditor<DefModel> configEditor = (ConfigEditor<DefModel>) ConfigEditors
                     .buildEditorFromClass(DefModel.class, null, null)
-                    .get();
+                    .orElse(editorNull);
             configEditor.setConfig(json);
             return configEditor;
         } catch (JsonProcessingException ex) {
-            LOGGER.error("Failed to generate JSON", ex);
-            alertError("Failed to generate JSON", ex);
+            LOGGER.error(FAILED_TO_GENERATE_JSON, ex);
+            alertError(FAILED_TO_GENERATE_JSON, ex);
         }
         return null;
     }
@@ -616,7 +627,7 @@ public class FXMLController implements Initializable {
 
     @FXML
     private void actionSelectFile(ActionEvent event) {
-        fileChooser.setTitle("Select target file or directory");
+        fileChooser.setTitle(SELECT_TARGET_FILE_OR_DIRECTORY);
         File file = fileChooser.showOpenDialog(paneConfig.getScene().getWindow());
         if (file == null) {
             return;
@@ -626,7 +637,7 @@ public class FXMLController implements Initializable {
 
     @FXML
     private void actionSelectDir(ActionEvent event) {
-        fileChooser.setTitle("Select target file or directory");
+        fileChooser.setTitle(SELECT_TARGET_FILE_OR_DIRECTORY);
         File file = dirChooser.showDialog(paneConfig.getScene().getWindow());
         if (file == null) {
             return;
@@ -651,8 +662,8 @@ public class FXMLController implements Initializable {
                     String typeName = subModel.getEntityTypes().get(0).getName();
                     saveToFile(editor.getConfig(), new File(currentFile, typeName + ".json"));
                 } catch (ConfigurationException ex) {
-                    LOGGER.error("Failed to write file.", ex);
-                    alertError("failed to write file", ex);
+                    LOGGER.error(FAILED_TO_LOAD_JSON, ex);
+                    alertError(FAILED_TO_LOAD_JSON, ex);
                 }
             }
         } else {
@@ -665,8 +676,8 @@ public class FXMLController implements Initializable {
                     composite.getConformance().addAll(subModel.getConformance());
                     composite.getSimplePropertyTypes().addAll(subModel.getSimplePropertyTypes());
                 } catch (ConfigurationException ex) {
-                    LOGGER.error("Failed to write file.", ex);
-                    alertError("failed to write file", ex);
+                    LOGGER.error(FAILED_TO_LOAD_JSON, ex);
+                    alertError(FAILED_TO_LOAD_JSON, ex);
                 }
             }
 
@@ -675,8 +686,8 @@ public class FXMLController implements Initializable {
                 JsonElement json = JsonParser.parseString(stringData);
                 saveToFile(json, currentFile);
             } catch (JsonProcessingException ex) {
-                LOGGER.error("Failed to write file.", ex);
-                alertError("failed to write file", ex);
+                LOGGER.error(FAILED_TO_GENERATE_JSON, ex);
+                alertError(FAILED_TO_GENERATE_JSON, ex);
             }
         }
     }
@@ -687,10 +698,10 @@ public class FXMLController implements Initializable {
         }
         String config = new GsonBuilder().setPrettyPrinting().create().toJson(json);
         try {
-            FileUtils.writeStringToFile(file, config, "UTF-8");
+            FileUtils.writeStringToFile(file, config, StandardCharsets.UTF_8);
         } catch (IOException ex) {
-            LOGGER.error("Failed to write file.", ex);
-            alertError("failed to write file", ex);
+            LOGGER.error(FAILED_TO_WRITE_FILE, ex);
+            alertError(FAILED_TO_WRITE_FILE, ex);
         }
     }
 

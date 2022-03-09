@@ -77,6 +77,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -154,7 +155,9 @@ public class TestSuite {
         @Test
         public void finalTest() {
             LOGGER.info("Stopping Servers...");
-            getInstance().stopAllServers();
+            assertDoesNotThrow(() -> {
+                getInstance().stopAllServers();
+            });
         }
     }
     /**

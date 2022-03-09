@@ -66,42 +66,32 @@ public class SettingsTest {
 
     @Test
     void testSettingsGetThere() {
-        assertThrows(PropertyMissingException.class, () -> {
-            Settings settings = new Settings();
-            settings.get(TAG_SERVICE_ROOT_URL);
-        });
+        Settings settings = new Settings();
+        assertThrows(PropertyMissingException.class, () -> settings.get(TAG_SERVICE_ROOT_URL));
     }
 
     @Test
     void testSettingsGetIntThere() {
-        assertThrows(PropertyMissingException.class, () -> {
-            Settings settings = new Settings();
-            settings.getInt(TAG_SERVICE_ROOT_URL);
-        });
+        Settings settings = new Settings();
+        assertThrows(PropertyMissingException.class, () -> settings.getInt(TAG_SERVICE_ROOT_URL));
     }
 
     @Test
     void testSettingsGetBooleanThere() {
-        assertThrows(PropertyMissingException.class, () -> {
-            Settings settings = new Settings();
-            settings.getBoolean(TAG_SERVICE_ROOT_URL);
-        });
+        Settings settings = new Settings();
+        assertThrows(PropertyMissingException.class, () -> settings.getBoolean(TAG_SERVICE_ROOT_URL));
     }
 
     @Test
     void testSettingsGetDoubleThere() {
-        assertThrows(PropertyMissingException.class, () -> {
-            Settings settings = new Settings();
-            settings.getDouble(TAG_SERVICE_ROOT_URL);
-        });
+        Settings settings = new Settings();
+        assertThrows(PropertyMissingException.class, () -> settings.getDouble(TAG_SERVICE_ROOT_URL));
     }
 
     @Test
     void testSettingsGetLongThere() {
-        assertThrows(PropertyMissingException.class, () -> {
-            Settings settings = new Settings();
-            settings.getLong(TAG_SERVICE_ROOT_URL);
-        });
+        Settings settings = new Settings();
+        assertThrows(PropertyMissingException.class, () -> settings.getLong(TAG_SERVICE_ROOT_URL));
     }
 
     @Test

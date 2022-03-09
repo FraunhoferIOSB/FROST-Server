@@ -50,7 +50,7 @@ public class EditorGui extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new Thread(() -> Reflection.getReflections()).start();
+        new Thread(Reflection::getReflections).start();
         Application.launch(args);
     }
 

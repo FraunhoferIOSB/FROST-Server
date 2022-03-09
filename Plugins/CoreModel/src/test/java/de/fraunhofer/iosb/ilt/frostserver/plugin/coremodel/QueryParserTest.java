@@ -211,12 +211,10 @@ public class QueryParserTest {
 
     @Test
     void testFilterInvalidCustomProperty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            // Theoretical path, does not actually exist
-            String query = "$filter=Thing/custom eq 1";
-            Query result = QueryParser.parseQuery(query, coreSettings, path);
-            result.validate(pluginCoreModel.etDatastream);
-        });
+        // Theoretical path, does not actually exist
+        String query = "$filter=Thing/custom eq 1";
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        assertThrows(IllegalArgumentException.class, () -> result.validate(pluginCoreModel.etDatastream));
     }
 
     @Test

@@ -193,29 +193,22 @@ public class QueryParserTest {
 
     @Test
     void testFilterInvalidNavPath() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String query = "$filter=House/Room/id eq 1";
-            Query result = QueryParser.parseQuery(query, coreSettings, path);
-            result.validate(testModel.ET_ROOM);
-        });
+        String query = "$filter=House/Room/id eq 1";
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        assertThrows(IllegalArgumentException.class, () -> result.validate(testModel.ET_ROOM));
     }
 
     @Test
     void testFilterInvalidCustomProperty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String query = "$filter=House/custom eq 1";
-            Query result = QueryParser.parseQuery(query, coreSettings, path);
-            result.validate(testModel.ET_ROOM);
-        });
+        String query = "$filter=House/custom eq 1";
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        assertThrows(IllegalArgumentException.class, () -> result.validate(testModel.ET_ROOM));
     }
 
     @Test
     void testFilterInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String query = "$filter=add and eq 1";
-            Query result = QueryParser.parseQuery(query, coreSettings, path);
-            result.validate(testModel.ET_ROOM);
-        });
+        String query = "$filter=add and eq 1";
+        assertThrows(IllegalArgumentException.class, () -> QueryParser.parseQuery(query, coreSettings, path));
     }
 
     @Test

@@ -112,16 +112,6 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public boolean isFullyInitialised() {
-        return fullyInitialised;
-    }
-
-    @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
         Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
         if (serverSettings == null) {
@@ -139,6 +129,16 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
         mr.registerEntityType(etMultiDatastream);
         epIdMultiDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeMultiDatastream), "id");
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override

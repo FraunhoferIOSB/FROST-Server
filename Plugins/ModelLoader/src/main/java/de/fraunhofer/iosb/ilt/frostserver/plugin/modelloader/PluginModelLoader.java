@@ -44,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,9 +89,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             settings.getPluginManager().registerPlugin(this);
 
             String liquibaseString = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_FILES, ModelLoaderSettings.class);
-            for (String file : StringUtils.split(liquibaseString)) {
-                liquibaseFiles.add(file);
-            }
+            liquibaseFiles.addAll(Arrays.asList(StringUtils.split(liquibaseString)));
 
             liquibasePath = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_PATH, ModelLoaderSettings.class);
             filesPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
@@ -138,16 +137,6 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public boolean isFullyInitialised() {
-        return fullyInitialised;
-    }
-
-    @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
         Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
         if (serverSettings == null) {
@@ -156,6 +145,16 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
         extensionList.addAll(conformance);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override
