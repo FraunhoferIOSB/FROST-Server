@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class DurationConstantTest {
 
     @Test
-    public void parseDurationBasic() {
+    void parseDurationBasic() {
         DurationConstant result = new DurationConstant("P12DT23H59M59.999S");
         Period expectedResult = Period.ZERO
                 .withDays(12)

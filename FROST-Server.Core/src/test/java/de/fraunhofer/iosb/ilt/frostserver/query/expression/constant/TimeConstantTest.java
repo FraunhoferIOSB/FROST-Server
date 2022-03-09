@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class TimeConstantTest {
 
     @Test
-    public void parseTimeBasic() {
+    void parseTimeBasic() {
         TimeConstant result = new TimeConstant("07:59:59.999");
         LocalTime expectedResult = new LocalTime()
                 .withHourOfDay(7)

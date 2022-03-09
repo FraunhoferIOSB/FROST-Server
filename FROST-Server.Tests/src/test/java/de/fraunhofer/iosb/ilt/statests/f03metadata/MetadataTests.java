@@ -229,14 +229,14 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     @Test
-    public void test01InvalidMetadata() {
+    void test01InvalidMetadata() {
         LOGGER.info("  test01InvalidMetadata");
         HttpResponse result = getEntity("invalid");
         assertEquals(400, result.code);
     }
 
     @Test
-    public void test02EntityMetadata() {
+    void test02EntityMetadata() {
         LOGGER.info("  test02EntityMetadata");
         testEntityMetadata("full", true);
         testEntityMetadata("minimal", false);
@@ -271,7 +271,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     @Test
-    public void test03MetadataInExpand() {
+    void test03MetadataInExpand() {
         LOGGER.info("  test03MetadataInExpand");
         testMetadataInExpand("full", true, true);
         testMetadataInExpand("minimal", false, false);
@@ -317,7 +317,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     @Test
-    public void test04PostDataArray() {
+    void test04PostDataArray() {
         LOGGER.info("  test04PostDataArray");
         testPostDataArray("full", true);
         testPostDataArray("minimal", true);
@@ -461,7 +461,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     @Test
-    public void test05PostData() {
+    void test05PostData() {
         LOGGER.info("  test05PostData");
         testPostData("full", true);
         testPostData("minimal", true);

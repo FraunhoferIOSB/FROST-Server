@@ -109,7 +109,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    public void test01GetDataArray() throws ServiceFailureException {
+    void test01GetDataArray() throws ServiceFailureException {
         LOGGER.info("  test01GetDataArray");
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -120,7 +120,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    public void test02GetDataArraySelect() throws ServiceFailureException {
+    void test02GetDataArraySelect() throws ServiceFailureException {
         LOGGER.info("  test02GetDataArraySelect");
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -131,7 +131,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    public void test03PostDataArray() {
+    void test03PostDataArray() {
         LOGGER.info("  test03PostDataArray");
         Datastream ds1 = DATASTREAMS.get(0);
         Datastream ds2 = DATASTREAMS.get(1);
@@ -248,7 +248,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    public void test04PostDataArrayMultiDatastream() {
+    void test04PostDataArrayMultiDatastream() {
         LOGGER.info("  test04PostDataArrayMultiDatastream");
         if (!serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
             return;

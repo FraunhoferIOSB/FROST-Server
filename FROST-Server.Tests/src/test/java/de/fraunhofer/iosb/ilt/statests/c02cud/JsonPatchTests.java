@@ -172,7 +172,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * @throws IOException if the patch is invalid.
      */
     @Test
-    public void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
+    void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchThingTest");
         Thing thingOnlyId = THINGS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
@@ -205,7 +205,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * @throws IOException if the patch is invalid.
      */
     @Test
-    public void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
+    void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchDatastreamTest");
         Datastream dsOnlyId = DATASTREAMS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();

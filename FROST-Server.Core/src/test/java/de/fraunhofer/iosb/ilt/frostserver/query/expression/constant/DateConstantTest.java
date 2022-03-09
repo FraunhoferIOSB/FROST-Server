@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class DateConstantTest {
 
     @Test
-    public void parseDateBasic() {
+    void parseDateBasic() {
         DateConstant result = new DateConstant("2015-04-29");
         LocalDate expectedResult = new LocalDate()
                 .withYear(2015)

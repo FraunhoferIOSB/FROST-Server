@@ -55,7 +55,7 @@ public class EntityCompleteTest {
     }
 
     @Test
-    public void testEntityComplete() {
+    void testEntityComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(testModel.ET_ROOM);
         Entity entity = new DefaultEntity(testModel.ET_ROOM);
         assertFalse(isEntityComplete(entity, containingSet));

@@ -31,84 +31,84 @@ import org.junit.jupiter.api.Test;
 public class GreaterEqualTest {
 
     @Test
-    public void testIntIntGreater() {
+    void testIntIntGreater() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new IntegerConstant(2), new IntegerConstant(1)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testIntIntSmaller() {
+    void testIntIntSmaller() {
         Expression expectedResult = new BooleanConstant(false);
         Expression result = new GreaterEqual(new IntegerConstant(1), new IntegerConstant(2)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testIntIntEqual() {
+    void testIntIntEqual() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new IntegerConstant(1), new IntegerConstant(1)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleDoubleGreater() {
+    void testDoubleDoubleGreater() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new DoubleConstant(2.5), new DoubleConstant(1.5)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleDoubleSmaller() {
+    void testDoubleDoubleSmaller() {
         Expression expectedResult = new BooleanConstant(false);
         Expression result = new GreaterEqual(new DoubleConstant(1.5), new DoubleConstant(2.5)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleDoubleEqual() {
+    void testDoubleDoubleEqual() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new DoubleConstant(1.5), new DoubleConstant(1.5)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testIntDoubleGreater() {
+    void testIntDoubleGreater() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new IntegerConstant(2), new DoubleConstant(1.5)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testIntDoubleSmaller() {
+    void testIntDoubleSmaller() {
         Expression expectedResult = new BooleanConstant(false);
         Expression result = new GreaterEqual(new IntegerConstant(1), new DoubleConstant(2.5)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testIntDoubleEqual() {
+    void testIntDoubleEqual() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new IntegerConstant(1), new DoubleConstant(1.0)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleIntGreater() {
+    void testDoubleIntGreater() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new DoubleConstant(2.5), new IntegerConstant(1)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleIntSmaller() {
+    void testDoubleIntSmaller() {
         Expression expectedResult = new BooleanConstant(false);
         Expression result = new GreaterEqual(new DoubleConstant(1.5), new IntegerConstant(2)).compress();
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDoubleIntEqual() {
+    void testDoubleIntEqual() {
         Expression expectedResult = new BooleanConstant(true);
         Expression result = new GreaterEqual(new DoubleConstant(1.0), new IntegerConstant(1)).compress();
         assertEquals(expectedResult, result);

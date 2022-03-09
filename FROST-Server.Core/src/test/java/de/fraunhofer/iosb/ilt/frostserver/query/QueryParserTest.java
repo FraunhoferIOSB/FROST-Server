@@ -83,7 +83,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testTop() {
+    void testTop() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getTop().isPresent());
         assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, CoreSettings.TAG_DEFAULT_TOP), expResult.getTopOrDefault());
@@ -97,7 +97,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSkip() {
+    void testSkip() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getSkip().isPresent());
         assertEquals(11, expResult.getSkip(11));
@@ -111,7 +111,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testCount() {
+    void testCount() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getCount().isPresent());
         assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_DEFAULT_COUNT), expResult.isCountOrDefault());
@@ -131,7 +131,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterOnly1() {
+    void testFilterOnly1() {
         String query = "$filter=(value sub 5) gt 10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -170,7 +170,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterLinked() {
+    void testFilterLinked() {
         String query = "$filter=House/id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
@@ -192,7 +192,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterInvalidNavPath() {
+    void testFilterInvalidNavPath() {
         assertThrows(IllegalArgumentException.class, () -> {
             String query = "$filter=House/Room/id eq 1";
             Query result = QueryParser.parseQuery(query, coreSettings, path);
@@ -201,7 +201,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterInvalidCustomProperty() {
+    void testFilterInvalidCustomProperty() {
         assertThrows(IllegalArgumentException.class, () -> {
             String query = "$filter=House/custom eq 1";
             Query result = QueryParser.parseQuery(query, coreSettings, path);
@@ -210,7 +210,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterInvalid() {
+    void testFilterInvalid() {
         assertThrows(IllegalArgumentException.class, () -> {
             String query = "$filter=add and eq 1";
             Query result = QueryParser.parseQuery(query, coreSettings, path);
@@ -219,7 +219,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterString() {
+    void testFilterString() {
         String query = "$filter=value gt '3'";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -282,7 +282,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterCustomEntityProperty() {
+    void testFilterCustomEntityProperty() {
         String query = "$filter=properties/building.House/name eq 'Main'";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -299,7 +299,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterProperty() {
+    void testFilterProperty() {
         {
             String query = "$filter=properties/array[1] gt 3";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -377,7 +377,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterTime() {
+    void testFilterTime() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -444,7 +444,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterFunction() {
+    void testFilterFunction() {
         String query = "$filter=round(value add 0.1) eq 2";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -463,7 +463,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByAlias() {
+    void testOrderByAlias() {
         String query = "$orderby=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
@@ -473,7 +473,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByEntityProperty() {
+    void testOrderByEntityProperty() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
@@ -483,7 +483,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByAliasAscDesc() {
+    void testOrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
@@ -494,7 +494,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByMixedPath() {
+    void testOrderByMixedPath() {
         String query = "$orderby=House/@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(testModel.NP_HOUSE, testModel.ET_HOUSE.getPrimaryKey())));
@@ -517,7 +517,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelect() {
+    void testSelect() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(testModel.NP_ROOMS);
         expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey());
@@ -536,7 +536,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectEntityProperty() {
+    void testSelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey());
@@ -546,7 +546,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectDeepEntityProperty() {
+    void testSelectDeepEntityProperty() {
         {
             String query = "$select=properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -585,7 +585,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectDistinct() {
+    void testSelectDistinct() {
         {
             String query = "$select=distinct:id,name,properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -630,7 +630,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectNavigationProperty() {
+    void testSelectNavigationProperty() {
         String query = "$select=Rooms";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(testModel.NP_ROOMS);
@@ -640,7 +640,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectMultipleMixed() {
+    void testSelectMultipleMixed() {
         String query = "$select=Rooms, id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.addSelect(testModel.NP_ROOMS)
@@ -651,7 +651,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandSingleNavigationProperty() {
+    void testExpandSingleNavigationProperty() {
         String query = "$expand=Rooms";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOMS));
@@ -661,7 +661,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandSingleNavigationPropertyEmpty() {
+    void testExpandSingleNavigationPropertyEmpty() {
         String query = "$expand=Rooms()";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOMS));
@@ -671,7 +671,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandDeep() {
+    void testExpandDeep() {
         String query = "$expand=Rooms/House";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery.getExpand().add(new Expand(modelRegistry, testModel.NP_HOUSE));
@@ -683,7 +683,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandCustom() {
+    void testExpandCustom() {
         boolean old = coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
 
@@ -705,7 +705,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandCustom2() {
+    void testExpandCustom2() {
         boolean old = coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
 
@@ -743,7 +743,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandDeepQuery() {
+    void testExpandDeepQuery() {
         String query = "$expand=Rooms/House($select=@iot.id)";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subSubQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -757,7 +757,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationProperties() {
+    void testExpandMultipleNavigationProperties() {
         String query = "$expand=Rooms,House";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOMS));
@@ -767,7 +767,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationPropertiesDeep1() {
+    void testExpandMultipleNavigationPropertiesDeep1() {
         String query = "$expand=Rooms/House,Rooms/Rooms";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                 .addExpand(new Expand(modelRegistry, testModel.NP_ROOMS)
@@ -780,7 +780,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationPropertiesDeep2() {
+    void testExpandMultipleNavigationPropertiesDeep2() {
         String query = "$expand=Houses($expand=Rooms,House)";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                 .addExpand(new Expand(modelRegistry, testModel.NP_HOUSES)
@@ -793,7 +793,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandWithSubquery() {
+    void testExpandWithSubquery() {
         String query = "$expand=Rooms($filter=value eq 1;$expand=House;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),House&$top=10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -813,7 +813,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testComplex1() {
+    void testComplex1() {
         String query = "$expand=Rooms($filter=value eq 1;$expand=House;$select=@iot.id),House&$top=10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery1 = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -829,7 +829,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterComplex() {
+    void testFilterComplex() {
         String query = "$filter=Rooms/House/id eq 'FOI_1' and House/Rooms/time ge 2010-06-01T00:00:00Z and House/Rooms/time le 2010-07-01T00:00:00Z";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new And(
@@ -857,7 +857,7 @@ public class QueryParserTest {
 
     // TODO add tests for all functions
     @Test
-    public void testFormat() {
+    void testFormat() {
         String query = "$resultFormat=dataArray";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFormat("dataArray");

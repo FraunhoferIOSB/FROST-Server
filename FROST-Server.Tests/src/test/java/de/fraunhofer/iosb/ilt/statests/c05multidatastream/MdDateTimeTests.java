@@ -301,7 +301,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test01Lt() throws ServiceFailureException {
+    void test01Lt() throws ServiceFailureException {
         LOGGER.info("  test01Lt");
         String op = "lt";
         testTimeOpValue(op,
@@ -337,7 +337,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test02Gt() throws ServiceFailureException {
+    void test02Gt() throws ServiceFailureException {
         LOGGER.info("  test02Gt");
         String op = "gt";
         testTimeOpValue(op,
@@ -373,7 +373,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test03Le() throws ServiceFailureException {
+    void test03Le() throws ServiceFailureException {
         LOGGER.info("  test03Le");
         String op = "le";
         testTimeOpValue(op,
@@ -409,7 +409,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test04Ge() throws ServiceFailureException {
+    void test04Ge() throws ServiceFailureException {
         LOGGER.info("  test04Ge");
         String op = "ge";
         testTimeOpValue(op,
@@ -445,7 +445,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test05Eq() throws ServiceFailureException {
+    void test05Eq() throws ServiceFailureException {
         LOGGER.info("  test05Eq");
         String op = "eq";
         testTimeOpValue(op,
@@ -481,7 +481,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test06Before() throws ServiceFailureException {
+    void test06Before() throws ServiceFailureException {
         LOGGER.info("  test06Before");
         String tpl = "before(%s,%s)";
         testTimeValue(tpl,
@@ -517,7 +517,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test07After() throws ServiceFailureException {
+    void test07After() throws ServiceFailureException {
         LOGGER.info("  test07After");
         String tpl = "after(%s,%s)";
         testTimeValue(tpl,
@@ -553,7 +553,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test08Meets() throws ServiceFailureException {
+    void test08Meets() throws ServiceFailureException {
         LOGGER.info("  test08Meets");
         String tpl = "meets(%s,%s)";
         testTimeValue(tpl,
@@ -589,7 +589,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test09During() throws ServiceFailureException {
+    void test09During() throws ServiceFailureException {
         LOGGER.info("  test09During");
         ObservationDao doa = service.observations();
         filterForException(doa, String.format("during(resultTime,%s)", T700), 400);
@@ -625,7 +625,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test10Overlaps() throws ServiceFailureException {
+    void test10Overlaps() throws ServiceFailureException {
         LOGGER.info("  test10Overlaps");
         String tpl = "overlaps(%s,%s)";
         testTimeValue(tpl,
@@ -661,7 +661,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test11Starts() throws ServiceFailureException {
+    void test11Starts() throws ServiceFailureException {
         LOGGER.info("  test11Starts");
         String tpl = "starts(%s,%s)";
         testTimeValue(tpl,
@@ -697,7 +697,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test12Finishes() throws ServiceFailureException {
+    void test12Finishes() throws ServiceFailureException {
         LOGGER.info("  test12Finishes");
         String tpl = "finishes(%s,%s)";
         testTimeValue(tpl,
@@ -733,7 +733,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test13Year() throws ServiceFailureException {
+    void test13Year() throws ServiceFailureException {
         LOGGER.info("  test13Year");
         ObservationDao doa = service.observations();
         testFilterResults(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
@@ -742,7 +742,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test14Durations() throws ServiceFailureException {
+    void test14Durations() throws ServiceFailureException {
         LOGGER.info("  test14Durations");
         ObservationDao doa = service.observations();
         // Durations
@@ -770,7 +770,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test15AlternativeOverlaps() throws ServiceFailureException {
+    void test15AlternativeOverlaps() throws ServiceFailureException {
         LOGGER.info("  test15AlternativeOverlaps");
         ObservationDao doa = service.observations();
         testFilterResults(doa, String.format("not resultTime lt %s and not resultTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4));
@@ -779,7 +779,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    public void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
+    void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
         LOGGER.info("  test19PhenomenonTimeAfterDelete");
         EntityUtils.deleteAll(service.observations());
         MultiDatastream ds1 = service.multiDatastreams().find(MULTI_DATASTREAMS.get(0).getId());

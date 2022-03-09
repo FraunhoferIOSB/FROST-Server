@@ -76,7 +76,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathsetThings() {
+    void testPathsetThings() {
         String path = "/Things";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -89,7 +89,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathThing() {
+    void testPathThing() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Thing";
             PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -97,7 +97,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathsetThingsRef() {
+    void testPathsetThingsRef() {
         String path = "/Things/$ref";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -111,7 +111,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testIdentifiers() {
+    void testIdentifiers() {
         testThing(0);
         testThing(1);
         testThing(-1);
@@ -121,7 +121,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathEntityProperty() {
+    void testPathEntityProperty() {
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             for (Property property : entityType.getPropertySet()) {
                 if (property instanceof EntityPropertyMain) {
@@ -144,7 +144,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathEntityThingPropertyValue() {
+    void testPathEntityThingPropertyValue() {
         String path = "/Things(1)/properties/$value";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -161,7 +161,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathEntityThingSubProperty() {
+    void testPathEntityThingSubProperty() {
         {
             String path = "/Things(1)/properties/property1";
             ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -247,7 +247,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathEntityObservation() {
+    void testPathEntityObservation() {
         String path = "/Observations(1)/parameters/property1";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -343,7 +343,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep0() {
+    void testPathdeep0() {
         String path = "/ObservedProperties(1)/Datastreams/Observations";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -361,7 +361,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep1() {
+    void testPathdeep1() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(7)/Observations(8)/FeatureOfInterest";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -418,7 +418,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep2() {
+    void testPathdeep2() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/Datastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -463,7 +463,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep3() {
+    void testPathdeep3() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(8)/Observations(9)/FeatureOfInterest";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -520,7 +520,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep4() {
+    void testPathdeep4() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/Datastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
@@ -567,7 +567,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeep5() {
+    void testPathdeep5() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperties/Datastreams(8)/Observations(9)/FeatureOfInterest";
             PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
@@ -575,7 +575,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeepCompressed1() {
+    void testPathdeepCompressed1() {
         String path = "/Observations(11)/Datastream/Thing";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         result.compress();
@@ -596,7 +596,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathdeepCompressed2() {
+    void testPathdeepCompressed2() {
         String path = "/Datastreams(5)/Observations(11)/Datastream/Thing";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         result.compress();

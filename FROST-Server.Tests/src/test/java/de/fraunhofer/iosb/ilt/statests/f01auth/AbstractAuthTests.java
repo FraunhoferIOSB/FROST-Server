@@ -163,25 +163,25 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test01AdminUpdateDb() throws IOException {
+    void test01AdminUpdateDb() throws IOException {
         LOGGER.info("  test01AdminUpdateDb");
         getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
     }
 
     @Test
-    public void test02WriteUpdateDb() throws IOException {
+    void test02WriteUpdateDb() throws IOException {
         LOGGER.info("  test02WriteUpdateDb");
         getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
-    public void test03ReadUpdateDb() throws IOException {
+    void test03ReadUpdateDb() throws IOException {
         LOGGER.info("  test03ReadUpdateDb");
         getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
-    public void test04AnonUpdateDb() throws IOException {
+    void test04AnonUpdateDb() throws IOException {
         LOGGER.info("  test04AnonUpdateDb");
         getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
@@ -214,7 +214,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test05AdminCreate() {
+    void test05AdminCreate() {
         LOGGER.info("  test05AdminCreate");
         Thing thing = new Thing("AdminThing", "The Thing made by admin.");
         THINGS.add(thing);
@@ -227,13 +227,13 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test06AdminRead() {
+    void test06AdminRead() {
         LOGGER.info("  test06AdminRead");
         EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
     }
 
     @Test
-    public void test07AdminUpdate() {
+    void test07AdminUpdate() {
         LOGGER.info("  test07AdminUpdate");
         Thing thing = THINGS.get(0);
         thing.setDescription("Updated Thing made by admin.");
@@ -247,7 +247,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test08AdminDelete() {
+    void test08AdminDelete() {
         LOGGER.info("  test08AdminDelete");
         Thing thing = THINGS.get(0);
         THINGS.remove(0);
@@ -261,7 +261,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test09WriteCreate() {
+    void test09WriteCreate() {
         LOGGER.info("  test09WriteCreate");
         Thing thing = new Thing("WriteThing", "The Thing made by write.");
         THINGS.add(thing);
@@ -274,13 +274,13 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test10WriteRead() {
+    void test10WriteRead() {
         LOGGER.info("  test10WriteRead");
         EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
     }
 
     @Test
-    public void test11WriteUpdate() {
+    void test11WriteUpdate() {
         LOGGER.info("  test11WriteUpdate");
         Thing thing = THINGS.get(0);
         thing.setDescription("Updated Thing made by write.");
@@ -294,7 +294,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test12WriteDelete() {
+    void test12WriteDelete() {
         LOGGER.info("  test12WriteDelete");
         Thing thing = THINGS.get(0);
         try {
@@ -307,7 +307,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test13ReadCreate() {
+    void test13ReadCreate() {
         LOGGER.info("  test13ReadCreate");
         Thing thing = new Thing("ReadThing", "The Thing made by read.");
         try {
@@ -320,7 +320,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test14ReadRead() {
+    void test14ReadRead() {
         LOGGER.info("  test14ReadRead");
         // Make sure there is something to read.
         Thing thing = new Thing("WriteThing", "The Thing made by write.");
@@ -335,7 +335,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test15ReadUpdate() {
+    void test15ReadUpdate() {
         LOGGER.info("  test15ReadUpdate");
         Thing thing = THINGS.get(0).withOnlyId();
         thing.setDescription("Read Updated Thing made by Admin.");
@@ -349,7 +349,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test16ReadDelete() {
+    void test16ReadDelete() {
         LOGGER.info("  test16ReadDelete");
         Thing thing = THINGS.get(0);
         try {
@@ -362,7 +362,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test17AnonCreate() {
+    void test17AnonCreate() {
         LOGGER.info("  test17AnonCreate");
         Thing thing = new Thing("AnonThing", "The Thing made by anonymous.");
         try {
@@ -375,7 +375,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test18AnonRead() {
+    void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
             EntityUtils.testFilterResults(serviceAnon.things(), "", THINGS);
@@ -390,7 +390,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test19AnonUpdate() {
+    void test19AnonUpdate() {
         LOGGER.info("  test19AnonUpdate");
         Thing thing = THINGS.get(0).withOnlyId();
         thing.setDescription("Anon Updated Thing made by Admin.");
@@ -404,7 +404,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    public void test20AnonDelete() {
+    void test20AnonDelete() {
         LOGGER.info("  test20AnonDelete");
         Thing thing = THINGS.get(0);
         try {

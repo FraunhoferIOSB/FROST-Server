@@ -105,7 +105,7 @@ public class EntityCompleteTest {
     }
 
     @Test
-    public void testMultiDatastreamComplete() {
+    void testMultiDatastreamComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(etMultiDatastream);
 
         Entity entity = new DefaultEntity(etMultiDatastream);
@@ -161,7 +161,7 @@ public class EntityCompleteTest {
     }
 
     @Test
-    public void testObservationComplete() {
+    void testObservationComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(pluginCoreModel.etObservation);
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation);
         assertFalse(isEntityComplete(entity, containingSet));

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 public class DateTimeConstantTest {
 
     @Test
-    public void parseDateTimeBasic() {
+    void parseDateTimeBasic() {
         DateTimeConstant result = new DateTimeConstant("2012-12-03T07:16:23.999Z");
         DateTime expectedResult = new DateTime()
                 .withZone(DateTimeZone.UTC)

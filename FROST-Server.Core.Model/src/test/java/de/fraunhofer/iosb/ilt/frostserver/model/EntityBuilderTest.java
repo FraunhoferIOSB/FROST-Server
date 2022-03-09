@@ -63,7 +63,7 @@ public class EntityBuilderTest {
     }
 
     @Test
-    public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
             testEntityType(type, type.getPropertySet());
         }

@@ -29,28 +29,28 @@ import org.junit.jupiter.api.Test;
 public class PointConstantTest {
 
     @Test
-    public void testparseFromStringSpaces() {
+    void testparseFromStringSpaces() {
         String text = "POINT                     (      30                                              10    )";
         PointConstant result = new PointConstant(text);
         assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
-    public void testparseFromString2D() {
+    void testparseFromString2D() {
         String text = "POINT (30 10)";
         PointConstant result = new PointConstant(text);
         assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
-    public void testparseFromString3D() {
+    void testparseFromString3D() {
         String text = "POINT (30 10 10)";
         PointConstant result = new PointConstant(text);
         assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
     @Test
-    public void testparseFromStringWithWrongDimension1D() {
+    void testparseFromStringWithWrongDimension1D() {
         assertThrows(IllegalArgumentException.class, () -> {
             String text = "POINT (10)";
             PointConstant pointConstant = new PointConstant(text);
@@ -58,7 +58,7 @@ public class PointConstantTest {
     }
 
     @Test
-    public void testparseFromStringWithWrongDimension4D() {
+    void testparseFromStringWithWrongDimension4D() {
         assertThrows(IllegalArgumentException.class, () -> {
             String text = "POINT (10 10 10 10)";
             PointConstant pointConstant = new PointConstant(text);

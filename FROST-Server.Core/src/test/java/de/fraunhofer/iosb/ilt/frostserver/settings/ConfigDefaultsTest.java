@@ -42,7 +42,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupInteger() {
+    void testDefaultValueLookupInteger() {
         MqttMessageBus b = new MqttMessageBus();
         // Test valid integer properties
         assertEquals(2, b.defaultValueInt(TAG_SEND_WORKER_COUNT));
@@ -54,7 +54,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupString() {
+    void testDefaultValueLookupString() {
         MqttMessageBus b = new MqttMessageBus();
         // Test valid string properties
         assertEquals("tcp://127.0.0.1:1884", b.defaultValue(TAG_MQTT_BROKER));
@@ -63,7 +63,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupBoolean() {
+    void testDefaultValueLookupBoolean() {
         // Test valid boolean properties
         CoreSettings c = new CoreSettings();
         assertEquals(true, c.defaultValueBoolean(CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
@@ -72,7 +72,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupIntegerString() {
+    void testDefaultValueLookupIntegerString() {
         MqttMessageBus b = new MqttMessageBus();
         // Test reading integer properties as strings
         assertEquals("2", b.defaultValue(TAG_SEND_WORKER_COUNT));
@@ -85,7 +85,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupBooleanString() {
+    void testDefaultValueLookupBooleanString() {
         // Test reading boolean properties as strings
         CoreSettings c = new CoreSettings();
         assertEquals(Boolean.TRUE.toString(), c.defaultValue(CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
@@ -94,7 +94,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupInvalid() {
+    void testDefaultValueLookupInvalid() {
         MqttMessageBus b = new MqttMessageBus();
         // Test invalid properties
         try {
@@ -119,7 +119,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupConfigTags() {
+    void testDefaultValueLookupConfigTags() {
         MqttMessageBus b = new MqttMessageBus();
         // Test configTags
         Set<String> tags = new HashSet<>();
@@ -136,7 +136,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupConfigDefaults() {
+    void testDefaultValueLookupConfigDefaults() {
         MqttMessageBus b = new MqttMessageBus();
         // Test configDefaults
         Map<String, String> configDefaults = b.configDefaults();
@@ -151,7 +151,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassInteger() {
+    void testDefaultValueLookupClassInteger() {
         Class c = MqttMessageBus.class;
         // Test valid integer properties
         assertEquals(2, ConfigUtils.getDefaultValueInt(c, TAG_SEND_WORKER_COUNT));
@@ -163,7 +163,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassString() {
+    void testDefaultValueLookupClassString() {
         Class c = MqttMessageBus.class;
         // Test valid string properties
         assertEquals("tcp://127.0.0.1:1884", ConfigUtils.getDefaultValue(c, TAG_MQTT_BROKER));
@@ -171,7 +171,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassBoolean() {
+    void testDefaultValueLookupClassBoolean() {
         Class c = MqttMessageBus.class;
         // Test valid boolean properties
         assertEquals(true, ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
@@ -180,7 +180,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassIntegerString() {
+    void testDefaultValueLookupClassIntegerString() {
         Class c = MqttMessageBus.class;
         // Test reading integer properties as strings
         assertEquals("2", ConfigUtils.getDefaultValue(c, TAG_SEND_WORKER_COUNT));
@@ -193,7 +193,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassBooleanString() {
+    void testDefaultValueLookupClassBooleanString() {
         Class c = MqttMessageBus.class;
         // Test reading boolean properties as strings
         assertEquals(Boolean.TRUE.toString(), ConfigUtils.getDefaultValue(CoreSettings.class, CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
@@ -202,7 +202,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassInvalid() {
+    void testDefaultValueLookupClassInvalid() {
         Class c = MqttMessageBus.class;
         // Test invalid properties
         try {
@@ -226,7 +226,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassConfigTags() {
+    void testDefaultValueLookupClassConfigTags() {
         Class c = MqttMessageBus.class;
         // Test configTags
         Set<String> tags = new HashSet<>();
@@ -242,7 +242,7 @@ public class ConfigDefaultsTest {
     }
 
     @Test
-    public void testDefaultValueLookupClassConfigDefaults() {
+    void testDefaultValueLookupClassConfigDefaults() {
         Class c = MqttMessageBus.class;
         // Test configDefaults
         Map<String, String> configDefaults = ConfigUtils.getConfigDefaults(c);

@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 public class SettingsTest {
 
     @Test
-    public void testSettingsBase() {
+    void testSettingsBase() {
         Properties properties = new Properties();
         properties.setProperty("property1", "value1");
         properties.setProperty("property2", "value2");
@@ -65,7 +65,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsGetThere() {
+    void testSettingsGetThere() {
         assertThrows(PropertyMissingException.class, () -> {
             Settings settings = new Settings();
             settings.get(TAG_SERVICE_ROOT_URL);
@@ -73,7 +73,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsGetIntThere() {
+    void testSettingsGetIntThere() {
         assertThrows(PropertyMissingException.class, () -> {
             Settings settings = new Settings();
             settings.getInt(TAG_SERVICE_ROOT_URL);
@@ -81,7 +81,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsGetBooleanThere() {
+    void testSettingsGetBooleanThere() {
         assertThrows(PropertyMissingException.class, () -> {
             Settings settings = new Settings();
             settings.getBoolean(TAG_SERVICE_ROOT_URL);
@@ -89,7 +89,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsGetDoubleThere() {
+    void testSettingsGetDoubleThere() {
         assertThrows(PropertyMissingException.class, () -> {
             Settings settings = new Settings();
             settings.getDouble(TAG_SERVICE_ROOT_URL);
@@ -97,7 +97,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsGetLongThere() {
+    void testSettingsGetLongThere() {
         assertThrows(PropertyMissingException.class, () -> {
             Settings settings = new Settings();
             settings.getLong(TAG_SERVICE_ROOT_URL);
@@ -105,7 +105,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsWithValues() {
+    void testSettingsWithValues() {
         Properties properties = createValues();
         Settings settings = new Settings(properties);
 
@@ -122,7 +122,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsWithInvalidValues() {
+    void testSettingsWithInvalidValues() {
         Properties properties = createValues();
         Settings settings = new Settings(properties);
 
@@ -148,7 +148,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsWithValuesDefaults() {
+    void testSettingsWithValuesDefaults() {
         Properties properties = createValues();
         Settings settings = new Settings(properties);
 
@@ -180,7 +180,7 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSettingsDefaults() {
+    void testSettingsDefaults() {
         Settings settings = new Settings();
 
         assertEquals("myDefault", settings.get(TAG_SERVICE_ROOT_URL, "myDefault"));

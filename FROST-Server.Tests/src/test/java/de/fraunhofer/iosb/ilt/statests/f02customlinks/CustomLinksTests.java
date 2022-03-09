@@ -159,7 +159,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Test
-    public void testCustomLinks1() throws ServiceFailureException {
+    void testCustomLinks1() throws ServiceFailureException {
         LOGGER.info("  testCustomLinks1");
         Thing thing = service.things().find(THINGS.get(1).getId());
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
@@ -170,7 +170,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Test
-    public void testCustomLinks2() throws ServiceFailureException {
+    void testCustomLinks2() throws ServiceFailureException {
         LOGGER.info("  testCustomLinks2");
         Thing thing = service.things()
                 .query()

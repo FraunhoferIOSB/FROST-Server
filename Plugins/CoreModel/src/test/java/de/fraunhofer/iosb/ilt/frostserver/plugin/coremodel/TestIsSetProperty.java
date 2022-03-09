@@ -74,7 +74,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
             testEntityType(type, type.getPropertySet());
             testEntityCompare(type, type.getPropertySet());
@@ -163,7 +163,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testDatastream() {
+    void testDatastream() {
         Entity entity = new DefaultEntity(pluginCoreModel.etDatastream);
         testIsSetPropertyDatastream(false, false, entity);
 
@@ -184,7 +184,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testFeatureOfInterest() {
+    void testFeatureOfInterest() {
         Entity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest);
         testIsSetPropertyFeatureOfInterest(false, false, entity);
 
@@ -205,7 +205,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testHistoricalLocation() {
+    void testHistoricalLocation() {
         Entity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation);
         testIsSetPropertyHistoricalLocation(false, false, entity);
 
@@ -226,7 +226,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testLocation() {
+    void testLocation() {
         Entity entity = new DefaultEntity(pluginCoreModel.etLocation);
         testIsSetPropertyLocation(false, false, entity);
 
@@ -257,7 +257,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testObservation() {
+    void testObservation() {
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation);
         testIsSetPropertyObservation(false, false, entity);
 
@@ -284,7 +284,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testObservedProperty() {
+    void testObservedProperty() {
         Entity entity = new DefaultEntity(pluginCoreModel.etObservedProperty);
         testIsSetPropertyObservedProperty(false, false, entity);
 
@@ -304,7 +304,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testSensor() {
+    void testSensor() {
         Entity entity = new DefaultEntity(pluginCoreModel.etSensor);
         testIsSetPropertySensor(false, false, entity);
 
@@ -325,7 +325,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    public void testThing() {
+    void testThing() {
         Entity entity = new DefaultEntity(pluginCoreModel.etThing);
         testIsSetPropertyThing(false, false, entity);
 

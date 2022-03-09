@@ -56,14 +56,14 @@ public class SerialisationTest {
     }
 
     @Test
-    public void serialiseDate() throws IOException {
+    void serialiseDate() throws IOException {
         String expResult = "\"1987-06-05\"";
         final String result = JsonWriter.writeObject(new Date(87, 5, 5));
         assertTrue(jsonEqual(expResult, result), "Date not serialised correctly.");
     }
 
     @Test
-    public void deSerialiseDate() throws IOException {
+    void deSerialiseDate() throws IOException {
         String input = "\"1987-06-05\"";
         Date expResult = new Date(87, 5, 5);
         expResult.setHours(0);

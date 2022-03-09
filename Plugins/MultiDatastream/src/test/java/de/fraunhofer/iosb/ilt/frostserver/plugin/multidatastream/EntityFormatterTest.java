@@ -105,7 +105,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingBasicAbs() throws IOException {
+    void writeThingBasicAbs() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -136,7 +136,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingBasicRel() throws IOException {
+    void writeThingBasicRel() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -167,7 +167,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingSelect() throws IOException {
+    void writeThingSelect() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -189,7 +189,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingsBasic() throws IOException {
+    void writeThingsBasic() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -228,7 +228,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingOnlyId() throws IOException {
+    void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
@@ -247,7 +247,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingsWithExpandedDatastream() throws IOException {
+    void writeThingsWithExpandedDatastream() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -325,7 +325,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingWithExpandedDatastream1() throws IOException {
+    void writeThingWithExpandedDatastream1() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -363,7 +363,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingWithExpandedDatastream2() throws IOException {
+    void writeThingWithExpandedDatastream2() throws IOException {
         String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -390,7 +390,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingWithExpandedDatastream3() throws IOException {
+    void writeThingWithExpandedDatastream3() throws IOException {
         String expResult = "{\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -419,7 +419,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingWithExpandedDatastream4() throws IOException {
+    void writeThingWithExpandedDatastream4() throws IOException {
         String expResult = "{\n"
                 + "  \"@iot.id\": 1,\n"
                 + "  \"Datastreams\": [],\n"
@@ -443,7 +443,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeMultiDatastreamBasic() throws IOException {
+    void writeMultiDatastreamBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -499,7 +499,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeSensorBasic() throws IOException {
+    void writeSensorBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -525,7 +525,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeSensorEmptyDatastreamsCollection() throws IOException {
+    void writeSensorEmptyDatastreamsCollection() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -549,7 +549,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservedPropertyBasic() throws IOException {
+    void writeObservedPropertyBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -573,7 +573,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationBasicDs() throws IOException {
+    void writeObservationBasicDs() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -599,7 +599,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationBasicMds() throws IOException {
+    void writeObservationBasicMds() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -625,7 +625,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationBasicWithNullResult() throws IOException {
+    void writeObservationBasicWithNullResult() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -651,7 +651,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationWithEmptyResultTime() throws IOException {
+    void writeObservationWithEmptyResultTime() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -677,7 +677,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeFeatureOfInterstBasic() throws IOException {
+    void writeFeatureOfInterstBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -700,7 +700,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
+    void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"

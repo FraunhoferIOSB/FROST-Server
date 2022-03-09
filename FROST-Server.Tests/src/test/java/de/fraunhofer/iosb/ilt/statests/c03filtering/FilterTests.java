@@ -282,7 +282,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testIndirectFilter() throws ServiceFailureException {
+    void testIndirectFilter() throws ServiceFailureException {
         LOGGER.info("  testIndirectFilter");
         ThingDao doa = service.things();
         testFilterResults(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
@@ -295,7 +295,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testDeepIndirection() throws ServiceFailureException {
+    void testDeepIndirection() throws ServiceFailureException {
         LOGGER.info("  testDeepIndirection");
         ObservedPropertyDao doa = service.observedProperties();
 
@@ -307,7 +307,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * Test if fetching a property that is NULL returns a 204.
      */
     @Test
-    public void testNullEntityProperty() {
+    void testNullEntityProperty() {
         LOGGER.info("  testNullEntityProperty");
         String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
@@ -320,7 +320,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * Test if fetching the $value of a property that is NULL returns a 204.
      */
     @Test
-    public void testNullEntityPropertyValue() {
+    void testNullEntityPropertyValue() {
         LOGGER.info("  testNullEntityPropertyValue");
         String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
@@ -333,7 +333,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * Test if filtering works on requltQuality values that are Strings.
      */
     @Test
-    public void testStringResultQualityValue() {
+    void testStringResultQualityValue() {
         LOGGER.info("  testStringResultQualityValue");
         ObservationDao doa = service.observations();
         testFilterResults(doa, "resultQuality eq 'number-1'", getFromList(OBSERVATIONS, 1));
@@ -343,7 +343,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * Test if filtering works on requltQuality values that are Numbers.
      */
     @Test
-    public void testNumericResultQualityValue() {
+    void testNumericResultQualityValue() {
         LOGGER.info("  testNumericResultQualityValue");
         ObservationDao doa = service.observations();
         testFilterResults(doa, "resultQuality eq 2", getFromList(OBSERVATIONS, 2));

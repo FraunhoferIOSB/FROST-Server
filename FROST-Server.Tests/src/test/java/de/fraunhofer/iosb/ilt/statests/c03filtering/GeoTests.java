@@ -312,7 +312,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testGeoDistance() throws ServiceFailureException {
+    void testGeoDistance() throws ServiceFailureException {
         LOGGER.info("  testGeoDistance");
         testFilterResults(service.locations(), "geo.distance(location, geography'POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
         testFilterResults(service.locations(), "geo.distance(location, geography'POINT(8 54.1)') gt 1", getFromList(LOCATIONS, 0, 1, 2, 4, 5, 6, 7));
@@ -326,7 +326,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testGeoIntersects() throws ServiceFailureException {
+    void testGeoIntersects() throws ServiceFailureException {
         LOGGER.info("  testGeoIntersects");
         testFilterResults(service.locations(), "geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         testFilterResults(service.featuresOfInterest(), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
@@ -341,7 +341,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testGeoLength() throws ServiceFailureException {
+    void testGeoLength() throws ServiceFailureException {
         LOGGER.info("  testGeoLength");
         testFilterResults(service.locations(), "geo.length(location) gt 1", getFromList(LOCATIONS, 6, 7));
         testFilterResults(service.locations(), "geo.length(location) ge 1", getFromList(LOCATIONS, 5, 6, 7));
@@ -363,7 +363,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStContains() throws ServiceFailureException {
+    void testStContains() throws ServiceFailureException {
         LOGGER.info("  testStContains");
         testFilterResults(service.locations(),
                 "st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -382,7 +382,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStCrosses() throws ServiceFailureException {
+    void testStCrosses() throws ServiceFailureException {
         LOGGER.info("  testStCrosses");
         testFilterResults(service.locations(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)", getFromList(LOCATIONS, 4, 7));
         testFilterResults(service.featuresOfInterest(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', feature)", getFromList(FEATURESOFINTEREST, 4, 7));
@@ -394,7 +394,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStDisjoint() throws ServiceFailureException {
+    void testStDisjoint() throws ServiceFailureException {
         LOGGER.info("  testStDisjoint");
         testFilterResults(service.locations(),
                 "st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -410,7 +410,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStEquals() throws ServiceFailureException {
+    void testStEquals() throws ServiceFailureException {
         LOGGER.info("  testStEquals");
         testFilterResults(service.locations(), "st_equals(location, geography'POINT(8 53)')", getFromList(LOCATIONS, 2));
         testFilterResults(service.featuresOfInterest(), "st_equals(feature, geography'POINT(8 53)')", getFromList(FEATURESOFINTEREST, 2));
@@ -422,7 +422,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStIntersects() throws ServiceFailureException {
+    void testStIntersects() throws ServiceFailureException {
         LOGGER.info("  testStIntersects");
         testFilterResults(service.locations(), "st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         testFilterResults(service.featuresOfInterest(), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
@@ -437,7 +437,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStOverlaps() throws ServiceFailureException {
+    void testStOverlaps() throws ServiceFailureException {
         LOGGER.info("  testStOverlaps");
         testFilterResults(service.locations(),
                 "st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -453,7 +453,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStRelate() throws ServiceFailureException {
+    void testStRelate() throws ServiceFailureException {
         LOGGER.info("  testStRelate");
         testFilterResults(service.locations(),
                 "st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
@@ -469,7 +469,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStTouches() throws ServiceFailureException {
+    void testStTouches() throws ServiceFailureException {
         LOGGER.info("  testStTouches");
         testFilterResults(service.locations(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)", getFromList(LOCATIONS, 2, 4));
         testFilterResults(service.featuresOfInterest(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', feature)", getFromList(FEATURESOFINTEREST, 2, 4));
@@ -481,7 +481,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void testStWithin() throws ServiceFailureException {
+    void testStWithin() throws ServiceFailureException {
         LOGGER.info("  testStWithin");
         testFilterResults(service.locations(), "st_within(geography'POINT(7.5 52.75)', location)", getFromList(LOCATIONS, 4));
         testFilterResults(service.featuresOfInterest(), "st_within(geography'POINT(7.5 52.75)', feature)", getFromList(FEATURESOFINTEREST, 4));

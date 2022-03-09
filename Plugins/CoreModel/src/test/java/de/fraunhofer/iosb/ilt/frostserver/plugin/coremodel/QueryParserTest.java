@@ -85,7 +85,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testTop() {
+    void testTop() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getTop().isPresent());
         assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, CoreSettings.TAG_DEFAULT_TOP), expResult.getTopOrDefault());
@@ -100,7 +100,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSkip() {
+    void testSkip() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getSkip().isPresent());
         assertEquals(11, expResult.getSkip(11));
@@ -115,7 +115,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testCount() {
+    void testCount() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         assertFalse(expResult.getCount().isPresent());
         assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_DEFAULT_COUNT), expResult.isCountOrDefault());
@@ -136,7 +136,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterLargeNumber() {
+    void testFilterLargeNumber() {
         String query = "$filter=result eq 800000113797";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -149,7 +149,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterOnly1() {
+    void testFilterOnly1() {
         String query = "$filter=(result sub 5) gt 10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -188,7 +188,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterLinked() {
+    void testFilterLinked() {
         String query = "$filter=Datastream/id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
@@ -210,7 +210,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterInvalidCustomProperty() {
+    void testFilterInvalidCustomProperty() {
         assertThrows(IllegalArgumentException.class, () -> {
             // Theoretical path, does not actually exist
             String query = "$filter=Thing/custom eq 1";
@@ -220,7 +220,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterString() {
+    void testFilterString() {
         String query = "$filter=result gt '3'";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -283,7 +283,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterCustomEntityProperty() {
+    void testFilterCustomEntityProperty() {
         {
             String query = "$filter=properties/building.Thing/name eq 'Main'";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -302,7 +302,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterProperty() {
+    void testFilterProperty() {
         {
             String query = "$filter=properties/array[1] gt 3";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -424,7 +424,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterUoM() {
+    void testFilterUoM() {
         {
             String query = "$filter=unitOfMeasurement/name eq 'metre'";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -441,7 +441,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterTime() {
+    void testFilterTime() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -508,7 +508,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterFunction() {
+    void testFilterFunction() {
         String query = "$filter=round(result add 0.1) eq 2";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -527,7 +527,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByAlias() {
+    void testOrderByAlias() {
         String query = "$orderby=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey())));
@@ -537,7 +537,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByEntityProperty() {
+    void testOrderByEntityProperty() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey())));
@@ -547,7 +547,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByAliasAscDesc() {
+    void testOrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.etObservation.getPrimaryKey())));
@@ -558,7 +558,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByMixedPath() {
+    void testOrderByMixedPath() {
         String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(pluginCoreModel.npDatastreamObservation, pluginCoreModel.etDatastream.getPrimaryKey())));
@@ -581,7 +581,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelect() {
+    void testSelect() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
         expResult.getSelect().add(pluginCoreModel.etObservation.getPrimaryKey());
@@ -600,7 +600,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectEntityProperty() {
+    void testSelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(pluginCoreModel.etObservation.getPrimaryKey());
@@ -610,7 +610,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectDeepEntityProperty() {
+    void testSelectDeepEntityProperty() {
         {
             String query = "$select=properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -649,7 +649,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectDistinct() {
+    void testSelectDistinct() {
         {
             String query = "$select=distinct:id,name,properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -694,7 +694,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectNavigationProperty() {
+    void testSelectNavigationProperty() {
         String query = "$select=Observations";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(pluginCoreModel.npObservationsDatastream);
@@ -704,7 +704,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testSelectMultipleMixed() {
+    void testSelectMultipleMixed() {
         String query = "$select=Observations, id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.addSelect(pluginCoreModel.npObservationsDatastream)
@@ -715,7 +715,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandSingleNavigationProperty() {
+    void testExpandSingleNavigationProperty() {
         String query = "$expand=Observations";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream));
@@ -725,7 +725,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandDeep() {
+    void testExpandDeep() {
         String query = "$expand=Observations/FeatureOfInterest";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npFeatureOfInterestObservation));
@@ -737,7 +737,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandCustom() {
+    void testExpandCustom() {
         boolean old = coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
 
@@ -760,7 +760,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandCustom2() {
+    void testExpandCustom2() {
         boolean old = coreSettings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
         coreSettings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
 
@@ -800,7 +800,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandDeepQuery() {
+    void testExpandDeepQuery() {
         String query = "$expand=Observations/FeatureOfInterest($select=@iot.id)";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subSubQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -814,7 +814,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationProperties() {
+    void testExpandMultipleNavigationProperties() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream));
@@ -825,7 +825,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationPropertiesDeep1() {
+    void testExpandMultipleNavigationPropertiesDeep1() {
         String query = "$expand=Datastreams/Observations,Datastreams/ObservedProperty";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                 .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreamsThing)
@@ -838,7 +838,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationPropertiesDeep2() {
+    void testExpandMultipleNavigationPropertiesDeep2() {
         String query = "$expand=Datastreams($expand=Observations,ObservedProperty)";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                 .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreamsThing)
@@ -852,7 +852,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandWithSubquery() {
+    void testExpandWithSubquery() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty&$top=10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -872,7 +872,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testComplex1() {
+    void testComplex1() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id),ObservedProperty&$top=10";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subQuery1 = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
@@ -888,7 +888,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testFilterComplex() {
+    void testFilterComplex() {
         String query = "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new And(
@@ -916,7 +916,7 @@ public class QueryParserTest {
 
     // TODO add tests for all functions
     @Test
-    public void testFormat() {
+    void testFormat() {
         String query = "$resultFormat=dataArray";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFormat("dataArray");

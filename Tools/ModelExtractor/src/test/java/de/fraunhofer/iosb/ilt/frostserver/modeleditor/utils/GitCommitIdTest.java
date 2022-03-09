@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class GitCommitIdTest {
 
     @Test
-    public void testGitDescription() {
+    void testGitDescription() {
         Assertions.assertNotNull("Git Commit Info must be non-null", GitVersionInfo.getGitDescription());
     }
 

@@ -74,7 +74,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingBasicAbs() throws IOException {
+    void writeThingBasicAbs() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -105,7 +105,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingBasicRel() throws IOException {
+    void writeThingBasicRel() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -136,7 +136,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingSelect() throws IOException {
+    void writeThingSelect() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -158,7 +158,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingsBasic() throws IOException {
+    void writeThingsBasic() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -197,7 +197,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingOnlyId() throws IOException {
+    void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
@@ -216,7 +216,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThingsWithExpandedDatastream() throws IOException {
+    void writeThingsWithExpandedDatastream() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"

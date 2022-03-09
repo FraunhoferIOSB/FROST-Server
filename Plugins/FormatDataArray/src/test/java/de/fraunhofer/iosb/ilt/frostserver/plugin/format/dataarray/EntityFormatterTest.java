@@ -76,7 +76,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationDataArray() throws IOException {
+    void writeObservationDataArray() throws IOException {
         String expResult = createDataJson();
 
         List<String> components = new ArrayList<>();

@@ -302,7 +302,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * Test if deep-requests on Things/properties work.
      */
     @Test
-    public void test01FetchLowLevelThingProperties() {
+    void test01FetchLowLevelThingProperties() {
         LOGGER.info("  test01FetchLowLevelThingProperties");
         String urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
@@ -341,7 +341,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * Test if deep-requests on Observations/parameters work.
      */
     @Test
-    public void test02FetchLowLevelObservationParameters() {
+    void test02FetchLowLevelObservationParameters() {
         LOGGER.info("  test02FetchLowLevelObservationParameters");
         String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
@@ -382,7 +382,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * string constant works.
      */
     @Test
-    public void test03StringFilter() {
+    void test03StringFilter() {
         LOGGER.info("  test03StringFilter");
         testFilterResults(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
         testFilterResults(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
@@ -401,7 +401,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * numeric constant works.
      */
     @Test
-    public void test04NumberFilter() {
+    void test04NumberFilter() {
         LOGGER.info("  test04NumberFilter");
         testFilterResults(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
         testFilterResults(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
@@ -430,7 +430,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * boolean constant works.
      */
     @Test
-    public void test05BooleanFilter() {
+    void test05BooleanFilter() {
         LOGGER.info("  test05BooleanFilter");
         testFilterResults(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
         testFilterResults(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
@@ -449,7 +449,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * Test if filtering on the Datastreams/unitOfMeasurement works.
      */
     @Test
-    public void test06UnitOfMeasurementFilter() {
+    void test06UnitOfMeasurementFilter() {
         LOGGER.info("  test06UnitOfMeasurementFilter");
         testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
         testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
@@ -463,7 +463,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * Test if comparing properties with other properties works.
      */
     @Test
-    public void test07PropertyCompare() {
+    void test07PropertyCompare() {
         LOGGER.info("  test07PropertyCompare");
         testFilterResults(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
         testFilterResults(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
@@ -474,7 +474,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
      * Test if filtering on the Observations/resultQuality works.
      */
     @Test
-    public void test20ResultQualityFilter() {
+    void test20ResultQualityFilter() {
         LOGGER.info("  test20ResultQualityFilter");
         testFilterResults(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
         testFilterResults(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));

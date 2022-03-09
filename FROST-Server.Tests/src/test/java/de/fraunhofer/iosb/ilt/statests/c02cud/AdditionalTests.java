@@ -97,7 +97,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test01MultipleLocations() throws ServiceFailureException {
+    void test01MultipleLocations() throws ServiceFailureException {
         LOGGER.info("  test01MultipleLocations");
         EntityUtils.deleteAll(version, serverSettings, service);
 
@@ -136,7 +136,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    public void test02GeneratePhenomenonTime() throws ServiceFailureException {
+    void test02GeneratePhenomenonTime() throws ServiceFailureException {
         LOGGER.info("  test02GeneratePhenomenonTime");
         ObservationDao doa = service.observations();
         Observation observation = new Observation(1.0, DATASTREAMS.get(0));
@@ -160,7 +160,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test03HistoricalLocationThing() throws ServiceFailureException {
+    void test03HistoricalLocationThing() throws ServiceFailureException {
         LOGGER.info("  test03HistoricalLocationThing");
         EntityUtils.deleteAll(version, serverSettings, service);
 
@@ -227,7 +227,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test04PostInvalidPath() throws ServiceFailureException {
+    void test04PostInvalidPath() throws ServiceFailureException {
         LOGGER.info("  test04PostInvalidPath");
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
@@ -347,7 +347,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    public void test05RecreateAutomaticFoi() throws ServiceFailureException {
+    void test05RecreateAutomaticFoi() throws ServiceFailureException {
         LOGGER.info("  test05RecreateAutomaticFoi");
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things

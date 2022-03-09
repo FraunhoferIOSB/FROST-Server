@@ -86,7 +86,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * properties, and mandatory related entities.
      */
     @Test
-    public void readEntitiesAndCheckResponse() {
+    void readEntitiesAndCheckResponse() {
         LOGGER.info("  readEntitiesAndCheckResponse");
         assertTrue(serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ), "Actuation entities not registered.");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
@@ -100,7 +100,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * response should be 404.
      */
     @Test
-    public void readNonexistentEntity() {
+    void readNonexistentEntity() {
         LOGGER.info("  readNonexistentEntity");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readNonexistentEntityWithEntityType(entityType);
@@ -113,7 +113,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * entities for the response entity.
      */
     @Test
-    public void readEntityAndCheckResponse() {
+    void readEntityAndCheckResponse() {
         LOGGER.info("  readEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = readEntityWithEntityType(entityType);
@@ -125,7 +125,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * This method is testing GET for a property of an entity.
      */
     @Test
-    public void readPropertyOfEntityAndCheckResponse() {
+    void readPropertyOfEntityAndCheckResponse() {
         LOGGER.info("  readPropertyOfEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readPropertyOfEntityWithEntityType(entityType);
@@ -223,7 +223,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * specified level.
      */
     @Test
-    public void checkResourcePaths() {
+    void checkResourcePaths() {
         LOGGER.info("  checkResourcePaths");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readRelatedEntityOfEntityWithEntityType(entityType);
@@ -396,7 +396,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * basically checks the first page.
      */
     @Test
-    public void checkServiceRootUri() {
+    void checkServiceRootUri() {
         LOGGER.info("  checkServiceRootUri");
         try {
             String response = getEntities(null);

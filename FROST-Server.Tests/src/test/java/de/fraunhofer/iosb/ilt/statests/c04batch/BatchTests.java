@@ -115,7 +115,7 @@ public abstract class BatchTests extends AbstractTestClass {
      * to get reproducible test not depending on server generated id.
      */
     @Test
-    public void test01BatchRequest() {
+    void test01BatchRequest() {
         LOGGER.info("  test01BatchRequest");
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
                 "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
@@ -209,7 +209,7 @@ public abstract class BatchTests extends AbstractTestClass {
      * <li>missing mandatory Datastream fields.
      */
     @Test
-    public void test02BatchRequestWithChangeSetReferencingNewEntities() {
+    void test02BatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test02BatchRequestWithChangeSetReferencingNewEntities");
         String post1 = "{\r\n"
                 + "  \"name\": \"DS18B20\",\r\n"
@@ -284,7 +284,7 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    public void test03BatchRequestWithEncodedCharsInUrl() {
+    void test03BatchRequestWithEncodedCharsInUrl() {
         LOGGER.info("  test03BatchRequestWithEncodedCharsInUrl");
 
         String response = postBatch("batch_test", "--batch_test\r\n"
@@ -316,7 +316,7 @@ public abstract class BatchTests extends AbstractTestClass {
      *
      */
     @Test
-    public void test04BatchRequestWithAbsoluteUri() {
+    void test04BatchRequestWithAbsoluteUri() {
         LOGGER.info("  test04BatchRequestWithAbsoluteUri");
 
         String response = postBatch("batch_test", "--batch_test\r\n"
@@ -362,7 +362,7 @@ public abstract class BatchTests extends AbstractTestClass {
      *
      */
     @Test
-    public void test05BatchRequestWithResourcePathRelativeToBatchRequest() {
+    void test05BatchRequestWithResourcePathRelativeToBatchRequest() {
         LOGGER.info("  test05BatchRequestWithResourcePathRelativeToBatchRequest");
 
         String response = postBatch("batch_test", "--batch_test\r\n"
@@ -397,7 +397,7 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    public void test06JsonBatchRequest() {
+    void test06JsonBatchRequest() {
         LOGGER.info("  test06JsonBatchRequest");
         String response = postBatch(null,
                 "{\"requests\":[{"
@@ -443,7 +443,7 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    public void test07JsonBatchRequestWithChangeSetReferencingNewEntities() {
+    void test07JsonBatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntities");
         String post1 = "{\r\n"
                 + "  \"name\": \"DS18B20\",\r\n"

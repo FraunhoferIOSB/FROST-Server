@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 public class PolygonConstantTest {
 
     @Test
-    public void testParseFromString2DOnlyExterior() {
+    void testParseFromString2DOnlyExterior() {
         String text = "POLYGON ((30 10, 10 30, 40 40))";
         PolygonConstant result = new PolygonConstant(text);
         assertEquals(
@@ -43,7 +43,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromString2DWithInteriorRing() {
+    void testParseFromString2DWithInteriorRing() {
         String text = "POLYGON ((30 10, 10 30, 40 40), (29 29, 29 30, 30 29))";
         PolygonConstant result = new PolygonConstant(text);
         Polygon polygon = TestHelper.getPolygon(
@@ -60,7 +60,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromString2DWithMultpleInteriorRings() {
+    void testParseFromString2DWithMultpleInteriorRings() {
         String text = "POLYGON ((30 10, 10 30, 40 40), (29 29, 29 30, 30 29), (21 21, 21 22, 22 21))";
         PolygonConstant result = new PolygonConstant(text);
         Polygon polygon = TestHelper.getPolygon(
@@ -82,7 +82,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromString3DOnlyExterior() {
+    void testParseFromString3DOnlyExterior() {
         String text = "POLYGON ((30 10 1, 10 30 1, 40 40 1))";
         PolygonConstant result = new PolygonConstant(text);
         assertEquals(
@@ -95,7 +95,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromString3DWithInteriorRing() {
+    void testParseFromString3DWithInteriorRing() {
         String text = "POLYGON ((30 10 1, 10 30 1, 40 40 1), (29 29 1, 29 30 1, 30 29 1))";
         PolygonConstant result = new PolygonConstant(text);
         Polygon polygon = TestHelper.getPolygon(
@@ -112,7 +112,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromString3DWithMultpleInteriorRings() {
+    void testParseFromString3DWithMultpleInteriorRings() {
         String text = "POLYGON ((30 10 1, 10 30 1, 40 40 1), (29 29 1, 29 30 1, 30 29 1), (21 21 1, 21 22 1, 22 21 1))";
         PolygonConstant result = new PolygonConstant(text);
         Polygon polygon = TestHelper.getPolygon(
@@ -134,7 +134,7 @@ public class PolygonConstantTest {
     }
 
     @Test
-    public void testParseFromStringWithMixedDimensions() {
+    void testParseFromStringWithMixedDimensions() {
         assertThrows(IllegalArgumentException.class, () -> {
             String text = "POLYGON ((30 10, 10 30 40))";
             PolygonConstant polygonConstant = new PolygonConstant(text);

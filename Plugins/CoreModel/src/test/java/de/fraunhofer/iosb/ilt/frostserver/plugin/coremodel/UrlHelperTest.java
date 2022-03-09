@@ -71,7 +71,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkTop() {
+    void testNextLinkTop() {
         testNextLink(
                 coreSettings,
                 "/Things?$top=2",
@@ -87,7 +87,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkSkip() {
+    void testNextLinkSkip() {
         testNextLink(
                 coreSettings,
                 "/Things?$skip=2&$top=2",
@@ -95,7 +95,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkCountTrue() {
+    void testNextLinkCountTrue() {
         testNextLink(
                 coreSettings,
                 "/Things?$count=true&$skip=2&$top=2",
@@ -103,7 +103,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkCountFalse() {
+    void testNextLinkCountFalse() {
         testNextLink(
                 coreSettings,
                 "/Things?$count=false&$skip=2&$top=2",
@@ -111,7 +111,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkOrderByAliasAscDesc() {
+    void testNextLinkOrderByAliasAscDesc() {
         testNextLink(
                 coreSettings,
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2",
@@ -119,7 +119,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkSelectMultipleMixed() {
+    void testNextLinkSelectMultipleMixed() {
         testNextLink(
                 coreSettings,
                 "/Datastreams?$select=Observations, @iot.id&$top=2",
@@ -127,7 +127,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkSelectDistinct() {
+    void testNextLinkSelectDistinct() {
         testNextLink(
                 coreSettings,
                 "/Things?$select=distinct:properties/type&$top=2",
@@ -135,7 +135,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkExpand() {
+    void testNextLinkExpand() {
         testNextLink(
                 coreSettings,
                 "/Things?$expand=Locations&$top=2",
@@ -143,7 +143,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLinkExpandMultipleNavigationPropertes() {
+    void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
                 coreSettings,
                 "/Datastreams?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
@@ -151,7 +151,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLink() {
+    void testNextLink() {
         String[] bases = {
             "/Observations?$filter=length(result) le 2",
             "/Things?$filter=name eq 'it''s a quote'",
@@ -181,7 +181,7 @@ public class UrlHelperTest {
 
     // TODO: Add all filters
     @Test
-    public void testNextLinkFilter() {
+    void testNextLinkFilter() {
         testNextLink(
                 coreSettings,
                 "/Things?$filter=id eq 1");
@@ -200,7 +200,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testgetRelativePath() {
+    void testgetRelativePath() {
         {
             String gotten = UrlHelper.getRelativePath("/a/b/c/e", "/a/b/c/d");
             String expected = "e";

@@ -107,7 +107,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * tests $select for one or more properties.
      */
     @Test
-    public void readEntitiesWithSelectQO() {
+    void readEntitiesWithSelectQO() {
         LOGGER.info("  readEntitiesWithSelectQO");
         checkSelectForEntityType(EntityType.THING);
         checkSelectForEntityType(EntityType.LOCATION);
@@ -135,7 +135,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * $expand.
      */
     @Test
-    public void readEntitiesWithExpandQO() {
+    void readEntitiesWithExpandQO() {
         LOGGER.info("  readEntitiesWithExpandQO");
         checkExpandForEntityType(EntityType.THING);
         checkExpandForEntityType(EntityType.LOCATION);
@@ -186,7 +186,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * {@literal @iot.nextLink} with regard to $top.
      */
     @Test
-    public void readEntitiesWithTopQO() {
+    void readEntitiesWithTopQO() {
         LOGGER.info("  readEntitiesWithTopQO");
         checkTopForEntityType(EntityType.THING);
         checkTopForEntityType(EntityType.LOCATION);
@@ -212,7 +212,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * {@literal @iot.nextLink} with regard to $skip.
      */
     @Test
-    public void readEntitiesWithSkipQO() {
+    void readEntitiesWithSkipQO() {
         LOGGER.info("  readEntitiesWithSkipQO");
         checkSkipForEntityType(EntityType.THING);
         checkSkipForEntityType(EntityType.LOCATION);
@@ -240,7 +240,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * sorting.
      */
     @Test
-    public void readEntitiesWithOrderbyQO() {
+    void readEntitiesWithOrderbyQO() {
         LOGGER.info("  readEntitiesWithOrderbyQO");
         checkOrderbyForEntityType(EntityType.THING);
         checkOrderbyForEntityType(EntityType.LOCATION);
@@ -265,7 +265,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * collection of entities with 1 level and 2 levels resource path.
      */
     @Test
-    public void readEntitiesWithCountQO() {
+    void readEntitiesWithCountQO() {
         LOGGER.info("  readEntitiesWithCountQO");
         checkCountForEntityType(EntityType.THING);
         checkCountForEntityType(EntityType.LOCATION);
@@ -293,7 +293,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * @throws java.io.UnsupportedEncodingException Should not happen for UTF-8.
      */
     @Test
-    public void readEntitiesWithFilterQO() throws UnsupportedEncodingException {
+    void readEntitiesWithFilterQO() throws UnsupportedEncodingException {
         LOGGER.info("  readEntitiesWithFilterQO");
         checkFilterForEntityType(EntityType.THING);
         checkFilterForEntityType(EntityType.LOCATION);
@@ -319,7 +319,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * in result.
      */
     @Test
-    public void checkQueriesPriorityOrdering() {
+    void checkQueriesPriorityOrdering() {
         LOGGER.info("  checkQueriesPriorityOrdering");
         try {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
@@ -352,7 +352,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * @throws java.io.UnsupportedEncodingException Should not happen for UTF-8.
      */
     @Test
-    public void checkAndOrPrecendece() throws UnsupportedEncodingException {
+    void checkAndOrPrecendece() throws UnsupportedEncodingException {
         LOGGER.info("  checkAndOrPrecendece");
         String filter = "$filter=result eq 2 and result eq 1 or result eq 1";
         String fetchError = "There is problem for GET Observations using " + filter;
@@ -386,7 +386,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * @throws java.io.UnsupportedEncodingException Should not happen for UTF-8.
      */
     @Test
-    public void checkArithmeticPrecendece() throws UnsupportedEncodingException {
+    void checkArithmeticPrecendece() throws UnsupportedEncodingException {
         LOGGER.info("  checkArithmeticPrecendece");
         String filter = "$filter=1 add result mul 2 sub -1 eq 4";
         String fetchError = "There is problem for GET Observations using " + filter;

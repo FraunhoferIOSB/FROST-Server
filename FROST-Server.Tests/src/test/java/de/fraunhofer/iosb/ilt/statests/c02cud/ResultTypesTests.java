@@ -116,7 +116,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testBooleanResult() throws ServiceFailureException {
+    void testBooleanResult() throws ServiceFailureException {
         LOGGER.info("  testBooleanResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation(Boolean.TRUE, DATASTREAMS.get(0));
@@ -142,7 +142,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testStringResult() throws ServiceFailureException {
+    void testStringResult() throws ServiceFailureException {
         LOGGER.info("  testStringResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation("fourty two", DATASTREAMS.get(0));
@@ -161,7 +161,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testNumericResult() throws ServiceFailureException {
+    void testNumericResult() throws ServiceFailureException {
         LOGGER.info("  testNumericResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation(1, DATASTREAMS.get(0));
@@ -188,7 +188,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testObjectResult() throws ServiceFailureException {
+    void testObjectResult() throws ServiceFailureException {
         LOGGER.info("  testObjectResult");
         ObservationDao doa = service.observations();
         Map<String, Object> result = new HashMap<>();
@@ -211,7 +211,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testArrayResult() throws ServiceFailureException {
+    void testArrayResult() throws ServiceFailureException {
         LOGGER.info("  testArrayResult");
         ObservationDao doa = service.observations();
         List<Object> result = new ArrayList<>();
@@ -234,7 +234,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testNullResult() throws ServiceFailureException {
+    void testNullResult() throws ServiceFailureException {
         LOGGER.info("  testNullResult");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(null, DATASTREAMS.get(0));
@@ -265,7 +265,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testResultQualityObject() throws ServiceFailureException, IOException {
+    void testResultQualityObject() throws ServiceFailureException, IOException {
         LOGGER.info("  testResultQualityObject");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
@@ -292,7 +292,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testResultQualityArray() throws ServiceFailureException, IOException {
+    void testResultQualityArray() throws ServiceFailureException, IOException {
         LOGGER.info("  testResultQualityArray");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(1.0, DATASTREAMS.get(0));

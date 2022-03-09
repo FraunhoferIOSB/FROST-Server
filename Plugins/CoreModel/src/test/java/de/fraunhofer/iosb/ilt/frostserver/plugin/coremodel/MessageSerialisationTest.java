@@ -58,7 +58,7 @@ public class MessageSerialisationTest {
     }
 
     @Test
-    public void serialiseMessageSimpleThing() throws IOException {
+    void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setId(new IdLong(123456))
@@ -76,7 +76,7 @@ public class MessageSerialisationTest {
     }
 
     @Test
-    public void serialiseMessageLocation() throws IOException {
+    void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etLocation)
                 .setId(new IdLong(123456))
@@ -96,7 +96,7 @@ public class MessageSerialisationTest {
     }
 
     @Test
-    public void serialiseMessageThingWithFields() throws IOException {
+    void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setId(new IdLong(123456))
@@ -117,7 +117,7 @@ public class MessageSerialisationTest {
     }
 
     @Test
-    public void serialiseMessageSimpleObservation() throws IOException {
+    void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setId(new IdLong(123456))

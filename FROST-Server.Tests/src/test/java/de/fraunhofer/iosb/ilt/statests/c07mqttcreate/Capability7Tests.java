@@ -97,7 +97,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkCreateObservationDirect() {
+    void checkCreateObservationDirect() {
         LOGGER.info("  checkCreateObservationDirect");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
@@ -111,7 +111,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkCreateObservationViaDatastream() {
+    void checkCreateObservationViaDatastream() {
         LOGGER.info("  checkCreateObservationViaDatastream");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
@@ -132,7 +132,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkCreateObservationViaFeatureOfInterest() {
+    void checkCreateObservationViaFeatureOfInterest() {
         LOGGER.info("  checkCreateObservationViaFeatureOfInterest");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
@@ -153,7 +153,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkCreateObservationWithDeepInsert() {
+    void checkCreateObservationWithDeepInsert() {
         LOGGER.info("  checkCreateObservationWithDeepInsert");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservationWithDeepInsert();

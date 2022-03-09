@@ -76,7 +76,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservationDataArray() throws IOException {
+    void readObservationDataArray() throws IOException {
         String json = createDataJson();
         List<DataArrayValue> expectedResult = new ArrayList<>();
 

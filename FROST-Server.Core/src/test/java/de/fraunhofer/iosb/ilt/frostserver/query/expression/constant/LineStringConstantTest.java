@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 public class LineStringConstantTest {
 
     @Test
-    public void testParseFromString2D() {
+    void testParseFromString2D() {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10}, new Integer[]{10, 30}, new Integer[]{40, 40});
         String text = "LINESTRING (30 10, 10 30, 40 40)";
         LineStringConstant result = new LineStringConstant(text);
@@ -50,7 +50,7 @@ public class LineStringConstantTest {
     }
 
     @Test
-    public void testParseFromStringDecimal() {
+    void testParseFromStringDecimal() {
         final LineString expected = TestHelper.getLine(new Double[]{30.1, 10.2}, new Double[]{0.1, .1}, new Double[]{40.0, 40.0});
         String text = "LINESTRING (30.1 10.2, 0.1 .1, 40.0 40.0)";
         LineStringConstant result = new LineStringConstant(text);
@@ -58,7 +58,7 @@ public class LineStringConstantTest {
     }
 
     @Test
-    public void testParseFromString3D() {
+    void testParseFromString3D() {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10, 10}, new Integer[]{10, 30, 10}, new Integer[]{40, 40, 40});
         String text = "LINESTRING (30 10 10, 10 30 10, 40 40 40)";
         LineStringConstant result = new LineStringConstant(text);
@@ -74,7 +74,7 @@ public class LineStringConstantTest {
     }
 
     @Test
-    public void testParseFromStringWithMixedDimensions() {
+    void testParseFromStringWithMixedDimensions() {
         assertThrows(IllegalArgumentException.class, () -> {
             String text = "LINESTRING (30 10, 10 30 40)";
             LineStringConstant lineStringConstant = new LineStringConstant(text);

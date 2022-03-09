@@ -217,7 +217,7 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
      * @throws ServiceFailureException if the service connection fails.
      */
     @Test
-    public void testDeleteByTime() throws ServiceFailureException {
+    void testDeleteByTime() throws ServiceFailureException {
         LOGGER.info("  testDeleteByTime");
         recreateObservations();
         Datastream ds1 = DATASTREAMS.get(0);

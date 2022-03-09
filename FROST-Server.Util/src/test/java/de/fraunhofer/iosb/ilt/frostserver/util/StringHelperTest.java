@@ -50,14 +50,14 @@ public class StringHelperTest {
     }
 
     @Test
-    public void testEscapeForStringConstant() {
+    void testEscapeForStringConstant() {
         assertEquals("abcdefg", StringHelper.escapeForStringConstant("abcdefg"));
         assertEquals("''", StringHelper.escapeForStringConstant("'"));
         assertEquals("''''", StringHelper.escapeForStringConstant("''"));
     }
 
     @Test
-    public void testUrlEncode() {
+    void testUrlEncode() {
         assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
         assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
     }

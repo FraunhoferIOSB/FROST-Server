@@ -93,20 +93,20 @@ public class MqttManagerTest {
     }
 
     @Test
-    public void testVersionParse() throws UnknownVersionException {
+    void testVersionParse() throws UnknownVersionException {
         assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic(coreSettings, "v1.0/Observations"));
         assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic(coreSettings, "v1.1/Observations"));
     }
 
     @Test
-    public void testVersionParseFail() {
+    void testVersionParseFail() {
         assertThrows(UnknownVersionException.class, () -> {
             MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
         });
     }
 
     @Test
-    public void testMqttManager() throws InterruptedException {
+    void testMqttManager() throws InterruptedException {
         MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
         assertEquals(1, mqttServers.size());

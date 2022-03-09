@@ -149,7 +149,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * or 409 and the entities should not be accessible using GET.
      */
     @Test
-    public void test01CreateInvalidEntitiesWithDeepInsert() {
+    void test01CreateInvalidEntitiesWithDeepInsert() {
         LOGGER.info("  test01CreateInvalidEntitiesWithDeepInsert");
 
         String urlParameters = "{\n"
@@ -351,7 +351,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * simple GET to make sure the entity is added to the service.
      */
     @Test
-    public void test02CreateEntities() {
+    void test02CreateEntities() {
         LOGGER.info("  test02CreateEntities");
         try {
             {
@@ -655,7 +655,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * service.
      */
     @Test
-    public void test03CreateEntitiesWithDeepInsert() {
+    void test03CreateEntitiesWithDeepInsert() {
         LOGGER.info("  test03CreateEntitiesWithDeepInsert");
         try {
             /* Thing */
@@ -838,7 +838,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * should be 400 or 409 and the entity should not be accessible using GET.
      */
     @Test
-    public void test04CreateInvalidEntities() {
+    void test04CreateInvalidEntities() {
         LOGGER.info("  test04CreateInvalidEntities");
         try {
             /* Datastream */
@@ -936,7 +936,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * rest must be unchanged.
      */
     @Test
-    public void test05PatchEntities() {
+    void test05PatchEntities() {
         LOGGER.info("  test05PatchEntities");
         try {
             /* Thing */
@@ -1034,7 +1034,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * restored to their default value.
      */
     @Test
-    public void test06PutEntities() {
+    void test06PutEntities() {
         LOGGER.info("  test06PutEntities");
         try {
             /* Thing */
@@ -1164,7 +1164,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * is invalid if the body contains related entities as inline content.
      */
     @Test
-    public void test07InvalidPatchEntities() {
+    void test07InvalidPatchEntities() {
         LOGGER.info("  test07InvalidPatchEntities");
         /**
          * Thing *
@@ -1262,7 +1262,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * 404.
      */
     @Test
-    public void test08DeleteEntities() {
+    void test08DeleteEntities() {
         LOGGER.info("  test08DeleteEntities");
         for (int i = 0; i < OBSERVATION_IDS.size(); i++) {
             deleteEntity(EntityType.OBSERVATION, OBSERVATION_IDS.get(i));
@@ -1297,7 +1297,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * response should be 404.
      */
     @Test
-    public void test09DeleteNoneexistentEntities() {
+    void test09DeleteNoneexistentEntities() {
         LOGGER.info("  test09DeleteNoneexistentEntities");
         for (EntityType type : serverSettings.getEnabledEntityTypes()) {
             deleteNonExsistentEntity(type);

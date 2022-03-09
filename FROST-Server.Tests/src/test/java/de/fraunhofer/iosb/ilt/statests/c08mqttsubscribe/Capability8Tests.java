@@ -138,7 +138,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check01SubscribeToEntitySetInsert() {
+    void check01SubscribeToEntitySetInsert() {
         LOGGER.info("  checkSubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -169,7 +169,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check02SubscribeToEntitySetUpdatePATCH() {
+    void check02SubscribeToEntitySetUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -184,7 +184,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check03SubscribeToEntitySetUpdatePUT() {
+    void check03SubscribeToEntitySetUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -199,7 +199,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check04SubscribeToEntitySetWithMultipleSelectInsert() {
+    void check04SubscribeToEntitySetWithMultipleSelectInsert() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -216,7 +216,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check05SubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
+    void check05SubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -233,7 +233,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check06SubscribeToEntitySetWithMultipleSelectUpdatePUT() {
+    void check06SubscribeToEntitySetWithMultipleSelectUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -250,7 +250,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check07SubscribeToEntitySetWithRelativeTopicUpdatePUT() {
+    void check07SubscribeToEntitySetWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -281,7 +281,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check08SubscribeToEntitySetsWithDeepInsert() {
+    void check08SubscribeToEntitySetsWithDeepInsert() {
         LOGGER.info("  checkSubscribeToEntitySetsWithDeepInsert");
         deleteCreatedEntities();
 
@@ -319,7 +319,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check09SubscribeToEntityUpdatePATCH() {
+    void check09SubscribeToEntityUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntityUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -334,7 +334,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check10SubscribeToEntityUpdatePUT() {
+    void check10SubscribeToEntityUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -349,7 +349,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check11SubscribeToEntityWithRelativeTopicUpdatePUT() {
+    void check11SubscribeToEntityWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -372,7 +372,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check12SubscribeToPropertyUpdatePATCH() {
+    void check12SubscribeToPropertyUpdatePATCH() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -401,7 +401,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check13SubscribeToPropertyUpdatePUT() {
+    void check13SubscribeToPropertyUpdatePUT() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -430,7 +430,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void check14SubscribeToHistoricalLocationSetUpdateThingLocations() {
+    void check14SubscribeToHistoricalLocationSetUpdateThingLocations() {
         LOGGER.info("  checkSubscribeToHistoricalLocationSetUpdateThingLocations");
         deleteCreatedEntities();
         createEntities();
