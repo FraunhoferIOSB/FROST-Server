@@ -92,11 +92,11 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpHistLocations::getId);
+        pfReg.addEntryId(TableImpHistLocations::getId);
         pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
                 new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
         );
-        pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId);
         pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
     }
 

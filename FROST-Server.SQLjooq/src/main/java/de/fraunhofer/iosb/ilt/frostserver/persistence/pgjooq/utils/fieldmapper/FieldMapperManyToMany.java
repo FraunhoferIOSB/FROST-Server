@@ -111,7 +111,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
         final NavigationPropertyMain navProp = getParent().getNavigationProperty();
         final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         final EntityFactories ef = ppm.getEntityFactories();
-        pfReg.addEntry(navProp, t -> t.field(fieldIdx), ef);
+        pfReg.addEntry(navProp, t -> t.field(fieldIdx));
 
         staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther)
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
@@ -124,7 +124,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
         if (inverse != null) {
             final NavigationPropertyMain navPropInverse = getParent().getNavigationPropertyInverse();
             final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
-            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther), ef);
+            pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther));
             staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable)
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))

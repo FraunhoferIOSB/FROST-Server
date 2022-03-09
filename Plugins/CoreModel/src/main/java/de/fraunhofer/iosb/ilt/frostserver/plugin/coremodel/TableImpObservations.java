@@ -181,7 +181,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpObservations::getId);
+        pfReg.addEntryId(TableImpObservations::getId);
         pfReg.addEntryMap(pluginCoreModel.epParameters, table -> table.colParameters);
         pfReg.addEntry(pluginCoreModel.epPhenomenonTime,
                 new ConverterTimeValue<>(pluginCoreModel.epPhenomenonTime, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
@@ -219,8 +219,8 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 new ConverterTimeInterval<>(pluginCoreModel.epValidTime, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId, entityFactories);
-        pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId);
+        pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId);
 
         registerHookPreInsert(0, (pm, entity, insertFields) -> {
             Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);

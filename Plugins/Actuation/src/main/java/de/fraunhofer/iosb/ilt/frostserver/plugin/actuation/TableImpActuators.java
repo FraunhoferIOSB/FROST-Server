@@ -87,7 +87,7 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpActuators::getId);
+        pfReg.addEntryId(TableImpActuators::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);

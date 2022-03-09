@@ -293,9 +293,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         return exprSet;
     }
 
-    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory, EntityFactories ef) {
+    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory) {
         if (property instanceof NavigationPropertyEntity) {
-            addEntry((NavigationPropertyEntity) property, factory, ef);
+            addEntry((NavigationPropertyEntity) property, factory);
         } else if (property instanceof NavigationPropertyEntitySet) {
             addEntry((NavigationPropertyEntitySet) property, factory);
         } else {
@@ -303,8 +303,8 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
     }
 
-    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, EntityFactories ef) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory, ef));
+    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);
@@ -343,8 +343,8 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         addEntry(epMapAll, property, null, factory);
     }
 
-    public void addEntryId(EntityFactories ef, ExpressionFactory<T> factory) {
-        final ConverterId<T> converterId = new ConverterId<>(factory, ef, true);
+    public void addEntryId(ExpressionFactory<T> factory) {
+        final ConverterId<T> converterId = new ConverterId<>(factory, true);
         addEntry(table.getEntityType().getPrimaryKey(), factory, converterId);
         addEntry(ModelRegistry.EP_SELFLINK, factory, converterId);
     }
@@ -378,7 +378,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(Property property, boolean isJson, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        PropertyFields<T> pf = new PropertyFields(property, isJson, ps);
+        PropertyFields<T> pf = new PropertyFields<>(property, isJson, ps);
         if (factory != null) {
             pf.addField(null, factory);
             addEntry(epMapAll, property, null, factory);
@@ -401,7 +401,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(Property property, boolean isJson, ConverterRecord<T> ps, NFP<T>... factories) {
-        PropertyFields<T> pf = new PropertyFields(property, isJson, ps);
+        PropertyFields<T> pf = new PropertyFields<>(property, isJson, ps);
         for (NFP<T> nfp : factories) {
             pf.addField(nfp.name, nfp.factory);
             addEntry(epMapAll, property, nfp.name, nfp.factory);
@@ -629,12 +629,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterId<T> implements ConverterRecord<T> {
 
         private final ExpressionFactory<T> factory;
-        private final EntityFactories ef;
         private final boolean canEdit;
 
-        public ConverterId(ExpressionFactory<T> factory, EntityFactories ef, boolean canEdit) {
+        public ConverterId(ExpressionFactory<T> factory, boolean canEdit) {
             this.factory = factory;
-            this.ef = ef;
             this.canEdit = canEdit;
         }
 
@@ -667,12 +665,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
         private final NavigationPropertyMain<Entity> property;
         private final ExpressionFactory<T> factory;
-        private final EntityFactories ef;
 
-        public ConverterEntity(NavigationPropertyMain<Entity> property, ExpressionFactory<T> factory, EntityFactories ef) {
+        public ConverterEntity(NavigationPropertyMain<Entity> property, ExpressionFactory<T> factory) {
             this.property = property;
             this.factory = factory;
-            this.ef = ef;
         }
 
         @Override
@@ -701,19 +697,19 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     public static class ConverterEntitySet<T> implements ConverterRecord<T> {
 
-        public ConverterEntitySet() {
-        }
-
         @Override
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            // EntitySet properties are not fetched in this way
         }
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
+            // EntitySet properties are not created in this way
         }
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            // EntitySet properties are not updated in this way
         }
     }
 

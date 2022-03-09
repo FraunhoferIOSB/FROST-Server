@@ -106,7 +106,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpThings::getId);
+        pfReg.addEntryId(TableImpThings::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);

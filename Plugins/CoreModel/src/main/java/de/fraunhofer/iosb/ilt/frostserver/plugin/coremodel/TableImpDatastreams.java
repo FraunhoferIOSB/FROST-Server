@@ -196,7 +196,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpDatastreams::getId);
+        pfReg.addEntryId(TableImpDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epObservationType, table -> table.colObservationType);
@@ -250,9 +250,9 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId, entityFactories);
-        pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId, entityFactories);
-        pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId, entityFactories);
+        pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId);
+        pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId);
+        pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId);
         pfReg.addEntry(pluginCoreModel.npObservationsDatastream, TableImpDatastreams::getId);
     }
 

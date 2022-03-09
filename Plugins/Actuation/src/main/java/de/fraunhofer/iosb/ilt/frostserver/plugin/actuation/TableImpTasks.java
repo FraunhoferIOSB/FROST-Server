@@ -80,11 +80,11 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpTasks::getId);
+        pfReg.addEntryId(TableImpTasks::getId);
         pfReg.addEntry(pluginCoreModel.epCreationTime, table -> table.colCreationTime,
                 new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime));
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId, entityFactories);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId);
     }
 
     @Override

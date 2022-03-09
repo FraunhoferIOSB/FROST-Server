@@ -117,13 +117,13 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         final TableCollection tables = getTables();
-        pfReg.addEntryId(entityFactories, TableImpTaskingCapabilities::getId);
+        pfReg.addEntryId(TableImpTaskingCapabilities::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId, entityFactories);
-        pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId, entityFactories);
+        pfReg.addEntry(pluginActuation.npActuatorTaskCap, TableImpTaskingCapabilities::getActuatorId);
+        pfReg.addEntry(pluginActuation.npThingTaskCap, TableImpTaskingCapabilities::getThingId);
         pfReg.addEntry(pluginActuation.npTasksTaskCap, TableImpTaskingCapabilities::getId);
 
         // We register a navigationProperty on the Things table.

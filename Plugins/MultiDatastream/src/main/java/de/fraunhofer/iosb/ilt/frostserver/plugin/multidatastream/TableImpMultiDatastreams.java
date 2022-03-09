@@ -215,7 +215,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         final TableCollection tables = getTables();
-        pfReg.addEntryId(entityFactories, TableImpMultiDatastreams::getId);
+        pfReg.addEntryId(TableImpMultiDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntry(pluginCoreModel.epObservationType, null,
@@ -272,8 +272,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
                             message.addField(pluginMultiDatastream.epUnitOfMeasurements);
                         }));
-        pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId, entityFactories);
-        pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId, entityFactories);
+        pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId);
+        pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId);
         pfReg.addEntry(pluginMultiDatastream.npObservedPropertiesMDs, TableImpMultiDatastreams::getId);
         pfReg.addEntry(pluginMultiDatastream.npObservationsMDs, TableImpMultiDatastreams::getId);
 
@@ -291,10 +291,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         // we need to register the MULTI_DATA column on the Observations table.
         final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         final int obsMultiDsIdIdx = observationsTable.registerField(DSL.name("MULTI_DATASTREAM_ID"), getIdType());
-        observationsTable.getPropertyFieldRegistry().addEntry(
-                pluginMultiDatastream.npMultiDatastreamObservation,
-                table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx),
-                entityFactories);
+        observationsTable.getPropertyFieldRegistry().addEntry(pluginMultiDatastream.npMultiDatastreamObservation,
+                table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx));
 
         // Register hooks to alter behaviour of other tables
         obsPropsTable.registerHookPreInsert(-1,

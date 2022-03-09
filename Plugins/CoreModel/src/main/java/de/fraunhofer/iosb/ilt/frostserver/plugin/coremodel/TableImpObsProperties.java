@@ -83,7 +83,7 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
-        pfReg.addEntryId(entityFactories, TableImpObsProperties::getId);
+        pfReg.addEntryId(TableImpObsProperties::getId);
         pfReg.addEntryString(pluginCoreModel.epDefinition, table -> table.colDefinition);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
