@@ -24,6 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdUuid;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class EntityType implements Comparable<EntityType> {
+public class EntityType implements Annotatable, Comparable<EntityType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityType.class.getName());
 
@@ -100,6 +102,11 @@ public class EntityType implements Comparable<EntityType> {
 
     private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
     private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
+
+    /**
+     * The (OData)annotations for this Entity Type.
+     */
+    private final List<Annotation> annotations = new ArrayList<>();
 
     /**
      * The ModelRegistry this EntityType is registered on.
@@ -329,6 +336,21 @@ public class EntityType implements Comparable<EntityType> {
             throw new IllegalArgumentException("Changing the ModelRegistry on an EntityType is not allowed.");
         }
         this.modelRegistry = modelRegistry;
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public EntityType addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public EntityType addAnnotations(List<Annotation> annotations) {
+        annotations.addAll(annotations);
+        return this;
     }
 
     @Override

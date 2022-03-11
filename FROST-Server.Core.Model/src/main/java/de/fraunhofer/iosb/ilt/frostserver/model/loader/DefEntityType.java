@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -93,6 +94,15 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     @EditorList.EdOptsList(editor = EditorSubclass.class)
     @EditorSubclass.EdOptsSubclass(iface = EntityValidator.class, merge = true, nameField = "@class")
     private List<EntityValidator> validators = new ArrayList<>();
+
+    /**
+     * The (OData)annotations for this Element.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "Annotations", description = "The (OData)annotations for this Element.")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    private final List<Annotation> annotations = new ArrayList<>();
 
     @JsonIgnore
     private EntityType entityType;
@@ -272,6 +282,20 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      */
     public DefEntityType setValidators(List<EntityValidator> validators) {
         this.validators = validators;
+        return this;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public DefEntityType addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public DefEntityType addAnnotations(List<Annotation> annotations) {
+        this.annotations.addAll(annotations);
         return this;
     }
 

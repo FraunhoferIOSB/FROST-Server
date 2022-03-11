@@ -18,16 +18,22 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author hylke
  */
-public class PropertyType {
+public class PropertyType implements Annotatable {
 
     private final String name;
     private final String description;
     private final TypeReference typeReference;
+
+    private final List<Annotation> annotations = new ArrayList<>();
 
     public PropertyType(String name, String description, TypeReference typeReference) {
         this.name = name;
@@ -54,4 +60,20 @@ public class PropertyType {
     public boolean isCollection() {
         return false;
     }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public PropertyType addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public PropertyType addAnnotations(List<Annotation> annotations) {
+        annotations.addAll(annotations);
+        return this;
+    }
+
 }

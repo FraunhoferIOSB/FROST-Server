@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
@@ -106,6 +107,15 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
     private List<PropertyPersistenceMapper> handlers;
 
+    /**
+     * The (OData)annotations for this Element.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "Annotations", description = "The (OData)annotations for this Element.")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    private final List<Annotation> annotations = new ArrayList<>();
+
     @JsonIgnore
     private EntityType entityType;
     @JsonIgnore
@@ -126,7 +136,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             PropertyType propType = modelRegistry.getPropertyType(type);
-            entityProperty = new EntityPropertyMain(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new));
+            entityProperty = new EntityPropertyMain(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new))
+                    .addAnnotations(annotations);
         }
         entityType.registerProperty(entityProperty, required);
     }
@@ -322,6 +333,20 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
 
     public EntityType getEntityType() {
         return entityType;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public DefEntityProperty addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public DefEntityProperty addAnnotations(List<Annotation> annotations) {
+        annotations.addAll(annotations);
+        return this;
     }
 
 }

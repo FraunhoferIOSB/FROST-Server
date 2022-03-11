@@ -21,6 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
@@ -29,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -37,7 +40,7 @@ import java.util.Objects;
  * @author scf
  * @param <P> The entityType of the value of the property.
  */
-public class NavigationPropertyMain<P extends NavigableElement> implements NavigationProperty<P> {
+public class NavigationPropertyMain<P extends NavigableElement> implements Annotatable, NavigationProperty<P> {
 
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
@@ -82,7 +85,12 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     private final Collection<String> aliases;
 
-    private NavigationPropertyMain inverse;
+    private NavigationPropertyMain<?> inverse;
+
+    /**
+     * The (OData)annotations for this Navigation Property.
+     */
+    private final List<Annotation> annotations = new ArrayList<>();
 
     private NavigationPropertyMain(String propertyName, boolean isSet) {
         this.name = propertyName;
@@ -172,6 +180,21 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
             link = UrlHelper.getRelativePath(link, curPath);
         }
         return link;
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public NavigationPropertyMain<P> addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public NavigationPropertyMain<P> addAnnotations(List<Annotation> annotations) {
+        annotations.addAll(annotations);
+        return this;
     }
 
     @Override

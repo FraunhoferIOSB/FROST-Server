@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class CsdlItemComplexType implements CsdlSchemaItem {
 
@@ -45,14 +46,14 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
 
-    public CsdlItemComplexType generateFrom(String nameSpace, CoreSettings settings, TypeComplex tc) {
+    public CsdlItemComplexType generateFrom(CsdlDocument doc, String nameSpace, CoreSettings settings, TypeComplex tc) {
         description = tc.getDescription();
         openType = tc.isOpenType();
-        for (Map.Entry<String, PropertyType> entry : tc.getProperties().entrySet()) {
+        for (Entry<String, PropertyType> entry : tc.getProperties().entrySet()) {
             final String name = entry.getKey();
             final PropertyType type = entry.getValue();
             final boolean nullable = !tc.isRequired(name);
-            properties.put(name, new CsdlPropertyEntity().generateFrom(nameSpace, settings, type, nullable));
+            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, settings, type, nullable));
         }
         return this;
     }
@@ -60,7 +61,7 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
         writer.write("<ComplexType Name=\"" + name + "\" OpenType=\"" + Boolean.toString(openType) + "\">");
-        for (Map.Entry<String, CsdlProperty> entry : properties.entrySet()) {
+        for (Entry<String, CsdlProperty> entry : properties.entrySet()) {
             String propName = entry.getKey();
             CsdlProperty property = entry.getValue();
             property.writeXml(nameSpace, propName, writer);

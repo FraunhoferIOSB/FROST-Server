@@ -45,8 +45,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
 
-    public CsdlItemEntityType generateFrom(Version version, String nameSpace, CoreSettings settings, EntityType et) {
-        ModelRegistry mr = settings.getModelRegistry();
+    public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings, EntityType et) {
         String keyName = et.getPrimaryKey().name;
         if ("@iot.id".equals(keyName)) {
             keyName = "id";
@@ -61,7 +60,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             if ("@iot.id".equals(propertyName)) {
                 propertyName = "id";
             }
-            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(version, nameSpace, settings, et, ep));
+            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, settings, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
             properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(nameSpace, settings, et, np));

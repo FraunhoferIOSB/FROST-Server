@@ -18,11 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -30,7 +33,7 @@ import java.util.Objects;
  * @author scf
  * @param <P> The type of the value of the property.
  */
-public class EntityPropertyMain<P> implements EntityProperty<P> {
+public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
 
     /**
      * The entityName of this property.
@@ -54,6 +57,11 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     public final boolean serialiseNull;
 
     private final Collection<String> aliases;
+
+    /**
+     * The (OData)annotations for this Entity Property.
+     */
+    private final List<Annotation> annotations = new ArrayList<>();
 
     public EntityPropertyMain(String name, PropertyType type) {
         this(name, type, false, false);
@@ -108,6 +116,21 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     @Override
     public void setOn(Entity entity, P value) {
         entity.setProperty(this, value);
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public EntityPropertyMain<P> addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public EntityPropertyMain<P> addAnnotations(List<Annotation> annotations) {
+        this.annotations.addAll(annotations);
+        return this;
     }
 
     @Override

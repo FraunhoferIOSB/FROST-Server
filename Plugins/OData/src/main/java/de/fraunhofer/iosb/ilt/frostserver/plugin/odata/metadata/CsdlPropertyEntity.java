@@ -17,9 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -28,6 +31,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CsdlPropertyEntity implements CsdlProperty {
 
@@ -45,7 +52,10 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public boolean collection;
 
-    public CsdlPropertyEntity generateFrom(Version version, String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain ep) {
+    @JsonIgnore
+    private final List<CsdlAnnotation> annotations = new ArrayList<>();
+
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain<?> ep) {
         final PropertyType propertyType = ep.getType();
         type = propertyType.getName();
         collection = propertyType.isCollection();
@@ -61,10 +71,13 @@ public class CsdlPropertyEntity implements CsdlProperty {
         if (et.getPrimaryKey() != ep && !et.isRequired(ep)) {
             nullable = true;
         }
+        for (Annotation an : ep.getAnnotations()) {
+            annotations.add(new CsdlAnnotation().generateFrom(doc, an));
+        }
         return this;
     }
 
-    public CsdlPropertyEntity generateFrom(String nameSpace, CoreSettings settings, PropertyType value, boolean nullable) {
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String nameSpace, CoreSettings settings, PropertyType value, boolean nullable) {
         type = value.getName();
         if (!type.startsWith("Edm.")) {
             type = nameSpace + "." + type;
@@ -73,7 +86,19 @@ public class CsdlPropertyEntity implements CsdlProperty {
             type = null;
         }
         this.nullable = nullable;
+        for (Annotation an : value.getAnnotations()) {
+            annotations.add(new CsdlAnnotation().generateFrom(doc, an));
+        }
         return this;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> otherProperties() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (CsdlAnnotation annotation : annotations) {
+            result.put(annotation.getQualifiedName(), annotation.getValue());
+        }
+        return result;
     }
 
     @Override
@@ -83,7 +108,16 @@ public class CsdlPropertyEntity implements CsdlProperty {
             typeString = "Collection(" + typeString + ")";
         }
         String nullableString = (nullable) ? " Nullable=\"" + Boolean.toString(nullable) + "\"" : "";
-        writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString + " />");
+        writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString);
+        if (annotations.isEmpty()) {
+            writer.write(" />");
+        } else {
+            writer.write(">");
+            for (CsdlAnnotation an : annotations) {
+                an.writeXml(writer);
+            }
+            writer.write("</Property>");
+        }
     }
 
 }

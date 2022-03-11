@@ -46,17 +46,17 @@ public class CsdlSchema {
     @JsonAnySetter
     public Map<String, CsdlSchemaItem> schemaItems = new LinkedHashMap<>();
 
-    public CsdlSchema generateFrom(Version version, String nameSpace, CoreSettings settings) {
+    public CsdlSchema generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings) {
         ModelRegistry mr = settings.getModelRegistry();
         for (EntityType entityType : mr.getEntityTypes()) {
-            schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(version, nameSpace, settings, entityType));
+            schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, nameSpace, settings, entityType));
         }
         for (Map.Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {
             String name = entry.getKey();
             PropertyType value = entry.getValue();
             if (value instanceof TypeComplex) {
                 TypeComplex tc = (TypeComplex) value;
-                schemaItems.put(name, new CsdlItemComplexType().generateFrom(nameSpace, settings, tc));
+                schemaItems.put(name, new CsdlItemComplexType().generateFrom(doc, nameSpace, settings, tc));
             } else if (value instanceof TypeSimpleCustom) {
                 TypeSimpleCustom tc = (TypeSimpleCustom) value;
                 schemaItems.put(name, new CsdlItemTypeDefinition().generateFrom(nameSpace, settings, tc));
