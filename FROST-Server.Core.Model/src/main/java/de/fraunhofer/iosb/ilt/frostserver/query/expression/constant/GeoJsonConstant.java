@@ -17,8 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
 import java.util.Objects;
 import org.geojson.GeoJsonObject;
+import org.geojson.LineString;
+import org.geojson.Point;
+import org.geojson.Polygon;
 
 /**
  *
@@ -32,28 +36,28 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
      */
     private String source;
 
-    public static GeoJsonConstant fromString(String value) {
-        // brute force all implementations
-        try {
-            return new PointConstant(value);
-        } catch (IllegalArgumentException e1) {
-            // Not a Point
+    public static GeoJsonConstant<? extends GeoJsonObject> fromString(String value) {
+
+        GeoJsonObject geoJsonObject = WktParser.parseWkt(value);
+        if (geoJsonObject instanceof Point) {
+            return new PointConstant((Point) geoJsonObject, value);
         }
-        try {
-            return new LineStringConstant(value);
-        } catch (IllegalArgumentException e2) {
-            // Not a LineString
+        if (geoJsonObject instanceof LineString) {
+            return new LineStringConstant((LineString) geoJsonObject, value);
         }
-        try {
-            return new PolygonConstant(value);
-        } catch (IllegalArgumentException e3) {
-            // Not a Polygon
+        if (geoJsonObject instanceof Polygon) {
+            return new PolygonConstant((Polygon) geoJsonObject, value);
         }
         throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
     protected GeoJsonConstant(T value) {
+        this(value, null);
+    }
+
+    protected GeoJsonConstant(T value, String source) {
         super(value);
+        this.source = source;
     }
 
     /**
@@ -78,8 +82,6 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
     public String toUrl() {
         return "geography'" + source + "'";
     }
-
-    protected abstract T parse(String value);
 
     @Override
     public int hashCode() {

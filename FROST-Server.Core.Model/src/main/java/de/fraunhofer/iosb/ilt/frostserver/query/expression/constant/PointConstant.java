@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
+import org.geojson.GeoJsonObject;
 import org.geojson.Point;
 
 /**
@@ -27,18 +29,16 @@ import org.geojson.Point;
  */
 public class PointConstant extends GeoJsonConstant<Point> {
 
-    public PointConstant(Point value) {
-        super(value);
+    public PointConstant(Point value, String source) {
+        super(value, source);
     }
 
-    public PointConstant(String value) {
-        super(GeoHelper.parsePoint(value));
-        setSource(value);
-    }
-
-    @Override
-    protected Point parse(String value) {
-        return GeoHelper.parsePoint(value);
+    public static PointConstant parse(String value) {
+        GeoJsonObject result = WktParser.parseWkt(value);
+        if (result instanceof Point) {
+            return new PointConstant((Point) result, value);
+        }
+        throw new IllegalArgumentException("Can not parse Point from: " + StringHelper.cleanForLogging(value));
     }
 
     @Override

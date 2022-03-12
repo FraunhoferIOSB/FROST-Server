@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
+import org.geojson.GeoJsonObject;
 import org.geojson.Polygon;
 
 /**
@@ -27,18 +29,16 @@ import org.geojson.Polygon;
  */
 public class PolygonConstant extends GeoJsonConstant<Polygon> {
 
-    public PolygonConstant(Polygon value) {
-        super(value);
+    public PolygonConstant(Polygon value, String source) {
+        super(value, source);
     }
 
-    public PolygonConstant(String value) {
-        super(GeoHelper.parsePolygon(value));
-        setSource(value);
-    }
-
-    @Override
-    protected Polygon parse(String value) {
-        return GeoHelper.parsePolygon(value);
+    public static PolygonConstant parse(String value) {
+        GeoJsonObject result = WktParser.parseWkt(value);
+        if (result instanceof Polygon) {
+            return new PolygonConstant((Polygon) result, value);
+        }
+        throw new IllegalArgumentException("Can not parse Polygon from: " + StringHelper.cleanForLogging(value));
     }
 
     @Override

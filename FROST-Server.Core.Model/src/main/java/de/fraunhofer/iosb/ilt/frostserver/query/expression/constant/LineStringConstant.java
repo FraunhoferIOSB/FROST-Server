@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
+import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 
 /**
@@ -27,18 +29,16 @@ import org.geojson.LineString;
  */
 public class LineStringConstant extends GeoJsonConstant<LineString> {
 
-    public LineStringConstant(LineString value) {
-        super(value);
+    public LineStringConstant(LineString value, String source) {
+        super(value, source);
     }
 
-    public LineStringConstant(String value) {
-        super(GeoHelper.parseLine(value));
-        setSource(value);
-    }
-
-    @Override
-    protected LineString parse(String value) {
-        return GeoHelper.parseLine(value);
+    public static LineStringConstant parse(String value) {
+        GeoJsonObject result = WktParser.parseWkt(value);
+        if (result instanceof LineString) {
+            return new LineStringConstant((LineString) result, value);
+        }
+        throw new IllegalArgumentException("Can not parse LineString from: " + StringHelper.cleanForLogging(value));
     }
 
     @Override

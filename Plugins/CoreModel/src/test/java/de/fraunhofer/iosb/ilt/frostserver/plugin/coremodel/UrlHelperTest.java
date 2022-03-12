@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -235,13 +236,30 @@ public class UrlHelperTest {
     }
 
     private static void testNextLink(CoreSettings settings, String baseUrl, String expectedNextUrl) {
-        Query queryBase = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
-        Query queryExpected = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+
+        Query queryBase = null;
+        Query queryExpected = null;
+        try {
+            queryBase = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+        } catch (IllegalArgumentException e) {
+            Assertions.fail("Failed to parse base url: " + baseUrl, e);
+        }
+        try {
+            queryExpected = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+        } catch (IllegalArgumentException e) {
+            Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
+        }
+
         probeQuery(queryBase);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase);
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
-        Query next = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+        Query next = null;
+        try {
+            next = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+        } catch (IllegalArgumentException e) {
+            Assertions.fail("Failed to parse generated next link: " + nextLink, e);
+        }
 
         assertEquals(queryExpected, next);
     }

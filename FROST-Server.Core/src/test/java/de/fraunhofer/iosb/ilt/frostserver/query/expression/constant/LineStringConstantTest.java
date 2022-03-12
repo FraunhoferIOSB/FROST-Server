@@ -33,19 +33,19 @@ public class LineStringConstantTest {
     void testParseFromString2D() {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10}, new Integer[]{10, 30}, new Integer[]{40, 40});
         String text = "LINESTRING (30 10, 10 30, 40 40)";
-        LineStringConstant result = new LineStringConstant(text);
+        LineStringConstant result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
 
         text = "LINESTRING(30 10,10 30,40 40)";
-        result = new LineStringConstant(text);
+        result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
 
         text = "LINESTRING  (30 10 , 10 30 , 40 40)";
-        result = new LineStringConstant(text);
+        result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
 
         text = "LINESTRING      (30             10                 ,                    10                 30                ,           40             40        )         ";
-        result = new LineStringConstant(text);
+        result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
     }
 
@@ -53,32 +53,30 @@ public class LineStringConstantTest {
     void testParseFromStringDecimal() {
         final LineString expected = TestHelper.getLine(new Double[]{30.1, 10.2}, new Double[]{0.1, .1}, new Double[]{40.0, 40.0});
         String text = "LINESTRING (30.1 10.2, 0.1 .1, 40.0 40.0)";
-        LineStringConstant result = new LineStringConstant(text);
+        LineStringConstant result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
     }
 
     @Test
     void testParseFromString3D() {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10, 10}, new Integer[]{10, 30, 10}, new Integer[]{40, 40, 40});
-        String text = "LINESTRING (30 10 10, 10 30 10, 40 40 40)";
-        LineStringConstant result = new LineStringConstant(text);
+        String text = "LINESTRING  Z (30 10 10, 10 30 10, 40 40 40)";
+        LineStringConstant result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
 
-        text = "LINESTRING(30 10 10,10 30 10,40 40 40)";
-        result = new LineStringConstant(text);
+        text = "LINESTRINGZ(30 10 10,10 30 10,40 40 40)";
+        result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
 
-        text = "LINESTRING  (30 10 10 , 10 30 10 , 40 40 40)";
-        result = new LineStringConstant(text);
+        text = "LINESTRINGZ  (30 10 10 , 10 30 10 , 40 40 40)";
+        result = LineStringConstant.parse(text);
         assertEquals(expected, result.getValue());
     }
 
     @Test
     void testParseFromStringWithMixedDimensions() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String text = "LINESTRING (30 10, 10 30 40)";
-            LineStringConstant lineStringConstant = new LineStringConstant(text);
-        });
+        String text = "LINESTRING (30 10, 10 30 40)";
+        assertThrows(IllegalArgumentException.class, () -> LineStringConstant.parse(text));
     }
 
 }

@@ -31,38 +31,34 @@ public class PointConstantTest {
     @Test
     void testparseFromStringSpaces() {
         String text = "POINT                     (      30                                              10    )";
-        PointConstant result = new PointConstant(text);
+        PointConstant result = PointConstant.parse(text);
         assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
     void testparseFromString2D() {
         String text = "POINT (30 10)";
-        PointConstant result = new PointConstant(text);
+        PointConstant result = PointConstant.parse(text);
         assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
     void testparseFromString3D() {
-        String text = "POINT (30 10 10)";
-        PointConstant result = new PointConstant(text);
+        String text = "POINT Z (30 10 10)";
+        PointConstant result = PointConstant.parse(text);
         assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
     @Test
     void testparseFromStringWithWrongDimension1D() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String text = "POINT (10)";
-            PointConstant pointConstant = new PointConstant(text);
-        });
+        String text = "POINT (10)";
+        assertThrows(IllegalArgumentException.class, () -> PointConstant.parse(text));
     }
 
     @Test
     void testparseFromStringWithWrongDimension4D() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            String text = "POINT (10 10 10 10)";
-            PointConstant pointConstant = new PointConstant(text);
-        });
+        String text = "POINT (10 10 10 10)";
+        assertThrows(IllegalArgumentException.class, () -> PointConstant.parse(text));
     }
 
 }
