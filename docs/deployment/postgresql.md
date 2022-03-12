@@ -26,7 +26,7 @@ The default name is `jdbc/sensorThings`.
 
 After setting up FROST-Server in Docker, Tomcat or Wildfly:
 
-1. Browse to http://localhost:8080/FROST/DatabaseStatus
+1. Browse to http://localhost:8080/FROST-Server/DatabaseStatus
 2. Click the upgrade button
 
 This should initialise/update the database to the latest version and the service is ready for use.
