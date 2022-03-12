@@ -221,7 +221,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.epResultTimeDs,
-                new ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
+                new ConverterTimeInterval<>(pluginCoreModel.epResultTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(pluginCoreModel.epUnitOfMeasurement,
