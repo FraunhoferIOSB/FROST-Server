@@ -48,7 +48,7 @@ public abstract class AbstractAnnotation<T extends AbstractAnnotation> implement
         return sourceUrlBase + "." + docType.getDefaultExtension();
     }
 
-    public AbstractAnnotation setSourceUrlBase(String sourceUrlBase) {
+    public T setSourceUrlBase(String sourceUrlBase) {
         this.sourceUrlBase = sourceUrlBase;
         return getThis();
     }
@@ -68,9 +68,9 @@ public abstract class AbstractAnnotation<T extends AbstractAnnotation> implement
         return name;
     }
 
-    public AbstractAnnotation<T> setName(String name) {
+    public T setName(String name) {
         this.name = name;
-        return this;
+        return getThis();
     }
 
     public abstract T getThis();

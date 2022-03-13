@@ -134,19 +134,25 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     }
 
     public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException {
-        propertySerializers.getOrDefault(ep, (inEp, inEntity, inGen) -> {
-            propertyTypeSerializers.getOrDefault(inEp.getType(), (inInEp, inInEntity, inInGen) -> {
-                final Object value = inInEntity.getProperty(inInEp);
-                if (serialiseAllNulls || value != null || inInEp.serialiseNull) {
-                    final String name = inInEp.name;
-                    if (serialiseAllNulls && "@iot.id".equals(name)) {
-                        inInGen.writeObjectField("id", value);
-                    } else {
-                        inInGen.writeObjectField(name, value);
-                    }
-                }
-            }).writeProperty(inEp, inEntity, inGen);
-        }).writeProperty(ep, entity, gen);
+        SimplePropertySerializer ser = propertySerializers.get(ep);
+        if (ser != null) {
+            ser.writeProperty(ep, entity, gen);
+            return;
+        }
+        ser = propertyTypeSerializers.get(ep.getType());
+        if (ser != null) {
+            ser.writeProperty(ep, entity, gen);
+            return;
+        }
+        final Object value = entity.getProperty(ep);
+        if (serialiseAllNulls || value != null || ep.serialiseNull) {
+            final String name = ep.name;
+            if (serialiseAllNulls && "@iot.id".equals(name)) {
+                gen.writeObjectField("id", value);
+            } else {
+                gen.writeObjectField(name, value);
+            }
+        }
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {

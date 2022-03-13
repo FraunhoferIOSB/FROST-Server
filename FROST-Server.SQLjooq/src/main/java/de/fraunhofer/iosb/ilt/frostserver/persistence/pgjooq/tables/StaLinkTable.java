@@ -52,6 +52,14 @@ public abstract class StaLinkTable<T extends StaLinkTable<T>> extends TableImpl<
         return fieldsRow().indexOf(newField);
     }
 
+    @Override
+    public abstract StaLinkTable<T> as(Name as);
+
+    @Override
+    public final StaLinkTable<T> as(String alias) {
+        return as(DSL.name(alias));
+    }
+
     /**
      * Must be called directly after creating an alias of this table.
      *
@@ -62,14 +70,6 @@ public abstract class StaLinkTable<T extends StaLinkTable<T>> extends TableImpl<
             createField(customField.name, customField.type, "", customField.binding);
         }
         return getThis();
-    }
-
-    @Override
-    public abstract StaLinkTable<T> as(Name as);
-
-    @Override
-    public final StaLinkTable<T> as(String alias) {
-        return as(DSL.name(alias));
     }
 
 }

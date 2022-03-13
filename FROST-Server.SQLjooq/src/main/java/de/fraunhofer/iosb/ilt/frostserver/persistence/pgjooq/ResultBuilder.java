@@ -60,9 +60,8 @@ import org.slf4j.LoggerFactory;
  * Turns the sqlQuery into the model instances to be returned to the client.
  *
  * @author scf
- * @param <J> The type of the EP_ID fields.
  */
-public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor {
+public class ResultBuilder implements ResourcePathVisitor {
 
     /**
      * The logger for this class.
@@ -226,9 +225,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
     private void expandEntitySet(EntitySet entitySet, Query subQuery) {
         for (Entity subEntity : entitySet) {
-            if (subEntity instanceof Entity) {
-                expandEntity((Entity) subEntity, subQuery);
-            }
+            expandEntity(subEntity, subQuery);
         }
     }
 

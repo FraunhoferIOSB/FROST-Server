@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -34,7 +33,7 @@ public class CsdlItemTypeDefinition implements CsdlSchemaItem {
     @JsonProperty("@Core.Description")
     public String description;
 
-    public CsdlItemTypeDefinition generateFrom(String nameSpace, CoreSettings settings, TypeSimpleCustom tc) {
+    public CsdlItemTypeDefinition generateFrom(TypeSimpleCustom tc) {
         underlyingType = tc.getUnderlyingType().getName();
         description = tc.getDescription();
         return this;

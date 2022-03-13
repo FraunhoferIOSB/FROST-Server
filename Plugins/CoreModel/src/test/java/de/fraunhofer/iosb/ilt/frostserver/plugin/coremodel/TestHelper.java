@@ -153,7 +153,7 @@ public class TestHelper {
         propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
         propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
+        propertyValues.put(pluginCoreModel.getEpUnitOfMeasurement(), unit1);
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         int nextId = 100;

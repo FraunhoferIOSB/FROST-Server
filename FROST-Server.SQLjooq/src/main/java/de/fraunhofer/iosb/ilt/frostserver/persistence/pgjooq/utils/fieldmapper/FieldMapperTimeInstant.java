@@ -39,6 +39,9 @@ public class FieldMapperTimeInstant extends FieldMapperAbstractEp {
     @EditorString.EdOptsString()
     private String field;
 
+    /**
+     * The index of the TimeInstant field in the table.
+     */
     @JsonIgnore
     private int fieldIdx;
 

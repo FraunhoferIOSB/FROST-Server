@@ -20,12 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
@@ -42,7 +42,6 @@ import java.util.Map;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
 
 /**
  *
@@ -85,7 +84,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     public static class ResultFormatterOData implements ResultFormatter {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterOData.class);
 
         public final CoreSettings settings;
 
@@ -102,27 +101,10 @@ public class PluginResultFormatOData implements PluginResultFormat {
                         + '/' + version.urlPart
                         + "/$metadata";
                 if (Entity.class.isAssignableFrom(result.getClass())) {
-                    LOGGER.trace("Formatting as Entity.");
-                    final Entity entity = (Entity) result;
-                    final EntityWrapper wrappedEntity = new EntityWrapper()
-                            .setEntity(entity)
-                            .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
-                    if (version == PluginOData.VERSION_ODATA_40) {
-                        return target -> JsonWriterOdata40.writeEntity(target, wrappedEntity);
-                    } else {
-                        return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
-                    }
+                    return formatAsEntity(result, contextBase, version);
                 }
                 if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                    LOGGER.trace("Formatting as EntitySet.");
-                    EntitySet entitySet = (EntitySet) result;
-                    EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet)
-                            .setContext(contextBase + '#' + entitySet.getEntityType().plural);
-                    if (version == PluginOData.VERSION_ODATA_40) {
-                        return target -> JsonWriterOdata40.writeEntityCollection(target, wrappedSet);
-                    } else {
-                        return target -> JsonWriterOdata401.writeEntityCollection(target, wrappedSet);
-                    }
+                    return formatAsEntitySet(result, contextBase, version);
                 }
                 // Not an Entity nor an EntitySet.
                 String entityJsonString = "";
@@ -144,6 +126,31 @@ public class PluginResultFormatOData implements PluginResultFormat {
                 LOGGER.error("Failed to format response.", ex);
             }
             return null;
+        }
+
+        private FormatWriter formatAsEntity(Object result, final String contextBase, final Version version) {
+            LOGGER.trace("Formatting as Entity.");
+            final Entity entity = (Entity) result;
+            final EntityWrapper wrappedEntity = new EntityWrapper()
+                    .setEntity(entity)
+                    .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
+            if (version == PluginOData.VERSION_ODATA_40) {
+                return target -> JsonWriterOdata40.writeEntity(target, wrappedEntity);
+            } else {
+                return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
+            }
+        }
+
+        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Version version) {
+            LOGGER.trace("Formatting as EntitySet.");
+            EntitySet entitySet = (EntitySet) result;
+            EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet)
+                    .setContext(contextBase + '#' + entitySet.getEntityType().plural);
+            if (version == PluginOData.VERSION_ODATA_40) {
+                return target -> JsonWriterOdata40.writeEntityCollection(target, wrappedSet);
+            } else {
+                return target -> JsonWriterOdata401.writeEntityCollection(target, wrappedSet);
+            }
         }
 
         @Override

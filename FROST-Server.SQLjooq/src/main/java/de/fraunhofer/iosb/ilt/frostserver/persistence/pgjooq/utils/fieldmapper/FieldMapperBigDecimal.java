@@ -38,6 +38,9 @@ public class FieldMapperBigDecimal extends FieldMapperAbstractEp {
     @EditorString.EdOptsString()
     private String field;
 
+    /**
+     * The index of the BigDecimal field in the table.
+     */
     @JsonIgnore
     private int fieldIdx;
 

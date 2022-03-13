@@ -115,7 +115,7 @@ public class EntityParserTest {
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")

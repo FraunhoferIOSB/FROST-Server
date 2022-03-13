@@ -67,9 +67,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
     public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
-    public EntityPropertyMain<?> epIdActuator;
-    public EntityPropertyMain<?> epIdTask;
-    public EntityPropertyMain<?> epIdTaskingCap;
+    private EntityPropertyMain<?> epIdActuator;
+    private EntityPropertyMain<?> epIdTask;
+    private EntityPropertyMain<?> epIdTaskingCap;
 
     public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR);
     public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");

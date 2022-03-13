@@ -38,6 +38,9 @@ public class FieldMapperString extends FieldMapperAbstractEp {
     @EditorString.EdOptsString()
     private String field;
 
+    /**
+     * The index of the String field in the table.
+     */
     @JsonIgnore
     private int fieldIdx;
 

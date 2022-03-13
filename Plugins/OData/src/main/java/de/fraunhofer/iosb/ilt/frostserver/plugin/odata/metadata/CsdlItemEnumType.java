@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEnumeration;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
@@ -39,7 +38,7 @@ public class CsdlItemEnumType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, Number> values = new LinkedHashMap<>();
 
-    public CsdlItemEnumType generateFrom(String nameSpace, CoreSettings settings, TypeEnumeration<?> te) {
+    public CsdlItemEnumType generateFrom(TypeEnumeration<?> te) {
         description = te.getDescription();
         for (Map.Entry<String, Number> entry : te.getValues().entrySet()) {
             final String name = entry.getKey();

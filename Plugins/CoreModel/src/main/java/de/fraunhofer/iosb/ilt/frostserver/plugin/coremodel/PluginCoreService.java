@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -34,7 +33,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public class PluginCoreService implements PluginService, PluginRootDocument, ConfigDefaults {
+public class PluginCoreService implements PluginService, ConfigDefaults {
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_SERVICE = "coreService.enable";
@@ -67,11 +65,6 @@ public class PluginCoreService implements PluginService, PluginRootDocument, Con
     @Override
     public boolean isEnabled() {
         return enabled;
-    }
-
-    @Override
-    public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
-
     }
 
     @Override

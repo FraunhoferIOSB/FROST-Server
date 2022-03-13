@@ -348,8 +348,8 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return this;
     }
 
-    public EntityType addAnnotations(List<Annotation> annotations) {
-        annotations.addAll(annotations);
+    public EntityType addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
         return this;
     }
 

@@ -301,7 +301,7 @@ public class EntityFormatterTest {
                         .setId(new IdLong(1))
                         .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                         .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
+                        .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
                                 .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")

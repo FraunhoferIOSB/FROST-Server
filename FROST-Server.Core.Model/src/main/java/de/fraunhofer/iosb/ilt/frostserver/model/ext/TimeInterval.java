@@ -36,7 +36,9 @@ public class TimeInterval implements TimeObject {
     private final Interval interval;
 
     public TimeInterval(Interval interval) {
-        assert (interval != null);
+        if (interval == null) {
+            throw new IllegalArgumentException("Interval must be non-null");
+        }
         this.interval = interval;
     }
 

@@ -192,8 +192,8 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Annot
         return this;
     }
 
-    public NavigationPropertyMain<P> addAnnotations(List<Annotation> annotations) {
-        annotations.addAll(annotations);
+    public NavigationPropertyMain<P> addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
         return this;
     }
 

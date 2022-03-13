@@ -87,7 +87,7 @@ public class EntityParserTest {
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
@@ -121,7 +121,7 @@ public class EntityParserTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        assertTrue(result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+        assertTrue(result.isSetProperty(pluginCoreModel.getEpUnitOfMeasurement())
                 && result.isSetProperty(pluginCoreModel.epObservationType)
                 && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
@@ -137,7 +137,7 @@ public class EntityParserTest {
     void readDatastreamWithAllValuesMissing() throws IOException {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
-        assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+        assertTrue(!result.isSetProperty(pluginCoreModel.getEpUnitOfMeasurement())
                 && !result.isSetProperty(pluginCoreModel.epObservationType)
                 && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
@@ -170,7 +170,7 @@ public class EntityParserTest {
                 + "	}\n"
                 + "}";
         final Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
@@ -206,7 +206,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                         new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
@@ -860,7 +860,7 @@ public class EntityParserTest {
                         .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
                 )
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                        .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                                 new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
                         .setProperty(pluginCoreModel.epName, "Temperature measurement")
                         .setProperty(pluginCoreModel.epDescription, "Temperature measurement")

@@ -119,7 +119,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
                 new PropertyFieldRegistry.NFP<>("t", t -> t.field(idxType)));
     }
 
-    public <T extends StaMainTable<T>> void handleResult(
+    private <T extends StaMainTable<T>> void handleResult(
             Entity entity, Property property,
             T table, Map<Field, Object> output,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
@@ -151,7 +151,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         }
     }
 
-    public <T extends StaMainTable<T>> void readResultFromDb(
+    private <T extends StaMainTable<T>> void readResultFromDb(
             Entity entity, Property property,
             T table, Record tuple, DataSize dataSize,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {

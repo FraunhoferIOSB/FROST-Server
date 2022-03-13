@@ -89,9 +89,10 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public static final String NAME_NP_THING = "Thing";
     public static final String NAME_NP_THINGS = "Things";
 
+    public static final String NAME_DEFINITION = "definition";
     public static final String NAME_EP_CREATIONTIME = "creationTime";
     public static final String NAME_EP_DESCRIPTION = "description";
-    public static final String NAME_EP_DEFINITION = "definition";
+    public static final String NAME_EP_DEFINITION = NAME_DEFINITION;
     public static final String NAME_EP_FEATURE = "feature";
     public static final String NAME_EP_LOCATION = "location";
     public static final String NAME_EP_METADATA = "metadata";
@@ -111,11 +112,20 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public static final String NAME_COL_LT_THINGID = "THING_ID";
     public static final String NAME_COL_LT_LOCATIONID = "LOCATION_ID";
 
+    public static final String NAME_LIQUIBASE_DATASTREAM = NAME_ET_DATASTREAM;
+    private static final String NAME_LIQUIBASE_THING = "Thing";
+    private static final String NAME_LIQUIBASE_SENSOR = "Sensor";
+    private static final String NAME_LIQUIBASE_OBSERVATION = "Observation";
+    private static final String NAME_LIQUIBASE_OBS_PROP = "ObsProp";
+    private static final String NAME_LIQUIBASE_LOCATION = "Location";
+    private static final String NAME_LIQUIBASE_HIST_LOCATION = "HistLocation";
+    private static final String NAME_LIQUIBASE_FEATURE = "Feature";
+
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/plugincoremodel/tables.xml";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
-    public TypeComplex eptUom;
+    private TypeComplex eptUom;
 
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING);
@@ -134,17 +144,17 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, false);
     public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, true, false);
     public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET);
-    public EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
+    private EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
 
-    public EntityPropertyMain<?> epIdDatastream;
-    public EntityPropertyMain<?> epIdFeature;
-    public EntityPropertyMain<?> epIdHistLocation;
-    public EntityPropertyMain<?> epIdLocation;
-    public EntityPropertyMain<?> epIdObsProp;
-    public EntityPropertyMain<?> epIdObservation;
-    public EntityPropertyMain<?> epIdSensor;
-    public EntityPropertyMain<?> epIdThing;
+    private EntityPropertyMain<?> epIdDatastream;
+    private EntityPropertyMain<?> epIdFeature;
+    private EntityPropertyMain<?> epIdHistLocation;
+    private EntityPropertyMain<?> epIdLocation;
+    private EntityPropertyMain<?> epIdObsProp;
+    private EntityPropertyMain<?> epIdObservation;
+    private EntityPropertyMain<?> epIdSensor;
+    private EntityPropertyMain<?> epIdThing;
 
     public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
     public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
@@ -235,7 +245,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
                 .addProperty("name", EDM_STRING, false)
                 .addProperty("symbol", EDM_STRING, false)
-                .addProperty("definition", EDM_STRING, false);
+                .addProperty(NAME_DEFINITION, EDM_STRING, false);
         mr.registerPropertyType(eptUom)
                 .registerPropertyType(TypeSimpleCustom.STA_GEOJSON)
                 .registerPropertyType(TypeComplex.STA_OBJECT)
@@ -365,14 +375,14 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         if (target == null) {
             target = new LinkedHashMap<>();
         }
-        ppm.generateLiquibaseVariables(target, "Datastream", modelSettings.idTypeDatastream);
-        ppm.generateLiquibaseVariables(target, "Feature", modelSettings.idTypeFeature);
-        ppm.generateLiquibaseVariables(target, "HistLocation", modelSettings.idTypeHistLoc);
-        ppm.generateLiquibaseVariables(target, "Location", modelSettings.idTypeLocation);
-        ppm.generateLiquibaseVariables(target, "ObsProp", modelSettings.idTypeObsProp);
-        ppm.generateLiquibaseVariables(target, "Observation", modelSettings.idTypeObservation);
-        ppm.generateLiquibaseVariables(target, "Sensor", modelSettings.idTypeSensor);
-        ppm.generateLiquibaseVariables(target, "Thing", modelSettings.idTypeThing);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_DATASTREAM, modelSettings.idTypeDatastream);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_FEATURE, modelSettings.idTypeFeature);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_HIST_LOCATION, modelSettings.idTypeHistLoc);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_LOCATION, modelSettings.idTypeLocation);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_OBS_PROP, modelSettings.idTypeObsProp);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_OBSERVATION, modelSettings.idTypeObservation);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_SENSOR, modelSettings.idTypeSensor);
+        ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_THING, modelSettings.idTypeThing);
 
         return target;
     }
@@ -398,6 +408,76 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             out.append("Unknown persistence manager class");
             return false;
         }
+    }
+
+    /**
+     * @return the entity property type for Unit Of Measurement
+     */
+    public TypeComplex getEptUom() {
+        return eptUom;
+    }
+
+    /**
+     * @return the entity property for UnitOfMeasurement
+     */
+    public EntityPropertyMain<UnitOfMeasurement> getEpUnitOfMeasurement() {
+        return epUnitOfMeasurement;
+    }
+
+    /**
+     * @return the epIdDatastream
+     */
+    public EntityPropertyMain<?> getEpIdDatastream() {
+        return epIdDatastream;
+    }
+
+    /**
+     * @return the epIdFeature
+     */
+    public EntityPropertyMain<?> getEpIdFeature() {
+        return epIdFeature;
+    }
+
+    /**
+     * @return the epIdHistLocation
+     */
+    public EntityPropertyMain<?> getEpIdHistLocation() {
+        return epIdHistLocation;
+    }
+
+    /**
+     * @return the epIdLocation
+     */
+    public EntityPropertyMain<?> getEpIdLocation() {
+        return epIdLocation;
+    }
+
+    /**
+     * @return the epIdObsProp
+     */
+    public EntityPropertyMain<?> getEpIdObsProp() {
+        return epIdObsProp;
+    }
+
+    /**
+     * @return the epIdObservation
+     */
+    public EntityPropertyMain<?> getEpIdObservation() {
+        return epIdObservation;
+    }
+
+    /**
+     * @return the epIdSensor
+     */
+    public EntityPropertyMain<?> getEpIdSensor() {
+        return epIdSensor;
+    }
+
+    /**
+     * @return the epIdThing
+     */
+    public EntityPropertyMain<?> getEpIdThing() {
+        return epIdThing;
     }
 
 }

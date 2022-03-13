@@ -144,7 +144,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
 
                 dslContext.insertInto(ttl)
                         .set((TableField) ttl.getThingId(), thingId)
-                        .set((TableField) ttl.getLocationId(), lId)
+                        .set(ttl.getLocationId(), lId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, lId, thingId);
                 locationIds.add(lId);
@@ -166,7 +166,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
                 for (Object locId : locationIds) {
                     dslContext.insertInto(qlhl)
                             .set(((TableField) qlhl.getHistLocationId()), histLocationId)
-                            .set(((TableField) qlhl.getLocationId()), locId)
+                            .set((qlhl.getLocationId()), locId)
                             .execute();
                     LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locId, histLocationId);
                 }

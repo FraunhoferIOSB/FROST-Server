@@ -26,15 +26,56 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
  */
 public class LandingPageItem {
 
-    public String name;
-    public String url;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public String title;
+    private String name;
+    private String url;
+    private String title;
 
     public LandingPageItem generateFrom(EntityType et, String path) {
         name = et.plural;
         url = path + et.plural;
         return this;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * @param url the url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * @return the title
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * @param title the title to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

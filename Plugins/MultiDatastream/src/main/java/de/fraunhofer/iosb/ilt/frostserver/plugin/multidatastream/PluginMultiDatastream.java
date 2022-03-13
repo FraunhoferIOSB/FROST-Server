@@ -70,8 +70,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
     public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING));
-    public EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
-    public EntityPropertyMain<?> epIdMultiDatastream;
+    private EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
+    private EntityPropertyMain<?> epIdMultiDatastream;
 
     public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
     public final NavigationPropertyEntitySet npObservationsMDs = new NavigationPropertyEntitySet("Observations", npMultiDatastreamObservation);
@@ -148,7 +148,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.eptUom, TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM));
+        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.getEptUom(), TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM));
         etMultiDatastream
                 .registerProperty(epIdMultiDatastream, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -230,7 +230,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pCoreModel.createLiqibaseParams(ppm, target);
-        ppm.generateLiquibaseVariables(target, "MultiDatastream", modelSettings.idTypeMultiDatastream);
+        ppm.generateLiquibaseVariables(target, MULTI_DATASTREAM, modelSettings.idTypeMultiDatastream);
 
         return target;
     }
@@ -256,6 +256,20 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             out.append("Unknown persistence manager class");
             return false;
         }
+    }
+
+    /**
+     * @return the entity property UnitOfMeasurements
+     */
+    public EntityPropertyMain<List<UnitOfMeasurement>> getEpUnitOfMeasurements() {
+        return epUnitOfMeasurements;
+    }
+
+    /**
+     * @return the entity property IdMultiDatastream
+     */
+    public EntityPropertyMain<?> getEpIdMultiDatastream() {
+        return epIdMultiDatastream;
     }
 
 }

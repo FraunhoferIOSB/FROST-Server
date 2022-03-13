@@ -11,6 +11,8 @@ import org.geojson.Polygon;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  *
@@ -39,15 +41,12 @@ public class WktParserTest {
         assertEquals(TestHelper.getPoint(30, 10, 10), result);
     }
 
-    @Test
-    void testParsePointWithWrongDimension1D() {
-        String text = "POINT (10)";
-        assertThrows(IllegalArgumentException.class, () -> WktParser.parseWkt(text));
-    }
-
-    @Test
-    void testParsePointWithWrongDimension4D() {
-        String text = "POINT ZM (10 10 10 10)";
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "POINT (10)",
+        "POINT ZM (10 10 10 10)"
+    })
+    void testParsePointWithWrongDimensions(String text) {
         assertThrows(IllegalArgumentException.class, () -> WktParser.parseWkt(text));
     }
 
@@ -59,35 +58,27 @@ public class WktParserTest {
         assertEquals(expected, result);
     }
 
-    @Test
-    void testParseMultiPoint3D() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "MULTIPOINT Z ((30 10 1),(40 20 2),(50 10 1))",
+        "MULTIPOINTM ( ( 30  10  1 ) , ( 40 20 2 ) , ( 50 10 1 ) ) "
+    })
+    void testParseMultiPoint3D(String text) {
         MultiPoint expected = TestHelper.buildMutliPoint().a(30, 10, 1).a(40, 20, 2).a(50, 10, 1).b();
-        String text = "MULTIPOINT Z ((30 10 1),(40 20 2),(50 10 1))";
         GeoJsonObject result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "MULTIPOINTM ( ( 30  10  1 ) , ( 40 20 2 ) , ( 50 10 1 ) ) ";
-        result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }
 
-    @Test
-    void testParseLineString2D() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "LINESTRING (30 10, 10 30, 40 40)",
+        "LINESTRING(30 10,10 30,40 40)",
+        "LINESTRING  (30 10 , 10 30 , 40 40)",
+        "LINESTRING      (30             10                 ,                    10                 30                ,           40             40        )         "
+    })
+    void testParseLineString2D(String text) {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10}, new Integer[]{10, 30}, new Integer[]{40, 40});
-        String text = "LINESTRING (30 10, 10 30, 40 40)";
         GeoJsonObject result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "LINESTRING(30 10,10 30,40 40)";
-        result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "LINESTRING  (30 10 , 10 30 , 40 40)";
-        result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "LINESTRING      (30             10                 ,                    10                 30                ,           40             40        )         ";
-        result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }
 
@@ -99,19 +90,15 @@ public class WktParserTest {
         assertEquals(expected, result);
     }
 
-    @Test
-    void testParseLineString3D() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "LINESTRING Z(30 10 10, 10 30 10, 40 40 40)",
+        "LINESTRINGZ(30 10 10,10 30 10,40 40 40)",
+        "LINESTRING Z (30 10 10 , 10 30 10 , 40 40 40)"
+    })
+    void testParseLineString3D(String text) {
         final LineString expected = TestHelper.getLine(new Integer[]{30, 10, 10}, new Integer[]{10, 30, 10}, new Integer[]{40, 40, 40});
-        String text = "LINESTRING Z(30 10 10, 10 30 10, 40 40 40)";
         GeoJsonObject result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "LINESTRINGZ(30 10 10,10 30 10,40 40 40)";
-        result = WktParser.parseWkt(text);
-        assertEquals(expected, result);
-
-        text = "LINESTRING Z (30 10 10 , 10 30 10 , 40 40 40)";
-        result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }
 

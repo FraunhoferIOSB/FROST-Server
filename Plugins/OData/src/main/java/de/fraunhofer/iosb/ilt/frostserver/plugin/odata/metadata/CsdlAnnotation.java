@@ -32,8 +32,6 @@ public class CsdlAnnotation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsdlAnnotation.class.getName());
 
-    public CsdlAnnotation() {
-    }
     private String name;
     private String namespace;
     private Object value;

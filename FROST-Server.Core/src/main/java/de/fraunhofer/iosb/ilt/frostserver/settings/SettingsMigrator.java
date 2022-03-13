@@ -40,9 +40,7 @@ public class SettingsMigrator {
     private final Map<String, String> keyChanges = new HashMap<>();
 
     private Map<String, ReplaceList> getReplaceValue(String key) {
-        return valueChanges.computeIfAbsent(key, (t) -> {
-            return new TreeMap<>();
-        });
+        return valueChanges.computeIfAbsent(key, t -> new TreeMap<>());
     }
 
     public SettingsMigrator() {

@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
@@ -48,7 +47,7 @@ public class DefPropertyTypeSimple implements AnnotatedConfigurable<Void, Void> 
     @EditorString.EdOptsString()
     private String baseType;
 
-    public PropertyType getPropertyType(ModelRegistry modelRegistry) {
+    public PropertyType getPropertyType() {
         return new TypeSimpleCustom(name, description, TypeSimplePrimitive.getType(baseType));
     }
 }

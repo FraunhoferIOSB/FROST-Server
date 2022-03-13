@@ -58,7 +58,6 @@ public class WktParser implements ParserVisitor {
             InputStream is = new ByteArrayInputStream(wkt.getBytes(StandardCharsets.UTF_8));
             Parser t = new Parser(is, StandardCharsets.UTF_8.name());
             ASTStart n = t.Start();
-            n.dump("");
             return (GeoJsonObject) n.jjtAccept(new WktParser(), null);
         } catch (ParseException ex) {
             throw new IllegalArgumentException(ex);

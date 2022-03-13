@@ -71,8 +71,8 @@ public class PropertyType implements Annotatable {
         return this;
     }
 
-    public PropertyType addAnnotations(List<Annotation> annotations) {
-        annotations.addAll(annotations);
+    public PropertyType addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
         return this;
     }
 

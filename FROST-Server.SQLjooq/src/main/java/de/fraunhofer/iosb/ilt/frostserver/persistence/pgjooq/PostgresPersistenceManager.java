@@ -97,6 +97,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
     private static final String SOURCE_NAME_FROST = "FROST-Source";
+    private static final String ID_TYPE = "idType-";
 
     private static final Map<CoreSettings, TableCollection> tableCollections = new HashMap<>();
 
@@ -254,18 +255,18 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder<>(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
         if (path.isEntityProperty() && entity instanceof Map) {
-            Map map = (Map) entity;
+            Map<String, Object> map = (Map) entity;
             if (map.get(entityCreator.getEntityName()) == null) {
                 return null;
             }
         }
         if (path.isValue() && entity instanceof Map) {
-            Map map = (Map) entity;
+            Map<String, Object> map = (Map) entity;
             entity = map.get(entityCreator.getEntityName());
         }
 
@@ -532,19 +533,29 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
             StaTableDynamic typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerField(this, typeStaTable);
-                    }
-                }
+                registerFieldsForEntityProperty(propertyDef, typeStaTable);
             }
             for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerField(this, typeStaTable);
-                    }
-                }
+                registerFieldsForNavProperty(propertyDef, typeStaTable);
             }
+        }
+    }
+
+    private void registerFieldsForEntityProperty(DefEntityProperty propertyDef, StaTableDynamic typeStaTable) {
+        for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+            maybeRegisterField(handler, typeStaTable);
+        }
+    }
+
+    private void registerFieldsForNavProperty(DefNavigationProperty propertyDef, StaTableDynamic typeStaTable) {
+        for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+            maybeRegisterField(handler, typeStaTable);
+        }
+    }
+
+    private void maybeRegisterField(PropertyPersistenceMapper handler, StaTableDynamic typeStaTable) {
+        if (handler instanceof FieldMapper) {
+            ((FieldMapper) handler).registerField(this, typeStaTable);
         }
     }
 
@@ -552,19 +563,29 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
             StaTableDynamic orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerMapping(this, orCreateTable);
-                    }
-                }
+                registerMappingForEntityProperties(propertyDef, orCreateTable);
             }
             for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerMapping(this, orCreateTable);
-                    }
-                }
+                registerMappingForNavProperties(propertyDef, orCreateTable);
             }
+        }
+    }
+
+    private void registerMappingForEntityProperties(DefEntityProperty propertyDef, StaTableDynamic orCreateTable) {
+        for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+            maybeRegisterMapping(handler, orCreateTable);
+        }
+    }
+
+    private void registerMappingForNavProperties(DefNavigationProperty propertyDef, StaTableDynamic orCreateTable) {
+        for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+            maybeRegisterMapping(handler, orCreateTable);
+        }
+    }
+
+    private void maybeRegisterMapping(PropertyPersistenceMapper handler, StaTableDynamic orCreateTable) {
+        if (handler instanceof FieldMapper) {
+            ((FieldMapper) handler).registerMapping(this, orCreateTable);
         }
     }
 
@@ -638,16 +659,16 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
         target.put("idTypeLong", "BIGINT");
         switch (type) {
             case "LONG":
-                target.put("idType-" + entity, "BIGINT");
+                target.put(ID_TYPE + entity, "BIGINT");
                 break;
 
             case "STRING":
-                target.put("idType-" + entity, "VARCHAR(36)");
+                target.put(ID_TYPE + entity, "VARCHAR(36)");
                 target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
                 break;
 
             case "UUID":
-                target.put("idType-" + entity, "uuid");
+                target.put(ID_TYPE + entity, "uuid");
                 target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
                 break;
             default:

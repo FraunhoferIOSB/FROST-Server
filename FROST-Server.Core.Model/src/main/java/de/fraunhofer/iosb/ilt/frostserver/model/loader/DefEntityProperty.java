@@ -136,7 +136,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             PropertyType propType = modelRegistry.getPropertyType(type);
-            entityProperty = new EntityPropertyMain(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new))
+            entityProperty = new EntityPropertyMain<>(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new))
                     .addAnnotations(annotations);
         }
         entityType.registerProperty(entityProperty, required);
@@ -344,8 +344,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
         return this;
     }
 
-    public DefEntityProperty addAnnotations(List<Annotation> annotations) {
-        annotations.addAll(annotations);
+    public DefEntityProperty addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
         return this;
     }
 

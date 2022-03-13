@@ -259,18 +259,18 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 new PropertyFieldRegistry.ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(pluginMultiDatastream.epUnitOfMeasurements, table -> table.colUnitOfMeasurements,
+        pfReg.addEntry(pluginMultiDatastream.getEpUnitOfMeasurements(), table -> table.colUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
-                            entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
+                            entity.setProperty(pluginMultiDatastream.getEpUnitOfMeasurements(), units);
                         },
-                        (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements))),
+                        (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.getEpUnitOfMeasurements()))),
                         (table, entity, updateFields, message) -> {
-                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
-                            message.addField(pluginMultiDatastream.epUnitOfMeasurements);
+                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.getEpUnitOfMeasurements())));
+                            message.addField(pluginMultiDatastream.getEpUnitOfMeasurements());
                         }));
         pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId);
         pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId);

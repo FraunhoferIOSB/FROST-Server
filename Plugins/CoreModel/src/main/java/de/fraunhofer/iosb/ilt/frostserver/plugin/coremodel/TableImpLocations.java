@@ -193,7 +193,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 // Link new Location to thing.
                 dslContext.insertInto(ttl)
                         .set((TableField) ttl.getThingId(), thingId)
-                        .set((TableField) ttl.getLocationId(), locationId)
+                        .set(ttl.getLocationId(), locationId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
 
@@ -210,7 +210,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 TableImpLocationsHistLocations qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
                 dslContext.insertInto(qlhl)
                         .set((TableField) qlhl.getHistLocationId(), histLocationId)
-                        .set((TableField) qlhl.getLocationId(), locationId)
+                        .set(qlhl.getLocationId(), locationId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
 

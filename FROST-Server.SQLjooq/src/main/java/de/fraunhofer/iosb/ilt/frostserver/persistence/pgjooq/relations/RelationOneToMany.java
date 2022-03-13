@@ -121,7 +121,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
         int count = pm.getDslContext().update(target)
-                .set((Field) targetFieldAccessor.getField(target), sourceId)
+                .set(targetFieldAccessor.getField(target), sourceId)
                 .where(target.getId().eq(targetId))
                 .execute();
         if (count != 1) {

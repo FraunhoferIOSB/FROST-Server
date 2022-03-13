@@ -734,9 +734,7 @@ public class FXMLController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         tableList = FXCollections.observableArrayList();
         listViewFound.setItems(tableList);
-        listViewFound.getSelectionModel().selectedItemProperty().addListener((ov, oldItem, newItem) -> {
-            showModel(newItem);
-        });
+        listViewFound.getSelectionModel().selectedItemProperty().addListener((ov, oldItem, newItem) -> showModel(newItem));
         listViewFound.setCellFactory(new TableDataCellFactory());
     }
 

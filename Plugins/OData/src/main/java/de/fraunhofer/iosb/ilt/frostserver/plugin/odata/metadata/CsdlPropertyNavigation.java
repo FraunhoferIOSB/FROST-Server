@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.Writer;
@@ -47,7 +46,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public Boolean nullable;
 
-    public CsdlPropertyNavigation generateFrom(String nameSpace, CoreSettings settings, EntityType et, NavigationPropertyMain np) {
+    public CsdlPropertyNavigation generateFrom(String nameSpace, EntityType et, NavigationPropertyMain np) {
         type = nameSpace + "." + np.getType().getName();
         final NavigationPropertyMain inverse = np.getInverse();
         if (inverse != null) {

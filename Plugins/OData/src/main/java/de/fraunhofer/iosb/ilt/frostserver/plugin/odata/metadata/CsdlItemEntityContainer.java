@@ -41,7 +41,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
 
     public CsdlItemEntityContainer generateFrom(String nameSpace, CoreSettings settings) {
         for (EntityType et : settings.getModelRegistry().getEntityTypes()) {
-            properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, settings, et));
+            properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, et));
         }
         return this;
     }
@@ -52,7 +52,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
         for (Map.Entry<String, ContainerItem> entry : properties.entrySet()) {
             String propName = entry.getKey();
             ContainerItem property = entry.getValue();
-            property.writeXml(nameSpace, propName, writer);
+            property.writeXml(propName, writer);
         }
 
         writer.write("</EntityContainer>");
@@ -70,7 +70,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
         @JsonProperty("$NavigationPropertyBinding")
         public Map<String, String> navPropBinding = new HashMap<>();
 
-        public ContainerItem generateFrom(String nameSpace, CoreSettings settings, EntityType et) {
+        public ContainerItem generateFrom(String nameSpace, EntityType et) {
             collection = true;
             type = nameSpace + "." + et.entityName;
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
@@ -79,7 +79,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
             return this;
         }
 
-        public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+        public void writeXml(String name, Writer writer) throws IOException {
             writer.write("<EntitySet Name=\"" + name + "\" EntityType=\"" + type + "\">");
             for (Map.Entry<String, String> entry : navPropBinding.entrySet()) {
                 writer.write("<NavigationPropertyBinding Path=\"" + entry.getKey() + "\" Target=\"" + entry.getValue() + "\" />");

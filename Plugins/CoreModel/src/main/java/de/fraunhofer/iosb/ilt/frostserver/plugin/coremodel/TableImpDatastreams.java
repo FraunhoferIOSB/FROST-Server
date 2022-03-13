@@ -224,27 +224,27 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                 new ConverterTimeInterval<>(pluginCoreModel.epResultTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(pluginCoreModel.epUnitOfMeasurement,
+        pfReg.addEntry(pluginCoreModel.getEpUnitOfMeasurement(),
                 new ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             final UnitOfMeasurement unitOfMeasurement = new UnitOfMeasurement(
                                     tuple.get(table.colUnitName),
                                     tuple.get(table.colUnitSymbol),
                                     tuple.get(table.colUnitDefinition));
-                            entity.setProperty(pluginCoreModel.epUnitOfMeasurement, unitOfMeasurement);
+                            entity.setProperty(pluginCoreModel.getEpUnitOfMeasurement(), unitOfMeasurement);
                         },
                         (table, entity, insertFields) -> {
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.getEpUnitOfMeasurement());
                             insertFields.put(table.colUnitDefinition, uom.getDefinition());
                             insertFields.put(table.colUnitName, uom.getName());
                             insertFields.put(table.colUnitSymbol, uom.getSymbol());
                         },
                         (table, entity, updateFields, message) -> {
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.getEpUnitOfMeasurement());
                             updateFields.put(table.colUnitDefinition, uom.getDefinition());
                             updateFields.put(table.colUnitName, uom.getName());
                             updateFields.put(table.colUnitSymbol, uom.getSymbol());
-                            message.addField(pluginCoreModel.epUnitOfMeasurement);
+                            message.addField(pluginCoreModel.getEpUnitOfMeasurement());
                         }),
                 new NFP<>("definition", table -> table.colUnitDefinition),
                 new NFP<>("name", table -> table.colUnitName),
@@ -287,7 +287,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     public PropertyFields<TableImpDatastreams> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final String epName = epCustomSelect.getMainEntityPropertyName();
         final EntityPropertyMain mainEntityProperty = getEntityType().getEntityProperty(epName);
-        if (mainEntityProperty == pluginCoreModel.epUnitOfMeasurement) {
+        if (mainEntityProperty == pluginCoreModel.getEpUnitOfMeasurement()) {
             PropertyFields<TableImpDatastreams> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();
             if (subPath.isEmpty() || subPath.size() > 1) {
@@ -314,10 +314,10 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                 new ConverterRecordDeflt<>(
                         (tbl, tuple, entity, dataSize) -> {
                             final String value = String.valueOf(tuple.get(field));
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.getEpUnitOfMeasurement());
                             if (uom == null) {
                                 uom = new UnitOfMeasurementPartial();
-                                entity.setProperty(pluginCoreModel.epUnitOfMeasurement, uom);
+                                entity.setProperty(pluginCoreModel.getEpUnitOfMeasurement(), uom);
                             }
                             switch (epCustomSelect.getSubPath().get(0)) {
                                 case "name":

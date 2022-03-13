@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.util.Objects;
 import java.util.UUID;
 import org.apache.commons.text.StringEscapeUtils;

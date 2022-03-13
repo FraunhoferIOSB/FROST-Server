@@ -25,14 +25,18 @@ import java.util.UUID;
  */
 public class SimpleParserUtils {
 
-    public static TypeSimple.Parser PARSER_LONG = input -> Long.parseLong(input);
-    public static TypeSimple.Parser PARSER_UUID = (input) -> {
+    private SimpleParserUtils() {
+        // Not for public instantiation.
+    }
+
+    public static final TypeSimple.Parser PARSER_LONG = Long::parseLong;
+    public static final TypeSimple.Parser PARSER_UUID = input -> {
         if (input.startsWith("'")) {
             return UUID.fromString(input.substring(1, input.length() - 1));
         }
         return UUID.fromString(input);
     };
-    public static TypeSimple.Parser PARSER_STRING = (input) -> {
+    public static final TypeSimple.Parser PARSER_STRING = input -> {
         if (input.startsWith("'")) {
             String idString = input.substring(1, input.length() - 1);
             return idString.replace("''", "'");

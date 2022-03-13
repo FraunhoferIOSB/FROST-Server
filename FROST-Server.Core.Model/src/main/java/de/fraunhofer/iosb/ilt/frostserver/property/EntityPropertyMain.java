@@ -128,8 +128,8 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
         return this;
     }
 
-    public EntityPropertyMain<P> addAnnotations(List<Annotation> annotations) {
-        this.annotations.addAll(annotations);
+    public EntityPropertyMain<P> addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
         return this;
     }
 

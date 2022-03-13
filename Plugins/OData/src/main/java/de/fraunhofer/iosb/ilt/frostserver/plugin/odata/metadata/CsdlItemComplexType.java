@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
@@ -46,14 +45,14 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
 
-    public CsdlItemComplexType generateFrom(CsdlDocument doc, String nameSpace, CoreSettings settings, TypeComplex tc) {
+    public CsdlItemComplexType generateFrom(CsdlDocument doc, String nameSpace, TypeComplex tc) {
         description = tc.getDescription();
         openType = tc.isOpenType();
         for (Entry<String, PropertyType> entry : tc.getProperties().entrySet()) {
             final String name = entry.getKey();
             final PropertyType type = entry.getValue();
             final boolean nullable = !tc.isRequired(name);
-            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, settings, type, nullable));
+            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, type, nullable));
         }
         return this;
     }

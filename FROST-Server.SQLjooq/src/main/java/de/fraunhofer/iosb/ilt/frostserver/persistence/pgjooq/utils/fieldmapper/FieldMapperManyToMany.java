@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -110,7 +109,6 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
 
         final NavigationPropertyMain navProp = getParent().getNavigationProperty();
         final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
-        final EntityFactories ef = ppm.getEntityFactories();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx));
 
         staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther)

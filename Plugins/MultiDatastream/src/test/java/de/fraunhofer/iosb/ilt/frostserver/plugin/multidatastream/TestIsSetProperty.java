@@ -217,7 +217,7 @@ public class TestIsSetProperty {
     private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npObservedPropertyDatastream);
-        testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epUnitOfMeasurement);
+        testIsSetProperty(shouldBeSet, entity, pluginCoreModel.getEpUnitOfMeasurement());
     }
 
     @Test

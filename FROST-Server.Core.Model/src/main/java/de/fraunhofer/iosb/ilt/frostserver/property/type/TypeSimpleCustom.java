@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeSimpleCustom extends TypeSimple {
 
-    public static TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom("GeoJson", "A GeoJSON Object", TypeSimplePrimitive.EDM_GEOMETRY, null);
+    public static final TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom("GeoJson", "A GeoJSON Object", TypeSimplePrimitive.EDM_GEOMETRY, null);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimplePrimitive.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimpleCustom.class.getName());
     private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();
 
     static {

@@ -32,11 +32,11 @@ import java.util.Date;
  */
 public class DateSerialiser extends JsonSerializer<Date> {
 
-    private static final DateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public void serialize(Date value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        gen.writeString(FORMAT.format(value));
+        gen.writeString(format.format(value));
     }
 
 }

@@ -162,7 +162,7 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
+        propertyValues.put(pluginCoreModel.getEpUnitOfMeasurement(), unit1);
         propertyValues.put(epUnitOfMeasurements, Arrays.asList(unit1, unit2));
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 

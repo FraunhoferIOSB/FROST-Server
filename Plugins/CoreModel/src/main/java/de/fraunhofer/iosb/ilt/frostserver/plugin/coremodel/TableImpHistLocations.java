@@ -142,7 +142,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
 
                 dslContext.insertInto(qtl)
                         .set(((TableField) qtl.getThingId()), thingId)
-                        .set(((TableField) qtl.getLocationId()), locationId)
+                        .set((qtl.getLocationId()), locationId)
                         .execute();
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
             }

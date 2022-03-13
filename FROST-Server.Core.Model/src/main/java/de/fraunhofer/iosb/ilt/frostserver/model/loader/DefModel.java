@@ -61,7 +61,7 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
     public void registerPropertyTypes(ModelRegistry modelRegistry) {
         if (simplePropertyTypes != null) {
             for (DefPropertyTypeSimple propertyType : simplePropertyTypes) {
-                modelRegistry.registerPropertyType(propertyType.getPropertyType(modelRegistry));
+                modelRegistry.registerPropertyType(propertyType.getPropertyType());
             }
         }
     }

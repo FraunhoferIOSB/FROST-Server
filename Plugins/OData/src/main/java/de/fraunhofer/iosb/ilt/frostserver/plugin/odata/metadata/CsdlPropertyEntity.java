@@ -38,7 +38,7 @@ import java.util.Map;
 
 public class CsdlPropertyEntity implements CsdlProperty {
 
-    private final String TYPE_DEFAULT = "Edm.String";
+    private static final String TYPE_DEFAULT = "Edm.String";
 
     @JsonProperty("$Type")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
@@ -77,7 +77,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         return this;
     }
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String nameSpace, CoreSettings settings, PropertyType value, boolean nullable) {
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String nameSpace, PropertyType value, boolean nullable) {
         type = value.getName();
         if (!type.startsWith("Edm.")) {
             type = nameSpace + "." + type;
@@ -103,7 +103,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
 
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
-        String typeString = type == null ? "Edm.String" : type;
+        String typeString = type == null ? TYPE_DEFAULT : type;
         if (collection) {
             typeString = "Collection(" + typeString + ")";
         }

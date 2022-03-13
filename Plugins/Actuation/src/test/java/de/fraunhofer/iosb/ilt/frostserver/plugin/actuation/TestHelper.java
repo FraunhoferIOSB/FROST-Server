@@ -134,7 +134,7 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epDescription, "My description");
         propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
         propertyValues.put(pluginCoreModel.epFeature, new Point(8, 42));
-        propertyValues.put(pluginCoreModel.epIdThing, new IdLong(1));
+        propertyValues.put(pluginCoreModel.getEpIdThing(), new IdLong(1));
         propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
         propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
         propertyValues.put(pluginCoreModel.epName, "myName");
@@ -154,7 +154,7 @@ public class TestHelper {
         propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
         propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
+        propertyValues.put(pluginCoreModel.getEpUnitOfMeasurement(), unit1);
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
         propertyValues.put(pluginActuation.epTaskingParameters, parameters);
 

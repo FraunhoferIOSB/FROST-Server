@@ -429,7 +429,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new Equal(
                             new Path(
-                                    pluginCoreModel.epUnitOfMeasurement,
+                                    pluginCoreModel.getEpUnitOfMeasurement(),
                                     new EntityPropertyCustom("name")),
                             new StringConstant("metre")));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
