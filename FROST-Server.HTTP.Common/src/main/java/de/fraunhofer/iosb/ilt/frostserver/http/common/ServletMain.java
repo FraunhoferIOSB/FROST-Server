@@ -28,14 +28,19 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.MultipartConfig;
@@ -65,10 +70,10 @@ public class ServletMain extends HttpServlet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
-    public static final String ENCODING = "UTF-8";
+    private static final String NOT_FOUND = "Not Found";
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
-        response.setCharacterEncoding(ENCODING);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         String pathInfo = request.getPathInfo();
         final CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         if (StringHelper.isNullOrEmpty(pathInfo)) {
@@ -76,7 +81,7 @@ public class ServletMain extends HttpServlet {
                 response.sendRedirect(coreSettings.getQueryDefaults().getServiceRootUrl() + "/");
                 return;
             } catch (IOException ex) {
-                sendResponse(Service.errorResponse(null, 500, "Not Found"), response);
+                sendResponse(Service.errorResponse(null, 500, NOT_FOUND), response);
                 return;
             }
         }
@@ -87,7 +92,7 @@ public class ServletMain extends HttpServlet {
                 in.transferTo(out);
                 return;
             } catch (IOException exc) {
-                sendResponse(Service.errorResponse(null, 500, "Not Found"), response);
+                sendResponse(Service.errorResponse(null, 500, NOT_FOUND), response);
                 return;
             }
         }
@@ -95,7 +100,7 @@ public class ServletMain extends HttpServlet {
         try {
             ServiceRequest serviceRequest = serviceRequestFromHttpRequest(coreSettings, request);
             if (serviceRequest == null) {
-                sendResponse(new ServiceResponseHttpServlet(response, 404, "Not Found"), response);
+                sendResponse(new ServiceResponseHttpServlet(response, 404, NOT_FOUND), response);
                 return;
             }
             executeService(serviceRequest, request, response);
@@ -127,7 +132,7 @@ public class ServletMain extends HttpServlet {
 
     private ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request) throws IOException {
         if (request.getCharacterEncoding() == null) {
-            request.setCharacterEncoding(ENCODING);
+            request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         }
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
@@ -170,9 +175,17 @@ public class ServletMain extends HttpServlet {
         }
 
         final Map<String, List<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
-        String accept = request.getHeader("Accept");
-        if (accept != null && !parameterMap.containsKey("$format")) {
-            parameterMap.computeIfAbsent("$format", t -> new ArrayList<>()).add(accept.toLowerCase());
+        String accept = request.getHeader(HEADER_ACCEPT);
+        if (accept != null) {
+            parameterMap.putIfAbsent(HEADER_ACCEPT, Arrays.asList(accept));
+        }
+
+        LinkedHashMap<String, String> prefer = new LinkedHashMap<>();
+        for (Enumeration<String> en = request.getHeaders(HEADER_PREFER); en.hasMoreElements();) {
+            UrlHelper.decodePrefer(en.nextElement(), prefer);
+        }
+        for (Entry<String, String> entry : prefer.entrySet()) {
+            parameterMap.putIfAbsent(entry.getKey(), Arrays.asList(entry.getValue()));
         }
 
         final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)

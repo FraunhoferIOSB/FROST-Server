@@ -77,7 +77,7 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
     }
 
     @Override
-    public ResultFormatter getResultFormatter() {
+    public ResultFormatter getResultFormatter(String format) {
         return new ResultFormatterGeoJson();
     }
 

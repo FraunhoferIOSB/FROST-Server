@@ -23,9 +23,14 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_EMPTY;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -33,7 +38,10 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETURN;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -57,8 +65,9 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     public static final Version VERSION_ODATA_40 = new Version("ODATA_4.0");
     public static final Version VERSION_ODATA_401 = new Version("ODATA_4.01");
-    public static final String PATH_METADATA = "/$metadata";
-    public static final String REQUEST_TYPE_METADATA = PATH_METADATA;
+    public static final String PARAM_METADATA = "$metadata";
+    public static final String PATH_METADATA = '/' + PARAM_METADATA;
+    public static final String REQUEST_TYPE_METADATA = PARAM_METADATA;
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ODATA = "odata.enable";
@@ -163,6 +172,15 @@ public class PluginOData implements PluginService, ConfigDefaults {
             case GET_CAPABILITIES:
                 return executeGetCapabilities(request, response);
 
+            case CREATE:
+            case UPDATE_ALL:
+            case UPDATE_CHANGES:
+            case UPDATE_CHANGESET:
+                if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
+                    request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                }
+                return mainService.execute(request, response);
+
             default:
                 return mainService.execute(request, response);
         }
@@ -173,12 +191,12 @@ public class PluginOData implements PluginService, ConfigDefaults {
         ModelRegistry modelRegistry = settings.getModelRegistry();
 
         String path = settings.getQueryDefaults().getServiceRootUrl()
-                + "/" + request.getVersion().urlPart
-                + "/";
+                + '/' + request.getVersion().urlPart
+                + '/';
         if (request.getVersion() == VERSION_ODATA_40) {
-            result.put(JsonWriterOdata40.AT_CONTEXT, path + "$metadata");
+            result.put(JsonWriterOdata40.AT_CONTEXT, path + PARAM_METADATA);
         } else {
-            result.put(JsonWriterOdata401.AT_CONTEXT, path + "$metadata");
+            result.put(JsonWriterOdata401.AT_CONTEXT, path + PARAM_METADATA);
         }
 
         List<LandingPageItem> entitySetList = new ArrayList<>();

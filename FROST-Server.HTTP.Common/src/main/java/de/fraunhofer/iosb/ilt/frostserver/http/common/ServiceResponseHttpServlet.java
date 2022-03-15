@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -41,14 +42,14 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
 
     public ServiceResponseHttpServlet(HttpServletResponse httpResponse, int code, String message) {
         this.httpResponse = httpResponse;
-        this.httpResponse.setCharacterEncoding(ServletMain.ENCODING);
+        this.httpResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
         this.code = code;
         this.message = message;
     }
 
     public ServiceResponseHttpServlet(HttpServletResponse httpResponse) {
         this.httpResponse = httpResponse;
-        this.httpResponse.setCharacterEncoding(ServletMain.ENCODING);
+        this.httpResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
     }
 
     @Override

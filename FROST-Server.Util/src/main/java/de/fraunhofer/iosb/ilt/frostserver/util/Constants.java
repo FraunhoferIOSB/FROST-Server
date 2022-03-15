@@ -38,11 +38,19 @@ public class Constants {
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     public static final String CHARSET_UTF8 = "charset=UTF-8";
 
+    public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_LOCATION = "Location";
+    public static final String HEADER_PREFER = "Prefer";
+
+    public static final String TAG_PREFER_RETURN = "return";
+
+    public static final String REQUEST_PARAM_FORMAT = "$format";
 
     public static final String VALUE_ID_TYPE_LONG = "LONG";
     public static final String VALUE_ID_TYPE_STRING = "STRING";
     public static final String VALUE_ID_TYPE_UUID = "UUID";
+    public static final String VALUE_RETURN_REPRESENTATION = "representation";
+    public static final String VALUE_RETURN_MINIMAL = "minimal";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
 

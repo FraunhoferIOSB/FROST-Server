@@ -276,7 +276,7 @@ public class PluginManager implements ConfigDefaults {
         if (plugin == null) {
             return null;
         }
-        return plugin.getResultFormatter();
+        return plugin.getResultFormatter(formatName);
     }
 
     /**

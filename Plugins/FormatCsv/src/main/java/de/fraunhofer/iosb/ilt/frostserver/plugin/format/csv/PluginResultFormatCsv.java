@@ -77,7 +77,7 @@ public class PluginResultFormatCsv implements PluginResultFormat, PluginRootDocu
     }
 
     @Override
-    public ResultFormatter getResultFormatter() {
+    public ResultFormatter getResultFormatter(String format) {
         return new ResultFormatterCsv();
     }
 

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterEmpty;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -74,11 +75,14 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(PluginResultFormat.DEFAULT_FORMAT_NAME, FORMAT_NAME_ODATA);
+        return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT, FORMAT_NAME_ODATA, FORMAT_NAME_EMPTY);
     }
 
     @Override
-    public ResultFormatter getResultFormatter() {
+    public ResultFormatter getResultFormatter(String format) {
+        if (FORMAT_NAME_EMPTY.equalsIgnoreCase(format)) {
+            return new ResultFormatterEmpty();
+        }
         return new ResultFormatterOData(settings);
     }
 

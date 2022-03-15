@@ -46,11 +46,14 @@ public class PluginResultFormatDefault implements PluginResultFormat {
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(DEFAULT_FORMAT_NAME);
+        return Arrays.asList(FORMAT_NAME_DEFAULT, FORMAT_NAME_EMPTY);
     }
 
     @Override
-    public ResultFormatter getResultFormatter() {
+    public ResultFormatter getResultFormatter(String format) {
+        if (FORMAT_NAME_EMPTY.equalsIgnoreCase(format)) {
+            return new ResultFormatterEmpty();
+        }
         return new ResultFormatterDefault();
     }
 

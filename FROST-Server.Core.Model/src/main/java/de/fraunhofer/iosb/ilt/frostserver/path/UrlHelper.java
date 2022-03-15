@@ -27,11 +27,13 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -224,4 +226,32 @@ public class UrlHelper {
         );
     }
 
+    public static Map<String, String> decodePrefer(String input, Map<String, String> output) {
+        if (output == null) {
+            output = new HashMap<>();
+        }
+        if (input == null || input.isEmpty()) {
+            return output;
+        }
+        String[] parts = StringUtils.split(input, ',');
+        for (String part : parts) {
+            if (part == null) {
+                continue;
+            }
+            String[] subParts = StringUtils.split(part, "=", 2);
+            switch (subParts.length) {
+                case 2:
+                    output.put(subParts[0].trim(), subParts[1].trim());
+                    break;
+
+                case 1:
+                    output.put(subParts[0].trim(), "");
+                    break;
+
+                default:
+                // Nothing to do.
+            }
+        }
+        return output;
+    }
 }

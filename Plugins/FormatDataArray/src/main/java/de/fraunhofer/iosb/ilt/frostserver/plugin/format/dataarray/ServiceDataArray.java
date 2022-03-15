@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArray
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
@@ -99,7 +99,7 @@ public class ServiceDataArray {
                 handleDataArrayItems(query, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
-            ResultFormatter formatter = settings.getFormatter(version, DEFAULT_FORMAT_NAME);
+            ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
             response.setContentType(formatter.getContentType());
             formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
                     .writeFormatted(response.getWriter());

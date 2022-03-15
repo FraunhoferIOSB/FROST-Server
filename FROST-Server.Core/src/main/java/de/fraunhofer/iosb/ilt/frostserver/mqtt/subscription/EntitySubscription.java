@@ -25,12 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -74,7 +74,7 @@ public class EntitySubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) throws IOException {
         try {
             entity.setQuery(emptyQuery);
-            return settings.getFormatter(emptyQuery.getVersion(), DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true).getFormatted();
+            return settings.getFormatter(emptyQuery.getVersion(), FORMAT_NAME_DEFAULT).format(path, emptyQuery, entity, true).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }

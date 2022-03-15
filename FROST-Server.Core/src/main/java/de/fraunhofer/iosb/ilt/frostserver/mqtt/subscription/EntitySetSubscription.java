@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -32,6 +31,7 @@ import java.net.URLDecoder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -82,7 +82,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) throws IOException {
         try {
             entity.setQuery(query);
-            return settings.getFormatter(query.getVersion(), DEFAULT_FORMAT_NAME).format(path, query, entity, true).getFormatted();
+            return settings.getFormatter(query.getVersion(), FORMAT_NAME_DEFAULT).format(path, query, entity, true).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }

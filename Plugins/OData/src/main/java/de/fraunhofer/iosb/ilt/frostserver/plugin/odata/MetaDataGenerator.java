@@ -24,9 +24,10 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_XML;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
-import java.util.List;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -46,13 +47,10 @@ public class MetaDataGenerator {
         final Version version = request.getVersion();
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
-            List<String> formats = request.getParameterMap().get("$format");
-            String format = "";
-            if (formats != null && !formats.isEmpty()) {
-                format = formats.get(0);
-            }
-            int idxXml = format.indexOf(CONTENT_TYPE_APPLICATION_XML);
-            int idxJson = format.indexOf(CONTENT_TYPE_APPLICATION_JSON);
+            String format = request.getParameter(REQUEST_PARAM_FORMAT, "");
+            String accept = request.getParameter(HEADER_ACCEPT);
+            int idxXml = accept.indexOf(CONTENT_TYPE_APPLICATION_XML);
+            int idxJson = accept.indexOf(CONTENT_TYPE_APPLICATION_JSON);
             if (idxXml == -1) {
                 idxXml = Integer.MAX_VALUE;
             }

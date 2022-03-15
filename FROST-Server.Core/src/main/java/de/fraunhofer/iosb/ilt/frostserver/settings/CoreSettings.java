@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -44,6 +43,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -431,7 +431,7 @@ public class CoreSettings implements ConfigDefaults {
      */
     public ResultFormatter getFormatter(Version version, String formatterName) throws IncorrectRequestException {
         if (formatterName == null) {
-            return pluginManager.getFormatter(version, DEFAULT_FORMAT_NAME);
+            return pluginManager.getFormatter(version, FORMAT_NAME_DEFAULT);
         }
         ResultFormatter formatter = pluginManager.getFormatter(version, formatterName);
         if (formatter == null) {

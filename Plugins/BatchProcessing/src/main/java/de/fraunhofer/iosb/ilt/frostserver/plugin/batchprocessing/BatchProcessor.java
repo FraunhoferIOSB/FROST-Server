@@ -27,11 +27,13 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentId
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
@@ -61,7 +63,8 @@ public class BatchProcessor<C extends Content> {
     }
 
     public Request processHttpRequest(Service service, Request httpRequest, boolean inChangeSet) {
-        PluginManager pluginManager = service.getSettings().getPluginManager();
+        final CoreSettings coreSettings = service.getSettings();
+        final PluginManager pluginManager = coreSettings.getPluginManager();
         final Version version = pluginManager.getVersion(httpRequest.getVersion());
         final String type = service.getRequestType(
                 httpRequest.getMethod(),
@@ -73,8 +76,14 @@ public class BatchProcessor<C extends Content> {
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData())
                 .build();
+        PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
-        service.execute(serviceRequest, serviceResponse);
+        if (plugin == null) {
+            serviceResponse.setCode(500)
+                    .setMessage("No plugin to handle requests of type " + serviceRequest.getRequestType() + " for version " + serviceRequest.getVersion());
+        } else {
+            plugin.execute(service, serviceRequest, serviceResponse);
+        }
 
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();

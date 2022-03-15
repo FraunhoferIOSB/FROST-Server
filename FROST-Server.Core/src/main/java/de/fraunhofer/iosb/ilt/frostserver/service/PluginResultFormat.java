@@ -31,7 +31,8 @@ public interface PluginResultFormat extends Plugin {
     /**
      * The "name" of the default resultFormatter.
      */
-    public static final String DEFAULT_FORMAT_NAME = "default";
+    public static final String FORMAT_NAME_DEFAULT = "default";
+    public static final String FORMAT_NAME_EMPTY = "noResponse";
 
     /**
      * Lists the Versions for which this plugin is relevant.
@@ -52,5 +53,5 @@ public interface PluginResultFormat extends Plugin {
      *
      * @return An actual result formatter.
      */
-    public ResultFormatter getResultFormatter();
+    public ResultFormatter getResultFormatter(String format);
 }

@@ -470,8 +470,12 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     private void testPostData(String metadata, boolean hasLinks) {
-        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING,
-                null, null, "?$resultMetadata=" + metadata);
+        String urlString = ServiceUrlHelper.buildURLString(
+                serverSettings.getServiceUrl(version),
+                EntityType.THING,
+                null,
+                null,
+                "?$resultMetadata=" + metadata);
         HttpResponse responseMap = HTTPMethods.doPost(urlString,
                 "{\"description\": \"thing description\",\"name\": \"thing name\"}");
         String response = responseMap.response;

@@ -38,7 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.DEFAULT_FORMAT_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
@@ -48,6 +48,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -300,13 +301,13 @@ public class Service implements AutoCloseable {
 
         response.setCode(200);
         response.setResult(result);
-        return formatResponse(version, response, result);
+        return formatResponse(request, response, result);
     }
 
-    private ServiceResponse formatResponse(Version version, ServiceResponse response, Object result) {
+    private ServiceResponse formatResponse(ServiceRequest request, ServiceResponse response, Object result) {
         ResultFormatter formatter;
         try {
-            formatter = settings.getFormatter(version, DEFAULT_FORMAT_NAME);
+            formatter = settings.getFormatter(request.getVersion(), FORMAT_NAME_DEFAULT);
         } catch (IncorrectRequestException ex) {
             LOGGER.error("Formatter not available.", ex);
             return errorResponse(response, 500, "Failed to instantiate formatter");
@@ -438,11 +439,12 @@ public class Service implements AutoCloseable {
 
     private ServiceResponse handlePost(PersistenceManager pm, String urlPath, ServiceResponse response, ServiceRequest request) throws IOException {
         ResourcePath path;
+        final Version version = request.getVersion();
         try {
             path = PathParser.parsePath(
                     modelRegistry,
                     settings.getQueryDefaults().getServiceRootUrl(),
-                    request.getVersion(),
+                    version,
                     urlPath);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
@@ -452,10 +454,12 @@ public class Service implements AutoCloseable {
         }
 
         Query query;
+        ResultFormatter formatter;
         try {
             query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
             query.validate();
-        } catch (IllegalArgumentException ex) {
+            formatter = findFormatter(query, request, version);
+        } catch (IllegalArgumentException | IncorrectRequestException ex) {
             return errorResponse(response, 400, ex.getMessage());
         }
 
@@ -484,17 +488,28 @@ public class Service implements AutoCloseable {
             }
             maybeCommitAndClose();
 
+            entity.setQuery(query);
             response.setResult(entity);
             response.setCode(201);
             if (query.getMetadata() != Metadata.OFF) {
                 String url = UrlHelper.generateSelfLink(null, path, entity);
                 response.addHeader(Constants.HEADER_LOCATION, url);
             }
-            return response;
+            return formatResponse(response, formatter, query, path, entity);
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
         }
+    }
+
+    public ResultFormatter findFormatter(Query query, ServiceRequest request, Version version) throws IncorrectRequestException {
+        ResultFormatter formatter;
+        String format = query.getFormat();
+        if (format == null) {
+            format = request.getParameter(REQUEST_PARAM_FORMAT);
+        }
+        formatter = settings.getFormatter(version, format);
+        return formatter;
     }
 
     private ServiceResponse executePatch(ServiceRequest request, ServiceResponse response, boolean isChangeSet) {

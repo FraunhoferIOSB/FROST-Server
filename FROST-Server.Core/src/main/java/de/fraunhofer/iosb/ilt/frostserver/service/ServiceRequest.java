@@ -26,6 +26,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -124,11 +126,34 @@ public class ServiceRequest {
     }
 
     public Map<String, List<String>> getParameterMap() {
+        if (parameterMap == null) {
+            parameterMap = new HashMap<>();
+        }
         return parameterMap;
     }
 
     public void setParameterMap(Map<String, List<String>> parameterMap) {
         this.parameterMap = parameterMap;
+    }
+
+    public String getParameter(String parameter) {
+        return getParameter(parameter, null);
+    }
+
+    public String getParameter(String parameter, String dflt) {
+        if (parameterMap == null) {
+            return dflt;
+        }
+        List<String> list = parameterMap.get(parameter);
+        if (list == null || list.isEmpty()) {
+            return dflt;
+        }
+        return list.get(0);
+    }
+
+    public ServiceRequest addParameterIfAbsent(String name, String value) {
+        getParameterMap().putIfAbsent(name, Arrays.asList(value));
+        return this;
     }
 
     public String getUrlPath() {
