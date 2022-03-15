@@ -27,7 +27,7 @@ import org.geojson.Polygon;
 /**
  *
  * @author jab
- * @param <T>
+ * @param <T> The type of GeoJSON object this constant wraps.
  */
 public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<T> {
 

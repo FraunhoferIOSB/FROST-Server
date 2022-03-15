@@ -77,6 +77,7 @@ public class FieldMapperId extends FieldMapperAbstract {
 
     /**
      * @param field the field to set
+     * @return this.
      */
     public FieldMapperId setField(String field) {
         this.field = field;

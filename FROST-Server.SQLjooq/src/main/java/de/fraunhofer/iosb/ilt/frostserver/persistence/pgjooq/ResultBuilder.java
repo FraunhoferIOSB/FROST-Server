@@ -89,6 +89,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * @param path The path leading to the items.
      * @param query The query parameters to use when fetching expanded items.
      * @param sqlQueryBuilder The configured sql query builder to use for
+     * @param dataSize The DataSize instance to add size information to.
      * generating select and count queries.
      */
     public ResultBuilder(PostgresPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder, DataSize dataSize) {

@@ -178,6 +178,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * The name of the field in "my" table.
      *
      * @param field the field to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setField(String field) {
         this.field = field;
@@ -197,6 +198,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * Name of the link table.
      *
      * @param linkTable the linkTable to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setLinkTable(String linkTable) {
         this.linkTable = linkTable;
@@ -216,6 +218,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * Name of "my" field in the link table.
      *
      * @param linkOurField the linkOurField to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setLinkOurField(String linkOurField) {
         this.linkOurField = linkOurField;
@@ -235,6 +238,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * Name of the other table's field in the link table.
      *
      * @param linkOtherField the linkOtherField to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setLinkOtherField(String linkOtherField) {
         this.linkOtherField = linkOtherField;
@@ -254,6 +258,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * Name of the sorting field in the link table.
      *
      * @param linkRankField the linkOrderField to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setLinkRankField(String linkRankField) {
         this.linkRankField = linkRankField;
@@ -273,6 +278,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * The name of the other table we link to.
      *
      * @param otherTable the otherTable to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setOtherTable(String otherTable) {
         this.otherTable = otherTable;
@@ -292,6 +298,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * The field in the other table that is the key in the relation.
      *
      * @param otherField the otherField to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setOtherField(String otherField) {
         this.otherField = otherField;
@@ -313,6 +320,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * over a navigationLink.
      *
      * @param distinct the distinct to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setDistinct(boolean distinct) {
         this.distinct = distinct;
@@ -334,6 +342,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
      * relation over a navigationLink.
      *
      * @param distinctInverse the distinctInverse to set
+     * @return this.
      */
     public FieldMapperManyToManyOrdered setDistinctInverse(boolean distinctInverse) {
         this.distinctInverse = distinctInverse;

@@ -216,6 +216,12 @@ public class ResourcePath {
         return this;
     }
 
+    /**
+     * Add the given element at the end.
+     *
+     * @param pe The element to add.
+     * @return this ResourcePath.
+     */
     public ResourcePath addPathElement(PathElement pe) {
         addPathElement(pe, false, false);
         return this;
@@ -228,6 +234,7 @@ public class ResourcePath {
      * @param pe The element to add.
      * @param isMain Flag indicating it is the main element.
      * @param isIdentifier Flag indicating it is the identifying element.
+     * @return this ResourcePath.
      */
     public ResourcePath addPathElement(PathElement pe, boolean isMain, boolean isIdentifier) {
         pathElements.add(pe);

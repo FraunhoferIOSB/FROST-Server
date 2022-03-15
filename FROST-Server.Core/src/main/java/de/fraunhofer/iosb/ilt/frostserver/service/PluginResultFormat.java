@@ -51,7 +51,8 @@ public interface PluginResultFormat extends Plugin {
     /**
      * Get an actual result formatter.
      *
-     * @return An actual result formatter.
+     * @param format The format to get a Formatter for.
+     * @return The result formatter for the given format.
      */
     public ResultFormatter getResultFormatter(String format);
 }

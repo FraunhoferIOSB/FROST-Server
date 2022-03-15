@@ -203,6 +203,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
 
     /**
      * @param fieldType the fieldType to set
+     * @return this.
      */
     public FieldMapperResult setFieldType(String fieldType) {
         this.fieldType = fieldType;
@@ -218,6 +219,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
 
     /**
      * @param fieldString the fieldString to set
+     * @return this.
      */
     public FieldMapperResult setFieldString(String fieldString) {
         this.fieldString = fieldString;
@@ -233,6 +235,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
 
     /**
      * @param fieldNumber the fieldNumber to set
+     * @return this.
      */
     public FieldMapperResult setFieldNumber(String fieldNumber) {
         this.fieldNumber = fieldNumber;
@@ -248,6 +251,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
 
     /**
      * @param fieldJson the fieldJson to set
+     * @return this.
      */
     public FieldMapperResult setFieldJson(String fieldJson) {
         this.fieldJson = fieldJson;
@@ -263,6 +267,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
 
     /**
      * @param fieldBoolean the fieldBoolean to set
+     * @return this.
      */
     public FieldMapperResult setFieldBoolean(String fieldBoolean) {
         this.fieldBoolean = fieldBoolean;

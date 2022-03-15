@@ -111,6 +111,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
      * The name of the field in "my" table.
      *
      * @param field the field to set
+     * @return this.
      */
     public FieldMapperOneToMany setField(String field) {
         this.field = field;
@@ -130,6 +131,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
      * The name of the other table we link to.
      *
      * @param otherTable the otherTable to set
+     * @return this.
      */
     public FieldMapperOneToMany setOtherTable(String otherTable) {
         this.otherTable = otherTable;
@@ -149,6 +151,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
      * The field in the other table that is the key in the relation.
      *
      * @param otherField the otherField to set
+     * @return this.
      */
     public FieldMapperOneToMany setOtherField(String otherField) {
         this.otherField = otherField;

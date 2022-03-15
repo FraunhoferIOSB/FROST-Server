@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -43,7 +44,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -423,6 +423,7 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * Returns the ResultFormatter with the given name.
      *
+     * @param version The version to get the formatter for.
      * @param formatterName the name of the requested ResultFormatter. If null,
      * the default formatter will be returned.
      * @return the requested ResultFormatter.

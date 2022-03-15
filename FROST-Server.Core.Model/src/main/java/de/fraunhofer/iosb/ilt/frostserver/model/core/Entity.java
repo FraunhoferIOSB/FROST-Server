@@ -188,7 +188,7 @@ public interface Entity extends NavigableElement {
      * Set the query that has resulted in this Entity.
      *
      * @param query the query that has resulted in this Entity.
-     * @return
+     * @return This entity.
      */
     public Entity setQuery(Query query);
 

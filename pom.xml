@@ -208,7 +208,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
-                            <excludePackageNames>de.fraunhofer.iosb.ilt.frostserver.parser.path:de.fraunhofer.iosb.ilt.frostserver.parser.query</excludePackageNames>
+                            <excludePackageNames>de.fraunhofer.iosb.ilt.frostserver.parser.path:de.fraunhofer.iosb.ilt.frostserver.parser.query:de.fraunhofer.iosb.ilt.frostserver.util.wktparser</excludePackageNames>
                             <quiet>true</quiet>
                         </configuration>
                         <executions>

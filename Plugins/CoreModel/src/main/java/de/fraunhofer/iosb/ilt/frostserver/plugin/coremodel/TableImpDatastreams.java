@@ -149,7 +149,12 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * Create a <code>public.DATASTREAMS</code> table reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * @param idType The (SQL)DataType of the ID column used in the database.
+     * @param idTypeOp The (SQL)DataType of the OBS_PROPERTY_ID column used in
+     * the database.
+     * @param idTypeSnsr The (SQL)DataType of the SENSOR_ID column used in the
+     * database.
+     * @param idTypeTng The (SQL)DataType of the THING_ID column used in the
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */

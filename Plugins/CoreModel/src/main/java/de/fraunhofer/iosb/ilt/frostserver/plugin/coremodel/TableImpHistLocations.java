@@ -56,7 +56,8 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * @param idType The (SQL)DataType of the ID column used in the database.
+     * @param idTypeThing The (SQL)DataType of the THING_ID column used in the
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */

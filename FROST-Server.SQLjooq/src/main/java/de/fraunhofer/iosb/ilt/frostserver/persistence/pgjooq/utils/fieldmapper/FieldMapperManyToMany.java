@@ -146,6 +146,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * The name of the field in "my" table.
      *
      * @param field the field to set
+     * @return this.
      */
     public FieldMapperManyToMany setField(String field) {
         this.field = field;
@@ -165,6 +166,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * Name of the link table.
      *
      * @param linkTable the linkTable to set
+     * @return this.
      */
     public FieldMapperManyToMany setLinkTable(String linkTable) {
         this.linkTable = linkTable;
@@ -184,6 +186,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * Name of "my" field in the link table.
      *
      * @param linkOurField the linkOurField to set
+     * @return this.
      */
     public FieldMapperManyToMany setLinkOurField(String linkOurField) {
         this.linkOurField = linkOurField;
@@ -203,6 +206,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * Name of the other table's field in the link table.
      *
      * @param linkOtherField the linkOtherField to set
+     * @return this.
      */
     public FieldMapperManyToMany setLinkOtherField(String linkOtherField) {
         this.linkOtherField = linkOtherField;
@@ -222,6 +226,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * The name of the other table we link to.
      *
      * @param otherTable the otherTable to set
+     * @return this.
      */
     public FieldMapperManyToMany setOtherTable(String otherTable) {
         this.otherTable = otherTable;
@@ -241,6 +246,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
      * The field in the other table that is the key in the relation.
      *
      * @param otherField the otherField to set
+     * @return this.
      */
     public FieldMapperManyToMany setOtherField(String otherField) {
         this.otherField = otherField;

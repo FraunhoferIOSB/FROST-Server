@@ -146,8 +146,11 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference.
      *
-     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * @param idType The (SQL)DataType of the ID column used in the database.
+     * @param idTypeDs The (SQL)DataType of the DATASTREAM_ID column used in the
      * database.
+     * @param idTypeFeature The (SQL)DataType of the FEATURE_ID column used in
+     * the database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObservations(DataType<?> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {

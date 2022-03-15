@@ -96,6 +96,7 @@ public class FieldMapperJson extends FieldMapperAbstractEp {
 
     /**
      * @param field the field to set
+     * @return this.
      */
     public FieldMapperJson setField(String field) {
         this.field = field;
@@ -111,6 +112,7 @@ public class FieldMapperJson extends FieldMapperAbstractEp {
 
     /**
      * @param isMap the isMap to set
+     * @return this.
      */
     public FieldMapperJson setIsMap(boolean isMap) {
         this.isMap = isMap;

@@ -103,6 +103,7 @@ public class UrlHelper {
      * Generate a navigation link for the given entity, using the given path and
      * parent entities.
      *
+     * @param query The query used.
      * @param path The path for the current page that relative links are
      * relative to.
      * @param parent The parent of the entity to generate a navlink for.
@@ -126,6 +127,7 @@ public class UrlHelper {
      * Generate a navigation link for the given EntitySet, using the given path
      * and parent entities.
      *
+     * @param query The query used.
      * @param path The path for the current page that relative links are
      * relative to.
      * @param parent The parent of the entity to generate a navlink for.
