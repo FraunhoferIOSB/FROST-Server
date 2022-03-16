@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@v3
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
@@ -34,6 +34,9 @@ jobs:
         chmod +x /tmp/helm
 
     - name: Build and upload Helm
+      env:
+        HELM_SSH_KEY: ${{ secrets.HELM_SSH_KEY }}
+        HELM_SSH_KEY_SNAPSHOT: ${{ secrets.HELM_SSH_KEY_SNAPSHOT }}
       run: |
         source ./helm/build.sh
         source ./helm/upload.sh
