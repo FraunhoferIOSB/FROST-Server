@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import static de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation.DocType.JSON;
 import java.io.IOException;
 import java.io.Writer;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,7 @@ public class CsdlAnnotation {
         }
         writer.write("<Annotation Term=\"" + getQualifiedName() + "\"");
         if (value instanceof String) {
-            writer.write(" String=\"" + value + "\" />");
+            writer.write(" String=\"" + StringEscapeUtils.escapeXml11((String) value) + "\" />");
             return;
         }
         LOGGER.error("Unknown annotation value type: {}", value.getClass().getName());
