@@ -83,6 +83,7 @@ jobs:
           fraunhoferiosb/frost-server-http:latest
           fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_MASTER }}
 
+
     - name: Build and push - MQTTP - Master branch latest
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v2
@@ -93,8 +94,9 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTTP_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:latest
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_MASTER }}
+          fraunhoferiosb/frost-server-mqttp:latest
+          fraunhoferiosb/frost-server-mqttp:${{ env.DOCKER_TAG_MASTER }}
+
 
     - name: Build and push - MQTT - Master branch latest
       if: github.ref == 'refs/heads/master'
@@ -106,8 +108,8 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTT_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:latest
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_MASTER }}
+          fraunhoferiosb/frost-server-mqtt:latest
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_MASTER }}
 
 
 
@@ -124,6 +126,7 @@ jobs:
         tags: |
           fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_BRANCH }}
 
+
     - name: Build and push - MQTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
       uses: docker/build-push-action@v2
@@ -134,7 +137,8 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTTP_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_BRANCH }}
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_BRANCH }}
+
 
     - name: Build and push - MQTT - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
@@ -146,5 +150,5 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTT_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_BRANCH }}
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_BRANCH }}
 

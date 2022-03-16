@@ -70,6 +70,7 @@ jobs:
           fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_FULL }}
           fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_SHORT }}
 
+
     - name: Build and push - MQTTP
       uses: docker/build-push-action@v2
       with:
@@ -79,8 +80,9 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTTP_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_FULL }}
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_SHORT }}
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_SHORT }}
+
 
     - name: Build and push - MQTT
       uses: docker/build-push-action@v2
@@ -91,5 +93,5 @@ jobs:
         build-args: |
           ARTIFACT_FILE=${{ env.MQTT_ARTIFACT }}
         tags: |
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_FULL }}
-          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_SHORT }}
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_SHORT }}
