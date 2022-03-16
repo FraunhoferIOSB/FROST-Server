@@ -96,7 +96,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
     public Map<String, Object> otherProperties() {
         Map<String, Object> result = new LinkedHashMap<>();
         for (CsdlAnnotation annotation : annotations) {
-            result.put(annotation.getQualifiedName(), annotation.getValue());
+            result.put('@' + annotation.getQualifiedName(), annotation.getValue());
         }
         return result;
     }

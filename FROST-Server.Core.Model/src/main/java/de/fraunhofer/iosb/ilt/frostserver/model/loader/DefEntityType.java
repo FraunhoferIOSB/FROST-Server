@@ -122,6 +122,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
             for (EntityValidator validator : validators) {
                 entityType.addValidator(validator);
             }
+            entityType.addAnnotations(annotations);
         }
         return entityType;
     }

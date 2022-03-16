@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,6 +94,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
     private List<PropertyPersistenceMapper> handlers;
 
+    /**
+     * The (OData)annotations for this Element.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "Annotations", description = "The (OData)annotations for this Element.")
+    @EditorList.EdOptsList(editor = EditorSubclass.class)
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    private final List<Annotation> annotations = new ArrayList<>();
+
     @JsonIgnore
     private EntityType sourceEntityType;
     @JsonIgnore
@@ -144,9 +154,11 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
                 navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp);
             }
             navPropInverse.setEntityType(sourceEntityType);
+            navPropInverse.addAnnotations(inverse.annotations);
             targetEntityType.registerProperty(navPropInverse, inverse.required);
         }
         navProp.setInverses(navPropInverse);
+        navProp.addAnnotations(annotations);
     }
 
     public NavigationPropertyMain getNavigationProperty() {
@@ -317,6 +329,20 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         return this;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public DefNavigationProperty addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        return this;
+    }
+
+    public DefNavigationProperty addAnnotations(List<Annotation> annotationsToAdd) {
+        annotations.addAll(annotationsToAdd);
+        return this;
+    }
+
     public static class Inverse {
 
         /**
@@ -342,6 +368,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
                 label = "Required", description = "Flag indicating the property must be set.")
         @EditorBoolean.EdOptsBool()
         private boolean required;
+
+        /**
+         * The (OData)annotations for this Element.
+         */
+        @ConfigurableField(editor = EditorList.class,
+                label = "Annotations", description = "The (OData)annotations for this Element.")
+        @EditorList.EdOptsList(editor = EditorSubclass.class)
+        @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+        private final List<Annotation> annotations = new ArrayList<>();
 
         /**
          * The name of the NavigationProperty.
@@ -400,6 +435,20 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
          */
         public Inverse setRequired(boolean required) {
             this.required = required;
+            return this;
+        }
+
+        public List<Annotation> getAnnotations() {
+            return annotations;
+        }
+
+        public Inverse addAnnotation(Annotation annotation) {
+            annotations.add(annotation);
+            return this;
+        }
+
+        public Inverse addAnnotations(List<Annotation> annotationsToAdd) {
+            annotations.addAll(annotationsToAdd);
             return this;
         }
 

@@ -18,10 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class CsdlItemEntityType implements CsdlSchemaItem {
 
@@ -41,9 +43,10 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     @JsonProperty("$Key")
     public List<String> key = new ArrayList<>();
 
-    @JsonAnyGetter
-    @JsonAnySetter
+    @JsonIgnore
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
+    @JsonIgnore
+    private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
     public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings, EntityType et) {
         String keyName = et.getPrimaryKey().name;
@@ -63,10 +66,25 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, settings, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
-            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(nameSpace, et, np));
+            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, nameSpace, et, np));
+        }
+        for (Annotation an : et.getAnnotations()) {
+            annotations.add(new CsdlAnnotation().generateFrom(doc, an));
         }
 
         return this;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> otherProperties() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Entry<String, CsdlProperty> entry : properties.entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        for (CsdlAnnotation annotation : annotations) {
+            result.put('@' + annotation.getQualifiedName(), annotation.getValue());
+        }
+        return result;
     }
 
     @Override
@@ -77,10 +95,13 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             writer.write("<PropertyRef Name=\"" + keyName + "\" />");
         }
         writer.write("</Key>");
-        for (Map.Entry<String, CsdlProperty> entry : properties.entrySet()) {
+        for (Entry<String, CsdlProperty> entry : properties.entrySet()) {
             String propName = entry.getKey();
             CsdlProperty property = entry.getValue();
             property.writeXml(nameSpace, propName, writer);
+        }
+        for (CsdlAnnotation an : annotations) {
+            an.writeXml(writer);
         }
         writer.write("</EntityType>");
     }

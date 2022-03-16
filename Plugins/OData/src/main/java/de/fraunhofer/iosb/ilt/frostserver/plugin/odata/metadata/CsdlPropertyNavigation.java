@@ -17,13 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CsdlPropertyNavigation implements CsdlProperty {
 
@@ -46,7 +53,10 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public Boolean nullable;
 
-    public CsdlPropertyNavigation generateFrom(String nameSpace, EntityType et, NavigationPropertyMain np) {
+    @JsonIgnore
+    private final List<CsdlAnnotation> annotations = new ArrayList<>();
+
+    public CsdlPropertyNavigation generateFrom(CsdlDocument doc, String nameSpace, EntityType et, NavigationPropertyMain<?> np) {
         type = nameSpace + "." + np.getType().getName();
         final NavigationPropertyMain inverse = np.getInverse();
         if (inverse != null) {
@@ -58,7 +68,19 @@ public class CsdlPropertyNavigation implements CsdlProperty {
         if (et.isRequired(np)) {
             nullable = false;
         }
+        for (Annotation an : np.getAnnotations()) {
+            annotations.add(new CsdlAnnotation().generateFrom(doc, an));
+        }
         return this;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> otherProperties() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (CsdlAnnotation annotation : annotations) {
+            result.put('@' + annotation.getQualifiedName(), annotation.getValue());
+        }
+        return result;
     }
 
     @Override
@@ -75,7 +97,16 @@ public class CsdlPropertyNavigation implements CsdlProperty {
         if (!StringHelper.isNullOrEmpty(partner)) {
             partnerString = " Partner=\"" + partner + "\"";
         }
-        writer.write("<NavigationProperty Name=\"" + name + "\" Type=\"" + finalType + "\"" + nullableString + partnerString + " />");
+        writer.write("<NavigationProperty Name=\"" + name + "\" Type=\"" + finalType + "\"" + nullableString + partnerString);
+        if (annotations.isEmpty()) {
+            writer.write(" />");
+        } else {
+            writer.write(">");
+            for (CsdlAnnotation an : annotations) {
+                an.writeXml(writer);
+            }
+            writer.write("</NavigationProperty>");
+        }
     }
 
 }
