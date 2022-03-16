@@ -37,6 +37,11 @@ public class AnnotationGenericBoolean extends AbstractAnnotation<AnnotationGener
         return value;
     }
 
+    public AnnotationGenericBoolean setValue(boolean value) {
+        this.value = value;
+        return this;
+    }
+
     @Override
     public AnnotationGenericBoolean getThis() {
         return this;

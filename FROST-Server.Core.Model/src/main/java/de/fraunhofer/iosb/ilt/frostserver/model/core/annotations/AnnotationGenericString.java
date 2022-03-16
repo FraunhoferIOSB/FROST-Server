@@ -37,6 +37,11 @@ public class AnnotationGenericString extends AbstractAnnotation<AnnotationGeneri
         return value;
     }
 
+    public AnnotationGenericString setValue(String value) {
+        this.value = value;
+        return this;
+    }
+
     @Override
     public AnnotationGenericString getThis() {
         return this;
