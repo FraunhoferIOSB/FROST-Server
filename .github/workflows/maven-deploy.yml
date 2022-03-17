@@ -3,7 +3,8 @@ name: Deploy to Maven Central
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -26,14 +27,16 @@ jobs:
         echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE  --yes --batch --import-ownertrust
 
     - name: Checkout Source
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache maven repository
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.7
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-maven
+        key: ${{ runner.os }}-maven-dpl-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-dpl
+          ${{ runner.os }}-maven
 
     - name: Set up JDK 11
       uses: actions/setup-java@v2
@@ -47,24 +50,68 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      run: mvn -B deploy -P release --settings maven-ci-settings.xml
-
-    - name: Build Docker Images
       run: |
-        mvn -B dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+        mvn -B deploy -P release --settings maven-ci-settings.xml
+        echo "Exporting Variables"
+        export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
+        echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
+        echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
+        export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
+        echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
+        echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV
 
-    - name: Push Docker Image - version
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: |
-        export VERSION=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
-        export DOCKER_TAG=${VERSION}
-        echo "Tagging and Pushing ${DOCKER_TAG}"
-        mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
-        export DOCKER_TAG=${VERSION%.*}
-        echo "Tagging and Pushing ${DOCKER_TAG}"
-        mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+
+
+    - name: Build and push - HTTP
+      uses: docker/build-push-action@v2
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: "./FROST-Server.HTTP"
+        push: true
+        build-args: |
+          ARTIFACT_FILE=${{ env.HTTP_ARTIFACT }}
+        tags: |
+          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server-http:${{ env.DOCKER_TAG_SHORT }}
+
+
+    - name: Build and push - MQTTP
+      uses: docker/build-push-action@v2
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: "./FROST-Server.MQTTP"
+        push: true
+        build-args: |
+          ARTIFACT_FILE=${{ env.MQTTP_ARTIFACT }}
+        tags: |
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_SHORT }}
+
+
+    - name: Build and push - MQTT
+      uses: docker/build-push-action@v2
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: "./FROST-Server.MQTT"
+        push: true
+        build-args: |
+          ARTIFACT_FILE=${{ env.MQTT_ARTIFACT }}
+        tags: |
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_SHORT }}
 
