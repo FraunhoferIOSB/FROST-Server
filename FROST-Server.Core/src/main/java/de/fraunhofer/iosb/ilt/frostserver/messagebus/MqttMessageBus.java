@@ -163,7 +163,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 client = new MqttClient(broker, clientId, new MemoryPersistence());
                 client.setCallback(this);
             } catch (MqttException ex) {
-                LOGGER.error("Failed to connect to broker: {}", broker);
+                LOGGER.error("Failed to create MQTT client to connect to broker: {}", broker);
                 LOGGER.error("", ex);
                 return;
             }
@@ -182,6 +182,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             } catch (MqttException ex) {
                 LOGGER.error("Failed to connect to broker: {}", broker);
                 LOGGER.error("", ex);
+                return;
             }
             if (!listening) {
                 startListening();
