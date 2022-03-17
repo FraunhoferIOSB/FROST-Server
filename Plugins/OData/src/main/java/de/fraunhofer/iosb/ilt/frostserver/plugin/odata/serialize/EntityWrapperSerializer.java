@@ -26,9 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles serialization of Entity objects. If a field is of type Entity and
- * contains a non-empty navigationLink the field will be renamed with the suffix
- * '@iot.navigationLink' and will only contain the navigationLink as String.
+ * Handles serialization of wrapped Entity objects that add a context property.
  *
  * @author jab
  * @author scf

@@ -171,7 +171,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             writeEntitySet(np, entitySet, gen);
         } else {
             Entity expandedEntity = (Entity) entityOrSet;
-            if (expandedEntity != null) {
+            if (expandedEntity == null) {
+                if (serialiseAllNulls) {
+                    gen.writeNullField(np.getJsonName());
+                }
+            } else {
                 if (expandedEntity.getQuery() == null && exp != null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }
