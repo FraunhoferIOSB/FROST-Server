@@ -71,13 +71,14 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
         for (Property property : propertySet) {
             if (property instanceof EntityPropertyMain) {
-                propertyByName.put(
-                        property.getJsonName(),
-                        new PropertyData(
-                                property,
-                                property.getType().getTypeReference(),
-                                false,
-                                null));
+                final PropertyData propertyData = new PropertyData(
+                        property,
+                        property.getType().getTypeReference(),
+                        false,
+                        null);
+                for (String alias : ((EntityPropertyMain<?>) property).getAliases()) {
+                    propertyByName.put(alias, propertyData);
+                }
             } else if (property instanceof NavigationPropertyMain) {
                 NavigationPropertyMain np = (NavigationPropertyMain) property;
                 propertyByName.put(

@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
  * @author scf
  * @param <P> The type of the value of the property.
  */
-public interface Property<P> extends Comparable<Property> {
+public interface Property<P> extends Comparable<Property<?>> {
 
     /**
      * The name of this property as used in URLs.
