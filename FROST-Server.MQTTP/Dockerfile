@@ -3,8 +3,8 @@ From tomcat:9-jdk11
 COPY target/docker_deps/ ${CATALINA_HOME}/lib/
 
 # Copy to images tomcat path
-ARG WAR_FILE
-COPY target/${WAR_FILE} /tmp/FROST-Server.war
+ARG ARTIFACT_FILE
+COPY target/${ARTIFACT_FILE} /tmp/FROST-Server.war
 
 RUN unzip -d ${CATALINA_HOME}/webapps/FROST-Server /tmp/FROST-Server.war \
     && rm /tmp/FROST-Server.war \
