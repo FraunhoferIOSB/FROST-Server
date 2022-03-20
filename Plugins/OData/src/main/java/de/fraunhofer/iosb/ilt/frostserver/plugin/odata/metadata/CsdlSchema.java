@@ -50,7 +50,7 @@ public class CsdlSchema {
     public CsdlSchema generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings) {
         ModelRegistry mr = settings.getModelRegistry();
         for (EntityType entityType : mr.getEntityTypes()) {
-            schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, nameSpace, settings, entityType));
+            schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, nameSpace, entityType));
         }
         for (Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {
             String name = entry.getKey();

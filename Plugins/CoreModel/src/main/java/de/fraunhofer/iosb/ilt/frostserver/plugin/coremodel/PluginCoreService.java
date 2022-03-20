@@ -132,6 +132,9 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
                 request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                break;
+            default:
+            // Nothing to do.
         }
         return mainService.execute(request, response);
     }

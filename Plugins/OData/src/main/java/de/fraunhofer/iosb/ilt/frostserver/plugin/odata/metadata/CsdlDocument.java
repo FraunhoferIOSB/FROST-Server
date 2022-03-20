@@ -78,7 +78,7 @@ public class CsdlDocument {
         }
 
         public ReferencedDoc addAnnotation(CsdlAnnotation annotation) {
-            ReferencedNamespace refNs = namespaces.computeIfAbsent(annotation.getNamespace(), ns -> createReferencedNamespace(ns));
+            ReferencedNamespace refNs = namespaces.computeIfAbsent(annotation.getNamespace(), this::createReferencedNamespace);
             refNs.addAnnotation(annotation);
             return this;
         }

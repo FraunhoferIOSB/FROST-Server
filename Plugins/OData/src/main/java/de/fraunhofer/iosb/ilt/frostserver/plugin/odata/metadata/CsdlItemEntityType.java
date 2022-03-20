@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings, EntityType et) {
+    public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, EntityType et) {
         String keyName = et.getPrimaryKey().name;
         if ("@iot.id".equals(keyName)) {
             keyName = "id";
@@ -63,7 +62,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             if ("@iot.id".equals(propertyName)) {
                 propertyName = "id";
             }
-            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, settings, et, ep));
+            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
             properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, nameSpace, et, np));

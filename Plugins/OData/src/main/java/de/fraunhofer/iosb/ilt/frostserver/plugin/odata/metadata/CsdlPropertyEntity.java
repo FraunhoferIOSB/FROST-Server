@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings, EntityType et, EntityPropertyMain<?> ep) {
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, Version version, String nameSpace, EntityType et, EntityPropertyMain<?> ep) {
         final PropertyType propertyType = ep.getType();
         type = propertyType.getName();
         collection = propertyType.isCollection();
