@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author jab
  * @author scf
  */
-public class EntityFormatterTest {
+class EntityFormatterTest {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntityFormatterTest.class.getName());
 

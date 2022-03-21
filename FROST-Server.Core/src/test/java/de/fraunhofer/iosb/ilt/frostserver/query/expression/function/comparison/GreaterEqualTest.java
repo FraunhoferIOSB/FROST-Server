@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class GreaterEqualTest {
+class GreaterEqualTest {
 
     @Test
     void testIntIntGreater() {

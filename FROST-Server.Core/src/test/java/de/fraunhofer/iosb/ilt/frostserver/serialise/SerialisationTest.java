@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public class SerialisationTest {
+class SerialisationTest {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SerialisationTest.class.getName());
     private static ModelRegistry modelRegistry;

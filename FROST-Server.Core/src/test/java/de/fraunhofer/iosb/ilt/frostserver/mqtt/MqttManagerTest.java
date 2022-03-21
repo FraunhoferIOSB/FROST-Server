@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class MqttManagerTest {
+class MqttManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManagerTest.class.getName());
 

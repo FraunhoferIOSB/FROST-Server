@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author scf
  */
-public class EntityCompleteTest {
+class EntityCompleteTest {
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;

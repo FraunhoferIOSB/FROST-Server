@@ -62,7 +62,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class QueryParserTest {
+class QueryParserTest {
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;

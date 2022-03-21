@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class GitCommitIdTest {
+class GitCommitIdTest {
 
     @Test
     void testGitDescription() {

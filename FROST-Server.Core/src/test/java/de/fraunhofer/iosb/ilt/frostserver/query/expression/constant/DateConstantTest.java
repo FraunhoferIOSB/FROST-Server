@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class DateConstantTest {
+class DateConstantTest {
 
     @Test
     void parseDateBasic() {

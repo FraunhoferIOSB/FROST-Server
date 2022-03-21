@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test;
  * @author jab
  * @author scf
  */
-public class EntityFormatterTest {
+class EntityFormatterTest {
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;

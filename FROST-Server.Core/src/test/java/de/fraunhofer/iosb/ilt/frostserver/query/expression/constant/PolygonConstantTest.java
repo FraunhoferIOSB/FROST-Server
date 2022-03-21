@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class PolygonConstantTest {
+class PolygonConstantTest {
 
     @Test
     void testParseFromString2DOnlyExterior() {

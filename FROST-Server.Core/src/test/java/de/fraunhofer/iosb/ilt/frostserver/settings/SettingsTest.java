@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class SettingsTest {
+class SettingsTest {
 
     @Test
     void testSettingsBase() {

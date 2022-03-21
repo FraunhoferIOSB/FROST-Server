@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class PointConstantTest {
+class PointConstantTest {
 
     @Test
     void testparseFromStringSpaces() {

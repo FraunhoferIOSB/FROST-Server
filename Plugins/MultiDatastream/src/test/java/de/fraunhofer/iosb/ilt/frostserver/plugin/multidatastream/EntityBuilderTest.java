@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class EntityBuilderTest {
+class EntityBuilderTest {
 
     /**
      * The logger for this class.

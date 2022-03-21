@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class MessageSerialisationTest {
+class MessageSerialisationTest {
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;

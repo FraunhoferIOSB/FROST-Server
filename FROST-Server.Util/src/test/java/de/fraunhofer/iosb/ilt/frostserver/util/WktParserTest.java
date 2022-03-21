@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * @author hylke
  */
-public class WktParserTest {
+class WktParserTest {
 
     @Test
     void testParsePointSpaces() {

@@ -64,6 +64,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private static final String TASKING_CAPABILITY = "TaskingCapability";
     private static final String TASKING_CAPABILITIES = "TaskingCapabilities";
 
+    public static final String LIQUIBASE_NAME_TASKING_CAP = "TaskingCap";
+    public static final String LIQUIBASE_NAME_TASK = "Task";
+    public static final String LIQUIBASE_NAME_ACTUATOR = "Actuator";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
     public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
@@ -199,9 +203,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pCoreModel.createLiqibaseParams(ppm, target);
-        ppm.generateLiquibaseVariables(target, "Actuator", modelSettings.idTypeActuator);
-        ppm.generateLiquibaseVariables(target, "Task", modelSettings.idTypeTask);
-        ppm.generateLiquibaseVariables(target, "TaskingCap", modelSettings.idTypeTaskingCap);
+        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_ACTUATOR, modelSettings.idTypeActuator);
+        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASK, modelSettings.idTypeTask);
+        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASKING_CAP, modelSettings.idTypeTaskingCap);
 
         return target;
     }

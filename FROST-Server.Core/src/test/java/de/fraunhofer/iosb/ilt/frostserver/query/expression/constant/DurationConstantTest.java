@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class DurationConstantTest {
+class DurationConstantTest {
 
     @Test
     void parseDurationBasic() {

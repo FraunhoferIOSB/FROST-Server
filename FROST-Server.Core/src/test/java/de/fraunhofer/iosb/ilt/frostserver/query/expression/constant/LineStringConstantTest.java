@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-public class LineStringConstantTest {
+class LineStringConstantTest {
 
     @Test
     void testParseFromString2D() {
