@@ -32,6 +32,15 @@ public class AnnotationGenericBoolean extends AbstractAnnotation<AnnotationGener
     @EditorBoolean.EdOptsBool()
     private boolean value;
 
+    public AnnotationGenericBoolean() {
+        // Default constructor
+    }
+
+    public AnnotationGenericBoolean(SourceNamespaceName snn, Boolean value) {
+        super(snn);
+        this.value = value;
+    }
+
     @Override
     public Boolean getValue() {
         return value;

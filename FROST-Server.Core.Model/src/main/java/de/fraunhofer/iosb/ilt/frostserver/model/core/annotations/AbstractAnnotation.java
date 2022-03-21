@@ -43,32 +43,42 @@ public abstract class AbstractAnnotation<T extends AbstractAnnotation> implement
     @EditorString.EdOptsString()
     private String name;
 
+    protected AbstractAnnotation() {
+        // Empty constructor
+    }
+
+    protected AbstractAnnotation(SourceNamespaceName snn) {
+        this.sourceUrlBase = snn.getSourceUrlBase();
+        this.nameSpace = snn.getNameSpace();
+        this.name = snn.getName();
+    }
+
     @Override
-    public String getSourceUrl(DocType docType) {
+    public final String getSourceUrl(DocType docType) {
         return sourceUrlBase + "." + docType.getDefaultExtension();
     }
 
-    public T setSourceUrlBase(String sourceUrlBase) {
+    public final T setSourceUrlBase(String sourceUrlBase) {
         this.sourceUrlBase = sourceUrlBase;
         return getThis();
     }
 
     @Override
-    public String getNameSpace() {
+    public final String getNameSpace() {
         return nameSpace;
     }
 
-    public T setNameSpace(String nameSpace) {
+    public final T setNameSpace(String nameSpace) {
         this.nameSpace = nameSpace;
         return getThis();
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public T setName(String name) {
+    public final T setName(String name) {
         this.name = name;
         return getThis();
     }

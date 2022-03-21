@@ -32,6 +32,15 @@ public class AnnotationGenericString extends AbstractAnnotation<AnnotationGeneri
     @EditorString.EdOptsString()
     private String value;
 
+    public AnnotationGenericString() {
+        // Default constructor
+    }
+
+    public AnnotationGenericString(SourceNamespaceName snn, String value) {
+        super(snn);
+        this.value = value;
+    }
+
     @Override
     public String getValue() {
         return value;
