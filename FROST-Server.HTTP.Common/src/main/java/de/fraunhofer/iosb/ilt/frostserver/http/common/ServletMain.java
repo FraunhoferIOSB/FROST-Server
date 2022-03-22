@@ -17,30 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import static de.fraunhofer.iosb.ilt.frostserver.http.common.HttpRequestDecoder.serviceRequestFromHttpRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.MultipartConfig;
@@ -128,85 +117,6 @@ public class ServletMain extends HttpServlet {
             LOGGER.error("", exc);
             sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
         }
-    }
-
-    private ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request) throws IOException {
-        if (request.getCharacterEncoding() == null) {
-            request.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        }
-        // request.getPathInfo() is decoded, breaking urls that contain //
-        // (ids that are urls)
-        final String requestURI = request.getRequestURI();
-        final String contextPath = request.getContextPath();
-        final String servletPath = request.getServletPath();
-        final String fullPath = contextPath + servletPath;
-        final String pathInfo;
-        if (requestURI.startsWith(fullPath)) {
-            pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
-        } else {
-            pathInfo = request.getPathInfo();
-        }
-        final int idxSlash2 = pathInfo.indexOf('/', 1);
-        final String path;
-        final Version version;
-        if (idxSlash2 > 0) {
-            path = pathInfo.substring(idxSlash2);
-            version = coreSettings.getPluginManager().getVersion(pathInfo.substring(1, idxSlash2));
-        } else {
-            path = "";
-            version = coreSettings.getPluginManager().getVersion(pathInfo.substring(1));
-        }
-
-        if (version == null) {
-            return null;
-        }
-
-        final PluginService plugin = coreSettings.getPluginManager().getServiceForPath(version, path);
-        if (plugin == null) {
-            return null;
-        }
-
-        final String method = request.getMethod();
-        final String requestType = plugin.getRequestTypeFor(version, path, HttpMethod.fromString(method), request.getContentType());
-        if (requestType == null) {
-            final String cleanedPath = StringHelper.cleanForLogging(path);
-            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
-            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
-        }
-
-        final Map<String, List<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
-        String accept = request.getHeader(HEADER_ACCEPT);
-        if (accept != null) {
-            parameterMap.putIfAbsent(HEADER_ACCEPT, Arrays.asList(accept));
-        }
-
-        LinkedHashMap<String, String> prefer = new LinkedHashMap<>();
-        for (Enumeration<String> en = request.getHeaders(HEADER_PREFER); en.hasMoreElements();) {
-            UrlHelper.decodePrefer(en.nextElement(), prefer);
-        }
-        for (Entry<String, String> entry : prefer.entrySet()) {
-            parameterMap.putIfAbsent(entry.getKey(), Arrays.asList(entry.getValue()));
-        }
-
-        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)
-                .withRequestType(requestType)
-                .withUrlPath(path)
-                .withUrlQuery(request.getQueryString() != null
-                        ? StringHelper.urlDecode(request.getQueryString())
-                        : null)
-                .withContent(request.getInputStream())
-                .withContentType(request.getContentType())
-                .withParameterMap(parameterMap)
-                .withUserPrincipal(request.getUserPrincipal());
-
-        Enumeration<String> attributeNames = request.getAttributeNames();
-        while (attributeNames.hasMoreElements()) {
-            String name = attributeNames.nextElement();
-            serviceRequestBuilder.withAttribute(name, request.getAttribute(name));
-        }
-
-        return serviceRequestBuilder
-                .build();
     }
 
     private void sendResponse(ServiceResponse serviceResponse, HttpServletResponse httpResponse) {
