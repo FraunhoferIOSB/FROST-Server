@@ -40,11 +40,11 @@ public class FractionalSeconds extends Function {
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
-        return new IntegerConstant(p1.getValue().getMillisOfSecond());
+        return new IntegerConstant(p1.getValue().getNanosecond());
     }
 
     protected IntegerConstant eval(TimeConstant p1) {
-        return new IntegerConstant(p1.getValue().getMillisOfSecond());
+        return new IntegerConstant(p1.getValue().getNanosecond());
     }
 
     @Override

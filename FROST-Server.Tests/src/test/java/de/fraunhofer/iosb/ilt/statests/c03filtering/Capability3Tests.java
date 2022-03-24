@@ -19,10 +19,9 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1349,8 +1348,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         if (!(propertyValue instanceof String)) {
                             propertyValue = propertyValue.toString();
                         }
-                    } else if (value instanceof DateTime) {
-                        propertyValue = ISODateTimeFormat.dateTime().parseDateTime(propertyValue.toString());
+                    } else if (value instanceof ZonedDateTime) {
+                        propertyValue = ZonedDateTime.parse(propertyValue.toString());
                     }
 
                     int result = value.compareTo(propertyValue);

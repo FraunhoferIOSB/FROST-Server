@@ -70,9 +70,9 @@
             <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${jodatime.version}</version>
+            <groupId>net.time4j</groupId>
+            <artifactId>time4j-sqlxml</artifactId>
+            <version>${time4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

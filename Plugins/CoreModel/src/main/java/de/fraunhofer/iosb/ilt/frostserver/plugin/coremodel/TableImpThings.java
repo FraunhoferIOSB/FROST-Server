@@ -13,11 +13,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationM
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.time.OffsetDateTime;
+import static java.time.ZoneOffset.UTC;
 import java.util.ArrayList;
 import java.util.List;
 import org.jooq.DSLContext;
@@ -156,7 +156,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
                 TableImpHistLocations qhl = tables.getTableForClass(TableImpHistLocations.class);
                 Object histLocationId = dslContext.insertInto(qhl)
                         .set((TableField) qhl.getThingId(), thingId)
-                        .set(qhl.time, OffsetDateTime.now(Constants.UTC))
+                        .set(qhl.time, OffsetDateTime.now(UTC))
                         .returningResult(qhl.getId())
                         .fetchOne(0);
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);

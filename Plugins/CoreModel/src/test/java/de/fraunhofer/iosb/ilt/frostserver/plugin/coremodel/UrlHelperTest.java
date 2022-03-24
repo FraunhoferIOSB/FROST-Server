@@ -31,6 +31,8 @@ import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,6 +40,10 @@ import org.junit.jupiter.api.Test;
  */
 class UrlHelperTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelperTest.class.getName());
+
+    public UrlHelperTest() {
+    }
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
     private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + Version.V_1_1.urlPart;
 
@@ -258,6 +264,9 @@ class UrlHelperTest {
         try {
             next = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
         } catch (IllegalArgumentException e) {
+            LOGGER.error("Failed for base url {}", baseUrl);
+            LOGGER.error("Expected nextLink   {}", expectedNextUrl);
+            LOGGER.error("Got nextLink        {}", nextLink);
             Assertions.fail("Failed to parse generated next link: " + nextLink, e);
         }
 

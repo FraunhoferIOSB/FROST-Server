@@ -39,7 +39,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import org.joda.time.DateTimeZone;
+import static net.time4j.tz.OffsetSign.BEHIND_UTC;
+import net.time4j.tz.ZonalOffset;
+import static net.time4j.tz.ZonalOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -97,7 +99,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -127,7 +129,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -149,7 +151,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -206,7 +208,7 @@ class EntityFormatterTest {
                         .addProperty("color", "Silver")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -232,8 +234,8 @@ class EntityFormatterTest {
                 + "		\"type\": \"Polygon\",\n"
                 + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
                 + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\""
+                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\""
                 + "}\n"
                 + "],\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
@@ -270,8 +272,8 @@ class EntityFormatterTest {
                         )
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                        .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
+                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
                 )
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
@@ -283,7 +285,7 @@ class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        compareJson(expResult, JsonWriter.writeEntityCollection(things));
     }
 
     @Test
@@ -320,7 +322,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -347,7 +349,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -376,7 +378,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -400,7 +402,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -423,7 +425,7 @@ class EntityFormatterTest {
                     .setProperty(pluginCoreModel.npThingsLocation, new EntitySetImpl(pluginCoreModel.etThing))
                     .setProperty(pluginCoreModel.npHistoricalLocationsLocation, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
-            assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+            compareJson(expResult, JsonWriter.writeEntity(entity));
         }
         {
             String expResult
@@ -441,7 +443,7 @@ class EntityFormatterTest {
                     .setQuery(query)
                     .setId(new IdLong(1))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
-            assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+            compareJson(expResult, JsonWriter.writeEntity(entity));
         }
     }
 
@@ -474,7 +476,7 @@ class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -485,7 +487,7 @@ class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/HistoricalLocations(1)\",\n"
                 + "	\"Locations@iot.navigationLink\": \"HistoricalLocations(1)/Locations\",\n"
                 + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
-                + "	\"time\": \"2015-01-25T19:00:00.000Z\"\n"
+                + "	\"time\": \"2015-01-25T19:00:00Z\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
@@ -494,8 +496,8 @@ class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npThingHistLoc, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+                .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, ZonalOffset.ofHours(BEHIND_UTC, 7)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -517,8 +519,8 @@ class EntityFormatterTest {
                 + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
                 + "	},\n"
                 + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
+                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
@@ -537,9 +539,9 @@ class EntityFormatterTest {
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -561,8 +563,8 @@ class EntityFormatterTest {
                 + "		\"definition\": null\n"
                 + "	},\n"
                 + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
+                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
@@ -577,9 +579,9 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -606,8 +608,8 @@ class EntityFormatterTest {
                 + "		\"type\": \"Polygon\",\n"
                 + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
                 + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
+                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
@@ -627,9 +629,9 @@ class EntityFormatterTest {
                 )
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
+                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -654,7 +656,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -678,7 +680,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -701,7 +703,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
                 .setProperty(pluginCoreModel.epName, "DewPoint Temperature")
                 .setProperty(pluginCoreModel.epDefinition, "http://dbpedia.org/page/Dew_point");
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -712,8 +714,8 @@ class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
-                + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
+                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
+                + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
                 + "	\"result\": 70.40\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
@@ -727,7 +729,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -738,8 +740,8 @@ class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
-                + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
+                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
+                + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
                 + "	\"result\": null\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
@@ -753,7 +755,8 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        final String value = JsonWriter.writeEntity(entity);
+        compareJson(expResult, value);
     }
 
     @Test
@@ -764,7 +767,7 @@ class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
+                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
                 + "	\"resultTime\": null,\n"
                 + "	\"result\": \"70.4\"\n"
                 + "}";
@@ -779,7 +782,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -802,7 +805,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
     @Test
@@ -837,7 +840,11 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
                 .setProperty(pluginCoreModel.epFeature, TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+        compareJson(expResult, JsonWriter.writeEntity(entity));
+    }
+
+    private void compareJson(String expected, String result) {
+        assertTrue(jsonEqual(expected, result), () -> "Expected:\n" + expected + "\nReceived:\n" + result + "\n");
     }
 
     private boolean jsonEqual(String string1, String string2) {

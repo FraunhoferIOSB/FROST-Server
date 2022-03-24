@@ -22,14 +22,15 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.time4j.PlainTimestamp;
+import net.time4j.tz.Timezone;
+import net.time4j.tz.ZonalOffset;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 /**
  * Helper class for testing JSON de-/serialization.
@@ -95,24 +96,20 @@ public class TestHelper {
         return result;
     }
 
-    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second, DateTimeZone timeZoneInput, DateTimeZone timeZoneOutput) {
-        return TimeInstant.create(new DateTime(year, month, day, hour, minute, second, timeZoneInput).getMillis(), timeZoneOutput);
+    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second, Timezone timeZoneInput) {
+        return new TimeInstant(PlainTimestamp.of(year, month, day, hour, minute, second).inTimezone(timeZoneInput.getID()));
     }
 
     public static TimeInstant createTimeInstantUTC(int year, int month, int day, int hour, int minute, int second) {
-        return createTimeInstant(year, month, day, hour, minute, second, DateTimeZone.UTC, DateTimeZone.UTC);
+        return createTimeInstant(year, month, day, hour, minute, second, Timezone.of(ZonalOffset.UTC));
     }
 
-    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second) {
-        return TimeInstant.create(new DateTime(year, month, day, hour, minute, second).getMillis());
-    }
-
-    public static TimeInterval createTimeInterval(int year1, int month1, int day1, int hour1, int minute1, int second1,
-            int year2, int month2, int day2, int hour2, int minute2, int second2, DateTimeZone timeZone) {
+    public static TimeInterval createTimeInterval(
+            int year1, int month1, int day1, int hour1, int minute1, int second1,
+            int year2, int month2, int day2, int hour2, int minute2, int second2, Timezone timeZone) {
         return TimeInterval.create(
-                new DateTime(year1, month1, day1, hour1, minute1, second1, timeZone).getMillis(),
-                new DateTime(year2, month2, day2, hour2, minute2, second2, timeZone).getMillis(),
-                timeZone);
+                PlainTimestamp.of(year1, month1, day1, hour1, minute1, second1).inTimezone(timeZone.getID()),
+                PlainTimestamp.of(year2, month2, day2, hour2, minute2, second2).inTimezone(timeZone.getID()));
     }
 
 }

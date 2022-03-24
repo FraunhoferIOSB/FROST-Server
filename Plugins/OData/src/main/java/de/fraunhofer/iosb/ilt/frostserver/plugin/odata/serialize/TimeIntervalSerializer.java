@@ -21,12 +21,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import net.time4j.Moment;
+import net.time4j.range.MomentInterval;
 
 /**
  * Serializer for TimeValue objects.
@@ -41,13 +39,12 @@ public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
             gen.writeNull();
         } else {
             gen.writeStartObject();
-            final Interval interval = value.getInterval();
-            final DateTime start = interval.getStart();
-            final DateTime end = interval.getEnd();
-            final DateTimeFormatter timePrinter = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
-            gen.writeObjectField("start", timePrinter.print(start));
+            final MomentInterval interval = value.getInterval();
+            final Moment start = interval.getStartAsMoment();
+            final Moment end = interval.getEndAsMoment();
+            gen.writeObjectField("start", StringHelper.FORMAT_MOMENT.print(start));
             if (!start.equals(end)) {
-                gen.writeObjectField("end", timePrinter.print(end));
+                gen.writeObjectField("end", StringHelper.FORMAT_MOMENT.print(end));
             }
             gen.writeEndObject();
         }

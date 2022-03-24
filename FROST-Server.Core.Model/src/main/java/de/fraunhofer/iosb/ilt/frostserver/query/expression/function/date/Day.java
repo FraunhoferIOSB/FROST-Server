@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeCons
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import static net.time4j.tz.ZonalOffset.UTC;
 
 /**
  *
@@ -44,7 +45,7 @@ public class Day extends Function {
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
-        return new IntegerConstant(p1.getValue().getDayOfMonth());
+        return new IntegerConstant(p1.getValue().toMoment().toZonalTimestamp(UTC).getDayOfMonth());
     }
 
     @Override

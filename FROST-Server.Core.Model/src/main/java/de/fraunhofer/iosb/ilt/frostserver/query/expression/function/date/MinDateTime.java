@@ -22,7 +22,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+import net.time4j.PlainTimestamp;
 
 /**
  *
@@ -39,7 +40,7 @@ public class MinDateTime extends Function {
     }
 
     protected DateTimeConstant eval() {
-        return new DateTimeConstant(new DateTime(Long.MIN_VALUE));
+        return new DateTimeConstant(PlainTimestamp.from(LocalDateTime.MIN).inZonalView(DateTimeConstant.TIMEZONE_UTC));
     }
 
     @Override

@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import static net.time4j.tz.ZonalOffset.UTC;
 
 /**
  *
@@ -40,11 +41,11 @@ public class Hour extends Function {
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
-        return new IntegerConstant(p1.getValue().getHourOfDay());
+        return new IntegerConstant(p1.getValue().toMoment().toZonalTimestamp(UTC).getHour());
     }
 
     protected IntegerConstant eval(TimeConstant p1) {
-        return new IntegerConstant(p1.getValue().getHourOfDay());
+        return new IntegerConstant(p1.getValue().getHour());
     }
 
     @Override

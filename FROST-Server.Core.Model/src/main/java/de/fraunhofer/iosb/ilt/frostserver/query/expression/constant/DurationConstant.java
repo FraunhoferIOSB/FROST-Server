@@ -18,20 +18,22 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import org.joda.time.Period;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.text.ParseException;
+import net.time4j.Duration;
 
 /**
  *
  * @author jab
  */
-public class DurationConstant extends Constant<Period> {
+public class DurationConstant extends Constant<Duration> {
 
-    public DurationConstant(Period value) {
+    public DurationConstant(Duration value) {
         super(value);
     }
 
-    public DurationConstant(String value) {
-        super(Period.parse(value));
+    public DurationConstant(String value) throws ParseException {
+        super(Duration.parsePeriod(value));
     }
 
     @Override
@@ -40,12 +42,19 @@ public class DurationConstant extends Constant<Period> {
     }
 
     public String asISO8601() {
-        return getValue().toString();
+        return getValue().toStringISO();
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+    public static DurationConstant parse(String value) {
+        try {
+            return new DurationConstant(value);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse Duration " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
 }

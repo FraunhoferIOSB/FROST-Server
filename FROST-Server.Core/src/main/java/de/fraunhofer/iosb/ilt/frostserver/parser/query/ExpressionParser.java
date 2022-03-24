@@ -22,15 +22,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
@@ -100,11 +95,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.Period;
+
 
 /**
  *
@@ -393,16 +384,8 @@ public class ExpressionParser extends AbstractParserVisitor {
             return new IntegerConstant((Integer) value);
         } else if (value instanceof Long) {
             return new IntegerConstant(((Number) value).longValue());
-        } else if (value instanceof DateTime) {
-            return new DateTimeConstant((DateTime) value);
-        } else if (value instanceof LocalDate) {
-            return new DateConstant((LocalDate) value);
-        } else if (value instanceof LocalTime) {
-            return new TimeConstant((LocalTime) value);
-        } else if (value instanceof Period) {
-            return new DurationConstant((Period) value);
-        } else if (value instanceof Interval) {
-            return new IntervalConstant((Interval) value);
+        } else if (value instanceof Constant) {
+            return (Constant) value;
         } else {
             return new StringConstant(node.jjtGetValue().toString());
         }

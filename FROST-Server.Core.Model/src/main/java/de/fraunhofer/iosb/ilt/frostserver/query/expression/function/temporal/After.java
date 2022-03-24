@@ -44,15 +44,15 @@ public class After extends Function {
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
-        return new BooleanConstant(p1.getValue().isAfter(p2.getValue().getStart()));
+        return new BooleanConstant(p1.getValue().toMoment().isAfter(p2.getValue().getStartAsMoment()));
     }
 
     protected BooleanConstant eval(IntervalConstant p1, DateTimeConstant p2) {
-        return new BooleanConstant(p1.getValue().isAfter(p2.getValue()));
+        return new BooleanConstant(p1.getValue().isAfter(p2.getValue().toMoment()));
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, DateTimeConstant p2) {
-        return new BooleanConstant(p1.getValue().isAfter(p2.getValue()));
+        return new BooleanConstant(p1.getValue().toMoment().isAfter(p2.getValue()));
     }
 
     @Override

@@ -26,9 +26,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TestHelper.createTimeInstantUTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
@@ -38,8 +38,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -415,8 +413,8 @@ class EntityParserTest {
                 + "  \"Datastream\":{\"@iot.id\":100}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
-                .setProperty(pluginCoreModel.epPhenomenonTime, TimeValue.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
+                .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
@@ -432,8 +430,8 @@ class EntityParserTest {
                 + "  \"FeatureOfInterest\":{\"@iot.id\": 14269}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
-                .setProperty(pluginCoreModel.epPhenomenonTime, TimeValue.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
+                .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(pluginCoreModel.etFeatureOfInterest.getPrimaryKey(), new IdLong(14269)));
@@ -456,8 +454,8 @@ class EntityParserTest {
                 + "  \"Datastream\":{\"@iot.id\": 14314}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
-                .setProperty(pluginCoreModel.epPhenomenonTime, TimeValue.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
+                .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
                 .setProperty(pluginCoreModel.epResult, 99)
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")

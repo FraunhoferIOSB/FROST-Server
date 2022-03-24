@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeCons
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import static net.time4j.tz.ZonalOffset.UTC;
 
 /**
  *
@@ -39,7 +40,7 @@ public class Time extends Function {
     }
 
     protected TimeConstant eval(DateTimeConstant p1) {
-        return new TimeConstant(p1.getValue().toLocalTime());
+        return new TimeConstant(p1.getValue().toMoment().toZonalTimestamp(UTC).toTime());
     }
 
     @Override

@@ -33,14 +33,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.time4j.PlainTimestamp;
+import net.time4j.tz.ZonalOffset;
+import static net.time4j.tz.ZonalOffset.UTC;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -107,24 +108,19 @@ public class TestHelper {
         return result;
     }
 
-    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second, DateTimeZone timeZoneInput, DateTimeZone timeZoneOutput) {
-        return TimeInstant.create(new DateTime(year, month, day, hour, minute, second, timeZoneInput).getMillis(), timeZoneOutput);
+    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second, ZonalOffset zone) {
+        return new TimeInstant(PlainTimestamp.of(year, month, day, hour, minute, second).at(zone));
     }
 
     public static TimeInstant createTimeInstantUTC(int year, int month, int day, int hour, int minute, int second) {
-        return createTimeInstant(year, month, day, hour, minute, second, DateTimeZone.UTC, DateTimeZone.UTC);
-    }
-
-    public static TimeInstant createTimeInstant(int year, int month, int day, int hour, int minute, int second) {
-        return TimeInstant.create(new DateTime(year, month, day, hour, minute, second).getMillis());
+        return createTimeInstant(year, month, day, hour, minute, second, UTC);
     }
 
     public static TimeInterval createTimeInterval(int year1, int month1, int day1, int hour1, int minute1, int second1,
-            int year2, int month2, int day2, int hour2, int minute2, int second2, DateTimeZone timeZone) {
+            int year2, int month2, int day2, int hour2, int minute2, int second2, ZonalOffset zone) {
         return TimeInterval.create(
-                new DateTime(year1, month1, day1, hour1, minute1, second1, timeZone).getMillis(),
-                new DateTime(year2, month2, day2, hour2, minute2, second2, timeZone).getMillis(),
-                timeZone);
+                PlainTimestamp.of(year1, month1, day1, hour1, minute1, second1).at(zone),
+                PlainTimestamp.of(year2, month2, day2, hour2, minute2, second2).at(zone));
     }
 
     public static void generateDefaultValues(Map<Property, Object> propertyValues, PluginCoreModel pluginCoreModel, ModelRegistry modelRegistry) {

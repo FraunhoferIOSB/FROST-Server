@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.text.ParseException;
 import java.util.Objects;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import net.time4j.Moment;
+import net.time4j.range.MomentInterval;
 
 /**
  * Represent an ISO8601 time interval.
@@ -30,12 +30,9 @@ import org.joda.time.format.ISODateTimeFormat;
  */
 public class TimeInterval implements TimeObject {
 
-    /**
-     * TODO: Convert to Time4J
-     */
-    private final Interval interval;
+    private final MomentInterval interval;
 
-    public TimeInterval(Interval interval) {
+    public TimeInterval(MomentInterval interval) {
         if (interval == null) {
             throw new IllegalArgumentException("Interval must be non-null");
         }
@@ -62,19 +59,19 @@ public class TimeInterval implements TimeObject {
         return Objects.equals(this.interval, other.interval);
     }
 
-    public static TimeInterval create(long start, long end) {
-        return new TimeInterval(new Interval(start, end));
-    }
-
-    public static TimeInterval create(long start, long end, DateTimeZone timeZone) {
-        return new TimeInterval(new Interval(start, end, timeZone));
+    public static TimeInterval create(Moment start, Moment end) {
+        return new TimeInterval(MomentInterval.between(start, end));
     }
 
     public static TimeInterval parse(String value) {
-        return new TimeInterval(Interval.parse(value));
+        try {
+            return new TimeInterval(MomentInterval.parseISO(value));
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse TimeInterval " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
-    public Interval getInterval() {
+    public MomentInterval getInterval() {
         return interval;
     }
 
@@ -85,16 +82,7 @@ public class TimeInterval implements TimeObject {
 
     @Override
     public String asISO8601() {
-        final DateTimeFormatter printer = ISODateTimeFormat.dateTime()
-                .withZone(DateTimeZone.UTC)
-                .withChronology(interval.getChronology());
-        final StringBuilder timeString = new StringBuilder(48);
-        final long startMillis = interval.getStartMillis();
-        printer.printTo(timeString, startMillis);
-        final long endMillis = interval.getEndMillis();
-        timeString.append('/');
-        printer.printTo(timeString, endMillis);
-        return timeString.toString();
+        return StringHelper.FORMAT_INTERVAL.print(interval);
     }
 
     @Override

@@ -26,14 +26,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import static java.time.ZoneOffset.UTC;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.time4j.Moment;
+import static net.time4j.TemporalType.INSTANT;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.jooq.Field;
 import org.jooq.OrderField;
@@ -81,6 +83,10 @@ public class Utils {
         return geoJsonMapper;
     }
 
+    public static OffsetDateTime offsetDateTime(Moment moment) {
+        return INSTANT.from(moment).atOffset(UTC);
+    }
+
     public static TimeInterval intervalFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {
         if (timeStart == null) {
             timeStart = OffsetDateTime.of(LocalDateTime.MAX, UTC);
@@ -91,7 +97,9 @@ public class Utils {
         if (timeEnd.isBefore(timeStart)) {
             return null;
         } else {
-            return TimeInterval.create(timeStart.toInstant().toEpochMilli(), timeEnd.toInstant().toEpochMilli());
+            return TimeInterval.create(
+                    INSTANT.translate(timeStart.toInstant()),
+                    INSTANT.translate(timeEnd.toInstant()));
         }
     }
 
@@ -99,7 +107,7 @@ public class Utils {
         if (time == null) {
             return new TimeInstant(null);
         }
-        return TimeInstant.create(time.toInstant().toEpochMilli());
+        return new TimeInstant(INSTANT.translate(time.toInstant()));
     }
 
     public static TimeValue valueFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {

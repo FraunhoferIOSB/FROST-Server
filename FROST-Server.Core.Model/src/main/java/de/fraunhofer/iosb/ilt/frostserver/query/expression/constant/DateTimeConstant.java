@@ -18,24 +18,31 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import org.joda.time.DateTime;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.text.ParseException;
+import net.time4j.ZonalDateTime;
+import net.time4j.format.expert.Iso8601Format;
+import net.time4j.tz.Timezone;
+import static net.time4j.tz.ZonalOffset.UTC;
 
 /**
  *
  * @author jab
  */
-public class DateTimeConstant extends Constant<DateTime> {
+public class DateTimeConstant extends Constant<ZonalDateTime> {
 
-    public DateTimeConstant(DateTime value) {
+    public static final Timezone TIMEZONE_UTC = Timezone.of(UTC);
+
+    public DateTimeConstant(ZonalDateTime value) {
         super(value);
     }
 
-    public DateTimeConstant(String value) {
+    public DateTimeConstant(String value) throws ParseException {
         if (value.lastIndexOf('-') <= 0) {
             // We do not want simple integers be interpreted as a year.
             throw new IllegalArgumentException("Not a date: " + value);
         }
-        this.value = DateTime.parse(value);
+        this.value = ZonalDateTime.parse(value, Iso8601Format.EXTENDED_DATE_TIME_OFFSET);
     }
 
     @Override
@@ -46,6 +53,14 @@ public class DateTimeConstant extends Constant<DateTime> {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    public static DateTimeConstant parse(String value) {
+        try {
+            return new DateTimeConstant(value);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse PlainTimestamp " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
 }

@@ -18,16 +18,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import org.joda.time.LocalDate;
+import net.time4j.PlainDate;
+import net.time4j.format.expert.Iso8601Format;
 
 /**
  *
  * @author jab
  */
-public class DateConstant extends Constant<LocalDate> {
+public class DateConstant extends Constant<PlainDate> {
 
-    public DateConstant(LocalDate value) {
-        // TODO: Convert to OffsetDateTime
+    public DateConstant(PlainDate value) {
         super(value);
     }
 
@@ -36,7 +36,7 @@ public class DateConstant extends Constant<LocalDate> {
             // We do not want simple integers be interpreted as a year.
             throw new IllegalArgumentException("Not a date: " + value);
         }
-        this.value = LocalDate.parse(value);
+        this.value = PlainDate.parse(value, Iso8601Format.EXTENDED_CALENDAR_DATE);
     }
 
     @Override
@@ -47,6 +47,10 @@ public class DateConstant extends Constant<LocalDate> {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    public static DateConstant parse(String value) {
+        return new DateConstant(value);
     }
 
 }

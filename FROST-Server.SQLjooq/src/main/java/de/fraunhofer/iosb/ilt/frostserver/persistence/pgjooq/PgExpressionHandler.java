@@ -115,22 +115,21 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Ove
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
-import java.time.Instant;
 import java.time.OffsetDateTime;
+import static java.time.ZoneOffset.UTC;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import net.time4j.PlainDate;
+import net.time4j.PlainTime;
+import static net.time4j.TemporalType.INSTANT;
+import net.time4j.ZonalDateTime;
+import net.time4j.range.MomentInterval;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.jooq.Condition;
 import org.jooq.DatePart;
 import org.jooq.Field;
@@ -367,17 +366,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(DateConstant node) {
-        LocalDate date = node.getValue();
+        PlainDate date = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        instance.set(date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth());
+        instance.set(date.getYear(), date.getMonth() - 1, date.getDayOfMonth());
         return new SimpleFieldWrapper(DSL.inline(new java.sql.Date(instance.getTimeInMillis())));
     }
 
     @Override
     public FieldWrapper visit(DateTimeConstant node) {
-        DateTime value = node.getValue();
-        DateTimeZone zone = value.getZone();
-        return new StaDateTimeWrapper(OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getMillis()), UTC), zone == DateTimeZone.UTC);
+        ZonalDateTime value = node.getValue();
+        return new StaDateTimeWrapper(Utils.offsetDateTime(value.toMoment()), true);
     }
 
     @Override
@@ -392,10 +390,10 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(IntervalConstant node) {
-        Interval value = node.getValue();
+        MomentInterval value = node.getValue();
         return new StaTimeIntervalWrapper(
-                OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getStartMillis()), UTC),
-                OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getEndMillis()), UTC)
+                OffsetDateTime.ofInstant(INSTANT.from(value.getStartAsMoment()), UTC),
+                OffsetDateTime.ofInstant(INSTANT.from(value.getEndAsMoment()), UTC)
         );
     }
 
@@ -436,9 +434,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(TimeConstant node) {
-        LocalTime time = node.getValue();
+        PlainTime time = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        instance.set(1970, 1, 1, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute());
+        instance.set(1970, 1, 1, time.getHour(), time.getMinute(), time.getSecond());
         return new SimpleFieldWrapper(DSL.inline(new java.sql.Time(instance.getTimeInMillis())));
     }
 
@@ -866,9 +864,6 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
-            if (!timeExpression.isUtc()) {
-                throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
-            }
             return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
         }
         throw new IllegalArgumentException("Time can only be used on times, not on " + input.getClass().getName());

@@ -612,7 +612,7 @@ void Duration() #ValueNode : {Token t;}
 {
   t=<DURATION>
   {
-    jjtThis.jjtSetValue(new org.joda.time.Period(t.image.substring(9,t.image.length()-1)));
+    jjtThis.jjtSetValue(de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant.parse(t.image.substring(9,t.image.length()-1)));
   }
 }
 
@@ -625,28 +625,28 @@ void DateTimeInterval() #ValueNode : {Token t;}
 {
   t=<DATETIMEINTERVAL>
   {
-    jjtThis.jjtSetValue(org.joda.time.Interval.parse(t.image));
+    jjtThis.jjtSetValue(de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant.parse(t.image));
   }
 }
 void DateTime() #ValueNode : {Token t;}
 {
   t=<DATETIME>
   {
-    jjtThis.jjtSetValue(org.joda.time.DateTime.parse(t.image));
+    jjtThis.jjtSetValue(de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.parse(t.image));
   }
 }
 void Date() #ValueNode : {Token t;}
 {
   t=<DATE>
   {
-    jjtThis.jjtSetValue(org.joda.time.LocalDate.parse(t.image));
+    jjtThis.jjtSetValue(de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant.parse(t.image));
   }
 }
 void Time() #ValueNode : {Token t;}
 {
   t=<TIME>
   {
-    jjtThis.jjtSetValue(org.joda.time.LocalTime.parse(t.image));
+    jjtThis.jjtSetValue(de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant.parse(t.image));
   }
 }
 

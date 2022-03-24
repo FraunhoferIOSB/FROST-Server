@@ -1,6 +1,6 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import org.joda.time.format.ISODateTimeFormat;
+import java.time.ZonedDateTime;
 
 /**
  * Provides list of sample values for each property of each entity for testing
@@ -20,7 +20,7 @@ public class EntityPropertiesSampleValue {
     /**
      * Sample properties for HistoricalLocation entity.
      */
-    public static final Comparable[] HISTORICAL_LOCATION_PROPERTIES_Values = {ISODateTimeFormat.dateTime().parseDateTime("2015-10-14T21:30:00.104Z")};
+    public static final Comparable[] HISTORICAL_LOCATION_PROPERTIES_Values = {ZonedDateTime.parse("2015-10-14T21:30:00.104Z")};
     /**
      * Sample properties for Datastream entity.
      */
@@ -37,9 +37,9 @@ public class EntityPropertiesSampleValue {
      * Sample properties for Observation entity.
      */
     public static final Comparable[] OBSERVATION_PROPERTIES_Values = {
-        ISODateTimeFormat.dateTime().parseDateTime("2015-03-02T00:00:00.000Z"),
-        Integer.valueOf(2),
-        ISODateTimeFormat.dateTime().parseDateTime("2015-03-02T00:00:00.000Z")};
+        ZonedDateTime.parse("2015-03-02T00:00:00.000Z"),
+        2,
+        ZonedDateTime.parse("2015-03-02T00:00:00.000Z")};
     /**
      * Sample properties for FeatureOfInterest entity.
      */

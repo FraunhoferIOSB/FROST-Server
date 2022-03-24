@@ -1,5 +1,7 @@
 *.autosave
 /nbproject/
+*/nbproject/
+*/*/nbproject/
 *~
 .idea/
 *.iml

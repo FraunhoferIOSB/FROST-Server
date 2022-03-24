@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
 import java.util.Objects;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormatter;
+import net.time4j.Moment;
 
 /**
  * Common interface for time values. Needed as STA sometimes does not specify
@@ -42,24 +41,8 @@ public class TimeValue implements TimeObject {
         this.interval = timeInterval;
     }
 
-    public static TimeValue create(Long value) {
-        return new TimeValue(TimeInstant.create(value));
-    }
-
-    public static TimeValue create(Long value, DateTimeZone timeZone) {
-        return new TimeValue(TimeInstant.create(value, timeZone));
-    }
-
-    public static TimeValue parse(String value, DateTimeFormatter dtf) {
-        return new TimeValue(TimeInstant.parse(value, dtf));
-    }
-
-    public static TimeValue create(long start, long end) {
+    public static TimeValue create(Moment start, Moment end) {
         return new TimeValue(TimeInterval.create(start, end));
-    }
-
-    public static TimeValue create(long start, long end, DateTimeZone timeZone) {
-        return new TimeValue(TimeInterval.create(start, end, timeZone));
     }
 
     public boolean isInstant() {

@@ -34,6 +34,8 @@ import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_CLEANUP;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
 import java.net.URI;
+import java.text.ParseException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,8 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Callable;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import net.time4j.range.MomentInterval;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -747,17 +748,17 @@ public abstract class Capability8Tests extends AbstractTestClass {
         }
 
         try {
-            DateTime dateTime1 = DateTime.parse(val1);
-            DateTime dateTime2 = DateTime.parse(val2);
+            ZonedDateTime dateTime1 = ZonedDateTime.parse(val1);
+            ZonedDateTime dateTime2 = ZonedDateTime.parse(val2);
             return dateTime1.isEqual(dateTime2);
         } catch (Exception ex) {
             // do nothing
         }
         try {
-            Interval interval1 = Interval.parse(val1);
-            Interval interval2 = Interval.parse(val2);
-            return interval1.isEqual(interval2);
-        } catch (Exception ex) {
+            MomentInterval interval1 = MomentInterval.parseISO(val1);
+            MomentInterval interval2 = MomentInterval.parseISO(val2);
+            return interval1.equals(interval2);
+        } catch (RuntimeException | ParseException ex) {
             fail("time properies could neither be parsed as time nor as interval");
         }
 

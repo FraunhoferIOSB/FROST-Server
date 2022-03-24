@@ -17,8 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import net.time4j.ClockUnit;
+import net.time4j.PlainTimestamp;
+import net.time4j.ZonalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -30,16 +31,9 @@ class DateTimeConstantTest {
 
     @Test
     void parseDateTimeBasic() {
-        DateTimeConstant result = new DateTimeConstant("2012-12-03T07:16:23.999Z");
-        DateTime expectedResult = new DateTime()
-                .withZone(DateTimeZone.UTC)
-                .withYear(2012)
-                .withMonthOfYear(12)
-                .withDayOfMonth(03)
-                .withHourOfDay(7)
-                .withMinuteOfHour(16)
-                .withSecondOfMinute(23)
-                .withMillisOfSecond(999);
+        DateTimeConstant result = DateTimeConstant.parse("2012-12-03T07:16:23.999Z");
+        ZonalDateTime expectedResult = PlainTimestamp.of(2012, 12, 3, 7, 16, 23)
+                .plus(999, ClockUnit.MILLIS).inZonalView(DateTimeConstant.TIMEZONE_UTC);
         assertEquals(expectedResult, result.getValue());
     }
 

@@ -44,7 +44,7 @@ public class During extends Function {
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
-        return new BooleanConstant(p2.getValue().contains(p1.getValue()));
+        return new BooleanConstant(p2.getValue().contains(p1.getValue().toMoment()));
     }
 
     @Override

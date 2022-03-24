@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
+import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
@@ -49,8 +50,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import net.time4j.PlainTimestamp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -376,7 +376,7 @@ class QueryParserTest {
         expResult.setFilter(
                 new GreaterThan(
                         new Path(testModel.EP_TIME),
-                        new DateTimeConstant("2015-10-14T23:30:00.104+02:00")));
+                        DateTimeConstant.parse("2015-10-14T23:30:00.104+02:00")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -387,8 +387,8 @@ class QueryParserTest {
                 new GreaterThan(
                         new Path(testModel.EP_TIME),
                         new Add(
-                                new DateTimeConstant("2015-10-14T23:30:00.104+02:00"),
-                                new DurationConstant("P1D")
+                                DateTimeConstant.parse("2015-10-14T23:30:00.104+02:00"),
+                                DurationConstant.parse("P1D")
                         )
                 ));
         result = QueryParser.parseQuery(query, coreSettings, path);
@@ -400,7 +400,7 @@ class QueryParserTest {
         expResult.setFilter(
                 new GreaterThan(
                         new Path(testModel.EP_TIME),
-                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
+                        IntervalConstant.parse("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -410,7 +410,7 @@ class QueryParserTest {
         expResult.setFilter(
                 new Overlaps(
                         new Path(testModel.EP_TIME),
-                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1D")));
+                        IntervalConstant.parse("2015-10-14T01:01:01.000+02:00/P1D")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -420,7 +420,7 @@ class QueryParserTest {
         expResult.setFilter(
                 new Overlaps(
                         new Path(testModel.EP_TIME),
-                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S")));
+                        IntervalConstant.parse("2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assert (result.equals(expResult));
@@ -430,7 +430,7 @@ class QueryParserTest {
         expResult.setFilter(
                 new Overlaps(
                         new Path(testModel.EP_TIME),
-                        new IntervalConstant("P1D/2015-10-14T01:01:01.000+02:00")));
+                        IntervalConstant.parse("P1D/2015-10-14T01:01:01.000+02:00")));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -837,12 +837,12 @@ class QueryParserTest {
                                 new Path(testModel.NP_HOUSE,
                                         testModel.NP_ROOMS,
                                         testModel.EP_TIME),
-                                new DateTimeConstant(new DateTime(2010, 06, 01, 0, 0, DateTimeZone.UTC))),
+                                new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))),
                         new LessEqual(
                                 new Path(testModel.NP_HOUSE,
                                         testModel.NP_ROOMS,
                                         testModel.EP_TIME),
-                                new DateTimeConstant(new DateTime(2010, 07, 01, 0, 0, DateTimeZone.UTC))))));
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);

@@ -18,20 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-import org.joda.time.LocalTime;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.text.ParseException;
+import net.time4j.PlainTime;
+import net.time4j.format.expert.Iso8601Format;
 
 /**
  *
  * @author jab
  */
-public class TimeConstant extends Constant<LocalTime> {
+public class TimeConstant extends Constant<PlainTime> {
 
-    public TimeConstant(LocalTime value) {
+    public TimeConstant(PlainTime value) {
         super(value);
     }
 
-    public TimeConstant(String value) {
-        super(LocalTime.parse(value));
+    public TimeConstant(String value) throws ParseException {
+        super(Iso8601Format.EXTENDED_WALL_TIME.parse(value));
     }
 
     @Override
@@ -42,6 +45,14 @@ public class TimeConstant extends Constant<LocalTime> {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    public static TimeConstant parse(String value) {
+        try {
+            return new TimeConstant(value);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse PlainTime " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
 }

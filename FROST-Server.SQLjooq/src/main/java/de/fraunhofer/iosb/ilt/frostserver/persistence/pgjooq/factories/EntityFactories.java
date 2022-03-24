@@ -35,22 +35,20 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import static de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils.idFromObject;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Map;
+import net.time4j.range.MomentInterval;
 import org.geojson.Crs;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.geom.Geometry;
-import org.joda.time.Interval;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -194,16 +192,16 @@ public class EntityFactories {
         if (time == null) {
             return;
         }
-        clause.put(field, time.getOffsetDateTime());
+        clause.put(field, Utils.offsetDateTime(time.getDateTime()));
     }
 
     public static void insertTimeInterval(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeInterval time) {
         if (time == null) {
             return;
         }
-        Interval interval = time.getInterval();
-        clause.put(startField, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getStartMillis()), UTC));
-        clause.put(endField, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getEndMillis()), UTC));
+        MomentInterval interval = time.getInterval();
+        clause.put(startField, Utils.offsetDateTime(interval.getStartAsMoment()));
+        clause.put(endField, Utils.offsetDateTime(interval.getEndAsMoment()));
     }
 
     /**

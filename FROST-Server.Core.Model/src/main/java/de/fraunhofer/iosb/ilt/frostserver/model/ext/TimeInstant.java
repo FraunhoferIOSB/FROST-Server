@@ -17,14 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
-import java.time.Instant;
-import java.time.OffsetDateTime;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.text.ParseException;
 import java.util.Objects;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import net.time4j.Moment;
+import net.time4j.SystemClock;
+import net.time4j.format.expert.Iso8601Format;
 
 /**
  * Represents ISO8601 Instant.
@@ -33,21 +31,14 @@ import org.joda.time.format.ISODateTimeFormat;
  */
 public class TimeInstant implements TimeObject {
 
-    /**
-     * TODO: Convert to java.time.OffsetDateTime
-     */
-    private final DateTime dateTime;
+    private final Moment dateTime;
 
-    public TimeInstant(DateTime dateTime) {
+    public TimeInstant(Moment dateTime) {
         this.dateTime = dateTime;
     }
 
     public static TimeInstant now() {
-        return new TimeInstant(DateTime.now());
-    }
-
-    public static TimeInstant now(DateTimeZone timeZone) {
-        return new TimeInstant(DateTime.now(timeZone));
+        return new TimeInstant(SystemClock.currentMoment());
     }
 
     @Override
@@ -73,31 +64,19 @@ public class TimeInstant implements TimeObject {
         if (this.dateTime == null || other.dateTime == null) {
             return false;
         }
-        return this.dateTime.isEqual(other.dateTime);
+        return this.dateTime.equals(other.dateTime);
     }
 
     public static TimeInstant parse(String value) {
-        return new TimeInstant(DateTime.parse(value));
+        try {
+            return new TimeInstant(Iso8601Format.EXTENDED_DATE_TIME_OFFSET.parse(value));
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse TimeInstant " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
-    public static TimeInstant create(Long value) {
-        return new TimeInstant(new DateTime(value));
-    }
-
-    public static TimeInstant create(Long value, DateTimeZone timeZone) {
-        return new TimeInstant(new DateTime(value, timeZone));
-    }
-
-    public static TimeInstant parse(String value, DateTimeFormatter dtf) {
-        return new TimeInstant(DateTime.parse(value, dtf));
-    }
-
-    public DateTime getDateTime() {
+    public Moment getDateTime() {
         return dateTime;
-    }
-
-    public OffsetDateTime getOffsetDateTime() {
-        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(dateTime.getMillis()), UTC);
     }
 
     @Override
@@ -110,7 +89,7 @@ public class TimeInstant implements TimeObject {
         if (dateTime == null) {
             return "";
         }
-        return ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC).print(dateTime);
+        return StringHelper.FORMAT_MOMENT.print(dateTime);
     }
 
     @Override

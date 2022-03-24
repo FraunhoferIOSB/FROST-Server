@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +25,6 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 public class Constants {
-
-    public static final ZoneOffset UTC = ZoneOffset.UTC;
 
     public static final String CONTENT_TYPE = "content-type";
     public static final String CONTENT_TYPE_APPLICATION_GEOJSON = "application/geo+json";

@@ -17,7 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import org.joda.time.Period;
+import net.time4j.Duration;
+import net.time4j.IsoUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -29,13 +30,14 @@ class DurationConstantTest {
 
     @Test
     void parseDurationBasic() {
-        DurationConstant result = new DurationConstant("P12DT23H59M59.999S");
-        Period expectedResult = Period.ZERO
-                .withDays(12)
-                .withHours(23)
-                .withMinutes(59)
-                .withSeconds(59)
-                .withMillis(999);
+        DurationConstant result = DurationConstant.parse("P12DT23H59M59.999S");
+        Duration<IsoUnit> expectedResult = Duration.ofPositive()
+                .days(12)
+                .hours(23)
+                .minutes(59)
+                .seconds(59)
+                .millis(999)
+                .build();
         assertEquals(expectedResult, result.getValue());
     }
 

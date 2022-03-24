@@ -10,12 +10,13 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
+import net.time4j.Moment;
+import net.time4j.TemporalType;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
@@ -111,8 +112,8 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         TableImpHistLocations thl = getTables().getTableForClass(TableImpHistLocations.class);
 
         final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.epTime);
-        OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(hlTime.getDateTime().getMillis()), Constants.UTC);
-
+        Moment moment = hlTime.getDateTime();
+        OffsetDateTime newTime = TemporalType.INSTANT.from(moment).atOffset(ZoneOffset.UTC);
         // https://github.com/opengeospatial/sensorthings/issues/30
         // Check the time of the latest HistoricalLocation of our thing.
         // If this time is earlier than our time, set the Locations of our Thing to our Locations.

@@ -20,9 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
+import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
-import org.joda.time.DateTime;
+import net.time4j.PlainTimestamp;
 
 /**
  *
@@ -39,7 +40,7 @@ public class Now extends Function {
     }
 
     protected DateTimeConstant eval() {
-        return new DateTimeConstant(DateTime.now());
+        return new DateTimeConstant(PlainTimestamp.nowInSystemTime().inZonalView(TIMEZONE_UTC));
     }
 
     @Override

@@ -40,14 +40,12 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
 
     @Override
     public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        TimeValue result;
         String node = jp.getValueAsString();
         try {
-            result = new TimeValue(TimeInstant.parse(node));
-        } catch (Exception e) {
-            result = new TimeValue(TimeInterval.parse(node));
+            return new TimeValue(TimeInstant.parse(node));
+        } catch (IllegalArgumentException e) {
+            return new TimeValue(TimeInterval.parse(node));
         }
-        return result;
     }
 
 }

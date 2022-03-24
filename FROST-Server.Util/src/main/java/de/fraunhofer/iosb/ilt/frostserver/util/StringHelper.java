@@ -22,7 +22,34 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.format.FormatStyle;
+import java.util.Collections;
+import java.util.Locale;
 import java.util.Objects;
+import net.time4j.Moment;
+import net.time4j.PlainDate;
+import net.time4j.PlainTime;
+import static net.time4j.PlainTime.HOUR_FROM_0_TO_24;
+import static net.time4j.PlainTime.MINUTE_OF_HOUR;
+import static net.time4j.PlainTime.NANO_OF_SECOND;
+import static net.time4j.PlainTime.SECOND_OF_MINUTE;
+import net.time4j.engine.ChronoCondition;
+import net.time4j.engine.ChronoDisplay;
+import net.time4j.engine.ChronoElement;
+import net.time4j.engine.ChronoEntity;
+import net.time4j.format.Attributes;
+import net.time4j.format.Leniency;
+import net.time4j.format.NumberSystem;
+import net.time4j.format.expert.ChronoFormatter;
+import net.time4j.format.expert.ChronoPrinter;
+import net.time4j.format.expert.Iso8601Format;
+import net.time4j.format.expert.IsoDateStyle;
+import static net.time4j.format.expert.IsoDateStyle.EXTENDED_CALENDAR_DATE;
+import net.time4j.format.expert.IsoDecimalStyle;
+import static net.time4j.format.expert.IsoDecimalStyle.DOT;
+import net.time4j.range.MomentInterval;
+import net.time4j.tz.ZonalOffset;
+import static net.time4j.tz.ZonalOffset.UTC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +59,16 @@ import org.slf4j.LoggerFactory;
  */
 public class StringHelper {
 
-    /**
-     * The logger for this class.
-     */
+    public static final Charset UTF8 = StandardCharsets.UTF_8;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
     private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
+    private static final NonZeroCondition NON_ZERO_SECOND = new NonZeroCondition(PlainTime.SECOND_OF_MINUTE);
+    private static final NonZeroCondition NON_ZERO_FRACTION = new NonZeroCondition(PlainTime.NANO_OF_SECOND);
+    private static final ChronoCondition<ChronoDisplay> SECOND_PART = NON_ZERO_SECOND.or(NON_ZERO_FRACTION);
 
-    public static final Charset UTF8 = StandardCharsets.UTF_8;
+    public static final ChronoPrinter<Moment> FORMAT_MOMENT = buildMomentFormatter();
+    public static final ChronoPrinter<MomentInterval> FORMAT_INTERVAL = buildIntervalFormatter();
 
     private StringHelper() {
         // Utility class, not to be instantiated.
@@ -146,6 +176,96 @@ public class StringHelper {
             split[i] = urlEncode(split[i]);
         }
         return String.join("/", split);
+    }
+
+    private static ChronoPrinter<MomentInterval> buildIntervalFormatter() {
+        return (formattable, buffer, attributes) -> {
+            MomentInterval interval = formattable.toCanonical();
+            if (interval.getStart().isInfinite()) {
+                buffer.append("-");
+            } else {
+                FORMAT_MOMENT.print(interval.getStartAsMoment(), buffer);
+            }
+            buffer.append('/');
+            if (interval.getEnd().isInfinite()) {
+                buffer.append("-");
+            } else {
+                FORMAT_MOMENT.print(interval.getEndAsMoment(), buffer);
+            }
+            return Collections.emptySet();
+        };
+    }
+
+    private static ChronoPrinter<Moment> buildMomentFormatter() {
+        IsoDateStyle dateStyle = EXTENDED_CALENDAR_DATE;
+        IsoDecimalStyle decimalStyle = DOT;
+        ZonalOffset offset = UTC;
+        ChronoFormatter.Builder<Moment> builder = ChronoFormatter.setUp(Moment.axis(), Locale.ROOT);
+        builder.addCustomized(
+                PlainDate.COMPONENT,
+                Iso8601Format.ofDate(dateStyle),
+                (text, status, attributes) -> null);
+        builder.addLiteral('T');
+        addWallTime(builder, dateStyle.isExtended(), decimalStyle);
+        builder.addTimezoneOffset(FormatStyle.MEDIUM, dateStyle.isExtended(), Collections.singletonList("Z"));
+        return builder.build().with(Leniency.STRICT).withTimezone(offset);
+
+    }
+
+    private static <T extends ChronoEntity<T>> void addWallTime(ChronoFormatter.Builder<T> builder, boolean extended, IsoDecimalStyle decimalStyle) {
+
+        builder.startSection(Attributes.NUMBER_SYSTEM, NumberSystem.ARABIC);
+        builder.startSection(Attributes.ZERO_DIGIT, '0');
+        builder.addFixedInteger(HOUR_FROM_0_TO_24, 2);
+
+        if (extended) {
+            builder.addLiteral(':');
+        }
+
+        builder.addFixedInteger(MINUTE_OF_HOUR, 2);
+
+        if (extended) {
+            builder.addLiteral(':');
+        }
+
+        builder.addFixedInteger(SECOND_OF_MINUTE, 2);
+        builder.startOptionalSection(NON_ZERO_FRACTION);
+
+        switch (decimalStyle) {
+            case COMMA:
+                builder.addLiteral(',', '.');
+                break;
+            case DOT:
+                builder.addLiteral('.', ',');
+                break;
+            default:
+                throw new UnsupportedOperationException(decimalStyle.name());
+        }
+
+        builder.addFraction(NANO_OF_SECOND, 1, 9, false);
+
+        for (int i = 0; i < 3; i++) {
+            builder.endSection();
+        }
+
+    }
+
+    private static class NonZeroCondition implements ChronoCondition<ChronoDisplay> {
+
+        private final ChronoElement<Integer> element;
+
+        NonZeroCondition(ChronoElement<Integer> element) {
+            this.element = element;
+        }
+
+        @Override
+        public boolean test(ChronoDisplay context) {
+            return (context.getInt(this.element) > 0);
+        }
+
+        ChronoCondition<ChronoDisplay> or(final NonZeroCondition other) {
+            return context -> (NonZeroCondition.this.test(context) || other.test(context));
+        }
     }
 
 }

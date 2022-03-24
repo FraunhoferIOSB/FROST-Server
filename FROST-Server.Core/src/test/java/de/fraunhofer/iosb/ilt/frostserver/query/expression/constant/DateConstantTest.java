@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import org.joda.time.LocalDate;
+import net.time4j.PlainDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +30,7 @@ class DateConstantTest {
     @Test
     void parseDateBasic() {
         DateConstant result = new DateConstant("2015-04-29");
-        LocalDate expectedResult = new LocalDate()
-                .withYear(2015)
-                .withMonthOfYear(4)
-                .withDayOfMonth(29);
+        PlainDate expectedResult = PlainDate.of(2015, 4, 29);
         assertEquals(expectedResult, result.getValue());
     }
 

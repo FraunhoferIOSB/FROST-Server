@@ -17,7 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import org.joda.time.LocalTime;
+import net.time4j.ClockUnit;
+import net.time4j.PlainTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +30,9 @@ class TimeConstantTest {
 
     @Test
     void parseTimeBasic() {
-        TimeConstant result = new TimeConstant("07:59:59.999");
-        LocalTime expectedResult = new LocalTime()
-                .withHourOfDay(7)
-                .withMinuteOfHour(59)
-                .withSecondOfMinute(59)
-                .withMillisOfSecond(999);
+        TimeConstant result = TimeConstant.parse("07:59:59.999");
+        PlainTime expectedResult = PlainTime.of(7, 59, 59)
+                .plus(999, ClockUnit.MILLIS);
         assertEquals(expectedResult, result.getValue());
     }
 
