@@ -77,7 +77,7 @@ create three default users:
 * **write:**  
   password `write`, has roles `read`, `create` and `update`
 * **admin:**  
-  password `admin`, has roles `read`, `write`, `update`, `delete` and `admin`
+  password `admin`, has roles `read`, `create`, `update`, `delete` and `admin`
 
 You should change these default users!
 
