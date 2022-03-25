@@ -13,6 +13,7 @@ import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1644,11 +1645,15 @@ public abstract class Capability2Tests extends AbstractTestClass {
         try {
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 if (diffs.containsKey(property.name)) {
-                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    assertEquals(diffs.get(property.name).toString(), newEntity.get(property.name).toString(), message);
+                    final String diffValue = String.valueOf(diffs.get(property.name));
+                    final String newValue = String.valueOf(newEntity.get(property.name));
+                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Should have changed.";
+                    assertParameterEquals(property.name, diffValue, newValue, message);
                 } else if (newEntity.has(property.name) && oldEntity.has(property.name)) {
-                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    assertEquals(oldEntity.get(property.name).toString(), newEntity.get(property.name).toString(), message);
+                    final String oldValue = String.valueOf(oldEntity.get(property.name));
+                    final String newValue = String.valueOf(newEntity.get(property.name));
+                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Value " + oldValue + " should not have changed to " + newValue;
+                    assertParameterEquals(property.name, oldValue, newValue, message);
                 } else {
                     String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
                     assertEquals(oldEntity.has(property.name), newEntity.has(property.name), message);
@@ -1674,7 +1679,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 if (diffs.containsKey(property.name)) {
                     String message = "PUT was not applied correctly for " + entityType + ".";
-                    assertEquals(diffs.get(property.name).toString(), newEntity.get(property.name).toString(), message);
+                    final String expected = diffs.get(property.name).toString();
+                    final String value = newEntity.get(property.name).toString();
+                    assertParameterEquals(property.name, expected, value, message);
                 } else {
                     String message = "PUT was not applied correctly for " + entityType + ".";
                     if (oldEntity.has(property.name)) {
@@ -1763,7 +1770,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
             while (iterator.hasNext()) {
                 String key = iterator.next().toString();
                 message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
-                assertEquals(relationObj.get(key).toString(), result.get(key).toString(), message);
+                final String expected = relationObj.get(key).toString();
+                final String value = result.get(key).toString();
+                assertParameterEquals(key, expected, value, message);
             }
             return result.get(ControlInformation.ID);
         } catch (JSONException e) {
@@ -1771,6 +1780,21 @@ public abstract class Capability2Tests extends AbstractTestClass {
             fail("An Exception occurred during testing: " + e.getMessage());
         }
         return -1;
+    }
+
+    private void assertParameterEquals(String key, final String expected, final String value, String message) {
+        if (key.toLowerCase().contains("time") && !"null".equals(expected) && !"null".equals(value)) {
+            if (expected.contains("/")) {
+                String[] expParts = expected.split("/");
+                String[] valParts = value.split("/");
+                assertEquals(ZonedDateTime.parse(expParts[0]), ZonedDateTime.parse(valParts[0]), message);
+                assertEquals(ZonedDateTime.parse(expParts[1]), ZonedDateTime.parse(valParts[1]), message);
+            } else {
+                assertEquals(ZonedDateTime.parse(expected), ZonedDateTime.parse(value), message);
+            }
+        } else {
+            assertEquals(expected, value, message);
+        }
     }
 
     /**
@@ -1786,7 +1810,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 assertEquals("null", observation.get("resultTime").toString(), message);
             } else {
                 String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been \"" + resultTimeValue + "\" but it is now \"" + observation.get("resultTime").toString() + "\".";
-                assertEquals(resultTimeValue, observation.get("resultTime").toString(), message);
+                assertEquals(ZonedDateTime.parse(resultTimeValue), ZonedDateTime.parse(observation.get("resultTime").toString()), message);
             }
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
