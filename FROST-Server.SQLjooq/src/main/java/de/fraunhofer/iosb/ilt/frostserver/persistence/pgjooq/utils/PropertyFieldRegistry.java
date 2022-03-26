@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,6 +46,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.time4j.Moment;
 import org.jooq.Field;
 import org.jooq.Record;
 
@@ -507,8 +507,8 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         @Override
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(property, Utils.intervalFromTimes(
-                    (OffsetDateTime) input.get(factoryStart.get(table)),
-                    (OffsetDateTime) input.get(factoryEnd.get(table))));
+                    (Moment) input.get(factoryStart.get(table)),
+                    (Moment) input.get(factoryEnd.get(table))));
         }
 
         @Override
@@ -539,7 +539,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(
                     property,
-                    Utils.instantFromTime((OffsetDateTime) input.get(factory.get(table)))
+                    Utils.instantFromTime((Moment) input.get(factory.get(table)))
             );
         }
 
@@ -574,8 +574,8 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             entity.setProperty(
                     property,
                     Utils.valueFromTimes(
-                            (OffsetDateTime) input.get(factoryStart.get(table)),
-                            (OffsetDateTime) input.get(factoryEnd.get(table))
+                            (Moment) input.get(factoryStart.get(table)),
+                            (Moment) input.get(factoryEnd.get(table))
                     )
             );
         }

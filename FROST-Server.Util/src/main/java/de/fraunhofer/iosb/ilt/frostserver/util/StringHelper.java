@@ -63,9 +63,7 @@ public class StringHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
     private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
-    private static final NonZeroCondition NON_ZERO_SECOND = new NonZeroCondition(PlainTime.SECOND_OF_MINUTE);
     private static final NonZeroCondition NON_ZERO_FRACTION = new NonZeroCondition(PlainTime.NANO_OF_SECOND);
-    private static final ChronoCondition<ChronoDisplay> SECOND_PART = NON_ZERO_SECOND.or(NON_ZERO_FRACTION);
 
     public static final ChronoPrinter<Moment> FORMAT_MOMENT = buildMomentFormatter();
     public static final ChronoPrinter<MomentInterval> FORMAT_INTERVAL = buildIntervalFormatter();

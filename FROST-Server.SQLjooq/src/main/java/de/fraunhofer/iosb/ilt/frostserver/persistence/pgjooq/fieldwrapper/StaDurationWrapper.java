@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.TIMESTAMP_PARAM;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
-import java.time.OffsetDateTime;
+import net.time4j.Moment;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
      * @param ts1 The first timestamp.
      * @param ts2 The second timestamp, to be subtracted from the first.
      */
-    public StaDurationWrapper(final Field<OffsetDateTime> ts1, final Field<OffsetDateTime> ts2) {
+    public StaDurationWrapper(final Field<Moment> ts1, final Field<Moment> ts2) {
         String template = "(" + TIMESTAMP_PARAM + " - " + TIMESTAMP_PARAM + ")";
         this.duration = DSL.field(template, String.class, ts1, ts2);
     }
@@ -75,7 +75,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
     }
 
     @Override
-    public Field<OffsetDateTime> getDateTime() {
+    public Field<Moment> getDateTime() {
         throw new UnsupportedOperationException("Can not convert duration to DateTime.");
     }
 
@@ -126,22 +126,22 @@ public class StaDurationWrapper implements TimeFieldWrapper {
 
     private FieldWrapper specificOp(String op, StaDurationWrapper other) {
         String template = "(" + INTERVAL_PARAM + " " + op + " " + INTERVAL_PARAM + ")";
-        Field<OffsetDateTime> expression = DSL.field(template, OffsetDateTime.class, this.duration, other.duration);
+        Field<Moment> expression = DSL.field(template, Moment.class, this.duration, other.duration);
         return new StaDateTimeWrapper(expression);
     }
 
     private FieldWrapper specificOp(String op, StaTimeIntervalWrapper other) {
-        Field<OffsetDateTime> dtEnd = other.getEnd();
-        Field<OffsetDateTime> dtStart = other.getStart();
+        Field<Moment> dtEnd = other.getEnd();
+        Field<Moment> dtStart = other.getStart();
         String template = "(" + INTERVAL_PARAM + " " + op + " " + TIMESTAMP_PARAM + ")";
-        Field<OffsetDateTime> newStart = DSL.field(template, OffsetDateTime.class, duration, dtStart);
-        Field<OffsetDateTime> newEnd = DSL.field(template, OffsetDateTime.class, duration, dtEnd);
+        Field<Moment> newStart = DSL.field(template, Moment.class, duration, dtStart);
+        Field<Moment> newEnd = DSL.field(template, Moment.class, duration, dtEnd);
         return new StaTimeIntervalWrapper(newStart, newEnd);
     }
 
     private FieldWrapper specificOp(String op, StaDateTimeWrapper other) {
         String template = "(" + INTERVAL_PARAM + " " + op + " " + TIMESTAMP_PARAM + ")";
-        Field<OffsetDateTime> expression = DSL.field(template, OffsetDateTime.class, duration, other);
+        Field<Moment> expression = DSL.field(template, Moment.class, duration, other);
         return new StaDateTimeWrapper(expression);
     }
 

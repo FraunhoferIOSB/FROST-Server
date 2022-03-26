@@ -9,6 +9,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -28,8 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Map;
+import net.time4j.Moment;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
@@ -71,17 +72,17 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTime = createField(DSL.name(NAME_COL_RESULTTIME), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> colResultTime = createField(DSL.name(NAME_COL_RESULTTIME), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_NUMBER</code>.
@@ -100,12 +101,12 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeStart = createField(DSL.name(NAME_COL_VALIDTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> colValidTimeStart = createField(DSL.name(NAME_COL_VALIDTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeEnd = createField(DSL.name(NAME_COL_VALIDTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> colValidTimeEnd = createField(DSL.name(NAME_COL_VALIDTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.

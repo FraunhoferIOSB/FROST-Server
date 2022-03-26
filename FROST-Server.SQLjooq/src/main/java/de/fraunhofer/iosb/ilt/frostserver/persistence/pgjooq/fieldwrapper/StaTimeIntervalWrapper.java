@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
-import java.time.OffsetDateTime;
 import java.util.Map;
+import net.time4j.Moment;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
@@ -42,29 +42,29 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
      */
     private static final boolean UTC = true;
 
-    private final Field<OffsetDateTime> start;
-    private final Field<OffsetDateTime> end;
+    private final Field<Moment> start;
+    private final Field<Moment> end;
 
     public StaTimeIntervalWrapper(Map<String, Field> expressions) {
         this.start = expressions.get(KEY_TIME_INTERVAL_START);
         this.end = expressions.get(KEY_TIME_INTERVAL_END);
     }
 
-    public StaTimeIntervalWrapper(Field<OffsetDateTime> start, Field<OffsetDateTime> end) {
+    public StaTimeIntervalWrapper(Field<Moment> start, Field<Moment> end) {
         this.start = start;
         this.end = end;
     }
 
-    public StaTimeIntervalWrapper(OffsetDateTime start, OffsetDateTime end) {
+    public StaTimeIntervalWrapper(Moment start, Moment end) {
         this.start = DSL.inline(start);
         this.end = DSL.inline(end);
     }
 
-    public Field<OffsetDateTime> getStart() {
+    public Field<Moment> getStart() {
         return start;
     }
 
-    public Field<OffsetDateTime> getEnd() {
+    public Field<Moment> getEnd() {
         return end;
     }
 
@@ -75,7 +75,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
-        Class<OffsetDateTime> fieldType = start.getType();
+        Class<Moment> fieldType = start.getType();
         if (expectedClazz.isAssignableFrom(fieldType)) {
             return (Field<T>) start;
         }
@@ -87,7 +87,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
     }
 
     @Override
-    public Field<OffsetDateTime> getDateTime() {
+    public Field<Moment> getDateTime() {
         return getStart();
     }
 
@@ -102,8 +102,8 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
             case "-":
                 String template = "(? " + op + " " + INTERVAL_PARAM + ")";
                 return new StaTimeIntervalWrapper(
-                        DSL.field(template, OffsetDateTime.class, start, other.getDuration()),
-                        DSL.field(template, OffsetDateTime.class, end, other.getDuration())
+                        DSL.field(template, Moment.class, start, other.getDuration()),
+                        DSL.field(template, Moment.class, end, other.getDuration())
                 );
 
             default:
@@ -145,9 +145,9 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
     }
 
     private Condition specificOpBool(String op, StaDateTimeWrapper other) {
-        Field<OffsetDateTime> s1 = start;
-        Field<OffsetDateTime> e1 = end;
-        Field<OffsetDateTime> t2 = other.getDateTime();
+        Field<Moment> s1 = start;
+        Field<Moment> e1 = end;
+        Field<Moment> t2 = other.getDateTime();
         switch (op) {
             case "=":
                 return s1.equal(t2).and(e1.equal(t2));
@@ -194,10 +194,10 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
     }
 
     private Condition specificOpBool(String op, StaTimeIntervalWrapper other) {
-        Field<OffsetDateTime> s1 = start;
-        Field<OffsetDateTime> e1 = end;
-        Field<OffsetDateTime> s2 = other.getStart();
-        Field<OffsetDateTime> e2 = other.getEnd();
+        Field<Moment> s1 = start;
+        Field<Moment> e1 = end;
+        Field<Moment> s2 = other.getStart();
+        Field<Moment> e2 = other.getEnd();
         switch (op) {
             case "=":
                 return s1.equal(s2).and(e1.equal(e2));

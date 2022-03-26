@@ -6,6 +6,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurementPartial;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
@@ -23,8 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.List;
+import net.time4j.Moment;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.jooq.DataType;
@@ -72,22 +73,22 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name(NAME_COL_RESULTTIMESTART), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, Moment> colResultTimeStart = createField(DSL.name(NAME_COL_RESULTTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name(NAME_COL_RESULTTIMEEND), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, Moment> colResultTimeEnd = createField(DSL.name(NAME_COL_RESULTTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_NAME</code>.

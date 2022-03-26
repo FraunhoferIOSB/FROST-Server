@@ -4,6 +4,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
@@ -12,11 +13,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import net.time4j.Moment;
-import net.time4j.TemporalType;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
@@ -40,7 +38,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> time = createField(DSL.name(NAME_COL_TIME), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+    public final TableField<Record, Moment> time = createField(DSL.name(NAME_COL_TIME), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
 
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.
@@ -112,8 +110,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         TableImpHistLocations thl = getTables().getTableForClass(TableImpHistLocations.class);
 
         final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.epTime);
-        Moment moment = hlTime.getDateTime();
-        OffsetDateTime newTime = TemporalType.INSTANT.from(moment).atOffset(ZoneOffset.UTC);
+        Moment newTime = hlTime.getDateTime();
         // https://github.com/opengeospatial/sensorthings/issues/30
         // Check the time of the latest HistoricalLocation of our thing.
         // If this time is earlier than our time, set the Locations of our Thing to our Locations.

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import net.time4j.Moment;
 
 /**
  * Enables serialization of entities as JSON.
@@ -71,6 +72,7 @@ public class JsonWriter {
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(TimeObject.class, new TimeObjectSerializer());
         module.addSerializer(OffsetDateTime.class, new OffsetDateTimeSerializer());
+        module.addSerializer(Moment.class, new MomentSerializer());
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
         module.addSerializer(Date.class, new DateSerialiser());

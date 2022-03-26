@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import static java.time.ZoneOffset.UTC;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,34 +82,28 @@ public class Utils {
         return geoJsonMapper;
     }
 
-    public static OffsetDateTime offsetDateTime(Moment moment) {
-        return INSTANT.from(moment).atOffset(UTC);
-    }
-
-    public static TimeInterval intervalFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {
+    public static TimeInterval intervalFromTimes(Moment timeStart, Moment timeEnd) {
         if (timeStart == null) {
-            timeStart = OffsetDateTime.of(LocalDateTime.MAX, UTC);
+            timeStart = INSTANT.translate(LocalDateTime.MAX.toInstant(UTC));
         }
         if (timeEnd == null) {
-            timeEnd = OffsetDateTime.of(LocalDateTime.MIN, UTC);
+            timeEnd = INSTANT.translate(LocalDateTime.MIN.toInstant(UTC));
         }
         if (timeEnd.isBefore(timeStart)) {
             return null;
         } else {
-            return TimeInterval.create(
-                    INSTANT.translate(timeStart.toInstant()),
-                    INSTANT.translate(timeEnd.toInstant()));
+            return TimeInterval.create(timeStart, timeEnd);
         }
     }
 
-    public static TimeInstant instantFromTime(OffsetDateTime time) {
+    public static TimeInstant instantFromTime(Moment time) {
         if (time == null) {
             return new TimeInstant(null);
         }
-        return new TimeInstant(INSTANT.translate(time.toInstant()));
+        return new TimeInstant(time);
     }
 
-    public static TimeValue valueFromTimes(OffsetDateTime timeStart, OffsetDateTime timeEnd) {
+    public static TimeValue valueFromTimes(Moment timeStart, Moment timeEnd) {
         if (timeEnd == null || timeEnd.equals(timeStart)) {
             return new TimeValue(instantFromTime(timeStart));
         }

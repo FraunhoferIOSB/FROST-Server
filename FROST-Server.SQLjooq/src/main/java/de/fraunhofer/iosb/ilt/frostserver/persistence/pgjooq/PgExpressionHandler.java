@@ -115,16 +115,14 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Ove
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import java.time.OffsetDateTime;
-import static java.time.ZoneOffset.UTC;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import net.time4j.Moment;
 import net.time4j.PlainDate;
 import net.time4j.PlainTime;
-import static net.time4j.TemporalType.INSTANT;
 import net.time4j.ZonalDateTime;
 import net.time4j.range.MomentInterval;
 import org.geojson.GeoJsonObject;
@@ -242,8 +240,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
         if (state.finalExpression instanceof Field) {
             Field field = (Field) state.finalExpression;
-            if (OffsetDateTime.class.isAssignableFrom(field.getType())) {
-                Field<OffsetDateTime> dateTimePath = (Field<OffsetDateTime>) state.finalExpression;
+            if (Moment.class.isAssignableFrom(field.getType())) {
+                Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
                 state.finalExpression = new StaDateTimeWrapper(dateTimePath);
             }
         }
@@ -375,7 +373,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(DateTimeConstant node) {
         ZonalDateTime value = node.getValue();
-        return new StaDateTimeWrapper(Utils.offsetDateTime(value.toMoment()), true);
+        return new StaDateTimeWrapper(value.toMoment(), true);
     }
 
     @Override
@@ -392,8 +390,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(IntervalConstant node) {
         MomentInterval value = node.getValue();
         return new StaTimeIntervalWrapper(
-                OffsetDateTime.ofInstant(INSTANT.from(value.getStartAsMoment()), UTC),
-                OffsetDateTime.ofInstant(INSTANT.from(value.getEndAsMoment()), UTC)
+                value.getStartAsMoment(),
+                value.getEndAsMoment()
         );
     }
 
@@ -844,7 +842,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Now node) {
-        return new StaDateTimeWrapper(DSL.currentOffsetDateTime());
+        return new StaDateTimeWrapper(DSL.field("now()", Moment.class));
     }
 
     @Override

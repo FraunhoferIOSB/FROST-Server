@@ -40,8 +40,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.Map;
+import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
 import org.geojson.Crs;
 import org.geojson.Feature;
@@ -177,7 +177,7 @@ public class EntityFactories {
         return entityExists(pm, e.getEntityType(), e.getId());
     }
 
-    public static void insertTimeValue(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeValue time) {
+    public static void insertTimeValue(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeValue time) {
         if (time.isInstant()) {
             TimeInstant timeInstant = time.getInstant();
             insertTimeInstant(clause, endField, timeInstant);
@@ -188,20 +188,20 @@ public class EntityFactories {
         }
     }
 
-    public static void insertTimeInstant(Map<Field, Object> clause, Field<OffsetDateTime> field, TimeInstant time) {
+    public static void insertTimeInstant(Map<Field, Object> clause, Field<Moment> field, TimeInstant time) {
         if (time == null) {
             return;
         }
-        clause.put(field, Utils.offsetDateTime(time.getDateTime()));
+        clause.put(field, time.getDateTime());
     }
 
-    public static void insertTimeInterval(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeInterval time) {
+    public static void insertTimeInterval(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeInterval time) {
         if (time == null) {
             return;
         }
         MomentInterval interval = time.getInterval();
-        clause.put(startField, Utils.offsetDateTime(interval.getStartAsMoment()));
-        clause.put(endField, Utils.offsetDateTime(interval.getEndAsMoment()));
+        clause.put(startField, interval.getStartAsMoment());
+        clause.put(endField, interval.getEndAsMoment());
     }
 
     /**

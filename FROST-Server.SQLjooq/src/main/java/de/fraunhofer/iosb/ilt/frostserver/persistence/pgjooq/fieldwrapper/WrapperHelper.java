@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
-import java.time.OffsetDateTime;
+import net.time4j.Moment;
 import org.jooq.Field;
 
 /**
@@ -32,8 +32,8 @@ public class WrapperHelper {
     }
 
     public static FieldWrapper wrapField(Field field) {
-        Class fieldType = field.getType();
-        if (OffsetDateTime.class.isAssignableFrom(fieldType)) {
+        Class<?> fieldType = field.getType();
+        if (Moment.class.isAssignableFrom(fieldType)) {
             return new StaDateTimeWrapper(field);
         }
         if (JsonValue.class.isAssignableFrom(fieldType)) {

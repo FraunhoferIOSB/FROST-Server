@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
-import java.time.OffsetDateTime;
+import net.time4j.Moment;
 import org.jooq.Field;
 
 /**
@@ -26,7 +26,7 @@ import org.jooq.Field;
  */
 public interface TimeFieldWrapper extends FieldWrapper {
 
-    public Field<OffsetDateTime> getDateTime();
+    public Field<Moment> getDateTime();
 
     public boolean isUtc();
 

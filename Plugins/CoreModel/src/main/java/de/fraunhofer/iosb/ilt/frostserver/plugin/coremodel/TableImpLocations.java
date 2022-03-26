@@ -21,8 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.time.OffsetDateTime;
-import static java.time.ZoneOffset.UTC;
+import net.time4j.Moment;
 import org.geolatte.geom.Geometry;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
@@ -201,7 +200,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 TableImpHistLocations qhl = tables.getTableForClass(TableImpHistLocations.class);
                 Object histLocationId = dslContext.insertInto(qhl)
                         .set((TableField) qhl.getThingId(), thingId)
-                        .set(qhl.time, OffsetDateTime.now(UTC))
+                        .set(qhl.time, Moment.nowInSystemTime())
                         .returningResult(qhl.getId())
                         .fetchOne(0);
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);

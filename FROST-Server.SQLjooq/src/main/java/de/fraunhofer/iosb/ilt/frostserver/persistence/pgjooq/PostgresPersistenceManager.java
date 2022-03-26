@@ -62,12 +62,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import static java.time.ZoneOffset.UTC;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.time4j.Moment;
+import net.time4j.format.expert.Iso8601Format;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Delete;
@@ -88,14 +88,24 @@ import org.slf4j.LoggerFactory;
  */
 public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
-    public static final Instant DATETIME_MAX_INSTANT = Instant.parse("9999-12-30T23:59:59.999Z");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
+
+    public static final String DATETIME_MAX_INSTANT = "9999-12-30T23:59:59.999Z";
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
     // TODO: Change back to -4000 when it is fixed.
-    public static final Instant DATETIME_MIN_INSTANT = Instant.parse("0001-01-02T00:00:00.000Z");
-    public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, UTC);
-    public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, UTC);
+    public static final String DATETIME_MIN_INSTANT = "0001-01-02T00:00:00.000Z";
+    public static final Moment DATETIME_MAX = parseMoment(DATETIME_MAX_INSTANT);
+    public static final Moment DATETIME_MIN = parseMoment(DATETIME_MIN_INSTANT);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
+    static final Moment parseMoment(String value) {
+        try {
+            return Iso8601Format.EXTENDED_DATE_TIME_OFFSET.parse(value);
+        } catch (ParseException ex) {
+            LOGGER.error("Failed to parse Moment: {}", value);
+            return null;
+        }
+    }
+
     private static final String SOURCE_NAME_FROST = "FROST-Source";
     private static final String ID_TYPE = "idType-";
 
