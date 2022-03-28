@@ -80,6 +80,7 @@ public class TypeSimplePrimitive extends TypeSimple {
         TYPES.put(Constants.VALUE_ID_TYPE_LONG, STA_ID_LONG);
         TYPES.put(Constants.VALUE_ID_TYPE_STRING, STA_ID_STRING);
         TYPES.put(Constants.VALUE_ID_TYPE_UUID, STA_ID_UUID);
+        TYPES.put("TimeInstant", EDM_DATETIMEOFFSET);
         for (Field field : FieldUtils.getAllFields(TypeSimplePrimitive.class)) {
             if (!Modifier.isStatic(field.getModifiers())) {
                 continue;

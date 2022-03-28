@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -56,8 +57,8 @@ public class FieldMapperTimeInterval extends FieldMapperAbstractEp {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable);
-        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable);
+        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable, new MomentBinding());
+        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable, new MomentBinding());
     }
 
     @Override

@@ -68,7 +68,13 @@ public class TimeValue implements TimeObject {
 
     @Override
     public boolean isEmpty() {
-        return instant == null ? interval.isEmpty() : instant.isEmpty();
+        if (instant != null) {
+            return instant.isEmpty();
+        }
+        if (interval != null) {
+            return interval.isEmpty();
+        }
+        return true;
     }
 
     @Override

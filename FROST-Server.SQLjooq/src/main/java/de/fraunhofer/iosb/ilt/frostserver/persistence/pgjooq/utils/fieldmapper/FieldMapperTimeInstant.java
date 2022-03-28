@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
@@ -49,7 +50,7 @@ public class FieldMapperTimeInstant extends FieldMapperAbstractEp {
     public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable);
+        fieldIdx = getOrRegisterField(field, dbTable, staTable, new MomentBinding());
     }
 
     @Override
