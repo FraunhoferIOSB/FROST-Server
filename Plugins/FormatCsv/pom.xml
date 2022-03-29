@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-Server.Plugins</artifactId>
-        <version>1.13.4-SNAPSHOT</version>
+        <version>1.13.4</version>
     </parent>
     <artifactId>FROST-Server.Plugin.FormatCsv</artifactId>
     <packaging>jar</packaging>
