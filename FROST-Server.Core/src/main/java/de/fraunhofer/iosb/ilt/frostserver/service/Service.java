@@ -327,8 +327,9 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handleGet(pm, request, response);
-        } catch (Exception e) {
-            LOGGER.error("", e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to handle request (details in debug): {}", e.getMessage());
+            LOGGER.debug("Exception:", e);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
@@ -408,8 +409,9 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handlePost(pm, urlPath, response, request);
-        } catch (IOException | RuntimeException e) {
-            LOGGER.error("", e);
+        } catch (IOException | RuntimeException exc) {
+            LOGGER.error("Failed to handle request (details in debug): {}", exc.getMessage());
+            LOGGER.debug("Exception:", exc);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
@@ -498,7 +500,8 @@ public class Service implements AutoCloseable {
             }
             return handlePatch(pm, request, response);
         } catch (IncompleteEntityException | IOException | RuntimeException exc) {
-            LOGGER.error("", exc);
+            LOGGER.error("Failed to handle request (details in debug): {}", exc.getMessage());
+            LOGGER.debug("Exception:", exc);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
@@ -615,12 +618,13 @@ public class Service implements AutoCloseable {
 
             pm = getPm();
             return handlePut(pm, request, response);
-        } catch (IncompleteEntityException | IOException | RuntimeException e) {
-            LOGGER.error("", e);
+        } catch (IncompleteEntityException | IOException | RuntimeException exc) {
+            LOGGER.error("Failed to handle request (details in debug): {}", exc.getMessage());
+            LOGGER.debug("Exception:", exc);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, 400, exc.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
