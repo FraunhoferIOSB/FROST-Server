@@ -105,9 +105,11 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+    private static final String EXCEPTION = "Exception:";
     private static final String NOT_A_VALID_PATH = "Not a valid path";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
+    private static final String FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG = "Failed to handle request (details in debug): {}";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
     private static final String NOTHING_FOUND_RESPONSE = "Nothing found.";
 
@@ -345,7 +347,8 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
+            LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to execute query. See logs for details.");
         } finally {
@@ -429,7 +432,8 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
         } catch (IOException | RuntimeException e) {
-            LOGGER.error("", e);
+            LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
+            LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to store data.");
         } finally {
@@ -478,7 +482,7 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
-            LOGGER.trace("Exception:", ex);
+            LOGGER.trace(EXCEPTION, ex);
             return errorResponse(response, 400, ex.getMessage());
         }
 
@@ -531,7 +535,8 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException exc) {
-            LOGGER.error("", exc);
+            LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, exc.getMessage());
+            LOGGER.debug(EXCEPTION, exc);
             rollbackAndClose(pm);
             return errorResponse(response, 500, "Failed to store data.");
         } finally {
@@ -650,7 +655,8 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException e) {
-            LOGGER.error("", e);
+            LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
+            LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {

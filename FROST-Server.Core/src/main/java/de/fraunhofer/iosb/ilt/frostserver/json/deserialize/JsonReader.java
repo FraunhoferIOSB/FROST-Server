@@ -119,6 +119,8 @@ public class JsonReader {
             dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
                     .deserializeFull(parser, dsc);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
         }
     }
 
@@ -128,6 +130,8 @@ public class JsonReader {
             dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
                     .deserializeFull(parser, dsc);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
         }
     }
 
