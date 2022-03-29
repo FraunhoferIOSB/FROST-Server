@@ -139,55 +139,71 @@ public class JsonReader {
     }
 
     public Datastream parseDatastream(String value) throws IOException {
-        return mapper.readValue(value, Datastream.class);
+        return parseEntity(Datastream.class, value);
     }
 
     public MultiDatastream parseMultiDatastream(String value) throws IOException {
-        return mapper.readValue(value, MultiDatastream.class);
+        return parseEntity(MultiDatastream.class, value);
     }
 
     public FeatureOfInterest parseFeatureOfInterest(String value) throws IOException {
-        return mapper.readValue(value, FeatureOfInterest.class);
+        return parseEntity(FeatureOfInterest.class, value);
     }
 
     public HistoricalLocation parseHistoricalLocation(String value) throws IOException {
-        return mapper.readValue(value, HistoricalLocation.class);
+        return parseEntity(HistoricalLocation.class, value);
     }
 
     public Location parseLocation(String value) throws IOException {
-        return mapper.readValue(value, Location.class);
+        return parseEntity(Location.class, value);
     }
 
     public Observation parseObservation(String value) throws IOException {
-        return mapper.readValue(value, Observation.class);
+        return parseEntity(Observation.class, value);
     }
 
     public ObservedProperty parseObservedProperty(String value) throws IOException {
-        return mapper.readValue(value, ObservedProperty.class);
+        return parseEntity(ObservedProperty.class, value);
     }
 
     public Sensor parseSensor(String value) throws IOException {
-        return mapper.readValue(value, Sensor.class);
+        return parseEntity(Sensor.class, value);
     }
 
     public Thing parseThing(String value) throws IOException {
-        return mapper.readValue(value, Thing.class);
+        return parseEntity(Thing.class, value);
     }
 
     public <T extends Entity> T parseEntity(Class<T> clazz, String value) throws IOException {
-        return mapper.readValue(value, clazz);
+        try {
+            return mapper.readValue(value, clazz);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
     }
 
     public <T extends Entity> T parseEntity(Class<T> clazz, JsonNode value) throws IOException {
-        return mapper.treeToValue(value, clazz);
+        try {
+            return mapper.treeToValue(value, clazz);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
     }
 
     public <T> T parseObject(Class<T> clazz, String value) throws IOException {
-        return mapper.readValue(value, clazz);
+        try {
+            return mapper.readValue(value, clazz);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
     }
 
     public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
-        return mapper.readValue(value, typeReference);
+        try {
+            return mapper.readValue(value, typeReference);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
     }
 
 }
