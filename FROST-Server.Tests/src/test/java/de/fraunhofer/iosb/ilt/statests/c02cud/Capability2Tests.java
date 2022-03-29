@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1766,12 +1767,12 @@ public abstract class Capability2Tests extends AbstractTestClass {
             if (isCollection == true) {
                 result = result.getJSONArray("value").getJSONObject(0);
             }
-            Iterator iterator = relationObj.keys();
+            Iterator<String> iterator = relationObj.keys();
             while (iterator.hasNext()) {
-                String key = iterator.next().toString();
+                String key = iterator.next();
                 message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
-                final String expected = relationObj.get(key).toString();
-                final String value = result.get(key).toString();
+                final String expected = Objects.toString(relationObj.get(key));
+                final String value = Objects.toString(result.get(key));
                 assertParameterEquals(key, expected, value, message);
             }
             return result.get(ControlInformation.ID);

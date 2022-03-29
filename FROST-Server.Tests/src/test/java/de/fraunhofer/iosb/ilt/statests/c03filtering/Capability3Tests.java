@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +60,14 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability3Tests.class);
+
+    private enum Order {
+        LT,
+        LE,
+        EQ,
+        GE,
+        GT;
+    }
 
     private static Object thingId1, thingId2,
             datastreamId1, datastreamId2, datastreamId3, datastreamId4,
@@ -484,7 +493,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
-                        assertTrue(compareWithPrevious(i, array, property.name) <= 0, message);
+                        compareWithPrevious(i, array, property.name, Order.LE, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                     responseMap = HTTPMethods.doGet(urlString);
@@ -492,7 +501,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
-                        assertTrue(compareWithPrevious(i, array, property.name) <= 0, message);
+                        compareWithPrevious(i, array, property.name, Order.LE, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
                     responseMap = HTTPMethods.doGet(urlString);
@@ -500,7 +509,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
-                        assertTrue(compareWithPrevious(i, array, property.name) >= 0, message);
+                        compareWithPrevious(i, array, property.name, Order.GE, message);
                     }
                 }
 
@@ -524,9 +533,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
-                            int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                            assertTrue(compare <= 0, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -542,9 +550,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
-                            int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                            assertTrue(compare <= 0, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -560,9 +567,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
-                            int compare = compareWithPrevious(i, array, orderProperty);
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                            assertTrue(compare >= 0, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Order.GE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -596,7 +602,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 JSONArray array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
-                    assertTrue(compareWithPrevious(i, array, property.name) <= 0, msg);
+                    compareWithPrevious(i, array, property.name, Order.LE, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
@@ -604,7 +610,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
-                    assertTrue(compareWithPrevious(i, array, property.name) <= 0, msg);
+                    compareWithPrevious(i, array, property.name, Order.LE, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
                 responseMap = HTTPMethods.doGet(urlString);
@@ -612,7 +618,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
-                    assertTrue(compareWithPrevious(i, array, property.name) >= 0, msg);
+                    compareWithPrevious(i, array, property.name, Order.GE, msg);
                 }
             }
 
@@ -636,9 +642,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 JSONArray array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
-                        int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                        assertTrue(compare <= 0, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
                         if (compare != 0) {
                             break;
                         }
@@ -654,9 +659,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
-                        int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                        assertTrue(compare <= 0, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
                         if (compare != 0) {
                             break;
                         }
@@ -672,9 +676,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
-                        int compare = compareWithPrevious(i, array, orderProperty);
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                        assertTrue(compare >= 0, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Order.GE, message);
                         if (compare != 0) {
                             break;
                         }
@@ -688,20 +691,50 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
     }
 
-    private int compareWithPrevious(int idx, JSONArray array, String property) throws JSONException {
+    private int compareWithPrevious(int idx, JSONArray array, String property, Order order, String message) throws JSONException {
         JSONObject jObj1 = array.getJSONObject(idx - 1);
         JSONObject jObj2 = array.getJSONObject(idx);
-        if (!jObj1.has(property) && !jObj2.has(property)) {
-            // Neither has the property, they are the same.
-            return 0;
+        int result = compareObjects(property, jObj1, jObj2, order, message);
+        return result;
+    }
+
+    private int compareObjects(String property, JSONObject jObj1, JSONObject jObj2, Order order, String message) throws JSONException {
+        int result;
+        Object o1 = null;
+        Object o2 = null;
+        if (jObj1.has(property)) {
+            o1 = jObj1.get(property);
         }
-        if (!jObj1.has(property) || !jObj2.has(property)) {
+        if (jObj2.has(property)) {
+            o2 = jObj2.get(property);
+        }
+        if (o1 == null || o2 == null) {
             // One of the two does not have the property, oder undefined?
-            return 0;
+            result = 0;
+        } else {
+            result = compareForOrder(o1, o2);
         }
-        Object o1 = jObj1.get(property);
-        Object o2 = jObj2.get(property);
-        return compareForOrder(o1, o2);
+        String fullMessage = message + " Checking: '" + Objects.toString(o1) + "' " + order + " '" + Objects.toString(o2) + "'";
+        switch (order) {
+            case LT:
+                assertTrue(result < 0, fullMessage);
+                break;
+            case LE:
+                assertTrue(result <= 0, fullMessage);
+                break;
+            case EQ:
+                assertTrue(result == 0, fullMessage);
+                break;
+            case GE:
+                assertTrue(result >= 0, fullMessage);
+                break;
+            case GT:
+                assertTrue(result > 0, fullMessage);
+                break;
+            default:
+                throw new AssertionError(order.name());
+        }
+        return result;
     }
 
     private int compareForOrder(Object o1, Object o2) {
