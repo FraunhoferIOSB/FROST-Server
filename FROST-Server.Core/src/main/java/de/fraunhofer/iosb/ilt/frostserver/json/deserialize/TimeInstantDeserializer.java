@@ -36,7 +36,11 @@ public class TimeInstantDeserializer extends StdDeserializer<TimeInstant> {
 
     @Override
     public TimeInstant deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        return TimeInstant.parse(jp.getValueAsString());
+        final String valueAsString = jp.getValueAsString();
+        if (valueAsString == null) {
+            return null;
+        }
+        return TimeInstant.parse(valueAsString);
     }
 
 }
