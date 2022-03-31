@@ -42,9 +42,8 @@ jobs:
       run: |
         mvn -B install -Dmaven.javadoc.skip=true -P owasp
 
-    - name: Build Docker Images
+    - name: Create environment variables
       run: |
-        mvn -B dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         echo "Exporting Variables"
         export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
