@@ -288,6 +288,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             return;
         }
         for (Property property : query.getSelect()) {
+            if (property instanceof NavigationPropertyMain) {
+                selectedProperties.add(requestedEntityType.getPrimaryKey());
+            }
             selectedProperties.add(property);
         }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
