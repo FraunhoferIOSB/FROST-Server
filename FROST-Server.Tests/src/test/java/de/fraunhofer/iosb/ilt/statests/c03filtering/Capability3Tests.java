@@ -708,11 +708,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
         if (jObj2.has(property)) {
             o2 = jObj2.get(property);
         }
-        if (o1 == null || o2 == null) {
-            // One of the two does not have the property, oder undefined?
+        if (o1 == null || o2 == null || o1 == JSONObject.NULL || o2 == JSONObject.NULL) {
+            // One of the two does not have the property, or undefined?
             result = 0;
         } else {
-            result = compareForOrder(o1, o2);
+            result = compareForOrder(property, o1, o2);
         }
         String fullMessage = message + " Checking: '" + Objects.toString(o1) + "' " + order + " '" + Objects.toString(o2) + "'";
         switch (order) {
@@ -737,7 +737,24 @@ public abstract class Capability3Tests extends AbstractTestClass {
         return result;
     }
 
-    private int compareForOrder(Object o1, Object o2) {
+    private int compareForOrder(String property, Object o1, Object o2) {
+        if (property.toLowerCase().endsWith("time")) {
+            String t1s = Objects.toString(o1);
+            String t2s = Objects.toString(o2);
+            if (t1s.contains("/")) {
+                String[] t1Parts = t1s.split("/");
+                String[] t2Parts = t2s.split("/");
+                int result = ZonedDateTime.parse(t1Parts[0]).compareTo(ZonedDateTime.parse(t2Parts[0]));
+                if (result != 0) {
+                    return result;
+                }
+                return ZonedDateTime.parse(t1Parts[1]).compareTo(ZonedDateTime.parse(t2Parts[1]));
+            } else {
+                final ZonedDateTime t1 = ZonedDateTime.parse(t1s);
+                final ZonedDateTime t2 = ZonedDateTime.parse(t2s);
+                return t1.compareTo(t2);
+            }
+        }
         if (o1 instanceof Comparable && o2 instanceof Comparable) {
             if (o1.getClass().isAssignableFrom(o2.getClass())) {
                 return ((Comparable) o1).compareTo(o2);
@@ -856,6 +873,14 @@ public abstract class Capability3Tests extends AbstractTestClass {
      */
     private void checkSelectForEntityType(EntityType entityType) {
         List<EntityType.EntityProperty> properties = entityType.getProperties();
+        checkSelectSingleProperty(entityType, properties);
+
+        checkSelectMultipleProperties(entityType, properties);
+
+        checkSelectNavigationProperty(entityType);
+    }
+
+    private void checkSelectSingleProperty(EntityType entityType, List<EntityType.EntityProperty> properties) {
         for (EntityType.EntityProperty property : properties) {
             Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
@@ -863,11 +888,25 @@ public abstract class Capability3Tests extends AbstractTestClass {
             JSONObject response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
+    }
 
+    private void checkSelectMultipleProperties(EntityType entityType, List<EntityType.EntityProperty> properties) {
         Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         for (EntityType.EntityProperty property : properties) {
             request.getQuery().addSelect(property.name);
+            JSONObject response = request.executeGet();
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
+        }
+    }
+
+    private void checkSelectNavigationProperty(EntityType entityType) {
+        // Check only navigation links
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
+        for (String relation : relations) {
+            Request request = new Request(serverSettings.getServiceUrl(version));
+            request.addElement(new PathElement(entityType.plural));
+            request.getQuery().addSelect(relation);
             JSONObject response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
