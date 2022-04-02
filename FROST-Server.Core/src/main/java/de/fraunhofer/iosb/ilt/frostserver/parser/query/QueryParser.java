@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
@@ -52,32 +53,36 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_METADATA = "resultmetadata";
     private static final String OP_ORDER_BY = "orderby";
 
-    private final CoreSettings settings;
+    private final QueryDefaults queryDefaults;
     private final ModelRegistry modelRegistry;
     private final ExpressionParser expressionParser;
     private final ResourcePath path;
 
-    public QueryParser(CoreSettings settings, ResourcePath path) {
-        this.settings = settings;
-        this.modelRegistry = settings.getModelRegistry();
+    public QueryParser(QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
+        this.queryDefaults = queryDefaults;
+        this.modelRegistry = modelRegistry;
         this.expressionParser = new ExpressionParser();
         this.path = path;
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, settings, path);
+        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path);
     }
 
-    public static Query parseQuery(String query, Charset encoding, CoreSettings settings, ResourcePath path) {
+    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
+        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path);
+    }
+
+    public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
+            return new Query(modelRegistry, queryDefaults, path);
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
         Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart n = t.Start();
-            QueryParser v = new QueryParser(settings, path);
+            QueryParser v = new QueryParser(queryDefaults, modelRegistry, path);
             return v.visit(n, null);
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));
@@ -96,7 +101,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(modelRegistry, settings.getQueryDefaults(), path);
+        Query result = new Query(modelRegistry, queryDefaults, path);
         node.childrenAccept(this, result);
         return result;
     }

@@ -77,6 +77,10 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_MAX_TOP = "maxTop";
     @DefaultValueInt(25_000_000)
     public static final String TAG_MAX_DATASIZE = "maxDataSize";
+
+    @DefaultValueBoolean(true)
+    public static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
+
     @DefaultValue("")
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
     @DefaultValueBoolean(true)
@@ -142,7 +146,8 @@ public class CoreSettings implements ConfigDefaults {
             defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
             defaultValueBoolean(TAG_DEFAULT_COUNT),
             defaultValueInt(TAG_DEFAULT_TOP),
-            defaultValueInt(TAG_MAX_TOP));
+            defaultValueInt(TAG_MAX_TOP),
+            defaultValueBoolean(TAG_ALWAYS_ORDERBY_ID));
     /**
      * The maximum data size.
      */
@@ -267,6 +272,7 @@ public class CoreSettings implements ConfigDefaults {
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
         queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
         queryDefaults.setTopMax(settings.getInt(TAG_MAX_TOP, getClass()));
+        queryDefaults.setAlwaysOrder(settings.getBoolean(TAG_ALWAYS_ORDERBY_ID, getClass()));
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
         filterDeleteEnabled = settings.getBoolean(TAG_FILTER_DELETE_ENABLE, getClass());
     }

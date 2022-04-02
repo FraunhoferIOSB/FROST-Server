@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
@@ -30,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,8 +137,16 @@ public class Query {
         if (filter != null) {
             filter.validate(modelRegistry.getParserHelper(), entityType);
         }
+        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
+        boolean pkOrder = false;
         for (OrderBy order : orderBy) {
             order.getExpression().validate(modelRegistry.getParserHelper(), entityType);
+            if (primaryKey.getName().equals(order.getExpression().toUrl())) {
+                pkOrder = true;
+            }
+        }
+        if (settings.isAlwaysOrder() && !pkOrder) {
+            orderBy.add(new OrderBy(new Path(primaryKey), OrderBy.OrderType.ASCENDING));
         }
         return this;
     }

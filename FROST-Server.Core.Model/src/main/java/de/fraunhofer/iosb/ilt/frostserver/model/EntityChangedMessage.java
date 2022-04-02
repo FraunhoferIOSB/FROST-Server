@@ -178,7 +178,7 @@ public class EntityChangedMessage {
 
     public static class QueryGenerator {
 
-        private final QueryDefaults queryDefaults = new QueryDefaults(true, false, 1, 1);
+        private final QueryDefaults queryDefaults = new QueryDefaults(true, false, 1, 1, false);
         /**
          * The queries used when serialising entities in messages.
          */

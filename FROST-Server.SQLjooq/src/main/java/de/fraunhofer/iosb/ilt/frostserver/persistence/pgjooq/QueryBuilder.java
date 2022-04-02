@@ -265,7 +265,7 @@ public class QueryBuilder implements ResourcePathVisitor {
             mainTable.clearJoins();
 
             parseFilter(staQuery);
-            parseOrder(staQuery, settings);
+            parseOrder(staQuery);
         }
     }
 
@@ -306,14 +306,11 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
     }
 
-    private void parseOrder(Query query, PersistenceSettings settings) {
+    private void parseOrder(Query query) {
         if (query != null) {
             PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
-            }
-            if (settings.getAlwaysOrderbyId()) {
-                queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
             }
         }
     }

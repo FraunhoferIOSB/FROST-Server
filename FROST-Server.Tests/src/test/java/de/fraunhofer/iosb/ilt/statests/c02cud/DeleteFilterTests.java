@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
@@ -204,6 +205,9 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             assertTrue(check.testOk, message);
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Failed to call service.", ex);
+            fail("Failed to call service." + ex.getReturnedContent());
         } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to call service.", ex);
             fail("Failed to call service." + ex.getMessage());

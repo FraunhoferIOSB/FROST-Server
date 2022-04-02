@@ -77,8 +77,9 @@ class QueryParserTest {
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
-        queryDefaults = coreSettings.getQueryDefaults();
-        queryDefaults.setUseAbsoluteNavigationLinks(false);
+        queryDefaults = coreSettings.getQueryDefaults()
+                .setAlwaysOrder(false)
+                .setUseAbsoluteNavigationLinks(false);
         path = new ResourcePath("http://example.org/FROST-Server", Version.V_1_0, "/");
     }
 

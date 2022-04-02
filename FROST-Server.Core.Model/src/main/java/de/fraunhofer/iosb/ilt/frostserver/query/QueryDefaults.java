@@ -48,13 +48,27 @@ public class QueryDefaults {
      */
     private int topMax;
 
+    /**
+     * If an automatic order by primary key is active.
+     */
+    private boolean alwaysOrder = false;
+
     public QueryDefaults(boolean absNavLinks, boolean countDefault, int topDefault, int topMax) {
+        this(absNavLinks, countDefault, topDefault, topMax, false);
+    }
+
+    public QueryDefaults(boolean absNavLinks, boolean countDefault, int topDefault, int topMax, boolean alwaysOrder) {
         this.useAbsoluteNavigationLinks = absNavLinks;
         this.countDefault = countDefault;
         this.topDefault = topDefault;
         this.topMax = topMax;
+        this.alwaysOrder = alwaysOrder;
     }
 
+    /**
+     * @param serviceRootUrl The service root url.
+     * @return this.
+     */
     public final QueryDefaults setServiceRootUrl(String serviceRootUrl) {
         this.serviceRootUrl = serviceRootUrl;
         return this;
@@ -73,9 +87,11 @@ public class QueryDefaults {
 
     /**
      * @param countDefault the countDefault to set
+     * @return this.
      */
-    public void setCountDefault(boolean countDefault) {
+    public QueryDefaults setCountDefault(boolean countDefault) {
         this.countDefault = countDefault;
+        return this;
     }
 
     /**
@@ -87,9 +103,11 @@ public class QueryDefaults {
 
     /**
      * @param topDefault the topDefault to set
+     * @return this.
      */
-    public void setTopDefault(int topDefault) {
+    public QueryDefaults setTopDefault(int topDefault) {
         this.topDefault = topDefault;
+        return this;
     }
 
     /**
@@ -101,9 +119,11 @@ public class QueryDefaults {
 
     /**
      * @param topMax the topMax to set
+     * @return this.
      */
-    public void setTopMax(int topMax) {
+    public QueryDefaults setTopMax(int topMax) {
         this.topMax = topMax;
+        return this;
     }
 
     /**
@@ -115,9 +135,31 @@ public class QueryDefaults {
 
     /**
      * @param useAbsoluteNavigationLinks the useAbsoluteNavigationLinks to set
+     * @return this.
      */
-    public void setUseAbsoluteNavigationLinks(boolean useAbsoluteNavigationLinks) {
+    public QueryDefaults setUseAbsoluteNavigationLinks(boolean useAbsoluteNavigationLinks) {
         this.useAbsoluteNavigationLinks = useAbsoluteNavigationLinks;
+        return this;
+    }
+
+    /**
+     * If an automatic order by primary key is active.
+     *
+     * @return the alwaysOrder value
+     */
+    public boolean isAlwaysOrder() {
+        return alwaysOrder;
+    }
+
+    /**
+     * If an automatic order by primary key is active.
+     *
+     * @param alwaysOrder the new alwaysOrder value
+     * @return this.
+     */
+    public QueryDefaults setAlwaysOrder(boolean alwaysOrder) {
+        this.alwaysOrder = alwaysOrder;
+        return this;
     }
 
 }

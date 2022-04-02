@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -28,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
@@ -63,11 +65,15 @@ public abstract class AbstractSubscription implements Subscription {
 
     protected ResourcePath path;
     protected CoreSettings settings;
+    protected QueryDefaults queryDefaults;
+    protected ModelRegistry modelRegistry;
 
     protected AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
         this.topic = topic;
         this.path = path;
         this.settings = settings;
+        this.queryDefaults = settings.getQueryDefaults().setAlwaysOrder(false);
+        this.modelRegistry = settings.getModelRegistry();
     }
 
     @Override
@@ -146,7 +152,7 @@ public abstract class AbstractSubscription implements Subscription {
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
-        query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
+        query = new Query(modelRegistry, queryDefaults, path);
         query.setFilter(matchExpression);
     }
 

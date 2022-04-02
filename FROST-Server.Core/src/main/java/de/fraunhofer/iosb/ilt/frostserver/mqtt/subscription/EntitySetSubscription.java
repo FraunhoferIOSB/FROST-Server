@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -31,7 +32,6 @@ import java.net.URLDecoder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -71,7 +71,7 @@ public class EntitySetSubscription extends AbstractSubscription {
             LOGGER.error("Unsupported encoding.", ex);
         }
         try {
-            return QueryParser.parseQuery(queryString, settings, path).validate();
+            return QueryParser.parseQuery(queryString, queryDefaults, modelRegistry, path).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
             return null;

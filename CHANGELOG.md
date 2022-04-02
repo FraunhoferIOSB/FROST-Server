@@ -22,6 +22,8 @@
 * Types of primary keys can be set on a per-table basis.
 * Data is directly streamed from the database to the http response instead of
   to a full intermediate model and String, greatly improving memory use.
+* The option alwaysOrderById now works directly on the query instead of the
+  persistenceManager and is enabled by default.
 
 
 ## Release Version 1.14.0

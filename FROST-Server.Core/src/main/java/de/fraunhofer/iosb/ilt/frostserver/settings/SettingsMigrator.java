@@ -66,6 +66,7 @@ public class SettingsMigrator {
 
         keyChanges.put("enableActuation", "plugins.actuation.enable");
         keyChanges.put("enableMultiDatastream", "plugins.multiDatastream.enable");
+        keyChanges.put("persistence.alwaysOrderbyId", "alwaysOrderbyId");
     }
 
     public void migrateOldSettings(Properties properties) {

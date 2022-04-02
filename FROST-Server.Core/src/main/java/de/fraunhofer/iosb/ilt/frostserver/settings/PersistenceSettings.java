@@ -32,8 +32,6 @@ public class PersistenceSettings implements ConfigDefaults {
      */
     @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong")
     public static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
-    @DefaultValueBoolean(false)
-    public static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
     @DefaultValue("ServerGeneratedOnly")
     public static final String TAG_ID_GENERATION_MODE = "idGenerationMode";
     @DefaultValueBoolean(false)
@@ -47,7 +45,6 @@ public class PersistenceSettings implements ConfigDefaults {
      * Fully-qualified class name of the PersistenceManager implementation class
      */
     private String persistenceManagerImplementationClass;
-    private boolean alwaysOrderbyId;
     private String idGenerationMode;
     private boolean autoUpdateDatabase;
     /**
@@ -80,7 +77,6 @@ public class PersistenceSettings implements ConfigDefaults {
 
     private void init(Settings settings) {
         persistenceManagerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, getClass());
-        alwaysOrderbyId = settings.getBoolean(TAG_ALWAYS_ORDERBY_ID, getClass());
         idGenerationMode = settings.get(TAG_ID_GENERATION_MODE, getClass());
         autoUpdateDatabase = settings.getBoolean(TAG_AUTO_UPDATE_DATABASE, getClass());
         slowQueryThreshold = settings.getInt(TAG_SLOW_QUERY_THRESHOLD, getClass());
@@ -92,10 +88,6 @@ public class PersistenceSettings implements ConfigDefaults {
 
     public String getPersistenceManagerImplementationClass() {
         return persistenceManagerImplementationClass;
-    }
-
-    public boolean getAlwaysOrderbyId() {
-        return alwaysOrderbyId;
     }
 
     public boolean isAutoUpdateDatabase() {

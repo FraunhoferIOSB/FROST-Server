@@ -825,9 +825,6 @@ public class Service implements AutoCloseable {
         if (!query.getExpand().isEmpty()) {
             return errorResponse(response, 400, "$expand not allowed on delete requests.");
         }
-        if (!query.getOrderBy().isEmpty()) {
-            return errorResponse(response, 400, "$orderby not allowed on delete requests.");
-        }
         if (query.getTop().isPresent()) {
             return errorResponse(response, 400, "$top not allowed on delete requests.");
         }

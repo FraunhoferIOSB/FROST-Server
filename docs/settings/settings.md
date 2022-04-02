@@ -45,6 +45,8 @@ These are settings affecting both the MQTT and HTTP packages.
   The number of bytes that can be loaded before the server stops loading more entities and returns the result. The default is 25000000 (25 MB).
 * **useAbsoluteNavigationLinks:**  
   If true, navigationLinks are absolute, otherwise relative.
+* **alwaysOrderbyId:**  
+  Always add an 'orderby=id asc' to queries to ensure consistent paging.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 * **queueLoggingInterval:**
@@ -152,8 +154,6 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
   * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManager`:**  
     Default value, for PostgreSQL.
-* **persistence.alwaysOrderbyId:**  
-  Always add an 'orderby=id asc' to queries to ensure consistent paging.
 * **persistence.autoUpdateDatabase:**  
   Automatically apply database updates.
 * **persistence.idGenerationMode:**  

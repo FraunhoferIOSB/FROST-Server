@@ -58,7 +58,7 @@ public class PropertySubscription extends AbstractSubscription {
             Id id = path.getIdentifiedElement().getId();
             matcher = x -> x.getProperty(entityType.getPrimaryKey()).equals(id);
         }
-        query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
+        query = new Query(modelRegistry, queryDefaults, path);
         query.addSelect(property);
         generateFilter(2);
     }

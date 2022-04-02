@@ -76,8 +76,9 @@ class QueryParserTest {
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
-        queryDefaults = coreSettings.getQueryDefaults();
-        queryDefaults.setUseAbsoluteNavigationLinks(false);
+        queryDefaults = coreSettings.getQueryDefaults()
+                .setAlwaysOrder(false)
+                .setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);

@@ -25,12 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
-import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 /**
  *
@@ -44,12 +44,11 @@ public class EntitySubscription extends AbstractSubscription {
 
     public EntitySubscription(CoreSettings settings, String topic, ResourcePath path) {
         super(topic, path, settings);
-        this.settings = settings;
         init();
     }
 
     private void init() {
-        emptyQuery = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path).validate();
+        emptyQuery = new Query(modelRegistry, queryDefaults, path).validate();
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
