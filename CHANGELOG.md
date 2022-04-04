@@ -24,6 +24,9 @@
   to a full intermediate model and String, greatly improving memory use.
 * The option alwaysOrderById now works directly on the query instead of the
   persistenceManager and is enabled by default.
+* Faster Paging: instead of always using $skip, FROST-Server now generates a filter
+  to improve paging speed if it is possible to do so. The query must have an (automatic)
+  orderby on the primary key.
 
 
 ## Release Version 1.14.0

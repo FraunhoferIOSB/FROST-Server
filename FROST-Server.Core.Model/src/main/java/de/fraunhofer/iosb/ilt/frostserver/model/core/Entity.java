@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 
 /**
@@ -81,6 +82,14 @@ public interface Entity extends NavigableElement {
      * @return The value of the property.
      */
     public <P> P getProperty(Property<P> property);
+
+    /**
+     * Get the value pointed to by the given Path.
+     *
+     * @param path The path to navigate to in the Entity.
+     * @return The value for the given path, or NULL.
+     */
+    public Object getProperty(Path path);
 
     /**
      * Set the value of the given property.

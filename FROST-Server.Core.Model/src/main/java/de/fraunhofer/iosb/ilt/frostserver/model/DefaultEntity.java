@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,6 +124,17 @@ public class DefaultEntity implements Entity {
             return (P) navProperties.get(navigationPropertyMain);
         }
         return property.getFrom(this);
+    }
+
+    @Override
+    public Object getProperty(Path path) {
+        Object result = this;
+        for (Property element : path.getElements()) {
+            if (result instanceof Entity) {
+                result = element.getFrom((Entity) result);
+            }
+        }
+        return result;
     }
 
     @Override

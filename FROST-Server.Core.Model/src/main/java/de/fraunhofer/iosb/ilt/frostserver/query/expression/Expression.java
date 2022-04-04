@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 
 /**
  *
@@ -38,4 +40,13 @@ public interface Expression {
      * @return The filter as it is expected to appear in a URL.
      */
     public String toUrl();
+
+    public default Expression and(Expression that) {
+        return new And(this, that);
+    }
+
+    public default Expression or(Expression that) {
+        return new Or(this, that);
+    }
+
 }

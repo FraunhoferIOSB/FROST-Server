@@ -22,7 +22,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
+import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
@@ -34,12 +43,16 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class UrlHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelper.class.getName());
 
     private UrlHelper() {
         // Should not be instantiated.
@@ -59,6 +72,73 @@ public class UrlHelper {
         String nextLink = path.toString() + "?" + query.toString(false);
         query.setSkip(oldSkip);
         return nextLink;
+    }
+
+    public static String generateNextLink(ResourcePath path, Query query, int resultCount, Entity last, Entity next) {
+        final String standardNextLink = generateNextLink(path, query, resultCount);
+        if (!query.isPkOrder()) {
+            return standardNextLink;
+        }
+        final StringBuilder nextLink = new StringBuilder(standardNextLink);
+        Expression skipFilter = null;
+        And lastAnd = null;
+        for (OrderBy orderby : query.getOrderBy()) {
+            Expression orderExpression = orderby.getExpression();
+            if (orderExpression instanceof Path) {
+                Path obPath = (Path) orderExpression;
+                Object lastValue = last.getProperty(obPath);
+                Object nextValue = next.getProperty(obPath);
+                if (lastValue == null || nextValue == null) {
+                    LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
+                    return standardNextLink;
+                }
+                if (!lastValue.equals(nextValue)) {
+                    Expression newFilter;
+                    if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
+                        newFilter = new LessThan(obPath, Constant.of(lastValue));
+                    } else {
+                        newFilter = new GreaterThan(obPath, Constant.of(lastValue));
+                    }
+                    if (lastAnd == null) {
+                        skipFilter = newFilter;
+                    } else {
+                        lastAnd.addParameter(newFilter);
+                    }
+                    LOGGER.debug("Hit value border for order, done.");
+                    break;
+                } else {
+                    And newAnd = new And(new Equal(obPath, Constant.of(lastValue)));
+                    Or newFilter;
+                    if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
+                        newFilter = new Or(
+                                new LessThan(obPath, Constant.of(lastValue)),
+                                newAnd
+                        );
+                    } else {
+                        newFilter = new Or(
+                                new GreaterThan(obPath, Constant.of(lastValue)),
+                                newAnd
+                        );
+                    }
+                    if (lastAnd == null) {
+                        skipFilter = newFilter;
+                    } else {
+                        lastAnd.addParameter(newFilter);
+                    }
+                    lastAnd = newAnd;
+                }
+            } else {
+                LOGGER.debug("Order expression is not a path, using normal nextLink: {}", orderExpression.toUrl());
+                return standardNextLink;
+            }
+        }
+        if (skipFilter == null) {
+            LOGGER.debug("No skipFilter generated, returning normal nextLink");
+            return standardNextLink;
+        }
+
+        nextLink.append("&$skipFilter=").append(StringHelper.urlEncode(skipFilter.toUrl()));
+        return nextLink.toString();
     }
 
     public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Object id) {

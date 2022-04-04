@@ -49,6 +49,7 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_SELECT_DISTINCT = "selectdistinct";
     private static final String OP_EXPAND = "expand";
     private static final String OP_FILTER = "filter";
+    private static final String OP_SKIPFILTER = "skipfilter";
     private static final String OP_FORMAT = "resultformat";
     private static final String OP_METADATA = "resultmetadata";
     private static final String OP_ORDER_BY = "orderby";
@@ -141,6 +142,10 @@ public class QueryParser extends AbstractParserVisitor {
 
             case OP_FILTER:
                 query.setFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
+                break;
+
+            case OP_SKIPFILTER:
+                query.setSkipFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
                 break;
 
             case OP_FORMAT:

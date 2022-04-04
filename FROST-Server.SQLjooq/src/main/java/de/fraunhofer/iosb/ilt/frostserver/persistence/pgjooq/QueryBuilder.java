@@ -39,10 +39,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.jooq.AggregateFunction;
 import org.jooq.DSLContext;
@@ -55,8 +55,6 @@ import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectIntoStep;
-import org.jooq.SelectSeekStepN;
-import org.jooq.SelectWithTiesAfterOffsetStep;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -120,13 +118,15 @@ public class QueryBuilder implements ResourcePathVisitor {
     public ResultQuery<Record> buildSelect() {
         gatherData();
 
-        DSLContext dslContext = pm.getDslContext();
-        SelectIntoStep<Record> selectStep;
+        final DSLContext dslContext = pm.getDslContext();
+        final SelectIntoStep<Record> selectStep;
         if (staQuery != null && staQuery.isSelectDistinct()) {
             selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
         } else if (queryState.isDistinctRequired()) {
             if (queryState.isSqlSortFieldsSet()) {
-                queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                if (staQuery == null || !staQuery.isPkOrder()) {
+                    queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                }
                 selectStep = dslContext.select(queryState.getSqlSelectFields())
                         .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
             } else {
@@ -136,11 +136,11 @@ public class QueryBuilder implements ResourcePathVisitor {
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
         }
-        SelectConditionStep<Record> whereStep = selectStep.from(queryState.getSqlFrom())
+        var whereStep = selectStep.from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere());
 
-        final List<OrderField> sortFields = queryState.getSqlSortFields().getSqlSortFields();
-        SelectSeekStepN<Record> orderByStep = whereStep.orderBy(sortFields.toArray(new OrderField[sortFields.size()]));
+        final var sortFields = queryState.getSqlSortFields().getSqlSortFields();
+        final var orderByStep = whereStep.orderBy(sortFields.toArray(OrderField[]::new));
 
         int skip = 0;
         int count;
@@ -148,12 +148,13 @@ public class QueryBuilder implements ResourcePathVisitor {
             count = 2;
         } else if (staQuery != null) {
             count = staQuery.getTopOrDefault() + 1;
-            skip = staQuery.getSkip(0);
+            if (staQuery.getSkipFilter() == null) {
+                skip = staQuery.getSkip(0);
+            }
         } else {
             count = 1;
         }
-        SelectWithTiesAfterOffsetStep<Record> limit = orderByStep.limit(skip, count);
-
+        var limit = orderByStep.limit(skip, count);
         if (forUpdate) {
             return limit.forUpdate();
         }
@@ -319,9 +320,18 @@ public class QueryBuilder implements ResourcePathVisitor {
         if (query != null) {
             queryState.setFilter(true);
             Expression filter = query.getFilter();
-            if (filter != null) {
+            Expression skipFilter = query.getSkipFilter();
+            Expression fullFilter = null;
+            if (filter != null && skipFilter != null) {
+                fullFilter = new And(filter, skipFilter);
+            } else if (filter != null) {
+                fullFilter = filter;
+            } else if (skipFilter != null) {
+                fullFilter = skipFilter;
+            }
+            if (fullFilter != null) {
                 PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
-                queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
+                queryState.setSqlWhere(handler.addFilterToWhere(fullFilter, queryState.getSqlWhere()));
             }
         }
     }

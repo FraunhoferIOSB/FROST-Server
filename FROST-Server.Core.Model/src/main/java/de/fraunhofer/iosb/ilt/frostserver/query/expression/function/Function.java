@@ -53,18 +53,18 @@ public abstract class Function implements Expression {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Function.class);
 
-    protected List<Expression> parameters;
+    protected List<Expression> parameters = new ArrayList<>();
     protected List<FunctionTypeBinding> allowedTypeBindings;
     private final String functionName;
 
     protected Function() {
-        allowedTypeBindings = new ArrayList();
+        allowedTypeBindings = new ArrayList<>();
         functionName = getClass().getSimpleName().toLowerCase();
     }
 
     protected Function(Expression... parameters) {
-        this.parameters = Arrays.asList(parameters);
-        allowedTypeBindings = new ArrayList();
+        this.parameters.addAll(Arrays.asList(parameters));
+        allowedTypeBindings = new ArrayList<>();
         functionName = getClass().getSimpleName().toLowerCase();
     }
 
@@ -106,6 +106,10 @@ public abstract class Function implements Expression {
 
     public void setParameters(Expression... parameters) {
         this.parameters = Arrays.asList(parameters);
+    }
+
+    public void addParameter(Expression parameter) {
+        parameters.add(parameter);
     }
 
     public List<Expression> getParameters() {

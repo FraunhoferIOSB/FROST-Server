@@ -96,6 +96,7 @@ TOKEN [IGNORE_CASE]:
 | <O_FILTER:   "filter" >
 | <O_FORMAT:   ("result")? "Format" >
 | <O_METADATA: "resultMetadata" >
+| <O_SKIPFILTER: "skipFilter" >
 
 | <QF_SUBSTRINGOF:        "substringof" <LB> >
 | <QF_ENDSWITH:           "endswith" <LB> >
@@ -190,6 +191,7 @@ void Option() #Option : {}
       | ( <O_FILTER>   <EQ> Filter() {jjtThis.setType("filter");} )
       | ( <O_FORMAT>   <EQ> Format() {jjtThis.setType("resultFormat");} )
       | ( <O_METADATA> <EQ> Metadata() {jjtThis.setType("resultMetadata");} )
+      | ( <O_SKIPFILTER> <EQ> Filter() {jjtThis.setType("skipfilter");} )
       )
 }
 

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
 import java.util.Objects;
@@ -68,4 +70,22 @@ public abstract class Constant<T> implements Value {
         return Objects.hash(value);
     }
 
+    public static Constant of(Object object) {
+        if (object instanceof Boolean) {
+            return new BooleanConstant((Boolean) object);
+        }
+        if (object instanceof Id) {
+            return new IdConstant((Id) object);
+        }
+        if (object instanceof Integer) {
+            return new IntegerConstant((Integer) object);
+        }
+        if (object instanceof Long) {
+            return new IntegerConstant((Long) object);
+        }
+        if (object instanceof TimeObject) {
+            return new TimeObjectConstant((TimeObject) object);
+        }
+        throw new IllegalArgumentException("Can not make constant of " + object);
+    }
 }

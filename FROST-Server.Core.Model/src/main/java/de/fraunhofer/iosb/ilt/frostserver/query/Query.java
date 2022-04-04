@@ -70,8 +70,10 @@ public class Query {
     private final Set<Property> select;
     private boolean selectDistinct = false;
     private Expression filter;
+    private Expression skipFilter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
+    private boolean pkOrder = false;
     private String format;
     private Metadata metadata = Metadata.DEFAULT;
 
@@ -137,16 +139,20 @@ public class Query {
         if (filter != null) {
             filter.validate(modelRegistry.getParserHelper(), entityType);
         }
+        if (skipFilter != null) {
+            skipFilter.validate(modelRegistry.getParserHelper(), entityType);
+        }
         final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
-        boolean pkOrder = false;
+        final String pkName = primaryKey.getName();
         for (OrderBy order : orderBy) {
             order.getExpression().validate(modelRegistry.getParserHelper(), entityType);
-            if (primaryKey.getName().equals(order.getExpression().toUrl())) {
+            if (pkName.equals(order.getExpression().toUrl())) {
                 pkOrder = true;
             }
         }
-        if (settings.isAlwaysOrder() && !pkOrder) {
+        if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
             orderBy.add(new OrderBy(new Path(primaryKey), OrderBy.OrderType.ASCENDING));
+            pkOrder = true;
         }
         return this;
     }
@@ -318,6 +324,19 @@ public class Query {
         return filter;
     }
 
+    public Query setFilter(Expression filter) {
+        this.filter = filter;
+        return this;
+    }
+
+    public Expression getSkipFilter() {
+        return skipFilter;
+    }
+
+    public void setSkipFilter(Expression skipFilter) {
+        this.skipFilter = skipFilter;
+    }
+
     public String getFormat() {
         return format;
     }
@@ -332,6 +351,15 @@ public class Query {
 
     public List<OrderBy> getOrderBy() {
         return orderBy;
+    }
+
+    /**
+     * Check if this Query is ordered by the primary key of the entity type.
+     *
+     * @return true if this Query is ordered by the primary key.
+     */
+    public boolean isPkOrder() {
+        return pkOrder;
     }
 
     public Query setTop(int top) {
@@ -350,11 +378,6 @@ public class Query {
 
     public Query setCount(boolean count) {
         this.count = Optional.of(count);
-        return this;
-    }
-
-    public Query setFilter(Expression filter) {
-        this.filter = filter;
         return this;
     }
 
@@ -422,7 +445,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy, path, selectDistinct);
+        return Objects.hash(top, skip, count, select, filter, skipFilter, format, expand, orderBy, path, selectDistinct);
     }
 
     @Override
@@ -443,6 +466,7 @@ public class Query {
                 && Objects.equals(this.select, other.select)
                 && Objects.equals(this.selectDistinct, other.selectDistinct)
                 && Objects.equals(this.filter, other.filter)
+                && Objects.equals(this.skipFilter, other.skipFilter)
                 && Objects.equals(this.format, other.format)
                 && Objects.equals(this.expand, other.expand)
                 && Objects.equals(this.orderBy, other.orderBy)

@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.jooq.Cursor;
 import org.jooq.Record;
+import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,24 +147,34 @@ public class EntitySetJooqCurser implements EntitySet {
                 throw new NoSuchElementException("Cursor is closed or empty.");
             }
             fetchedCount++;
-            Record tuple = parent.results.fetchNext();
-            Entity entity = parent.queryState.entityFromQuery(tuple, parent.size);
+            final Entity entity = fetchNext();
             if (parent.size.isExceeded()) {
                 LOGGER.debug("Size limit reached: {} > {}.", parent.size.getDataSize(), parent.size.getMaxSize());
                 parent.maxFetch = fetchedCount;
-                if (parent.results.hasNext()) {
-                    parent.generateNextLink();
-                }
-                parent.results.close();
+                generateNextAndClose(entity);
             } else if (fetchedCount >= parent.maxFetch) {
-                if (parent.results.hasNext()) {
-                    parent.generateNextLink();
-                }
-                parent.results.close();
+                generateNextAndClose(entity);
             }
             entity.setQuery(parent.staQuery);
             parent.resultBuilder.expandEntity(entity, parent.staQuery);
             return entity;
+        }
+
+        private Entity fetchNext() throws DataAccessException {
+            final Record tuple = parent.results.fetchNext();
+            return parent.queryState.entityFromQuery(tuple, parent.size);
+        }
+
+        private void generateNextLink(Entity last, Entity next) {
+            parent.nextLink = UrlHelper.generateNextLink(parent.resultBuilder.getPath(), parent.staQuery, parent.maxFetch, last, next);
+        }
+
+        private void generateNextAndClose(Entity entity) throws DataAccessException {
+            if (parent.results.hasNext()) {
+                final Entity next = fetchNext();
+                generateNextLink(entity, next);
+            }
+            parent.results.close();
         }
     }
 
