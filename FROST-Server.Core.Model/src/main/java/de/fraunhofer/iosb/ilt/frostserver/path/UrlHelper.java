@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
@@ -92,12 +93,17 @@ public class UrlHelper {
                     LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
                     return standardNextLink;
                 }
+                Constant valueConstant = ConstantFactory.of(lastValue);
+                if (valueConstant == null) {
+                    LOGGER.debug("Order expression value can not be made a constant, using normal nextLink: {}", orderExpression.toUrl());
+                    return standardNextLink;
+                }
                 if (!lastValue.equals(nextValue)) {
                     Expression newFilter;
                     if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
-                        newFilter = new LessThan(obPath, Constant.of(lastValue));
+                        newFilter = new LessThan(obPath, valueConstant);
                     } else {
-                        newFilter = new GreaterThan(obPath, Constant.of(lastValue));
+                        newFilter = new GreaterThan(obPath, valueConstant);
                     }
                     if (lastAnd == null) {
                         skipFilter = newFilter;
@@ -107,16 +113,16 @@ public class UrlHelper {
                     LOGGER.debug("Hit value border for order, done.");
                     break;
                 } else {
-                    And newAnd = new And(new Equal(obPath, Constant.of(lastValue)));
+                    And newAnd = new And(new Equal(obPath, valueConstant));
                     Or newFilter;
                     if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
                         newFilter = new Or(
-                                new LessThan(obPath, Constant.of(lastValue)),
+                                new LessThan(obPath, valueConstant),
                                 newAnd
                         );
                     } else {
                         newFilter = new Or(
-                                new GreaterThan(obPath, Constant.of(lastValue)),
+                                new GreaterThan(obPath, valueConstant),
                                 newAnd
                         );
                     }

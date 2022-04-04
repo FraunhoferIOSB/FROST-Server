@@ -8,6 +8,7 @@
     <!-- service setting -->
     <Parameter override="false" name="serviceRootUrl" value="http://localhost:8080/FROST-Server" />
     <Parameter override="false" name="defaultCount" value="false" />
+    <Parameter override="false" name="alwaysOrderbyId" value="true" />
     <Parameter override="false" name="defaultTop" value="100" />
     <Parameter override="false" name="maxTop" value="1000" />
     <Parameter override="false" name="maxDataSize" value="25000000" />
@@ -57,7 +58,6 @@
         "ClientGeneratedOnly"       = Client has to provide @iot.id to create entities.
     -->
     <Parameter override="false" name="persistence.autoUpdateDatabase" value="false" />
-    <Parameter override="false" name="persistence.alwaysOrderbyId" value="false" />
     <!-- JNDO Database connection. Does suppport connection pooling. -->
     <Parameter override="false" name="persistence.db_jndi_datasource" value="jdbc/sensorThings" />
     <Resource

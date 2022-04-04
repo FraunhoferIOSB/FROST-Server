@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -132,6 +133,18 @@ public class DefaultEntity implements Entity {
         for (Property element : path.getElements()) {
             if (result instanceof Entity) {
                 result = element.getFrom((Entity) result);
+            } else if (result instanceof Map) {
+                result = ((Map<String, Object>) result).get(element.getName());
+            } else if (result instanceof List) {
+                try {
+                    int idx = Integer.parseInt(element.getName());
+                    result = ((List) result).get(idx);
+                } catch (NumberFormatException exc) {
+                    // it was not an index...
+                    return null;
+                }
+            } else {
+                return null;
             }
         }
         return result;
