@@ -75,76 +75,132 @@ public class UrlHelper {
         return nextLink;
     }
 
+    private static class SkipFilterGenerator {
+
+        final Entity last;
+        final Entity next;
+
+        private boolean done = false;
+        private boolean failed = false;
+
+        Expression skipFilter = null;
+        And lastAnd = null;
+
+        public SkipFilterGenerator(Entity last, Entity next) {
+            this.last = last;
+            this.next = next;
+        }
+
+        public boolean isFailed() {
+            return failed || skipFilter == null;
+        }
+
+        private boolean setFailed() {
+            failed = true;
+            return setDone();
+        }
+
+        public boolean isDone() {
+            return done;
+        }
+
+        private boolean setDone() {
+            done = true;
+            return done;
+        }
+
+        public Expression getSkipFilter() {
+            return skipFilter;
+        }
+
+        public boolean addOrderBy(OrderBy orderby) {
+            if (done) {
+                return done;
+            }
+            Expression orderExpression = orderby.getExpression();
+            if (!(orderExpression instanceof Path)) {
+                return setFailed();
+            }
+            Path obPath = (Path) orderExpression;
+            Object lastValue = last.getProperty(obPath);
+            Object nextValue = next.getProperty(obPath);
+            if (lastValue == null || nextValue == null) {
+                LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
+                return setFailed();
+            }
+            Constant valueConstant = ConstantFactory.of(lastValue);
+            if (valueConstant == null) {
+                LOGGER.debug("Order expression value can not be made a constant, using normal nextLink: {}", orderExpression.toUrl());
+                return setFailed();
+            }
+            if (lastValue.equals(nextValue)) {
+                return handleValueEqual(obPath, valueConstant, orderby);
+            } else {
+                return handleValueDifferent(orderby, obPath, valueConstant);
+            }
+        }
+
+        private boolean handleValueEqual(Path obPath, Constant valueConstant, OrderBy orderby) {
+            And newAnd = new And(new Equal(obPath, valueConstant));
+            Or newFilter;
+            if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
+                newFilter = new Or(
+                        new LessThan(obPath, valueConstant),
+                        newAnd
+                );
+            } else {
+                newFilter = new Or(
+                        new GreaterThan(obPath, valueConstant),
+                        newAnd
+                );
+            }
+            if (lastAnd == null) {
+                skipFilter = newFilter;
+            } else {
+                lastAnd.addParameter(newFilter);
+            }
+            lastAnd = newAnd;
+            return done;
+        }
+
+        private boolean handleValueDifferent(OrderBy orderby, Path obPath, Constant valueConstant) {
+            Expression newFilter;
+            if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
+                newFilter = new LessThan(obPath, valueConstant);
+            } else {
+                newFilter = new GreaterThan(obPath, valueConstant);
+            }
+            if (lastAnd == null) {
+                skipFilter = newFilter;
+            } else {
+                lastAnd.addParameter(newFilter);
+            }
+            LOGGER.debug("Hit value border for order, done.");
+            return setDone();
+        }
+
+    }
+
     public static String generateNextLink(ResourcePath path, Query query, int resultCount, Entity last, Entity next) {
         final String standardNextLink = generateNextLink(path, query, resultCount);
         if (!query.isPkOrder()) {
             return standardNextLink;
         }
-        final StringBuilder nextLink = new StringBuilder(standardNextLink);
-        Expression skipFilter = null;
-        And lastAnd = null;
+        SkipFilterGenerator sfg = new SkipFilterGenerator(last, next);
         for (OrderBy orderby : query.getOrderBy()) {
-            Expression orderExpression = orderby.getExpression();
-            if (orderExpression instanceof Path) {
-                Path obPath = (Path) orderExpression;
-                Object lastValue = last.getProperty(obPath);
-                Object nextValue = next.getProperty(obPath);
-                if (lastValue == null || nextValue == null) {
-                    LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
-                    return standardNextLink;
-                }
-                Constant valueConstant = ConstantFactory.of(lastValue);
-                if (valueConstant == null) {
-                    LOGGER.debug("Order expression value can not be made a constant, using normal nextLink: {}", orderExpression.toUrl());
-                    return standardNextLink;
-                }
-                if (!lastValue.equals(nextValue)) {
-                    Expression newFilter;
-                    if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
-                        newFilter = new LessThan(obPath, valueConstant);
-                    } else {
-                        newFilter = new GreaterThan(obPath, valueConstant);
-                    }
-                    if (lastAnd == null) {
-                        skipFilter = newFilter;
-                    } else {
-                        lastAnd.addParameter(newFilter);
-                    }
-                    LOGGER.debug("Hit value border for order, done.");
-                    break;
-                } else {
-                    And newAnd = new And(new Equal(obPath, valueConstant));
-                    Or newFilter;
-                    if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
-                        newFilter = new Or(
-                                new LessThan(obPath, valueConstant),
-                                newAnd
-                        );
-                    } else {
-                        newFilter = new Or(
-                                new GreaterThan(obPath, valueConstant),
-                                newAnd
-                        );
-                    }
-                    if (lastAnd == null) {
-                        skipFilter = newFilter;
-                    } else {
-                        lastAnd.addParameter(newFilter);
-                    }
-                    lastAnd = newAnd;
-                }
-            } else {
-                LOGGER.debug("Order expression is not a path, using normal nextLink: {}", orderExpression.toUrl());
-                return standardNextLink;
+            if (sfg.addOrderBy(orderby)) {
+                break;
             }
         }
-        if (skipFilter == null) {
-            LOGGER.debug("No skipFilter generated, returning normal nextLink");
+
+        if (sfg.isFailed()) {
             return standardNextLink;
         }
-
-        nextLink.append("&$skipFilter=").append(StringHelper.urlEncode(skipFilter.toUrl()));
-        return nextLink.toString();
+        final String skipFilter = sfg.getSkipFilter().toUrl();
+        return new StringBuilder(standardNextLink)
+                .append("&$skipFilter=")
+                .append(StringHelper.urlEncode(skipFilter))
+                .toString();
     }
 
     public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Object id) {

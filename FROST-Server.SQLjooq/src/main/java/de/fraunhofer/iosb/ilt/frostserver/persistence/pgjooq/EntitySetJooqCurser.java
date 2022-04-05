@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.jooq.Cursor;
 import org.jooq.Record;
-import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,7 +159,7 @@ public class EntitySetJooqCurser implements EntitySet {
             return entity;
         }
 
-        private Entity fetchNext() throws DataAccessException {
+        private Entity fetchNext() {
             final Record tuple = parent.results.fetchNext();
             return parent.queryState.entityFromQuery(tuple, parent.size);
         }
@@ -169,7 +168,7 @@ public class EntitySetJooqCurser implements EntitySet {
             parent.nextLink = UrlHelper.generateNextLink(parent.resultBuilder.getPath(), parent.staQuery, parent.maxFetch, last, next);
         }
 
-        private void generateNextAndClose(Entity entity) throws DataAccessException {
+        private void generateNextAndClose(Entity entity) {
             if (parent.results.hasNext()) {
                 final Entity next = fetchNext();
                 generateNextLink(entity, next);

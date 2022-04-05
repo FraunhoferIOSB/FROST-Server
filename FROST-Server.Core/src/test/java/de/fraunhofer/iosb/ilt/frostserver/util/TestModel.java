@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -76,6 +77,23 @@ public class TestModel implements PluginService {
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(NP_ROOMS, false)
                 .registerProperty(NP_HOUSE, true);
+    }
+
+    public Entity createHouse(int id, String name, double value) {
+        return new DefaultEntity(ET_HOUSE, new IdLong(id))
+                .setProperty(EP_NAME, name)
+                .setProperty(EP_VALUE, value);
+    }
+
+    public Entity createRoom(int id, String name, double value) {
+        return new DefaultEntity(ET_HOUSE, new IdLong(id))
+                .setProperty(EP_NAME, name)
+                .setProperty(EP_VALUE, value);
+    }
+
+    public Entity createRoom(int id, String name, double value, TimeValue time) {
+        return createRoom(id, name, value)
+                .setProperty(EP_TIME, time);
     }
 
     public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {
