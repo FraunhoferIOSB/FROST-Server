@@ -294,6 +294,10 @@ public class QueryBuilder implements ResourcePathVisitor {
             }
             selectedProperties.add(property);
         }
+        if (query.isPkOrder() && !query.isSelectDistinct() && !selectedProperties.isEmpty()) {
+            // We're ordering by PK, make sure we select it too, so we can build better nextLinks
+            selectedProperties.add(requestedEntityType.getPrimaryKey());
+        }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.

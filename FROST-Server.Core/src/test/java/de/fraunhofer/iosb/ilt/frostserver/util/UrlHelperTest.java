@@ -121,6 +121,20 @@ class UrlHelperTest {
                 "/Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and id gt 1))");
     }
 
+    @Test
+    void testNextLinkSameOrderNameValue() {
+        Entity house1 = testModel.createHouse(1, "House 1", 1.0);
+        Entity house2 = testModel.createHouse(2, "House 1", 1.0);
+        testNextLink(
+                coreSettings, house1, house2,
+                "/Houses?$orderby=name,value&$top=2",
+                "/Houses?$orderby=name,value&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
+        testNextLink(
+                coreSettings, house1, house2,
+                "/Houses?$orderby=name desc,value&$top=2",
+                "/Houses?$orderby=name desc,value&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
+    }
+
     private static void testNextLink(CoreSettings settings, Entity last, Entity next, String baseUrl, String expectedNextUrl) {
 
         Query queryBase = null;
