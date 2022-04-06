@@ -59,4 +59,16 @@
             onDelete="CASCADE" onUpdate="CASCADE" />
     </changeSet>
 
+    <changeSet author="scf" id="2022-04-06-Index-OBS-MDS_ID-ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="OBS-MDS_ID-ID" />
+            </not>
+        </preConditions>
+        <createIndex tableName="OBSERVATIONS" indexName="OBS-MDS_ID-ID">
+            <column name="MULTI_DATASTREAM_ID" />
+            <column name="ID" />
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
