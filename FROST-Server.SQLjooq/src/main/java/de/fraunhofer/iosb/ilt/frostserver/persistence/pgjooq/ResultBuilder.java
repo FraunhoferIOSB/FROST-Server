@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -257,10 +258,15 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntitySet element) {
-        Cursor<Record> results = timeQuery(sqlQuery);
-        EntitySet entitySet = sqlQueryBuilder
-                .getQueryState()
-                .createSetFromRecords(results, this);
+        final EntitySet entitySet;
+        if (staQuery.getTopOrDefault() > 0) {
+            final Cursor<Record> results = timeQuery(sqlQuery);
+            entitySet = sqlQueryBuilder
+                    .getQueryState()
+                    .createSetFromRecords(results, this);
+        } else {
+            entitySet = new EntitySetImpl(sqlQueryBuilder.getQueryState().getMainTable().getEntityType());
+        }
 
         if (entitySet == null) {
             throw new IllegalStateException("Empty set!");
