@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
@@ -46,6 +47,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.time4j.Moment;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +159,6 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        // ToDo: Fix IDs
         etActuator
                 .registerProperty(epIdActuator, false)
                 .registerProperty(pluginCoreModel.epName, true)
@@ -170,7 +171,12 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epIdTask, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
-                .registerProperty(npTaskingCapabilityTask, true);
+                .registerProperty(npTaskingCapabilityTask, true)
+                .addValidator((entity, entityPropertiesOnly) -> {
+                    if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
+                        entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
+                    }
+                });
         etTaskingCapability
                 .registerProperty(epIdTaskingCap, false)
                 .registerProperty(pluginCoreModel.epName, true)
