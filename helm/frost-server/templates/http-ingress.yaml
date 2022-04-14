@@ -25,4 +25,8 @@ spec:
             name:  {{ $fullName }}
             port:
               number: 80
+  {{- if .Values.frost.http.ingress.tls.enabled }}
+  tls:
+    - { }
+  {{- end -}}
 {{- end -}}
