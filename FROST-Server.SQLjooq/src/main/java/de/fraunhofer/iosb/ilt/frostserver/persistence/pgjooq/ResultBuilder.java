@@ -342,7 +342,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (estimate < estimateTreshold) {
             final int count = timeCountQuery(sqlQueryBuilder.buildCount());
             entitySet.setCount(count);
-            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
         } else {
             entitySet.setCount(estimate);
         }
@@ -356,7 +356,7 @@ public class ResultBuilder implements ResourcePathVisitor {
             final var csr = sqlQueryBuilder.buildEstimateCountSample();
             final int estimate = (int) (timeCountQueryRecord(csr.countQuery) * Math.pow(100, csr.sampledTables));
             entitySet.setCount(Math.max(count, estimate));
-            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
         }
     }
 
@@ -365,7 +365,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (estimate < estimateTreshold) {
             final int count = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
             entitySet.setCount(count);
-            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
         } else {
             entitySet.setCount(estimate);
         }
@@ -378,7 +378,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         } else {
             final int estimate = timeCountQuery(sqlQueryBuilder.buildEstimateCountExplain());
             entitySet.setCount(Math.max(count, estimate));
-            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
         }
     }
 
