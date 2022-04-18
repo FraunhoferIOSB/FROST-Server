@@ -20,12 +20,33 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class PersistenceSettings implements ConfigDefaults {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceSettings.class.getName());
+
+    public enum CountMode {
+        FULL,
+        LIMIT_SAMPLE,
+        SAMPLE_LIMIT,
+        LIMIT_ESTIMATE,
+        ESTIMATE_LIMIT;
+
+        public static CountMode fromValue(String value) {
+            try {
+                return CountMode.valueOf(value.toUpperCase());
+            } catch (IllegalArgumentException exc) {
+                LOGGER.error("No CountMode named {}, should be one of {}", value, CountMode.values());
+                return FULL;
+            }
+        }
+    }
 
     /**
      * Tags
@@ -40,6 +61,10 @@ public class PersistenceSettings implements ConfigDefaults {
     public static final String TAG_SLOW_QUERY_THRESHOLD = "slowQueryThreshold";
     @DefaultValueInt(0)
     public static final String TAG_QUERY_TIMEOUT = "queryTimeout";
+    @DefaultValue("full")
+    public static final String TAG_COUNT_MODE = "countMode";
+    @DefaultValueInt(10_000)
+    public static final String TAG_ESTIMATE_COUNT_THRESHOLD = "countEstimateThreshold";
 
     /**
      * Fully-qualified class name of the PersistenceManager implementation class
@@ -47,6 +72,8 @@ public class PersistenceSettings implements ConfigDefaults {
     private String persistenceManagerImplementationClass;
     private String idGenerationMode;
     private boolean autoUpdateDatabase;
+    private CountMode countMode;
+    private int estimateCountThreshold;
     /**
      * The threshold for queries to be logged as slow, in milliseconds.
      */
@@ -83,6 +110,8 @@ public class PersistenceSettings implements ConfigDefaults {
         logSlowQueries = slowQueryThreshold > 0;
         queryTimeout = settings.getInt(TAG_QUERY_TIMEOUT, getClass());
         timeoutQueries = queryTimeout > 0;
+        countMode = CountMode.fromValue(settings.get(TAG_COUNT_MODE, getClass()));
+        estimateCountThreshold = settings.getInt(TAG_ESTIMATE_COUNT_THRESHOLD, getClass());
         customSettings = settings;
     }
 
@@ -136,6 +165,14 @@ public class PersistenceSettings implements ConfigDefaults {
      */
     public boolean isTimeoutQueries() {
         return timeoutQueries;
+    }
+
+    public CountMode getCountMode() {
+        return countMode;
+    }
+
+    public int getEstimateCountThreshold() {
+        return estimateCountThreshold;
     }
 
 }

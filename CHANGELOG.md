@@ -27,6 +27,10 @@
 * Faster Paging: instead of always using $skip, FROST-Server now generates a filter
   to improve paging speed if it is possible to do so. The query must have an (automatic)
   orderby on the primary key.
+* Faster Counting: There are four options for faster, though less accurate, ways
+  to count entities. Using either [TABLESAMPLE (1)](https://www.postgresql.org/docs/current/sql-select.html) or 
+  [EXPLAIN](https://wiki.postgresql.org/wiki/Count_estimate) in combination with
+  a limit on the SQL Count.
 
 
 ## Release Version 1.14.0

@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.CountMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
+
     private final PostgresPersistenceManager pm;
     private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
@@ -76,6 +78,8 @@ public class ResultBuilder implements ResourcePathVisitor {
     private final ResultQuery<Record> sqlQuery;
     private final CustomLinksHelper customLinksHelper;
     private final DataSize dataSize;
+    private final int estimateTreshold;
+    private final CountMode countMode;
 
     private Object resultObject;
     /**
@@ -103,6 +107,8 @@ public class ResultBuilder implements ResourcePathVisitor {
         final CoreSettings coreSettings = pm.getCoreSettings();
         this.persistenceSettings = coreSettings.getPersistenceSettings();
         this.customLinksHelper = coreSettings.getCustomLinksHelper();
+        countMode = persistenceSettings.getCountMode();
+        estimateTreshold = persistenceSettings.getEstimateCountThreshold();
     }
 
     public Object getEntity() {
@@ -256,6 +262,22 @@ public class ResultBuilder implements ResourcePathVisitor {
         return result;
     }
 
+    private int timeCountQueryRecord(ResultQuery<Record> query) {
+        try ( Cursor<Record> countCursor = timeQuery(query)) {
+            return countCursor
+                    .fetchNext()
+                    .get(0, Integer.class);
+        }
+    }
+
+    private int timeCountQuery(ResultQuery<Record1<Integer>> query) {
+        try ( Cursor<Record1<Integer>> countCursor = timeQuery(query)) {
+            return countCursor
+                    .fetchNext()
+                    .component1();
+        }
+    }
+
     @Override
     public void visit(PathElementEntitySet element) {
         final EntitySet entitySet;
@@ -278,14 +300,85 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private void fetchAndAddCount(EntitySet entitySet) {
+        if (LOGGER.isTraceEnabled()) {
+            final int estimate = timeCountQuery(sqlQueryBuilder.buildEstimateCountExplain());
+            final int sample = timeCountQueryRecord(sqlQueryBuilder.buildEstimateCountSample().countQuery) * 100;
+            final int limit = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
+            final int full = timeCountQuery(sqlQueryBuilder.buildCount());
+            LOGGER.trace("Estimate: {}, Sample: {}, Limit: {}, Full: {}", estimate, sample, limit, full);
+        }
         if (staQuery.isCountOrDefault()) {
-            ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
-            try (Cursor<Record1<Integer>> countCursor = timeQuery(countQuery)) {
-                Integer count = countCursor
-                        .fetchNext()
-                        .component1();
-                entitySet.setCount(count);
+            switch (countMode) {
+                case FULL:
+                    entitySet.setCount(timeCountQuery(sqlQueryBuilder.buildCount()));
+                    return;
+
+                case LIMIT_ESTIMATE:
+                    countLimitEstimate(entitySet);
+                    return;
+
+                case ESTIMATE_LIMIT:
+                    countEstimateLimit(entitySet);
+                    return;
+
+                case LIMIT_SAMPLE:
+                    countLimitSample(entitySet);
+                    return;
+
+                case SAMPLE_LIMIT:
+                    countSampleLimit(entitySet);
+                    return;
+
+                default:
+                    throw new AssertionError(countMode.name());
+
             }
+        }
+    }
+
+    public void countSampleLimit(EntitySet entitySet) {
+        final var csr = sqlQueryBuilder.buildEstimateCountSample();
+        final int estimate = (int) (timeCountQueryRecord(csr.countQuery) * Math.pow(100, csr.sampledTables));
+        if (estimate < estimateTreshold) {
+            final int count = timeCountQuery(sqlQueryBuilder.buildCount());
+            entitySet.setCount(count);
+            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+        } else {
+            entitySet.setCount(estimate);
+        }
+    }
+
+    public void countLimitSample(EntitySet entitySet) {
+        final int count = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
+        if (count < estimateTreshold) {
+            entitySet.setCount(count);
+        } else {
+            final var csr = sqlQueryBuilder.buildEstimateCountSample();
+            final int estimate = (int) (timeCountQueryRecord(csr.countQuery) * Math.pow(100, csr.sampledTables));
+            entitySet.setCount(Math.max(count, estimate));
+            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+        }
+    }
+
+    public void countEstimateLimit(EntitySet entitySet) {
+        final int estimate = timeCountQuery(sqlQueryBuilder.buildEstimateCountExplain());
+        if (estimate < estimateTreshold) {
+            final int count = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
+            entitySet.setCount(count);
+            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
+        } else {
+            entitySet.setCount(estimate);
+        }
+    }
+
+    public void countLimitEstimate(EntitySet entitySet) {
+        final int count = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
+        if (count < estimateTreshold) {
+            entitySet.setCount(count);
+        } else {
+            final int estimate = timeCountQuery(sqlQueryBuilder.buildEstimateCountExplain());
+            entitySet.setCount(Math.max(count, estimate));
+            LOGGER.info("Estimate: {}, Count: {}", estimate, count);
         }
     }
 

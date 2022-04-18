@@ -44,6 +44,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jooq.AggregateFunction;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
@@ -53,10 +56,15 @@ import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
+import org.jooq.SQL;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectIntoStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectSelectStep;
+import org.jooq.Table;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +81,9 @@ public class QueryBuilder implements ResourcePathVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
 
     private static final String GENERATED_SQL = "Generated SQL:\n{}";
+    private static final String TABLESAMPLE_REPLACE_REGEX = "$1 tablesample system (1)";
+    private static final String TABLE_SEARCH_REGEX = "(\"[A-Za-z0-9_-]+\" as \"[A-Za-z0-9]+\")";
+    private static final Pattern TABLE_SEARCH_PATTERN = Pattern.compile(TABLE_SEARCH_REGEX);
 
     /**
      * The prefix used for table aliases. The main entity is always
@@ -191,6 +202,82 @@ public class QueryBuilder implements ResourcePathVisitor {
             LOGGER.trace(GENERATED_SQL, query.getSQL(ParamType.INDEXED));
         }
         return query;
+    }
+
+    public ResultQuery<Record1<Integer>> buildCount(int limit) {
+        gatherData();
+
+        DSLContext dslContext = pm.getDslContext();
+        SelectSelectStep<?> subSelect;
+        if (staQuery != null && staQuery.isSelectDistinct()) {
+            final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
+            subSelect = DSL.selectDistinct(sqlSelectFields.toArray(Field[]::new));
+        } else if (queryState.isDistinctRequired()) {
+            subSelect = DSL.selectDistinct(queryState.getSqlMainIdField());
+        } else {
+            subSelect = DSL.select(queryState.getSqlMainIdField());
+        }
+        var selectFromWhere = subSelect.from(queryState.getSqlFrom())
+                .where(queryState.getSqlWhere())
+                .limit(limit);
+        var query = dslContext.selectCount().from(selectFromWhere);
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(GENERATED_SQL, query.getSQL(ParamType.INDEXED));
+        }
+        return query;
+    }
+
+    public static final class CountSampleResult {
+
+        public final ResultQuery<Record> countQuery;
+        public final int sampledTables;
+
+        public CountSampleResult(ResultQuery<Record> countQuery, int sampledTables) {
+            this.countQuery = countQuery;
+            this.sampledTables = sampledTables;
+        }
+
+    }
+
+    public CountSampleResult buildEstimateCountSample() {
+        ResultQuery<Record1<Integer>> baseQuery = buildCount();
+        String queryString = baseQuery.getSQL(ParamType.INLINED);
+
+        String extendedQuery = RegExUtils.replaceFirst(queryString, TABLE_SEARCH_PATTERN, TABLESAMPLE_REPLACE_REGEX);
+        int replaces = (extendedQuery.length() - queryString.length()) / " tablesample system (1)".length();
+        DSLContext dslContext = pm.getDslContext();
+        final var query = dslContext.resultQuery(extendedQuery);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(GENERATED_SQL, extendedQuery);
+        }
+        return new CountSampleResult(query, replaces);
+    }
+
+    public ResultQuery<Record1<Integer>> buildEstimateCountExplain() {
+        gatherData();
+
+        DSLContext dslContext = pm.getDslContext();
+        SelectSelectStep<?> select;
+        if (staQuery != null && staQuery.isSelectDistinct()) {
+            final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
+            select = dslContext.selectDistinct(sqlSelectFields.toArray(Field[]::new));
+        } else if (queryState.isDistinctRequired()) {
+            select = dslContext.selectDistinct(queryState.getSqlMainIdField());
+        } else {
+            select = dslContext.select(queryState.getSqlMainIdField());
+        }
+        String selectQuery = select
+                .from(queryState.getSqlFrom())
+                .where(queryState.getSqlWhere())
+                .getSQL(ParamType.INLINED);
+
+        Field<Integer> countField = DSL.field("count_estimate({0})", SQLDataType.INTEGER, selectQuery);
+        SelectSelectStep<Record1<Integer>> countQuery = dslContext.select(countField);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(GENERATED_SQL, countQuery.getSQL(ParamType.INDEXED));
+        }
+        return countQuery;
     }
 
     public Delete buildDelete(PathElementEntitySet set) {

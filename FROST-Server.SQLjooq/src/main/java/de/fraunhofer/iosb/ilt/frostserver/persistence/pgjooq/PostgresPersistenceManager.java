@@ -55,6 +55,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -63,6 +64,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +88,10 @@ import org.slf4j.LoggerFactory;
 /**
  * @author scf
  */
-public class PostgresPersistenceManager extends AbstractPersistenceManager {
+public class PostgresPersistenceManager extends AbstractPersistenceManager implements LiquibaseUser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/core.xml";
 
     public static final String DATETIME_MAX_INSTANT = "9999-12-30T23:59:59.999Z";
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
@@ -684,5 +687,15 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
             default:
                 throw new IllegalArgumentException("Unknown ID type: " + type);
         }
+    }
+
+    @Override
+    public String checkForUpgrades() {
+        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap());
+    }
+
+    @Override
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap(), out);
     }
 }

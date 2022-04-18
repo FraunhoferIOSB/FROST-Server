@@ -152,7 +152,7 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
 
 * **persistence.persistenceManagerImplementationClass:**  
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
-  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManager`:**  
+  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager`:**  
     Default value, for PostgreSQL.
 * **persistence.autoUpdateDatabase:**  
   Automatically apply database updates.
@@ -186,6 +186,25 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
   The maximum duration, in seconds, that a query is allowed to take. Default 0 (no timeout). If
   your FROST instance is behind a reverse proxy that will abort the connection after a certain time, set this to the
   same duration.
+* **persistence.countMode:**  
+  The way to count entities. Allowed values:
+  * `FULL`: (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
+  * **`LIMIT_SAMPLE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
+    estimate using [`TABLESAMPLE (1)`](https://www.postgresql.org/docs/current/sql-select.html). For large result sets
+    this is much faster than a full count, but is still guaranteed to give accurate results for low counts.
+  * **`SAMPLE_LIMIT`:** First do an estimate using `TABLESAMPLE (1)` and if the estimate is below the threshold, do a
+    count with a limit of countEstimateThreshold. This is faster than the above option for large result sets, but
+    if the estimate is inaccurate, it can give an incorrect estimate for low counts.
+  * **`LIMIT_ESTIMATE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
+    estimate using [`EXPLAIN`](https://wiki.postgresql.org/wiki/Count_estimate). For large result sets
+    this is even faster than the TABLESAMPLE estimate, but estimates can be wildly inaccurate for fields that are
+    not backed by in index. For low counts this method is still guaranteed to give accurate results.
+  * **`ESTIMATE_LIMIT`:** First do an estimate using `EXPLAIN` and if the estimate is below the threshold, do a
+    count with a limit of countEstimateThreshold. This is the fastest method, but
+    if the estimate is inaccurate, it can give an incorrect estimate for low counts.
+* **persistence.countEstimateThreshold:**  
+  When to switch from counting to estimating. Detailed behaviour depends on the value of
+  `persistence.countMode`. Default value: 10000.
 
 
 ## message bus settings
