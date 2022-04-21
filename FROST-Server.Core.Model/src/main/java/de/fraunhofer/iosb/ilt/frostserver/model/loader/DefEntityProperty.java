@@ -69,7 +69,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
      */
     @ConfigurableField(editor = EditorString.class,
             label = "Type", description = "The java type (Class) of the Property.")
-    @EditorString.EdOptsString(dflt = "String")
+    @EditorString.EdOptsString(dflt = "Edm.String")
     private String type;
 
     /**

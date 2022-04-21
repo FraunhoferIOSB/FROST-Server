@@ -66,7 +66,13 @@ public class ModelRegistry {
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
 
     public final ModelRegistry registerEntityType(EntityType type) {
-        if (entityTypesByName.containsKey(type.entityName)) {
+        EntityType existing = entityTypesByName.get(type.entityName);
+        if (existing == type) {
+            LOGGER.info("Entity type {} already registered.", type.entityName);
+            return this;
+        }
+        if (existing != null) {
+            LOGGER.error("Duplicate entity type name: {}", type.entityName);
             throw new IllegalArgumentException("An entity type named " + type.entityName + " is already registered");
         }
         entityTypesByName.put(type.entityName, type);

@@ -68,7 +68,7 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
 
     public void registerEntityTypes(ModelRegistry modelRegistry) {
         for (DefEntityType defType : entityTypes) {
-            modelRegistry.registerEntityType(defType.getEntityType());
+            modelRegistry.registerEntityType(defType.getEntityType(modelRegistry));
         }
     }
 

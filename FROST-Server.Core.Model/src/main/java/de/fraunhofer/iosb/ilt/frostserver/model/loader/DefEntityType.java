@@ -116,9 +116,24 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         }
     }
 
+    @Deprecated
     public EntityType getEntityType() {
         if (entityType == null) {
             entityType = new EntityType(name, plural);
+            for (EntityValidator validator : validators) {
+                entityType.addValidator(validator);
+            }
+            entityType.addAnnotations(annotations);
+        }
+        return entityType;
+    }
+
+    public EntityType getEntityType(ModelRegistry modelRegistry) {
+        if (entityType == null) {
+            entityType = modelRegistry.getEntityTypeForName(name);
+            if (entityType == null) {
+                entityType = new EntityType(name, plural);
+            }
             for (EntityValidator validator : validators) {
                 entityType.addValidator(validator);
             }

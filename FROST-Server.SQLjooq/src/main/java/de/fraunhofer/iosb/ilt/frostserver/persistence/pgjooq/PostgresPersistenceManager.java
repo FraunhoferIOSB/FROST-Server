@@ -515,7 +515,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                 final String tableName = entityTypeDef.getTable();
                 LOGGER.info("  Table: {}.", tableName);
                 getDbTable(tableName);
-                getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
             }
         }
 
@@ -544,7 +544,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     private void registerModelFields(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            StaTableDynamic typeStaTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            StaTableDynamic typeStaTable = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
                 registerFieldsForEntityProperty(propertyDef, typeStaTable);
             }
@@ -574,12 +575,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     private void registerModelMappings(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            StaTableDynamic orCreateTable = getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final StaTableDynamic table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
-                registerMappingForEntityProperties(propertyDef, orCreateTable);
+                registerMappingForEntityProperties(propertyDef, table);
             }
             for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties()) {
-                registerMappingForNavProperties(propertyDef, orCreateTable);
+                registerMappingForNavProperties(propertyDef, table);
             }
         }
     }
