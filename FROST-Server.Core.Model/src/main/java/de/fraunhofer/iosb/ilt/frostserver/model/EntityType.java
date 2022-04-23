@@ -159,7 +159,19 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         }
     }
 
+    /**
+     * Adds a creation-validator to the entity type.
+     *
+     * @param validator The validator to add.
+     * @return this.
+     * @deprecated use {@link #addValidatorForCreate(EntityValidator)} instead
+     */
+    @Deprecated(forRemoval = true)
     public EntityType addValidator(EntityValidator validator) {
+        return addValidatorForCreate(validator);
+    }
+
+    public EntityType addValidatorForCreate(EntityValidator validator) {
         validatorsNewEntity.add(validator);
         return this;
     }

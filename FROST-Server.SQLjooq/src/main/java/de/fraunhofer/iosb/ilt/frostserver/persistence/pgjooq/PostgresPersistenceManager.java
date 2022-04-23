@@ -545,7 +545,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private void registerModelFields(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
             final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
-            StaTableDynamic typeStaTable = getOrCreateMainTable(entityType, entityTypeDef.getTable());
+            StaMainTable typeStaTable = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
                 registerFieldsForEntityProperty(propertyDef, typeStaTable);
             }
@@ -555,19 +555,19 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
-    private void registerFieldsForEntityProperty(DefEntityProperty propertyDef, StaTableDynamic typeStaTable) {
+    private void registerFieldsForEntityProperty(DefEntityProperty propertyDef, StaMainTable typeStaTable) {
         for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
             maybeRegisterField(handler, typeStaTable);
         }
     }
 
-    private void registerFieldsForNavProperty(DefNavigationProperty propertyDef, StaTableDynamic typeStaTable) {
+    private void registerFieldsForNavProperty(DefNavigationProperty propertyDef, StaMainTable typeStaTable) {
         for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
             maybeRegisterField(handler, typeStaTable);
         }
     }
 
-    private void maybeRegisterField(PropertyPersistenceMapper handler, StaTableDynamic typeStaTable) {
+    private void maybeRegisterField(PropertyPersistenceMapper handler, StaMainTable typeStaTable) {
         if (handler instanceof FieldMapper) {
             ((FieldMapper) handler).registerField(this, typeStaTable);
         }
@@ -576,7 +576,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private void registerModelMappings(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
             final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
-            final StaTableDynamic table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
+            final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
                 registerMappingForEntityProperties(propertyDef, table);
             }
@@ -586,19 +586,19 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
-    private void registerMappingForEntityProperties(DefEntityProperty propertyDef, StaTableDynamic orCreateTable) {
+    private void registerMappingForEntityProperties(DefEntityProperty propertyDef, StaMainTable orCreateTable) {
         for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
             maybeRegisterMapping(handler, orCreateTable);
         }
     }
 
-    private void registerMappingForNavProperties(DefNavigationProperty propertyDef, StaTableDynamic orCreateTable) {
+    private void registerMappingForNavProperties(DefNavigationProperty propertyDef, StaMainTable orCreateTable) {
         for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
             maybeRegisterMapping(handler, orCreateTable);
         }
     }
 
-    private void maybeRegisterMapping(PropertyPersistenceMapper handler, StaTableDynamic orCreateTable) {
+    private void maybeRegisterMapping(PropertyPersistenceMapper handler, StaMainTable orCreateTable) {
         if (handler instanceof FieldMapper) {
             ((FieldMapper) handler).registerMapping(this, orCreateTable);
         }
@@ -622,7 +622,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         return tables.get(0);
     }
 
-    private StaTableDynamic getOrCreateMainTable(EntityType entityType, String tableName) {
+    private StaMainTable getOrCreateMainTable(EntityType entityType, String tableName) {
         if (entityType == null) {
             throw new IllegalArgumentException("Not implemented yet");
         }
@@ -633,10 +633,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             tableCollection.registerTable(entityType, newTable);
             table = newTable;
         }
-        if (table instanceof StaTableDynamic) {
-            return (StaTableDynamic) table;
-        }
-        throw new IllegalStateException("Table already exists, but is not of type dynamic.");
+        return table;
     }
 
     public StaLinkTableDynamic getOrCreateLinkTable(String tableName) {
