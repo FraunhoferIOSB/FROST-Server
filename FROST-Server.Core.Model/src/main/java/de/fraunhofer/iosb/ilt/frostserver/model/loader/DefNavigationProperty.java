@@ -147,6 +147,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         navProp.addAnnotations(annotations);
 
         if (inverse == null) {
+            LOGGER.debug("    {} -> {}", name, targetEntityType.entityName);
             LOGGER.warn("No inverse for navigation property {}", name);
         } else {
             navPropInverse = targetEntityType.getNavigationProperty(inverse.name);
@@ -161,6 +162,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
                 navPropInverse.addAnnotations(inverse.annotations);
                 targetEntityType.registerProperty(navPropInverse, inverse.required);
             }
+            LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
             navProp.setInverses(navPropInverse);
         }
     }

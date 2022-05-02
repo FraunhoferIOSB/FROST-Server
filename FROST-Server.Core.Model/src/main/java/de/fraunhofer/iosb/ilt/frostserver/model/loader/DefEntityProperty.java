@@ -32,12 +32,16 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
 public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefEntityProperty.class.getName());
 
     /**
      * The name of the EntityProperty.
@@ -139,6 +143,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
             entityProperty = new EntityPropertyMain<>(name, propType, hasCustomProperties, serialiseNull, aliases.toArray(String[]::new))
                     .addAnnotations(annotations);
         }
+        LOGGER.debug("    {} ({})", name, type);
         entityType.registerProperty(entityProperty, required);
     }
 

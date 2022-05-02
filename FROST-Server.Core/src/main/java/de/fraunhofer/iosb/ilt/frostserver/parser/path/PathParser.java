@@ -127,7 +127,7 @@ public class PathParser implements ParserVisitor {
         }
     }
 
-    private void addAsEntitiySet(ResourcePath rp, EntityType type) {
+    private void addAsEntitySet(ResourcePath rp, EntityType type) {
         if (rp.getLastElement() != null) {
             throw new IllegalArgumentException("Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead." + rp);
         }
@@ -135,7 +135,7 @@ public class PathParser implements ParserVisitor {
         rp.addPathElement(espa, true, false);
     }
 
-    private void addAsEntitiySet(ResourcePath rp, NavigationPropertyMain type) {
+    private void addAsEntitySet(ResourcePath rp, NavigationPropertyMain type) {
         if (type instanceof NavigationPropertyEntitySet) {
             PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, rp.getLastElement());
             rp.addPathElement(espa, true, false);
@@ -144,7 +144,7 @@ public class PathParser implements ParserVisitor {
         }
     }
 
-    private void addAsEntitiyProperty(ResourcePath rp, EntityPropertyMain type) {
+    private void addAsEntityProperty(ResourcePath rp, EntityPropertyMain type) {
         PathElementProperty ppe = new PathElementProperty();
         ppe.setProperty(type);
         ppe.setParent(rp.getLastElement());
@@ -239,7 +239,7 @@ public class PathParser implements ParserVisitor {
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
             }
-            addAsEntitiySet(data, entityType);
+            addAsEntitySet(data, entityType);
             return defltAction(node, data);
         }
 
@@ -259,7 +259,7 @@ public class PathParser implements ParserVisitor {
             throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
         }
         if (np.isEntitySet()) {
-            addAsEntitiySet(data, np);
+            addAsEntitySet(data, np);
             return defltAction(node, data);
         } else {
             addAsEntity(data, np, null);
@@ -288,7 +288,7 @@ public class PathParser implements ParserVisitor {
             if (property == null) {
                 throw new IllegalArgumentException("Entities of type " + parentEntityType + " do not have an entity property named " + StringHelper.cleanForLogging(node.value));
             }
-            addAsEntitiyProperty(data, property);
+            addAsEntityProperty(data, property);
             return defltAction(node, data);
         }
         throw new IllegalArgumentException("Properties must follow after Entities");

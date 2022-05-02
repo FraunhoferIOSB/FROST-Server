@@ -143,6 +143,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     public void linkProperties(ModelRegistry modelRegistry) {
+        LOGGER.debug("  {} ({})", name, plural);
         for (DefEntityProperty defEp : entityProperties) {
             defEp.setEntityType(entityType);
             defEp.registerProperties(modelRegistry);
