@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author scf
  */
 public class StaDurationWrapper implements TimeFieldWrapper {
@@ -53,7 +52,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
      */
     public StaDurationWrapper(final Field<Moment> ts1, final Field<Moment> ts2) {
         String template = "(" + TIMESTAMP_PARAM + " - " + TIMESTAMP_PARAM + ")";
-        this.duration = DSL.field(template, String.class, ts1, ts2);
+        duration = DSL.field(template, String.class, ts1, ts2);
     }
 
     @Override

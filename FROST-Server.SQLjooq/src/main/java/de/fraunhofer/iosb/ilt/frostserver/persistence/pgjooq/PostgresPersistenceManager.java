@@ -114,10 +114,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     private static final Map<CoreSettings, TableCollection> tableCollections = new HashMap<>();
 
-    private static TableCollection getTableCollection(CoreSettings settings) {
-        return tableCollections.computeIfAbsent(settings, t -> new TableCollection().setModelRegistry(t.getModelRegistry()));
-    }
-
     private boolean initialised = false;
 
     private TableCollection tableCollection;
@@ -132,6 +128,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      * Tracker for the amount of data fetched form the DB by this PM.
      */
     private DataSize dataSize;
+
+    private static TableCollection getTableCollection(CoreSettings settings) {
+        return tableCollections.computeIfAbsent(settings, t -> new TableCollection().setModelRegistry(t.getModelRegistry()));
+    }
+
 
     @Override
     public void init(CoreSettings settings) {

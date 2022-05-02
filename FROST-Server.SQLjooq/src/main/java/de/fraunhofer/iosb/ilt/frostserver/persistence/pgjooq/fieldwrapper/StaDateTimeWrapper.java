@@ -36,6 +36,7 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
      * Flag indicating that the original time given was in utc.
      */
     private boolean utc = true;
+
     private final Field<Moment> field;
 
     /**

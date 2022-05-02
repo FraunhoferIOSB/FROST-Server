@@ -170,7 +170,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (filterField.isCondition()) {
             return sqlWhere.and(filterField.getCondition());
 
-        } else if (filterField instanceof FieldListWrapper) {
+        }
+        if (filterField instanceof FieldListWrapper) {
             FieldListWrapper listExpression = (FieldListWrapper) filterField;
             for (Field expression : listExpression.getExpressions().values()) {
                 if (Boolean.class.isAssignableFrom(expression.getType())) {
@@ -186,9 +187,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public void addOrderbyToQuery(OrderBy orderBy, Utils.SortSelectFields orderFields) {
         FieldWrapper resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof StaTimeIntervalWrapper) {
-            StaTimeIntervalWrapper ti = (StaTimeIntervalWrapper) resultExpression;
-            addToQuery(orderBy, ti.getStart(), orderFields);
-            addToQuery(orderBy, ti.getEnd(), orderFields);
+            StaTimeIntervalWrapper timeInterval = (StaTimeIntervalWrapper) resultExpression;
+            addToQuery(orderBy, timeInterval.getStart(), orderFields);
+            addToQuery(orderBy, timeInterval.getEnd(), orderFields);
             return;
         }
         if (resultExpression instanceof StaDurationWrapper) {
@@ -229,7 +230,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
                 handleCustomProperty(state, path);
 
             } else if (element instanceof EntityPropertyMain) {
-                handleEntityProperty(state, path, element);
+                handleEntityProperty(state, path, (EntityPropertyMain) element);
 
             } else if (element instanceof NavigationPropertyMain) {
                 handleNavigationProperty(state, path, (NavigationPropertyMain) element);
@@ -286,14 +287,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         state.finalExpression = null;
     }
 
-    private void handleEntityProperty(PathState state, Path path, Property element) {
+    private void handleEntityProperty(PathState state, Path path, EntityPropertyMain element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
-        EntityPropertyMain entityProperty = (EntityPropertyMain) element;
         Map<String, Field> pathExpressions = state.pathTableRef.getTable()
                 .getPropertyFieldRegistry()
-                .getAllFieldsForProperty(entityProperty, new LinkedHashMap<>());
+                .getAllFieldsForProperty(element, new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
             state.finalExpression = WrapperHelper.wrapField(pathExpressions.values().iterator().next());
         } else {
@@ -320,13 +320,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             // We can not accept json, so the subProperty must be a known direction.
             state.finished = true;
             return new SimpleFieldWrapper(pathExpressions.get(subProperty.getName()));
-        } else {
-            if (pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START)
-                    && pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END)) {
-                return new StaTimeIntervalWrapper(pathExpressions);
-            }
-            return new FieldListWrapper(pathExpressions);
         }
+        if (pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START)
+                && pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END)) {
+            return new StaTimeIntervalWrapper(pathExpressions);
+        }
+        return new FieldListWrapper(pathExpressions);
     }
 
     public Field[] findPair(FieldWrapper p1, FieldWrapper p2) {
@@ -418,7 +417,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
     }
 
-    private Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
+    private static Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
         if (node.getValue().getCrs() == null) {
             return Wkt.fromWkt("SRID=4326;" + node.getSource());
         }
@@ -482,9 +481,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p2 instanceof StaTimeIntervalWrapper) {
             StaTimeIntervalWrapper ti2 = (StaTimeIntervalWrapper) p2;
             return ti2.contains(p1);
-        } else {
-            throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
         }
+        throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
     }
 
     @Override

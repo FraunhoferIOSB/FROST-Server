@@ -53,12 +53,15 @@ public class Utils {
     public static final TypeReference<Object> TYPE_OBJECT = new TypeReference<Object>() {
         // Empty on purpose.
     };
+
     public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
         // Empty on purpose.
     };
+
     public static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
         // Empty on purpose.
     };
+
     public static final TypeReference<Map<String, Object>> TYPE_MAP_STRING_OBJECT = new TypeReference<Map<String, Object>>() {
         // Empty on purpose.
     };
@@ -91,9 +94,8 @@ public class Utils {
         }
         if (timeEnd.isBefore(timeStart)) {
             return null;
-        } else {
-            return TimeInterval.create(timeStart, timeEnd);
         }
+        return TimeInterval.create(timeStart, timeEnd);
     }
 
     public static TimeInstant instantFromTime(Moment time) {
@@ -116,23 +118,21 @@ public class Utils {
         }
         if (encodingType == null) {
             return locationUnknownEncoding(locationString);
-        } else {
-            if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-                try {
-                    return new GeoJsonDeserializier().deserialize(locationString);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to deserialise geoJson.", ex);
-                }
-                return locationString;
-            } else {
-                try {
-                    return jsonToObject(locationString, Object.class);
-                } catch (Exception ex) {
-                    LOGGER.trace("Not a map.", ex);
-                }
-                return locationString;
-            }
         }
+        if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
+            try {
+                return new GeoJsonDeserializier().deserialize(locationString);
+            } catch (IOException ex) {
+                LOGGER.error("Failed to deserialise geoJson.", ex);
+            }
+            return locationString;
+        }
+        try {
+            return jsonToObject(locationString, Object.class);
+        } catch (Exception ex) {
+            LOGGER.trace("Not a map.", ex);
+        }
+        return locationString;
     }
 
     public static Object locationUnknownEncoding(String locationString) {

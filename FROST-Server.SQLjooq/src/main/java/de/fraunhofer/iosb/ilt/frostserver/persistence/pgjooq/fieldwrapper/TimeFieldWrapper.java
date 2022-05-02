@@ -21,7 +21,6 @@ import net.time4j.Moment;
 import org.jooq.Field;
 
 /**
- *
  * @author scf
  */
 public interface TimeFieldWrapper extends FieldWrapper {
