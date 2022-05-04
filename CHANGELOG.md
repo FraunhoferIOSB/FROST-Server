@@ -31,6 +31,8 @@
   to count entities. Using either [TABLESAMPLE (1)](https://www.postgresql.org/docs/current/sql-select.html) or 
   [EXPLAIN](https://wiki.postgresql.org/wiki/Count_estimate) in combination with
   a limit on the SQL Count.
+* Generated Features Of Interest now use the name, description and properties of
+  the Location they are generated from.
 
 
 ## Release Version 1.14.0

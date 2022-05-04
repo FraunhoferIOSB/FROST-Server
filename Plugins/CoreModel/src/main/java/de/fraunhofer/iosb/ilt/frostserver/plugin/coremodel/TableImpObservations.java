@@ -386,7 +386,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         if (genFoiId != null) {
             foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, ParserUtils.idFromObject(genFoiId));
         } else if (locationId != null) {
-            SelectConditionStep<Record3<Object, String, String>> query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation)
+            SelectConditionStep<Record3<Object, String, String>> query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties)
                     .from(ql)
                     .where(((TableField) ql.getId()).eq(locationId));
             Record tuple = query2.fetchOne();
@@ -395,14 +395,18 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 // Should not happen, since the query succeeded just before.
                 return null;
             }
+            String name = getFieldOrNull(tuple, ql.colName);
+            String description = getFieldOrNull(tuple, ql.colDescription);
+            JsonValue properties = getFieldOrNull(tuple, ql.colProperties);
             String encoding = getFieldOrNull(tuple, ql.colEncodingType);
             String locString = getFieldOrNull(tuple, ql.colLocation);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
             foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                    .setProperty(pluginCoreModel.epName, "FoI for location " + locationId)
-                    .setProperty(pluginCoreModel.epDescription, "Generated from location " + locationId)
+                    .setProperty(pluginCoreModel.epName, name)
+                    .setProperty(pluginCoreModel.epDescription, description)
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
-                    .setProperty(pluginCoreModel.epFeature, locObject);
+                    .setProperty(pluginCoreModel.epFeature, locObject)
+                    .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
             pm.insert(foi);
             Object foiId = foi.getId().getValue();
             dslContext.update(ql)
