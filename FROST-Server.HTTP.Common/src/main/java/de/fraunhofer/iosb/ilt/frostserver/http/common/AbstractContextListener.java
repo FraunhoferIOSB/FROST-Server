@@ -45,6 +45,9 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractContextListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractContextListener.class);
+    private static final String CORS_FILTER_NAME = "CorsFilter";
+    private static final String CATALINA_CORS_FILTER_CLASS = "org.apache.catalina.filters.CorsFilter";
+    private static final String JETTY_CORS_FILTER_CLASS = "org.eclipse.jetty.servlets.CrossOriginFilter";
 
     private CoreSettings coreSettings;
 
@@ -120,35 +123,56 @@ public abstract class AbstractContextListener implements ServletContextListener 
         boolean corsEnable = httpSettings.getBoolean(CoreSettings.TAG_CORS_ENABLE, CoreSettings.class);
         if (corsEnable) {
             try {
-                String filterName = "CorsFilter";
-
-                FilterRegistration.Dynamic corsFilter = servletContext.addFilter(filterName, "org.apache.catalina.filters.CorsFilter");
-                corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/*");
-
-                String allowedOrigins = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_ORIGINS, CoreSettings.class);
-                corsFilter.setInitParameter("cors.allowed.origins", allowedOrigins);
-
-                String allowedMethods = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_METHODS, CoreSettings.class);
-                corsFilter.setInitParameter("cors.allowed.methods", allowedMethods);
-
-                String exposedHeaders = httpSettings.get(CoreSettings.TAG_CORS_EXPOSED_HEADERS, CoreSettings.class);
-                corsFilter.setInitParameter("cors.exposed.headers", exposedHeaders);
-
-                String allowedHeaders = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_HEADERS, CoreSettings.class);
-                corsFilter.setInitParameter("cors.allowed.headers", allowedHeaders);
-
-                String supportCreds = httpSettings.get(CoreSettings.TAG_CORS_SUPPORT_CREDENTIALS, CoreSettings.class);
-                corsFilter.setInitParameter("cors.support.credentials", supportCreds);
-
-                String preflightMaxage = httpSettings.get(CoreSettings.TAG_CORS_PREFLIGHT_MAXAGE, CoreSettings.class);
-                corsFilter.setInitParameter("cors.preflight.maxage", preflightMaxage);
-
-                String requestDecorate = httpSettings.get(CoreSettings.TAG_CORS_REQUEST_DECORATE, CoreSettings.class);
-                corsFilter.setInitParameter("cors.request.decorate", requestDecorate);
-            } catch (Exception exc) {
-                LOGGER.error("Failed to initialise CORS filter.", exc);
+                Class.forName(CATALINA_CORS_FILTER_CLASS, false, getClass().getClassLoader());
+                setUpCatalinaCorsFilter(servletContext, httpSettings);
+                return;
+            } catch (ClassNotFoundException ex) {
+                LOGGER.debug("Catalina CORS Filter class not found.");
             }
+            try {
+                Class.forName(JETTY_CORS_FILTER_CLASS, false, getClass().getClassLoader());
+                setUpJettyCorsFilter(servletContext, httpSettings);
+            } catch (ClassNotFoundException ex) {
+                LOGGER.debug("Catalina CORS Filter class not found.");
+            }
+
         }
+    }
+
+    private void setUpCatalinaCorsFilter(ServletContext servletContext, Settings httpSettings) {
+        try {
+            FilterRegistration.Dynamic corsFilter = servletContext.addFilter(CORS_FILTER_NAME, CATALINA_CORS_FILTER_CLASS);
+            corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/*");
+            setInitParameter(corsFilter, "cors.allowed.origins", httpSettings, CoreSettings.TAG_CORS_ALLOWED_ORIGINS);
+            setInitParameter(corsFilter, "cors.allowed.methods", httpSettings, CoreSettings.TAG_CORS_ALLOWED_METHODS);
+            setInitParameter(corsFilter, "cors.exposed.headers", httpSettings, CoreSettings.TAG_CORS_EXPOSED_HEADERS);
+            setInitParameter(corsFilter, "cors.allowed.headers", httpSettings, CoreSettings.TAG_CORS_ALLOWED_HEADERS);
+            setInitParameter(corsFilter, "cors.support.credentials", httpSettings, CoreSettings.TAG_CORS_SUPPORT_CREDENTIALS);
+            setInitParameter(corsFilter, "cors.preflight.maxage", httpSettings, CoreSettings.TAG_CORS_PREFLIGHT_MAXAGE);
+            setInitParameter(corsFilter, "cors.request.decorate", httpSettings, CoreSettings.TAG_CORS_REQUEST_DECORATE);
+        } catch (Exception exc) {
+            LOGGER.error("Failed to initialise Catalina CORS filter.", exc);
+        }
+    }
+
+    private void setUpJettyCorsFilter(ServletContext servletContext, Settings httpSettings) {
+        try {
+            FilterRegistration.Dynamic corsFilter = servletContext.addFilter(CORS_FILTER_NAME, JETTY_CORS_FILTER_CLASS);
+            corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/*");
+            setInitParameter(corsFilter, "allowedOrigins", httpSettings, CoreSettings.TAG_CORS_ALLOWED_ORIGINS);
+            setInitParameter(corsFilter, "allowedMethods", httpSettings, CoreSettings.TAG_CORS_ALLOWED_METHODS);
+            setInitParameter(corsFilter, "exposedHeaders", httpSettings, CoreSettings.TAG_CORS_EXPOSED_HEADERS);
+            setInitParameter(corsFilter, "allowedHeaders", httpSettings, CoreSettings.TAG_CORS_ALLOWED_HEADERS);
+            setInitParameter(corsFilter, "allowCredentials", httpSettings, CoreSettings.TAG_CORS_SUPPORT_CREDENTIALS);
+            setInitParameter(corsFilter, "preflightMaxAge", httpSettings, CoreSettings.TAG_CORS_PREFLIGHT_MAXAGE);
+        } catch (Exception exc) {
+            LOGGER.error("Failed to initialise Jetty CORS filter.", exc);
+        }
+    }
+
+    private void setInitParameter(FilterRegistration.Dynamic filter, String pramName, Settings httpSettings, String settingName) {
+        String supportCreds = httpSettings.get(settingName, CoreSettings.class);
+        filter.setInitParameter(pramName, supportCreds);
     }
 
     private void setupAuthFilter(ServletContext servletContext, CoreSettings coreSettings) {
