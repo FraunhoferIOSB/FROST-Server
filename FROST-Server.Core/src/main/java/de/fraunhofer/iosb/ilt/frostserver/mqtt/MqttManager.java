@@ -196,7 +196,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         final String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
-            final ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
+            final ServiceRequest serviceRequest = new ServiceRequestBuilder(settings, version)
                     .withRequestType(RequestTypeUtils.CREATE)
                     .withContent(e.getPayload())
                     .withUrlPath(url)

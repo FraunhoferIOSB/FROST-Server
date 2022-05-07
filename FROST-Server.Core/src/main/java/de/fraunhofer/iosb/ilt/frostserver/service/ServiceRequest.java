@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -50,6 +51,7 @@ public class ServiceRequest {
     private Map<String, List<String>> parameterMap;
     private Map<String, Object> attributeMap;
     private Principal userPrincipal;
+    private CoreSettings coreSettings;
 
     protected ServiceRequest() {
         // empty by design.
@@ -61,6 +63,14 @@ public class ServiceRequest {
 
     public void setAttributeMap(Map<String, Object> attributeMap) {
         this.attributeMap = attributeMap;
+    }
+
+    public CoreSettings getCoreSettings() {
+        return coreSettings;
+    }
+
+    protected void setCoreSettings(CoreSettings coreSettings) {
+        this.coreSettings = coreSettings;
     }
 
     public String getRequestType() {

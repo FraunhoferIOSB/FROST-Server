@@ -60,8 +60,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     private String plural;
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly
-     * means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
      */
     @ConfigurableField(editor = EditorString.class,
             label = "Table", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
@@ -92,8 +91,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorList.class, optional = true,
             label = "NavProps")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = EntityValidator.class, merge = true, nameField = "@class")
-    private List<EntityValidator> validators = new ArrayList<>();
+    @EditorSubclass.EdOptsSubclass(iface = DefValidator.class, merge = true, nameField = "@class")
+    private List<DefValidator> validators = new ArrayList<>();
 
     /**
      * The (OData)annotations for this Element.
@@ -116,26 +115,14 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         }
     }
 
-    @Deprecated
-    public EntityType getEntityType() {
-        if (entityType == null) {
-            entityType = new EntityType(name, plural);
-            for (EntityValidator validator : validators) {
-                entityType.addValidator(validator);
-            }
-            entityType.addAnnotations(annotations);
-        }
-        return entityType;
-    }
-
     public EntityType getEntityType(ModelRegistry modelRegistry) {
         if (entityType == null) {
             entityType = modelRegistry.getEntityTypeForName(name);
             if (entityType == null) {
                 entityType = new EntityType(name, plural);
             }
-            for (EntityValidator validator : validators) {
-                entityType.addValidator(validator);
+            for (DefValidator validator : validators) {
+                validator.createValidators(modelRegistry, entityType);
             }
             entityType.addAnnotations(annotations);
         }
@@ -261,8 +248,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly
-     * means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
      *
      * @return the table
      */
@@ -271,8 +257,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly
-     * means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
      *
      * @param table the table to set
      * @return this.
@@ -287,7 +272,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      *
      * @return the validators
      */
-    public List<EntityValidator> getValidators() {
+    public List<DefValidator> getValidators() {
         return validators;
     }
 
@@ -297,7 +282,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      * @param validators the validators to set
      * @return this.
      */
-    public DefEntityType setValidators(List<EntityValidator> validators) {
+    public DefEntityType setValidators(List<DefValidator> validators) {
         this.validators = validators;
         return this;
     }

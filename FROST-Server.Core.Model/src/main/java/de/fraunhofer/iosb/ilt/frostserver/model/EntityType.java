@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -70,13 +71,11 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     private EntityPropertyMain primaryKey;
     /**
-     * The Set of PROPERTIES that Entities of this type have, mapped to the flag
-     * indicating if they are required.
+     * The Set of PROPERTIES that Entities of this type have, mapped to the flag indicating if they are required.
      */
     private final Map<Property, Boolean> propertyMap = new LinkedHashMap<>();
     /**
-     * The Set of PROPERTIES that Entities of this type have, mapped by their
-     * name.
+     * The Set of PROPERTIES that Entities of this type have, mapped by their name.
      */
     private final Map<String, Property> propertiesByName = new LinkedHashMap<>();
     /**
@@ -100,8 +99,8 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     private final Map<EntityType, NavigationPropertyMain> navigationPropertiesByTarget = new HashMap<>();
 
-    private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
-    private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
+    private final Map<String, EntityValidator> validatorsCreateEntity = new LinkedHashMap<>();
+    private final Map<String, EntityValidator> validatorsUpdateEntity = new LinkedHashMap<>();
 
     /**
      * The (OData)annotations for this Entity Type.
@@ -164,21 +163,111 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      *
      * @param validator The validator to add.
      * @return this.
-     * @deprecated use {@link #addValidatorForCreate(EntityValidator)} instead
+     * @deprecated use {@link #addValidatorForCreate(String, EntityValidator)} instead
      */
     @Deprecated(forRemoval = true)
     public EntityType addValidator(EntityValidator validator) {
         return addValidatorForCreate(validator);
     }
 
+    /**
+     * Adds a creation-validator to the entity type with a generated name.
+     *
+     * @param validator The validator to add
+     * @return this
+     * @deprecated use {@link #addValidatorForCreate(String, EntityValidator)} instead
+     */
+    @Deprecated(forRemoval = true)
     public EntityType addValidatorForCreate(EntityValidator validator) {
-        validatorsNewEntity.add(validator);
+        int count = validatorsCreateEntity.size() + 1;
+        while (validatorsCreateEntity.containsKey(Integer.toString(count))) {
+            count++;
+        }
+        return addCreateValidator(Integer.toString(count), validator);
+    }
+
+    /**
+     * Adds a create-validator to the entity type with the given name.
+     *
+     * @param name The name of the validator.
+     * @param validator The validator to add.
+     * @return this
+     */
+    public EntityType addCreateValidator(String name, EntityValidator validator) {
+        EntityValidator value = validatorsCreateEntity.putIfAbsent(name, validator);
+        if (value != null) {
+            throw new IllegalArgumentException("A CreateValidator for " + entityName + " already exists with name " + name);
+        }
         return this;
     }
 
+    /**
+     * Get the unmodifiable map of Create-validators.
+     *
+     * @return the unmodifiable map of Create-validators.
+     */
+    public Map<String, EntityValidator> getCreateValidators() {
+        return Collections.unmodifiableMap(validatorsCreateEntity);
+    }
+
+    /**
+     * Remove the UpdateValidator with the given name.
+     *
+     * @param name The name of the validator to remove.
+     * @return the removed Validator.
+     */
+    public EntityValidator removeCreateValidator(String name) {
+        return validatorsCreateEntity.remove(name);
+    }
+
+    /**
+     * Adds an update-validator to the entity type with a generated name.
+     *
+     * @param validator The validator to add
+     * @return this
+     * @deprecated use {@link #addUpdateValidator(String, EntityValidator)} instead
+     */
+    @Deprecated(forRemoval = true)
     public EntityType addValidatorForUpdate(EntityValidator validator) {
-        validatorsUpdateEntity.add(validator);
+        int count = validatorsUpdateEntity.size() + 1;
+        while (validatorsUpdateEntity.containsKey(Integer.toString(count))) {
+            count++;
+        }
+        return addUpdateValidator(Integer.toString(count), validator);
+    }
+
+    /**
+     * Adds an update-validator to the entity type with the given name.
+     *
+     * @param name The name of the validator.
+     * @param validator The validator to add.
+     * @return this
+     */
+    public EntityType addUpdateValidator(String name, EntityValidator validator) {
+        EntityValidator value = validatorsUpdateEntity.putIfAbsent(name, validator);
+        if (value != null) {
+            throw new IllegalArgumentException("An UpdateValidator for " + entityName + " already exists with name " + name);
+        }
         return this;
+    }
+
+    /**
+     * Get the unmodifiable map of Update-validators.
+     *
+     * @return the unmodifiable map of Create-validators.
+     */
+    public Map<String, EntityValidator> getUpdateValidators() {
+        return Collections.unmodifiableMap(validatorsUpdateEntity);
+    }
+
+    /**
+     * Remove the UpdateValidator with the given name.
+     *
+     * @param name The name of the validator to remove.
+     * @return the removed Validator.
+     */
+    public EntityValidator removeUpdateValidator(String name) {
+        return validatorsUpdateEntity.remove(name);
     }
 
     public EntityPropertyMain<Id> getPrimaryKey() {
@@ -266,12 +355,9 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * Check if all required properties are non-null on the given Entity.
      *
      * @param entity the Entity to check.
-     * @param entityPropertiesOnly flag indicating only the EntityProperties
-     * should be checked.
-     * @throws IncompleteEntityException If any of the required properties are
-     * null.
-     * @throws IllegalStateException If any of the required properties are
-     * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
+     * @param entityPropertiesOnly flag indicating only the EntityProperties should be checked.
+     * @throws IncompleteEntityException If any of the required properties are null.
+     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
     public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
         for (Property property : getPropertySet()) {
@@ -282,7 +368,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
                 throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
             }
         }
-        for (EntityValidator validator : validatorsNewEntity) {
+        for (EntityValidator validator : validatorsCreateEntity.values()) {
             validator.validate(entity, entityPropertiesOnly);
         }
     }
@@ -299,7 +385,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public void validateUpdate(Entity entity) throws IncompleteEntityException {
-        for (EntityValidator validator : validatorsUpdateEntity) {
+        for (EntityValidator validator : validatorsUpdateEntity.values()) {
             validator.validate(entity, false);
         }
     }

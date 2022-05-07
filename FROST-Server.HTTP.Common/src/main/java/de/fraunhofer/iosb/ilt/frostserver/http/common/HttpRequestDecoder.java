@@ -93,7 +93,7 @@ class HttpRequestDecoder {
         decodeAccepHeader(request, parameterMap);
         decodePreferHeader(request, parameterMap);
 
-        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(version)
+        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(coreSettings, version)
                 .withRequestType(requestType)
                 .withUrlPath(path)
                 .withUrlQuery(request.getQueryString() != null

@@ -172,7 +172,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
                 .registerProperty(npTaskingCapabilityTask, true)
-                .addValidator((entity, entityPropertiesOnly) -> {
+                .addCreateValidator("AC-Task-CrationTime", (entity, entityPropertiesOnly) -> {
                     if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
                         entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
                     }

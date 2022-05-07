@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.HashMap;
@@ -40,10 +41,12 @@ public class ServiceRequestBuilder {
     private Optional<String> contentType;
     private Optional<Map<String, List<String>>> parameterMap;
     private final Map<String, Object> attributeMap = new HashMap<>();
+    private final CoreSettings coreSettings;
     private final Version version;
     private Principal userPrincipal;
 
-    public ServiceRequestBuilder(Version version) {
+    public ServiceRequestBuilder(CoreSettings coreSettings, Version version) {
+        this.coreSettings = coreSettings;
         this.version = version;
         this.requestType = Optional.empty();
         this.url = Optional.empty();
@@ -107,6 +110,7 @@ public class ServiceRequestBuilder {
     public ServiceRequest build() {
         ServiceRequest result = new ServiceRequest();
         result.setVersion(version);
+        result.setCoreSettings(coreSettings);
         if (url.isPresent()) {
             result.setUrl(url.get());
         }

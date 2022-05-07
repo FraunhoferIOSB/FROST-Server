@@ -71,7 +71,7 @@ public class BatchProcessor<C extends Content> {
                 version,
                 httpRequest.getPath(),
                 httpRequest.getHttpHeaders().get(CONTENT_TYPE));
-        final ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
+        final ServiceRequest serviceRequest = new ServiceRequestBuilder(coreSettings, version)
                 .withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData())

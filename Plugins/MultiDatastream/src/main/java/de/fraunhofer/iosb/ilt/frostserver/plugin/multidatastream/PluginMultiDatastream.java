@@ -165,7 +165,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .registerProperty(npSensorMDs, true)
                 .registerProperty(npThingMDs, true)
                 .registerProperty(npObservationsMDs, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
+                .addCreateValidator("MD-Properties", (entity, entityPropertiesOnly) -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     EntitySet observedProperties = entity.getProperty(npObservedPropertiesMDs);
@@ -193,7 +193,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         pluginCoreModel.etObservation
                 .registerProperty(pluginCoreModel.npDatastreamObservation, false)
                 .registerProperty(npMultiDatastreamObservation, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
+                .addCreateValidator("MD-Obs-DsOrMds", (entity, entityPropertiesOnly) -> {
                     if (!entityPropertiesOnly) {
                         Entity datastream = entity.getProperty(pluginCoreModel.npDatastreamObservation);
                         Entity multiDatastream = entity.getProperty(npMultiDatastreamObservation);
