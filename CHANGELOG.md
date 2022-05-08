@@ -2,6 +2,16 @@
 
 ## Release version 2.0.0
 
+Version 2.0 contains many large updates to the FROST-Server codebase, greatly increasing its flexibility.
+Much funktionality is now controlled by plugins, from the data model to result formats.
+
+
+**Upgrading from 1.x**
+
+First update to 1.14.x and run the Update Database script to ensure the database schema is fully up to date.
+After this version 2.x can be used on the same Datasbase.
+
+
 **New Features**
 * The data model provided by FROST-Server is now completely defined in plugins.
   This means it is possible to use FROST-Server with a totally different data

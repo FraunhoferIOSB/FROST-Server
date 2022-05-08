@@ -11,24 +11,33 @@ preliminary actuation support.
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/1.13.0/FROST-Server.MQTTP-1.13.0.war)
-* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/1.13.0/FROST-Server.HTTP-1.13.0.war)
-* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/1.13.0/FROST-Server.MQTT-1.13.0-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/2.0.0/FROST-Server.MQTTP-2.0.0.war)
+* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/2.0.0/FROST-Server.HTTP-2.0.0.war)
+* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/2.0.0/FROST-Server.MQTT-2.0.0-jar-with-dependencies.jar)
 
 Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
+
 
 ## Documentation
 
 Documentation can be found on the [documentation site](https://fraunhoferiosb.github.io/FROST-Server/)
 
+
+## Changes and Updates
+
+See the [Change Log](CHANGELOG.md).
+
+
 ## Kubernetes (Helm) support
 
 See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use the FROST-Server Helm chart for a Kubernetes deployment.
+
 
 ## Standalone Spring Boot
 
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
 Spring Boot application that makes it easy to run Fraunhofer IOSB FROST-Server in cloud environments.
+
 
 ## Compiling
 
@@ -40,6 +49,7 @@ To compile FROST-Server you need to have a JDK and Maven installed.
   * `FROST-Server.MQTTP/target/`
   * `FROST-Server.HTTP/target/`
   * `FROST-Server.MQTT/target/`
+
 
 ## Authors
 
