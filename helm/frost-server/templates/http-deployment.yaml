@@ -34,6 +34,8 @@ spec:
           ports:
             - name: tomcat
               containerPort: 8080
+          resources:
+          {{- toYaml .Values.frost.http.resources | nindent 12 }}
           env:
             # Internal properties
             - name: ApiVersion
@@ -54,6 +56,8 @@ spec:
               value: "{{ .Values.frost.http.maxDataSize | int64 }}"
             - name: useAbsoluteNavigationLinks
               value: "{{ .Values.frost.http.useAbsoluteNavigationLinks }}"
+            - name: http_cors_enable
+              value: "{{ .Values.frost.http.enableCors }}"
 
             {{ if .Values.frost.mqtt.enabled -}}
             # Messages bus related properties
