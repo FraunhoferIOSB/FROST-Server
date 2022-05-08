@@ -3,7 +3,8 @@ name: Maven Build
 on:
   push:
     branches:
-      - master
+      - v1.x
+      - v2.x
       - develop
       - develop-*
 
@@ -21,7 +22,7 @@ jobs:
         fetch-depth: 0
 
     - name: Cache maven repository
-      uses: actions/cache@v2.1.7
+      uses: actions/cache@v3
       with:
         path: |
           ~/.m2/repository

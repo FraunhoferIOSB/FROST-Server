@@ -3,7 +3,8 @@ name: Helm Build
 on:
   push:
     branches:
-    - master
+    - v1.x
+    - v2.x
     tags:
     - "v[0-9]+.[0-9]+.[0-9]+"
 
