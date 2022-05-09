@@ -163,7 +163,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      *
      * @param validator The validator to add.
      * @return this.
-     * @deprecated use {@link #addValidatorForCreate(String, EntityValidator)} instead
+     * @deprecated use {@link #addCreateValidator(String, EntityValidator)} instead
      */
     @Deprecated(forRemoval = true)
     public EntityType addValidator(EntityValidator validator) {
@@ -175,7 +175,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      *
      * @param validator The validator to add
      * @return this
-     * @deprecated use {@link #addValidatorForCreate(String, EntityValidator)} instead
+     * @deprecated use {@link #addCreateValidator(String, EntityValidator)} instead
      */
     @Deprecated(forRemoval = true)
     public EntityType addValidatorForCreate(EntityValidator validator) {
