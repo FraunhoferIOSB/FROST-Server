@@ -68,7 +68,7 @@
         <maven-jacoco-plugin.version>0.8.8</maven-jacoco-plugin.version>
         <maven-jar-plugin>3.2.2</maven-jar-plugin>
         <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
-        <maven-nexus-staging-plugin>1.6.8</maven-nexus-staging-plugin>
+        <maven-nexus-staging-plugin>1.6.13</maven-nexus-staging-plugin>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
