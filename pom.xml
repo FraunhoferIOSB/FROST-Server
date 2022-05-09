@@ -75,7 +75,7 @@
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <owasp.version>6.3.1</owasp.version>
 
-        <org.json.version>20210307</org.json.version>
+        <org.json.version>20220320</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2.5.1</postgis.version>
         <postgres.version>42.2.23</postgres.version>
