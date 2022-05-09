@@ -6,15 +6,12 @@ updates:
     schedule:
       interval: "daily"
 
-  # Maintain dependencies for Maven in the v1.x branch
+  # Maintain dependencies for Maven in the v2.0.x branch
   - package-ecosystem: "maven"
     directory: "/"
-    target-branch: v1.x
+    target-branch: v2.0.x
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "com.github.dasniko:testcontainers-keycloak"
-        update-types: ["version-update:semver-major"]
 
   # Maintain dependencies for Maven in the v1.14.x branch
   - package-ecosystem: "maven"
