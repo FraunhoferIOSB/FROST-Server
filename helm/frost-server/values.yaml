@@ -72,7 +72,7 @@ frost:
     image:
       registry: docker.io
       repository: postgis/postgis
-      tag: 11-2.5-alpine
+      tag: 14-3.2-alpine
       pullPolicy: IfNotPresent
     # FROST-Server Database deployment settings
     ports:
