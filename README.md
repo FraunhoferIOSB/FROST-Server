@@ -54,10 +54,9 @@ To compile FROST-Server you need to have a JDK and Maven installed.
 ## Authors
 
 Hylke van der Schaaf
-hylke.vanderschaaf@iosb.fraunhofer.de
-
 Michael Jacoby
-michael.jacoby@iosb.fraunhofer.de
+
+frost@iosb.fraunhofer.de
 
 
 ## License
@@ -77,3 +76,4 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
