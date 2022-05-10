@@ -150,10 +150,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class TestSuite {
 
-    public static class SuiteFinaliser {
+    static class SuiteFinaliser {
 
         @Test
-        public void finalTest() {
+        void finalTest() {
             LOGGER.info("Stopping Servers...");
             assertDoesNotThrow(() -> {
                 getInstance().stopAllServers();
@@ -268,7 +268,7 @@ public class TestSuite {
 
             org.testcontainers.containers.Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
-            pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
+            pgConnectUrl = "jdbc:postgresql://" + pgServer.getHost() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
         }
     }
 
@@ -344,7 +344,7 @@ public class TestSuite {
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
         handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
-        handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+        handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
         handler.setInitParameter("bus.sendWorkerPoolSize", Integer.toString(20));
         handler.setInitParameter("bus.sendQueueSize", Integer.toString(10000));
         handler.setInitParameter("bus.maxInFlight", Integer.toString(10000));
@@ -400,11 +400,11 @@ public class TestSuite {
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
-        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
+        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getHost()+ ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
-        properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+        properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost()+ ":" + mqttBus.getFirstMappedPort());
         if (parameters != null) {
             properties.putAll(parameters);
         }

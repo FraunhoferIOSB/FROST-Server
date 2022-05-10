@@ -31,13 +31,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Includes various tests of "A.2 Filtering Extension" Conformance class.
  */
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability3Tests extends AbstractTestClass {
 
     public static class Implementation10 extends Capability3Tests {
@@ -143,8 +146,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * $expand.
      */
     @Test
-    void readEntitiesWithExpandQO() {
-        LOGGER.info("  readEntitiesWithExpandQO");
+    void readEntitiesWithExpand() {
+        LOGGER.info("  readEntitiesWithExpand");
         checkExpandForEntityType(EntityType.THING);
         checkExpandForEntityType(EntityType.LOCATION);
         checkExpandForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -153,6 +156,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
         checkExpandForEntityType(EntityType.OBSERVED_PROPERTY);
         checkExpandForEntityType(EntityType.OBSERVATION);
         checkExpandForEntityType(EntityType.FEATURE_OF_INTEREST);
+    }
+
+    @Test
+    void readEntitiesWithExpandRelations() {
+        LOGGER.info("  readEntitiesWithExpandRelations");
         checkExpandForEntityTypeRelations(EntityType.THING, thingId1);
         checkExpandForEntityTypeRelations(EntityType.LOCATION, locationId1);
         checkExpandForEntityTypeRelations(EntityType.HISTORICAL_LOCATION, historicalLocationId1);
@@ -161,6 +169,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
         checkExpandForEntityTypeRelations(EntityType.OBSERVED_PROPERTY, observedPropertyId1);
         checkExpandForEntityTypeRelations(EntityType.OBSERVATION, observationId1);
         checkExpandForEntityTypeRelations(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1);
+    }
+
+    @Test
+    void readEntitiesWithExpandMultilevel() {
+        LOGGER.info("  readEntitiesWithExpandMultilevel");
         checkExpandForEntityTypeMultilevel(EntityType.THING);
         checkExpandForEntityTypeMultilevel(EntityType.LOCATION);
         checkExpandForEntityTypeMultilevel(EntityType.HISTORICAL_LOCATION);
@@ -169,6 +182,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
         checkExpandForEntityTypeMultilevel(EntityType.OBSERVED_PROPERTY);
         checkExpandForEntityTypeMultilevel(EntityType.OBSERVATION);
         checkExpandForEntityTypeMultilevel(EntityType.FEATURE_OF_INTEREST);
+    }
+
+    @Test
+    void readEntitiesWithExpandMultilevelRelations() {
+        LOGGER.info("  readEntitiesWithExpandMultilevelRelations");
         checkExpandForEntityTypeMultilevelRelations(EntityType.THING, thingId1);
         checkExpandForEntityTypeMultilevelRelations(EntityType.LOCATION, locationId1);
         checkExpandForEntityTypeMultilevelRelations(EntityType.HISTORICAL_LOCATION, historicalLocationId1);
@@ -177,7 +195,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
         checkExpandForEntityTypeMultilevelRelations(EntityType.OBSERVED_PROPERTY, observedPropertyId1);
         checkExpandForEntityTypeMultilevelRelations(EntityType.OBSERVATION, observationId1);
         checkExpandForEntityTypeMultilevelRelations(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1);
+    }
 
+    @Test
+    void readEntitiesWithExpandNested() {
+        LOGGER.info("  readEntitiesWithExpandNested");
         checkNestedExpandForEntity(EntityType.THING, thingId1);
         checkNestedExpandForEntity(EntityType.LOCATION, locationId1);
         checkNestedExpandForEntity(EntityType.HISTORICAL_LOCATION, historicalLocationId1);
@@ -723,7 +745,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 assertTrue(result <= 0, fullMessage);
                 break;
             case EQ:
-                assertTrue(result == 0, fullMessage);
+                assertEquals(0, result, fullMessage);
                 break;
             case GE:
                 assertTrue(result >= 0, fullMessage);

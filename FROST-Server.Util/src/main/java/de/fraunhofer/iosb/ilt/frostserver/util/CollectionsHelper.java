@@ -99,7 +99,6 @@ public class CollectionsHelper {
 
         Map<String, Object> properties = new HashMap<>();
 
-        // TODO: Rename back
         public PropertyBuilder addProperty(String key, Object value) {
             properties.put(key, value);
             return this;

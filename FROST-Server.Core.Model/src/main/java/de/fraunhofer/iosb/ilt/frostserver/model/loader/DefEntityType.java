@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import java.util.ArrayList;
 import java.util.List;

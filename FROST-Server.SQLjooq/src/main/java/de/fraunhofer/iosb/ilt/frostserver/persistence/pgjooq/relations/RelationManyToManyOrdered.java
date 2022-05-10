@@ -79,7 +79,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
     }
 
     @Override
-    public void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
+    protected void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
         final DSLContext dslContext = pm.getDslContext();
         final L linkTable = getLinkTable();
         final Field<Object> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);

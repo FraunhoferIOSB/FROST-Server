@@ -69,6 +69,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
+    private static final String ESTIMATE_COUNT = "Estimate: {}, Count: {}";
 
     private final PostgresPersistenceManager pm;
     private final PersistenceSettings persistenceSettings;
@@ -342,7 +343,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (estimate < estimateTreshold) {
             final int count = timeCountQuery(sqlQueryBuilder.buildCount());
             entitySet.setCount(count);
-            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug(ESTIMATE_COUNT, estimate, count);
         } else {
             entitySet.setCount(estimate);
         }
@@ -356,7 +357,7 @@ public class ResultBuilder implements ResourcePathVisitor {
             final var csr = sqlQueryBuilder.buildEstimateCountSample();
             final int estimate = (int) (timeCountQueryRecord(csr.countQuery) * Math.pow(100, csr.sampledTables));
             entitySet.setCount(Math.max(count, estimate));
-            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug(ESTIMATE_COUNT, estimate, count);
         }
     }
 
@@ -365,7 +366,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (estimate < estimateTreshold) {
             final int count = timeCountQuery(sqlQueryBuilder.buildCount(estimateTreshold));
             entitySet.setCount(count);
-            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug(ESTIMATE_COUNT, estimate, count);
         } else {
             entitySet.setCount(estimate);
         }
@@ -378,7 +379,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         } else {
             final int estimate = timeCountQuery(sqlQueryBuilder.buildEstimateCountExplain());
             entitySet.setCount(Math.max(count, estimate));
-            LOGGER.debug("Estimate: {}, Count: {}", estimate, count);
+            LOGGER.debug(ESTIMATE_COUNT, estimate, count);
         }
     }
 

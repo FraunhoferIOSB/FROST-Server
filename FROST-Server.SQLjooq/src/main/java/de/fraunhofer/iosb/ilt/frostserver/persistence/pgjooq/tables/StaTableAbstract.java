@@ -35,8 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreIn
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
@@ -48,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -282,47 +281,14 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @throws IllegalStateException If something else goes wrong.
      */
     protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
-        Object entityId = entity.getId().getValue();
-        EntityType entityType = getEntityType();
-        final EntityType linkedType = linkedSet.getEntityType();
-        NavigationPropertyMain backLink = linkedType.getNavigationProperty(entityType);
-
-        Relation relation = findRelation(linkedSet.getNavigationProperty().getName());
-        RelationManyToMany relationManyToMany = null;
-        if (backLink == null) {
-            LOGGER.error("Target type ({}) does not actually link to this ({}).", linkedSet.getEntityType(), entityType);
-            throw new IllegalStateException("Target type (" + linkedSet.getEntityType() + ") does not actually link to this (" + entityType + ").");
-        } else if (backLink.isEntitySet()) {
-            if (relation instanceof RelationManyToMany) {
-                relationManyToMany = (RelationManyToMany) relation;
-            } else {
-                LOGGER.error("Target type ({}) and this ({}) not linked by RelationManyToMany.", linkedSet.getEntityType(), entityType);
-                throw new IllegalStateException("Many-to-many relation not linked by RelationManyToMany");
-            }
-        } else {
-            // One to Many
+        final NavigationPropertyEntitySet navProp = linkedSet.getNavigationProperty();
+        final Relation relation = findRelation(navProp.getName());
+        if (relation == null) {
+            LOGGER.error("Unknown relation: {}", navProp.getName());
+            throw new IllegalStateException("Unknown relation: " + navProp.getName());
         }
-
-        EntityFactories entityFactories = pm.getEntityFactories();
         for (Entity child : linkedSet) {
-            if (relationManyToMany == null) {
-                if (entityFactories.entityExists(pm, child)) {
-                    ((RelationOneToMany) relation).link(pm, entityId, child.getId().getValue());
-                } else if (forInsert) {
-                    child.setProperty(backLink, entity);
-                    child.complete();
-                    pm.insert(child);
-                } else {
-                    throw new NoSuchEntityException("Linked Entity with no id.");
-                }
-            } else {
-                if (forInsert) {
-                    entityFactories.entityExistsOrCreate(pm, child);
-                } else if (!entityFactories.entityExists(pm, child)) {
-                    throw new NoSuchEntityException("Linked Entity with no id.");
-                }
-                relationManyToMany.link(pm, entityId, child.getId().getValue());
-            }
+            relation.link(pm, entity, child, navProp, forInsert);
         }
     }
 

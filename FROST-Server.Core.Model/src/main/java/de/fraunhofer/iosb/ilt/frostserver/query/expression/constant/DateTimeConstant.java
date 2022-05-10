@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.text.ParseException;
 import net.time4j.ZonalDateTime;
+import net.time4j.engine.ChronoException;
 import net.time4j.format.expert.Iso8601Format;
 import net.time4j.tz.Timezone;
 import static net.time4j.tz.ZonalOffset.UTC;
@@ -37,7 +37,7 @@ public class DateTimeConstant extends Constant<ZonalDateTime> {
         super(value);
     }
 
-    public DateTimeConstant(String value) throws ParseException {
+    public DateTimeConstant(String value) {
         if (value.lastIndexOf('-') <= 0) {
             // We do not want simple integers be interpreted as a year.
             throw new IllegalArgumentException("Not a date: " + value);
@@ -58,7 +58,7 @@ public class DateTimeConstant extends Constant<ZonalDateTime> {
     public static DateTimeConstant parse(String value) {
         try {
             return new DateTimeConstant(value);
-        } catch (ParseException ex) {
+        } catch (ChronoException ex) {
             throw new IllegalArgumentException("Failed to parse PlainTimestamp " + StringHelper.cleanForLogging(value), ex);
         }
     }

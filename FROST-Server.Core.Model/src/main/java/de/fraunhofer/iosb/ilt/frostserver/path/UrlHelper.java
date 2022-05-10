@@ -125,12 +125,16 @@ public class UrlHelper {
             Object lastValue = last.getProperty(obPath);
             Object nextValue = next.getProperty(obPath);
             if (lastValue == null || nextValue == null) {
-                LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Order expression value is null, using normal nextLink: {}", orderExpression.toUrl());
+                }
                 return setFailed();
             }
             Constant valueConstant = ConstantFactory.of(lastValue);
             if (valueConstant == null) {
-                LOGGER.debug("Order expression value can not be made a constant, using normal nextLink: {}", orderExpression.toUrl());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Order expression value can not be made a constant, using normal nextLink: {}", orderExpression.toUrl());
+                }
                 return setFailed();
             }
             if (lastValue.equals(nextValue)) {
@@ -242,12 +246,10 @@ public class UrlHelper {
     }
 
     /**
-     * Generate a navigation link for the given entity, using the given path and
-     * parent entities.
+     * Generate a navigation link for the given entity, using the given path and parent entities.
      *
      * @param query The query used.
-     * @param path The path for the current page that relative links are
-     * relative to.
+     * @param path The path for the current page that relative links are relative to.
      * @param parent The parent of the entity to generate a navlink for.
      * @param entity The entity to generate a navlink for.
      * @param absolute If true, the generated link is absolute.
@@ -266,12 +268,10 @@ public class UrlHelper {
     }
 
     /**
-     * Generate a navigation link for the given EntitySet, using the given path
-     * and parent entities.
+     * Generate a navigation link for the given EntitySet, using the given path and parent entities.
      *
      * @param query The query used.
-     * @param path The path for the current page that relative links are
-     * relative to.
+     * @param path The path for the current page that relative links are relative to.
      * @param parent The parent of the entity to generate a navlink for.
      * @param es The EntitySet to generate a navlink for.
      * @param absolute If true, the generated link is absolute.

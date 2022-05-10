@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
-import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -73,12 +72,13 @@ public class DatabaseStatus extends HttpServlet {
             out.println("</form></p>");
             out.println("<p><a href='.'>Back...</a></p>");
 
-            PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
-            if (pm instanceof LiquibaseUser) {
-                checkForUpgrades(out, (LiquibaseUser) pm);
-            }
-            for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
-                checkForUpgrades(out, user);
+            try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
+                if (pm instanceof LiquibaseUser) {
+                    checkForUpgrades(out, (LiquibaseUser) pm);
+                }
+                for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
+                    checkForUpgrades(out, user);
+                }
             }
 
             out.println("<p>Done. Click the button to execute the listed updates.</p>");
@@ -117,12 +117,13 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
-            if (pm instanceof LiquibaseUser) {
-                processUpgrade(out, (LiquibaseUser) pm);
-            }
-            for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
-                processUpgrade(out, user);
+            try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
+                if (pm instanceof LiquibaseUser) {
+                    processUpgrade(out, (LiquibaseUser) pm);
+                }
+                for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
+                    processUpgrade(out, user);
+                }
             }
 
             out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");

@@ -18,13 +18,17 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +148,17 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
+    public void link(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws NoSuchEntityException, IncompleteEntityException {
+        EntityFactories entityFactories = pm.getEntityFactories();
+        if (forInsert) {
+            entityFactories.entityExistsOrCreate(pm, target);
+        } else if (!entityFactories.entityExists(pm, target)) {
+            throw new NoSuchEntityException("Linked Entity with no id.");
+        }
+        link(pm, source.getId().getValue(), target.getId().getValue());
+    }
+
+    protected void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
         pm.getDslContext().insertInto(linkTable)
                 .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
                 .set(targetLinkFieldAcc.getField(linkTable), targetId)
