@@ -53,7 +53,7 @@ services:
       - "./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
 
   database:
-    image: postgis/postgis:11-2.5-alpine
+    image: postgis/postgis:14-3.2-alpine
     environment:
       - POSTGRES_DB=sensorthings
       - POSTGRES_USER=sensorthings

@@ -185,7 +185,7 @@ public class TestSuite {
     private final AtomicInteger nextId = new AtomicInteger(1);
 
     @Container
-    private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
+    private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:14-3.2-alpine")
             .withEnv("POSTGRES_DB", VAL_PG_DB)
             .withEnv("POSTGRES_USER", VAL_PG_USER)
             .withEnv("POSTGRES_PASSWORD", VAL_PG_PASS)
