@@ -1,5 +1,13 @@
 # Changelog
 
+## Release Version 1.14.3
+
+**Internal changes & Bugfixes**
+* Fixed #515: Allow root logging level, and some other log levels, to be set using env. variables
+* Fixed #549: Datastream times not nulled when deleting all Observations
+* Updated dependencies
+
+
 ## Release Version 1.14.2
 
 **Internal changes & Bugfixes**
