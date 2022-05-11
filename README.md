@@ -53,7 +53,7 @@ To compile FROST-Server you need to have a JDK and Maven installed.
 
 ## Authors
 
-Hylke van der Schaaf
+Hylke van der Schaaf, 
 Michael Jacoby
 
 frost@iosb.fraunhofer.de
