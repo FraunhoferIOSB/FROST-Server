@@ -1,5 +1,20 @@
 # Changelog
 
+## Release Version 1.15.0
+
+**New Features**
+* Implemented #510: GeoJSON featureCollections have nextLinks
+* Implemented #515: Allow root logging and some other logging levels to be set using env. variables
+* Implemented #463: Added response metadata parameter "resultMetadata"
+
+**Internal changes & Bugfixes**
+* Updated dependencies
+* Improved exception handling
+* Improved output on path parsing errors
+* Fixed #549: Datastream times not nulled when deleting all Observations
+* Fixed #427: Added servers section to OpenAPI doc
+
+
 ## Release Version 1.14.0
 
 **New Features**
