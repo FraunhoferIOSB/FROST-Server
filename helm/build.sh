@@ -5,7 +5,7 @@ git config --global user.email "noReply@local"
 git config --global user.name "Workflow Build"
 
 # release version
-if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; then
+if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; then
   echo "Building release helm chart"
   git clone --quiet --branch master https://github.com/FraunhoferIOSB/helm-charts.git
   /tmp/helm lint ./helm/frost-server
