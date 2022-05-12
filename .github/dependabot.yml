@@ -1,8 +1,9 @@
 version: 2
 updates:
-  # Maintain dependencies for Maven in the default branch
+  # Maintain dependencies for Maven in the v2.x branch
   - package-ecosystem: "maven"
     directory: "/"
+    target-branch: v2.x
     schedule:
       interval: "daily"
 
@@ -16,17 +17,17 @@ updates:
   # Maintain dependencies for Maven in the v1.14.x branch
   - package-ecosystem: "maven"
     directory: "/"
-    target-branch: v1.14.x
+    target-branch: v1.15.x
     schedule:
       interval: "daily"
     ignore:
       - dependency-name: "com.github.dasniko:testcontainers-keycloak"
         update-types: ["version-update:semver-major"]
 
-  # Maintain dependencies for Maven in the v1.13.x branch
+  # Maintain dependencies for Maven in the v1.14.x branch
   - package-ecosystem: "maven"
     directory: "/"
-    target-branch: v1.13.x
+    target-branch: v1.14.x
     schedule:
       interval: "daily"
     ignore:
@@ -36,6 +37,7 @@ updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: v2.x
     schedule:
       interval: "daily"
 
