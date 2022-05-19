@@ -48,7 +48,7 @@ public class MetaDataGenerator {
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
             String format = request.getParameter(REQUEST_PARAM_FORMAT, "");
-            String accept = request.getParameter(HEADER_ACCEPT);
+            String accept = request.getParameter(HEADER_ACCEPT, "");
             int idxXml = accept.indexOf(CONTENT_TYPE_APPLICATION_XML);
             int idxJson = accept.indexOf(CONTENT_TYPE_APPLICATION_JSON);
             if (idxXml == -1) {
