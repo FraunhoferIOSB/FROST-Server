@@ -47,7 +47,7 @@ public class DateTimeConstant extends Constant<ZonalDateTime> {
 
     @Override
     public String toUrl() {
-        return getValue().toString();
+        return StringHelper.FORMAT_MOMENT.print(getValue().toMoment());
     }
 
     @Override
