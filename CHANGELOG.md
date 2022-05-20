@@ -1,5 +1,12 @@
 # Changelog
 
+## Development version 2.1.0
+
+**Internal changes & Bugfixes**
+* Fixed DateTimeConstants sometimes being generated with decimal comma.
+* Fixed DateTimeConstants failing to parse when using decimal comma.
+
+
 ## Release version 2.0.0
 
 Version 2.0 contains many large updates to the FROST-Server codebase, greatly increasing its flexibility.
