@@ -160,6 +160,8 @@ class UrlHelperTest {
     @Test
     void testNextLink() {
         String[] bases = {
+            "/Observations?$filter=validTime gt 2016-01-02T01:01:01.123Z",
+            "/Observations?$filter=validTime gt 2016-01-02T01:01:01,123Z",
             "/Observations?$filter=length(result) le 2",
             "/Things?$filter=name eq 'it''s a quote'",
             "/Things?$filter=name eq 'it''''s two quotes'",
