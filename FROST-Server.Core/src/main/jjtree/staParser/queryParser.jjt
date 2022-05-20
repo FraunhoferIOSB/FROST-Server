@@ -60,7 +60,7 @@ TOKEN [IGNORE_CASE]:
 | <DATETIMEINTERVAL: (<DATETIME> | <DURATIONVALUE>) ["/"] (<DATETIME> | <DURATIONVALUE>) >
 | <DATETIME: <DATE> "T" <TIME> <TIMEZONE> >
 | <DATE: <LONG> "-" <MONTH> "-" <DAY> >
-| <TIME:  <HOUR> ":" <ZERO_FIFTYNINE> ( ":" <ZERO_FIFTYNINE> ( "." (["0"-"9"])+ )? )? >
+| <TIME:  <HOUR> ":" <ZERO_FIFTYNINE> ( ":" <ZERO_FIFTYNINE> ( ("." | ",") (["0"-"9"])+ )? )? >
 | <#TIMEZONE: ( "Z" | ["+", "-"] <HOUR> ":" <ZERO_FIFTYNINE> ) >
 | <#MONTH: ("0" ["0"-"9"] | "1" ["0", "1", "2"]) >
 | <#DAY: (["0", "1", "2"] ["0"-"9"] | "3" ["0", "1"]) >
