@@ -39,8 +39,11 @@ jobs:
         java-version: 11
 
     - name: Build with Maven
+      env:
+        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
+        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
       run: |
-        mvn -B install -Dmaven.javadoc.skip=true -P owasp
+        mvn -B install -Dmaven.javadoc.skip=true -P owasp --settings maven-ci-settings.xml
 
     - name: Create environment variables
       run: |

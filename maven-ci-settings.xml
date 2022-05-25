@@ -12,13 +12,15 @@
             <username>${env.SONATYPE_USERNAME}</username>
             <password>${env.SONATYPE_PASSWORD}</password>
         </server>
+		<server>
+			<id>OWASP_OSS_INDEX</id>
+			<username>${env.OWASP_OSS_INDEX_USERNAME}</username>
+			<password>${env.OWASP_OSS_INDEX_APIKEY}</password>
+		</server>
     </servers>
     <profiles>
         <profile>
-            <id>ossrh</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <id>release</id>
             <properties>
                 <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
