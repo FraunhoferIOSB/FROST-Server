@@ -58,7 +58,7 @@
         <junit.version>5.8.2</junit.version>
         <junit.platform.version>1.8.2</junit.platform.version>
         <keycloak.version>18.0.0</keycloak.version>
-        <liquibase.version>4.10.0</liquibase.version>
+        <liquibase.version>4.11.0</liquibase.version>
         <logback.version>1.2.11</logback.version>
 
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
@@ -78,7 +78,7 @@
         <org.json.version>20220320</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2.5.1</postgis.version>
-        <postgres.version>42.3.5</postgres.version>
+        <postgres.version>42.3.6</postgres.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <testcontainers.version>1.17.2</testcontainers.version>
         <testcontainers-keycloak.version>2.2.2</testcontainers-keycloak.version>
