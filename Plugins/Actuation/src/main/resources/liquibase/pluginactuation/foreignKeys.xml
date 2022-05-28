@@ -27,7 +27,7 @@
     <changeSet author="scf" id="2021-01-01-actuation-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="TASKINGCAPABILITIES_ACTUATOR_ID_FKEY" />
+                <foreignKeyConstraintExists foreignKeyName="TASKINGCAPABILITIES_ACTUATOR_ID_FKEY" foreignKeyTableName="TASKINGCAPABILITIES" />
             </not>
         </preConditions>
 

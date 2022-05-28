@@ -23,7 +23,7 @@
     <changeSet author="scf" id="2021-01-01-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="DATASTREAMS_OBS_PROPERTY_ID_FKEY" />
+                <foreignKeyConstraintExists foreignKeyName="DATASTREAMS_OBS_PROPERTY_ID_FKEY" foreignKeyTableName="DATASTREAMS" />
             </not>
         </preConditions>
         <addForeignKeyConstraint
