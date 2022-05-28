@@ -826,24 +826,31 @@ class QueryParserTest {
     void testFilterComplex() {
         String query = "$filter=Rooms/House/id eq 'FOI_1' and House/Rooms/time ge 2010-06-01T00:00:00Z and House/Rooms/time le 2010-07-01T00:00:00Z";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.setFilter(new And(
-                new Equal(
-                        new Path(
-                                testModel.NP_ROOMS,
-                                testModel.NP_HOUSE,
-                                testModel.ET_HOUSE.getPrimaryKey()),
-                        new StringConstant("FOI_1")),
+        expResult.setFilter(
                 new And(
-                        new GreaterEqual(
-                                new Path(testModel.NP_HOUSE,
-                                        testModel.NP_ROOMS,
-                                        testModel.EP_TIME),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))),
+                        new And(
+                                new Equal(
+                                        new Path(
+                                                testModel.NP_ROOMS,
+                                                testModel.NP_HOUSE,
+                                                testModel.ET_HOUSE.getPrimaryKey()),
+                                        new StringConstant("FOI_1")
+                                ),
+                                new GreaterEqual(
+                                        new Path(testModel.NP_HOUSE,
+                                                testModel.NP_ROOMS,
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))
+                                )
+                        ),
                         new LessEqual(
                                 new Path(testModel.NP_HOUSE,
                                         testModel.NP_ROOMS,
                                         testModel.EP_TIME),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))))));
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))
+                        )
+                )
+        );
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);

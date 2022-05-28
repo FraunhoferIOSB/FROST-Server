@@ -1,0 +1,399 @@
+/*
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+PRESERVE_LINE_ENDINGS = true;
+PRESERVE_TABS = true;
+USE_CHECKED_EXCEPTION=true;
+PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.parser.query;
+NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes;
+BASE_NAME=Q;
+
+<DEFAULT,LS_QUERY,LS_SUBQUERY,LS_FILTER,LS_CONSTANTS,LS_PLAIN_PATH,LS_ORDERBYS,LS_ORDERBY>
+SKIP : " " | "\n" | "\r" | "\t";
+
+<LS_CONSTANTS> TOKEN [IGNORE_CASE]:
+  <#SIGN: ["+", "-"]>
+| <#DURATIONVALUE: ( <SIGN> )? "P" ( <AN_LONG> "Y" )? ( <AN_LONG> "M" )? ( <AN_LONG> "W" )? ( <AN_LONG> "D" )? ( "T" ( <AN_LONG> "H" )? ( <AN_LONG> "M" )? ( <AN_LONG> ( "." <AN_LONG> )? "S" )? )? >
+| <#TIMEZONE: ( "Z" | ["+", "-"] <HOUR> ":" <ZERO_FIFTYNINE> ) >
+| <#MONTH: ("0" ["0"-"9"] | "1" ["0", "1", "2"]) >
+| <#DAY: (["0", "1", "2"] ["0"-"9"] | "3" ["0", "1"]) >
+| <#HOUR: ("0" ["0"-"9"] | "1" ["0"-"9"] | "2" ["0", "1", "2", "3"]) >
+| <#ZERO_FIFTYNINE: (["0"-"5"] ["0"-"9"]) >
+| <#AN_LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
+;
+
+<LS_QUERY> TOKEN [IGNORE_CASE]:
+  <T_OPTIONS_SEPARATOR: "&" >
+| <T_O_FORMAT:   "$" ("result")? "Format=" >
+| <T_O_METADATA: "$resultMetadata=" >
+| <T_O_SKIPFILTER: "$skipFilter=" >
+;
+
+<LS_QUERY,LS_SUBQUERY> TOKEN [IGNORE_CASE]:
+  <T_O_COUNT:    "$count=" >
+| <T_O_TOP:      "$top=" >
+| <T_O_SKIP:     "$skip=" >
+| <T_O_SELECT:   "$select=" >
+| <T_O_FILTER:   "$filter=" >
+| <T_O_EXPAND:   "$expand=" >
+| <T_O_ORDERBY:  "$orderby=" >
+;
+
+<LS_SUBQUERY> TOKEN [IGNORE_CASE]:
+  <T_SUBQUERY_OPTIONS_SEPARATOR: ";" >
+;
+
+<LS_FORMAT> TOKEN [IGNORE_CASE]:
+  <T_CHARSEQ_FORMAT: (["a"-"z", "0"-"9", ".", "@", "%", ":", ";", "-", "_", "/", "="])+ >
+;
+
+<LS_METADATA> TOKEN [IGNORE_CASE]:
+  <T_CHARSEQ_METADATA: (["a"-"z", "0"-"9"])+ >
+;
+
+<LS_COUNT,LS_CONSTANTS> TOKEN [IGNORE_CASE]:
+  <T_BOOL: "true" | "false" >
+;
+
+<LS_TOP,LS_SKIP,LS_CONSTANTS> TOKEN [IGNORE_CASE]:
+  <T_LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
+;
+
+<LS_EXPAND,LS_SELECT,LS_FILTER,LS_ORDERBYS> TOKEN [IGNORE_CASE]:
+  <T_VALUE_SEPARATOR: "," >
+;
+
+<LS_SELECT> TOKEN [IGNORE_CASE]:
+  <T_DISTINCT: "distinct:" >
+;
+
+<LS_PLAIN_PATH> TOKEN [IGNORE_CASE]:
+  <T_ARRAYINDEX: "[" <AN_LONG> "]">
+| <T_PATH_SEPARATOR: "/" >
+;
+
+<LS_ORDERBY> TOKEN [IGNORE_CASE]:
+  <T_O_ASC:  "asc" >
+| <T_O_DESC: "desc" >
+;
+
+<LS_PLAIN_PATH> TOKEN [IGNORE_CASE]:
+  <T_CHARSEQ: (["a"-"z", "0"-"9", ".", "@", "-", "_"])+ >
+;
+
+<LS_FILTER,LS_EXPAND> TOKEN [IGNORE_CASE]:
+  <T_LB: "(">
+| <T_RB: ")">
+;
+
+<LS_FILTER> TOKEN [IGNORE_CASE]:
+  <T_QO_EQ:       "eq" >
+| <T_QO_NE:       "ne" >
+| <T_QO_GT:       "gt" >
+| <T_QO_GE:       "ge" >
+| <T_QO_LT:       "lt" >
+| <T_QO_LE:       "le" >
+
+| <T_QO_AND:      "and" >
+| <T_QO_NOT:      "not" >
+| <T_QO_OR:       "or" >
+
+| <T_QO_ADD:      "add" >
+| <T_QO_SUB:      "sub" >
+| <T_QO_MUL:      "mul" >
+| <T_QO_DIV:      "div" >
+| <T_QO_MOD:      "mod" >
+
+| <T_QF_SUBSTRINGOF:        "substringof" <T_LB> >
+| <T_QF_ENDSWITH:           "endswith" <T_LB> >
+| <T_QF_STARTSWITH:         "startswith" <T_LB> >
+| <T_QF_LENGTH:             "length" <T_LB> >
+| <T_QF_INDEXOF:            "indexof" <T_LB> >
+| <T_QF_SUBSTRING:          "substring" <T_LB> >
+| <T_QF_TOLOWER:            "tolower" <T_LB> >
+| <T_QF_TOUPPER:            "toupper" <T_LB> >
+| <T_QF_TRIM:               "trim" <T_LB> >
+| <T_QF_CONCAT:             "concat" <T_LB> >
+| <T_QF_YEAR:               "year" <T_LB> >
+| <T_QF_MONTH:              "month" <T_LB> >
+| <T_QF_DAY:                "day" <T_LB> >
+| <T_QF_HOUR:               "hour" <T_LB> >
+| <T_QF_MINUTE:             "minute" <T_LB> >
+| <T_QF_SECOND:             "second" <T_LB> >
+| <T_QF_FRACTIONALSECONDS:  "fractionalseconds" <T_LB> >
+| <T_QF_DATE:               "date" <T_LB> >
+| <T_QF_TIME:               "time" <T_LB> >
+| <T_QF_TOTALOFFSETMINUTES: "totaloffsetminutes" <T_LB> >
+| <T_QF_NOW:                "now" <T_LB> >
+| <T_QF_MINDATETIME:        "mindatetime" <T_LB> >
+| <T_QF_MAXDATETIME:        "maxdatetime" <T_LB> >
+
+| <T_QF_BEFORE:   "before" <T_LB> >
+| <T_QF_AFTER:    "after" <T_LB> >
+| <T_QF_MEETS:    "meets" <T_LB> >
+| <T_QF_DURING:   "during" <T_LB> >
+| <T_QF_OVERLAPS: "overlaps" <T_LB> >
+| <T_QF_STARTS:   "starts" <T_LB> >
+| <T_QF_FINISHES: "finishes" <T_LB> >
+
+| <T_QF_ROUND:   "round" <T_LB> >
+| <T_QF_FLOOR:   "floor" <T_LB> >
+| <T_QF_CEILING: "ceiling" <T_LB> >
+
+| <T_QF_GEO_DISTANCE:   "geo.distance" <T_LB> >
+| <T_QF_GEO_LENGTH:     "geo.length" <T_LB> >
+| <T_QF_GEO_INTERSECTS: "geo.intersects" <T_LB> >
+
+| <T_QF_ST_EQUALS:     "st_equals" <T_LB> >
+| <T_QF_ST_DISJOINT:   "st_disjoint" <T_LB> >
+| <T_QF_ST_TOUCHES:    "st_touches" <T_LB> >
+| <T_QF_ST_WITHIN:     "st_within" <T_LB> >
+| <T_QF_ST_OVERLAPS:   "st_overlaps" <T_LB> >
+| <T_QF_ST_CROSSES:    "st_crosses" <T_LB> >
+| <T_QF_ST_INTERSECTS: "st_intersects" <T_LB> >
+| <T_QF_ST_CONTAINS:   "st_contains" <T_LB> >
+| <T_QF_ST_RELATE:     "st_relate" <T_LB> >
+;
+
+<LS_CONSTANTS> TOKEN [IGNORE_CASE]:
+  <#DOUBLESQUOTE: "''" >
+| <T_STR_LIT: "'" (~["'"] | <DOUBLESQUOTE> )* "'" >
+| <T_GEO_STR_LIT: "geography'" (~["'"])* "'" >
+| <T_DURATION: "duration'" <DURATIONVALUE> "'" >
+| <T_DATE: <T_LONG> "-" <MONTH> "-" <DAY> >
+| <T_TIME: <HOUR> ":" <ZERO_FIFTYNINE> ( ":" <ZERO_FIFTYNINE> ( ("." | ",") (["0"-"9"])+ )? )? >
+| <T_DATETIME: <T_DATE> "T" <T_TIME> <TIMEZONE> >
+| <T_DATETIMEINTERVAL: (<T_DATETIME> | <DURATIONVALUE>) ["/"] (<T_DATETIME> | <DURATIONVALUE>) >
+| <T_DOUBLE: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
+;
+
+// ***************
+// * Productions *
+// ***************
+
+Start Start :
+  P_Options <EOF> { return jjtThis; }
+;
+
+P_Options #void : LS_QUERY :
+  P_Option ( <T_OPTIONS_SEPARATOR> P_Option )*
+;
+
+P_InnerOptions #void : LS_SUBQUERY :
+  ( P_Option ( <T_SUBQUERY_OPTIONS_SEPARATOR> P_Option )* )?
+;
+
+P_Option : 
+    ( <T_O_COUNT>      P_Count )
+  | ( <T_O_EXPAND>     P_Expand )
+  | ( <T_O_FILTER>     P_Filter )
+  | ( <T_O_FORMAT>     P_Format )
+  | ( <T_O_METADATA>   P_Metadata )
+  | ( <T_O_ORDERBY>    P_OrderBys )
+  | ( <T_O_SELECT>     P_Select )
+  | ( <T_O_SKIP>       P_Skip )
+  | ( <T_O_SKIPFILTER> P_Filter )
+  | ( <T_O_TOP>        P_Top )
+;
+
+P_Count : LS_COUNT : <T_BOOL>;
+
+P_Expand #void : LS_EXPAND :
+    P_ExpandItem ( <T_VALUE_SEPARATOR> P_ExpandItem )*
+;
+
+P_ExpandItem #P_ExpandItem :
+    P_PlainPath ( <T_LB> P_InnerOptions <T_RB>)?
+;
+
+P_Format : LS_FORMAT : <T_CHARSEQ_FORMAT> ;
+
+P_Metadata : LS_METADATA : <T_CHARSEQ_METADATA> ;
+
+P_OrderBys #void : LS_ORDERBYS :
+    P_OrderBy ( <T_VALUE_SEPARATOR> P_OrderBy )*
+;
+
+P_OrderBy #P_OrderBy : LS_ORDERBY :
+    P_AdditiveExpression ( <T_O_ASC> | <T_O_DESC> )?
+;
+
+P_Select #void : LS_SELECT :
+    (<T_DISTINCT>)? P_PlainPaths
+;
+
+P_Skip : LS_SKIP : <T_LONG>;
+
+P_Top : LS_TOP : <T_LONG>;
+
+P_PlainPaths #void :
+    P_PlainPath ( <T_VALUE_SEPARATOR> P_PlainPath )*
+;
+
+P_PlainPath #P_PlainPath : LS_PLAIN_PATH :
+  <T_CHARSEQ> ( <T_ARRAYINDEX> )* ( <T_PATH_SEPARATOR> <T_CHARSEQ> (<T_ARRAYINDEX>)* )*
+;
+
+// **********
+// * FILTER *
+// **********
+
+P_Filter : LS_FILTER :
+    P_LogicalExpression
+;
+
+P_LogicalExpression :
+    P_LogicalAnd (<T_QO_OR> P_LogicalAnd )*
+;
+P_LogicalAnd :
+    P_NegationExpression (<T_QO_AND> P_NegationExpression )*
+;
+P_NegationExpression :
+    (<T_QO_NOT>)? (P_BoolFunction | P_ComparativeExpression =>||)
+;
+
+P_BoolFunction :
+  ( P_BoolFunctionNameTwo P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_RB>
+  | P_BoolFunctionNameThree P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_RB>
+  )
+;
+
+P_BoolFunctionNameTwo :
+    <T_QF_SUBSTRINGOF>
+  | <T_QF_ENDSWITH>
+  | <T_QF_STARTSWITH>
+  | <T_QF_BEFORE>
+  | <T_QF_AFTER>
+  | <T_QF_MEETS>
+  | <T_QF_DURING>
+  | <T_QF_OVERLAPS>
+  | <T_QF_STARTS>
+  | <T_QF_FINISHES>
+  | <T_QF_GEO_INTERSECTS>
+  | <T_QF_ST_EQUALS>
+  | <T_QF_ST_DISJOINT>
+  | <T_QF_ST_TOUCHES>
+  | <T_QF_ST_WITHIN>
+  | <T_QF_ST_OVERLAPS>
+  | <T_QF_ST_CROSSES>
+  | <T_QF_ST_INTERSECTS>
+  | <T_QF_ST_CONTAINS>
+;
+
+P_BoolFunctionNameThree:
+    <T_QF_ST_RELATE>
+;
+
+P_ComparativeExpression :
+    P_AdditiveExpression (P_Compare P_AdditiveExpression )?
+;
+
+P_Compare :
+      <T_QO_EQ>
+    | <T_QO_NE>
+    | <T_QO_GT>
+    | <T_QO_GE>
+    | <T_QO_LT>
+    | <T_QO_LE>
+;
+
+P_AdditiveExpression : LS_FILTER:
+    P_MultiplicativeExpression (P_PlusMin P_MultiplicativeExpression )*
+;
+
+P_PlusMin #void:
+    <T_QO_ADD> | <T_QO_SUB>
+;
+
+
+P_MultiplicativeExpression:
+    P_UnaryExpression (P_MulDiv P_UnaryExpression )*
+;
+
+P_MulDiv #void:
+    <T_QO_DIV> | <T_QO_MUL> | <T_QO_MOD>
+;
+
+
+P_UnaryExpression :
+    P_MathFunction
+  | (<T_LB> P_LogicalExpression <T_RB>)
+  | (P_Constant =>||)
+  | (P_PlainPath =>||)
+;
+
+P_MathFunction:
+    (P_FunctionNameNone  <T_RB>)
+  | (P_FunctionNameSingle  P_AdditiveExpression  <T_RB>)
+  | (P_FunctionNameDouble  P_AdditiveExpression <T_VALUE_SEPARATOR> P_AdditiveExpression  <T_RB>)
+  | (P_FunctionNameDoubleTripple  P_AdditiveExpression <T_VALUE_SEPARATOR> P_AdditiveExpression (<T_VALUE_SEPARATOR> P_AdditiveExpression)?  <T_RB>)
+;
+
+P_FunctionNameNone:
+    <T_QF_NOW>
+  | <T_QF_MINDATETIME>
+  | <T_QF_MAXDATETIME>
+;
+
+P_FunctionNameSingle:
+    <T_QF_ROUND>
+  | <T_QF_FLOOR>
+  | <T_QF_CEILING>
+  | <T_QF_LENGTH>
+  | <T_QF_YEAR>
+  | <T_QF_MONTH>
+  | <T_QF_DAY>
+  | <T_QF_HOUR>
+  | <T_QF_MINUTE>
+  | <T_QF_SECOND>
+  | <T_QF_FRACTIONALSECONDS>
+  | <T_QF_DATE>
+  | <T_QF_TIME>
+  | <T_QF_TOTALOFFSETMINUTES>
+  | <T_QF_TOLOWER>
+  | <T_QF_TOUPPER>
+  | <T_QF_TRIM>
+  | <T_QF_GEO_LENGTH>
+;
+
+P_FunctionNameDouble:
+    <T_QF_INDEXOF>
+  | <T_QF_CONCAT>
+  | <T_QF_GEO_DISTANCE>
+;
+
+P_FunctionNameDoubleTripple:
+    <T_QF_SUBSTRING>
+;
+
+P_Constant : LS_CONSTANTS :
+    (
+        <T_STR_LIT>
+      | <T_GEO_STR_LIT>
+      | <T_DURATION>
+      | <T_DATETIMEINTERVAL>
+      | <T_DATETIME>
+      | <T_DATE>
+      | <T_TIME>
+      | <T_LONG>
+      | <T_DOUBLE>
+      | <T_BOOL>
+    ) =>||
+;
+
+

@@ -17,15 +17,40 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_AdditiveExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_BoolFunction;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_ComparativeExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_LogicalAnd;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_LogicalExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_MathFunction;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_MultiplicativeExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_NegationExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_PlainPath;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_UnaryExpression;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_BOOL;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATE;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATETIME;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATETIMEINTERVAL;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DOUBLE;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DURATION;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_GEO_STR_LIT;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_LONG;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_STR_LIT;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_TIME;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
@@ -96,12 +121,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
 /**
  *
  * @author jab
  */
-public class ExpressionParser extends AbstractParserVisitor {
+public class ExpressionParser extends Node.Visitor {
 
     private static final String GEOGRAPHY_REGEX = "^geography'([^']+)'$";
     private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
@@ -112,8 +136,8 @@ public class ExpressionParser extends AbstractParserVisitor {
         OP_AND("and", And.class),
         OP_OR("or", Or.class),
         // Math
-        OP_ADD("+", Add.class),
-        OP_SUB("-", Subtract.class),
+        OP_ADD("add", Add.class),
+        OP_SUB("sub", Subtract.class),
         OP_MUL("mul", Multiply.class),
         OP_DIV("div", Divide.class),
         OP_MOD("mod", Modulo.class),
@@ -199,6 +223,9 @@ public class ExpressionParser extends AbstractParserVisitor {
         }
 
         public static Operator fromKey(String key) {
+            if (key.endsWith("(")) {
+                key = key.substring(0, key.length() - 1);
+            }
             Operator operator = BY_KEY.get(key);
             if (operator == null) {
                 throw new IllegalArgumentException("Unknown operator: '" + key + "'.");
@@ -207,204 +234,197 @@ public class ExpressionParser extends AbstractParserVisitor {
         }
     }
 
+    private final QueryParser queryParser;
+    private Expression currentExpression;
+
+    public ExpressionParser(QueryParser queryParser) {
+        this.queryParser = queryParser;
+    }
+
     public Expression parseExpression(Node node) {
-        return visit(node, null);
+        currentExpression = null;
+        visit(node);
+        return currentExpression;
     }
 
-    @Override
-    public Path visit(ASTPlainPath node, Object data) {
-
-        PropertyPlaceholder property = null;
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            Node child = node.jjtGetChild(i);
-            if (!(child instanceof ASTPathElement)) {
-                throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
-            }
-            property = visit((ASTPathElement) child, property);
+    private void addToCurrentExpression(Expression toAdd) {
+        if (currentExpression == null) {
+            currentExpression = toAdd;
+        } else {
+            currentExpression.addParameter(toAdd);
         }
-        return new Path(property);
     }
 
-    @Override
-    public PropertyPlaceholder visit(ASTPathElement node, Object data) {
-        if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
-            throw new IllegalArgumentException("no identified paths are allowed inside expressions");
+    public void visit(P_PlainPath node) {
+        PropertyPlaceholder property = queryParser.handle(node);
+        Path path = new Path(property);
+        addToCurrentExpression(path);
+    }
+
+    public void visit(P_LogicalExpression node) {
+        handleOperatorFunction(node);
+    }
+
+    public void visit(P_LogicalAnd node) {
+        handleOperatorFunction(node);
+    }
+
+    public void visit(P_MultiplicativeExpression node) {
+        handleOperatorFunction(node);
+    }
+
+    public void visit(P_AdditiveExpression node) {
+        handleOperatorFunction(node);
+    }
+
+    private void handleOperatorFunction(Node node) {
+        Expression previousExpression = currentExpression;
+
+        final int childCount = node.getChildCount();
+        if (childCount < 3 || childCount % 2 == 0) {
+            throw new IllegalArgumentException("'" + node.getClass().getName() + "' must have at least two parameters");
         }
-        if (data instanceof PropertyPlaceholder) {
-            return ((PropertyPlaceholder) data).addToSubPath(node.getName());
+        // Find first operator
+        String operatorName = ((Token) node.getChild(1)).getImage();
+        Function function = getFunction(operatorName);
+        currentExpression = function;
+        // Put the first two parameters into the first (current) operator
+        visit(node.getChild(0));
+        visit(node.getChild(2));
+
+        for (int i = 3; i < childCount; i += 2) {
+            operatorName = ((Token) node.getChild(i)).getImage();
+            function = getFunction(operatorName);
+            function.addParameter(currentExpression);
+            currentExpression = function;
+            visit(node.getChild(i + 1));
         }
-        return new PropertyPlaceholder(node.getName());
+        currentExpression = previousExpression;
+        addToCurrentExpression(function);
     }
 
-    @Override
-    public Expression visit(ASTFilter node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("filter node must have exactly one child!");
-        }
-        return visit(node.jjtGetChild(0), data);
-    }
+    public void handleFunction(Node node) {
+        Expression previousExpression = currentExpression;
+        final int childCount = node.getChildCount();
 
-    @Override
-    public Or visit(ASTLogicalOr node, Object data) {
-        return (Or) visitLogicalFunction(Operator.OP_OR, node, data);
-    }
-
-    @Override
-    public And visit(ASTLogicalAnd node, Object data) {
-        return (And) visitLogicalFunction(Operator.OP_AND, node, data);
-    }
-
-    private Function visitLogicalFunction(Operator operator, Node node, Object data) {
-        if (node.jjtGetNumChildren() < 2) {
-            throw new IllegalArgumentException("'" + operator + "' must have at least two parameters");
-        }
-        Function function = operator.instantiate();
-        Expression result = visitChildWithType(function, node.jjtGetChild(node.jjtGetNumChildren() - 1), data, 1);
-        for (int i = node.jjtGetNumChildren() - 2; i >= 0; i--) {
-            function = operator.instantiate();
-            Expression lhs = visitChildWithType(function, node.jjtGetChild(i), data, 0);
-            function.setParameters(lhs, result);
-            result = function;
+        String operator = node.getFirstToken().getImage();
+        Function function = getFunction(operator);
+        currentExpression = function;
+        for (int i = 1; i < childCount; i += 2) {
+            visit(node.getChild(i));
         }
 
-        return (Function) result;
+        currentExpression = previousExpression;
+        addToCurrentExpression(function);
     }
 
-    @Override
-    public Function visit(ASTNot node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
+    public void visit(P_NegationExpression node) {
+        if (node.getChildCount() != 2) {
             throw new IllegalArgumentException("'not' must have exactly one parameter");
         }
-        return visit((ASTFunction) node, data);
+        handleFunction(node);
     }
 
-    @Override
-    public Function visit(ASTBooleanFunction node, Object data) {
-        return visit((ASTFunction) node, data);
+    public void visit(P_UnaryExpression node) {
+        if (node.getChildCount() != 3) {
+            throw new IllegalArgumentException("Unary experssion must have exactly one parameter");
+        }
+        visit(node.getChild(1));
     }
 
-    @Override
-    public Function visit(ASTComparison node, Object data) {
-        if (node.jjtGetNumChildren() != 2) {
+    public void visit(P_BoolFunction node) {
+        handleFunction(node);
+    }
+
+    public void visit(P_MathFunction node) {
+        handleFunction(node);
+    }
+
+    public void visit(P_ComparativeExpression node) {
+        Expression previousExpression = currentExpression;
+
+        if (node.getChildCount() != 3) {
             throw new IllegalArgumentException("comparison must have exactly 2 children");
         }
-        return visit((ASTFunction) node, data);
-    }
 
-    private Expression visit(Node node, Object data) {
-        return (Expression) node.jjtAccept(this, data);
-    }
+        String operator = ((Token) node.getChild(1)).getImage();
+        Function function = getFunction(operator);
+        currentExpression = function;
+        visit(node.getChild(0));
+        visit(node.getChild(2));
 
-    private Function visitArithmeticFunction(SimpleNode node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        if (childCount < 3 || childCount % 2 == 0) {
-            throw new IllegalArgumentException("add/sub with wrong number of arguments");
-        }
-        // can be n-ary relation -> need to binaryfy
-        // backwards iteration over children incl. visit(this) to handle expressions
-        Expression rhs;
-        Expression lhs;
-        Function result = null;
-        int idx = 0;
-        while (idx < childCount) {
-            int operatorIndex = result == null ? idx + 1 : idx;
-            if (!(node.jjtGetChild(operatorIndex) instanceof ASTOperator)) {
-                throw new IllegalArgumentException("operator expected but '" + node.jjtGetChild(idx).getClass().getName() + "' found");
-            }
-            String operatorKey = ((ASTOperator) node.jjtGetChild(operatorIndex)).getName().trim().toLowerCase();
-            Function function = getFunction(operatorKey);
-
-            if (result == null) {
-                lhs = visitChildWithType(function, node.jjtGetChild(idx), data, 1);
-                idx++;
-            } else {
-                lhs = result;
-            }
-            idx++;
-            rhs = visitChildWithType(function, node.jjtGetChild(idx), data, 0);
-            function.setParameters(lhs, rhs);
-            result = function;
-            idx++;
-        }
-        return result;
-    }
-
-    @Override
-    public Function visit(ASTPlusMin node, Object data) {
-        return visitArithmeticFunction(node, data);
-    }
-
-    @Override
-    public Function visit(ASTMulDiv node, Object data) {
-        return visitArithmeticFunction(node, data);
+        currentExpression = previousExpression;
+        addToCurrentExpression(function);
     }
 
     private Function getFunction(String operator) {
         return Operator.fromKey(operator).instantiate();
     }
 
-    @Override
-    public Function visit(ASTFunction node, Object data) {
-        String operator = node.getName().trim().toLowerCase();
-        Function function = getFunction(operator);
-        function.setParameters(visitChildsWithType(function, node, data));
-        return function;
+    public void visit(T_STR_LIT node) {
+        String image = node.getImage();
+        if (image.length() < 2) {
+            throw new IllegalArgumentException("String constant too short.");
+        }
+        addToCurrentExpression(new StringConstant(image.substring(1, image.length() - 1)));
     }
 
-    private Expression[] visitChildsWithType(Function function, Node node, Object data) {
-        List<FunctionTypeBinding> allowedBindings = function.getAllowedTypeBindings();
-        if (data != null) {
-            List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
-            allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
-        }
-        Expression[] parameters = new Expression[node.jjtGetNumChildren()];
-        for (int i = 0; i < parameters.length; i++) {
-            parameters[i] = visit(node.jjtGetChild(i), allowedBindings.stream().map(x -> x.getParameters().get(0)).collect(Collectors.toList()));
-        }
-        return parameters;
-    }
-
-    private Expression visitChildWithType(Function function, Node child, Object data, int parameterIndex) {
-        List<FunctionTypeBinding> allowedBindings = function.getAllowedTypeBindings();
-        if (data != null) {
-            List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
-            allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
-        }
-        return visit(child, allowedBindings.stream().map(x -> x.getParameters().get(parameterIndex)).collect(Collectors.toList()));
-    }
-
-    @Override
-    public Constant visit(ASTValueNode node, Object data) {
-        Object value = node.jjtGetValue();
-        if (value instanceof Boolean) {
-            return new BooleanConstant((Boolean) value);
-        } else if (value instanceof Double) {
-            return new DoubleConstant((Double) value);
-        } else if (value instanceof Integer) {
-            return new IntegerConstant((Integer) value);
-        } else if (value instanceof Long) {
-            return new IntegerConstant(((Number) value).longValue());
-        } else if (value instanceof Constant) {
-            return (Constant) value;
-        } else {
-            return new StringConstant(node.jjtGetValue().toString());
-        }
-    }
-
-    @Override
-    public GeoJsonConstant visit(ASTGeoStringLit node, Object data) {
-        String raw = node.jjtGetValue().toString().trim();
-        Matcher matcher = GEORAPHY_PATTERN.matcher(raw);
+    public void visit(T_GEO_STR_LIT node) {
+        String image = node.getImage();
+        Matcher matcher = GEORAPHY_PATTERN.matcher(image);
         if (matcher.matches()) {
-            return GeoJsonConstant.fromString(matcher.group(1).trim());
+            addToCurrentExpression(GeoJsonConstant.fromString(matcher.group(1).trim()));
         } else {
-            throw new IllegalArgumentException("invalid geography string '" + StringHelper.cleanForLogging(raw) + "'");
+            throw new IllegalArgumentException("invalid geography string '" + StringHelper.cleanForLogging(image) + "'");
         }
     }
 
-    @Override
-    public BooleanConstant visit(ASTBool node, Object data) {
-        return new BooleanConstant(node.getValue());
+    public void visit(T_DURATION node) {
+        String image = node.getImage();
+        DurationConstant value = DurationConstant.parse(image.substring(9, image.length() - 1));
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_DATETIMEINTERVAL node) {
+        String image = node.getImage();
+        IntervalConstant value = IntervalConstant.parse(image);
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_DATETIME node) {
+        String image = node.getImage();
+        DateTimeConstant value = DateTimeConstant.parse(image);
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_DATE node) {
+        String image = node.getImage();
+        DateConstant value = DateConstant.parse(image);
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_TIME node) {
+        String image = node.getImage();
+        TimeConstant value = TimeConstant.parse(image);
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_LONG node) {
+        String image = node.getImage();
+        IntegerConstant value = new IntegerConstant(Long.valueOf(image));
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_DOUBLE node) {
+        String image = node.getImage();
+        DoubleConstant value = new DoubleConstant(Double.valueOf(image));
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_BOOL node) {
+        String image = node.getImage();
+        BooleanConstant value = new BooleanConstant(image);
+        addToCurrentExpression(value);
     }
 
 }

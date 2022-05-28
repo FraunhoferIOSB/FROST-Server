@@ -28,6 +28,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
  */
 public interface Expression {
 
+    public default void addParameter(Expression parameter) {
+        throw new IllegalArgumentException("Expression of type " + getClass().getName() + " does not accept parameters.");
+    }
+
     public Expression compress();
 
     public <O> O accept(ExpressionVisitor<O> visitor);
