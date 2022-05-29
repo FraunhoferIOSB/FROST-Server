@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2022 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 PRESERVE_LINE_ENDINGS = true;
 PRESERVE_TABS = true;
 USE_CHECKED_EXCEPTION=true;
-PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.parser.query;
-NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes;
+PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.queryparser;
+NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes;
 BASE_NAME=Q;
 
 <DEFAULT,LS_QUERY,LS_SUBQUERY,LS_FILTER,LS_CONSTANTS,LS_PLAIN_PATH,LS_ORDERBYS,LS_ORDERBY>

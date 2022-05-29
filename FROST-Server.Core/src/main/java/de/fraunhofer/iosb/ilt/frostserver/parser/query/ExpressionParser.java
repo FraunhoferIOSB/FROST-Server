@@ -17,31 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_AdditiveExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_BoolFunction;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_ComparativeExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_LogicalAnd;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_LogicalExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_MathFunction;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_MultiplicativeExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_NegationExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_PlainPath;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.P_UnaryExpression;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_BOOL;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATE;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATETIME;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DATETIMEINTERVAL;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DOUBLE;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_DURATION;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_GEO_STR_LIT;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_LONG;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_STR_LIT;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.nodes.T_TIME;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
@@ -52,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalCons
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Divide;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Modulo;
@@ -113,19 +91,40 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Mee
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Token;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_AdditiveExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_BoolFunction;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ComparativeExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_LogicalAnd;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_LogicalExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_MathFunction;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_MultiplicativeExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_NegationExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_PlainPath;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_UnaryExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_BOOL;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DATE;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DATETIME;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DATETIMEINTERVAL;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DOUBLE;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DURATION;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_GEO_STR_LIT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_LONG;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STR_LIT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_TIME;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  *
  * @author jab
  */
-public class ExpressionParser extends Node.Visitor {
+public class ExpressionParser extends Visitor {
 
     private static final String GEOGRAPHY_REGEX = "^geography'([^']+)'$";
     private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
