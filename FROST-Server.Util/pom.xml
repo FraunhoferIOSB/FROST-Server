@@ -59,26 +59,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>javacc-maven-plugin</artifactId>
-                <version>${javacc-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>jjtree-javacc</id>
-                        <goals>
-                            <goal>jjtree-javacc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.java.dev.javacc</groupId>
-                        <artifactId>javacc</artifactId>
-                        <version>${javacc.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
                 <version>1.6.8</version>
@@ -103,7 +83,7 @@
                 <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>default-cli</id>
+                        <id>generateQueryParser</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>exec</goal>
@@ -116,6 +96,25 @@
                                 <argument>${project.build.directory}/scripts/javacc-full.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/queryParser.ccc</argument>
+                                <argument>-d</argument>
+                                <argument>../../../target/generated-sources/congocc/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generateWktParser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full.jar</argument>
+                                <argument>-n</argument>
+                                <argument>src/main/congocc/wktParser.ccc</argument>
                                 <argument>-d</argument>
                                 <argument>../../../target/generated-sources/congocc/</argument>
                             </arguments>
@@ -136,8 +135,6 @@
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/congocc</source>
-                                <source>${project.build.directory}/generated-sources/javacc</source>
-                                <source>${project.build.directory}/generated-sources/jjtree</source>
                             </sources>
                         </configuration>
                     </execution>
