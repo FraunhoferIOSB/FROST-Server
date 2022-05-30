@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -28,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,7 +53,6 @@ class UrlHelperTest {
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
     private static TestModel testModel;
-    private static ResourcePath path;
 
     @BeforeAll
     public static void beforeClass() {
@@ -62,7 +64,41 @@ class UrlHelperTest {
         queryDefaults = coreSettings.getQueryDefaults()
                 .setAlwaysOrder(true)
                 .setUseAbsoluteNavigationLinks(false);
-        path = new ResourcePath("http://example.org/FROST-Server", Version.V_1_0, "/");
+    }
+
+    @Test
+    void testPathsetThings() {
+        String path = "/Rooms";
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
+        expResult.addPathElement(espe, true, false);
+        expResult.setMainElement(espe);
+
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testPathThing() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            String path = "/Room";
+            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        });
+    }
+
+    @Test
+    void testPathsetThingsRef() {
+        String path = "/Houses/$ref";
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+        expResult.addPathElement(espe, true, false);
+        expResult.setMainElement(espe);
+        expResult.setRef(true);
+
+        assertEquals(expResult, result);
     }
 
     @Test

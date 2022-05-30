@@ -83,6 +83,25 @@
                 <version>3.0.0</version>
                 <executions>
                     <execution>
+                        <id>generatePathParser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full.jar</argument>
+                                <argument>-n</argument>
+                                <argument>src/main/congocc/pathParser.ccc</argument>
+                                <argument>-d</argument>
+                                <argument>../../../target/generated-sources/congocc/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generateQueryParser</id>
                         <phase>generate-sources</phase>
                         <goals>

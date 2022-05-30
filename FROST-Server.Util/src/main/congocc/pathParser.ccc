@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2022 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+PRESERVE_LINE_ENDINGS = true;
+PRESERVE_TABS = true;
+USE_CHECKED_EXCEPTION=true;
+PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.pathparser;
+NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes;
+BASE_NAME=P;
+
+SKIP : " " | "\t" | "\n" | "\r" ;
+
+<DEFAULT> TOKEN: {
+  <T_PATH_SEPARATOR: "/" >
+| <T_VALUE:  "/$value" >
+| <T_REF:    "/$ref" >
+| <T_LB:     "(" >
+| <T_RB:     ")" >
+| <T_NAME:   ["A"-"Z", "a"-"z"](["A"-"Z", "a"-"z", "0"-"9", ".", "_", "-"])+ | "@iot.id" | "@iot.selfLink" >
+| <T_LONG:   ("-")?(["0"]|["1"-"9"](["0"-"9"])*) >
+| <T_DOUBLE: <T_LONG> ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
+| <T_STR_LIT: "'" (~["'"] | <T_DOUBLESQUOTE> )* "'" >
+| <T_ARRAYINDEX: "[" <T_LONG> "]">
+| <#T_DOUBLESQUOTE: "''" >
+;
+
+
+Start Start :
+  <T_PATH_SEPARATOR> P_PathElement (<T_PATH_SEPARATOR> P_PathElement)* ( <T_REF> | <T_VALUE> )? <EOF> { return jjtThis; }
+;
+
+P_PathElement:
+  <T_NAME> ( P_ArrayIndex | P_EntityId )?
+;
+
+P_EntityId #P_EntityId:
+    <T_LB> ( <T_LONG> | <T_STR_LIT>) <T_RB>
+;
+
+P_ArrayIndex #void:
+    <T_ARRAYINDEX> (<T_ARRAYINDEX>)*
+;
+
