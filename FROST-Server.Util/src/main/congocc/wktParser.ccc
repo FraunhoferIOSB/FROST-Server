@@ -45,7 +45,7 @@ TOKEN [IGNORE_CASE]:
 | <GEOMETRYCOLLECTION: "GEOMETRYCOLLECTION" >
 ;
 
-Start Start #Start :
+Start Start :
   ( PointWithData
   | MultiPointWithData
   | LineStringWithData

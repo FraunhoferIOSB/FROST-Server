@@ -21,30 +21,15 @@ import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.Node;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ParseException;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.WParser;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.COMMA;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords2;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords3;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.DOUBLE;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.GEOMETRYCOLLECTION;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LB;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LINESTRING;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LinearRing;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.MULTILINESTRING;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.MULTIPOINT;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.MULTIPOLYGON;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.POINT;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.POLYGON;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.POLYHEDRALSURFACE;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.RB;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Start;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.TIN;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.TRIANGLE;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktLineString;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktMultiPoint;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPoint;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPolygon;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.ZaM;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.ZoM;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -56,12 +41,26 @@ import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
 public class WktParser extends Visitor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WktParser.class.getName());
+
+    public WktParser(GeoJsonObject result, LngLatAlt lastLngLatAlt, List<LngLatAlt> lastLinearRing, Polygon lastPolygon, LineString lastLineString, MultiPoint lastMultiPoint, Point lastPoint) {
+        this.result = result;
+        this.lastLngLatAlt = lastLngLatAlt;
+        this.lastLinearRing = lastLinearRing;
+        this.lastPolygon = lastPolygon;
+        this.lastLineString = lastLineString;
+        this.lastMultiPoint = lastMultiPoint;
+        this.lastPoint = lastPoint;
+    }
 
     private WktParser() {
         // Not for public consumption
@@ -77,6 +76,7 @@ public class WktParser extends Visitor {
 
     public static GeoJsonObject parseWkt(String wkt) {
         try {
+            LOGGER.debug("Parsing: {}", wkt);
             InputStream is = new ByteArrayInputStream(wkt.getBytes(StandardCharsets.UTF_8));
             WParser parser = new WParser(is);
             Start start = parser.Start();
@@ -204,66 +204,6 @@ public class WktParser extends Visitor {
         } else {
             throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }
-    }
-
-    public void visit(LB node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(RB node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(COMMA node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(LINESTRING node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(GEOMETRYCOLLECTION node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(MULTILINESTRING node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(MULTIPOINT node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(MULTIPOLYGON node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(POINT node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(POLYGON node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(POLYHEDRALSURFACE node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(TIN node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(TRIANGLE node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(ZaM node) {
-        // Can be ignored while parsing.
-    }
-
-    public void visit(ZoM node) {
-        // Can be ignored while parsing.
     }
 
 }
