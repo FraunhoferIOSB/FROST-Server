@@ -51,7 +51,7 @@ public class PersistenceSettings implements ConfigDefaults {
     /**
      * Tags
      */
-    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong")
+    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager")
     public static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
     @DefaultValue("ServerGeneratedOnly")
     public static final String TAG_ID_GENERATION_MODE = "idGenerationMode";

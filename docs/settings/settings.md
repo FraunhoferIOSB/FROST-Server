@@ -152,7 +152,7 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
 
 * **persistence.persistenceManagerImplementationClass:**  
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
-  * **`de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager`:**  
+  * **`de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager`:**  
     Default value, for PostgreSQL.
 * **persistence.autoUpdateDatabase:**  
   Automatically apply database updates.
