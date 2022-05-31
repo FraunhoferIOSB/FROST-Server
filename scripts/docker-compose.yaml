@@ -1,12 +1,12 @@
-version: '2'
+version: '3'
 
 services:
   web:
-    image: fraunhoferiosb/frost-server:latest
+    image: fraunhoferiosb/frost-server:2.0
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - http_cors_enable=true
-      - http_cors_allowed.origins=*
+      - http_cors_allowed_origins=*
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings

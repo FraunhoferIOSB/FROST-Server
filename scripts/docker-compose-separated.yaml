@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: fraunhoferiosb/frost-server-http:latest
+    image: fraunhoferiosb/frost-server-http:2.0
     ports:
       - 8080:8080
     depends_on:
@@ -24,7 +24,7 @@ services:
       - persistence_autoUpdateDatabase=true
 
   mqtt:
-    image: fraunhoferiosb/frost-server-mqtt:latest
+    image: fraunhoferiosb/frost-server-mqtt:2.0
     ports:
       - 1883:1883
       - 9876:9876
@@ -40,12 +40,11 @@ services:
       - mqtt_CreateMessageQueueSize=10000
       - mqtt_SubscribeThreadPoolSize=20
       - mqtt_SubscribeMessageQueueSize=10000
-      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
-      - plugins_providedPlugins=de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault
 
   mosquitto:
     image: eclipse-mosquitto
