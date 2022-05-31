@@ -264,7 +264,7 @@ P_LogicalAnd :
     P_NegationExpression (<T_QO_AND> P_NegationExpression )*
 ;
 P_NegationExpression :
-    (<T_QO_NOT>)? (P_BoolFunction | P_ComparativeExpression =>||)
+    (<T_QO_NOT>)? (P_BoolFunction | P_ComparativeExpression)
 ;
 
 P_BoolFunction :
@@ -333,8 +333,8 @@ P_MulDiv #void:
 P_UnaryExpression :
     P_MathFunction
   | (<T_LB> P_LogicalExpression <T_RB>)
-  | (P_Constant =>||)
-  | (P_PlainPath =>||)
+  | (P_Constant)
+  | (P_PlainPath)
 ;
 
 P_MathFunction:
@@ -393,7 +393,7 @@ P_Constant : LS_CONSTANTS :
       | <T_LONG>
       | <T_DOUBLE>
       | <T_BOOL>
-    ) =>||
+    )
 ;
 
 

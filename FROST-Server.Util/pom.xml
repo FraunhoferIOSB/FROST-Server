@@ -64,7 +64,7 @@
                 <version>1.6.8</version>
                 <executions>
                     <execution>
-                        <id>install-jbpm</id>
+                        <id>fetch-files</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>wget</goal>
