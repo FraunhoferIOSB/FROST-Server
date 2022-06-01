@@ -25,45 +25,222 @@ import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.ParseException;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.QParser;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Token;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ExpandItem;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_Option;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_PlainPath;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.Start;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_ARRAYINDEX;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_BOOL;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_CHARSEQ_FORMAT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_CHARSEQ_METADATA;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DISTINCT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_LONG;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_COUNT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_DESC;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_EXPAND;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_FILTER;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_FORMAT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_METADATA;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_ORDERBY;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SELECT;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SKIP;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SKIPFILTER;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryParser extends AbstractParserVisitor {
+public class QueryParser extends Visitor {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
 
-    private static final String OP_TOP = "top";
-    private static final String OP_SKIP = "skip";
-    private static final String OP_COUNT = "count";
-    private static final String OP_SELECT = "select";
-    private static final String OP_SELECT_DISTINCT = "selectdistinct";
-    private static final String OP_EXPAND = "expand";
-    private static final String OP_FILTER = "filter";
-    private static final String OP_SKIPFILTER = "skipfilter";
-    private static final String OP_FORMAT = "resultformat";
-    private static final String OP_METADATA = "resultmetadata";
-    private static final String OP_ORDER_BY = "orderby";
-
     private final QueryDefaults queryDefaults;
     private final ModelRegistry modelRegistry;
-    private final ExpressionParser expressionParser;
     private final ResourcePath path;
+    private ExpressionParser expressionParser;
+    private Query currentQuery;
+    private P_Option currentOption;
 
     public QueryParser(QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
         this.queryDefaults = queryDefaults;
         this.modelRegistry = modelRegistry;
-        this.expressionParser = new ExpressionParser();
         this.path = path;
+    }
+
+    private Query handle(Start node) {
+        Query query = new Query(modelRegistry, queryDefaults, path);
+        for (P_Option child : node.childrenOfType(P_Option.class)) {
+            handle(child, query);
+        }
+        return query;
+    }
+
+    private void handle(P_Option option, Query query) {
+        Query lastQuery = currentQuery;
+        P_Option lastOption = currentOption;
+
+        Node type = option.getFirstChild();
+        currentQuery = query;
+        currentOption = option;
+        visit(type);
+
+        currentQuery = lastQuery;
+        currentOption = lastOption;
+    }
+
+    void visit(T_O_COUNT node) {
+        List<T_BOOL> values = currentOption.childrenOfType(T_BOOL.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        currentQuery.setCount(Boolean.valueOf(values.get(0).getImage()));
+    }
+
+    void visit(T_O_SKIP node) {
+        List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        currentQuery.setSkip(Integer.parseInt(values.get(0).getImage()));
+    }
+
+    void visit(T_O_TOP node) {
+        List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        String image = values.get(0).getImage();
+        currentQuery.setTop(Integer.parseInt(image));
+    }
+
+    void visit(T_O_FORMAT node) {
+        List<T_CHARSEQ_FORMAT> values = currentOption.childrenOfType(T_CHARSEQ_FORMAT.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        currentQuery.setFormat(values.get(0).getImage());
+    }
+
+    void visit(T_O_METADATA node) {
+        List<T_CHARSEQ_METADATA> values = currentOption.childrenOfType(T_CHARSEQ_METADATA.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        currentQuery.setMetadata(Metadata.lookup(values.get(0).getImage()));
+    }
+
+    void visit(T_O_SELECT node) {
+        if (currentOption.getChild(1) instanceof T_DISTINCT) {
+            currentQuery.setSelectDistinct(true);
+        }
+        List<P_PlainPath> values = currentOption.childrenOfType(P_PlainPath.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        for (P_PlainPath pp : values) {
+            PropertyPlaceholder property = handle(pp);
+            currentQuery.addSelect(property);
+        }
+    }
+
+    PropertyPlaceholder handle(P_PlainPath pp) {
+        List<Token> children = pp.childrenOfType(Token.class);
+        PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).getImage());
+        for (int i = 1; i < children.size(); i++) {
+            final Token child = children.get(i);
+            if (child instanceof T_PATH_SEPARATOR) {
+                continue;
+            }
+            final String img = child.getImage();
+            if (child instanceof T_ARRAYINDEX) {
+                property.addToSubPath(img.substring(1, img.length() - 1));
+            } else {
+                property.addToSubPath(img);
+            }
+        }
+        return property;
+    }
+
+    void visit(T_O_ORDERBY node) {
+        List<P_OrderBy> values = currentOption.childrenOfType(P_OrderBy.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        for (P_OrderBy orderby : values) {
+            QueryParser.this.handle(orderby);
+        }
+    }
+
+    void handle(P_OrderBy node) {
+        var dir = OrderBy.OrderType.ASCENDING;
+        if (node.getChildCount() == 2 && node.getChild(1) instanceof T_O_DESC) {
+            dir = OrderBy.OrderType.DESCENDING;
+        }
+        Expression expression = getExpressionParser().parseExpression(node.getChild(0));
+        currentQuery.addOrderBy(new OrderBy(expression, dir));
+    }
+
+    void visit(T_O_FILTER node) {
+        currentQuery.setFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
+    }
+
+    void visit(T_O_SKIPFILTER node) {
+        currentQuery.setSkipFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
+    }
+
+    void visit(T_O_EXPAND node) {
+        List<P_ExpandItem> values = currentOption.childrenOfType(P_ExpandItem.class);
+        if (values.isEmpty()) {
+            return;
+        }
+        for (P_ExpandItem expand : values) {
+            handle(expand);
+        }
+    }
+
+    void handle(P_ExpandItem expandItem) {
+        Expand expand = new Expand(modelRegistry);
+        List<P_PlainPath> paths = expandItem.childrenOfType(P_PlainPath.class);
+        if (paths.isEmpty()) {
+            return;
+        }
+        PropertyPlaceholder property = handle(paths.get(0));
+        expand.addToRawPath(property.getName());
+        for (String item : property.getSubPath()) {
+            expand.addToRawPath(item);
+        }
+        List<P_Option> subOptions = expandItem.childrenOfType(P_Option.class);
+        if (!subOptions.isEmpty()) {
+            Query subQuery = new Query(modelRegistry, queryDefaults, path);
+            for (P_Option subOption : subOptions) {
+                handle(subOption, subQuery);
+            }
+            expand.setSubQuery(subQuery);
+        }
+        currentQuery.addExpand(expand);
+    }
+
+    private ExpressionParser getExpressionParser() {
+        if (expressionParser == null) {
+            expressionParser = new ExpressionParser(this);
+        }
+        return expressionParser;
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
@@ -78,238 +255,18 @@ public class QueryParser extends AbstractParserVisitor {
         if (query == null || query.isEmpty()) {
             return new Query(modelRegistry, queryDefaults, path);
         }
+        LOGGER.debug("Parsing: {}", query);
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        Parser t = new Parser(is, StringHelper.UTF8.name());
+        QParser t = new QParser(is);
         try {
-            ASTStart n = t.Start();
+            Start start = t.Start();
             QueryParser v = new QueryParser(queryDefaults, modelRegistry, path);
-            return v.visit(n, null);
-        } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
+            return v.handle(start);
+        } catch (ParseException | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));
             throw new IllegalArgumentException("Query is not valid: " + ex.getMessage(), ex);
         }
     }
 
-    @Override
-    public Query visit(ASTStart node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("query start node must have exactly one child of type Options");
-        }
-        ASTOptions options = getChildOfType(node, 0, ASTOptions.class);
-        return visit(options, data);
-    }
-
-    @Override
-    public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(modelRegistry, queryDefaults, path);
-        node.childrenAccept(this, result);
-        return result;
-    }
-
-    @Override
-    public Object visit(ASTOption node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("Query options must have exactly one child node.");
-        }
-        Query query = (Query) data;
-        String operator = node.getType().toLowerCase().trim();
-        switch (operator) {
-            case OP_TOP:
-                handleTop(node, query);
-                break;
-
-            case OP_SKIP:
-                handleSkip(node, query);
-                break;
-
-            case OP_COUNT:
-                handleCount(node, query);
-                break;
-
-            case OP_SELECT_DISTINCT:
-                query.setSelectDistinct(true);
-                handleSelect(node, query);
-                break;
-
-            case OP_SELECT:
-                handleSelect(node, query);
-                break;
-
-            case OP_EXPAND:
-                handleExpand(node, query, data);
-                break;
-
-            case OP_FILTER:
-                query.setFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
-                break;
-
-            case OP_SKIPFILTER:
-                query.setSkipFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
-                break;
-
-            case OP_FORMAT:
-                handleFormat(node, query);
-                break;
-
-            case OP_METADATA:
-                handleMetadata(node, query);
-                break;
-
-            case OP_ORDER_BY:
-                handleOrderBy(node, query, data);
-                break;
-
-            default:
-                // ignore or throw exception?
-                throw new IllegalArgumentException("unknow query option '" + operator + "'");
-        }
-        return data;
-    }
-
-    private void handleOrderBy(ASTOption node, Query query, Object data) {
-        ASTOrderBys child = getChildOfType(node, 0, ASTOrderBys.class);
-        query.setOrderBy(visit(child, data));
-    }
-
-    private void handleFormat(ASTOption node, Query query) {
-        ASTFormat child = getChildOfType(node, 0, ASTFormat.class);
-        query.setFormat(child.getValue());
-    }
-
-    private void handleMetadata(ASTOption node, Query query) {
-        ASTMetadata child = getChildOfType(node, 0, ASTMetadata.class);
-        query.setMetadata(Metadata.lookup(child.getValue()));
-    }
-
-    private void handleExpand(ASTOption node, Query query, Object data) {
-        ASTFilteredPaths child = getChildOfType(node, 0, ASTFilteredPaths.class);
-        query.setExpand(visit(child, data));
-    }
-
-    private void handleSelect(ASTOption node, Query query) {
-        ASTPlainPaths child = getChildOfType(node, 0, ASTPlainPaths.class);
-        query.addSelect(visit(child, query));
-    }
-
-    private void handleCount(ASTOption node, Query query) {
-        ASTBool child = getChildOfType(node, 0, ASTBool.class);
-        query.setCount(child.getValue());
-    }
-
-    private void handleSkip(ASTOption node, Query query) {
-        ASTValueNode child = getChildOfType(node, 0, ASTValueNode.class);
-        query.setSkip(Math.toIntExact((long) child.jjtGetValue()));
-    }
-
-    private void handleTop(ASTOption node, Query query) {
-        ASTValueNode child = getChildOfType(node, 0, ASTValueNode.class);
-        int top = Math.toIntExact((long) child.jjtGetValue());
-        query.setTop(top);
-    }
-
-    @Override
-    public List<Expand> visit(ASTFilteredPaths node, Object data) {
-        List<Expand> result = new ArrayList<>();
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            final ASTFilteredPath childNode = getChildOfType(node, i, ASTFilteredPath.class);
-            result.add(visit(childNode, data));
-        }
-        return result;
-    }
-
-    @Override
-    public Expand visit(ASTFilteredPath node, Object data) {
-        // ASTOptions is not another child but rather a child of last ASTPathElement
-        Expand resultExpand = new Expand(modelRegistry);
-        handleChild(node, 0, resultExpand, data);
-        return resultExpand;
-    }
-
-    private void handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
-        int idx = start;
-        ASTPathElement childNode = getChildOfType(node, idx, ASTPathElement.class);
-        String name = childNode.getName();
-        currentExpand.addToRawPath(name);
-
-        int numChildren = node.jjtGetNumChildren();
-        while (++idx < numChildren) {
-            childNode = getChildOfType(node, idx, ASTPathElement.class);
-            currentExpand.addToRawPath(childNode.getName());
-        }
-
-        // look at children of child
-        if (childNode.jjtGetNumChildren() > 1) {
-            throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
-        }
-        if (childNode.jjtGetNumChildren() == 1) {
-            if (currentExpand.hasSubQuery()) {
-                throw new IllegalArgumentException("there is only one subquery allowed per expand path");
-            }
-            ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
-            currentExpand.setSubQuery(visit(subChildNode, data));
-        }
-    }
-
-    public List<PropertyPlaceholder> visit(ASTPlainPaths node, Query data) {
-        List<PropertyPlaceholder> result = new ArrayList<>();
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            ASTPlainPath child = getChildOfType(node, i, ASTPlainPath.class);
-            result.add(visit(child, data));
-        }
-        return result;
-    }
-
-    @Override
-    public PropertyPlaceholder visit(ASTPlainPath node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        if (childCount == 1) {
-            ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
-            return visit(child, data);
-        } else {
-            ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
-            PropertyPlaceholder property = new PropertyPlaceholder(StringHelper.urlDecode(child.getName()));
-            for (int idx = 1; idx < childCount; idx++) {
-                child = getChildOfType(node, idx, ASTPathElement.class);
-                property.addToSubPath(child.getName());
-            }
-            return property;
-        }
-    }
-
-    @Override
-    public PropertyPlaceholder visit(ASTPathElement node, Object data) {
-        if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
-            throw new IllegalArgumentException("no identified paths are allowed inside select");
-        }
-        return new PropertyPlaceholder(node.getName());
-    }
-
-    @Override
-    public List<OrderBy> visit(ASTOrderBys node, Object data) {
-        List<OrderBy> result = new ArrayList<>();
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            ASTOrderBy child = getChildOfType(node, i, ASTOrderBy.class);
-            result.add(visit(child, data));
-        }
-        return result;
-    }
-
-    @Override
-    public OrderBy visit(ASTOrderBy node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("ASTOrderBy node must have exactly one child");
-        }
-        return new OrderBy(
-                expressionParser.parseExpression(node.jjtGetChild(0)),
-                node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
-    }
-
-    private static <T extends Node> T getChildOfType(SimpleNode parent, int index, Class<T> expectedType) {
-        Node childNode = parent.jjtGetChild(index);
-        if (!(expectedType.isAssignableFrom(childNode.getClass()))) {
-            throw new IllegalArgumentException(parent.getClass().getName() + " expected to have child of type " + expectedType.getName());
-        }
-        return (T) childNode;
-    }
 }

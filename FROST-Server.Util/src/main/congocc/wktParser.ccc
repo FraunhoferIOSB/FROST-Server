@@ -1,0 +1,107 @@
+/*
+ * Copyright (C) 2022 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+PRESERVE_LINE_ENDINGS = true;
+PRESERVE_TABS = true;
+USE_CHECKED_EXCEPTION=true;
+PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.wktparser;
+NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes;
+BASE_NAME=W;
+
+SKIP : " " | "\t" | "\n" | "\r" ;
+
+TOKEN [IGNORE_CASE]:
+  <LB: "(" >
+| <RB: ")" >
+| <COMMA: "," >
+| <DOUBLE: ( <SIGN> )? ( (["0"-"9"])+ ("."(["0"-"9"])*)?) | ( "."(["0"-"9"])+ ) (["E"]("-")?(["0"-"9"])+)? >
+| <#SIGN: ["+", "-"]>
+| <ZoM: "Z" | "M">
+| <ZaM: "ZM">
+| <POINT:              "POINT" >
+| <MULTIPOINT:         "MULTIPOINT" >
+| <LINESTRING:         "LINESTRING" >
+| <MULTILINESTRING:    "MULTILINESTRING" >
+| <POLYGON:            "POLYGON" >
+| <MULTIPOLYGON:       "MULTIPOLYGON" >
+| <TRIANGLE:           "TRIANGLE" >
+| <TIN:                "TIN" >
+| <POLYHEDRALSURFACE:  "POLYHEDRALSURFACE" >
+| <GEOMETRYCOLLECTION: "GEOMETRYCOLLECTION" >
+;
+
+Start Start :
+  ( PointWithData
+  | MultiPointWithData
+  | LineStringWithData
+  | PolygonWithData
+  ) <EOF>
+  { return jjtThis; }
+;
+
+PointWithData #WktPoint :
+  <POINT>  
+  ( <ZoM> <LB> Coords3 <RB>
+  |       <LB> Coords2 <RB>
+  ) 
+;
+
+MultiPointWithData #WktMultiPoint :
+  <MULTIPOINT> 
+  ( <ZoM> <LB> <LB> Coords3 <RB> (<COMMA> <LB> Coords3 <RB>)* <RB>
+  |       <LB> <LB> Coords2 <RB> (<COMMA> <LB> Coords2 <RB>)* <RB>
+  )
+;
+
+LineStringWithData #WktLineString :
+  <LINESTRING> 
+  ( <ZoM> <LB> Coords3List <RB>
+  |       <LB> Coords2List <RB>
+  )
+;
+
+PolygonWithData #WktPolygon :
+  <POLYGON> 
+  ( <ZoM> <LB> LinearRing3 ( <COMMA> LinearRing3 )* <RB>
+  |       <LB> LinearRing2 ( <COMMA> LinearRing2 )* <RB>
+  )
+;
+
+
+LinearRing2 #LinearRing :
+  <LB> Coords2List <RB>
+;
+
+LinearRing3 #LinearRing :
+  <LB> Coords3List <RB>
+;
+
+Coords2 #Coords2 :
+  <DOUBLE> <DOUBLE>
+;
+
+Coords3 #Coords3 :
+  <DOUBLE> <DOUBLE> <DOUBLE>
+;
+
+Coords2List #void :
+  Coords2 ( <COMMA> Coords2 )*
+;
+Coords3List #void :
+  Coords3 ( <COMMA> Coords3 )*
+;
