@@ -1,6 +1,12 @@
 # Changelog
 
-## Release version 2.0.0
+## Release version 2.0.2
+
+**Internal changes & Bugfixes**
+* Updated dependency versions
+
+
+## Release version 2.0.1
 
 **Internal changes & Bugfixes**
 * Fixed DateTimeConstants sometimes being generated with decimal comma.
