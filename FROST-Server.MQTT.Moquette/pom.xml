@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <moquette.version>0.14.3</moquette.version>
+        <moquette.version>0.15.1</moquette.version>
     </properties>
 
     <dependencies>
@@ -37,7 +37,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
+                    <artifactId>slf4j-reload4j</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.bugsnag</groupId>
