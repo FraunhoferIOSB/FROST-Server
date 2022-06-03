@@ -59,24 +59,107 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>javacc-maven-plugin</artifactId>
-                <version>${javacc-maven-plugin.version}</version>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.6.8</version>
                 <executions>
                     <execution>
-                        <id>jjtree-javacc</id>
+                        <id>fetch-files</id>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>jjtree-javacc</goal>
+                            <goal>wget</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.java.dev.javacc</groupId>
-                        <artifactId>javacc</artifactId>
-                        <version>${javacc.version}</version>
-                    </dependency>
-                </dependencies>
+                <configuration>
+                    <url>https://github.com/hylkevds/CongoCC-Versions/releases/download/v${congocc.version}/javacc-full-${congocc.version}.jar</url>
+                    <unpack>false</unpack>
+                    <outputDirectory>${project.build.directory}/scripts</outputDirectory>
+                    <sha512>${congocc.sha512}</sha512>
+                    <alwaysVerifyChecksum>true</alwaysVerifyChecksum>
+                </configuration>
+            </plugin>        
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>generatePathParser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>-n</argument>
+                                <argument>src/main/congocc/pathParser.ccc</argument>
+                                <argument>-d</argument>
+                                <argument>../../../target/generated-sources/congocc/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generateQueryParser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>-n</argument>
+                                <argument>src/main/congocc/queryParser.ccc</argument>
+                                <argument>-d</argument>
+                                <argument>../../../target/generated-sources/congocc/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generateWktParser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>-n</argument>
+                                <argument>src/main/congocc/wktParser.ccc</argument>
+                                <argument>-d</argument>
+                                <argument>../../../target/generated-sources/congocc/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/congocc</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

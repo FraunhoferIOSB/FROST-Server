@@ -344,7 +344,7 @@ class PathParserTest {
 
     @Test
     void testPathdeep0() {
-        String path = "/ObservedProperties(1)/Datastreams/Observations";
+        String path = "/ObservedProperties(1)/Datastreams(2)/Observations";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
@@ -354,7 +354,9 @@ class PathParserTest {
         expResult.addPathElement(epe, false, true);
         espe = new PathElementEntitySet(pluginCoreModel.npDatastreamsObsProp, epe);
         expResult.addPathElement(espe, false, false);
-        espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, espe);
+        epe = new PathElementEntity(new IdLong(2), pluginCoreModel.etDatastream, espe);
+        expResult.addPathElement(epe, false, true);
+        espe = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, epe);
         expResult.addPathElement(espe, false, false);
 
         assertEquals(expResult, result);

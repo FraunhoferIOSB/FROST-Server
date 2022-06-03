@@ -890,24 +890,31 @@ class QueryParserTest {
     void testFilterComplex() {
         String query = "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.setFilter(new And(
-                new Equal(
-                        new Path(pluginCoreModel.npDatastreamsThing,
-                                pluginCoreModel.npObservationsDatastream,
-                                pluginCoreModel.npFeatureOfInterestObservation,
-                                pluginCoreModel.etFeatureOfInterest.getPrimaryKey()),
-                        new StringConstant("FOI_1")),
+        expResult.setFilter(
                 new And(
-                        new GreaterEqual(
-                                new Path(pluginCoreModel.npDatastreamsThing,
-                                        pluginCoreModel.npObservationsDatastream,
-                                        pluginCoreModel.epResultTime),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))),
+                        new And(
+                                new Equal(
+                                        new Path(pluginCoreModel.npDatastreamsThing,
+                                                pluginCoreModel.npObservationsDatastream,
+                                                pluginCoreModel.npFeatureOfInterestObservation,
+                                                pluginCoreModel.etFeatureOfInterest.getPrimaryKey()),
+                                        new StringConstant("FOI_1")
+                                ),
+                                new GreaterEqual(
+                                        new Path(pluginCoreModel.npDatastreamsThing,
+                                                pluginCoreModel.npObservationsDatastream,
+                                                pluginCoreModel.epResultTime),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))
+                                )
+                        ),
                         new LessEqual(
                                 new Path(pluginCoreModel.npDatastreamsThing,
                                         pluginCoreModel.npObservationsDatastream,
                                         pluginCoreModel.epResultTime),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))))));
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))
+                        )
+                )
+        );
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
         assertEquals(expResult, result);

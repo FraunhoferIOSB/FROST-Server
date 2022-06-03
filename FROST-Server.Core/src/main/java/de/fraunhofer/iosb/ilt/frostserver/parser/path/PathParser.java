@@ -31,14 +31,26 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Node.Visitor;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.PParser;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.ParseException;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Token;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.P_EntityId;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_ARRAYINDEX;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_LONG;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_NAME;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_REF;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_STR_LIT;
+import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_VALUE;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PathParser implements ParserVisitor {
+public class PathParser extends Visitor {
 
     /**
      * The logger for this class.
@@ -46,10 +58,13 @@ public class PathParser implements ParserVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(PathParser.class);
 
     private final ModelRegistry modelRegistry;
+    private final ResourcePath resourcePath;
+    private boolean foundFirstId;
 
     /**
      * Parse the given path, assuming UTF-8 encoding.
      *
+     * @param modelRegistry The Model Registry to use.
      * @param serviceRootUrl The root URL of the service.
      * @param version The version of the service.
      * @param path The path to parse.
@@ -62,7 +77,7 @@ public class PathParser implements ParserVisitor {
     /**
      * Parse the given path.
      *
-     * @param idmanager The IdManager to use.
+     * @param modelRegistry The Model Registry to use.
      * @param serviceRootUrl The root URL of the service.
      * @param version The version of the service.
      * @param path The path to parse.
@@ -80,157 +95,105 @@ public class PathParser implements ParserVisitor {
         resourcePath.setPath(path);
         LOGGER.debug("Parsing: {}", path);
         InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        Parser t = new Parser(is, StringHelper.UTF8.name());
+        PParser parser = new PParser(is);
         try {
-            ASTStart start = t.Start();
-            PathParser v = new PathParser(modelRegistry);
-            start.jjtAccept(v, resourcePath);
-        } catch (ParseException | TokenMgrError ex) {
+            parser.Start();
+            PathParser pp = new PathParser(modelRegistry, resourcePath);
+            pp.visit(parser.rootNode());
+        } catch (ParseException ex) {
             throw new IllegalArgumentException("Path " + StringHelper.cleanForLogging(path) + " is not valid: " + ex.getMessage());
         }
         return resourcePath;
     }
 
-    public PathParser(ModelRegistry modelRegistry) {
+    public PathParser(ModelRegistry modelRegistry, ResourcePath resourcePath) {
         this.modelRegistry = modelRegistry;
+        this.resourcePath = resourcePath;
     }
 
-    public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
-        if (node.value == null) {
-            LOGGER.debug("{}", node);
-        } else {
-            LOGGER.debug("{} : ({}){}", node, node.value.getClass().getSimpleName(), node.value);
-        }
-        node.childrenAccept(this, data);
-        return data;
-    }
-
-    private void addAsEntity(ResourcePath rp, EntityType type, String id) {
-        PathElementEntity epa = new PathElementEntity(type, rp.getLastElement());
+    private void addAsEntity(EntityType type, String id) {
+        PathElementEntity epa = new PathElementEntity(type, resourcePath.getLastElement());
         if (id != null) {
             epa.setId(type.parsePrimaryKey(id));
-            rp.setIdentifiedElement(epa);
+            resourcePath.setIdentifiedElement(epa);
         }
-        rp.addPathElement(epa, true, false);
+        resourcePath.addPathElement(epa, true, false);
     }
 
-    private void addAsEntity(ResourcePath rp, NavigationPropertyMain type, String id) {
-        if (type instanceof NavigationPropertyEntity) {
-            PathElementEntity epa = new PathElementEntity((NavigationPropertyEntity) type, rp.getLastElement());
-            if (id != null) {
-                epa.setId(((NavigationPropertyEntity) type).getEntityType().parsePrimaryKey(id));
-                rp.setIdentifiedElement(epa);
-            }
-            rp.addPathElement(epa, true, false);
-        } else {
-            throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntity, got: " + StringHelper.cleanForLogging(type));
+    private void addAsEntity(NavigationPropertyEntity type, String id) {
+        PathElementEntity epa = new PathElementEntity(type, resourcePath.getLastElement());
+        if (id != null) {
+            epa.setId((type).getEntityType().parsePrimaryKey(id));
+            resourcePath.setIdentifiedElement(epa);
         }
+        resourcePath.addPathElement(epa, true, false);
     }
 
-    private void addAsEntitySet(ResourcePath rp, EntityType type) {
-        if (rp.getLastElement() != null) {
-            throw new IllegalArgumentException("Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead." + rp);
+    private void addAsEntitySet(EntityType type) {
+        if (resourcePath.getLastElement() != null) {
+            throw new IllegalArgumentException("Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead." + resourcePath);
         }
         PathElementEntitySet espa = new PathElementEntitySet(type);
-        rp.addPathElement(espa, true, false);
+        resourcePath.addPathElement(espa, true, false);
     }
 
-    private void addAsEntitySet(ResourcePath rp, NavigationPropertyMain type) {
+    private void addAsEntitySet(NavigationPropertyMain type) {
         if (type instanceof NavigationPropertyEntitySet) {
-            PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, rp.getLastElement());
-            rp.addPathElement(espa, true, false);
+            PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, resourcePath.getLastElement());
+            resourcePath.addPathElement(espa, true, false);
         } else {
             throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntitySet, got: " + StringHelper.cleanForLogging(type));
         }
     }
 
-    private void addAsEntityProperty(ResourcePath rp, EntityPropertyMain type) {
+    private void addAsEntityProperty(EntityPropertyMain type) {
         PathElementProperty ppe = new PathElementProperty();
         ppe.setProperty(type);
-        ppe.setParent(rp.getLastElement());
-        rp.addPathElement(ppe);
+        ppe.setParent(resourcePath.getLastElement());
+        resourcePath.addPathElement(ppe);
     }
 
-    private void addAsCustomProperty(ResourcePath rp, SimpleNode node) {
+    private void addAsCustomProperty(String name) {
         PathElementCustomProperty cppa = new PathElementCustomProperty();
-        cppa.setName(node.value.toString());
-        cppa.setParent(rp.getLastElement());
-        rp.addPathElement(cppa);
+        cppa.setName(name);
+        cppa.setParent(resourcePath.getLastElement());
+        resourcePath.addPathElement(cppa);
     }
 
-    private void addAsArrayIndex(ResourcePath rp, SimpleNode node) {
-        PathElementArrayIndex cpai = new PathElementArrayIndex();
-        String image = node.value.toString();
+    private void addAsArrayIndex(Token node) {
+        final String image = node.getImage();
+        final PathElement parent = resourcePath.getLastElement();
+        if (!(parent instanceof PathElementProperty || parent instanceof PathElementCustomProperty || parent instanceof PathElementArrayIndex)) {
+            throw new IllegalArgumentException("Array indices must follow a property or array index: " + StringHelper.cleanForLogging(image));
+        }
         if (!image.startsWith("[") && image.endsWith("]")) {
             throw new IllegalArgumentException("Received node is not an array index: " + StringHelper.cleanForLogging(image));
         }
         String numberString = image.substring(1, image.length() - 1);
         try {
-            int index = Integer.parseInt(numberString);
+            final int index = Integer.parseInt(numberString);
+            final PathElementArrayIndex cpai = new PathElementArrayIndex();
             cpai.setIndex(index);
-            cpai.setParent(rp.getLastElement());
-            rp.addPathElement(cpai);
+            cpai.setParent(parent);
+            resourcePath.addPathElement(cpai);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + StringHelper.cleanForLogging(image));
         }
     }
 
-    @Override
-    public ResourcePath visit(SimpleNode node, ResourcePath data) {
-        LOGGER.error("{}: acceptor not implemented in subclass?", node);
-        node.childrenAccept(this, data);
-        return data;
+    public void visit(T_REF node) {
+        resourcePath.setRef(true);
+        recurse(node);
     }
 
-    @Override
-    public ResourcePath visit(ASTStart node, ResourcePath data) {
-        node.childrenAccept(this, data);
-        return data;
+    public void visit(T_VALUE node) {
+        resourcePath.setValue(true);
+        recurse(node);
     }
 
-    @Override
-    public ResourcePath visit(ASTIdentifiedPath node, ResourcePath data) {
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTRef node, ResourcePath data) {
-        data.setRef(true);
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTValue node, ResourcePath data) {
-        data.setValue(true);
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTSubProperty node, ResourcePath data) {
-        addAsCustomProperty(data, node);
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTArrayIndex node, ResourcePath data) {
-        addAsArrayIndex(data, node);
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTLong node, ResourcePath data) {
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTString node, ResourcePath data) {
-        return defltAction(node, data);
-    }
-
-    @Override
-    public ResourcePath visit(ASTEntityType node, ResourcePath data) {
-        final PathElement parent = data.getLastElement();
-        final String name = node.value.toString();
+    public void visit(T_NAME node) {
+        final String name = node.getImage();
+        final PathElement parent = resourcePath.getLastElement();
         if (parent == null) {
             final EntityType entityType = modelRegistry.getEntityTypeForName(name);
             if (entityType == null) {
@@ -239,59 +202,79 @@ public class PathParser implements ParserVisitor {
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
             }
-            addAsEntitySet(data, entityType);
-            return defltAction(node, data);
+            addAsEntitySet(entityType);
+            return;
+        }
+        if (!foundFirstId) {
+            throw new IllegalArgumentException("Second element should be an ID or $ref, not " + StringHelper.cleanForLogging(node.toString()));
         }
 
         final EntityType parentType;
-        if (parent instanceof PathElementEntity) {
-            PathElementEntity parentEntity = (PathElementEntity) parent;
-            parentType = parentEntity.getEntityType();
-        } else if (parent instanceof PathElementEntitySet) {
-            PathElementEntitySet parentEntity = (PathElementEntitySet) parent;
-            parentType = parentEntity.getEntityType();
-        } else {
-            throw new IllegalArgumentException("Do not know what to do with: " + StringHelper.cleanForLogging(node.value));
-        }
-
-        final NavigationPropertyMain np = parentType.getNavigationProperty(name);
-        if (np == null || !np.getName().equals(name)) {
-            throw new IllegalArgumentException("Entities of type " + parentType + " do not have a navigation property named " + StringHelper.cleanForLogging(node.value));
-        }
-        if (np.isEntitySet()) {
-            addAsEntitySet(data, np);
-            return defltAction(node, data);
-        } else {
-            addAsEntity(data, np, null);
-            return defltAction(node, data);
-        }
-    }
-
-    @Override
-    public ResourcePath visit(ASTentityId node, ResourcePath data) {
-        PathElement parent = data.getLastElement();
         if (parent instanceof PathElementEntitySet) {
-            PathElementEntitySet parentEntitySet = (PathElementEntitySet) parent;
-            addAsEntity(data, parentEntitySet.getEntityType(), node.value.toString());
-            return defltAction(node, data);
+            throw new IllegalArgumentException("A property name can not follow a set: " + StringHelper.cleanForLogging(node.toString()));
         }
-        throw new IllegalArgumentException("IDs must follow after EntitySets");
-    }
 
-    @Override
-    public ResourcePath visit(ASTEntityProperty node, ResourcePath data) {
-        PathElement parent = data.getLastElement();
         if (parent instanceof PathElementEntity) {
             PathElementEntity parentEntity = (PathElementEntity) parent;
-            final EntityType parentEntityType = parentEntity.getEntityType();
-            EntityPropertyMain property = parentEntityType.getEntityProperty(node.value.toString());
-            if (property == null) {
-                throw new IllegalArgumentException("Entities of type " + parentEntityType + " do not have an entity property named " + StringHelper.cleanForLogging(node.value));
+            parentType = parentEntity.getEntityType();
+            Property property = parentType.getProperty(name);
+            if (property instanceof EntityPropertyMain) {
+                addAsEntityProperty((EntityPropertyMain) property);
+                return;
             }
-            addAsEntityProperty(data, property);
-            return defltAction(node, data);
+            if (property instanceof NavigationPropertyEntity) {
+                addAsEntity((NavigationPropertyEntity) property, null);
+                return;
+            }
+            if (property instanceof NavigationPropertyEntitySet) {
+                addAsEntitySet((NavigationPropertyEntitySet) property);
+                return;
+            }
+            throw new IllegalArgumentException("EntityType " + parentType + " does not have a property: " + StringHelper.cleanForLogging(node.getImage()));
         }
-        throw new IllegalArgumentException("Properties must follow after Entities");
+
+        if (parent instanceof PathElementProperty) {
+            addAsCustomProperty(name);
+            return;
+        }
+        if (parent instanceof PathElementCustomProperty) {
+            addAsCustomProperty(name);
+            return;
+        }
+        if (parent instanceof PathElementArrayIndex) {
+            addAsCustomProperty(name);
+            return;
+        }
+
+        throw new IllegalArgumentException("Do not know what to do with: " + StringHelper.cleanForLogging(node.toString()));
+    }
+
+    public void visit(T_ARRAYINDEX node) {
+        addAsArrayIndex(node);
+        recurse(node);
+    }
+
+    public void visit(P_EntityId node) {
+        foundFirstId = true;
+        recurse(node);
+    }
+
+    public void visit(T_LONG node) {
+        handleIdentifierToken(node);
+    }
+
+    public void visit(T_STR_LIT node) {
+        handleIdentifierToken(node);
+    }
+
+    void handleIdentifierToken(Token node) throws IllegalArgumentException {
+        final PathElement parent = resourcePath.getLastElement();
+        if (parent instanceof PathElementEntitySet) {
+            final PathElementEntitySet parentSet = (PathElementEntitySet) parent;
+            addAsEntity(parentSet.getEntityType(), node.getImage());
+        } else {
+            throw new IllegalArgumentException("An ID must follow a set: " + StringHelper.cleanForLogging(node.getImage()));
+        }
     }
 
 }

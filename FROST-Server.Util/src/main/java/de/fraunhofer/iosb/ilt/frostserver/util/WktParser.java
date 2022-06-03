@@ -17,20 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTCoords2;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTCoords3;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTLinearRing;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTNumber;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTStart;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTWktLineString;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTWktMultiPoint;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTWktPoint;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ASTWktPolygon;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.Node;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ParseException;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.Parser;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ParserVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.SimpleNode;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.WParser;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords2;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords3;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.DOUBLE;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LinearRing;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Start;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktLineString;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktMultiPoint;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPoint;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPolygon;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -42,126 +41,169 @@ import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
-public class WktParser implements ParserVisitor {
+public class WktParser extends Visitor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WktParser.class.getName());
+
+    public WktParser(GeoJsonObject result, LngLatAlt lastLngLatAlt, List<LngLatAlt> lastLinearRing, Polygon lastPolygon, LineString lastLineString, MultiPoint lastMultiPoint, Point lastPoint) {
+        this.result = result;
+        this.lastLngLatAlt = lastLngLatAlt;
+        this.lastLinearRing = lastLinearRing;
+        this.lastPolygon = lastPolygon;
+        this.lastLineString = lastLineString;
+        this.lastMultiPoint = lastMultiPoint;
+        this.lastPoint = lastPoint;
+    }
 
     private WktParser() {
         // Not for public consumption
     }
 
+    private GeoJsonObject result;
+    private LngLatAlt lastLngLatAlt;
+    private List<LngLatAlt> lastLinearRing;
+    private Polygon lastPolygon;
+    private LineString lastLineString;
+    private MultiPoint lastMultiPoint;
+    private Point lastPoint;
+
     public static GeoJsonObject parseWkt(String wkt) {
         try {
+            LOGGER.debug("Parsing: {}", wkt);
             InputStream is = new ByteArrayInputStream(wkt.getBytes(StandardCharsets.UTF_8));
-            Parser t = new Parser(is, StandardCharsets.UTF_8.name());
-            ASTStart n = t.Start();
-            return (GeoJsonObject) n.jjtAccept(new WktParser(), null);
+            WParser parser = new WParser(is);
+            Start start = parser.Start();
+            return new WktParser().visit(start);
         } catch (ParseException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
 
-    @Override
-    public Object visit(ASTStart node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("Multiple items found, expected only one.");
+    public GeoJsonObject visit(Start node) {
+        if (node.getChildCount() != 2) {
+            throw new IllegalArgumentException("Multiple items found in WKT, expected only one.");
         }
-        return node.jjtGetChild(0).jjtAccept(this, data);
+        visit(node.getChild(0));
+        return result;
     }
 
-    @Override
-    public Object visit(ASTWktPoint node, Object data) {
-        if (node.jjtGetNumChildren() != 1) {
-            throw new IllegalArgumentException("Multiple items found, expected only one.");
+    public void visit(WktPoint node) {
+        if (lastPoint != null) {
+            throw new IllegalArgumentException("Previously parsed Point not used.");
         }
-        return new Point((LngLatAlt) node.jjtGetChild(0).jjtAccept(this, null));
+        List<Node> children = new ArrayList<>();
+        children.addAll(node.childrenOfType(Coords2.class));
+        children.addAll(node.childrenOfType(Coords3.class));
+        if (children.size() != 1) {
+            throw new IllegalArgumentException("Multiple items (" + children.size() + ") found in Point, expected only one.");
+        }
+        lastLngLatAlt = null;
+        visit(children.get(0));
+        lastPoint = new Point(lastLngLatAlt);
+        result = lastPoint;
     }
 
-    @Override
-    public Object visit(ASTWktMultiPoint node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        LngLatAlt[] points = new LngLatAlt[childCount];
-        for (int i = 0; i < childCount; i++) {
-            points[i] = (LngLatAlt) node.jjtGetChild(i).jjtAccept(this, null);
+    public void visit(WktMultiPoint node) {
+        if (lastMultiPoint != null) {
+            throw new IllegalArgumentException("Previously parsed MultiPoint not used.");
         }
-        return new MultiPoint(points);
+        lastMultiPoint = new MultiPoint();
+        for (Node child : node.children()) {
+            lastLngLatAlt = null;
+            visit(child);
+            if (lastLngLatAlt != null) {
+                lastMultiPoint.add(lastLngLatAlt);
+            }
+        }
+        result = lastMultiPoint;
     }
 
-    @Override
-    public Object visit(ASTWktLineString node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        LngLatAlt[] points = new LngLatAlt[childCount];
-        for (int i = 0; i < childCount; i++) {
-            points[i] = (LngLatAlt) node.jjtGetChild(i).jjtAccept(this, null);
+    public void visit(WktLineString node) {
+        if (lastLineString != null) {
+            throw new IllegalArgumentException("Previously parsed LineString not used.");
         }
-        return new LineString(points);
+        lastLineString = new LineString();
+        for (Node child : node.children()) {
+            lastLngLatAlt = null;
+            visit(child);
+            if (lastLngLatAlt != null) {
+                lastLineString.add(lastLngLatAlt);
+            }
+        }
+        result = lastLineString;
     }
 
-    @Override
-    public Object visit(ASTWktPolygon node, Object data) {
-        final Polygon polygon = new Polygon();
-        polygon.setExteriorRing((List<LngLatAlt>) node.jjtGetChild(0).jjtAccept(this, null));
-        int childCount = node.jjtGetNumChildren();
+    public void visit(WktPolygon node) {
+        if (lastPolygon != null) {
+            throw new IllegalArgumentException("Previously parsed Polygon not used.");
+        }
+        List<LinearRing> children = node.childrenOfType(LinearRing.class);
+        lastPolygon = new Polygon();
+        lastLinearRing = null;
+        visit(children.get(0));
+        lastPolygon.setExteriorRing(lastLinearRing);
+
+        int childCount = children.size();
         for (int i = 1; i < childCount; i++) {
-            polygon.addInteriorRing((List<LngLatAlt>) node.jjtGetChild(i).jjtAccept(this, null));
+            lastLinearRing = null;
+            visit(children.get(i));
+            if (lastLinearRing != null) {
+                lastPolygon.addInteriorRing(lastLinearRing);
+            }
         }
-        return polygon;
+        result = lastPolygon;
     }
 
-    @Override
-    public Object visit(ASTLinearRing node, Object data) {
-        final List<LngLatAlt> coordinates = new ArrayList<>();
-        int childCount = node.jjtGetNumChildren();
-        for (int i = 0; i < childCount; i++) {
-            coordinates.add((LngLatAlt) node.jjtGetChild(i).jjtAccept(this, null));
+    public void visit(LinearRing node) {
+        if (lastLinearRing != null) {
+            throw new IllegalArgumentException("Previously parsed coordinates not used.");
         }
-        return coordinates;
+        lastLinearRing = new ArrayList<>();
+        for (Node child : node.children()) {
+            lastLngLatAlt = null;
+            visit(child);
+            if (lastLngLatAlt != null) {
+                lastLinearRing.add(lastLngLatAlt);
+            }
+        }
     }
 
-    @Override
-    public Object visit(ASTCoords2 node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        if (childCount == 2) {
-            return new LngLatAlt(
-                    (Double) getChildOfType(node, 0, ASTNumber.class).jjtGetValue(),
-                    (Double) getChildOfType(node, 1, ASTNumber.class).jjtGetValue()
+    public void visit(Coords2 node) {
+        if (lastLngLatAlt != null) {
+            throw new IllegalArgumentException("Previously parsed LngLatAlt not used.");
+        }
+        List<DOUBLE> children = node.childrenOfType(DOUBLE.class);
+        if (children.size() == 2) {
+            lastLngLatAlt = new LngLatAlt(
+                    Double.valueOf(children.get(0).getImage()),
+                    Double.valueOf(children.get(1).getImage())
             );
+        } else {
+            throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }
-        throw new IllegalArgumentException("Point can not have " + childCount + " coordinates.");
     }
 
-    @Override
-    public Object visit(ASTCoords3 node, Object data) {
-        int childCount = node.jjtGetNumChildren();
-        if (childCount == 3) {
-            return new LngLatAlt(
-                    (Double) getChildOfType(node, 0, ASTNumber.class).jjtGetValue(),
-                    (Double) getChildOfType(node, 1, ASTNumber.class).jjtGetValue(),
-                    (Double) getChildOfType(node, 2, ASTNumber.class).jjtGetValue()
+    public void visit(Coords3 node) {
+        if (lastLngLatAlt != null) {
+            throw new IllegalArgumentException("Previously parsed LngLatAlt not used.");
+        }
+        List<DOUBLE> children = node.childrenOfType(DOUBLE.class);
+        if (children.size() == 3) {
+            lastLngLatAlt = new LngLatAlt(
+                    Double.valueOf(children.get(0).getImage()),
+                    Double.valueOf(children.get(1).getImage()),
+                    Double.valueOf(children.get(2).getImage())
             );
+        } else {
+            throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }
-        throw new IllegalArgumentException("Point can not have " + childCount + " coordinates.");
-    }
-
-    @Override
-    public Object visit(ASTNumber node, Object data) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Object visit(SimpleNode node, Object data) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private static <T extends Node> T getChildOfType(SimpleNode parent, int index, Class<T> expectedType) {
-        Node childNode = parent.jjtGetChild(index);
-        if (!(expectedType.isAssignableFrom(childNode.getClass()))) {
-            throw new IllegalArgumentException(parent.getClass().getName() + " expected to have child of type " + expectedType.getName());
-        }
-        return (T) childNode;
     }
 
 }

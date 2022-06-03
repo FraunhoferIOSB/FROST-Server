@@ -227,6 +227,14 @@ public class Query {
         return this;
     }
 
+    public Query addSelect(PropertyPlaceholder property) {
+        if (!select.isEmpty()) {
+            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+        }
+        rawSelect.add(property);
+        return this;
+    }
+
     public Query addSelect(Collection<PropertyPlaceholder> properties) {
         if (!select.isEmpty()) {
             throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
@@ -261,8 +269,7 @@ public class Query {
     }
 
     /**
-     * @param inExpand flag indicating the requested properties are used in an
-     * expand.
+     * @param inExpand flag indicating the requested properties are used in an expand.
      * @return The direct (non-deep) entity properties involved in the select.
      */
     public Set<EntityPropertyMain> getSelectMainEntityProperties(boolean inExpand) {
@@ -273,8 +280,7 @@ public class Query {
     }
 
     /**
-     * @param inExpand flag indicating the requested properties are used in an
-     * expand.
+     * @param inExpand flag indicating the requested properties are used in an expand.
      * @return The direct (non-deep) entity properties involved in the select.
      */
     public Set<NavigationPropertyMain> getSelectNavProperties(boolean inExpand) {
@@ -436,6 +442,14 @@ public class Query {
         }
         expand.clear();
         expand.addAll(newExpands);
+    }
+
+    public Query addOrderBy(OrderBy orderBy) {
+        if (this.orderBy == null) {
+            this.orderBy = new ArrayList<>();
+        }
+        this.orderBy.add(orderBy);
+        return this;
     }
 
     public Query setOrderBy(List<OrderBy> orderBy) {
