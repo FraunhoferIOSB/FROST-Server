@@ -133,6 +133,12 @@ These are settings for the MQTT package.
 * **mqtt.persistentStoreType:**  
   The way the MQTT server keeps track of subscriptions, either in-memory (`memory`) or using an H2 database (`h2`).
   Default: `memory`.
+* **mqtt.session_queue_size:**  
+  The size of the internal queue the mqtt broker uses per CPU core.
+  Default: `1024`.
+* **mqtt.session_timeout_seconds:**  
+  The maximum lifetime of disconnected sessions, in seconds.
+  Default: `3600`.
 * **mqtt.maxInFlight:**  
   The maximum number of "in-flight" messages to allow when sending notifications.
 * **mqtt.netty.mqtt.message_size:**  
