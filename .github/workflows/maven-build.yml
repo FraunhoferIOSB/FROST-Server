@@ -82,7 +82,7 @@ jobs:
 
 
     - name: Build and push - HTTP - Master branch latest
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/v2.x'
       uses: docker/build-push-action@v3
       with:
         platforms: linux/amd64,linux/arm64
@@ -96,7 +96,7 @@ jobs:
 
 
     - name: Build and push - MQTTP - Master branch latest
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/v2.x'
       uses: docker/build-push-action@v3
       with:
         platforms: linux/amd64,linux/arm64
@@ -110,7 +110,7 @@ jobs:
 
 
     - name: Build and push - MQTT - Master branch latest
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/v2.x'
       uses: docker/build-push-action@v3
       with:
         platforms: linux/amd64,linux/arm64
