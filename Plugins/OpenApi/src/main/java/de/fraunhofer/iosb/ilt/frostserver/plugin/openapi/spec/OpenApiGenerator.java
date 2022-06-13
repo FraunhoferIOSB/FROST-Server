@@ -441,7 +441,7 @@ public class OpenApiGenerator {
                 String baseName = base + "/" + type.entityName;
                 OAPath paPath = createPathForEntity(options, baseName, type);
                 paths.put(baseName, paPath);
-                addPathsForEntity(document, level, paths, baseName, type, options);
+                addPathsForEntity(document, level + 1, paths, baseName, type, options);
             }
         }
     }
