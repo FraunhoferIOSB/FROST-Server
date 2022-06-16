@@ -23,6 +23,17 @@ public enum Metadata {
 
     public static final Metadata DEFAULT = Metadata.FULL;
 
+    public static Metadata lookup(String metadata, Metadata dflt) {
+        if (metadata == null) {
+            return DEFAULT;
+        }
+        try {
+            return lookup(metadata);
+        } catch (IllegalArgumentException e) {
+            return dflt;
+        }
+    }
+
     public static Metadata lookup(String metadata) {
         if (metadata == null) {
             return DEFAULT;

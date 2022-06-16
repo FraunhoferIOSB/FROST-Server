@@ -32,14 +32,19 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResult
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +58,13 @@ public class PluginResultFormatOData implements PluginResultFormat {
     /**
      * The "name" of the OData resultFormatter.
      */
-    public static final String FORMAT_NAME_ODATA = "ODATA-JSON";
+    public static final String FORMAT_NAME_ODATA_JSON = "ODATA-JSON";
+    public static final String FORMAT_PARAM_EXP_DECIMALS = "ExponentialDecimals";
+    public static final String FORMAT_PARAM_IEEE754 = "IEEE754Compatible";
+    public static final String FORMAT_PARAM_METADATA401 = "metadata";
+    public static final String FORMAT_PARAM_METADATA40 = "odata.metadata";
+    public static final String FORMAT_PARAM_STREAMING401 = "streaming";
+    public static final String FORMAT_PARAM_STREAMING40 = "odata.streaming";
 
     private CoreSettings settings;
 
@@ -75,7 +86,28 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT, FORMAT_NAME_ODATA, FORMAT_NAME_EMPTY);
+        return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT,
+                FORMAT_NAME_ODATA_JSON,
+                FORMAT_NAME_EMPTY
+        );
+    }
+
+    @Override
+    public void parsedPathAndQuery(CoreSettings settings, ServiceRequest request, Query query) {
+        String format = query.getFormat();
+        if (isNullOrEmpty(format)) {
+            return;
+        }
+        String[] formatSplit = StringUtils.split(format, ';');
+        if (CONTENT_TYPE_APPLICATION_JSON.equalsIgnoreCase(formatSplit[0])) {
+            query.setFormat(FORMAT_NAME_ODATA_JSON);
+            if (formatSplit.length > 1) {
+                String[] paramSplit = StringUtils.split(formatSplit[1], '=');
+                if (paramSplit != null && paramSplit.length == 2 && FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0]) || FORMAT_PARAM_METADATA40.equalsIgnoreCase(paramSplit[0])) {
+                    query.setMetadata(Metadata.lookup(paramSplit[1], Metadata.DEFAULT));
+                }
+            }
+        }
     }
 
     @Override
