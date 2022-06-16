@@ -372,6 +372,7 @@ public class Service implements AutoCloseable {
             query = QueryParser
                     .parseQuery(request.getUrlQuery(), settings, path)
                     .validate();
+            settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = settings.getFormatter(version, query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
@@ -460,8 +461,10 @@ public class Service implements AutoCloseable {
         Query query;
         ResultFormatter formatter;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
-            query.validate();
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
+            settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = findFormatter(query, request, version);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
             return errorResponse(response, 400, ex.getMessage());
@@ -816,6 +819,7 @@ public class Service implements AutoCloseable {
             query = QueryParser
                     .parseQuery(request.getUrlQuery(), settings, path)
                     .validate();
+            settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, "Failed to parse query: " + e.getMessage());
         }

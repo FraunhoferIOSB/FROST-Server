@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -80,7 +81,8 @@ public class PluginManager implements ConfigDefaults {
     /**
      * The plugins that supply resultFormatters.
      */
-    private final Map<Version, Map<String, PluginResultFormat>> resultFormatters = new HashMap<>();
+    private final Map<Version, Map<String, PluginResultFormat>> resultFormattersByFormat = new HashMap<>();
+    private final Map<Version, List<PluginResultFormat>> resultFormatters = new HashMap<>();
 
     /**
      * The plugins that can handle registered paths.
@@ -201,10 +203,13 @@ public class PluginManager implements ConfigDefaults {
 
     private void registerPlugin(PluginResultFormat plugin) {
         final Collection<Version> pluginVersions = plugin.getVersions();
-        for (String format : plugin.getFormatNames()) {
-            for (Version version : pluginVersions) {
+        final Collection<String> formatNames = plugin.getFormatNames();
+        for (Version version : pluginVersions) {
+            resultFormatters.computeIfAbsent(version, t -> new ArrayList<>())
+                    .add(plugin);
+            for (String format : formatNames) {
                 if (versions.containsKey(version.urlPart)) {
-                    resultFormatters.computeIfAbsent(version, v -> new TreeMap<>()).put(format.toLowerCase(), plugin);
+                    resultFormattersByFormat.computeIfAbsent(version, v -> new TreeMap<>()).put(format.toLowerCase(), plugin);
                 }
             }
         }
@@ -268,7 +273,7 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public ResultFormatter getFormatter(Version version, String formatName) {
-        final Map<String, PluginResultFormat> formatters = resultFormatters.get(version);
+        final Map<String, PluginResultFormat> formatters = resultFormattersByFormat.get(version);
         if (formatters == null) {
             return null;
         }
@@ -277,6 +282,13 @@ public class PluginManager implements ConfigDefaults {
             return null;
         }
         return plugin.getResultFormatter(formatName);
+    }
+
+    public void parsedQuery(CoreSettings settings, ServiceRequest request, Query query) {
+        List<PluginResultFormat> formatters = resultFormatters.get(query.getVersion());
+        for (PluginResultFormat formatter : formatters) {
+            formatter.parsedPathAndQuery(settings, request, query);
+        }
     }
 
     /**

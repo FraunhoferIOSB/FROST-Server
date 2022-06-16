@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Collection;
 
 /**
@@ -55,4 +57,17 @@ public interface PluginResultFormat extends Plugin {
      * @return The result formatter for the given format.
      */
     public ResultFormatter getResultFormatter(String format);
+
+    /**
+     * Methid called after the path and query are parsed into a Query object,
+     * giving the plugin a change to modify the Query.
+     *
+     * @param settings the CoreSettings used for the request.
+     * @param request The ServiceRequest the query comes from.
+     * @param query The query generated from the path and query.
+     */
+    public default void parsedPathAndQuery(CoreSettings settings, ServiceRequest request, Query query) {
+        // Does nothing by default.
+    }
+
 }
