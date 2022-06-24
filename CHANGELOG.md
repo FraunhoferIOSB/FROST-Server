@@ -3,7 +3,8 @@
 ## Release version 2.0.2
 
 **Internal changes & Bugfixes**
-* Updated dependency versions
+* Updated dependency versions.
+* Fixed StackOverflow in OpenAPI generator on 1-1 relations.
 
 
 ## Release version 2.0.1
