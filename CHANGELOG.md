@@ -1,10 +1,12 @@
 # Changelog
 
-## Development version 2.1.0
+## Release version 2.1.0
 
 **Internal changes & Bugfixes**
 * Fixed DateTimeConstants sometimes being generated with decimal comma.
 * Fixed DateTimeConstants failing to parse when using decimal comma.
+* Updated version of moquette allows persistent sessions to time out, avoiding memory leaks.
+* Improved OpenAPI spec generator.
 
 
 ## Release version 2.0.0

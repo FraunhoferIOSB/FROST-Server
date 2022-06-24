@@ -27,6 +27,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NA
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generates a partial OpenApi specification for the SensorThings API.
@@ -45,6 +46,8 @@ public class OpenApiGenerator {
     private static final String PARAM_TOP = "top";
     private static final String PARAM_SKIP = "skip";
     private static final String PARAM_ENTITY_ID = "entityId";
+    private static final String[] REPLACE_CHARS = new String[]{"~1", "%28", "%29", "%7B", "%7D"};
+    private static final String[] FIND_CHARS = new String[]{"/", "(", ")", "{", "}"};
 
     private OpenApiGenerator() {
         // Only has static methods.
@@ -181,7 +184,7 @@ public class OpenApiGenerator {
             }
 
             OAPath refPath = new OAPath();
-            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
+            refPath.setRef(PATH_PATHS + ecodeForRef(path));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
@@ -206,7 +209,7 @@ public class OpenApiGenerator {
             oaPath.addParameter(new OAParameter(PARAM_COUNT));
             oaPath.addParameter(new OAParameter(PARAM_FILTER));
             OAPath refPath = new OAPath();
-            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
+            refPath.setRef(PATH_PATHS + ecodeForRef(path));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
@@ -223,6 +226,7 @@ public class OpenApiGenerator {
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + schemaName));
             resp.addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType);
+            resp.setDescription("A set of entities of type " + entityType.entityName);
             context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
@@ -239,6 +243,7 @@ public class OpenApiGenerator {
             createLocationHeader(context);
             OAResponse resp = new OAResponse();
             resp.addHeader("Location", new OAHeader("#/components/headers/location"));
+            resp.setDescription("Creation of an entity of type " + entityType.entityName);
             context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
@@ -307,7 +312,7 @@ public class OpenApiGenerator {
             }
 
             OAPath refPath = new OAPath();
-            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
+            refPath.setRef(PATH_PATHS + ecodeForRef(path));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
@@ -324,6 +329,7 @@ public class OpenApiGenerator {
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + schemaName));
             resp.addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType);
+            resp.setDescription("A single entity of type " + entityType.entityName);
             context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
@@ -338,6 +344,7 @@ public class OpenApiGenerator {
         String name = entityType.plural + "-patch-200";
         if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
+            resp.setDescription("Patch of single entity of type " + entityType.entityName);
             context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
@@ -351,6 +358,7 @@ public class OpenApiGenerator {
         String name = entityType.plural + "-delete-200";
         if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
+            resp.setDescription("Delete of single entity of type " + entityType.entityName);
             context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
@@ -460,4 +468,7 @@ public class OpenApiGenerator {
         }
     }
 
+    private static String ecodeForRef(String path) {
+        return StringUtils.replaceEach(path, FIND_CHARS, REPLACE_CHARS);
+    }
 }
