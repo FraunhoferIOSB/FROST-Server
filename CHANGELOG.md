@@ -3,6 +3,7 @@
 ## Release Version 1.15.1
 
 **Internal changes & Bugfixes**
+* Updated dependencies
 * Updated version of moquette allows persistent sessions to time out, avoiding memory leaks.
 
 
