@@ -20,10 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.Map;
 import java.util.TreeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An OpenAPI schema object.
@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OASchema {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OASchema.class.getName());
 
     public enum Type {
         @JsonProperty(value = "string")
@@ -51,6 +49,8 @@ public final class OASchema {
     }
 
     public enum Format {
+        @JsonProperty(value = "binary")
+        BINARY,
         @JsonProperty(value = "int32")
         INT32,
         @JsonProperty(value = "int64")
@@ -58,7 +58,11 @@ public final class OASchema {
         @JsonProperty(value = "float")
         FLOAT,
         @JsonProperty(value = "double")
-        DOUBLE
+        DOUBLE,
+        @JsonProperty(value = "date")
+        DATE,
+        @JsonProperty(value = "date-time")
+        DATETIME
     }
 
     @JsonProperty(value = "$ref")
@@ -82,8 +86,56 @@ public final class OASchema {
     }
 
     public OASchema(Property property) {
-        type = Type.STRING;
-        LOGGER.trace("TODO: sniff type from property: {}.", property);
+        switch (property.getType().getName()) {
+            case TypeSimplePrimitive.EDM_BINARY_NAME:
+                type = Type.STRING;
+                format = Format.BINARY;
+                break;
+
+            case TypeSimplePrimitive.EDM_BOOLEAN_NAME:
+                type = Type.BOOLEAN;
+                break;
+
+            case TypeSimplePrimitive.EDM_INT16_NAME:
+            case TypeSimplePrimitive.EDM_INT32_NAME:
+                type = Type.INTEGER;
+                format = Format.INT32;
+                break;
+
+            case TypeSimplePrimitive.EDM_INT64_NAME:
+                type = Type.INTEGER;
+                format = Format.INT64;
+                break;
+
+            case TypeSimplePrimitive.EDM_DOUBLE_NAME:
+            case TypeSimplePrimitive.EDM_DECIMAL_NAME:
+                type = Type.NUMBER;
+                format = Format.DOUBLE;
+                break;
+
+            case TypeSimplePrimitive.EDM_DATETIMEOFFSET_NAME:
+                type = Type.STRING;
+                format = Format.DATETIME;
+                break;
+
+            case TypeSimplePrimitive.EDM_DATE_NAME:
+                type = Type.STRING;
+                format = Format.DATE;
+                break;
+
+            case TypeComplex.STA_MAP_NAME:
+                type = Type.OBJECT;
+                break;
+
+            case TypeSimplePrimitive.EDM_UNTYPED_NAME:
+            case TypeComplex.STA_OBJECT_NAME:
+                type = null;
+                break;
+
+            default:
+                type = Type.STRING;
+                break;
+        }
     }
 
     public void addProperty(String name, OASchema property) {
