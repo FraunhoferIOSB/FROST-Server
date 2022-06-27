@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 import java.io.IOException;
 import java.util.Arrays;
@@ -131,19 +130,19 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+            final Version version = path.getVersion();
+            final String contextBase = settings.getQueryDefaults().getServiceRootUrl()
+                    + '/' + version.urlPart
+                    + "/$metadata";
+            if (Entity.class.isAssignableFrom(result.getClass())) {
+                return formatAsEntity(result, contextBase, version);
+            }
+            if (EntitySet.class.isAssignableFrom(result.getClass())) {
+                return formatAsEntitySet(result, contextBase, version);
+            }
+            // Not an Entity nor an EntitySet.
+            String entityJsonString;
             try {
-                final Version version = path.getVersion();
-                final String contextBase = settings.getQueryDefaults().getServiceRootUrl()
-                        + '/' + version.urlPart
-                        + "/$metadata";
-                if (Entity.class.isAssignableFrom(result.getClass())) {
-                    return formatAsEntity(result, contextBase, version);
-                }
-                if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                    return formatAsEntitySet(result, contextBase, version);
-                }
-                // Not an Entity nor an EntitySet.
-                String entityJsonString = "";
                 if (path.isValue()) {
                     LOGGER.trace("Formatting as $Value.");
                     if (result instanceof Map || result instanceof GeoJsonObject) {
