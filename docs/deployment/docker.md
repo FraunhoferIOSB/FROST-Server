@@ -15,9 +15,9 @@ It is possible to use a non-dockerised database with a dockerised FROST-Server.
 
 If you have docker and docker-compose
 
-1. Download our [docker-compose](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/scripts/docker-compose.yaml) file:
+1. Download our [docker-compose](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/scripts/docker-compose.yaml) file:
 
-    ```wget https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/scripts/docker-compose.yaml```
+    ```wget https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/scripts/docker-compose.yaml```
 
 2. Start the server with docker: `docker-compose up`
 3. Fetch a json file with some [demo entities](https://gist.githubusercontent.com/hylkevds/4ffba774fe0128305047b7bcbcd2672e/raw/demoEntities.json):
