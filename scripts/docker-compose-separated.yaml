@@ -11,6 +11,7 @@ services:
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
+      - plugins.multiDatastream.enable=true
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - bus_mqttBroker=tcp://mosquitto:1883
@@ -34,6 +35,7 @@ services:
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
+      - plugins.multiDatastream.enable=true
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10

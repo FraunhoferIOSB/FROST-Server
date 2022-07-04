@@ -5,6 +5,7 @@ services:
     image: fraunhoferiosb/frost-server:2.0
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
+      - plugins.multiDatastream.enable=true
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - persistence_db_driver=org.postgresql.Driver

@@ -5,7 +5,7 @@ version: '3'
 
 services:
   web:
-    image: fraunhoferiosb/frost-server-http:latest
+    image: fraunhoferiosb/frost-server-http:2.0
     ports:
       - 8080:8080
     depends_on:
@@ -15,6 +15,7 @@ services:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - logSensitiveData=true #disable on production!
+      - plugins.multiDatastream.enable=true
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - bus_mqttBroker=tcp://mosquitto:1883
@@ -34,7 +35,7 @@ services:
       - auth_autoUpdateDatabase=true
 
   mqtt:
-    image: fraunhoferiosb/frost-server-mqtt:latest
+    image: fraunhoferiosb/frost-server-mqtt:2.0
     ports:
       - 1883:1883
       - 9876:9876
@@ -44,6 +45,7 @@ services:
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
+      - plugins.multiDatastream.enable=true
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
