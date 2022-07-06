@@ -1,7 +1,7 @@
 # FROST-Server [![Build Status](https://github.com/FraunhoferIOSB/FROST-Server/workflows/Maven%20Build/badge.svg)](https://github.com/FraunhoferIOSB/FROST-Server/actions) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/da22d7347eb7450a955274916ed2d336)](https://www.codacy.com/gh/FraunhoferIOSB/FROST-Server?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FraunhoferIOSB/FROST-Server&amp;utm_campaign=Badge_Grade) [![Docker badge](https://img.shields.io/docker/pulls/fraunhoferiosb/frost-server.svg)](https://hub.docker.com/r/fraunhoferiosb/frost-server/)
 
-![FROST-Server Logo](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/docs/images/FROST-Server-darkgrey.png)
-<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/docs/images/Certified_OGC_Compliant_Logo_Web.png"/></a>
+![FROST-Server Logo](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/docs/images/FROST-Server-darkgrey.png)
+<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/docs/images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
 is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing. It now also includes
@@ -11,9 +11,9 @@ preliminary actuation support.
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/2.0.0/FROST-Server.MQTTP-2.0.0.war)
-* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/2.0.0/FROST-Server.HTTP-2.0.0.war)
-* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/2.0.0/FROST-Server.MQTT-2.0.0-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/2.0.2/FROST-Server.MQTTP-2.0.2.war)
+* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/2.0.2/FROST-Server.HTTP-2.0.2.war)
+* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/2.0.2/FROST-Server.MQTT-2.0.2-jar-with-dependencies.jar)
 
 Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
 
