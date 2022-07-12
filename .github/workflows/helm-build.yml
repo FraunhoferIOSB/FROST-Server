@@ -38,6 +38,7 @@ jobs:
       env:
         HELM_SSH_KEY: ${{ secrets.HELM_SSH_KEY }}
         HELM_SSH_KEY_SNAPSHOT: ${{ secrets.HELM_SSH_KEY_SNAPSHOT }}
+        DEFAULT_BRANCH: "refs/heads/v2.x"
       run: |
         source ./helm/build.sh
         source ./helm/upload.sh

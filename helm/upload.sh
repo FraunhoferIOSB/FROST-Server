@@ -5,6 +5,8 @@ set -e
 mkdir -p ~/.ssh
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
+echo "Running for branch: ${GITHUB_REF}"
+
 # release version
 if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; then
   echo -e "${HELM_SSH_KEY}" > ~/.ssh/id_rsa
@@ -21,7 +23,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; th
 fi
 
 # Only deploy master branch and tagged builds to snapshot repository
-if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "refs/heads/master" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]]); then
+if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "${DEFAULT_BRANCH}" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]]); then
 
     echo -e "${HELM_SSH_KEY_SNAPSHOT}" > ~/.ssh/id_rsa
     chmod 600 ~/.ssh/id_rsa
