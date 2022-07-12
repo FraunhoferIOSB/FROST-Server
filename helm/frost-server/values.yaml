@@ -27,6 +27,8 @@ frost:
       rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
       rewriteTraget: /FROST-Server/$1
       path: /(.*)
+      annotations:
+
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace. 
     resources:
       # limits:
@@ -85,6 +87,7 @@ frost:
       accessModes:
         - ReadWriteOnce
       capacity: 10Gi
+      mountPath: /var/lib/postgresql/data
       # Uncomment bellow if you want to use the builtin "frost-server-db-local" StorageClass name.
       # Only compatible if the ReadWriteOnce access mode is only claimed (check the frost.db.persistence.accessModes value).
       # See project documentation for more information
@@ -98,6 +101,10 @@ frost:
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
 
+    securityContext:
+      runAsUser:
+      runAsGroup:
+      fsGroup:
   ##########################################
   # FROST-Server MQTT module configuration #
   ##########################################

@@ -26,6 +26,8 @@ spec:
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
+      securityContext:
+          {{- toYaml .Values.frost.db.securityContext | nindent 10 }}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.db.image.registry }}/{{ .Values.frost.db.image.repository }}:{{ .Values.frost.db.image.tag }}"
@@ -36,7 +38,7 @@ spec:
           {{- if .Values.frost.db.persistence.enabled }}
           volumeMounts:
             - name: {{ $fullName }}
-              mountPath: /var/lib/postgresql/data
+              mountPath: {{ .Values.frost.db.persistence.mountPath }}
           {{- end }}
           env:
             - name: POSTGRES_DB
