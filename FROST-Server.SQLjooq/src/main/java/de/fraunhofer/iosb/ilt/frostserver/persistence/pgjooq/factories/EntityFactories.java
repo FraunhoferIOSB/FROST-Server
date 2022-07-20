@@ -178,7 +178,10 @@ public class EntityFactories {
     }
 
     public static void insertTimeValue(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeValue time) {
-        if (time.isInstant()) {
+        if (time == null) {
+            clause.put(endField, null);
+            clause.put(startField, null);
+        } else if (time.isInstant()) {
             TimeInstant timeInstant = time.getInstant();
             insertTimeInstant(clause, endField, timeInstant);
             insertTimeInstant(clause, startField, timeInstant);
@@ -190,18 +193,21 @@ public class EntityFactories {
 
     public static void insertTimeInstant(Map<Field, Object> clause, Field<Moment> field, TimeInstant time) {
         if (time == null) {
-            return;
+            clause.put(field, null);
+        } else {
+            clause.put(field, time.getDateTime());
         }
-        clause.put(field, time.getDateTime());
     }
 
     public static void insertTimeInterval(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeInterval time) {
         if (time == null) {
-            return;
+            clause.put(startField, null);
+            clause.put(endField, null);
+        } else {
+            MomentInterval interval = time.getInterval();
+            clause.put(startField, interval.getStartAsMoment());
+            clause.put(endField, interval.getEndAsMoment());
         }
-        MomentInterval interval = time.getInterval();
-        clause.put(startField, interval.getStartAsMoment());
-        clause.put(endField, interval.getEndAsMoment());
     }
 
     /**

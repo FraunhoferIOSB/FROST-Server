@@ -52,6 +52,9 @@ public class MomentBinding implements Binding<Timestamp, Moment> {
 
         @Override
         public Timestamp to(Moment userObject) {
+            if (userObject == null) {
+                return null;
+            }
             return JDBCAdapter.SQL_TIMESTAMP_WITH_ZONE.from(userObject);
         }
 
