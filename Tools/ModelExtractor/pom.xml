@@ -21,7 +21,7 @@
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
 
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
-        <openjfx.version>18.0.1</openjfx.version>
+        <openjfx.version>18.0.2</openjfx.version>
         <jooq.version>3.16.8</jooq.version>
     </properties>
 
