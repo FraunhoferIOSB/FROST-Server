@@ -32,7 +32,8 @@ public interface EntityValidator {
      * @param entity the Entity to check.
      * @param entityPropertiesOnly flag indicating only the EntityProperties should be checked.
      * @throws IncompleteEntityException If any of the required properties are null.
-     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
+     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a
+     * Datastream and a MultiDatastream.
      */
     public void validate(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException;
 }

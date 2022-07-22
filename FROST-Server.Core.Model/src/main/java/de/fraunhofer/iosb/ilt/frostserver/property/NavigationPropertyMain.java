@@ -40,16 +40,16 @@ import java.util.Objects;
  * @author scf
  * @param <P> The entityType of the value of the property.
  */
-public class NavigationPropertyMain<P extends NavigableElement> implements Annotatable, NavigationProperty<P> {
+public abstract class NavigationPropertyMain<P extends NavigableElement> implements Annotatable, NavigationProperty<P> {
 
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
-        public NavigationPropertyEntity(String propertyName) {
-            super(propertyName, false);
+        public NavigationPropertyEntity(String propertyName, boolean required) {
+            super(propertyName, false, required, !required);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse) {
-            super(propertyName, false);
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, boolean required) {
+            super(propertyName, false, required, !required);
             setInverses(inverse);
         }
     }
@@ -57,11 +57,11 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Annot
     public static class NavigationPropertyEntitySet extends NavigationPropertyMain<EntitySet> {
 
         public NavigationPropertyEntitySet(String propertyName) {
-            super(propertyName, true);
+            super(propertyName, true, false, true);
         }
 
         public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse) {
-            super(propertyName, true);
+            super(propertyName, true, false, true);
             setInverses(inverse);
         }
     }
@@ -82,6 +82,14 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Annot
      * Flag indication the path is to an EntitySet.
      */
     private final boolean entitySet;
+    /**
+     * Flag indicating the property must be explicitly set.
+     */
+    private boolean required;
+    /**
+     * Flag indicating the property may be set to null.
+     */
+    private boolean nullable;
 
     private final Collection<String> aliases;
 
@@ -92,11 +100,13 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Annot
      */
     private final List<Annotation> annotations = new ArrayList<>();
 
-    private NavigationPropertyMain(String propertyName, boolean isSet) {
+    private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable) {
         this.name = propertyName;
         this.aliases = new ArrayList<>();
         this.aliases.add(propertyName);
         this.entitySet = isSet;
+        this.required = required;
+        this.nullable = nullable;
     }
 
     public void setEntityType(EntityType entityType) {
@@ -149,6 +159,24 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Annot
     @Override
     public PropertyType getType() {
         return type;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 
     @Override

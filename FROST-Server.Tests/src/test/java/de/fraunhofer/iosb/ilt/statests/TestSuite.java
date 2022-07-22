@@ -400,11 +400,11 @@ public class TestSuite {
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
-        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getHost()+ ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
+        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getHost() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
-        properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost()+ ":" + mqttBus.getFirstMappedPort());
+        properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
         if (parameters != null) {
             properties.putAll(parameters);
         }

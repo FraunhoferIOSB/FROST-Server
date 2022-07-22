@@ -127,23 +127,23 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
 
     private TypeComplex eptUom;
 
-    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
-    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING);
-    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_GEOJSON, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_GEOJSON, true, false);
-    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING);
-    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING);
-    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING);
+    public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET, false, false);
+    public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING, true, false);
+    public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, true, false);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
+    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING, true, false);
+    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, true, false);
+    public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, true, false);
     public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, true, false);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, true, false);
-    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, true, false);
-    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true);
-    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true);
-    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, false);
-    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, true, false);
-    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, false, false, true, false);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, false, false, true, false);
+    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, false, true, true, false);
+    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true, true, true);
+    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true, false, true);
+    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, true, false, false);
+    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, false, true, true, false);
+    public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET, true, false);
     private EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
 
@@ -156,12 +156,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     private EntityPropertyMain<?> epIdSensor;
     private EntityPropertyMain<?> epIdThing;
 
-    public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM);
+    public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM, true);
     public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
     public final NavigationPropertyEntitySet npDatastreamsSensor = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
     public final NavigationPropertyEntitySet npDatastreamsObsProp = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
 
-    public final NavigationPropertyEntity npFeatureOfInterestObservation = new NavigationPropertyEntity(NAME_NP_FEATUREOFINTEREST);
+    public final NavigationPropertyEntity npFeatureOfInterestObservation = new NavigationPropertyEntity(NAME_NP_FEATUREOFINTEREST, false);
 
     public final NavigationPropertyEntitySet npHistoricalLocationsThing = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
     public final NavigationPropertyEntitySet npHistoricalLocationsLocation = new NavigationPropertyEntitySet(NAME_NP_HISTORICALLOCATIONS);
@@ -172,12 +172,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final NavigationPropertyEntitySet npObservationsDatastream = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS, npDatastreamObservation);
     public final NavigationPropertyEntitySet npObservationsFeature = new NavigationPropertyEntitySet(NAME_NP_OBSERVATIONS, npFeatureOfInterestObservation);
 
-    public final NavigationPropertyEntity npObservedPropertyDatastream = new NavigationPropertyEntity(NAME_NP_OBSERVEDPROPERTY, npDatastreamsObsProp);
+    public final NavigationPropertyEntity npObservedPropertyDatastream = new NavigationPropertyEntity(NAME_NP_OBSERVEDPROPERTY, npDatastreamsObsProp, true);
 
-    public final NavigationPropertyEntity npSensorDatastream = new NavigationPropertyEntity(NAME_NP_SENSOR, npDatastreamsSensor);
+    public final NavigationPropertyEntity npSensorDatastream = new NavigationPropertyEntity(NAME_NP_SENSOR, npDatastreamsSensor, true);
 
-    public final NavigationPropertyEntity npThingDatasteam = new NavigationPropertyEntity(NAME_NP_THING, npDatastreamsThing);
-    public final NavigationPropertyEntity npThingHistLoc = new NavigationPropertyEntity(NAME_NP_THING, npHistoricalLocationsThing);
+    public final NavigationPropertyEntity npThingDatasteam = new NavigationPropertyEntity(NAME_NP_THING, npDatastreamsThing, true);
+    public final NavigationPropertyEntity npThingHistLoc = new NavigationPropertyEntity(NAME_NP_THING, npHistoricalLocationsThing, true);
     public final NavigationPropertyEntitySet npThingsLocation = new NavigationPropertyEntitySet(NAME_NP_THINGS, npLocationsThing);
 
     public final EntityType etThing = new EntityType(NAME_NP_THING, NAME_NP_THINGS);
@@ -214,6 +214,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         if (enabled) {
             modelSettings = new CoreModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
+            epPhenomenonTimeDs.setReadOnly(!modelSettings.dsPropsEditable);
+            epResultTimeDs.setReadOnly(!modelSettings.dsPropsEditable);
+            epObservedArea.setReadOnly(!modelSettings.dsPropsEditable);
         }
     }
 
@@ -261,14 +264,14 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerEntityType(etObservedProperty)
                 .registerEntityType(etSensor)
                 .registerEntityType(etThing);
-        epIdDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeDatastream), "id");
-        epIdFeature = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeFeature), "id");
-        epIdHistLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeHistLoc), "id");
-        epIdLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeLocation), "id");
-        epIdObsProp = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObsProp), "id");
-        epIdObservation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObservation), "id");
-        epIdSensor = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeSensor), "id");
-        epIdThing = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeThing), "id");
+        epIdDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeDatastream)).setAliases("id");
+        epIdFeature = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeFeature)).setAliases("id");
+        epIdHistLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeHistLoc)).setAliases("id");
+        epIdLocation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeLocation)).setAliases("id");
+        epIdObsProp = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObsProp)).setAliases("id");
+        epIdObservation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObservation)).setAliases("id");
+        epIdSensor = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeSensor)).setAliases("id");
+        epIdThing = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeThing)).setAliases("id");
         epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, eptUom, true, false);
     }
 
@@ -276,74 +279,74 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Linking Core Model Types...");
         etDatastream
-                .registerProperty(epIdDatastream, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(epObservationType, true)
-                .registerProperty(epUnitOfMeasurement, true)
-                .registerProperty(epObservedArea, false)
-                .registerProperty(epPhenomenonTimeDs, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(epResultTimeDs, false)
-                .registerProperty(npObservedPropertyDatastream, true)
-                .registerProperty(npSensorDatastream, true)
-                .registerProperty(npThingDatasteam, true)
-                .registerProperty(npObservationsDatastream, false);
+                .registerProperty(epIdDatastream)
+                .registerProperty(epName)
+                .registerProperty(epDescription)
+                .registerProperty(epObservationType)
+                .registerProperty(epUnitOfMeasurement)
+                .registerProperty(epObservedArea)
+                .registerProperty(epPhenomenonTimeDs)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(epResultTimeDs)
+                .registerProperty(npObservedPropertyDatastream)
+                .registerProperty(npSensorDatastream)
+                .registerProperty(npThingDatasteam)
+                .registerProperty(npObservationsDatastream);
         etFeatureOfInterest
-                .registerProperty(epIdFeature, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(epFeature, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npObservationsFeature, false);
+                .registerProperty(epIdFeature)
+                .registerProperty(epName)
+                .registerProperty(epDescription)
+                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(epFeature)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npObservationsFeature);
         etHistoricalLocation
-                .registerProperty(epIdHistLocation, false)
-                .registerProperty(epTime, true)
-                .registerProperty(npThingHistLoc, true)
-                .registerProperty(npLocationsHistLoc, false);
+                .registerProperty(epIdHistLocation)
+                .registerProperty(epTime)
+                .registerProperty(npThingHistLoc)
+                .registerProperty(npLocationsHistLoc);
         etLocation
-                .registerProperty(epIdLocation, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(epLocation, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npHistoricalLocationsLocation, false)
-                .registerProperty(npThingsLocation, false);
+                .registerProperty(epIdLocation)
+                .registerProperty(epName)
+                .registerProperty(epDescription)
+                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(epLocation)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npHistoricalLocationsLocation)
+                .registerProperty(npThingsLocation);
         etObservation
-                .registerProperty(epIdObservation, false)
-                .registerProperty(epPhenomenonTime, false)
-                .registerProperty(epResultTime, false)
-                .registerProperty(epResult, true)
-                .registerProperty(epResultQuality, false)
-                .registerProperty(epValidTime, false)
-                .registerProperty(epParameters, false)
-                .registerProperty(npDatastreamObservation, true)
-                .registerProperty(npFeatureOfInterestObservation, false);
+                .registerProperty(epIdObservation)
+                .registerProperty(epPhenomenonTime)
+                .registerProperty(epResultTime)
+                .registerProperty(epResult)
+                .registerProperty(epResultQuality)
+                .registerProperty(epValidTime)
+                .registerProperty(epParameters)
+                .registerProperty(npDatastreamObservation)
+                .registerProperty(npFeatureOfInterestObservation);
         etObservedProperty
-                .registerProperty(epIdObsProp, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDefinition, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npDatastreamsObsProp, false);
+                .registerProperty(epIdObsProp)
+                .registerProperty(epName)
+                .registerProperty(epDefinition)
+                .registerProperty(epDescription)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npDatastreamsObsProp);
         etSensor
-                .registerProperty(epIdSensor, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(epMetadata, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npDatastreamsSensor, false);
+                .registerProperty(epIdSensor)
+                .registerProperty(epName)
+                .registerProperty(epDescription)
+                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(epMetadata)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npDatastreamsSensor);
         etThing
-                .registerProperty(epIdThing, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npLocationsThing, false)
-                .registerProperty(npHistoricalLocationsThing, false)
-                .registerProperty(npDatastreamsThing, false);
+                .registerProperty(epIdThing)
+                .registerProperty(epName)
+                .registerProperty(epDescription)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npLocationsThing)
+                .registerProperty(npHistoricalLocationsThing)
+                .registerProperty(npDatastreamsThing);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;

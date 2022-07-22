@@ -31,6 +31,8 @@ public final class CoreModelSettings implements ConfigDefaults {
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_MODEL = "coreModel.enable";
+    @DefaultValueBoolean(false)
+    public static final String TAG_CAN_EDIT_DS_PHENTIME = "coreModel.editableDsProperties";
     @DefaultValue("LONG")
     public static final String TAG_ID_TYPE_DEFAULT = "coreModel.idType";
     @DefaultValue("")
@@ -59,6 +61,7 @@ public final class CoreModelSettings implements ConfigDefaults {
     public final String idTypeObservation;
     public final String idTypeSensor;
     public final String idTypeThing;
+    public final boolean dsPropsEditable;
 
     public CoreModelSettings(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
@@ -71,5 +74,6 @@ public final class CoreModelSettings implements ConfigDefaults {
         idTypeObservation = pluginSettings.get(TAG_ID_TYPE_OBSERVATION, idTypeDefault).toUpperCase();
         idTypeSensor = pluginSettings.get(TAG_ID_TYPE_SENSOR, idTypeDefault).toUpperCase();
         idTypeThing = pluginSettings.get(TAG_ID_TYPE_THING, idTypeDefault).toUpperCase();
+        dsPropsEditable = pluginSettings.getBoolean(TAG_CAN_EDIT_DS_PHENTIME, CoreModelSettings.class);
     }
 }

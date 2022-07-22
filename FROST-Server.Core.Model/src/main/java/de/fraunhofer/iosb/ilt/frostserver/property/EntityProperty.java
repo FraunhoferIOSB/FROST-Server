@@ -24,4 +24,9 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
  */
 public interface EntityProperty<T> extends Property<T> {
 
+    @Override
+    public default boolean isReadOnly() {
+        return false;
+    }
+
 }

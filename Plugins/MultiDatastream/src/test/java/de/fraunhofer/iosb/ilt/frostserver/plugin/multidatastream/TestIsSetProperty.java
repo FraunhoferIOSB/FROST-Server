@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
@@ -107,8 +108,9 @@ public class TestIsSetProperty {
     @Test
     void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
-            testEntityType(type, type.getPropertySet());
-            testEntityCompare(type, type.getPropertySet());
+            Set<Property> properties = type.getPropertySet().stream().filter(t -> !t.isReadOnly()).collect(Collectors.toSet());
+            testEntityType(type, properties);
+            testEntityCompare(type, properties);
         }
     }
 
@@ -307,9 +309,6 @@ public class TestIsSetProperty {
     private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epObservationType);
-        testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epObservedArea);
-        testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epPhenomenonTime);
-        testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epResultTime);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npSensorDatastream);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.npThingDatasteam);
     }

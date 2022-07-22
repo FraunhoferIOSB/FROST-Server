@@ -17,8 +17,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Objects;
 
 /**
@@ -65,6 +65,16 @@ public class EntityPropertyCustom implements EntityProperty<Object> {
     @Override
     public PropertyType getType() {
         return TypeComplex.STA_OBJECT;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return true;
     }
 
     @Override

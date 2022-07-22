@@ -49,6 +49,8 @@ It adds the entity types described in this specification and their behaviour.
 
 * **plugins.coreModel.enable:**  
   Toggle indicating the CoreModel plugin should be enabled. Default: `true`.
+* **plugins.coreModel.editableDsProperties:**  
+  Toggle indicating the server-generated properties of (Multi)Datastreams can be edited. Default: `false`.
 * **plugins.coreModel.idType:**  
   The default type of the primary key columns, can be overruled on a per-table basis:
   * **`LONG`:**  

@@ -43,15 +43,15 @@ public class ModelRegistry {
     /**
      * The global EntityProperty SelfLink.
      */
-    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, EDM_STRING, "selfLink");
+    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<String>(AT_IOT_SELF_LINK, EDM_STRING).setAliases("selfLink");
     /**
      * The global EntityProperty properties.
      */
-    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, true, false);
+    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, false, true, true, false);
     /**
      * The global EntityProperty encodingType.
      */
-    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING);
+    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, true, false);
 
     private final Map<String, EntityType> entityTypesByName = new TreeMap<>();
     private final Set<EntityType> entityTypes = new LinkedHashSet<>();

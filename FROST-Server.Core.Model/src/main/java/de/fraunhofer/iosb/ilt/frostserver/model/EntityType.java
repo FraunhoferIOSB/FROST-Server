@@ -71,9 +71,9 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     private EntityPropertyMain primaryKey;
     /**
-     * The Set of PROPERTIES that Entities of this type have, mapped to the flag indicating if they are required.
+     * The Set of PROPERTIES that Entities of this type have.
      */
-    private final Map<Property, Boolean> propertyMap = new LinkedHashMap<>();
+    private final Set<Property> properties = new LinkedHashSet<>();
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped by their name.
      */
@@ -117,8 +117,8 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         this.plural = plural;
     }
 
-    public EntityType registerProperty(Property property, boolean required) {
-        propertyMap.put(property, required);
+    public EntityType registerProperty(Property property) {
+        properties.add(property);
         propertiesByName.put(property.getName(), property);
         if (property instanceof EntityPropertyMain) {
             EntityPropertyMain<?> propertyMain = (EntityPropertyMain<?>) property;
@@ -137,7 +137,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
             LOGGER.error("Re-Init of EntityType!");
         }
         initialised = true;
-        for (Property property : propertyMap.keySet()) {
+        for (Property property : properties) {
             if (property instanceof EntityPropertyMain) {
                 entityProperties.add((EntityPropertyMain) property);
             }
@@ -300,7 +300,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Set<Property> getPropertySet() {
-        return propertyMap.keySet();
+        return properties;
     }
 
     /**
@@ -344,28 +344,31 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     /**
-     * @param property The property to check the required state for.
-     * @return True when the property is required, false otherwise.
-     */
-    public boolean isRequired(Property property) {
-        return propertyMap.getOrDefault(property, false);
-    }
-
-    /**
      * Check if all required properties are non-null on the given Entity.
      *
      * @param entity the Entity to check.
      * @param entityPropertiesOnly flag indicating only the EntityProperties should be checked.
      * @throws IncompleteEntityException If any of the required properties are null.
-     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
+     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a
+     * Datastream and a MultiDatastream.
      */
     public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
         for (Property property : getPropertySet()) {
             if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
                 continue;
             }
-            if (isRequired(property) && !entity.isSetProperty(property)) {
-                throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
+            if (entity.isSetProperty(property)) {
+                if (property.isReadOnly()) {
+                    entity.unsetProperty(property);
+                    continue;
+                }
+                if (!property.isNullable() && entity.getProperty(property) == null) {
+                    throw new IncompleteEntityException("Property '" + property.getJsonName() + "' must be non-NULL.");
+                }
+            } else {
+                if (property.isRequired()) {
+                    throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
+                }
             }
         }
         for (EntityValidator validator : validatorsCreateEntity.values()) {

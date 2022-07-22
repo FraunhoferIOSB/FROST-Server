@@ -69,21 +69,21 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
-    public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING));
+    public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING), true, false);
     private EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
     private EntityPropertyMain<?> epIdMultiDatastream;
 
-    public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
+    public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM, false);
     public final NavigationPropertyEntitySet npObservationsMDs = new NavigationPropertyEntitySet("Observations", npMultiDatastreamObservation);
 
     public final NavigationPropertyEntitySet npMultiDatastreamsObsProp = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
     public final NavigationPropertyEntitySet npObservedPropertiesMDs = new NavigationPropertyEntitySet("ObservedProperties", npMultiDatastreamsObsProp);
 
     public final NavigationPropertyEntitySet npMultiDatastreamsThing = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
-    public final NavigationPropertyEntity npThingMDs = new NavigationPropertyEntity("Thing", npMultiDatastreamsThing);
+    public final NavigationPropertyEntity npThingMDs = new NavigationPropertyEntity("Thing", npMultiDatastreamsThing, true);
 
     public final NavigationPropertyEntitySet npMultiDatastreamsSensor = new NavigationPropertyEntitySet(MULTI_DATASTREAMS);
-    public final NavigationPropertyEntity npSensorMDs = new NavigationPropertyEntity("Sensor", npMultiDatastreamsSensor);
+    public final NavigationPropertyEntity npSensorMDs = new NavigationPropertyEntity("Sensor", npMultiDatastreamsSensor, true);
 
     public final EntityType etMultiDatastream = new EntityType(MULTI_DATASTREAM, MULTI_DATASTREAMS);
 
@@ -128,7 +128,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         ModelRegistry mr = settings.getModelRegistry();
 
         mr.registerEntityType(etMultiDatastream);
-        epIdMultiDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeMultiDatastream), "id");
+        epIdMultiDatastream = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeMultiDatastream)).setAliases("id");
     }
 
     @Override
@@ -148,23 +148,23 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.getEptUom(), TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM));
+        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.getEptUom(), TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM), true, false);
         etMultiDatastream
-                .registerProperty(epIdMultiDatastream, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(pluginCoreModel.epName, true)
-                .registerProperty(pluginCoreModel.epDescription, true)
-                .registerProperty(pluginCoreModel.epObservationType, false)
-                .registerProperty(epMultiObservationDataTypes, true)
-                .registerProperty(epUnitOfMeasurements, true)
-                .registerProperty(pluginCoreModel.epObservedArea, false)
-                .registerProperty(pluginCoreModel.epPhenomenonTimeDs, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(pluginCoreModel.epResultTimeDs, false)
-                .registerProperty(npObservedPropertiesMDs, false)
-                .registerProperty(npSensorMDs, true)
-                .registerProperty(npThingMDs, true)
-                .registerProperty(npObservationsMDs, false)
+                .registerProperty(epIdMultiDatastream)
+                .registerProperty(EP_SELFLINK)
+                .registerProperty(pluginCoreModel.epName)
+                .registerProperty(pluginCoreModel.epDescription)
+                .registerProperty(pluginCoreModel.epObservationType)
+                .registerProperty(epMultiObservationDataTypes)
+                .registerProperty(epUnitOfMeasurements)
+                .registerProperty(pluginCoreModel.epObservedArea)
+                .registerProperty(pluginCoreModel.epPhenomenonTimeDs)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(pluginCoreModel.epResultTimeDs)
+                .registerProperty(npObservedPropertiesMDs)
+                .registerProperty(npSensorMDs)
+                .registerProperty(npThingMDs)
+                .registerProperty(npObservationsMDs)
                 .addCreateValidator("MD-Properties", (entity, entityPropertiesOnly) -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
@@ -183,16 +183,16 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 });
         // Register multiDatastream on existing entities.
         pluginCoreModel.etThing
-                .registerProperty(npMultiDatastreamsThing, false);
+                .registerProperty(npMultiDatastreamsThing);
         pluginCoreModel.etObservedProperty
-                .registerProperty(npMultiDatastreamsObsProp, false);
+                .registerProperty(npMultiDatastreamsObsProp);
         pluginCoreModel.etSensor
-                .registerProperty(npMultiDatastreamsSensor, false);
+                .registerProperty(npMultiDatastreamsSensor);
         // Now make DATASTREAM optional and register a validator that checks if
         // either Datastream or MultiDatastream is set.
+        pluginCoreModel.npDatastreamObservation.setRequired(false);
         pluginCoreModel.etObservation
-                .registerProperty(pluginCoreModel.npDatastreamObservation, false)
-                .registerProperty(npMultiDatastreamObservation, false)
+                .registerProperty(npMultiDatastreamObservation)
                 .addCreateValidator("MD-Obs-DsOrMds", (entity, entityPropertiesOnly) -> {
                     if (!entityPropertiesOnly) {
                         Entity datastream = entity.getProperty(pluginCoreModel.npDatastreamObservation);

@@ -28,6 +28,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
  */
 public interface NavigationProperty<P> extends Property<P> {
 
+    @Override
+    public default boolean isReadOnly() {
+        return false;
+    }
+
     /**
      * The entity type this property links to.
      *

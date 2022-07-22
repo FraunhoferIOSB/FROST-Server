@@ -177,7 +177,7 @@ public class DefaultEntity implements Entity {
             NavigationPropertyMain navigationPropertyMain = (NavigationPropertyMain) property;
             navProperties.remove(navigationPropertyMain);
         }
-        setProperties.add(property);
+        setProperties.remove(property);
         return this;
     }
 
@@ -207,7 +207,11 @@ public class DefaultEntity implements Entity {
         if (!set) {
             setProperties.clear();
         } else {
-            setProperties.addAll(entityType.getEntityProperties());
+            for (EntityPropertyMain property : entityType.getEntityProperties()) {
+                if (!property.isReadOnly()) {
+                    setProperties.add(property);
+                }
+            }
             if (!entityPropertiesOnly) {
                 setProperties.addAll(entityType.getNavigationEntities());
             }

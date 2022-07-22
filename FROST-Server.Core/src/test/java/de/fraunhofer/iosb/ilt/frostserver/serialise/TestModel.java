@@ -41,14 +41,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class TestModel {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, true, false);
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
     public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House");
+    public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House", true);
     public final NavigationPropertyEntitySet NP_ROOMS_HOUSE = new NavigationPropertyEntitySet("Rooms");
 
-    public final NavigationPropertyEntity NP_BATHROOMFOR_ROOM = new NavigationPropertyEntity("BathroomFor");
+    public final NavigationPropertyEntity NP_BATHROOMFOR_ROOM = new NavigationPropertyEntity("BathroomFor", false);
     public final NavigationPropertyEntitySet NP_BATHROOMS_HOUSE = new NavigationPropertyEntitySet("Bathrooms");
 
     public final NavigationPropertyEntitySet NP_STREETS_HOUSE = new NavigationPropertyEntitySet("Streets");
@@ -66,25 +66,25 @@ public class TestModel {
         NP_STREETS_HOUSE.setInverses(NP_STREETS_HOUSE);
 
         modelRegistry.registerEntityType(ET_STREET);
-        ET_STREET.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(NP_HOUSES_STREET, false);
+        ET_STREET.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(EP_NAME)
+                .registerProperty(NP_HOUSES_STREET);
         modelRegistry.registerEntityType(ET_HOUSE);
-        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_VALUE, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_STREETS_HOUSE, false)
-                .registerProperty(NP_ROOMS_HOUSE, false)
-                .registerProperty(NP_BATHROOMS_HOUSE, false);
+        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(EP_NAME)
+                .registerProperty(EP_VALUE)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(NP_STREETS_HOUSE)
+                .registerProperty(NP_ROOMS_HOUSE)
+                .registerProperty(NP_BATHROOMS_HOUSE);
         modelRegistry.registerEntityType(ET_ROOM);
-        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_VALUE, false)
-                .registerProperty(EP_TIME, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_HOUSE_ROOM, true)
-                .registerProperty(NP_BATHROOMFOR_ROOM, false);
+        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(EP_NAME)
+                .registerProperty(EP_VALUE)
+                .registerProperty(EP_TIME)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(NP_HOUSE_ROOM)
+                .registerProperty(NP_BATHROOMFOR_ROOM);
     }
 
     public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {

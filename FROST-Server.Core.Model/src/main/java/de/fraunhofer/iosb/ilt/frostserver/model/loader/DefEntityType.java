@@ -59,7 +59,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     private String plural;
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
+     * PersistenceManager.
      */
     @ConfigurableField(editor = EditorString.class,
             label = "Table", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
@@ -247,7 +248,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
+     * PersistenceManager.
      *
      * @return the table
      */
@@ -256,7 +258,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
+     * PersistenceManager.
      *
      * @param table the table to set
      * @return this.

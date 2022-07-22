@@ -80,6 +80,16 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
     }
 
     @Override
+    public boolean isRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return true;
+    }
+
+    @Override
     public Object getFrom(Entity entity) {
         if (entityProperty == null) {
             entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);

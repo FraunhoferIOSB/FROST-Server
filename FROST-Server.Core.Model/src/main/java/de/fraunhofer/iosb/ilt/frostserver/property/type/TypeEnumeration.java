@@ -24,6 +24,7 @@ import java.util.Map;
 /**
  *
  * @author hylke
+ * @param <K> The enum this Type extends.
  */
 public class TypeEnumeration<K extends Enum<K>> extends PropertyType {
 

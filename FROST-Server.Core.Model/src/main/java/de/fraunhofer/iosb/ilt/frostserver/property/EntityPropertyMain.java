@@ -43,7 +43,7 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
     /**
      * The type(class) of the type of the value of this property.
      */
-    private final PropertyType type;
+    public final PropertyType type;
 
     /**
      * Flag indicating the property has sub-properties.
@@ -56,6 +56,22 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
      */
     public final boolean serialiseNull;
 
+    /**
+     * Flag indicating the property must be explicitly set.
+     */
+    private boolean required;
+
+    /**
+     * Flag indicating the property may be set to null.
+     */
+    private boolean nullable;
+
+    /**
+     * Flag indicating the property is system generated and can not be edited by
+     * the user.
+     */
+    private boolean readOnly;
+
     private final Collection<String> aliases;
 
     /**
@@ -64,22 +80,23 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
     private final List<Annotation> annotations = new ArrayList<>();
 
     public EntityPropertyMain(String name, PropertyType type) {
-        this(name, type, false, false);
+        this(name, type, false, true, false, false);
     }
 
-    public EntityPropertyMain(String name, PropertyType type, String... aliases) {
-        this(name, type, false, false, aliases);
+    public EntityPropertyMain(String name, PropertyType type, boolean required, boolean nullable) {
+        this(name, type, required, nullable, false, false);
     }
 
-    public EntityPropertyMain(String name, PropertyType type, boolean hasCustomProperties, boolean serialiseNull, String... aliases) {
+    public EntityPropertyMain(String name, PropertyType type, boolean required, boolean nullable, boolean hasCustomProperties, boolean serialiseNull) {
         if (type == null) {
             throw new IllegalArgumentException("Type must not be null");
         }
         this.type = type;
+        this.required = required;
+        this.nullable = nullable;
         this.aliases = new ArrayList<>();
         this.aliases.add(name);
         this.name = StringHelper.deCapitalize(name);
-        this.aliases.addAll(Arrays.asList(aliases));
         this.hasCustomProperties = hasCustomProperties;
         this.serialiseNull = serialiseNull;
     }
@@ -98,9 +115,45 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
         return aliases;
     }
 
+    public EntityPropertyMain<P> setAliases(String... aliases) {
+        if (this.aliases.size() != 1) {
+            throw new IllegalStateException("Aliases already set for " + name);
+        }
+        this.aliases.addAll(Arrays.asList(aliases));
+        return this;
+    }
+
     @Override
     public PropertyType getType() {
         return type;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public EntityPropertyMain<P> setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        return this;
     }
 
     @Override

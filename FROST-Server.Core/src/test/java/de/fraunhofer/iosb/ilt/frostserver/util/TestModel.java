@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -49,14 +49,13 @@ import java.util.Map;
  */
 public class TestModel implements PluginService {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, true, false);
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
     public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_HOUSE = new NavigationPropertyEntity("House");
+    public final NavigationPropertyEntity NP_HOUSE = new NavigationPropertyEntity("House", true);
     public final NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyEntitySet("Houses");
 
-    public final NavigationPropertyEntity NP_ROOM = new NavigationPropertyEntity("Room");
     public final NavigationPropertyEntitySet NP_ROOMS = new NavigationPropertyEntitySet("Rooms");
 
     public final EntityType ET_HOUSE = new EntityType("House", "Houses");
@@ -64,19 +63,19 @@ public class TestModel implements PluginService {
 
     public void initModel(ModelRegistry modelRegistry, String idType) {
         modelRegistry.registerEntityType(ET_HOUSE);
-        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_VALUE, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_ROOMS, false);
+        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(EP_NAME)
+                .registerProperty(EP_VALUE)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(NP_ROOMS);
         modelRegistry.registerEntityType(ET_ROOM);
-        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType), "id"), false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_VALUE, false)
-                .registerProperty(EP_TIME, false)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_ROOMS, false)
-                .registerProperty(NP_HOUSE, true);
+        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(EP_NAME)
+                .registerProperty(EP_VALUE)
+                .registerProperty(EP_TIME)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(NP_ROOMS)
+                .registerProperty(NP_HOUSE);
     }
 
     public Entity createHouse(int id, String name, double value) {

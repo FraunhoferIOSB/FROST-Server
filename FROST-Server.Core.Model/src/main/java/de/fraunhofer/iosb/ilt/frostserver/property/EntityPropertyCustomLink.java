@@ -58,6 +58,21 @@ public class EntityPropertyCustomLink implements Property<Entity> {
     }
 
     @Override
+    public boolean isRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return true;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
     public Entity getFrom(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }

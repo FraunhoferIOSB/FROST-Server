@@ -65,9 +65,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
         if (np.isEntitySet()) {
             collection = true;
         }
-        if (et.isRequired(np)) {
-            nullable = false;
-        }
+        nullable = np.isNullable();
         for (Annotation an : np.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));
         }

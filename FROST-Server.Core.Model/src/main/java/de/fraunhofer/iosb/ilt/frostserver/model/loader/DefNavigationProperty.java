@@ -135,7 +135,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         if (entitySet) {
             navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name);
         } else {
-            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name);
+            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required);
         }
         targetEntityType = modelRegistry.getEntityTypeForName(entityType);
         if (targetEntityType == null) {
@@ -143,7 +143,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
             throw new IllegalArgumentException("Missing entityType: " + entityType);
         }
         navProp.setEntityType(targetEntityType);
-        sourceEntityType.registerProperty(navProp, required);
+        sourceEntityType.registerProperty(navProp);
         navProp.addAnnotations(annotations);
 
         if (inverse == null) {
@@ -156,11 +156,11 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
                 if (inverse.entitySet) {
                     navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp);
                 } else {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp);
+                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.required);
                 }
                 navPropInverse.setEntityType(sourceEntityType);
                 navPropInverse.addAnnotations(inverse.annotations);
-                targetEntityType.registerProperty(navPropInverse, inverse.required);
+                targetEntityType.registerProperty(navPropInverse);
             }
             LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
             navProp.setInverses(navPropInverse);

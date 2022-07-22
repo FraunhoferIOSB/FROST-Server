@@ -88,7 +88,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     @Override
     public boolean validFor(EntityType entityType) {
-        return entityType.getProperty(entityProperty.name) != null;
+        return entityType.getProperty(entityProperty.getName()) != null;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     @Override
     public String getName() {
-        return entityProperty.name + "/" + StringUtils.join(subPath, '/');
+        return entityProperty.getName() + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
@@ -109,6 +109,16 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     @Override
     public PropertyType getType() {
         return new TypeEntity(type);
+    }
+
+    @Override
+    public boolean isRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullable() {
+        return true;
     }
 
     public void setElementOn(Entity entity, NavigableElement expandedElement) {
@@ -150,7 +160,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         if (selfLink == null) {
             return null;
         }
-        String link = selfLink + '/' + entityProperty.name + '/' + String.join("/", subPath);
+        String link = selfLink + '/' + entityProperty.getName() + '/' + String.join("/", subPath);
         if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
             Query query = parent.getQuery();
             ResourcePath path = query.getPath();

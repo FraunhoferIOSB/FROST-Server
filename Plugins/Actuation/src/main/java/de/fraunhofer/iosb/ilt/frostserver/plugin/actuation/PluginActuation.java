@@ -77,11 +77,11 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private EntityPropertyMain<?> epIdTask;
     private EntityPropertyMain<?> epIdTaskingCap;
 
-    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR);
-    public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing");
+    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR, true);
+    public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing", true);
     public final NavigationPropertyEntitySet npTasksTaskCap = new NavigationPropertyEntitySet(TASKS);
 
-    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity(TASKING_CAPABILITY, npTasksTaskCap);
+    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity(TASKING_CAPABILITY, npTasksTaskCap, true);
     public final NavigationPropertyEntitySet npTaskingCapabilitiesActuator = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npActuatorTaskCap);
     public final NavigationPropertyEntitySet npTaskingCapabilitiesThing = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npThingTaskCap);
 
@@ -147,9 +147,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         mr.registerEntityType(etTask);
         mr.registerEntityType(etTaskingCapability);
 
-        epIdActuator = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeActuator), "id");
-        epIdTask = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTask), "id");
-        epIdTaskingCap = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTaskingCap), "id");
+        epIdActuator = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeActuator)).setAliases("id");
+        epIdTask = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTask)).setAliases("id");
+        epIdTaskingCap = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeTaskingCap)).setAliases("id");
     }
 
     @Override
@@ -160,33 +160,33 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             return false;
         }
         etActuator
-                .registerProperty(epIdActuator, false)
-                .registerProperty(pluginCoreModel.epName, true)
-                .registerProperty(pluginCoreModel.epDescription, true)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(pluginCoreModel.epMetadata, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npTaskingCapabilitiesActuator, false);
+                .registerProperty(epIdActuator)
+                .registerProperty(pluginCoreModel.epName)
+                .registerProperty(pluginCoreModel.epDescription)
+                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(pluginCoreModel.epMetadata)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(npTaskingCapabilitiesActuator);
         etTask
-                .registerProperty(epIdTask, false)
-                .registerProperty(pluginCoreModel.epCreationTime, false)
-                .registerProperty(epTaskingParameters, true)
-                .registerProperty(npTaskingCapabilityTask, true)
+                .registerProperty(epIdTask)
+                .registerProperty(pluginCoreModel.epCreationTime)
+                .registerProperty(epTaskingParameters)
+                .registerProperty(npTaskingCapabilityTask)
                 .addCreateValidator("AC-Task-CrationTime", (entity, entityPropertiesOnly) -> {
                     if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
                         entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
                     }
                 });
         etTaskingCapability
-                .registerProperty(epIdTaskingCap, false)
-                .registerProperty(pluginCoreModel.epName, true)
-                .registerProperty(pluginCoreModel.epDescription, true)
-                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(epTaskingParameters, true)
-                .registerProperty(npActuatorTaskCap, true)
-                .registerProperty(npTasksTaskCap, false)
-                .registerProperty(npThingTaskCap, true);
-        pluginCoreModel.etThing.registerProperty(npTaskingCapabilitiesThing, false);
+                .registerProperty(epIdTaskingCap)
+                .registerProperty(pluginCoreModel.epName)
+                .registerProperty(pluginCoreModel.epDescription)
+                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(epTaskingParameters)
+                .registerProperty(npActuatorTaskCap)
+                .registerProperty(npTasksTaskCap)
+                .registerProperty(npThingTaskCap);
+        pluginCoreModel.etThing.registerProperty(npTaskingCapabilitiesThing);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;

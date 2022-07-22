@@ -50,6 +50,27 @@ public interface Property<P> extends Comparable<Property<?>> {
     public PropertyType getType();
 
     /**
+     * Flag indicating the property must be explicitly set.
+     *
+     * @return the 'required' flag
+     */
+    public boolean isRequired();
+
+    /**
+     * Flag indicating the property may be set to null.
+     *
+     * @return the nullable flag
+     */
+    public boolean isNullable();
+
+    /**
+     * Flag indicating the property is system generated and can not be edited by the user.
+     *
+     * @return the readOnly flag.
+     */
+    public boolean isReadOnly();
+
+    /**
      * Get the value of this property from the given entity.
      *
      * @param entity The entity to get this property from.

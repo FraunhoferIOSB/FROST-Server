@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -176,14 +175,7 @@ public interface Entity extends NavigableElement {
      */
     public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
-        for (Property property : type.getPropertySet()) {
-            if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
-                continue;
-            }
-            if (type.isRequired(property) && !isSetProperty(property)) {
-                throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
-            }
-        }
+        type.complete(this, entityPropertiesOnly);
     }
 
     /**

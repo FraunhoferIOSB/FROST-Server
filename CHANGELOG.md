@@ -2,6 +2,10 @@
 
 ## Release version 2.1.0
 
+**New Features**
+* The new setting `plugins.coreModel.editableDsProperties` to control if generated
+  (Multi)Datastream properties can be directly edited.
+
 **Internal changes & Bugfixes**
 * Fixed DateTimeConstants sometimes being generated with decimal comma.
 * Fixed DateTimeConstants failing to parse when using decimal comma.
