@@ -32,7 +32,7 @@ frost:
         enabled: false
         secretName:
 
-    # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace. 
+    # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
       # limits:
       #   cpu: 1000m
@@ -108,6 +108,33 @@ frost:
       runAsUser:
       runAsGroup:
       fsGroup:
+
+  ##############################################
+  # FROST-Server Backup module configuration #
+  ##############################################
+  backup:
+    enabled: false
+    image:
+      registry: docker.io
+      repository: kartoza/pg-backup
+      tag: 14-3.2
+      pullPolicy: IfNotPresent
+
+    removeBefore: 14
+
+    persistence:
+      existingClaim:
+      storageClassName:
+      accessModes:
+        - ReadWriteOnce
+      capacity: 10Gi
+      mountPath: /backups
+
+    securityContext:
+      runAsUser:
+      runAsGroup:
+      fsGroup:
+
   ##########################################
   # FROST-Server MQTT module configuration #
   ##########################################
