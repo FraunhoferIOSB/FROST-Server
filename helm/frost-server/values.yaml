@@ -28,6 +28,9 @@ frost:
       rewriteTraget: /FROST-Server/$1
       path: /(.*)
       annotations:
+      tls:
+        enabled: false
+        secretName:
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace. 
     resources:
