@@ -17,6 +17,12 @@ metadata:
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:
+  {{- if .Values.frost.http.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.frost.http.serviceHost }}
+      secretName: {{ .Values.frost.http.ingress.tls.secretName }}
+  {{- end }}
   rules:
   - host: {{ .Values.frost.http.serviceHost }}
     http:
