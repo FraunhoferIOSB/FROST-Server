@@ -48,6 +48,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-multiDatastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:258b0204628d3a2b40284b6a96bd5223</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-MultiDatastream" value="LONG" />
             <not>
@@ -55,13 +56,14 @@
             </not>
         </preConditions>
         <addColumn tableName="MULTI_DATASTREAMS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="MULTI_DATASTREAMS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-multiDatastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:e62444ac2baff75aeed0d2f903282122</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-MultiDatastream" value="STRING" />
@@ -72,7 +74,7 @@
             </not>
         </preConditions>
         <addColumn tableName="MULTI_DATASTREAMS">
-            <column name="ID" type="${idType-MultiDatastream}" defaultValueComputed="${defaultValueComputed-MultiDatastream}" position="1">
+            <column name="ID" type="${idType-MultiDatastream}" defaultValueComputed="${defaultValueComputed-MultiDatastream}">
                 <constraints primaryKey="true" primaryKeyName="MULTI_DATASTREAMS_PKEY"/>
             </column>
         </addColumn>

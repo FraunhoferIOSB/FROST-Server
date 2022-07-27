@@ -49,6 +49,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:ea53f31fb995c9298e6e63a91247e2b3</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Observation" value="LONG" />
             <not>
@@ -56,13 +57,14 @@
             </not>
         </preConditions>
         <addColumn tableName="OBSERVATIONS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="OBSERVATIONS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:353b4d5d13905e59100c7228e262eef6</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Observation" value="STRING" />
@@ -73,7 +75,7 @@
             </not>
         </preConditions>
         <addColumn tableName="OBSERVATIONS">
-            <column name="ID" type="${idType-Observation}" defaultValueComputed="${defaultValueComputed-Observation}" position="1">
+            <column name="ID" type="${idType-Observation}" defaultValueComputed="${defaultValueComputed-Observation}">
                 <constraints primaryKey="true" primaryKeyName="OBSERVATIONS_PKEY"/>
             </column>
         </addColumn>

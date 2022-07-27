@@ -35,6 +35,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-histLocations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:e39604ab7fc585885d0246956bff07d6</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-HistLocation" value="LONG" />
             <not>
@@ -42,13 +43,14 @@
             </not>
         </preConditions>
         <addColumn tableName="HIST_LOCATIONS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="HIST_LOCATIONS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-histLocations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:7f45f341b27a27d73890d2be6a44e933</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-HistLocation" value="STRING" />
@@ -59,7 +61,7 @@
             </not>
         </preConditions>
         <addColumn tableName="HIST_LOCATIONS">
-            <column name="ID" type="${idType-HistLocation}" defaultValueComputed="${defaultValueComputed-HistLocation}" position="1">
+            <column name="ID" type="${idType-HistLocation}" defaultValueComputed="${defaultValueComputed-HistLocation}">
                 <constraints primaryKey="true" primaryKeyName="HIST_LOCATIONS_PKEY"/>
             </column>
         </addColumn>

@@ -38,6 +38,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-locations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:ca579a1ba98b2cc49e2eac745a636576</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Location" value="LONG" />
             <not>
@@ -45,13 +46,14 @@
             </not>
         </preConditions>
         <addColumn tableName="LOCATIONS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="LOCATIONS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-locations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:2ba863c5b011c04d887cf8131b1afea1</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Location" value="STRING" />
@@ -62,7 +64,7 @@
             </not>
         </preConditions>
         <addColumn tableName="LOCATIONS">
-            <column name="ID" type="${idType-Location}" defaultValueComputed="${defaultValueComputed-Location}" position="1">
+            <column name="ID" type="${idType-Location}" defaultValueComputed="${defaultValueComputed-Location}">
                 <constraints primaryKey="true" primaryKeyName="LOCATIONS_PKEY"/>
             </column>
         </addColumn>

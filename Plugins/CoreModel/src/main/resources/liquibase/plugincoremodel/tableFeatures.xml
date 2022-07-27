@@ -37,6 +37,7 @@
     </changeSet>
     
     <changeSet author="scf" id="2021-01-01-features-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:4374da152cdee1882ce18c5b93882da1</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Feature" value="LONG" />
             <not>
@@ -44,13 +45,14 @@
             </not>
         </preConditions>
         <addColumn tableName="FEATURES">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="FEATURES_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-features-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:b7e9c85c285f28e461713f0a5a1e912f</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Feature" value="STRING" />
@@ -61,7 +63,7 @@
             </not>
         </preConditions>
         <addColumn tableName="FEATURES">
-            <column name="ID" type="${idType-Feature}" defaultValueComputed="${defaultValueComputed-Feature}" position="1">
+            <column name="ID" type="${idType-Feature}" defaultValueComputed="${defaultValueComputed-Feature}">
                 <constraints primaryKey="true" primaryKeyName="FEATURES_PKEY"/>
             </column>
         </addColumn>

@@ -41,6 +41,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-taskingcapabilities-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:88439ecbfb81a28f9de5da80b83386b5</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-TaskingCap" value="LONG" />
             <not>
@@ -48,13 +49,14 @@
             </not>
         </preConditions>
         <addColumn tableName="TASKINGCAPABILITIES">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="TASKINGCAPABILITIES_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-taskingcapabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:d88900bfe13c8ad2a796ccfa5b4fd373</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-TaskingCap" value="STRING" />
@@ -65,7 +67,7 @@
             </not>
         </preConditions>
         <addColumn tableName="TASKINGCAPABILITIES">
-            <column name="ID" type="${idType-TaskingCap}" defaultValueComputed="${defaultValueComputed-TaskingCap}" position="1">
+            <column name="ID" type="${idType-TaskingCap}" defaultValueComputed="${defaultValueComputed-TaskingCap}">
                 <constraints primaryKey="true" primaryKeyName="TASKINGCAPABILITIES_PKEY"/>
             </column>
         </addColumn>

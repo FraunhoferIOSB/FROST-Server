@@ -34,6 +34,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-things-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:4037fa8d524968e70312450b03041969</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Thing" value="LONG" />
             <not>
@@ -41,13 +42,14 @@
             </not>
         </preConditions>
         <addColumn tableName="THINGS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="THINGS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-things-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:4a2ee18ba9be58b91c0757a4c4a313cd</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Thing" value="STRING" />
@@ -58,7 +60,7 @@
             </not>
         </preConditions>
         <addColumn tableName="THINGS">
-            <column name="ID" type="${idType-Thing}" defaultValueComputed="${defaultValueComputed-Thing}" position="1">
+            <column name="ID" type="${idType-Thing}" defaultValueComputed="${defaultValueComputed-Thing}">
                 <constraints primaryKey="true" primaryKeyName="THINGS_PKEY"/>
             </column>
         </addColumn>

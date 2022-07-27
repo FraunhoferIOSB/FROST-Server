@@ -53,6 +53,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:7280464944bd850cc032a81ed4a3c3c7</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Datastream" value="LONG" />
             <not>
@@ -60,13 +61,14 @@
             </not>
         </preConditions>
         <addColumn tableName="DATASTREAMS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="DATASTREAMS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:e4ce2829219200cf80dd41f2874a009a</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Datastream" value="STRING" />
@@ -77,7 +79,7 @@
             </not>
         </preConditions>
         <addColumn tableName="DATASTREAMS">
-            <column name="ID" type="${idType-Datastream}" defaultValueComputed="${defaultValueComputed-Datastream}" position="1">
+            <column name="ID" type="${idType-Datastream}" defaultValueComputed="${defaultValueComputed-Datastream}">
                 <constraints primaryKey="true" primaryKeyName="DATASTREAMS_PKEY"/>
             </column>
         </addColumn>

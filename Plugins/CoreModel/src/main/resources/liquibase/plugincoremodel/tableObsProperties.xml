@@ -35,6 +35,7 @@
     </changeSet>
     
     <changeSet author="scf" id="2021-01-01-obsProperties-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:fa91056fcc5047639bfbe0bdccbc0d64</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-ObsProp" value="LONG" />
             <not>
@@ -42,13 +43,14 @@
             </not>
         </preConditions>
         <addColumn tableName="OBS_PROPERTIES">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="OBS_PROPERTIES_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-obsProperties-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:8f7fa9da4e634208a0eed9f330759b81</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-ObsProp" value="STRING" />
@@ -59,7 +61,7 @@
             </not>
         </preConditions>
         <addColumn tableName="OBS_PROPERTIES">
-            <column name="ID" type="${idType-ObsProp}" defaultValueComputed="${defaultValueComputed-ObsProp}" position="1">
+            <column name="ID" type="${idType-ObsProp}" defaultValueComputed="${defaultValueComputed-ObsProp}">
                 <constraints primaryKey="true" primaryKeyName="OBS_PROPERTIES_PKEY"/>
             </column>
         </addColumn>

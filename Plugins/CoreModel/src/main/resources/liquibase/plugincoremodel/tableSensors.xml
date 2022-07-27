@@ -36,6 +36,7 @@
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-sensors-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:d3c0fdd93f39a4c5e8d4d48794eaed3b</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Sensor" value="LONG" />
             <not>
@@ -43,13 +44,14 @@
             </not>
         </preConditions>
         <addColumn tableName="SENSORS">
-            <column name="ID" type="${idTypeLong}" autoIncrement="true" position="1">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="SENSORS_PKEY" />
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="scf" id="2021-01-01-sensors-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <validCheckSum>8:7793864b12aef84673b255ada3b48132</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Sensor" value="STRING" />
@@ -60,7 +62,7 @@
             </not>
         </preConditions>
         <addColumn tableName="SENSORS">
-            <column name="ID" type="${idType-Sensor}" defaultValueComputed="${defaultValueComputed-Sensor}" position="1">
+            <column name="ID" type="${idType-Sensor}" defaultValueComputed="${defaultValueComputed-Sensor}">
                 <constraints primaryKey="true" primaryKeyName="SENSORS_PKEY"/>
             </column>
         </addColumn>
