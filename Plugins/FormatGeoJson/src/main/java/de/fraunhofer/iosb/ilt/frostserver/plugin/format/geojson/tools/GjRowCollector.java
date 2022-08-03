@@ -39,8 +39,12 @@ import org.geojson.GeoJsonObject;
  */
 public class GjRowCollector {
 
+    private static class FeatureList extends ArrayList<GeoJsonObject> {
+        // Nothing to override.
+    };
+
     private final Map<String, Object> collection = new LinkedHashMap<>();
-    private final List<Feature> features = new ArrayList<>();
+    private final FeatureList features = new FeatureList();
     private Feature feature;
 
     /**
