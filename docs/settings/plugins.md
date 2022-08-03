@@ -112,6 +112,15 @@ in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThing
   Toggle indicating the ResultFormat CSV should be enabled. Default: `true`.
 
 
+### GeoJSON Result Format
+
+The GeoJSON plugin implements a GeoJSON result formatter, enabling GeoJSON output as described
+in: [GeoJSON-ResultFormat](https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.html)
+
+* **plugins.geojson.enable:**  
+  Toggle indicating the ResultFormat GeoJSON should be enabled. Default: `true`.
+
+
 ## Other Plugins
 
 These plugins enable various other behaviours.

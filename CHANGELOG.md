@@ -1,5 +1,12 @@
 # Changelog
 
+## Release version 2.0.3
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
+* Fixed #1069: GeoJSON output is missing the `type` attribute for the feature elements.
+
+
 ## Release version 2.0.2
 
 **Internal changes & Bugfixes**
