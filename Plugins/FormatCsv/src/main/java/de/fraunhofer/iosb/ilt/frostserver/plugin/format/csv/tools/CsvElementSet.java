@@ -92,7 +92,7 @@ public class CsvElementSet {
         if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
             element = new CsvComplexProperty(namePrefix, property);
         } else {
-            element = new CsvEntityProperty(namePrefix + property.name, property);
+            element = new CsvEntityProperty(namePrefix + property.getName(), property);
         }
 
         elements.add(element);

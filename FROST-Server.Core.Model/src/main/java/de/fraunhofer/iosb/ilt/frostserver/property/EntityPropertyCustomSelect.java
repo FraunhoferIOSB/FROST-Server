@@ -17,7 +17,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Hylke van der Schaaf
  */
-public class EntityPropertyCustomSelect implements EntityProperty<Object> {
+public class EntityPropertyCustomSelect extends PropertyAbstract<Object> implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
@@ -43,6 +42,7 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
     private final List<String> subPath = new ArrayList<>();
 
     public EntityPropertyCustomSelect(String entityPropertyName) {
+        super(entityPropertyName, TypeComplex.STA_OBJECT, false, true, false);
         this.entityPropertyName = entityPropertyName;
     }
 
@@ -56,37 +56,19 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     public EntityPropertyCustomSelect addToSubPath(Collection<String> subPathElements) {
         subPath.addAll(subPathElements);
+        setName(entityPropertyName + "/" + StringUtils.join(subPath, '/'));
         return this;
     }
 
     public EntityPropertyCustomSelect addToSubPath(String subPathElement) {
         subPath.add(subPathElement);
+        setName(entityPropertyName + "/" + StringUtils.join(subPath, '/'));
         return this;
-    }
-
-    @Override
-    public String getName() {
-        return entityPropertyName + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
     public String getJsonName() {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
-    }
-
-    @Override
-    public PropertyType getType() {
-        return TypeComplex.STA_OBJECT;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isNullable() {
-        return true;
     }
 
     @Override
@@ -122,11 +104,6 @@ public class EntityPropertyCustomSelect implements EntityProperty<Object> {
     @Override
     public boolean isSetOn(Entity entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 
     @Override

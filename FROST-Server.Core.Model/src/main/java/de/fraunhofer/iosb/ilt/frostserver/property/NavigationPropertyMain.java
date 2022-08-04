@@ -25,12 +25,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,7 +39,7 @@ import java.util.Objects;
  * @author scf
  * @param <P> The entityType of the value of the property.
  */
-public abstract class NavigationPropertyMain<P extends NavigableElement> implements Annotatable, NavigationProperty<P> {
+public abstract class NavigationPropertyMain<P extends NavigableElement> extends PropertyAbstract<P> implements Annotatable, NavigationProperty<P> {
 
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
@@ -67,14 +66,6 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
     }
 
     /**
-     * The name of the navigation property in urls.
-     */
-    private final String name;
-    /**
-     * The type(class) of the type of the value of this property.
-     */
-    private PropertyType type;
-    /**
      * The entityType of entity that this navigation property points to.
      */
     private EntityType entityType;
@@ -82,16 +73,6 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
      * Flag indication the path is to an EntitySet.
      */
     private final boolean entitySet;
-    /**
-     * Flag indicating the property must be explicitly set.
-     */
-    private boolean required;
-    /**
-     * Flag indicating the property may be set to null.
-     */
-    private boolean nullable;
-
-    private final Collection<String> aliases;
 
     private NavigationPropertyMain<?> inverse;
 
@@ -101,9 +82,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
     private final List<Annotation> annotations = new ArrayList<>();
 
     private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable) {
-        this.name = propertyName;
-        this.aliases = new ArrayList<>();
-        this.aliases.add(propertyName);
+        super(propertyName, TypeComplex.STA_OBJECT, required, nullable, false);
         this.entitySet = isSet;
         this.required = required;
         this.nullable = nullable;
@@ -112,9 +91,9 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
     public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
         if (entitySet) {
-            this.type = new TypeEntitySet(entityType);
+            setType(new TypeEntitySet(entityType));
         } else {
-            this.type = new TypeEntity(entityType);
+            setType(new TypeEntity(entityType));
         }
     }
 
@@ -138,7 +117,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
 
     @Override
     public boolean validFor(EntityType entityType) {
-        return (entityType.getProperty(name) instanceof NavigationProperty);
+        return (entityType.getProperty(getName()) instanceof NavigationProperty);
     }
 
     @Override
@@ -146,33 +125,8 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
         return entitySet;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getJsonName() {
-        return getName();
-    }
-
-    @Override
-    public PropertyType getType() {
-        return type;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return required;
-    }
-
     public void setRequired(boolean required) {
         this.required = required;
-    }
-
-    @Override
-    public boolean isNullable() {
-        return nullable;
     }
 
     public void setNullable(boolean nullable) {
@@ -200,7 +154,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
         if (selfLink == null) {
             return null;
         }
-        String link = selfLink + '/' + name;
+        String link = selfLink + '/' + getName();
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();
@@ -237,16 +191,12 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> impleme
             return false;
         }
         final NavigationPropertyMain<?> other = (NavigationPropertyMain<?>) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.equals(getName(), other.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.name);
+        return Objects.hashCode(getName());
     }
 
-    @Override
-    public String toString() {
-        return getName();
-    }
 }

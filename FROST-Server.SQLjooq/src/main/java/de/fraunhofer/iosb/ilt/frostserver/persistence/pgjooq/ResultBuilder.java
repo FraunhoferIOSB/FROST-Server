@@ -389,7 +389,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (Entity.class.isAssignableFrom(resultObject.getClass())) {
             Object propertyValue = ((Entity) resultObject).getProperty(element.getProperty());
             Map<String, Object> entityMap = new HashMap<>();
-            entityName = element.getProperty().name;
+            entityName = element.getProperty().getName();
             entityMap.put(entityName, propertyValue);
             resultObject = entityMap;
         }

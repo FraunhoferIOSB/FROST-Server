@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,17 +32,7 @@ import java.util.Objects;
  * @author scf
  * @param <P> The type of the value of the property.
  */
-public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
-
-    /**
-     * The entityName of this property.
-     */
-    public final String name;
-
-    /**
-     * The type(class) of the type of the value of this property.
-     */
-    public final PropertyType type;
+public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annotatable, EntityProperty<P> {
 
     /**
      * Flag indicating the property has sub-properties.
@@ -55,22 +44,6 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
      * Json NULL.
      */
     public final boolean serialiseNull;
-
-    /**
-     * Flag indicating the property must be explicitly set.
-     */
-    private boolean required;
-
-    /**
-     * Flag indicating the property may be set to null.
-     */
-    private boolean nullable;
-
-    /**
-     * Flag indicating the property is system generated and can not be edited by
-     * the user.
-     */
-    private boolean readOnly;
 
     private final Collection<String> aliases;
 
@@ -88,27 +61,13 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
     }
 
     public EntityPropertyMain(String name, PropertyType type, boolean required, boolean nullable, boolean hasCustomProperties, boolean serialiseNull) {
-        if (type == null) {
-            throw new IllegalArgumentException("Type must not be null");
-        }
-        this.type = type;
-        this.required = required;
+        super(name, type, required, nullable, false);
+
         this.nullable = nullable;
         this.aliases = new ArrayList<>();
         this.aliases.add(name);
-        this.name = StringHelper.deCapitalize(name);
         this.hasCustomProperties = hasCustomProperties;
         this.serialiseNull = serialiseNull;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getJsonName() {
-        return name;
     }
 
     public Collection<String> getAliases() {
@@ -117,38 +76,20 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
 
     public EntityPropertyMain<P> setAliases(String... aliases) {
         if (this.aliases.size() != 1) {
-            throw new IllegalStateException("Aliases already set for " + name);
+            throw new IllegalStateException("Aliases already set for " + getName());
         }
         this.aliases.addAll(Arrays.asList(aliases));
         return this;
     }
 
-    @Override
-    public PropertyType getType() {
-        return type;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return required;
-    }
-
-    public void setRequired(boolean required) {
+    public EntityPropertyMain<P> setRequired(boolean required) {
         this.required = required;
+        return this;
     }
 
-    @Override
-    public boolean isNullable() {
-        return nullable;
-    }
-
-    public void setNullable(boolean nullable) {
+    public EntityPropertyMain<P> setNullable(boolean nullable) {
         this.nullable = nullable;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return readOnly;
+        return this;
     }
 
     public EntityPropertyMain<P> setReadOnly(boolean readOnly) {
@@ -198,16 +139,12 @@ public class EntityPropertyMain<P> implements Annotatable, EntityProperty<P> {
             return false;
         }
         final EntityPropertyMain<?> other = (EntityPropertyMain<?>) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.equals(getName(), other.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.name);
+        return Objects.hashCode(getName());
     }
 
-    @Override
-    public String toString() {
-        return getName();
-    }
 }

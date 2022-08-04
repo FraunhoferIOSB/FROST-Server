@@ -85,7 +85,7 @@ public class JsonWriterOdata40 {
         entitySerializer.addPropertyTypeSerializer(TypeSimplePrimitive.EDM_UNTYPED, (ep, entity, gen) -> {
             final Object value = entity.getProperty(ep);
             if (value != null || ep.serialiseNull) {
-                gen.writeStringField(ep.name, mapper.writeValueAsString(value));
+                gen.writeStringField(ep.getName(), mapper.writeValueAsString(value));
             }
         });
         module.addSerializer(Entity.class, entitySerializer);

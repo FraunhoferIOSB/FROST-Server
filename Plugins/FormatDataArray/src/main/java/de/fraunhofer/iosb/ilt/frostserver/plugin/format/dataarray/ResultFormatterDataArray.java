@@ -143,22 +143,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 components.add("id");
             }
             if (phenomenonTime) {
-                components.add(pluginCoreModel.epPhenomenonTime.name);
+                components.add(pluginCoreModel.epPhenomenonTime.getName());
             }
             if (result) {
-                components.add(pluginCoreModel.epResult.name);
+                components.add(pluginCoreModel.epResult.getName());
             }
             if (resultTime) {
-                components.add(pluginCoreModel.epResultTime.name);
+                components.add(pluginCoreModel.epResultTime.getName());
             }
             if (resultQuality) {
-                components.add(pluginCoreModel.epResultQuality.name);
+                components.add(pluginCoreModel.epResultQuality.getName());
             }
             if (validTime) {
-                components.add(pluginCoreModel.epValidTime.name);
+                components.add(pluginCoreModel.epValidTime.getName());
             }
             if (parameters) {
-                components.add(pluginCoreModel.epParameters.name);
+                components.add(pluginCoreModel.epParameters.getName());
             }
             return components;
         }

@@ -17,7 +17,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Objects;
 
@@ -25,16 +24,12 @@ import java.util.Objects;
  *
  * @author Hylke van der Schaaf
  */
-public class EntityPropertyCustom implements EntityProperty<Object> {
+public class EntityPropertyCustom extends PropertyAbstract<Object> implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
-    /**
-     * The name of this property as used in URLs.
-     */
-    public final String name;
-
     public EntityPropertyCustom(String name) {
+        super(name, TypeComplex.STA_OBJECT, false, true, false);
         String finalName = name;
         Integer realIndex;
         if (finalName.startsWith("[") && finalName.endsWith("]")) {
@@ -44,37 +39,8 @@ public class EntityPropertyCustom implements EntityProperty<Object> {
             } catch (NumberFormatException e) {
                 // Not a number...
             }
+            setName(finalName);
         }
-        this.name = finalName;
-    }
-
-    public EntityPropertyCustom() {
-        this.name = null;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getJsonName() {
-        return name;
-    }
-
-    @Override
-    public PropertyType getType() {
-        return TypeComplex.STA_OBJECT;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isNullable() {
-        return true;
     }
 
     @Override
@@ -93,13 +59,8 @@ public class EntityPropertyCustom implements EntityProperty<Object> {
     }
 
     @Override
-    public String toString() {
-        return getName();
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
@@ -114,7 +75,7 @@ public class EntityPropertyCustom implements EntityProperty<Object> {
             return false;
         }
         final EntityPropertyCustom other = (EntityPropertyCustom) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.equals(this.getName(), other.getName());
     }
 
 }

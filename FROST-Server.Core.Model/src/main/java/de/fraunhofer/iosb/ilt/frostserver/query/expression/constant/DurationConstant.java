@@ -49,6 +49,7 @@ public class DurationConstant extends Constant<Duration> {
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
     }
+
     public static DurationConstant parse(String value) {
         try {
             return new DurationConstant(value);

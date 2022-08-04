@@ -62,7 +62,7 @@ public class PathElementProperty implements PathElement {
 
     @Override
     public String toString() {
-        return property.name;
+        return property.getName();
     }
 
     @Override

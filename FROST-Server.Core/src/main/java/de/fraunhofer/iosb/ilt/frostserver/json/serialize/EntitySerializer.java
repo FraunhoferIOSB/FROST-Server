@@ -146,7 +146,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
         final Object value = entity.getProperty(ep);
         if (serialiseAllNulls || value != null || ep.serialiseNull) {
-            final String name = ep.name;
+            final String name = ep.getName();
             if (serialiseAllNulls && "@iot.id".equals(name)) {
                 gen.writeObjectField("id", value);
             } else {

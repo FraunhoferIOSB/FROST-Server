@@ -48,7 +48,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
     public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, EntityType et) {
-        String keyName = et.getPrimaryKey().name;
+        String keyName = et.getPrimaryKey().getName();
         if ("@iot.id".equals(keyName)) {
             keyName = "id";
         }

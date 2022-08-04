@@ -26,50 +26,19 @@ import java.util.Objects;
  *
  * @author hylke
  */
-public class EntityPropertyCustomLink implements Property<Entity> {
+public class EntityPropertyCustomLink extends PropertyAbstract<Entity> {
 
     private static final String UNSUPPORTED = "Not supported on custom properties.";
 
-    private final String name;
     private final EntityType targetEntityType;
 
     public EntityPropertyCustomLink(String name, EntityType targetEntityType) {
-        this.name = name;
+        super(name, new TypeEntity(targetEntityType), false, true, false);
         this.targetEntityType = targetEntityType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getJsonName() {
-        return getName();
-    }
-
-    @Override
-    public TypeEntity getType() {
-        return new TypeEntity(targetEntityType);
     }
 
     public EntityType getTargetEntityType() {
         return targetEntityType;
-    }
-
-    @Override
-    public boolean isRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isNullable() {
-        return true;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return false;
     }
 
     @Override
@@ -99,13 +68,13 @@ public class EntityPropertyCustomLink implements Property<Entity> {
             return false;
         }
         final EntityPropertyCustomLink other = (EntityPropertyCustomLink) obj;
-        return Objects.equals(this.name, other.name)
+        return Objects.equals(this.getName(), other.getName())
                 && Objects.equals(this.targetEntityType, other.targetEntityType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, targetEntityType);
+        return Objects.hash(getName(), targetEntityType);
     }
 
 }

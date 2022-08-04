@@ -23,10 +23,5 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
  * @param <T> The type of the value of the property.
  */
 public interface EntityProperty<T> extends Property<T> {
-
-    @Override
-    public default boolean isReadOnly() {
-        return false;
-    }
-
+    // Does not add methods.
 }

@@ -121,6 +121,11 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         return true;
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
     public void setElementOn(Entity entity, NavigableElement expandedElement) {
         init(entity);
         targetData.containingMap.put(name + "." + type.entityName, expandedElement);
