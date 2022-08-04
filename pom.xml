@@ -84,9 +84,6 @@
         <time4j.version>5.9.1</time4j.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
-        <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
-
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
 
         <!-- Sonar -->

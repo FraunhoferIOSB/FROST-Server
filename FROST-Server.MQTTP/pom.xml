@@ -132,64 +132,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>${dockerfile-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>build-and-tag-latest</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>tag-version</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>tag</goal>
-                        </goals>
-                        <configuration>
-                            <tag>${env.DOCKER_TAG}</tag>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>push-latest</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                        <configuration>
-                            <tag>latest</tag>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>push-version</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                        <configuration>
-                            <tag>${env.DOCKER_TAG}</tag>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <repository>${docker-image-name}</repository>
-                    <buildArgs>
-                        <WAR_FILE>${project.build.finalName}.war</WAR_FILE>
-                    </buildArgs>
-                </configuration>
-                <dependencies>
-                    <!-- Java 9 support -->
-                    <dependency>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>activation</artifactId>
-                        <version>${javax-activation.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
         </plugins>
     </build>
 
