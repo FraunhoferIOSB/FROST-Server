@@ -11,6 +11,11 @@
 * Fixed DateTimeConstants failing to parse when using decimal comma.
 * Updated version of moquette allows persistent sessions to time out, avoiding memory leaks.
 * Improved OpenAPI spec generator.
+* Improved handling of required, nullable and non-editable properties.
+* Fixed #1069: GeoJSON output is missing the <type> attribute for the feature elements.
+* Changed build system to Java 17.
+* Added Maven wrapper to build without locally installed Maven.
+* (OData) Add support for metadata sub parameter in format parameter.
 
 
 ## Release version 2.0.0
