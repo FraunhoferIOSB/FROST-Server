@@ -36,6 +36,10 @@ spec:
                     operator: In
                     values:
                       - {{ .Values.frost.db.requiredHostname }}
+      tolerations:
+        - effect: NoSchedule
+          key: workload-type/db
+          operator: Exists
       {{- end }}
       securityContext:
           {{- toYaml .Values.frost.db.securityContext | nindent 10 }}
