@@ -50,7 +50,7 @@ spec:
           ports:
             - name: postgresql
               containerPort: 5432
-          {{- if .Values.frost.db.persistence.enabled }}
+          {{- if or (.Values.frost.db.persistence.enabled) (.Values.frost.db.persistence.hostPath) }}
           volumeMounts:
             - name: {{ $fullName }}
               mountPath: {{ .Values.frost.db.persistence.mountPath }}
