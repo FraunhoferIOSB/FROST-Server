@@ -26,6 +26,17 @@ spec:
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
+      {{- if .Values.frost.db.requiredHostname }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - {{ .Values.frost.db.requiredHostname }}
+      {{- end }}
       securityContext:
           {{- toYaml .Values.frost.db.securityContext | nindent 10 }}
       containers:
@@ -58,4 +69,10 @@ spec:
         - name: {{ $fullName }}
           persistentVolumeClaim:
             claimName: {{ default $fullName .Values.frost.db.persistence.existingClaim }}
+      {{- else if .Values.frost.db.persistence.hostPath }}
+      volumes:
+        - name: {{ $fullName }}
+          hostPath:
+            path: {{ .Values.frost.db.persistence.hostPath }}
+            type: ""
       {{- end -}}

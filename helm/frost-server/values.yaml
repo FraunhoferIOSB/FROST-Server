@@ -91,11 +91,8 @@ frost:
         - ReadWriteOnce
       capacity: 10Gi
       mountPath: /var/lib/postgresql/data
-      # Uncomment bellow if you want to use the builtin "frost-server-db-local" StorageClass name.
-      # Only compatible if the ReadWriteOnce access mode is only claimed (check the frost.db.persistence.accessModes value).
-      # See project documentation for more information
-      #local:
-      #  nodeMountPath: /mnt/frost-server-db
+      hostPath:
+    requiredHostname:
 
     # Common FROST-Server Database properties, shared by any other FROST-Server modules
     implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
