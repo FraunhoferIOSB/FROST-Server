@@ -48,7 +48,7 @@
         <jackson-databind.version>2.13.3</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.12</javacc.version>
-        <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
+        <javacc-maven-plugin.version>3.0.0</javacc-maven-plugin.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <jetty.version>10.0.11</jetty.version>
         <jodatime.version>2.10.14</jodatime.version>
