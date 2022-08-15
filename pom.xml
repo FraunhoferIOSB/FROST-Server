@@ -63,7 +63,7 @@
         <maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
         <maven-gpg-plugin>3.0.1</maven-gpg-plugin>
         <maven-jacoco-plugin.version>0.8.8</maven-jacoco-plugin.version>
-        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
         <maven-nexus-staging-plugin>1.6.13</maven-nexus-staging-plugin>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
