@@ -167,7 +167,20 @@ frost:
       websocket:
         nodePort:
         servicePort: 9876
+
+    secureWebsocketPort:
     stickySessionTimeout: 10800
+    exposedEndpoints:
+    javaKeystorePath:
+    keyManagerPassword:
+    keyStorePassword:
+    persistentStoreType: memory
+    session_queue_size: 1024
+    session_timeout_seconds: 3600
+    sslPort:
+    netty:
+      mqtt:
+        message_size: 8092
 
     # FROST-Server MQTT business settings
     qos: 2

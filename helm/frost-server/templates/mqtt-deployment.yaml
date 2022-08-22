@@ -85,6 +85,26 @@ spec:
               value: "{{ .Values.frost.mqtt.createThreadPoolSize }}"
             - name: mqtt_maxInFlight
               value: "{{ .Values.frost.mqtt.maxInFlight }}"
+            - name: mqtt_exposedEndpoints
+              value: "{{ .Values.frost.mqtt.exposedEndpoints }}"
+            - name: mqtt_javaKeystorePath
+              value: "{{ .Values.frost.mqtt.javaKeystorePath }}"
+            - name: mqtt_keyManagerPassword
+              value: "{{ .Values.frost.mqtt.keyManagerPassword }}"
+            - name: mqtt_keyStorePassword
+              value: "{{ .Values.frost.mqtt.keyStorePassword }}"
+            - name: mqtt_persistentStoreType
+              value: "{{ .Values.frost.mqtt.persistentStoreType }}"
+            - name: mqtt_secureWebsocketPort
+              value: "{{ .Values.frost.mqtt.secureWebsocketPort }}"
+            - name: mqtt_session_queue_size
+              value: "{{ .Values.frost.mqtt.session_queue_size }}"
+            - name: mqtt_session_timeout_seconds
+              value: "{{ .Values.frost.mqtt.session_timeout_seconds }}"
+            - name: mqtt_sslPort
+              value: "{{ .Values.frost.mqtt.sslPort }}"
+            - name: mqtt_netty_mqtt_message_size
+              value: "{{ .Values.frost.mqtt.netty.mqtt.message_size }}"
 
             # Messages bus related properties
             - name: bus_mqttBroker
