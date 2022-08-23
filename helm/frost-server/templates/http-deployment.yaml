@@ -104,9 +104,9 @@ spec:
 
             # Persistence related properties
             - name: persistence_db_jndi_datasource
-              value: ""
+              value: "{{ .Values.frost.db.jndi.datasource }}"
             - name: persistence_db_driver
-              value: "org.postgresql.Driver"
+              value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             - name: persistence_persistenceManagerImplementationClass

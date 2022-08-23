@@ -111,11 +111,14 @@ frost:
     requiredHostname:
 
     # Common FROST-Server Database properties, shared by any other FROST-Server modules
+    driver: "org.postgresql.Driver"
     implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
     idGenerationMode: "ServerGeneratedOnly"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
+    jndi:
+      datasource:
 
     securityContext:
       runAsUser:
@@ -167,6 +170,8 @@ frost:
       websocket:
         nodePort:
         servicePort: 9876
+    host: 0.0.0.0
+    internalHost: localhost
 
     secureWebsocketPort:
     stickySessionTimeout: 10800

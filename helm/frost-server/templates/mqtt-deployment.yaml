@@ -34,9 +34,9 @@ spec:
           imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
           ports:
             - name: mqtt
-              containerPort: 1883
+              containerPort: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
             - name: websocket
-              containerPort: 9876
+              containerPort: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
           env:
             # Internal properties
             - name: ApiVersion
@@ -62,17 +62,17 @@ spec:
             - name: mqtt_mqttServerImplementationClass
               value: "de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer"
             - name: mqtt_Enabled
-              value: "true"
+              value: "{{ .Values.frost.mqtt.enabled }}"
             - name: mqtt_Port
-              value: "1883"
+              value: "{{ .Values.frost.mqtt.ports.mqtt.servicePort }}"
             - name: mqtt_Host
-              value: "0.0.0.0"
+              value: "{{ .Values.frost.mqtt.host }}"
             - name: mqtt_internalHost
-              value: "localhost"
+              value: "{{ .Values.frost.mqtt.internalHost }}"
             - name: mqtt_WebsocketPort
-              value: "9876"
+              value: "{{ .Values.frost.mqtt.ports.websocket.servicePort }}"
             - name: mqtt_WaitForEnter
-              value: "false"
+              value: "{{ .Values.frost.mqtt.waitForEnter }}"
             - name: mqtt_QoS
               value: "{{ .Values.frost.mqtt.qos }}"
             - name: mqtt_SubscribeMessageQueueSize
@@ -128,9 +128,9 @@ spec:
 
             # Persistence related properties
             - name: persistence_db_jndi_datasource
-              value: ""
+              value: "{{ .Values.frost.db.jndi.datasource }}"
             - name: persistence_db_driver
-              value: "org.postgresql.Driver"
+              value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             - name: persistence_persistenceManagerImplementationClass

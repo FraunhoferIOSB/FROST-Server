@@ -33,5 +33,5 @@ spec:
           imagePullPolicy: {{ .Values.frost.bus.image.pullPolicy | quote }}
           ports:
             - name: mqtt
-              containerPort: 1883
+              containerPort: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
 {{- end -}}
