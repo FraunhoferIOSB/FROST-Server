@@ -15,7 +15,7 @@ flexible, authentication is handled by classes that implement an interface, just
 persistence backends. The interface to be implemented is de.fraunhofer.iosb.ilt.sta.util.AuthProvider.
 
 An example docker-compose file with basic auth set up can be found at: 
-[docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/scripts/docker-compose-separated-basicauth.yaml)
+[docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/v2.x/scripts/docker-compose-separated-basicauth.yaml)
 
 
 ## Roles
@@ -67,7 +67,7 @@ These are generic settings for authentication/authorisation.
 The BasicAuthProvider needs a database to store its usernames, passwords and user roles.
 This database can be the same as the database used by the persistence manager, but it can also be
 a different database. The database has the same structure as described in the
-https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#DataSourceRealm[DataSourceRealm documentation of Tomcat]
+[DataSourceRealm documentation of Tomcat](https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#DataSourceRealm)
 except with the table and column names in upper case, like the rest of the database.
 If you let this provider create its database tables (with auth.autoUpdateDatabase) it will
 create three default users:
