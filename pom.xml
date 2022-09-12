@@ -56,7 +56,7 @@
         <junit.version>4.13.2</junit.version>
         <keycloak.version>18.0.2</keycloak.version>
         <liquibase.version>4.12.0</liquibase.version>
-        <logback.version>1.2.11</logback.version>
+        <logback.version>1.4.0</logback.version>
 
         <maven-assembly-plugin.version>3.4.2</maven-assembly-plugin.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
@@ -68,7 +68,7 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-        <owasp.version>7.1.1</owasp.version>
+        <owasp.version>7.1.2</owasp.version>
 
         <org.json.version>20220320</org.json.version>
         <paho.version>1.2.5</paho.version>
