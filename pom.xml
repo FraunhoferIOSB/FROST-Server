@@ -57,7 +57,7 @@
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.0</junit.version>
         <keycloak.version>19.0.1</keycloak.version>
-        <liquibase.version>4.15.0</liquibase.version>
+        <liquibase.version>4.16.0</liquibase.version>
         <logback.version>1.4.0</logback.version>
 
         <maven-assembly-plugin.version>3.4.2</maven-assembly-plugin.version>
