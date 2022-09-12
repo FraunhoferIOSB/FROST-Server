@@ -47,7 +47,7 @@
         <guava.version>31.1-jre</guava.version>
         <httpclient.version>4.5.13</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
-        <jackson.version>2.13.3</jackson.version>
+        <jackson.version>2.13.4</jackson.version>
         <jackson-databind.version>2.13.3</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.12</javacc.version>
