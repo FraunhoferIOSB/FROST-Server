@@ -16,6 +16,8 @@ updates:
     ignore:
       - dependency-name: "org.jooq:jooq"
         versions: ["[3.17,)"]
+      - dependency-name: "org.liquibase:liquibase-core"
+        versions: ["[4.12,)"]
 
   # Maintain dependencies for Maven in the v1.15.x branch
   - package-ecosystem: "maven"
@@ -28,6 +30,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.jooq:jooq"
         versions: ["[3.17,)"]
+      - dependency-name: "org.liquibase:liquibase-core"
+        versions: ["[4.12,)"]
 
   # Maintain dependencies for Maven in the v1.14.x branch
   - package-ecosystem: "maven"
@@ -40,6 +44,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.jooq:jooq"
         versions: ["[3.17,)"]
+      - dependency-name: "org.liquibase:liquibase-core"
+        versions: ["[4.12,)"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
