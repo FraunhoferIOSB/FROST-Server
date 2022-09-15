@@ -56,7 +56,7 @@
         <jooq.version>3.17.4</jooq.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.0</junit.version>
-        <keycloak.version>19.0.1</keycloak.version>
+        <keycloak.version>19.0.2</keycloak.version>
         <liquibase.version>4.16.0</liquibase.version>
         <logback.version>1.4.1</logback.version>
 
