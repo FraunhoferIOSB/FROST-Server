@@ -20,7 +20,7 @@
         <mainClass>de.fraunhofer.iosb.ilt.frostserver.modelextractor.MainApp</mainClass>
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
 
-        <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.4.0</maven-shade-plugin.version>
         <openjfx.version>19</openjfx.version>
         <jooq.version>3.16.10</jooq.version>
     </properties>
