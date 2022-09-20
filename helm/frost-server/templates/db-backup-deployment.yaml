@@ -1,3 +1,4 @@
+{{- if .Values.frost.db.enableIntegratedDb -}}
 {{- if .Values.frost.backup.enabled -}}
 {{- $tier := "db" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
@@ -59,4 +60,5 @@ spec:
         - name: {{ $fullName }}
           persistentVolumeClaim:
             claimName: {{ default (list $fullName "backup" | join "-") .Values.frost.backup.persistence.existingClaim }}
+  {{- end -}}
   {{- end -}}

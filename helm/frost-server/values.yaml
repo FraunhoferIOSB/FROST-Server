@@ -74,6 +74,8 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
+    enableIntegratedDb: true
+    dbExternalConnectionString: "jdbc:postgresql://externaldbhost:5432/sensorthings"
     image:
       registry: docker.io
       repository: postgis/postgis
