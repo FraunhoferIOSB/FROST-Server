@@ -1,3 +1,4 @@
+{{- if .Values.frost.db.enableIntegratedDb -}}
 {{- if .Values.frost.db.persistence.enabled -}}
 {{- if .Values.frost.db.persistence.storageClassName -}}
 {{- if eq .Values.frost.db.persistence.storageClassName "frost-server-db-local" -}}
@@ -21,6 +22,7 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: {{ .Values.frost.db.persistence.local.nodeMountPath }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

@@ -1,3 +1,4 @@
+{{- if .Values.frost.db.enableIntegratedDb -}}
 {{- if and .Values.frost.backup.enabled (not .Values.frost.backup.persistence.existingClaim) -}}
 {{- $tier := "db" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
@@ -22,4 +23,5 @@ spec:
   {{- range .Values.frost.backup.persistence.accessModes }}
     - {{ . }}
   {{- end }}
+{{- end -}}
 {{- end -}}
