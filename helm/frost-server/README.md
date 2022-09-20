@@ -12,7 +12,7 @@ Declare the Helm repo or update it
 
 Install the FROST-Server chart
 
-    $ helm install fraunhoferiosb/frost-server  
+    $ helm install fraunhoferiosb/frost-server
 
 
 ## Introduction
@@ -40,7 +40,7 @@ Before to go, declare the Helm repo or update it
 
 Then, to install the chart with the [release name](https://docs.helm.sh/using_helm/#quickstart-guide) `my-release`
 
-    $ helm install --name my-release fraunhoferiosb/frost-server  
+    $ helm install --name my-release fraunhoferiosb/frost-server
 
 This command deploys FROST-Server on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
@@ -140,6 +140,8 @@ The following table lists the configurable parameters of the FROST-Server chart 
 |`frost.db.persistence.mountPath`            | The path the volume is mount into the database container.                                                                                                                                                                                             | `/var/lib/postgresql/data`                                                                |
 |`frost.db.persistence.local.nodeMountPath`  | The mount path to use if using the `local` StorageClassName as FROST-Server database StorageClass persistence. See [bellow](#persistence) for more information                                                                                        | `/mnt/frost-server-db`                                                                    |
 |`frost.db.persistence.hostPath`             | If `frost.db.persistence.enabled` is set to false. Than this variable can be used to mount this hostPath to the database container.                                                                                                                   | `nil`                                                                    |
+|`frost.db.enableIntegratedDb` | If set, the Helm chart will deploy a internal Postgis database server. When disabled, you can use the value below to specify a external connection string. | `true`|
+|`frost.db.dbExternalConnectionString`              | If the setting `frost.db.enableIntegratedDb` is set to true, you can specify the connection to connect to an external Postgres / PostGIS database| `jdbc:postgresql://externaldbhost:5432/sensorthings` |
 |`frost.db.database`                         | The FROST-Server database name to use                                                                                                                                                                                                                 | `sensorthings`                                                                            |
 |`frost.db.username`                         | The _base64_ username to use when connecting to the FROST-Server database                                                                                                                                                                             | `c2Vuc29ydGhpbmdz` (`sensorthings`)                                                       |
 |`frost.db.password`                         | The _base64_ password to use when connecting to the FROST-Server database                                                                                                                                                                             | `bm93eW91Y2FuY2hhbmdlaXQ=` (`nowyoucanchangeit`)                                          |
@@ -215,7 +217,7 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
     # example for staging
-    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server  
+    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server
 
 > **Tip**: You can use the default [values.yaml](./values.yaml)
 
@@ -271,7 +273,7 @@ Once Ingress is enabled on the FROST-Server HTTP component, then the FROST-Serve
 
  > **Warning**: `frost.http.serviceHost` needs to be a DNS name. Make sure to be able to resolve it by adding a rule either in your DNS server or in your local DNS resolver (e.g. `/etc/hosts` in Unix-based environments).
 
-Since the HTTP endpoint of FROST is reachable under the `/FROST-Server`-path, we leverage the Ingress rewriting capability. 
+Since the HTTP endpoint of FROST is reachable under the `/FROST-Server`-path, we leverage the Ingress rewriting capability.
 
 **Caution: Our configuration is specific for nginx ingress controller version 0.22.0 or above. It needs to be adjusted, if another ingress controller is used.**
 
