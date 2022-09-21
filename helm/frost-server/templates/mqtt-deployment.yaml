@@ -62,7 +62,7 @@ spec:
             - name: mqtt_mqttServerImplementationClass
               value: "de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer"
             - name: mqtt_Enabled
-              value: "{{ .Values.frost.mqtt.enabled }}"
+              value: "true"
             - name: mqtt_Port
               value: "{{ .Values.frost.mqtt.ports.mqtt.servicePort }}"
             - name: mqtt_Host
