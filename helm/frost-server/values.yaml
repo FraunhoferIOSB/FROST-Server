@@ -117,9 +117,6 @@ frost:
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
-    jndi:
-      datasource:
-
     securityContext:
       runAsUser:
       runAsGroup:

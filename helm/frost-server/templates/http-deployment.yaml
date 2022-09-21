@@ -104,7 +104,7 @@ spec:
 
             # Persistence related properties
             - name: persistence_db_jndi_datasource
-              value: "{{ .Values.frost.db.jndi.datasource }}"
+              value: ""
             - name: persistence_db_driver
               value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url

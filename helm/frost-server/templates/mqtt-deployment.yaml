@@ -34,9 +34,9 @@ spec:
           imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
           ports:
             - name: mqtt
-              containerPort: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
+              containerPort: 1883
             - name: websocket
-              containerPort: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+              containerPort: 9876
           env:
             # Internal properties
             - name: ApiVersion
@@ -66,11 +66,11 @@ spec:
             - name: mqtt_Port
               value: "{{ .Values.frost.mqtt.ports.mqtt.servicePort }}"
             - name: mqtt_Host
-              value: "{{ .Values.frost.mqtt.host }}"
+              value: "0.0.0.0"
             - name: mqtt_internalHost
               value: "{{ .Values.frost.mqtt.internalHost }}"
             - name: mqtt_WebsocketPort
-              value: "{{ .Values.frost.mqtt.ports.websocket.servicePort }}"
+              value: "9876"
             - name: mqtt_WaitForEnter
               value: "{{ .Values.frost.mqtt.waitForEnter }}"
             - name: mqtt_QoS
@@ -128,7 +128,7 @@ spec:
 
             # Persistence related properties
             - name: persistence_db_jndi_datasource
-              value: "{{ .Values.frost.db.jndi.datasource }}"
+              value: ""
             - name: persistence_db_driver
               value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
