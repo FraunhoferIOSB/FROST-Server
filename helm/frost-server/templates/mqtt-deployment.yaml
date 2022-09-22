@@ -64,7 +64,7 @@ spec:
             - name: mqtt_Enabled
               value: "true"
             - name: mqtt_Port
-              value: "{{ .Values.frost.mqtt.ports.mqtt.servicePort }}"
+              value: "1883"
             - name: mqtt_Host
               value: "0.0.0.0"
             - name: mqtt_internalHost
