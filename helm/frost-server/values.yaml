@@ -52,7 +52,23 @@ frost:
     maxTop: 1000
     maxDataSize: 25000000
     useAbsoluteNavigationLinks: true
-    enableCors: false
+
+    # FROST-Server Cross-Origin Resource Sharing settings to the FROST-Server HTTP
+    cors:
+      enable: false
+      allowed:
+        headers: Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization
+        methods: GET, HEAD, OPTIONS
+        origins: '*'
+      exposed:
+        headers: Location
+      preflight:
+        maxage: 1800
+      request:
+        decorate: true
+      support:
+        credentials: false
+
 
     # FROST-Server Database related settings to the FROST-Server HTTP
     db:
@@ -95,12 +111,12 @@ frost:
     requiredHostname:
 
     # Common FROST-Server Database properties, shared by any other FROST-Server modules
+    driver: "org.postgresql.Driver"
     implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
     idGenerationMode: "ServerGeneratedOnly"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
-
     securityContext:
       runAsUser:
       runAsGroup:
@@ -151,7 +167,22 @@ frost:
       websocket:
         nodePort:
         servicePort: 9876
+    host: 0.0.0.0
+    internalHost: localhost
+
+    secureWebsocketPort:
     stickySessionTimeout: 10800
+    exposedEndpoints:
+    javaKeystorePath:
+    keyManagerPassword:
+    keyStorePassword:
+    persistentStoreType: memory
+    session_queue_size: 1024
+    session_timeout_seconds: 3600
+    sslPort:
+    netty:
+      mqtt:
+        message_size: 8092
 
     # FROST-Server MQTT business settings
     qos: 2

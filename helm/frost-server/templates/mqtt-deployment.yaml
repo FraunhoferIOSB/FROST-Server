@@ -68,11 +68,11 @@ spec:
             - name: mqtt_Host
               value: "0.0.0.0"
             - name: mqtt_internalHost
-              value: "localhost"
+              value: "{{ .Values.frost.mqtt.internalHost }}"
             - name: mqtt_WebsocketPort
               value: "9876"
             - name: mqtt_WaitForEnter
-              value: "false"
+              value: "{{ .Values.frost.mqtt.waitForEnter }}"
             - name: mqtt_QoS
               value: "{{ .Values.frost.mqtt.qos }}"
             - name: mqtt_SubscribeMessageQueueSize
@@ -85,6 +85,26 @@ spec:
               value: "{{ .Values.frost.mqtt.createThreadPoolSize }}"
             - name: mqtt_maxInFlight
               value: "{{ .Values.frost.mqtt.maxInFlight }}"
+            - name: mqtt_exposedEndpoints
+              value: "{{ .Values.frost.mqtt.exposedEndpoints }}"
+            - name: mqtt_javaKeystorePath
+              value: "{{ .Values.frost.mqtt.javaKeystorePath }}"
+            - name: mqtt_keyManagerPassword
+              value: "{{ .Values.frost.mqtt.keyManagerPassword }}"
+            - name: mqtt_keyStorePassword
+              value: "{{ .Values.frost.mqtt.keyStorePassword }}"
+            - name: mqtt_persistentStoreType
+              value: "{{ .Values.frost.mqtt.persistentStoreType }}"
+            - name: mqtt_secureWebsocketPort
+              value: "{{ .Values.frost.mqtt.secureWebsocketPort }}"
+            - name: mqtt_session_queue_size
+              value: "{{ .Values.frost.mqtt.session_queue_size }}"
+            - name: mqtt_session_timeout_seconds
+              value: "{{ .Values.frost.mqtt.session_timeout_seconds }}"
+            - name: mqtt_sslPort
+              value: "{{ .Values.frost.mqtt.sslPort }}"
+            - name: mqtt_netty_mqtt_message_size
+              value: "{{ .Values.frost.mqtt.netty.mqtt.message_size }}"
 
             # Messages bus related properties
             - name: bus_mqttBroker
@@ -110,7 +130,7 @@ spec:
             - name: persistence_db_jndi_datasource
               value: ""
             - name: persistence_db_driver
-              value: "org.postgresql.Driver"
+              value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             - name: persistence_persistenceManagerImplementationClass

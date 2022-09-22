@@ -57,7 +57,25 @@ spec:
             - name: useAbsoluteNavigationLinks
               value: "{{ .Values.frost.http.useAbsoluteNavigationLinks }}"
             - name: http_cors_enable
-              value: "{{ .Values.frost.http.enableCors }}"
+              value: "{{ .Values.frost.http.cors.enable }}"
+
+            {{ if .Values.frost.http.cors.enable -}}
+            # Cross-Origin Resource Sharing related properties
+            - name: http_cors_allowed_headers
+              value: "{{ .Values.frost.http.cors.allowed.headers }}"
+            - name: http_cors_allowed_methods
+              value: "{{ .Values.frost.http.cors.allowed.methods }}"
+            - name: http_cors_allowed_origins
+              value: "{{ .Values.frost.http.cors.allowed.origins }}"
+            - name: http_cors_exposed_headers
+              value: "{{ .Values.frost.http.cors.exposed.headers }}"
+            - name: http_cors_preflight_maxage
+              value: "{{ .Values.frost.http.cors.preflight.maxage }}"
+            - name: http_cors_request_decorate
+              value: "{{ .Values.frost.http.cors.request.decorate }}"
+            - name: http_cors_support_credentials
+              value: "{{ .Values.frost.http.cors.support.credentials }}"
+            {{- end}}
 
             {{ if .Values.frost.mqtt.enabled -}}
             # Messages bus related properties
@@ -88,7 +106,7 @@ spec:
             - name: persistence_db_jndi_datasource
               value: ""
             - name: persistence_db_driver
-              value: "org.postgresql.Driver"
+              value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             - name: persistence_persistenceManagerImplementationClass
