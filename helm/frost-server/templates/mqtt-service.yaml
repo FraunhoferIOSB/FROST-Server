@@ -11,6 +11,10 @@ metadata:
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
+  {{- if .Values.frost.mqtt.annotations }}
+  annotations:
+    {{- toYaml .Values.frost.mqtt.annotations | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -18,6 +22,7 @@ spec:
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
+  {{- if eq .Values.frost.mqtt.serviceType "NodePort" }}
   type: NodePort
   ports:
     - name: mqtt
@@ -28,7 +33,28 @@ spec:
       port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
       nodePort: {{ .Values.frost.mqtt.ports.websocket.nodePort }}
       targetPort: websocket
-  # MQTT server stores the subscriptions and the client should connect to the same server after the connection is lost
+  {{ end }}
+  {{- if eq .Values.frost.mqtt.serviceType "LoadBalancer" }}
+  type: LoadBalancer
+  ports:
+    - name: mqtt
+      port: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
+      targetPort: mqtt
+    - name: websocket
+      port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+      targetPort: websocket
+  {{- end }}
+  {{- if eq .Values.frost.mqtt.serviceType "ClusterIp" }}
+  type: ClusterIp
+  ports:
+    - name: mqtt
+      port: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
+      targetPort: mqtt
+    - name: websocket
+      port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+      targetPort: websocket
+  {{- end }}
+    # MQTT server stores the subscriptions and the client should connect to the same server after the connection is lost
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
