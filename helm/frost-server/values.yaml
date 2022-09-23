@@ -29,8 +29,8 @@ frost:
       path: /(.*)
       annotations:
       tls:
-        enabled: false
-        secretName:
+        enabled: true
+        secretName: []
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
