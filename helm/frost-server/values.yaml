@@ -145,8 +145,7 @@ frost:
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
-    annotations:
-      bla.io/a: bla
+    annotations: {}
     replicas: 1
     serviceType: NodePort
     ports:
