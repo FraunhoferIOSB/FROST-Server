@@ -145,6 +145,7 @@ frost:
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
+    annotations: {}
     replicas: 1
     ports:
       mqtt:

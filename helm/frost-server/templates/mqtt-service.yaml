@@ -11,6 +11,10 @@ metadata:
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
+  {{- if .Values.frost.mqtt.annotations }}
+  annotations:
+    {{- toYaml .Values.frost.mqtt.annotations | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
