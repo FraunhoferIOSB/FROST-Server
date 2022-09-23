@@ -13,7 +13,7 @@ metadata:
     component: {{ $tier }}
   {{- if .Values.frost.mqtt.annotations }}
   annotations:
-    {{- toYaml .Values.frost.mqtt.annotations | nindent 4 }}
+    {{- toYaml .Values.frost.mqtt.annotations | nindent 4 -}}
   {{- end }}
 spec:
   selector:
