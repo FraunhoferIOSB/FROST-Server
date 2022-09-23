@@ -21,7 +21,9 @@ spec:
   tls:
     - hosts:
         - {{ .Values.frost.http.serviceHost }}
+    {{- if .Values.frost.http.ingress.tls.secretName }}
       secretName: {{ .Values.frost.http.ingress.tls.secretName }}
+    {{- end -}}
   {{- end }}
   rules:
   - host: {{ .Values.frost.http.serviceHost }}
