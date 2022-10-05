@@ -79,7 +79,7 @@
         <postgis.version>2.5.1</postgis.version>
         <postgres.version>42.5.0</postgres.version>
         <slf4j-api.version>2.0.3</slf4j-api.version>
-        <testcontainers.version>1.17.4</testcontainers.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
         <testcontainers-keycloak.version>2.3.0</testcontainers-keycloak.version>
         <time4j.version>5.9.1</time4j.version>
 
