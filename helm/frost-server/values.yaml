@@ -147,7 +147,7 @@ frost:
     enabled: true
     annotations: {}
     replicas: 1
-    serviceType: NodePort
+    serviceType: ClusterIp
     ports:
       mqtt:
         nodePort:

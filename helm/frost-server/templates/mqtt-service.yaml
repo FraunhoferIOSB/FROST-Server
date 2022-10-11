@@ -44,6 +44,17 @@ spec:
       port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
       targetPort: websocket
   {{- end }}
+  {{- if eq .Values.frost.mqtt.serviceType "ClusterIp" }}
+  type: ClusterIp
+  ports:
+    - name: mqtt
+      port: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
+      targetPort: mqtt
+    - name: websocket
+      port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+      targetPort: websocket
+  {{- end }}
+
 
   # MQTT server stores the subscriptions and the client should connect to the same server after the connection is lost
   sessionAffinity: ClientIP
