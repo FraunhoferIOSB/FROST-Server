@@ -22,12 +22,10 @@
         <dependency>
             <groupId>net.time4j</groupId>
             <artifactId>time4j-base</artifactId>
-            <version>${time4j.version}</version>
         </dependency>
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
-            <version>${jacksonGeojson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -37,12 +35,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
         </dependency>
     </dependencies>
 

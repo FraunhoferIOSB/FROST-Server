@@ -1,6 +1,6 @@
 # Changelog
 
-## Release version 2.1.0
+## Development version 2.1.0
 
 **New Features**
 * The new setting `plugins.coreModel.editableDsProperties` to control if generated
