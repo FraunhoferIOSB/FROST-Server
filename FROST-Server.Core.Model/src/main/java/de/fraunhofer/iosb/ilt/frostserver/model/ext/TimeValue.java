@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import java.util.Objects;
 import net.time4j.Moment;
 
@@ -26,7 +27,7 @@ import net.time4j.Moment;
  *
  * @author jab
  */
-public class TimeValue implements TimeObject {
+public class TimeValue implements TimeObject, ComplexValue {
 
     private final TimeInstant instant;
     private final TimeInterval interval;
@@ -101,6 +102,15 @@ public class TimeValue implements TimeObject {
         hash = 67 * hash + Objects.hashCode(this.instant);
         hash = 67 * hash + Objects.hashCode(this.interval);
         return hash;
+    }
+
+    @Override
+    public Object get(String name) {
+        if (isInterval()) {
+            return interval.get(name);
+        } else {
+            return instant;
+        }
     }
 
 }
