@@ -16,6 +16,7 @@
 * Changed build system to Java 17.
 * Added Maven wrapper to build without locally installed Maven.
 * (OData) Add support for metadata sub parameter in format parameter.
+* Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter
 
 
 ## Release version 2.0.0
