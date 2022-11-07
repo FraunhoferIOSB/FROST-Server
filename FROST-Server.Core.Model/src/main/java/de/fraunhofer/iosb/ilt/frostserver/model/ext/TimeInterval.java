@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
 import java.util.Objects;
@@ -28,7 +31,7 @@ import net.time4j.range.MomentInterval;
  *
  * @author jab
  */
-public class TimeInterval implements TimeObject {
+public class TimeInterval implements TimeObject, ComplexValue {
 
     private final MomentInterval interval;
 
@@ -88,6 +91,22 @@ public class TimeInterval implements TimeObject {
     @Override
     public String toString() {
         return asISO8601();
+    }
+
+    @Override
+    public Object get(String name) {
+        switch (name) {
+            case KEY_INTERVAL_START -> {
+                return interval.getStartAsMoment();
+            }
+
+            case KEY_INTERVAL_END -> {
+                return interval.getEndAsMoment();
+            }
+
+            default ->
+                throw new IllegalArgumentException("Unknown sub-property: " + name);
+        }
     }
 
 }
