@@ -49,17 +49,17 @@
         <guava.version>31.1-jre</guava.version>
         <httpclient.version>4.5.13</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
-        <jackson.version>2.13.4</jackson.version>
-        <jackson-databind.version>2.13.4.2</jackson-databind.version>
+        <jackson.version>2.14.0</jackson.version>
+        <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javaee-web-api.version>8.0.1</javaee-web-api.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <jetty.version>10.0.12</jetty.version>
-        <jooq.version>3.17.4</jooq.version>
+        <jooq.version>3.17.5</jooq.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.1</junit.version>
         <junit-platform-suite.version>1.9.1</junit-platform-suite.version>
-        <keycloak.version>20.0.0</keycloak.version>
+        <keycloak.version>20.0.1</keycloak.version>
         <liquibase.version>4.17.2</liquibase.version>
         <logback.version>1.4.4</logback.version>
 
