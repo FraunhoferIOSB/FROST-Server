@@ -1,8 +1,9 @@
 # Changelog
 
-## PreRelease version 2.0.4
+## Release version 2.0.4
 
 **Internal changes & Bugfixes**
+* Updated dependency versions.
 * Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter
 
 
