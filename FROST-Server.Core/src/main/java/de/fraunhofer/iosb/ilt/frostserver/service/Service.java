@@ -429,7 +429,6 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (IllegalArgumentException e) {
-            LOGGER.debug("User Error: {}", e.getMessage());
             rollbackAndClose(pm);
             return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
         } catch (IOException | RuntimeException e) {
@@ -484,8 +483,7 @@ public class Service implements AutoCloseable {
             entity.complete(mainSet);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
-            LOGGER.debug("Post failed: {}", ex.getMessage());
-            LOGGER.trace(EXCEPTION, ex);
+            LOGGER.debug("Post failed.", ex);
             return errorResponse(response, 400, ex.getMessage());
         }
 
@@ -557,7 +555,7 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Path not valid for patch.", exc);
+            LOGGER.debug("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException | JsonMappingException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
@@ -589,7 +587,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
             jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContentReader(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Path not valid.", exc);
+            LOGGER.debug("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
@@ -603,7 +601,6 @@ public class Service implements AutoCloseable {
                 maybeCommitAndClose();
                 return successResponse(response, 200, "JSON-Patch applied.");
             } else {
-                LOGGER.debug(FAILED_TO_UPDATE_ENTITY);
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
@@ -679,7 +676,7 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Path not valid.", exc);
+            LOGGER.debug("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException | IncompleteEntityException exc) {
             LOGGER.error(COULD_NOT_PARSE_JSON, exc);
@@ -693,7 +690,6 @@ public class Service implements AutoCloseable {
                 maybeCommitAndClose();
                 return successResponse(response, 200, "Updated.");
             } else {
-                LOGGER.debug(FAILED_TO_UPDATE_ENTITY);
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
@@ -772,7 +768,6 @@ public class Service implements AutoCloseable {
                 response.setCode(200);
                 return response;
             } else {
-                LOGGER.debug("Failed to delete entity.");
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, "Failed to delete entity.");
             }
