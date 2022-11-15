@@ -859,6 +859,9 @@ public class Service implements AutoCloseable {
     }
 
     public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
+        if (code < 500) {
+            LOGGER.warn("{} response: {}", code, message);
+        }
         if (response == null) {
             response = new ServiceResponseDefault();
         }
