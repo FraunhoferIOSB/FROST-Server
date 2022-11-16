@@ -401,7 +401,7 @@ public class Service implements AutoCloseable {
             pm.rollbackAndClose();
             return errorResponse(response, 500, "Unsupported operation: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            LOGGER.debug("Illegal operation.", e);
+            LOGGER.trace("Illegal operation.", e);
             pm.rollbackAndClose();
             return errorResponse(response, 400, "Illegal operation: " + e.getMessage());
         } catch (ClassCastException e) {
@@ -483,7 +483,7 @@ public class Service implements AutoCloseable {
             entity.complete(mainSet);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
-            LOGGER.debug("Post failed.", ex);
+            LOGGER.trace("Post failed.", ex);
             return errorResponse(response, 400, ex.getMessage());
         }
 
@@ -555,10 +555,10 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
-            LOGGER.debug("Path not valid for patch.", exc);
+            LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException | JsonMappingException exc) {
-            LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
+            LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
         } catch (IncompleteEntityException | NoSuchEntityException exc) {
             return errorResponse(response, 404, exc.getMessage());
@@ -570,7 +570,6 @@ public class Service implements AutoCloseable {
                 response.setCode(200);
                 return response;
             } else {
-                LOGGER.debug("Failed to patch entity.");
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, "Failed to patch entity.");
             }
@@ -587,10 +586,10 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
             jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContentReader(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
-            LOGGER.debug("Path not valid.", exc);
+            LOGGER.trace("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException exc) {
-            LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
+            LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
         } catch (NoSuchEntityException exc) {
             return errorResponse(response, 404, exc.getMessage());
@@ -655,8 +654,7 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException e) {
-            LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
-            LOGGER.debug(EXCEPTION, e);
+            LOGGER.trace("Failed to handle request", e);
             rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
@@ -676,10 +674,10 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
-            LOGGER.debug("Path not valid.", exc);
+            LOGGER.trace("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException | IncompleteEntityException exc) {
-            LOGGER.error(COULD_NOT_PARSE_JSON, exc);
+            LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
         } catch (NoSuchEntityException exc) {
             return errorResponse(response, 404, exc.getMessage());
@@ -753,7 +751,7 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 403, e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.trace("", e);
             rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
@@ -800,7 +798,7 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, 401, e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.trace("", e);
             rollbackAndClose(pm);
             return errorResponse(response, 400, e.getMessage());
         } finally {
@@ -855,7 +853,7 @@ public class Service implements AutoCloseable {
 
     public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
         if (code < 500) {
-            LOGGER.warn("{} response: {}", code, message);
+            LOGGER.debug("{} response: {}", code, message);
         }
         if (response == null) {
             response = new ServiceResponseDefault();
