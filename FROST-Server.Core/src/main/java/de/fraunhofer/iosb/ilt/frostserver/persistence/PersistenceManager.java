@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -121,6 +122,8 @@ public interface PersistenceManager extends AutoCloseable {
      * @return The settings that were used to initialise this PM.
      */
     public CoreSettings getCoreSettings();
+
+    public void setRole(Principal user);
 
     public void commit();
 

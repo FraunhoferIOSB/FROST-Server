@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -148,6 +149,9 @@ public class Service implements AutoCloseable {
      * @return the service response passed, or a new one.
      */
     public ServiceResponse execute(ServiceRequest request, ServiceResponse response) {
+        if (!transactionActive) {
+            getPm().setRole(request.getUserPrincipal());
+        }
         if (response == null) {
             response = new ServiceResponseDefault();
         }
@@ -189,7 +193,8 @@ public class Service implements AutoCloseable {
      *
      * @return this
      */
-    public Service startTransaction() {
+    public Service startTransaction(Principal user) {
+        getPm().setRole(user);
         transactionActive = true;
         return this;
     }
