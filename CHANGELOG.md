@@ -2,6 +2,8 @@
 
 ## Development version 2.1.0
 
+FROST-Server version 2.1 and higher requires Java 17. This is because some libraries that are used now require Java 17.
+
 **New Features**
 * The new setting `plugins.coreModel.editableDsProperties` to control if generated
   (Multi)Datastream properties can be directly edited.
@@ -16,7 +18,8 @@
 * Changed build system to Java 17.
 * Added Maven wrapper to build without locally installed Maven.
 * (OData) Add support for metadata sub parameter in format parameter.
-* Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter
+* Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter.
+* Fixed NPE in auth module on DatabaseStatus path.
 
 
 ## Release version 2.0.0
