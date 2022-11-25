@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_PLAIN_TEST_PASSWORD;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
@@ -31,6 +32,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SQLDialect;
@@ -56,6 +58,7 @@ public class DatabaseHandler {
     private final CoreSettings coreSettings;
     private final Settings authSettings;
     private boolean maybeUpdateDatabase;
+    private boolean plainTextPassword;
 
     public static void init(CoreSettings coreSettings) {
         if (instance == null) {
@@ -81,9 +84,17 @@ public class DatabaseHandler {
         this.coreSettings = coreSettings;
         authSettings = coreSettings.getAuthSettings();
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
+        plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEST_PASSWORD, BasicAuthProvider.class);
     }
 
-    public boolean isValidUser(String userName, String password) {
+    private Condition passwordCondition(String passwordOrHash) {
+      return TableUsers.USERS.userPass.eq(plainTextPassword
+              ? DSL.val(passwordOrHash)
+              : DSL.function(
+                  "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
+    }
+
+    public boolean isValidUser(String userName, String passwordOrHash) {
         maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
@@ -92,7 +103,7 @@ public class DatabaseHandler {
                     .from(TableUsers.USERS)
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(TableUsers.USERS.userPass.eq(password))
+                                    .and(passwordCondition(passwordOrHash))
                     ).fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
@@ -106,12 +117,12 @@ public class DatabaseHandler {
      * has the given role.
      *
      * @param userName The username of the user to check the role for.
-     * @param userPass The password of the user to check the role for.
+     * @param userPass The password or its hash of the user to check the role for.
      * @param roleName The role to check.
      * @return true if the user exists AND has the given password AND has the
      * given role.
      */
-    public boolean userHasRole(String userName, String userPass, String roleName) {
+    public boolean userHasRole(String userName, String userPassOrHash, String roleName) {
         maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
@@ -122,7 +133,7 @@ public class DatabaseHandler {
                     .on(TableUsers.USERS.userName.eq(TableUsersRoles.USER_ROLES.userName))
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(TableUsers.USERS.userPass.eq(userPass))
+                                    .and(passwordCondition(userPassOrHash))
                                     .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
                     ).fetchOne();
             return one != null;

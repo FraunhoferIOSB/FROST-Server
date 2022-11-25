@@ -38,6 +38,9 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueBoolean(false)
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
 
+    @DefaultValueBoolean(true)
+    public static final String TAG_PLAIN_TEST_PASSWORD = "plainTextPassword";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 
