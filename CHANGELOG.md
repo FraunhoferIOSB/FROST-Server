@@ -1,5 +1,12 @@
 # Changelog
 
+## Development version 2.0.5
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
+* Fixed NPE in auth module on DatabaseStatus path.
+
+
 ## Release version 2.0.4
 
 **Internal changes & Bugfixes**

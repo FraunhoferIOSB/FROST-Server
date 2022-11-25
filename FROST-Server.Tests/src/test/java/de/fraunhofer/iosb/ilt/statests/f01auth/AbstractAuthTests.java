@@ -183,11 +183,20 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test04AnonUpdateDb() throws IOException {
         LOGGER.info("  test04AnonUpdateDb");
+        getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
+    private void getDatabaseStatusIndirect(SensorThingsService service, int... expectedResponse) throws IOException {
+        getDatabaseStatus(service, service.getEndpoint() + "../DatabaseStatus", expectedResponse);
+    }
+
     private void getDatabaseStatus(SensorThingsService service, int... expectedResponse) throws IOException {
-        HttpGet getUpdateDb = new HttpGet(service.getEndpoint() + "../DatabaseStatus");
+        getDatabaseStatus(service, serverSettings.getServiceRootUrl() + "/DatabaseStatus", expectedResponse);
+    }
+
+    private void getDatabaseStatus(SensorThingsService service, String url, int... expectedResponse) throws IOException {
+        HttpGet getUpdateDb = new HttpGet(url);
         CloseableHttpResponse response = service.execute(getUpdateDb);
         int code = response.getStatusLine().getStatusCode();
         for (int expected : expectedResponse) {
