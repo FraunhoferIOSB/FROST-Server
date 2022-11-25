@@ -21,7 +21,6 @@ frost:
         actuator:
         task:
         taskingCapability:
-
     coreModel:
       enable: true
       editableDsProperties: false
@@ -39,6 +38,12 @@ frost:
       enable: false
       idType:
         multiDatastream:
+    modelLoader:
+      enable: false
+      modelPath:
+      modelFiles:
+      liquibasePath:
+      liquibaseFiles:
     dataArray:
       enable: true
     csv:

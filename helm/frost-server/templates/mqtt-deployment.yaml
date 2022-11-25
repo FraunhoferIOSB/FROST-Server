@@ -236,6 +236,20 @@ spec:
             {{- end }}
             {{- end }}
 
+            # Model Loader Plugin settings
+            {{- if .Values.frost.plugins.modelLoader.enable }}
+            - name: plugins_modelLoader_enable
+              value: "{{ .Values.frost.plugins.modelLoader.enable }}"
+            - name: plugins_modelLoader_modelPath
+              value: "{{ .Values.frost.plugins.modelLoader.modelPath }}"
+            - name: plugins_modelLoader_modelFiles
+              value: "{{ .Values.frost.plugins.modelLoader.modelFiles }}"
+            - name: plugins_modelLoader_liquibasePath
+              value: "{{ .Values.frost.plugins.modelLoader.liquibasePath }}"
+            - name: plugins_modelLoader_liquibaseFiles
+              value: "{{ .Values.frost.plugins.modelLoader.liquibaseFiles }}"
+            {{- end }}
+
             # Other Plugins settings
             - name: plugins_dataArray_enable
               value: "{{ .Values.frost.plugins.dataArray.enable }}"
