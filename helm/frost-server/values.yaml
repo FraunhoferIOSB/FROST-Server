@@ -5,7 +5,82 @@ frost:
   ######################################
   # FROST-Server general configuration #
   ######################################
-  enableActuation: false
+  alwaysOrderbyId: true
+  logSensitiveData: false
+  queueLoggingInterval: 0
+
+  #####################################
+  # FROST-Server plugin configuration #
+  #####################################
+  plugins:
+    providedPlugins:
+    plugins:
+    actuation:
+      enable: false
+      idType:
+        actuator:
+        task:
+        taskingCapability:
+
+    coreModel:
+      enable: true
+      editableDsProperties: false
+      idType:
+        default: LONG
+        datastream:
+        feature:
+        historicalLocation:
+        location:
+        observedProperty:
+        observation:
+        sensor:
+        thing:
+    multiDatastream:
+      enable: false
+      idType:
+        multiDatastream:
+    dataArray:
+      enable: true
+    csv:
+      enable: true
+    geojson:
+      enable: true
+    batchProcessing:
+      enable: true
+    odata:
+      enable: false
+    openApi:
+      enable: false
+
+  auth:
+    provider:
+    allowAnonymousRead: false
+    role:
+      read:
+      create:
+      update:
+      delete:
+      admin:
+    realmName: FROST-Server
+    db:
+      autoUpdate: "{{ .Values.frost.http.db.autoUpdate }}"
+      maximumConnection: "{{ .Values.frost.http.db.maximumConnection }}"
+      maximumIdleConnection: "{{ .Values.frost.http.db.maximumIdleConnection }}"
+      minimumIdleConnection: "{{ .Values.frost.http.db.minimumIdleConnection }}"
+    keycloakConfig:
+    keycloakConfigFile:
+    keycloakConfigUrl:
+    keycloakConfigSecret:
+
+  logging:
+    default:
+    parser:
+    queries:
+    requests:
+    settings:
+    moquette:
+    liquibase:
+    jooq:
 
   ##########################################
   # FROST-Server HTTP module configuration #
@@ -73,7 +148,6 @@ frost:
     # FROST-Server Database related settings to the FROST-Server HTTP
     db:
       autoUpdate: true
-      alwaysOrderbyId: false
       maximumConnection: 10
       maximumIdleConnection: 10
       minimumIdleConnection: 10
@@ -81,9 +155,9 @@ frost:
     # FROST-Server Messages Bus related settings to the FROST-Server HTTP
     bus:
       sendWorkerPoolSize: 10
-      sendQueueSize: 100
+      sendQueueSize: 2000
       recvWorkerPoolSize: 10
-      recvQueueSize: 100
+      recvQueueSize: 2000
       maxInFlight: 50
 
   ##########################################
@@ -133,7 +207,7 @@ frost:
 
     # FROST-Server Database related settings to the FROST-Server MQTT
     db:
-      alwaysOrderbyId: false
+      autoUpdate: false
       maximumConnection: 10
       maximumIdleConnection: 10
       minimumIdleConnection: 10
@@ -141,9 +215,9 @@ frost:
     # FROST-Server Messages Bus related settings to the FROST-Server MQTT
     bus:
       sendWorkerPoolSize: 10
-      sendQueueSize: 100
+      sendQueueSize: 2000
       recvWorkerPoolSize: 10
-      recvQueueSize: 100
+      recvQueueSize: 2000
       maxInFlight: 50
 
   ##############################################
@@ -172,7 +246,7 @@ frost:
 
     # Common FROST-Server Database properties, shared by any other FROST-Server modules
     driver: "org.postgresql.Driver"
-    implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
+    implementationClass: "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager"
     idGenerationMode: "ServerGeneratedOnly"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
