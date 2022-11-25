@@ -86,6 +86,66 @@ frost:
       recvQueueSize: 100
       maxInFlight: 50
 
+  ##########################################
+  # FROST-Server MQTT module configuration #
+  ##########################################
+  mqtt:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-mqtt
+      tag: latest
+      pullPolicy: IfNotPresent
+    # FROST-Server MQTT deployment settings
+    enabled: true
+    replicas: 1
+    ports:
+      mqtt:
+        nodePort:
+        servicePort: 1883
+      websocket:
+        nodePort:
+        servicePort: 9876
+    host: 0.0.0.0
+    internalHost: localhost
+
+    secureWebsocketPort:
+    stickySessionTimeout: 10800
+    exposedEndpoints:
+    javaKeystorePath:
+    keyManagerPassword:
+    keyStorePassword:
+    persistentStoreType: memory
+    session_queue_size: 1024
+    session_timeout_seconds: 3600
+    sslPort:
+    netty:
+      mqtt:
+        message_size: 8092
+
+    # FROST-Server MQTT business settings
+    qos: 2
+    subscribeMessageQueueSize: 100
+    subscribeThreadPoolSize: 10
+    createMessageQueueSize: 100
+    createThreadPoolSize: 10
+    maxInFlight: 50
+    waitForEnter: false
+
+    # FROST-Server Database related settings to the FROST-Server MQTT
+    db:
+      alwaysOrderbyId: false
+      maximumConnection: 10
+      maximumIdleConnection: 10
+      minimumIdleConnection: 10
+
+    # FROST-Server Messages Bus related settings to the FROST-Server MQTT
+    bus:
+      sendWorkerPoolSize: 10
+      sendQueueSize: 100
+      recvWorkerPoolSize: 10
+      recvQueueSize: 100
+      maxInFlight: 50
+
   ##############################################
   # FROST-Server Database module configuration #
   ##############################################
@@ -147,66 +207,6 @@ frost:
       runAsUser:
       runAsGroup:
       fsGroup:
-
-  ##########################################
-  # FROST-Server MQTT module configuration #
-  ##########################################
-  mqtt:
-    image:
-      registry: docker.io
-      repository: fraunhoferiosb/frost-server-mqtt
-      tag: latest
-      pullPolicy: IfNotPresent
-    # FROST-Server MQTT deployment settings
-    enabled: true
-    replicas: 1
-    ports:
-      mqtt:
-        nodePort:
-        servicePort: 1883
-      websocket:
-        nodePort:
-        servicePort: 9876
-    host: 0.0.0.0
-    internalHost: localhost
-
-    secureWebsocketPort:
-    stickySessionTimeout: 10800
-    exposedEndpoints:
-    javaKeystorePath:
-    keyManagerPassword:
-    keyStorePassword:
-    persistentStoreType: memory
-    session_queue_size: 1024
-    session_timeout_seconds: 3600
-    sslPort:
-    netty:
-      mqtt:
-        message_size: 8092
-
-    # FROST-Server MQTT business settings
-    qos: 2
-    subscribeMessageQueueSize: 100
-    subscribeThreadPoolSize: 10
-    createMessageQueueSize: 100
-    createThreadPoolSize: 10
-    maxInFlight: 50
-    waitForEnter: false
-
-    # FROST-Server Database related settings to the FROST-Server MQTT
-    db:
-      alwaysOrderbyId: false
-      maximumConnection: 10
-      maximumIdleConnection: 10
-      minimumIdleConnection: 10
-
-    # FROST-Server Messages Bus related settings to the FROST-Server MQTT
-    bus:
-      sendWorkerPoolSize: 10
-      sendQueueSize: 100
-      recvWorkerPoolSize: 10
-      recvQueueSize: 100
-      maxInFlight: 50
 
   ##################################################
   # FROST-Server Messages Bus module configuration #
