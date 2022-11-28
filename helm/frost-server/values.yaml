@@ -225,6 +225,16 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
+    ingress:
+      enabled: false
+      path: /mqtt
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-read-timeout: 3600
+        nginx.ingress.kubernetes.io/proxy-send-timeout: 3600
+      tls:
+        enabled: false
+        secretName:
+
   ##############################################
   # FROST-Server Database module configuration #
   ##############################################
@@ -253,6 +263,7 @@ frost:
     driver: "org.postgresql.Driver"
     implementationClass: "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager"
     idGenerationMode: "ServerGeneratedOnly"
+    countMode: "FULL"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=

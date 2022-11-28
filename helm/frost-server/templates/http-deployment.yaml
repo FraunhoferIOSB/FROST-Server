@@ -113,6 +113,8 @@ spec:
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             - name: persistence_persistenceManagerImplementationClass
               value: "{{ .Values.frost.db.implementationClass }}"
+            - name: persistence_countMode
+              value: "{{ .Values.frost.db.countMode }}"
             - name: persistence_idGenerationMode
               value: "{{ .Values.frost.db.idGenerationMode }}"
             - name: persistence_autoUpdateDatabase

@@ -201,7 +201,7 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
   same duration.
 * **persistence.countMode:**  
   The way to count entities. Allowed values:
-  * `FULL`: (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
+  * **`FULL`:** (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
   * **`LIMIT_SAMPLE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
     estimate using [`TABLESAMPLE (1)`](https://www.postgresql.org/docs/current/sql-select.html). For large result sets
     this is much faster than a full count, but is still guaranteed to give accurate results for low counts.
