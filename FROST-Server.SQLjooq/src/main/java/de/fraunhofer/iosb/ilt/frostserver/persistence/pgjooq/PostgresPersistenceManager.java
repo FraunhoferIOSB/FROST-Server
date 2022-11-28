@@ -387,8 +387,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public void setRole(Principal user) {
         if (settings.getPersistenceSettings().isTransactionRole()) {
-            getDslContext().setLocal(
-                DSL.name("ROLE"), DSL.val(user == null ? "anonymous" : user.getName()));
+            getDslContext()
+                .setLocal(DSL.name("ROLE"), DSL.val(user == null ? "anonymous" : user.getName()))
+                .execute();
         }
     }
 
