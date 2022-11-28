@@ -17,6 +17,9 @@ persistence backends. The interface to be implemented is de.fraunhofer.iosb.ilt.
 An example docker-compose file with basic auth set up can be found at: 
 [docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/v2.x/scripts/docker-compose-separated-basicauth.yaml)
 
+More fine-grained authorisation rules can be configured using:
+* plugins with `EntityType` validators,
+* PostgreSQL Row-level security (see `persistence.transactionRole` setting).
 
 ## Roles
 
