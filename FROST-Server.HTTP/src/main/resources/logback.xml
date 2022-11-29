@@ -3,6 +3,7 @@
     <variable name="FROST_LL" value="${FROST_LL:-INFO}" />
     <variable name="FROST_LL_parser" value="${FROST_LL_parser:-INFO}" />
     <variable name="FROST_LL_requests" value="${FROST_LL_requests:-INFO}" />
+    <variable name="FROST_LL_service" value="${FROST_LL_service:-INFO}" />
     <variable name="FROST_LL_settings" value="${FROST_LL_settings:-INFO}" />
     <variable name="FROST_LL_queries" value="${FROST_LL_queries:-INFO}" />
     <variable name="FROST_LL_io_moquette" value="${FROST_LL_io_moquette:-WARN}" />
@@ -36,6 +37,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.http.common.HttpRequestDecoder" level="${FROST_LL_requests}"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="${FROST_LL_parser}"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder" level="${FROST_LL_queries}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.service" level="${FROST_LL_service}"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings" level="${FROST_LL_settings}"/>
     <logger name="io.moquette" level="${FROST_LL_io_moquette}"/>
     <logger name="liquibase" level="${FROST_LL_liquibase}"/>

@@ -28,6 +28,9 @@ environment variables that influence basic logging options.
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder` package. Default: INFO
 * **FROST_LL_requests:**  
   The log level for the request decoder. When set to DEBUG each request with its headers will be logged. Default: INFO
+* **FROST_LL_service:**  
+  The log level for the `de.fraunhofer.iosb.ilt.frostserver.service` package.
+  When set to DEBUG, 4xx error details and 5xx stack traces will be logged. Default: INFO
 * **FROST_LL_settings:**  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.settings` package. Default: INFO
 * **FROST_LL_io_moquette:**  
