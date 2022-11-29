@@ -86,6 +86,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         if (target == null) {
             target = new LinkedHashMap<>();
         }
+        target.put(TAG_PLAIN_TEXT_PASSWORD, Boolean.toString(dbHandler.isPlainTextPassword()));
         return target;
     }
 

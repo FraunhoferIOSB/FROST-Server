@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
+import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
@@ -136,6 +137,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     BasicAuthTests.Implementation11.class,
     BasicAuthAnonReadTests.Implementation10.class,
     BasicAuthAnonReadTests.Implementation11.class,
+    BasicAuthCryptPwTests.Implementation10.class,
+    BasicAuthCryptPwTests.Implementation11.class,
     KeyCloakTests.Implementation10.class,
     KeyCloakTests.Implementation11.class,
     KeyCloakAnonReadTests.Implementation10.class,
@@ -150,16 +153,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class TestSuite {
 
-    static class SuiteFinaliser {
-
-        @Test
-        void finalTest() {
-            LOGGER.info("Stopping Servers...");
-            assertDoesNotThrow(() -> {
-                getInstance().stopAllServers();
-            });
-        }
-    }
     /**
      * The logger for this class.
      */
@@ -196,6 +189,17 @@ public class TestSuite {
     @Container
     private final KeycloakContainer keycloak = new KeycloakContainer()
             .withRealmImportFile("keycloak/FROST-Test.json");
+
+    static class SuiteFinaliser {
+
+        @Test
+        void finalTest() {
+            LOGGER.info("Stopping Servers...");
+            assertDoesNotThrow(() -> {
+                getInstance().stopAllServers();
+            });
+        }
+    }
 
     public static TestSuite getInstance() {
         // Create a new instance if none exists. This only happens when running

@@ -54,29 +54,29 @@ public class DatabaseHandler {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
 
-    private static final Map<CoreSettings, DatabaseHandler> instances = new HashMap<>();
+    private static final Map<CoreSettings, DatabaseHandler> INSTANCES = new HashMap<>();
 
     private final CoreSettings coreSettings;
     private final Settings authSettings;
+    private final boolean plainTextPassword;
     private final String connectionUrl;
     private boolean maybeUpdateDatabase;
-    private boolean plainTextPassword;
 
     public static void init(CoreSettings coreSettings) {
-        if (instances.get(coreSettings) == null) {
+        if (INSTANCES.get(coreSettings) == null) {
             createInstance(coreSettings);
         }
     }
 
     private static synchronized DatabaseHandler createInstance(CoreSettings coreSettings) {
-        return instances.computeIfAbsent(coreSettings, (s) -> {
+        return INSTANCES.computeIfAbsent(coreSettings, (s) -> {
             LOGGER.info("Initialising DatabaseHandler.");
             return new DatabaseHandler(coreSettings);
         });
     }
 
     public static DatabaseHandler getInstance(CoreSettings coreSettings) {
-        DatabaseHandler instance = instances.get(coreSettings);
+        DatabaseHandler instance = INSTANCES.get(coreSettings);
         if (instance == null) {
             LOGGER.error("DatabaseHandler not initialised.");
         }
@@ -91,11 +91,15 @@ public class DatabaseHandler {
         connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
     }
 
+    public boolean isPlainTextPassword() {
+        return plainTextPassword;
+    }
+
     private Condition passwordCondition(String passwordOrHash) {
-      return TableUsers.USERS.userPass.eq(plainTextPassword
-              ? DSL.val(passwordOrHash)
-              : DSL.function(
-                  "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
+        return TableUsers.USERS.userPass.eq(plainTextPassword
+                ? DSL.val(passwordOrHash)
+                : DSL.function(
+                        "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
     }
 
     public boolean isValidUser(String userName, String passwordOrHash) {
@@ -121,7 +125,8 @@ public class DatabaseHandler {
      * has the given role.
      *
      * @param userName The username of the user to check the role for.
-     * @param userPass The password or its hash of the user to check the role for.
+     * @param userPassOrHash The password or its hash of the user to check the
+     * role for.
      * @param roleName The role to check.
      * @return true if the user exists AND has the given password AND has the
      * given role.
