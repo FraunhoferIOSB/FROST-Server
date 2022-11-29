@@ -85,6 +85,11 @@ The BasicAuthProvider has the following specific settings:
 
 * **auth.realmName:**  
   The name of the realm that the browser displays when asking for username and password.
+* **auth.plainTextPassword:**
+  If true (the default), passwords are stored in plain text.
+  Otherwise password can use any result of the `https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7[PostgreSQL crypt function]`,
+  for example with Blowfish variant 2a (recommended):
+  `INSERT INTO "USERS" VALUES ('my_user', crypt('my_password', gen_salt('bf', 12)))`.
 * **auth.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
 * **auth.db.driver:**  
