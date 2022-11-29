@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -57,8 +59,11 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValue("admin")
     public static final String TAG_ROLE_ADMIN = "roleAdmin";
 
+    private CoreSettings coreSettings;
+
     @Override
     public void init(CoreSettings coreSettings) {
+        this.coreSettings = coreSettings;
         DatabaseHandler.init(coreSettings);
     }
 
@@ -69,21 +74,30 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @Override
     public boolean isValidUser(String clientId, String userName, String password) {
-        return DatabaseHandler.getInstance().isValidUser(userName, password);
+        return DatabaseHandler.getInstance(coreSettings).isValidUser(userName, password);
     }
 
     @Override
     public boolean userHasRole(String clientId, String userName, String roleName) {
-        return DatabaseHandler.getInstance().userHasRole(userName, roleName);
+        return DatabaseHandler.getInstance(coreSettings).userHasRole(userName, roleName);
+    }
+
+    public Map<String, Object> createLiqibaseParams(DatabaseHandler dbHandler, Map<String, Object> target) {
+        if (target == null) {
+            target = new LinkedHashMap<>();
+        }
+        return target;
     }
 
     @Override
     public String checkForUpgrades() {
-        return DatabaseHandler.getInstance().checkForUpgrades();
+        final DatabaseHandler dbHandler = DatabaseHandler.getInstance(coreSettings);
+        return dbHandler.checkForUpgrades(createLiqibaseParams(dbHandler, null));
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        return DatabaseHandler.getInstance().doUpgrades(out);
+        final DatabaseHandler dbHandler = DatabaseHandler.getInstance(coreSettings);
+        return dbHandler.doUpgrades(out, createLiqibaseParams(dbHandler, null));
     }
 }
