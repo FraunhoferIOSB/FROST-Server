@@ -67,6 +67,7 @@ frost:
       delete:
       admin:
     realmName: FROST-Server
+    plainTextPassword: true
     db:
       autoUpdate: "{{ .Values.frost.http.db.autoUpdate }}"
       maximumConnection: "{{ .Values.frost.http.db.maximumConnection }}"
@@ -82,6 +83,7 @@ frost:
     parser:
     queries:
     requests:
+    service:
     settings:
     moquette:
     liquibase:

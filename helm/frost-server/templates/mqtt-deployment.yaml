@@ -296,6 +296,8 @@ spec:
               value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
             - name: auth_realmName
               value: "{{ .Values.frost.auth.realmName }}"
+            - name: auth_plainTextPassword
+              value: "{{ .Values.frost.auth.plainTextPassword }}"
             - name: auth_db_jndi_datasource
               value: ""
             - name: auth_db_driver
@@ -344,6 +346,44 @@ spec:
             - name: auth_provider
               value: "{{ .Values.frost.auth.provider }}"
             {{- end }}
+            {{- end }}
+
+            # Logging variables
+            {{- if .Values.frost.logging.default }}
+            - name: FROST_LL
+              value: "{{ .Values.frost.logging.default }}"
+            {{- end }}
+            {{- if .Values.frost.logging.parser }}
+            - name: FROST_LL_parser
+              value: "{{ .Values.frost.logging.parser }}"
+            {{- end }}
+            {{- if .Values.frost.logging.queries }}
+            - name: FROST_LL_queries
+              value: "{{ .Values.frost.logging.queries }}"
+            {{- end }}
+            {{- if .Values.frost.logging.requests }}
+            - name: FROST_LL_requests
+              value: "{{ .Values.frost.logging.requests }}"
+            {{- end }}
+            {{- if .Values.frost.logging.service }}
+            - name: FROST_LL_service
+              value: "{{ .Values.frost.logging.service }}"
+            {{- end }}
+            {{- if .Values.frost.logging.settings }}
+            - name: FROST_LL_settings
+              value: "{{ .Values.frost.logging.settings }}"
+            {{- end }}
+            {{- if .Values.frost.logging.moquette }}
+            - name: FROST_LL_io_moquette
+              value: "{{ .Values.frost.logging.moquette }}"
+            {{- end }}
+            {{- if .Values.frost.logging.liquibase }}
+            - name: FROST_LL_liquibase
+              value: "{{ .Values.frost.logging.liquibase }}"
+            {{- end }}
+            {{- if .Values.frost.logging.jooq }}
+            - name: FROST_LL_org_jooq
+              value: "{{ .Values.frost.logging.jooq }}"
             {{- end }}
 
 {{- end -}}
