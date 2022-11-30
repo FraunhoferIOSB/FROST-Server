@@ -61,6 +61,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -381,6 +382,15 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
         long rowCount = sqlDelete.execute();
         LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);
+    }
+
+    @Override
+    public void setRole(Principal user) {
+        if (settings.getPersistenceSettings().isTransactionRole()) {
+            getDslContext()
+                .setLocal(DSL.name("ROLE"), DSL.val(user == null ? "anonymous" : user.getName()))
+                .execute();
+        }
     }
 
     @Override

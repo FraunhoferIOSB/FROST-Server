@@ -170,6 +170,12 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
     Both, server and client generated ids, are allowed.
   * **`ClientGeneratedOnly`:**  
     Client has to provide @iot.id to create entities.
+* **persistence.transactionRole:**
+  If true, [SET LOCAL ROLE](https://www.postgresql.org/docs/current/sql-set-role.html)
+  is used for each query and set as HTTP user name or `anonymous` for anonymous HTTP users,
+  to be used typically with [Row-Level Security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html).
+  The PostgreSQL role is not related to the AuthProvider roles security (auth.role.* settings) which is also applied.
+  Default: `false`.
 * **persistence.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly.
 * **persistence.db.driver:**  
