@@ -265,6 +265,7 @@ frost:
     driver: "org.postgresql.Driver"
     implementationClass: "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager"
     idGenerationMode: "ServerGeneratedOnly"
+    transactionRole: false
     countMode: "FULL"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
