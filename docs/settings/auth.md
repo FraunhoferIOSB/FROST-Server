@@ -90,7 +90,7 @@ The BasicAuthProvider has the following specific settings:
   The name of the realm that the browser displays when asking for username and password.
 * **auth.plainTextPassword:**
   If true (the default), passwords are stored in plain text.
-  Otherwise password can use any result of the `https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7[PostgreSQL crypt function]`,
+  Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
   for example with Blowfish variant 2a (recommended):
   `INSERT INTO "USERS" VALUES ('my_user', crypt('my_password', gen_salt('bf', 12)))`.
 * **auth.db.jndi.datasource:**  

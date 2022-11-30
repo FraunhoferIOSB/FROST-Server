@@ -7,6 +7,9 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 **New Features**
 * The new setting `plugins.coreModel.editableDsProperties` to control if generated
   (Multi)Datastream properties can be directly edited.
+* Allow BasicAuthProvider to use hashed passwords. (pbaumard)
+* Add FROST_LL_service env variable for log level. (pbaumard)
+* Added option to set PostgreSQL role to enable Row-Level Security for HTTP. (pbaumard)
 
 **Internal changes & Bugfixes**
 * Fixed DateTimeConstants sometimes being generated with decimal comma.
@@ -20,6 +23,7 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 * (OData) Add support for metadata sub parameter in format parameter.
 * Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter.
 * Fixed NPE in auth module on DatabaseStatus path.
+* Improved consistency of 4xx logging. (pbaumard)
 
 
 ## Release version 2.0.0

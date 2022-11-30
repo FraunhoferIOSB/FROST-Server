@@ -69,7 +69,7 @@ public class PersistenceSettings implements ConfigDefaults {
     public static final String TAG_TRANSACTION_ROLE = "transactionRole";
 
     /**
-     * Fully-qualified class name of the PersistenceManager implementation class
+     * Fully-qualified class name of the PersistenceManager implementation class.
      */
     private String persistenceManagerImplementationClass;
     private String idGenerationMode;
@@ -97,7 +97,7 @@ public class PersistenceSettings implements ConfigDefaults {
      */
     private boolean transactionRole;
     /**
-     * Extension point for implementation specific settings
+     * Extension point for implementation specific settings.
      */
     private Settings customSettings;
 
