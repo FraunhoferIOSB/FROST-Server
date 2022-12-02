@@ -153,8 +153,7 @@ These are settings for the MQTT package.
 
 ## Persistence Settings
 
-These settings deal with the database connection, for both the HTTP and MQTT packages. There are currently two versions of the PostgreSQL
-database persistence manager, one using QueryDSL, and one using JOOQ.
+These settings deal with the database connection, for both the HTTP and MQTT packages.
 
 * **persistence.persistenceManagerImplementationClass:**  
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
