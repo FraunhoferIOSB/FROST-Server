@@ -3,6 +3,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public abstract class Batch<C extends Content> implements Content {
 
     protected final boolean isChangeSet;
     protected final Version batchVersion;
+    protected Principal userPrincipal;
 
     protected Batch(Version batchVersion, CoreSettings settings, boolean isChangeSet) {
         this.batchVersion = batchVersion;
@@ -57,6 +59,14 @@ public abstract class Batch<C extends Content> implements Content {
     public Batch<C> addPart(Part<C> part) {
         parts.add(part);
         return this;
+    }
+
+    public Principal getUserPrincipal() {
+        return userPrincipal;
+    }
+
+    public void setUserPrincipal(Principal userPrincipal) {
+        this.userPrincipal = userPrincipal;
     }
 
 }
