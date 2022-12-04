@@ -3,6 +3,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,8 @@ public abstract class Request implements Content {
     protected HttpMethod method;
     protected String version;
     protected String path;
+    /** Batch request user. */
+    protected Principal userPrincipal;
 
     protected final Map<String, String> headersOuter = new HashMap<>();
     protected final Map<String, String> headersInner = new HashMap<>();
@@ -132,6 +135,14 @@ public abstract class Request implements Content {
     @Override
     public Map<String, String> getHeaders() {
         return headersOuter;
+    }
+
+    public Principal getUserPrincipal() {
+        return userPrincipal;
+    }
+
+    public void setUserPrincipal(Principal userPrincipal) {
+        this.userPrincipal = userPrincipal;
     }
 
     public String getVersion() {

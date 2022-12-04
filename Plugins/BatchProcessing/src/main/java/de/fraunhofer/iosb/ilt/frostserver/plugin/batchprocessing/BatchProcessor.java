@@ -75,6 +75,7 @@ public class BatchProcessor<C extends Content> {
                 .withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData())
+                .withUserPrincipal(httpRequest.getUserPrincipal())
                 .build();
         PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
@@ -136,7 +137,7 @@ public class BatchProcessor<C extends Content> {
             if (content instanceof Request) {
                 Request request = (Request) content;
                 request.updateUsingContentIds(contentIds);
-
+                request.setUserPrincipal(changeset.getUserPrincipal());
                 Request httpResponse = processHttpRequest(service, request, true);
                 if (httpResponse.isExecuteFailed()) {
                     service.rollbackTransaction();
@@ -168,12 +169,14 @@ public class BatchProcessor<C extends Content> {
             Content content = part.getContent();
             if (content instanceof Batch) {
                 Batch<C> changset = (Batch<C>) content;
+                changset.setUserPrincipal(batchRequest.getUserPrincipal());
                 Content changesetResponse = processChangeset(batchRequest, service, changset);
                 Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");
                 newPart.setContent(changesetResponse);
                 batchResponse.addPart(newPart);
             } else if (content instanceof Request) {
                 Request request = (Request) content;
+                request.setUserPrincipal(batchRequest.getUserPrincipal());
                 Request httpResponse = processHttpRequest(service, request, false);
                 Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");
                 newPart.setContent(httpResponse);
