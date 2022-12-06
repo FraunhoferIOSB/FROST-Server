@@ -465,14 +465,30 @@ public class EntityHelper {
      * @return The first entity found, or null after all retries.
      */
     public JSONObject getAnyEntity(EntityType entityType, String queryOptions, int retries) {
+        return getAnyEntity(entityType, queryOptions, retries, null);
+    }
+
+    /**
+     * Tries to fetch the given entity type, with the given query options,
+     * retrying a maximum of retries times, waiting MqttHelper.WAIT_AFTER_INSERT
+     * milliseconds between retries.
+     *
+     * @param entityType The entity type to fetch the first entity of.
+     * @param queryOptions The query options to use while fetching.
+     * @param retries The maximum number of retries.
+     * @param authorization When not null, the authorization header value
+     * @return The first entity found, or null after all retries.
+     */
+    public JSONObject getAnyEntity(EntityType entityType, String queryOptions, int retries, String authorization) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null) + "?$top=1";
         if (queryOptions != null && !queryOptions.isEmpty()) {
             urlString += "&" + queryOptions;
         }
+        String json = null;
         try {
             int retry = 0;
             while (retry < retries) {
-                String json = HTTPMethods.doGet(urlString).response;
+                json = HTTPMethods.doGet(urlString, authorization).response;
                 JSONArray items = new JSONObject(json).getJSONArray("value");
                 if (!items.isEmpty()) {
                     return items.getJSONObject(0);
@@ -485,7 +501,7 @@ public class EntityHelper {
             LOGGER.error("Failed to read an entity from url after {} tries: {}", retries, urlString);
             return null;
         } catch (JSONException e) {
-            LOGGER.error("Failed while reading from url {}", urlString);
+            LOGGER.error("Failed while reading from url {}: {}", urlString, json);
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!: " + e.getMessage());
             return null;

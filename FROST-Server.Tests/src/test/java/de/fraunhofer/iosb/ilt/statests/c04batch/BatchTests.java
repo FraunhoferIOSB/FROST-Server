@@ -7,6 +7,8 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
@@ -17,9 +19,11 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,9 +62,20 @@ public abstract class BatchTests extends AbstractTestClass {
     private static final List<ObservedProperty> OBSERVED_PROPS = new ArrayList<>();
     private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
     private final ObjectMapper mapper;
+    private static final Properties SERVER_PROPERTIES = new Properties();
+    static {
+        SERVER_PROPERTIES.put("auth_provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
+        SERVER_PROPERTIES.put("auth_allowAnonymousRead", "false");
+        SERVER_PROPERTIES.put("auth_autoUpdateDatabase", "true");
+        final String dbName = "basicauth";
+        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
+        SERVER_PROPERTIES.put("auth_db_driver", "org.postgresql.Driver");
+        SERVER_PROPERTIES.put("auth_db_username", TestSuite.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth_db_password", TestSuite.VAL_PG_PASS);
+    }
 
     public BatchTests(ServerVersion version) {
-        super(version);
+        super(version, SERVER_PROPERTIES);
         mapper = new ObjectMapper();
     }
 
@@ -86,12 +101,13 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(version, serverSettings,  BasicAuthTests.setAuth(service, "admin", "admin"));
         THINGS.clear();
         OBSERVED_PROPS.clear();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
+        BasicAuthTests.setAuth(service, "write", "write");
         for (int i = 0; i < 6; i++) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("int", i + 8);
@@ -109,6 +125,52 @@ public abstract class BatchTests extends AbstractTestClass {
         ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getId().getValue()));
     }
 
+    private String makeBatchBody() {
+        return "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+            + "Content-Type: application/http\r\n"
+            + "\r\n"
+            + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl()
+            + ")?$select=name HTTP/1.1\r\n"
+            + "Host: localhost\r\n"
+            + "\r\n"
+            + "\r\n"
+            + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+            + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+            + "\r\n"
+            + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+            + "Content-Type: application/http\r\n"
+            + "Content-ID: 1\r\n"
+            + "\r\n"
+            + "POST /" + version.urlPart + "/Things HTTP/1.1\r\n"
+            + "Host: localhost\r\n"
+            + "Content-Type: application/json\r\n"
+            + "Content-Length: 36\r\n"
+            + "\r\n"
+            + "{\"name\":\"New\",\"description\":\"Thing\"}\r\n"
+            + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+            + "Content-Type: application/http\r\n"
+            + "Content-ID: 2\r\n"
+            + "\r\n"
+            + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl()
+            + ") HTTP/1.1\r\n"
+            + "Host: localhost\r\n"
+            + "Content-Type: application/json\r\n"
+            + "Content-Length: 18\r\n"
+            + "\r\n"
+            + "{\"name\":\"Patched\"}\r\n"
+            + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
+            + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+            + "Content-Type: application/http\r\n"
+            + "\r\n"
+            + "GET /" + version.urlPart + "/Things("
+            + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely())
+            + ") HTTP/1.1\r\n"
+            + "Host: localhost\r\n"
+            + "\r\n"
+            + "\r\n"
+            + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--";
+    }
+
     /**
      * Test batch request body example from "OGC SensorThings API Part 1,
      * Sensing Version 1.1, 11.2.1. Batch request body example" except changes
@@ -118,45 +180,8 @@ public abstract class BatchTests extends AbstractTestClass {
     void test01BatchRequest() {
         LOGGER.info("  test01BatchRequest");
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
-                "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: 1\r\n"
-                + "\r\n"
-                + "POST /" + version.urlPart + "/Things HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: 36\r\n"
-                + "\r\n"
-                + "{\"name\":\"New\",\"description\":\"Thing\"}\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: 2\r\n"
-                + "\r\n"
-                + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: 18\r\n"
-                + "\r\n"
-                + "{\"name\":\"Patched\"}\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                makeBatchBody(),
+                "write");
         String thingId = getLastestEntityIdForPath(EntityType.THING);
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
@@ -254,7 +279,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + post2 + "\r\n"
                 + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--",
+                "write");
 
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
@@ -293,7 +319,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "GET Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
-                + "--batch_test--");
+                + "--batch_test--",
+                "write");
         String batchBoundary = response.split("\n", 2)[0];
         assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
@@ -333,7 +360,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "/Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
-                + "--batch_test--");
+                + "--batch_test--",
+                "write");
         String batchBoundary = response.split("\n", 2)[0];
         assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
@@ -377,7 +405,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "GET Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
-                + "--batch_test--");
+                + "--batch_test--",
+                "write");
         String batchBoundary = response.split("\n", 2)[0];
         assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
@@ -421,7 +450,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"id\": \"3\","
                 + "\"method\": \"get\","
                 + "\"url\": \"Things(null)\""
-                + "}]}");
+                + "}]}",
+                "write");
         String thingId = getLastestEntityIdForPath(EntityType.THING);
 
         try {
@@ -478,7 +508,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
                 + "\"body\":"
                 + post2
-                + "}]}");
+                + "}]}",
+                "write");
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
 
@@ -497,13 +528,28 @@ public abstract class BatchTests extends AbstractTestClass {
 
     }
 
-    private String postBatch(String boundary, String body) {
+    @Test
+    void test08BatchRequestFailedAuthorization() {
+        LOGGER.info("  test08BatchRequestFailedAuthorization");
+        String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
+                makeBatchBody(),
+                "read",
+                401);
+        assertEquals("", response);
+    }
+
+    private String postBatch(String boundary, String body, String user) {
+        return postBatch(boundary, body, user, 200);
+    }
+
+    private String postBatch(String boundary, String body, String user, int responseCode) {
         String urlString = serverSettings.getServiceUrl(version) + "/$batch";
         try {
-            HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
-                    boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary);
-            assertEquals(200, httpResponse.code, "Batch response should be 200");
-            return httpResponse.response;
+          HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
+              boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary,
+              basicAuth(user));
+          assertEquals(responseCode, httpResponse.code, "Batch response should be " + responseCode);
+          return httpResponse.response;
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
@@ -511,9 +557,17 @@ public abstract class BatchTests extends AbstractTestClass {
         }
     }
 
+    /**
+     * @param user
+     * @return Authorization header with password identical to user
+     */
+    private String basicAuth(String user) {
+        return "Basic " + Base64.getEncoder().encodeToString((user + ':' + user).getBytes());
+    }
+
     private String getLastestEntityIdForPath(EntityType entityType) {
         EntityHelper entityHelper = new EntityHelper(version, serverSettings);
-        Object id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
+        Object id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1, basicAuth("read")).get("@iot.id");
         if (id instanceof Number) {
             return id.toString();
         } else {
