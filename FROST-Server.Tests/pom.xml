@@ -124,26 +124,27 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>        
+        <dependency>
             <groupId>com.github.dasniko</groupId>
             <artifactId>testcontainers-keycloak</artifactId>
-            <version>${testcontainers-keycloak.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Overriding guava for jackson-coreutils and gson-patch -->
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>${jetty.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -159,31 +160,26 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>${slf4j-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>${org.json.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
             <artifactId>FROST-Client</artifactId>
-            <version>${FROST-Client.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

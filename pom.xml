@@ -39,30 +39,33 @@
         <commons-csv.version>1.9.0</commons-csv.version>
         <commons-io.version>2.11.0</commons-io.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <commons-text.version>1.9</commons-text.version>
+        <commons-text.version>1.10.0</commons-text.version>
         <configurable.version>0.33</configurable.version>
         <congocc.version>2022-05-31</congocc.version>
         <congocc.sha512>2fd26af4c42bf49573bbffd68426d45ddc11f5478545a295781436b24e27d37c3e2274b6b477abe4f0cb99d8328ab4e58f1b4daf8cb70490bb553aab98df18bf</congocc.sha512>
-        <FROST-Client.version>0.43</FROST-Client.version>
+        <FROST-Client.version>0.44</FROST-Client.version>
         <git-commit-id-plugin.version>5.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
         <guava.version>31.1-jre</guava.version>
-        <httpclient.version>4.5.13</httpclient.version>
+        <httpclient.version>4.5.14</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
-        <jackson.version>2.13.4</jackson.version>
+        <jackson.version>2.14.1</jackson.version>
+        <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
+        <javaee-web-api.version>8.0.1</javaee-web-api.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <jetty.version>10.0.12</jetty.version>
-        <jooq.version>3.17.4</jooq.version>
+        <jooq.version>3.17.5</jooq.version>
         <json-patch.version>1.13</json-patch.version>
-        <junit.version>5.9.0</junit.version>
-        <keycloak.version>19.0.2</keycloak.version>
-        <liquibase.version>4.16.1</liquibase.version>
-        <logback.version>1.4.1</logback.version>
+        <junit.version>5.9.1</junit.version>
+        <junit-platform-suite.version>1.9.1</junit-platform-suite.version>
+        <keycloak.version>20.0.1</keycloak.version>
+        <liquibase.version>4.17.2</liquibase.version>
+        <logback.version>1.4.5</logback.version>
 
         <maven-assembly-plugin.version>3.4.2</maven-assembly-plugin.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
+        <maven-dependency-plugin.version>3.4.0</maven-dependency-plugin.version>
         <maven-gpg-plugin>3.0.1</maven-gpg-plugin>
         <maven-jacoco-plugin.version>0.8.8</maven-jacoco-plugin.version>
         <maven-jar-plugin>3.3.0</maven-jar-plugin>
@@ -72,15 +75,15 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-        <owasp.version>7.2.0</owasp.version>
+        <owasp.version>7.4.0</owasp.version>
 
-        <org.json.version>20220320</org.json.version>
+        <org.json.version>20220924</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2.5.1</postgis.version>
-        <postgres.version>42.5.0</postgres.version>
-        <slf4j-api.version>2.0.1</slf4j-api.version>
-        <testcontainers.version>1.17.3</testcontainers.version>
-        <testcontainers-keycloak.version>2.3.0</testcontainers-keycloak.version>
+        <postgres.version>42.5.1</postgres.version>
+        <slf4j-api.version>2.0.5</slf4j-api.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
+        <testcontainers-keycloak.version>2.4.0</testcontainers-keycloak.version>
         <time4j.version>5.9.1</time4j.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
@@ -144,11 +147,188 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>de.fraunhofer.iosb.ilt</groupId>
+                <artifactId>Configurable</artifactId>
+                <version>${configurable.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.fraunhofer.iosb.ilt</groupId>
+                <artifactId>FROST-Client</artifactId>
+                <version>${FROST-Client.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${junit.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-suite</artifactId>
+                <version>${junit-platform-suite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.grundid.opendatalab</groupId>
+                <artifactId>geojson-jackson</artifactId>
+                <version>${jacksonGeojson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>${json-patch.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.paho</groupId>
+                <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+                <version>${paho.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgres.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-web-api</artifactId>
+                <version>${javaee-web-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-servlet-filter-adapter</artifactId>
+                <version>${keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${javax-servlet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.postgis</groupId>
+                <artifactId>postgis-jdbc</artifactId>
+                <version>${postgis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${commons-csv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-dbcp2</artifactId>
+                <version>${dbcp2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.time4j</groupId>
+                <artifactId>time4j-sqlxml</artifactId>
+                <version>${time4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>${jooq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${liquibase.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geolatte</groupId>
+                <artifactId>geolatte-common</artifactId>
+                <version>${geolatte-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.dasniko</groupId>
+                <artifactId>testcontainers-keycloak</artifactId>
+                <version>${testcontainers-keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Overriding guava for jackson-coreutils and gson-patch -->
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.time4j</groupId>
+                <artifactId>time4j-base</artifactId>
+                <version>${time4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

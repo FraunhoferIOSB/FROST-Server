@@ -65,9 +65,11 @@ public class PersistenceSettings implements ConfigDefaults {
     public static final String TAG_COUNT_MODE = "countMode";
     @DefaultValueInt(10_000)
     public static final String TAG_ESTIMATE_COUNT_THRESHOLD = "countEstimateThreshold";
+    @DefaultValueBoolean(false)
+    public static final String TAG_TRANSACTION_ROLE = "transactionRole";
 
     /**
-     * Fully-qualified class name of the PersistenceManager implementation class
+     * Fully-qualified class name of the PersistenceManager implementation class.
      */
     private String persistenceManagerImplementationClass;
     private String idGenerationMode;
@@ -91,7 +93,11 @@ public class PersistenceSettings implements ConfigDefaults {
      */
     private boolean timeoutQueries;
     /**
-     * Extension point for implementation specific settings
+     * Flag indicating role should be set in transaction from HTTP user, typically for Row-Level Security.
+     */
+    private boolean transactionRole;
+    /**
+     * Extension point for implementation specific settings.
      */
     private Settings customSettings;
 
@@ -112,6 +118,7 @@ public class PersistenceSettings implements ConfigDefaults {
         timeoutQueries = queryTimeout > 0;
         countMode = CountMode.fromValue(settings.get(TAG_COUNT_MODE, getClass()));
         estimateCountThreshold = settings.getInt(TAG_ESTIMATE_COUNT_THRESHOLD, getClass());
+        transactionRole = settings.getBoolean(TAG_TRANSACTION_ROLE, getClass());
         customSettings = settings;
     }
 
@@ -129,6 +136,10 @@ public class PersistenceSettings implements ConfigDefaults {
 
     public String getIdGenerationMode() {
         return idGenerationMode;
+    }
+
+    public boolean isTransactionRole() {
+        return transactionRole;
     }
 
     /**

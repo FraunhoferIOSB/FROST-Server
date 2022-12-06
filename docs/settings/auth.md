@@ -17,6 +17,9 @@ persistence backends. The interface to be implemented is de.fraunhofer.iosb.ilt.
 An example docker-compose file with basic auth set up can be found at: 
 [docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/v2.x/scripts/docker-compose-separated-basicauth.yaml)
 
+More fine-grained authorisation rules can be configured using:
+* plugins with `EntityType` validators,
+* PostgreSQL Row-level security (see `persistence.transactionRole` setting).
 
 ## Roles
 
@@ -85,6 +88,11 @@ The BasicAuthProvider has the following specific settings:
 
 * **auth.realmName:**  
   The name of the realm that the browser displays when asking for username and password.
+* **auth.plainTextPassword:**
+  If true (the default), passwords are stored in plain text.
+  Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
+  for example with Blowfish variant 2a (recommended):
+  `INSERT INTO "USERS" VALUES ('my_user', crypt('my_password', gen_salt('bf', 12)))`.
 * **auth.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
 * **auth.db.driver:**  

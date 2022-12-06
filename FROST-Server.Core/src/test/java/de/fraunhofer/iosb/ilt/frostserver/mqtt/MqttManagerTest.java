@@ -42,6 +42,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -350,6 +351,10 @@ class MqttManagerTest {
         @Override
         public CoreSettings getCoreSettings() {
             return coreSettings;
+        }
+
+        @Override
+        public void setRole(Principal user) {
         }
 
         @Override

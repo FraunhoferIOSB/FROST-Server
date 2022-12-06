@@ -153,8 +153,7 @@ These are settings for the MQTT package.
 
 ## Persistence Settings
 
-These settings deal with the database connection, for both the HTTP and MQTT packages. There are currently two versions of the PostgreSQL
-database persistence manager, one using QueryDSL, and one using JOOQ.
+These settings deal with the database connection, for both the HTTP and MQTT packages.
 
 * **persistence.persistenceManagerImplementationClass:**  
   The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
@@ -170,6 +169,13 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
     Both, server and client generated ids, are allowed.
   * **`ClientGeneratedOnly`:**  
     Client has to provide @iot.id to create entities.
+* **persistence.transactionRole:**
+  If true, [SET LOCAL ROLE](https://www.postgresql.org/docs/current/sql-set-role.html)
+  is used for each query and set as HTTP user name or `anonymous` for anonymous HTTP users,
+  to be used typically with [Row-Level Security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html).
+  The PostgreSQL role is not related to the AuthProvider roles security (auth.role.* settings) which is also applied.
+  This currently has no effect on MQTT since MQTT subscriptions do not query the database directly.
+  Default: `false`.
 * **persistence.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly.
 * **persistence.db.driver:**  
@@ -194,7 +200,7 @@ database persistence manager, one using QueryDSL, and one using JOOQ.
   same duration.
 * **persistence.countMode:**  
   The way to count entities. Allowed values:
-  * `FULL`: (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
+  * **`FULL`:** (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
   * **`LIMIT_SAMPLE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
     estimate using [`TABLESAMPLE (1)`](https://www.postgresql.org/docs/current/sql-select.html). For large result sets
     this is much faster than a full count, but is still guaranteed to give accurate results for low counts.

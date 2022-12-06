@@ -126,7 +126,7 @@ public class BatchProcessor<C extends Content> {
             content.setStatus(400, "Bad Request");
             return content;
         }
-        service.startTransaction();
+        service.startTransaction(batchRequest.getUserPrincipal());
         Batch response = batchFactory.createBatch(batchRequest.getVersion(), service.getSettings(), true);
         List<Part> parts = changeset.getParts();
         List<ContentIdPair> contentIds = new ArrayList<>(parts.size());

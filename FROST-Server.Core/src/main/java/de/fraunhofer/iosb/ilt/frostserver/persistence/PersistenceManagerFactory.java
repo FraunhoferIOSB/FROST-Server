@@ -37,11 +37,11 @@ public class PersistenceManagerFactory {
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
-    private static final Map<CoreSettings, PersistenceManagerFactory> instances = new HashMap<>();
+    private static final Map<CoreSettings, PersistenceManagerFactory> INSTANCES = new HashMap<>();
     private boolean maybeUpdateDatabase = true;
 
     public static synchronized PersistenceManagerFactory init(CoreSettings coreSettings) {
-        PersistenceManagerFactory instance = instances.computeIfAbsent(coreSettings, t -> {
+        PersistenceManagerFactory instance = INSTANCES.computeIfAbsent(coreSettings, t -> {
             PersistenceManagerFactory newInstance = new PersistenceManagerFactory(coreSettings);
             PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
             newInstance.maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
@@ -52,7 +52,7 @@ public class PersistenceManagerFactory {
     }
 
     public static PersistenceManagerFactory getInstance(CoreSettings coreSettings) {
-        PersistenceManagerFactory instance = instances.get(coreSettings);
+        PersistenceManagerFactory instance = INSTANCES.get(coreSettings);
         if (instance == null) {
             instance = init(coreSettings);
         }

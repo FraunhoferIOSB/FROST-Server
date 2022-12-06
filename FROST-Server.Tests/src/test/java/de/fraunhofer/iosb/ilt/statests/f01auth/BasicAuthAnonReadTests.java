@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.http.auth.AuthScope;
@@ -61,13 +62,15 @@ public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
     private static final Properties SERVER_PROPERTIES = new Properties();
 
     static {
-        SERVER_PROPERTIES.put("auth_provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
-        SERVER_PROPERTIES.put("auth_allowAnonymousRead", "true");
-        SERVER_PROPERTIES.put("auth_autoUpdateDatabase", "true");
-        SERVER_PROPERTIES.put("auth_db_driver", "org.postgresql.Driver");
-        SERVER_PROPERTIES.put("auth_db_url", TestSuite.getInstance().getPgConnectUrl());
-        SERVER_PROPERTIES.put("auth_db_username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth_db_password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
+        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "true");
+        SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
+        final String dbName = "basicauth";
+        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
+        SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
+        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
     }
 
     public BasicAuthAnonReadTests(ServerVersion version) {

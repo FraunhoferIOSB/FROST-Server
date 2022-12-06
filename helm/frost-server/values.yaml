@@ -112,7 +112,7 @@ frost:
       annotations:
       tls:
         enabled: false
-        secretName: []
+        secretName:
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
@@ -178,6 +178,8 @@ frost:
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
+    annotations: {}
+    serviceType: ClusterIp
     replicas: 1
     ports:
       mqtt:
@@ -241,7 +243,7 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
-    enableIntegratedDb: true
+    enableIntegratedDb: false
     dbExternalConnectionString: "jdbc:postgresql://externaldbhost:5432/sensorthings"
     image:
       registry: docker.io
@@ -302,54 +304,6 @@ frost:
       runAsUser:
       runAsGroup:
       fsGroup:
-
-
-  ##########################################
-  # FROST-Server MQTT module configuration #
-  ##########################################
-  mqtt:
-    image:
-      registry: docker.io
-      repository: fraunhoferiosb/frost-server-mqtt
-      tag: latest
-      pullPolicy: IfNotPresent
-    # FROST-Server MQTT deployment settings
-    enabled: true
-    annotations: {}
-    replicas: 1
-    serviceType: ClusterIp
-    ports:
-      mqtt:
-        nodePort:
-        servicePort: 1883
-      websocket:
-        nodePort:
-        servicePort: 9876
-    stickySessionTimeout: 10800
-
-    # FROST-Server MQTT business settings
-    qos: 2
-    subscribeMessageQueueSize: 100
-    subscribeThreadPoolSize: 10
-    createMessageQueueSize: 100
-    createThreadPoolSize: 10
-    maxInFlight: 50
-    waitForEnter: false
-
-    # FROST-Server Database related settings to the FROST-Server MQTT
-    db:
-      alwaysOrderbyId: false
-      maximumConnection: 10
-      maximumIdleConnection: 10
-      minimumIdleConnection: 10
-
-    # FROST-Server Messages Bus related settings to the FROST-Server MQTT
-    bus:
-      sendWorkerPoolSize: 10
-      sendQueueSize: 100
-      recvWorkerPoolSize: 10
-      recvQueueSize: 100
-      maxInFlight: 50
 
   ##################################################
   # FROST-Server Messages Bus module configuration #

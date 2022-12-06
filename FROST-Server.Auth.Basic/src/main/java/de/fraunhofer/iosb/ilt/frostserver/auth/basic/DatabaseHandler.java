@@ -19,8 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_PLAIN_TEXT_PASSWORD;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -31,6 +33,9 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SQLDialect;
@@ -49,28 +54,29 @@ public class DatabaseHandler {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
 
-    private static final String CONNECTION_NAME = "FROST-Auth";
-
-    private static DatabaseHandler instance;
+    private static final Map<CoreSettings, DatabaseHandler> INSTANCES = new HashMap<>();
 
     private final CoreSettings coreSettings;
     private final Settings authSettings;
+    private final boolean plainTextPassword;
+    private final String connectionUrl;
     private boolean maybeUpdateDatabase;
 
     public static void init(CoreSettings coreSettings) {
-        if (instance == null) {
+        if (INSTANCES.get(coreSettings) == null) {
             createInstance(coreSettings);
         }
     }
 
-    private static synchronized void createInstance(CoreSettings coreSettings) {
-        if (instance == null) {
+    private static synchronized DatabaseHandler createInstance(CoreSettings coreSettings) {
+        return INSTANCES.computeIfAbsent(coreSettings, (s) -> {
             LOGGER.info("Initialising DatabaseHandler.");
-            instance = new DatabaseHandler(coreSettings);
-        }
+            return new DatabaseHandler(coreSettings);
+        });
     }
 
-    public static DatabaseHandler getInstance() {
+    public static DatabaseHandler getInstance(CoreSettings coreSettings) {
+        DatabaseHandler instance = INSTANCES.get(coreSettings);
         if (instance == null) {
             LOGGER.error("DatabaseHandler not initialised.");
         }
@@ -81,18 +87,31 @@ public class DatabaseHandler {
         this.coreSettings = coreSettings;
         authSettings = coreSettings.getAuthSettings();
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
+        plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEXT_PASSWORD, BasicAuthProvider.class);
+        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
     }
 
-    public boolean isValidUser(String userName, String password) {
+    public boolean isPlainTextPassword() {
+        return plainTextPassword;
+    }
+
+    private Condition passwordCondition(String passwordOrHash) {
+        return TableUsers.USERS.userPass.eq(plainTextPassword
+                ? DSL.val(passwordOrHash)
+                : DSL.function(
+                        "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
+    }
+
+    public boolean isValidUser(String userName, String passwordOrHash) {
         maybeUpdateDatabase();
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
                     .from(TableUsers.USERS)
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(TableUsers.USERS.userPass.eq(password))
+                                    .and(passwordCondition(passwordOrHash))
                     ).fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
@@ -106,14 +125,15 @@ public class DatabaseHandler {
      * has the given role.
      *
      * @param userName The username of the user to check the role for.
-     * @param userPass The password of the user to check the role for.
+     * @param userPassOrHash The password or its hash of the user to check the
+     * role for.
      * @param roleName The role to check.
      * @return true if the user exists AND has the given password AND has the
      * given role.
      */
-    public boolean userHasRole(String userName, String userPass, String roleName) {
+    public boolean userHasRole(String userName, String userPassOrHash, String roleName) {
         maybeUpdateDatabase();
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
@@ -122,7 +142,7 @@ public class DatabaseHandler {
                     .on(TableUsers.USERS.userName.eq(TableUsersRoles.USER_ROLES.userName))
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(TableUsers.USERS.userPass.eq(userPass))
+                                    .and(passwordCondition(userPassOrHash))
                                     .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
                     ).fetchOne();
             return one != null;
@@ -145,7 +165,7 @@ public class DatabaseHandler {
             return false;
         }
         maybeUpdateDatabase();
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
@@ -170,9 +190,13 @@ public class DatabaseHandler {
     }
 
     public String checkForUpgrades() {
+        return checkForUpgrades(Collections.emptyMap());
+    }
+
+    public String checkForUpgrades(Map<String, Object> params) {
         Settings customSettings = coreSettings.getAuthSettings();
-        try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
-            return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap());
+        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+            return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             return "Failed to initialise database:\n"
@@ -182,9 +206,13 @@ public class DatabaseHandler {
     }
 
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        return doUpgrades(out, Collections.emptyMap());
+    }
+
+    public boolean doUpgrades(Writer out, Map<String, Object> params) throws UpgradeFailedException, IOException {
         Settings customSettings = coreSettings.getAuthSettings();
-        try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
-            return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap(), out);
+        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+            return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params, out);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");

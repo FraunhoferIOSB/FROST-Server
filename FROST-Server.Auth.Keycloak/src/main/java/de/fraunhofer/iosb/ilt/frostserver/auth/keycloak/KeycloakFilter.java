@@ -236,13 +236,16 @@ public class KeycloakFilter implements Filter {
         final String contextPath = httpRequest.getContextPath();
         final String servletPath = httpRequest.getServletPath();
         final String preVersionPath = contextPath + servletPath;
-        final String pathInfo;
+        String pathInfo;
         if (requestURI.startsWith(preVersionPath)) {
             pathInfo = StringHelper.urlDecode(requestURI.substring(preVersionPath.length()));
         } else if (!servletPath.isEmpty()) {
             pathInfo = servletPath;
         } else {
             throw new IllegalArgumentException("Path oddness!");
+        }
+        if (pathInfo.isEmpty()) {
+            pathInfo = servletPath;
         }
         LOGGER.trace("\nrequestURI: {}\ncontextPath: {}\nservletPath: {}\nfullPath: {}\npathInfo: {}", requestURI, contextPath, servletPath, preVersionPath, pathInfo);
         Utils.MethodRoleMapper mapper = roleMappersByPath.get(pathInfo.substring(0, 5));

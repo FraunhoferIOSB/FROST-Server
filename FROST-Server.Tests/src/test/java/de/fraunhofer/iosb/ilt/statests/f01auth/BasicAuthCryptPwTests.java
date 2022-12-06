@@ -31,13 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tests for access rights checking with Basic Authentication.
+ * Tests for access rights checking with Basic Authentication and hashed
+ * passwords.
  *
  * @author Hylke van der Schaaf
  */
-public abstract class BasicAuthTests extends AbstractAuthTests {
+public abstract class BasicAuthCryptPwTests extends AbstractAuthTests {
 
-    public static class Implementation10 extends BasicAuthTests {
+    public static class Implementation10 extends BasicAuthCryptPwTests {
 
         public Implementation10() {
             super(ServerVersion.v_1_0);
@@ -45,7 +46,7 @@ public abstract class BasicAuthTests extends AbstractAuthTests {
 
     }
 
-    public static class Implementation11 extends BasicAuthTests {
+    public static class Implementation11 extends BasicAuthCryptPwTests {
 
         public Implementation11() {
             super(ServerVersion.v_1_1);
@@ -56,7 +57,7 @@ public abstract class BasicAuthTests extends AbstractAuthTests {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthCryptPwTests.class);
 
     private static final Properties SERVER_PROPERTIES = new Properties();
 
@@ -64,7 +65,8 @@ public abstract class BasicAuthTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
-        final String dbName = "basicauth";
+        SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
+        final String dbName = "hashauth";
         SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
         SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
         SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
@@ -72,7 +74,7 @@ public abstract class BasicAuthTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
     }
 
-    public BasicAuthTests(ServerVersion version) {
+    public BasicAuthCryptPwTests(ServerVersion version) {
         super(version, SERVER_PROPERTIES, false);
     }
 

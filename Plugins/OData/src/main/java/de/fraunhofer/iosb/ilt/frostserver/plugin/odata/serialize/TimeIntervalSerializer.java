@@ -21,7 +21,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.FORMAT_MOMENT;
 import java.io.IOException;
 import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
@@ -42,9 +44,9 @@ public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
             final MomentInterval interval = value.getInterval();
             final Moment start = interval.getStartAsMoment();
             final Moment end = interval.getEndAsMoment();
-            gen.writeObjectField("start", StringHelper.FORMAT_MOMENT.print(start));
+            gen.writeObjectField(KEY_INTERVAL_START, FORMAT_MOMENT.print(start));
             if (!start.equals(end)) {
-                gen.writeObjectField("end", StringHelper.FORMAT_MOMENT.print(end));
+                gen.writeObjectField(KEY_INTERVAL_END, FORMAT_MOMENT.print(end));
             }
             gen.writeEndObject();
         }

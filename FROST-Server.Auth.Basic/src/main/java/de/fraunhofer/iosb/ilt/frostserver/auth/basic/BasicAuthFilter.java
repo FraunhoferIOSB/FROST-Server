@@ -91,7 +91,7 @@ public class BasicAuthFilter implements Filter {
         CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
 
-        databaseHandler = DatabaseHandler.getInstance();
+        databaseHandler = DatabaseHandler.getInstance(coreSettings);
         String realmName = authSettings.get(TAG_AUTH_REALM_NAME, BasicAuthProvider.class);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 

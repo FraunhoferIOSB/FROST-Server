@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
+import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
@@ -136,6 +137,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     BasicAuthTests.Implementation11.class,
     BasicAuthAnonReadTests.Implementation10.class,
     BasicAuthAnonReadTests.Implementation11.class,
+    BasicAuthCryptPwTests.Implementation10.class,
+    BasicAuthCryptPwTests.Implementation11.class,
     KeyCloakTests.Implementation10.class,
     KeyCloakTests.Implementation11.class,
     KeyCloakAnonReadTests.Implementation10.class,
@@ -150,6 +153,43 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class TestSuite {
 
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestSuite.class);
+    public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
+    public static final String KEY_HAS_ACTUATION = "hasActuation";
+    public static final String KEY_DB_NAME = "dbName";
+
+    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
+    public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_UUID;
+    public static final String VAL_ID_TYPE_OBSERVATIONS = Constants.VALUE_ID_TYPE_LONG;
+    public static final String VAL_ID_TYPE_HIST_LOCATIONS = Constants.VALUE_ID_TYPE_LONG;
+    public static final String VAL_PG_DB = "sensorthings";
+    public static final String VAL_PG_USER = "sensorthings";
+    public static final String VAL_PG_PASS = "ChangeMe";
+
+    private static final String DATABASE_CONNECT_URL_BASE = "jdbc:tc:postgis:14-3.2:///";
+    private static final String DATABASE_CONNECT_URL_POSTFIX = "?TC_DAEMON=true&TC_INITSCRIPT=file:src/test/resources/pgInit.sql";
+
+    private static TestSuite instance;
+
+    private final Map<Properties, Server> httpServers = new HashMap<>();
+    private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
+    private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
+
+    private final AtomicInteger nextBusId = new AtomicInteger(1);
+    private final AtomicInteger nextDbId = new AtomicInteger(1);
+
+    @Container
+    private final GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
+            .withExposedPorts(1883)
+            .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
+
+    @Container
+    private final KeycloakContainer keycloak = new KeycloakContainer()
+            .withRealmImportFile("keycloak/FROST-Test.json");
+
     static class SuiteFinaliser {
 
         @Test
@@ -160,45 +200,6 @@ public class TestSuite {
             });
         }
     }
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestSuite.class);
-    public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
-    public static final String KEY_HAS_ACTUATION = "hasActuation";
-
-    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
-    public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_UUID;
-    public static final String VAL_ID_TYPE_OBSERVATIONS = Constants.VALUE_ID_TYPE_LONG;
-    public static final String VAL_ID_TYPE_HIST_LOCATIONS = Constants.VALUE_ID_TYPE_LONG;
-    public static final String VAL_PG_DB = "sensorthings";
-    public static final String VAL_PG_USER = "sensorthings";
-    public static final String VAL_PG_PASS = "ChangeMe";
-
-    private static TestSuite instance;
-
-    private final Map<Properties, Server> httpServers = new HashMap<>();
-    private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
-    private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
-
-    private String pgConnectUrl;
-    private final AtomicInteger nextId = new AtomicInteger(1);
-
-    @Container
-    private final GenericContainer pgServer = new GenericContainer<>("postgis/postgis:14-3.2-alpine")
-            .withEnv("POSTGRES_DB", VAL_PG_DB)
-            .withEnv("POSTGRES_USER", VAL_PG_USER)
-            .withEnv("POSTGRES_PASSWORD", VAL_PG_PASS)
-            .withExposedPorts(5432);
-
-    @Container
-    private final GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
-            .withExposedPorts(1883)
-            .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
-
-    @Container
-    private final KeycloakContainer keycloak = new KeycloakContainer()
-            .withRealmImportFile("keycloak/FROST-Test.json");
 
     public static TestSuite getInstance() {
         // Create a new instance if none exists. This only happens when running
@@ -234,15 +235,6 @@ public class TestSuite {
         getInstance().stopAllServers();
     }
 
-    public String getPgConnectUrl() {
-        try {
-            maybeStartPostgres();
-        } catch (InterruptedException | UnsupportedOperationException | IOException ex) {
-            LOGGER.error("Failed to start database", ex);
-        }
-        return pgConnectUrl;
-    }
-
     public ServerSettings getServerSettings(Properties parameters) throws IOException, InterruptedException {
         maybeStartServers(parameters);
         return serverSettings.get(parameters);
@@ -260,15 +252,9 @@ public class TestSuite {
         return keycloak;
     }
 
-    private synchronized void maybeStartPostgres() throws InterruptedException, UnsupportedOperationException, IOException {
-        if (!pgServer.isRunning()) {
-            pgServer.start();
-            // To log pg output: pgServer.followOutput(new Slf4jLogConsumer(LOGGER));
+    private synchronized void maybeStartMessagebus() throws InterruptedException, UnsupportedOperationException, IOException {
+        if (!mqttBus.isRunning()) {
             mqttBus.start();
-
-            org.testcontainers.containers.Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
-            LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
-            pgConnectUrl = "jdbc:postgresql://" + pgServer.getHost() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
         }
     }
 
@@ -282,7 +268,8 @@ public class TestSuite {
         if (serverSettings.containsKey(parameters)) {
             return;
         }
-        maybeStartPostgres();
+        maybeStartMessagebus();
+        parameters.computeIfAbsent(KEY_DB_NAME, (t) -> "db" + nextDbId.incrementAndGet());
         try {
             LOGGER.info("Testing if Mosquitto works...");
             MqttClient client = new MqttClient(
@@ -302,7 +289,7 @@ public class TestSuite {
 
     private void startHttpServer(Properties parameters) {
         // Set common properties shared by HTTP and MQTT
-        parameters.put("bus." + MqttMessageBus.TAG_TOPIC_NAME, "FROST-BUS-" + nextId.getAndIncrement());
+        parameters.put("bus." + MqttMessageBus.TAG_TOPIC_NAME, "FROST-BUS-" + nextBusId.getAndIncrement());
 
         LOGGER.info("HTTP Server starting...");
         ServerSettings serverSetting = new ServerSettings();
@@ -339,7 +326,7 @@ public class TestSuite {
         handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         handler.setInitParameter("persistence.autoUpdateDatabase", "true");
         handler.setInitParameter("persistence.db.driver", "org.postgresql.Driver");
-        handler.setInitParameter("persistence.db.url", pgConnectUrl);
+        handler.setInitParameter("persistence.db.url", createDbUrl(parameters.getProperty(KEY_DB_NAME)));
         handler.setInitParameter("persistence.db.username", VAL_PG_USER);
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
@@ -368,6 +355,10 @@ public class TestSuite {
         findImplementedVersions(serverSetting);
         checkServiceRootUri(serverSetting);
         serverSetting.initExtensionsAndTypes();
+    }
+
+    public static String createDbUrl(String dbName) {
+        return DATABASE_CONNECT_URL_BASE + dbName + DATABASE_CONNECT_URL_POSTFIX;
     }
 
     private void startMqttServer(Properties parameters) throws IOException {
@@ -400,7 +391,7 @@ public class TestSuite {
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
-        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getHost() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
+        properties.put("persistence.db.url", createDbUrl(parameters.getProperty(KEY_DB_NAME)));
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
@@ -461,7 +452,6 @@ public class TestSuite {
             }
         }
         keycloak.stop();
-        pgServer.stop();
         mqttBus.stop();
     }
 
