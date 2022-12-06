@@ -5,7 +5,89 @@ frost:
   ######################################
   # FROST-Server general configuration #
   ######################################
-  enableActuation: false
+  alwaysOrderbyId: true
+  logSensitiveData: false
+  queueLoggingInterval: 0
+
+  #####################################
+  # FROST-Server plugin configuration #
+  #####################################
+  plugins:
+    providedPlugins:
+    plugins:
+    actuation:
+      enable: false
+      idType:
+        actuator:
+        task:
+        taskingCapability:
+    coreModel:
+      enable: true
+      editableDsProperties: false
+      idType:
+        default: LONG
+        datastream:
+        feature:
+        historicalLocation:
+        location:
+        observedProperty:
+        observation:
+        sensor:
+        thing:
+    multiDatastream:
+      enable: false
+      idType:
+        multiDatastream:
+    modelLoader:
+      enable: false
+      modelPath:
+      modelFiles:
+      liquibasePath:
+      liquibaseFiles:
+    dataArray:
+      enable: true
+    csv:
+      enable: true
+    geojson:
+      enable: true
+    batchProcessing:
+      enable: true
+    odata:
+      enable: false
+    openApi:
+      enable: false
+
+  auth:
+    provider:
+    allowAnonymousRead: false
+    role:
+      read:
+      create:
+      update:
+      delete:
+      admin:
+    realmName: FROST-Server
+    plainTextPassword: true
+    db:
+      autoUpdate: "{{ .Values.frost.http.db.autoUpdate }}"
+      maximumConnection: "{{ .Values.frost.http.db.maximumConnection }}"
+      maximumIdleConnection: "{{ .Values.frost.http.db.maximumIdleConnection }}"
+      minimumIdleConnection: "{{ .Values.frost.http.db.minimumIdleConnection }}"
+    keycloakConfig:
+    keycloakConfigFile:
+    keycloakConfigUrl:
+    keycloakConfigSecret:
+
+  logging:
+    default:
+    parser:
+    queries:
+    requests:
+    service:
+    settings:
+    moquette:
+    liquibase:
+    jooq:
 
   ##########################################
   # FROST-Server HTTP module configuration #
@@ -52,12 +134,27 @@ frost:
     maxTop: 1000
     maxDataSize: 25000000
     useAbsoluteNavigationLinks: true
-    enableCors: false
+
+    # FROST-Server Cross-Origin Resource Sharing settings to the FROST-Server HTTP
+    cors:
+      enable: false
+      allowed:
+        headers: Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization
+        methods: GET, HEAD, OPTIONS
+        origins: '*'
+      exposed:
+        headers: Location
+      preflight:
+        maxage: 1800
+      request:
+        decorate: true
+      support:
+        credentials: false
+
 
     # FROST-Server Database related settings to the FROST-Server HTTP
     db:
       autoUpdate: true
-      alwaysOrderbyId: false
       maximumConnection: 10
       maximumIdleConnection: 10
       minimumIdleConnection: 10
@@ -65,10 +162,80 @@ frost:
     # FROST-Server Messages Bus related settings to the FROST-Server HTTP
     bus:
       sendWorkerPoolSize: 10
-      sendQueueSize: 100
+      sendQueueSize: 2000
       recvWorkerPoolSize: 10
-      recvQueueSize: 100
+      recvQueueSize: 2000
       maxInFlight: 50
+
+  ##########################################
+  # FROST-Server MQTT module configuration #
+  ##########################################
+  mqtt:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-mqtt
+      tag: latest
+      pullPolicy: IfNotPresent
+    # FROST-Server MQTT deployment settings
+    enabled: true
+    replicas: 1
+    ports:
+      mqtt:
+        nodePort:
+        servicePort: 1883
+      websocket:
+        nodePort:
+        servicePort: 9876
+    host: 0.0.0.0
+    internalHost: localhost
+
+    secureWebsocketPort:
+    stickySessionTimeout: 10800
+    exposedEndpoints:
+    javaKeystorePath:
+    keyManagerPassword:
+    keyStorePassword:
+    persistentStoreType: memory
+    session_queue_size: 1024
+    session_timeout_seconds: 3600
+    sslPort:
+    netty:
+      mqtt:
+        message_size: 8092
+
+    # FROST-Server MQTT business settings
+    qos: 2
+    subscribeMessageQueueSize: 100
+    subscribeThreadPoolSize: 10
+    createMessageQueueSize: 100
+    createThreadPoolSize: 10
+    maxInFlight: 50
+    waitForEnter: false
+
+    # FROST-Server Database related settings to the FROST-Server MQTT
+    db:
+      autoUpdate: false
+      maximumConnection: 10
+      maximumIdleConnection: 10
+      minimumIdleConnection: 10
+
+    # FROST-Server Messages Bus related settings to the FROST-Server MQTT
+    bus:
+      sendWorkerPoolSize: 10
+      sendQueueSize: 2000
+      recvWorkerPoolSize: 10
+      recvQueueSize: 2000
+      maxInFlight: 50
+
+    ingress:
+      enabled: false
+      path: /mqtt
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-read-timeout: 3600
+        nginx.ingress.kubernetes.io/proxy-send-timeout: 3600
+      tls:
+        enabled: false
+        secretName:
 
   ##############################################
   # FROST-Server Database module configuration #
@@ -97,12 +264,14 @@ frost:
     requiredHostname:
 
     # Common FROST-Server Database properties, shared by any other FROST-Server modules
-    implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
+    driver: "org.postgresql.Driver"
+    implementationClass: "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager"
     idGenerationMode: "ServerGeneratedOnly"
+    transactionRole: false
+    countMode: "FULL"
     database: sensorthings
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
-
     securityContext:
       runAsUser:
       runAsGroup:
@@ -133,6 +302,7 @@ frost:
       runAsUser:
       runAsGroup:
       fsGroup:
+
 
   ##########################################
   # FROST-Server MQTT module configuration #
