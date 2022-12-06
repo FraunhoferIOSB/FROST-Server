@@ -108,6 +108,8 @@ spec:
             - name: persistence_db_jndi_datasource
               value: ""
             - name: persistence_db_driver
+              value: "org.postgresql.Driver"
+            {{ if .Values.frost.db.enableIntegratedDb }}
               value: "{{ .Values.frost.db.driver }}"
               value: "org.postgresql.Driver"
             {{ if .Values.frost.db.enableIntegratedDb }}

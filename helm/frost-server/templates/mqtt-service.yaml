@@ -21,7 +21,7 @@ spec:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
-    component: {{ $tier }}
+    component: {{ $tier -}}
   {{- if eq .Values.frost.mqtt.serviceType "NodePort" }}
   type: NodePort
   ports:

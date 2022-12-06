@@ -178,6 +178,8 @@ frost:
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
+    annotations: {}
+    serviceType: ClusterIp
     replicas: 1
     ports:
       mqtt:
