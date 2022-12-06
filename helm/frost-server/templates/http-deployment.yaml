@@ -111,6 +111,7 @@ spec:
               value: "{{ .Values.frost.db.driver }}"
               value: "org.postgresql.Driver"
             {{ if .Values.frost.db.enableIntegratedDb }}
+              value: "{{ .Values.frost.db.driver }}"
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
             {{ else }}
