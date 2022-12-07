@@ -57,7 +57,7 @@ Datastreams?$filter=ObservedProperty/@iot.id eq 1
 
 ObservedProperties that are measured at the same station as the ObservedProperty with name Temperature
 ```
-ObservedProperties?$filter=Datastream/Thing/Datastreams/ObservedProperty/name eq 'Temperature'
+ObservedProperties?$filter=Datastreams/Thing/Datastreams/ObservedProperty/name eq 'Temperature'
 ```
 
 

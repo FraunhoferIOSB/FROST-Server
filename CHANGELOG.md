@@ -29,13 +29,17 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 ## Release version 2.0.0
 
 Version 2.0 contains many large updates to the FROST-Server codebase, greatly increasing its flexibility.
-Much funktionality is now controlled by plugins, from the data model to result formats.
+Much functionality is now controlled by plugins, from the data model to result formats.
 
 
 **Upgrading from 1.x**
 
-First update to 1.14.x and run the Update Database script to ensure the database schema is fully up to date.
-After this version 2.x can be used on the same Datasbase.
+First update to 1.14.x or 1.15.x and run the Update Database script to ensure the database schema is fully up to date.
+After this version 2.x can be used on the same Database.
+
+FROST 2.x is more strict when it comes to relation names when filtering. Frost 1.x would accept
+ `/ObservedProperties?$filter=Datastream/name` even though an ObservedProperty has a `Datastreams`
+ (plural) relation and not a `Datastream` (singular) relation. Version 2.x will give an error in this case.
 
 
 **New Features**
