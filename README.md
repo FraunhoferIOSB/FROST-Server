@@ -1,12 +1,10 @@
 # FROST-Server [![Build Status](https://github.com/FraunhoferIOSB/FROST-Server/workflows/Maven%20Build/badge.svg)](https://github.com/FraunhoferIOSB/FROST-Server/actions) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/da22d7347eb7450a955274916ed2d336)](https://www.codacy.com/gh/FraunhoferIOSB/FROST-Server?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FraunhoferIOSB/FROST-Server&amp;utm_campaign=Badge_Grade) [![Docker badge](https://img.shields.io/docker/pulls/fraunhoferiosb/frost-server.svg)](https://hub.docker.com/r/fraunhoferiosb/frost-server/)
 
 ![FROST-Server Logo](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/docs/images/FROST-Server-darkgrey.png)
-<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/docs/images/Certified_OGC_Compliant_Logo_Web.png"/></a>
+<a href="https://www.ogc.org/resource/products/details/?pid=1751"><img align="right" src="https://portal.ogc.org/public_ogc/compliance/OGC_Certified_Badge.png" alt="Certified OGC Compliant Logo" width="206" height="130"/></a>
 
-A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
-is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing. It now also includes
-preliminary actuation support.
-
+A Server implementation of the [OGC SensorThings API](https://github.com/opengeospatial/sensorthings). The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
+is the first complete, open-source official reference implementation of the [OGC SensorThings API Part 1: Sensing 1.0](https://docs.ogc.org/is/15-078r6/15-078r6.html). It also implements [OGC SensorThings API Part 1: Sensing 1.1](https://docs.ogc.org/is/18-088/18-088.html) and [OGC SensorThings API Part 2: Tasking Core 1.1](https://docs.ogc.org/is/17-079r1/17-079r1.html).
 
 ## Downloading
 

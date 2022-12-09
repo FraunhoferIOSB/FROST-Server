@@ -7,7 +7,7 @@ order: 1
 
 # The OGC SensorThings API
 
-To quote the standard itself:
+To quote the [standard](https://github.com/opengeospatial/sensorthings) itself:
 
 > The OGC SensorThings API is an OGC standard specification for providing an open and unified way to interconnect IoT devices, data, and applications over the Web.
 > The SensorThings API is an open standard, builds on Web protocols and the OGC Sensor Web Enablement standards, and applies an easy-to-use REST-like style.
