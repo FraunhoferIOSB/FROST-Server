@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,6 +62,17 @@ class SerialisationTest {
         String expResult = "\"1987-06-05\"";
         final String result = JsonWriter.writeObject(new Date(87, 5, 5));
         assertTrue(jsonEqual(expResult, result), "Date not serialised correctly.");
+    }
+
+    @Test
+    void serialiseEmptyProperties() throws IOException {
+        String expResult = "{\"foo\":\"bar\"}";
+        Map<String, String> props = new HashMap<>();
+        props.put("foo","bar");
+        props.put("nullable",null);
+        props.put("empty","");
+        final String result = JsonWriter.writeObject(props);
+        assertTrue(jsonEqual(expResult, result), "Empty properties not serialised correctly: " + result);
     }
 
     @Test
