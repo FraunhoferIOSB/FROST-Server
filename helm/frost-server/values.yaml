@@ -112,7 +112,7 @@ frost:
       annotations:
       tls:
         enabled: false
-        secretName:
+        secretName: []
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
@@ -178,6 +178,8 @@ frost:
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
+    annotations: {}
+    serviceType: NodePort
     replicas: 1
     ports:
       mqtt:
@@ -241,6 +243,8 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
+    enableIntegratedDb: true
+    dbExternalConnectionString: "jdbc:postgresql://externaldbhost:5432/sensorthings"
     image:
       registry: docker.io
       repository: postgis/postgis

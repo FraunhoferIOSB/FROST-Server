@@ -1,3 +1,4 @@
+{{- if .Values.frost.db.enableIntegratedDb -}}
 {{- $tier := "db" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 apiVersion: apps/v1
@@ -79,4 +80,5 @@ spec:
           hostPath:
             path: {{ .Values.frost.db.persistence.hostPath }}
             type: ""
+      {{- end -}}
       {{- end -}}

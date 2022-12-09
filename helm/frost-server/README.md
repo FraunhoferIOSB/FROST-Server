@@ -12,7 +12,7 @@ Declare the Helm repo or update it
 
 Install the FROST-Server chart
 
-    $ helm install fraunhoferiosb/frost-server  
+    $ helm install fraunhoferiosb/frost-server
 
 
 ## Introduction
@@ -40,7 +40,7 @@ Before to go, declare the Helm repo or update it
 
 Then, to install the chart with the [release name](https://docs.helm.sh/using_helm/#quickstart-guide) `my-release`
 
-    $ helm install --name my-release fraunhoferiosb/frost-server  
+    $ helm install --name my-release fraunhoferiosb/frost-server
 
 This command deploys FROST-Server on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
@@ -187,6 +187,8 @@ The following table lists the configurable parameters of the FROST-Server chart 
 | `frost.http.resources.limits.memory`        | Memory limit for the http module.                                                                                                                                                                                                                                                       | `NIL`                                                                                                                          |
 | `frost.db.ports.postgresql.servicePort`     | The internal port of the FROST-Server database service.                                                                                                                                                                                                                                 | `5432`                                                                                                                         |
 | `frost.db.persistence.enabled`              | If data persistence needs to be enabled. See [bellow](#persistence) for more information.                                                                                                                                                                                               | `false`                                                                                                                        |
+|`frost.db.enableIntegratedDb` | If set, the Helm chart will deploy a internal Postgis database server. When disabled, you can use the value below to specify a external connection string. | `true`|
+|`frost.db.dbExternalConnectionString`              | If the setting `frost.db.enableIntegratedDb` is set to true, you can specify the connection to connect to an external Postgres / PostGIS database| `jdbc:postgresql://externaldbhost:5432/sensorthings` |
 | `frost.db.persistence.existingClaim`        | If set, then use an existing [PersistenceVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim) for the FROST-Server database volume. See [bellow](#persistence) for more information.                                           | `nil` (use the builtin PersistenceVol)                                                                                         |
 | `frost.db.persistence.storageClassName`     | The [StorageClassName](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class) to use by the FROST-Server database persistence. See [bellow](#persistence) for more information.                                                                                         | `nil` (use the default StorageClass currently in use)                                                                          |
 | `frost.db.persistence.accessModes`          | List of [AccessModes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) to claim if FROST-Server database persistence is enabled. See [bellow](#persistence) for more information.                                                                          | `{ReadWriteOnce}`                                                                                                              |
@@ -211,7 +213,9 @@ The following table lists the configurable parameters of the FROST-Server chart 
 | `frost.db.requiredHostname`                 | If this is set, an affinity rule will be added, so that the database pod will only be scheduled on the node with this hostname.                                                                                                                                                         | `nil`                                                                                                                          |
 | `frost.db.driver`                           | The Database driver to use when not using JNDI.                                                                                                                                                                                                                                         | `org.postgresql.Driver`                                                                                                        |
 | `frost.mqtt.enabled`                        | If MQTT support needs to be enabled. See [bellow](#mqtt) for more information.                                                                                                                                                                                                          | `true`                                                                                                                         |
+|`frost.mqtt.annotations`                        | It is possible to set certain annotation for the service. This can be handy when using `metallb` as a LoadBalancer. With the annotation option it is possible to set a static ip address for the service. | `true`
 | `frost.mqtt.replicas`                       | The number of FROST-Server MQTT module replicas.                                                                                                                                                                                                                                        | `1`                                                                                                                            |
+|`frost.mqtt.serviceType`                       | The `serviceType` that Kubernetes will use when deploying the mqtt service. This can either be `NodePort` or `LoadBalancer`. When choosing `LoadBalancer` the service will directly be exposed on a separate ip address by the loadbalancer. This can be useful in cloud environments on if you run `metallb` for example. When using `metallb` you can optionally set a annotation so you can specify a specific ip address to the service.                                                                                                                                                                                                     | `NodePort`                                                                                       |
 | `frost.mqtt.ports.mqtt.nodePort`            | The external port (node port) of the FROST-Server MQTT service.                                                                                                                                                                                                                         | `nil` (port selected by Kubernetes)                                                                                            |
 | `frost.mqtt.ports.mqtt.servicePort`         | The internal port of the FROST-Server MQTT service.                                                                                                                                                                                                                                     | `1883`                                                                                                                         |
 | `frost.mqtt.ports.websocket.nodePort`       | The external port (node port) of the FROST-Server MQTT websocket service.                                                                                                                                                                                                               | `nil` (port selected by Kubernetes)                                                                                            |
@@ -299,7 +303,7 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
     # example for staging
-    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server  
+    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server
 
 > **Tip**: You can use the default [values.yaml](./values.yaml)
 
@@ -355,7 +359,7 @@ Once Ingress is enabled on the FROST-Server HTTP component, then the FROST-Serve
 
  > **Warning**: `frost.http.serviceHost` needs to be a DNS name. Make sure to be able to resolve it by adding a rule either in your DNS server or in your local DNS resolver (e.g. `/etc/hosts` in Unix-based environments).
 
-Since the HTTP endpoint of FROST is reachable under the `/FROST-Server`-path, we leverage the Ingress rewriting capability. 
+Since the HTTP endpoint of FROST is reachable under the `/FROST-Server`-path, we leverage the Ingress rewriting capability.
 
 **Caution: Our configuration is specific for nginx ingress controller version 0.22.0 or above. It needs to be adjusted, if another ingress controller is used.**
 

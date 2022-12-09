@@ -109,8 +109,13 @@ spec:
               value: ""
             - name: persistence_db_driver
               value: "{{ .Values.frost.db.driver }}"
+            {{ if .Values.frost.db.enableIntegratedDb }}
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            {{ else }}
+            - name: persistence_db_url
+              value: "{{ .Values.frost.db.dbExternalConnectionString }}"
+            {{ end }}
             - name: persistence_persistenceManagerImplementationClass
               value: "{{ .Values.frost.db.implementationClass }}"
             - name: persistence_countMode
