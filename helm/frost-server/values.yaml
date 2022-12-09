@@ -179,7 +179,7 @@ frost:
     # FROST-Server MQTT deployment settings
     enabled: true
     annotations: {}
-    serviceType: ClusterIp
+    serviceType: NodePort
     replicas: 1
     ports:
       mqtt:
