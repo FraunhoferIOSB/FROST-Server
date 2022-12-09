@@ -345,7 +345,7 @@ To enable it, set the `frost.db.persistence.storageClassName` to `frost-server-d
 > **Warning #2**: The `local` StorageClass can only be used if only the ReadWriteOnce [AccessMode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) is claimed (check the `frost.db.persistence.accessModes` configuration parameter).
 
 
-## Ingress HTTP HTTP
+## Ingress HTTP
 
 The FROST-Server HTTP component can be accessed through an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/), which is the recommended mode of operation. By default, Ingress is enabled but can be disabled using the `frost.http.ingress.enabled` option:
 
