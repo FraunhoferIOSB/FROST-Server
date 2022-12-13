@@ -64,9 +64,6 @@ public class UrlHelper {
     }
 
     public static String generateNextLink(ResourcePath path, Query query, int resultCount) {
-        if (query == null || query.getMetadata() == Metadata.OFF) {
-            return null;
-        }
         int oldSkip = query.getSkip(0);
         int newSkip = oldSkip + resultCount;
         query.setSkip(newSkip);
