@@ -101,7 +101,7 @@ Example: A Batch Request that containing a single change set that contains the f
       "body": {
 		  "name": "Temperature Thing 5",
 		  "description": "The temperature of thing 5",
-		  "ObservedProperty: {"@iot.id": 12},
+		  "ObservedProperty": {"@iot.id": 12},
 		  "Sensor": {"@iot.id": "$sensor1"}
 		}
     }
