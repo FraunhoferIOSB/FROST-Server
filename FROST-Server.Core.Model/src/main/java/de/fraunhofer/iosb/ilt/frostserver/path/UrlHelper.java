@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -205,9 +204,6 @@ public class UrlHelper {
     }
 
     public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Object id) {
-        if (query != null && query.getMetadata() != Metadata.FULL) {
-            return null;
-        }
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -220,9 +216,6 @@ public class UrlHelper {
     }
 
     public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Id id) {
-        if (query != null && query.getMetadata() != Metadata.FULL) {
-            return null;
-        }
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -253,9 +246,6 @@ public class UrlHelper {
      * @return A navigation link or null depending on query responseMetadata.
      */
     public static String generateNavLink(Query query, ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        if (query != null && query.getMetadata() != Metadata.FULL) {
-            return null;
-        }
         String result = generateSelfLink(query, path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
@@ -275,9 +265,6 @@ public class UrlHelper {
      * @return A navigation link or null depending on query responseMetadata.
      */
     public static String generateNavLink(Query query, ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
-        if (query != null && query.getMetadata() != Metadata.FULL) {
-            return null;
-        }
         String result = generateSelfLink(query, path, parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();

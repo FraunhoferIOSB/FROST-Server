@@ -41,6 +41,7 @@ FROST 2.x is more strict when it comes to relation names when filtering. Frost 1
  `/ObservedProperties?$filter=Datastream/name` even though an ObservedProperty has a `Datastreams`
  (plural) relation and not a `Datastream` (singular) relation. Version 2.x will give an error in this case.
 
+FROST 2.x does not allow `$resultMetadata` in `$expand`.
 
 **New Features**
 * The data model provided by FROST-Server is now completely defined in plugins.

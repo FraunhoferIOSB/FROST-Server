@@ -55,10 +55,10 @@ public class ResultFormatterDefault implements ResultFormatter {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
                 LOGGER.trace("Formatting as EntitySet.");
-                return target -> JsonWriter.writeEntityCollection(target, entitySet);
+                return target -> JsonWriter.writeEntityCollection(target, entitySet, query);
             }
             // Not an Entity nor an EntitySet.
-            String entityJsonString = "";
+            String entityJsonString;
             if (path != null && path.isValue()) {
                 LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {

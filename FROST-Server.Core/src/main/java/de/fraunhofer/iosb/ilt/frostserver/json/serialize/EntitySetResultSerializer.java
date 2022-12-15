@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import java.io.IOException;
 
 /**
@@ -46,9 +47,11 @@ public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
         }
         gen.writeEndArray();
 
-        String nextLink = value.getValues().getNextLink();
-        if (nextLink != null) {
-            gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
+        if (value.getQuery().getMetadata() != Metadata.OFF) {
+            String nextLink = value.getValues().getNextLink();
+            if (nextLink != null) {
+                gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
+            }
         }
     }
 

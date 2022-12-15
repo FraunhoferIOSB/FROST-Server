@@ -50,7 +50,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelp
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -133,7 +132,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private static TableCollection getTableCollection(CoreSettings settings) {
         return tableCollections.computeIfAbsent(settings, t -> new TableCollection().setModelRegistry(t.getModelRegistry()));
     }
-
 
     @Override
     public void init(CoreSettings settings) {
@@ -248,7 +246,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (result == null) {
             return null;
         }
-        return psb.getQueryState().entityFromQuery(result, dataSize);
+        return psb.getQueryState().entityFromQuery(result, dataSize)
+                .setQuery(query);
     }
 
     @Override
@@ -321,9 +320,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             throw new IllegalArgumentException("No Entity of type " + entityType.entityName + " with id " + id);
         }
         original.setEntityPropertiesSet(false, false);
-        original.setQuery(
-                new Query(settings.getModelRegistry(), settings.getQueryDefaults(), original.getPath())
-                        .setMetadata(Metadata.INTERNAL_COMPARE));
+        original.setQuery(settings.getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
         JsonNode originalNode = JsonWriter.getObjectMapper().valueToTree(original);
         LOGGER.trace("Old {}", originalNode);
         JsonNode newNode;
@@ -388,8 +385,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     public void setRole(Principal user) {
         if (settings.getPersistenceSettings().isTransactionRole()) {
             getDslContext()
-                .setLocal(DSL.name("ROLE"), DSL.val(user == null ? "anonymous" : user.getName()))
-                .execute();
+                    .setLocal(DSL.name("ROLE"), DSL.val(user == null ? "anonymous" : user.getName()))
+                    .execute();
         }
     }
 

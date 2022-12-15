@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import java.util.Collections;
@@ -187,13 +188,15 @@ public class EntityChangedMessage {
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
-                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
+                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName))
+                        .setMetadata(Metadata.INTERNAL_COMPARE);
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                     query.addSelect(ep);
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
                     Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
-                            .addSelect(np.getEntityType().getPrimaryKey());
+                            .addSelect(np.getEntityType().getPrimaryKey())
+                            .setMetadata(Metadata.INTERNAL_COMPARE);
                     query.addExpand(new Expand(t.getModelRegistry(), np).setSubQuery(subQuery));
                 }
                 return query;

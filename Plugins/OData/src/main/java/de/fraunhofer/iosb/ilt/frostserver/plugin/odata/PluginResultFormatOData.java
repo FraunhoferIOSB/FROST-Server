@@ -138,7 +138,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
                 return formatAsEntity(result, contextBase, version);
             }
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                return formatAsEntitySet(result, contextBase, version);
+                return formatAsEntitySet(result, contextBase, version, query);
             }
             // Not an Entity nor an EntitySet.
             String entityJsonString;
@@ -176,10 +176,10 @@ public class PluginResultFormatOData implements PluginResultFormat {
             }
         }
 
-        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Version version) {
+        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Version version, final Query query) {
             LOGGER.trace("Formatting as EntitySet.");
             EntitySet entitySet = (EntitySet) result;
-            EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet)
+            EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet, query)
                     .setContext(contextBase + '#' + entitySet.getEntityType().plural);
             if (version == PluginOData.VERSION_ODATA_40) {
                 return target -> JsonWriterOdata40.writeEntityCollection(target, wrappedSet);
