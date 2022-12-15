@@ -1,3 +1,4 @@
+{{- if .Values.frost.db.enableIntegratedDb -}}
 {{- $tier := "db" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 apiVersion: apps/v1
@@ -26,6 +27,23 @@ spec:
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
+      {{- if .Values.frost.db.requiredHostname }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - {{ .Values.frost.db.requiredHostname }}
+      tolerations:
+        - effect: NoSchedule
+          key: workload-type/db
+          operator: Exists
+      {{- end }}
+      securityContext:
+          {{- toYaml .Values.frost.db.securityContext | nindent 10 }}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.db.image.registry }}/{{ .Values.frost.db.image.repository }}:{{ .Values.frost.db.image.tag }}"
@@ -33,10 +51,10 @@ spec:
           ports:
             - name: postgresql
               containerPort: 5432
-          {{- if .Values.frost.db.persistence.enabled }}
+          {{- if or (.Values.frost.db.persistence.enabled) (.Values.frost.db.persistence.hostPath) }}
           volumeMounts:
             - name: {{ $fullName }}
-              mountPath: /var/lib/postgresql/data
+              mountPath: {{ .Values.frost.db.persistence.mountPath }}
           {{- end }}
           env:
             - name: POSTGRES_DB
@@ -56,4 +74,11 @@ spec:
         - name: {{ $fullName }}
           persistentVolumeClaim:
             claimName: {{ default $fullName .Values.frost.db.persistence.existingClaim }}
+      {{- else if .Values.frost.db.persistence.hostPath }}
+      volumes:
+        - name: {{ $fullName }}
+          hostPath:
+            path: {{ .Values.frost.db.persistence.hostPath }}
+            type: ""
+      {{- end -}}
       {{- end -}}

@@ -1,26 +1,26 @@
 {{- if .Values.frost.db.enableIntegratedDb -}}
-{{- if and .Values.frost.db.persistence.enabled (not .Values.frost.db.persistence.existingClaim) -}}
+{{- if and .Values.frost.backup.enabled (not .Values.frost.backup.persistence.existingClaim) -}}
 {{- $tier := "db" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-backup
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
-    component: {{ $tier }}
+    component: {{ $tier }}-backup
 spec:
-  {{- if .Values.frost.db.persistence.storageClassName }}
-  storageClassName: {{ .Values.frost.db.persistence.storageClassName }}
+  {{- if .Values.frost.backup.persistence.storageClassName }}
+  storageClassName: {{ .Values.frost.backup.persistence.storageClassName }}
   {{- end }}
   resources:
     requests:
-      storage: {{ .Values.frost.db.persistence.capacity }}
+      storage: {{ .Values.frost.backup.persistence.capacity }}
   accessModes:
-  {{- range .Values.frost.db.persistence.accessModes }}
+  {{- range .Values.frost.backup.persistence.accessModes }}
     - {{ . }}
   {{- end }}
 {{- end -}}

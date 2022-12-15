@@ -1,0 +1,37 @@
+{{- if .Values.frost.mqtt.ingress.enabled -}}
+{{- $tier := "mqtt" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  annotations:
+    nginx.org/websocket-services: {{ $fullName }}
+    {{- if .Values.frost.mqtt.ingress.annotations }}
+    {{- toYaml .Values.frost.mqtt.ingress.annotations | nindent 4 }}
+    {{ end }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  {{- if .Values.frost.mqtt.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.frost.mqtt.serviceHost }}
+      secretName: {{ .Values.frost.mqtt.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.frost.mqtt.serviceHost }}
+    http:
+      paths:
+      - path:  {{ .Values.frost.mqtt.ingress.path  }}
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name:  {{ $fullName }}
+            port:
+              number: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+{{- end -}}

@@ -14,7 +14,7 @@ home: https://github.com/FraunhoferIOSB/FROST-Server
 icon: https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/docs/images/FROST-Server-darkgrey.png
 sources:
   - https://github.com/FraunhoferIOSB/FROST-Server
-mainteners:
+maintainers:
   - name: Aurelien Bourdon
     url: http://abourdon.github.io
   - name: Philipp Hertweck

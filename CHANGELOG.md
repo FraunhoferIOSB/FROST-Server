@@ -5,6 +5,8 @@
 **Internal changes & Bugfixes**
 * Updated dependency versions.
 * Fixed NPE in auth module on DatabaseStatus path.
+* Fixed implementation of `$resultMetadata` sometimes causing Exceptions.
+* Updated the Helm charts to have all options.
 
 
 ## Release version 2.0.4

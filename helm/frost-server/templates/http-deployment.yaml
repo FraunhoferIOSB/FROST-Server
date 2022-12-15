@@ -38,12 +38,14 @@ spec:
           {{- toYaml .Values.frost.http.resources | nindent 12 }}
           env:
             # Internal properties
-            - name: ApiVersion
-              value: {{ include "frost-server.http.apiVersion" . | quote }}
             - name: serviceRootUrl
               value: {{ include "frost-server.http.serviceRootUrl" . | quote }}
-            - name: enableActuation
-              value: "{{ .Values.frost.enableActuation }}"
+            - name: alwaysOrderbyId
+              value: "{{ .Values.frost.alwaysOrderbyId }}"
+            - name: logSensitiveData
+              value: "{{ .Values.frost.logSensitiveData }}"
+            - name: queueLoggingInterval
+              value: "{{ .Values.frost.queueLoggingInterval }}"
 
             # HTTP related properties
             - name: defaultCount
@@ -57,9 +59,27 @@ spec:
             - name: useAbsoluteNavigationLinks
               value: "{{ .Values.frost.http.useAbsoluteNavigationLinks }}"
             - name: http_cors_enable
-              value: "{{ .Values.frost.http.enableCors }}"
+              value: "{{ .Values.frost.http.cors.enable }}"
 
-            {{ if .Values.frost.mqtt.enabled -}}
+            {{- if .Values.frost.http.cors.enable }}
+            # Cross-Origin Resource Sharing related properties
+            - name: http_cors_allowed_headers
+              value: "{{ .Values.frost.http.cors.allowed.headers }}"
+            - name: http_cors_allowed_methods
+              value: "{{ .Values.frost.http.cors.allowed.methods }}"
+            - name: http_cors_allowed_origins
+              value: "{{ .Values.frost.http.cors.allowed.origins }}"
+            - name: http_cors_exposed_headers
+              value: "{{ .Values.frost.http.cors.exposed.headers }}"
+            - name: http_cors_preflight_maxage
+              value: "{{ .Values.frost.http.cors.preflight.maxage }}"
+            - name: http_cors_request_decorate
+              value: "{{ .Values.frost.http.cors.request.decorate }}"
+            - name: http_cors_support_credentials
+              value: "{{ .Values.frost.http.cors.support.credentials }}"
+            {{- end}}
+
+            {{- if .Values.frost.mqtt.enabled }}
             # Messages bus related properties
             - name: bus_mqttBroker
               value: {{ printf "tcp://%s:1883" (include "frost-server.fullName" (merge (dict "tier" "bus") .)) | quote }}
@@ -88,17 +108,22 @@ spec:
             - name: persistence_db_jndi_datasource
               value: ""
             - name: persistence_db_driver
-              value: "org.postgresql.Driver"
+              value: "{{ .Values.frost.db.driver }}"
+            {{ if .Values.frost.db.enableIntegratedDb }}
             - name: persistence_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            {{ else }}
+            - name: persistence_db_url
+              value: "{{ .Values.frost.db.dbExternalConnectionString }}"
+            {{ end }}
             - name: persistence_persistenceManagerImplementationClass
               value: "{{ .Values.frost.db.implementationClass }}"
+            - name: persistence_countMode
+              value: "{{ .Values.frost.db.countMode }}"
             - name: persistence_idGenerationMode
               value: "{{ .Values.frost.db.idGenerationMode }}"
             - name: persistence_autoUpdateDatabase
               value: "{{ .Values.frost.http.db.autoUpdate }}"
-            - name: persistence_alwaysOrderbyId
-              value: "{{ .Values.frost.http.db.alwaysOrderbyId }}"
             - name: persistence_db_conn_max
               value: "{{ .Values.frost.http.db.maximumConnection }}"
             - name: persistence_db_conn_idle_max
@@ -115,3 +140,231 @@ spec:
                 secretKeyRef:
                   name: {{ include "frost-server.fullName" . }}
                   key: db.password
+
+            # Plugin-Loading settings
+            {{- if .Values.frost.plugins.providedPlugins }}
+            - name: plugins_providedPlugins
+              value: "{{ .Values.frost.plugins.providedPlugins }}"
+            {{- end }}
+            - name: plugins_plugins
+              value: "{{ .Values.frost.plugins.plugins }}"
+
+            # Actuation Plugin settings
+            {{- if .Values.frost.plugins.actuation.enable }}
+            - name: plugins_actuation_enable
+              value: "{{ .Values.frost.plugins.actuation.enable }}"
+            {{- if .Values.frost.plugins.actuation.idType.actuator }}
+            - name: plugins_actuation_idType_actuator
+              value: "{{ .Values.frost.plugins.actuation.idType.actuator }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.actuation.idType.task }}
+            - name: plugins_actuation_idType_actuator
+              value: "{{ .Values.frost.plugins.actuation.idType.task }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.actuation.idType.taskingCapability }}
+            - name: plugins_actuation_idType_actuator
+              value: "{{ .Values.frost.plugins.actuation.idType.taskingCapability }}"
+            {{- end }}
+            {{- end }}
+
+            # Core Model Plugin settings
+            {{- if .Values.frost.plugins.coreModel.enable }}
+            - name: plugins_coreModel_enable
+              value: "{{ .Values.frost.plugins.coreModel.enable }}"
+            - name: plugins_coreModel_editableDsProperties
+              value: "{{ .Values.frost.plugins.coreModel.editableDsProperties }}"
+            {{- if .Values.frost.plugins.coreModel.idType.default }}
+            - name: plugins_coreModel_idType
+              value: "{{ .Values.frost.plugins.coreModel.idType.default }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.datastream }}
+            - name: plugins_coreModel_idType_datastream
+              value: "{{ .Values.frost.plugins.coreModel.idType.datastream }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.feature }}
+            - name: plugins_coreModel_idType_feature
+              value: "{{ .Values.frost.plugins.coreModel.idType.feature }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.historicalLocation }}
+            - name: plugins_coreModel_idType_historicalLocation
+              value: "{{ .Values.frost.plugins.coreModel.idType.historicalLocation }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.location }}
+            - name: plugins_coreModel_idType_location
+              value: "{{ .Values.frost.plugins.coreModel.idType.location }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.observedProperty }}
+            - name: plugins_coreModel_idType_observedProperty
+              value: "{{ .Values.frost.plugins.coreModel.idType.observedProperty }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.observation }}
+            - name: plugins_coreModel_idType_observation
+              value: "{{ .Values.frost.plugins.coreModel.idType.observation }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.sensor }}
+            - name: plugins_coreModel_idType_sensor
+              value: "{{ .Values.frost.plugins.coreModel.idType.sensor }}"
+            {{- end }}
+            {{- if .Values.frost.plugins.coreModel.idType.thing }}
+            - name: plugins_coreModel_idType_thing
+              value: "{{ .Values.frost.plugins.coreModel.idType.thing }}"
+            {{- end }}
+            {{- end }}
+
+            # MultiDatastream Plugin settings
+            {{- if .Values.frost.plugins.multiDatastream.enable }}
+            - name: plugins_multiDatastream_enable
+              value: "{{ .Values.frost.plugins.multiDatastream.enable }}"
+            {{- if .Values.frost.plugins.multiDatastream.idType.multiDatastream }}
+            - name: plugins_multiDatastream_idType_multiDatastream
+              value: "{{ .Values.frost.plugins.multiDatastream.idType.multiDatastream }}"
+            {{- end }}
+            {{- end }}
+
+            # Model Loader Plugin settings
+            {{- if .Values.frost.plugins.modelLoader.enable }}
+            - name: plugins_modelLoader_enable
+              value: "{{ .Values.frost.plugins.modelLoader.enable }}"
+            - name: plugins_modelLoader_modelPath
+              value: "{{ .Values.frost.plugins.modelLoader.modelPath }}"
+            - name: plugins_modelLoader_modelFiles
+              value: "{{ .Values.frost.plugins.modelLoader.modelFiles }}"
+            - name: plugins_modelLoader_liquibasePath
+              value: "{{ .Values.frost.plugins.modelLoader.liquibasePath }}"
+            - name: plugins_modelLoader_liquibaseFiles
+              value: "{{ .Values.frost.plugins.modelLoader.liquibaseFiles }}"
+            {{- end }}
+
+            # Other Plugins settings
+            - name: plugins_dataArray_enable
+              value: "{{ .Values.frost.plugins.dataArray.enable }}"
+            - name: plugins_csv_enable
+              value: "{{ .Values.frost.plugins.csv.enable }}"
+            - name: plugins_geojson_enable
+              value: "{{ .Values.frost.plugins.geojson.enable }}"
+            - name: plugins_batchProcessing_enable
+              value: "{{ .Values.frost.plugins.batchProcessing.enable }}"
+            - name: plugins_odata_enable
+              value: "{{ .Values.frost.plugins.odata.enable }}"
+            - name: plugins_openApi_enable
+              value: "{{ .Values.frost.plugins.openApi.enable }}"
+
+            # Auth* Plugins settings
+            {{- if .Values.frost.auth.provider }}
+            - name: auth_allowAnonymousRead
+              value: "{{ .Values.frost.auth.allowAnonymousRead }}"
+            {{- if .Values.frost.auth.role.read }}
+            - name: auth_role_read
+              value: "{{ .Values.frost.auth.role.read }}"
+            {{- end }}
+            {{- if .Values.frost.auth.role.create }}
+            - name: auth_role_read
+              value: "{{ .Values.frost.auth.role.create }}"
+            {{- end }}
+            {{- if .Values.frost.auth.role.update }}
+            - name: auth_role_read
+              value: "{{ .Values.frost.auth.role.update }}"
+            {{- end }}
+            {{- if .Values.frost.auth.role.delete }}
+            - name: auth_role_read
+              value: "{{ .Values.frost.auth.role.delete }}"
+            {{- end }}
+            {{- if .Values.frost.auth.role.admin }}
+            - name: auth_role_read
+              value: "{{ .Values.frost.auth.role.admin }}"
+            {{- end }}
+            {{- if contains "basic" (lower .Values.frost.auth.provider) }}
+            # Basic auth requested
+            - name: auth_provider
+              value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
+            - name: auth_realmName
+              value: "{{ .Values.frost.auth.realmName }}"
+            - name: auth_plainTextPassword
+              value: "{{ .Values.frost.auth.plainTextPassword }}"
+            - name: auth_db_jndi_datasource
+              value: ""
+            - name: auth_db_driver
+              value: "{{ .Values.frost.db.driver }}"
+            - name: auth_db_url
+              value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            - name: auth_autoUpdateDatabase
+              value: "{{tpl .Values.frost.auth.db.autoUpdate . }}"
+            - name: auth_db_conn_max
+              value: "{{ .Values.frost.http.db.maximumConnection }}"
+            - name: auth_db_conn_idle_max
+              value: "{{ .Values.frost.http.db.maximumIdleConnection }}"
+            - name: auth_db_conn_idle_min
+              value: "{{ .Values.frost.http.db.maximumIdleConnection }}"
+            - name: auth_db_username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.username
+            - name: auth_db_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.password
+            {{- else if contains "keycloak" (lower .Values.frost.auth.provider) }}
+            # KeyCloak auth requested
+            - name: auth_provider
+              value: "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider"
+            {{- if .Values.frost.auth.keycloakConfig }}
+            - name: auth_keycloakConfig
+              value: "{{ .Values.frost.auth.keycloakConfig }}"
+            {{- end }}
+            {{- if .Values.frost.auth.keycloakConfigFile }}
+            - name: auth_keycloakConfig
+              value: "{{ .Values.frost.auth.keycloakConfigFile }}"
+            {{- end }}
+            {{- if .Values.frost.auth.keycloakConfigUrl }}
+            - name: auth_keycloakConfig
+              value: "{{ .Values.frost.auth.keycloakConfigUrl }}"
+            {{- end }}
+            {{- if .Values.frost.auth.keycloakConfigSecret }}
+            - name: auth_keycloakConfig
+              value: "{{ .Values.frost.auth.keycloakConfigSecret }}"
+            {{- end }}
+            {{- else }}
+            - name: auth_provider
+              value: "{{ .Values.frost.auth.provider }}"
+            {{- end }}
+            {{- end }}
+
+            # Logging variables
+            {{- if .Values.frost.logging.default }}
+            - name: FROST_LL
+              value: "{{ .Values.frost.logging.default }}"
+            {{- end }}
+            {{- if .Values.frost.logging.parser }}
+            - name: FROST_LL_parser
+              value: "{{ .Values.frost.logging.parser }}"
+            {{- end }}
+            {{- if .Values.frost.logging.queries }}
+            - name: FROST_LL_queries
+              value: "{{ .Values.frost.logging.queries }}"
+            {{- end }}
+            {{- if .Values.frost.logging.requests }}
+            - name: FROST_LL_requests
+              value: "{{ .Values.frost.logging.requests }}"
+            {{- end }}
+            {{- if .Values.frost.logging.service }}
+            - name: FROST_LL_service
+              value: "{{ .Values.frost.logging.service }}"
+            {{- end }}
+            {{- if .Values.frost.logging.settings }}
+            - name: FROST_LL_settings
+              value: "{{ .Values.frost.logging.settings }}"
+            {{- end }}
+            {{- if .Values.frost.logging.moquette }}
+            - name: FROST_LL_io_moquette
+              value: "{{ .Values.frost.logging.moquette }}"
+            {{- end }}
+            {{- if .Values.frost.logging.liquibase }}
+            - name: FROST_LL_liquibase
+              value: "{{ .Values.frost.logging.liquibase }}"
+            {{- end }}
+            {{- if .Values.frost.logging.jooq }}
+            - name: FROST_LL_org_jooq
+              value: "{{ .Values.frost.logging.jooq }}"
+            {{- end }}
