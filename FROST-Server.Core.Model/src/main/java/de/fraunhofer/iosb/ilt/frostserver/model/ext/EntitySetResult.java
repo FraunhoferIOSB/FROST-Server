@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 
 /**
  *
@@ -26,13 +27,19 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 public class EntitySetResult {
 
     private final EntitySet values;
+    private final Query query;
 
-    public EntitySetResult(EntitySet values) {
+    public EntitySetResult(EntitySet values, Query query) {
         this.values = values;
+        this.query = query;
     }
 
     public EntitySet getValues() {
         return values;
+    }
+
+    public Query getQuery() {
+        return query;
     }
 
 }

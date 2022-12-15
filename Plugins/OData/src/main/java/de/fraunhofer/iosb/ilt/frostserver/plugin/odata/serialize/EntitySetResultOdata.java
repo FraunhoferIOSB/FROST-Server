@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 
 /**
  *
@@ -28,8 +29,8 @@ public class EntitySetResultOdata extends EntitySetResult {
 
     private String context;
 
-    public EntitySetResultOdata(EntitySet values) {
-        super(values);
+    public EntitySetResultOdata(EntitySet values, Query query) {
+        super(values, query);
     }
 
     /**

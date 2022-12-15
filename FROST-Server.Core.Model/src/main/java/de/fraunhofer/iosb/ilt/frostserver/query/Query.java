@@ -75,7 +75,7 @@ public class Query {
     private List<OrderBy> orderBy;
     private boolean pkOrder = false;
     private String format;
-    private Metadata metadata = Metadata.DEFAULT;
+    private Metadata metadata;
 
     public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path) {
         this.modelRegistry = modelRegistry;
@@ -296,7 +296,7 @@ public class Query {
             if (entityType == null) {
                 validate();
             }
-            if (metadata != Metadata.INTERNAL_COMPARE) {
+            if (getMetadata() == Metadata.FULL) {
                 selectedEntityPropMain.add(ModelRegistry.EP_SELFLINK);
             }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
@@ -342,7 +342,14 @@ public class Query {
     }
 
     public Metadata getMetadata() {
+        if (metadata == null) {
+            return Metadata.DEFAULT;
+        }
         return metadata;
+    }
+
+    public boolean hasMetadata() {
+        return metadata != null;
     }
 
     public List<Expand> getExpand() {

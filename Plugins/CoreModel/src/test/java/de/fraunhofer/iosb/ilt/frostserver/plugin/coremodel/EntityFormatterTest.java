@@ -189,7 +189,7 @@ class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.add(entity);
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things, query)));
     }
 
     @Test
@@ -285,7 +285,7 @@ class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
-        compareJson(expResult, JsonWriter.writeEntityCollection(things));
+        compareJson(expResult, JsonWriter.writeEntityCollection(things, query));
     }
 
     @Test

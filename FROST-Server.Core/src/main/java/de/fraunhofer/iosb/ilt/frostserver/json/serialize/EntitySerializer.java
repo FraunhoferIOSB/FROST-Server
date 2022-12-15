@@ -73,9 +73,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         this.nextLinkField = nextLinkField;
         this.serialiseAllNulls = nulls;
         propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, entity, gen) -> {
-            final String value = entity.getSelfLink();
-            if (value != null) {
-                gen.writeStringField(selfLinkField, value);
+            if (entity.getQuery().getMetadata() == Metadata.FULL) {
+                final String value = entity.getSelfLink();
+                if (value != null) {
+                    gen.writeStringField(selfLinkField, value);
+                }
             }
         });
     }
@@ -100,16 +102,23 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         Query query = entity.getQuery();
         Metadata metadata = Metadata.DEFAULT;
         if (query == null) {
-            navigationProps = Collections.emptySet();
-            entityProps = entity.getEntityType().getEntityProperties();
-            entityProps.add(ModelRegistry.EP_SELFLINK);
-            expand = null;
+            LOGGER.error("Received entity without Query: {}", entity);
+            throw new IllegalArgumentException("Entity without query.");
         } else {
             metadata = query.getMetadata();
-            if (metadata == Metadata.OFF || metadata == Metadata.NONE || metadata == Metadata.MINIMAL) {
-                navigationProps = Collections.emptySet();
-            } else {
-                navigationProps = query.getSelectNavProperties(query.hasParentExpand());
+            switch (metadata) {
+                case OFF:
+                case NONE:
+                case MINIMAL:
+                    navigationProps = Collections.emptySet();
+                    break;
+
+                case INTERNAL_COMPARE:
+                    navigationProps = query.getSelectNavProperties(query.hasParentExpand());
+                    break;
+
+                default:
+                    navigationProps = query.getSelectNavProperties(query.hasParentExpand());
             }
             entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
             expand = query.getExpand();
@@ -168,7 +177,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         Object entityOrSet = np.getFrom(entity);
         if (np.isEntitySet()) {
             EntitySet entitySet = (EntitySet) entityOrSet;
-            writeEntitySet(np, entitySet, gen);
+            writeEntitySet(np, entitySet, gen, exp.getSubQuery());
         } else {
             Entity expandedEntity = (Entity) entityOrSet;
             if (expandedEntity == null) {
@@ -184,7 +193,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
     }
 
-    private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen) throws IOException {
+    private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen, Query query) throws IOException {
         String jsonName = np.getJsonName();
         if (entitySet == null) {
             gen.writeArrayFieldStart(jsonName);
@@ -200,9 +209,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             gen.writeObject(child);
         }
         gen.writeEndArray();
-        String nextLink = entitySet.getNextLink();
-        if (nextLink != null) {
-            gen.writeStringField(jsonName + nextLinkField, nextLink);
+        if (query.getMetadata() != Metadata.OFF) {
+            String nextLink = entitySet.getNextLink();
+            if (nextLink != null) {
+                gen.writeStringField(jsonName + nextLinkField, nextLink);
+            }
         }
     }
 

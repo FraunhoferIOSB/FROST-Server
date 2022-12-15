@@ -46,6 +46,7 @@ Much funktionality is now controlled by plugins, from the data model to result f
 First update to 1.14.x and run the Update Database script to ensure the database schema is fully up to date.
 After this version 2.x can be used on the same Datasbase.
 
+FROST 2.x does not allow `$resultMetadata` in `$expand`.
 
 **New Features**
 * The data model provided by FROST-Server is now completely defined in plugins.

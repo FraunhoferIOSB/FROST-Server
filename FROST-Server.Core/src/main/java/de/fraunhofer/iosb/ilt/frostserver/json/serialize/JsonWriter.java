@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.OffsetDateTime;
@@ -91,12 +92,12 @@ public class JsonWriter {
         return getObjectMapper().writeValueAsString(entity);
     }
 
-    public static void writeEntityCollection(Writer writer, EntitySet entityCollection) throws IOException {
-        getObjectMapper().writeValue(writer, new EntitySetResult(entityCollection));
+    public static void writeEntityCollection(Writer writer, EntitySet entityCollection, Query query) throws IOException {
+        getObjectMapper().writeValue(writer, new EntitySetResult(entityCollection, query));
     }
 
-    public static String writeEntityCollection(EntitySet entityCollection) throws IOException {
-        return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection));
+    public static String writeEntityCollection(EntitySet entityCollection, Query query) throws IOException {
+        return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection, query));
     }
 
     public static void writeObject(Writer writer, Object object) throws IOException {

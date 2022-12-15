@@ -162,6 +162,9 @@ public class Expand {
 
         }
         if (subQuery != null && validatedPath instanceof NavigationPropertyMain) {
+            if (!subQuery.hasMetadata()) {
+                subQuery.setMetadata(parentQuery.getMetadata());
+            }
             subQuery.validate(validatedPath.getEntityType());
         }
     }

@@ -193,7 +193,7 @@ class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.add(entity);
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things, query)));
     }
 
     @Test
@@ -290,7 +290,7 @@ class EntityFormatterTest {
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.setCount(1);
-        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
+        assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things, query)));
     }
 
     private boolean jsonEqual(String string1, String string2) {
