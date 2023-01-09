@@ -1,5 +1,10 @@
 # Changelog
 
+## Development version 2.0.7
+
+**Internal changes & Bugfixes**
+
+
 ## Release version 2.0.6
 
 **Internal changes & Bugfixes**
