@@ -80,6 +80,9 @@ public class SettingsMigrator {
 
     private void migrateOldSettings(Properties properties, String key, Map<String, ReplaceList> replaces) {
         String oldValue = properties.getProperty(key);
+        if (oldValue == null) {
+            return;
+        }
         ReplaceList newValues = replaces.get(oldValue);
         if (newValues != null) {
             LOGGER.warn("Converting settings of key '{}' with old value '{}'", key, oldValue);

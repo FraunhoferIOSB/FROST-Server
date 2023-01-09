@@ -24,6 +24,7 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 * Fixed #1246: phenomenonTime not serialised in CSV ResultFormatter.
 * Fixed NPE in auth module on DatabaseStatus path.
 * Improved consistency of 4xx logging. (pbaumard)
+* Fixed handling of default settings.
 
 
 ## Release version 2.0.0
