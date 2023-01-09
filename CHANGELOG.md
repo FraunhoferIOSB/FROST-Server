@@ -1,13 +1,19 @@
 # Changelog
 
-## Development version 2.0.5
+## Release version 2.0.6
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
+* Fixed handling of default settings.
+
+
+## Release version 2.0.5
 
 **Internal changes & Bugfixes**
 * Updated dependency versions.
 * Fixed NPE in auth module on DatabaseStatus path.
 * Fixed implementation of `$resultMetadata` sometimes causing Exceptions.
 * Updated the Helm charts to have all options.
-* Fixed handling of default settings.
 
 
 ## Release version 2.0.4
