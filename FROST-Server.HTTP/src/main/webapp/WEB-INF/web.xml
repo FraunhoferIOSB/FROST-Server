@@ -37,11 +37,7 @@
 
 
     <!--Location for properties for deploying in Wildfly-->
-    <context-param>
-        <description>The version tag of the API used in the URL.</description>
-        <param-name>ApiVersion</param-name>
-        <param-value>v1.0</param-value>
-    </context-param>
+    <!--
     <context-param>
         <description>The base URL of the SensorThings Server without version.</description>
         <param-name>serviceRootUrl</param-name>
@@ -77,16 +73,10 @@
         <param-name>mqtt.mqttServerImplementationClass</param-name>
         <param-value>de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer</param-value>
     </context-param>
-    <!-- persistence setting -->
     <context-param>
-        <description>The java class used for persistence (must implement PersistenceManaher interface)</description>
+        <description>The java class used for persistence (must implement PersistenceManager interface)</description>
         <param-name>persistence.persistenceManagerImplementationClass</param-name>
-        <param-value>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong</param-value>
-        <!-- All options:
-            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
-            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
-            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
-        -->
+        <param-value>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager</param-value>
     </context-param>
     <context-param>
         <description>Automatically apply database updates.</description>
@@ -95,13 +85,13 @@
     </context-param>
     <context-param>
         <description>Always add an 'orderby=id asc' to queries to ensure consistent paging.</description>
-        <param-name>persistence.alwaysOrderbyId</param-name>
+        <param-name>alwaysOrderbyId</param-name>
         <param-value>false</param-value>
     </context-param>
-    <!-- JNDO Database connection. Does suppport connection pooling. Wildfly requires java:/ on a datasource -->
     <context-param>
-        <description>JNDI data source name</description>
+        <description>JNDI data source name. Wildfly requires java:/ on a datasource</description>
         <param-name>persistence.db_jndi_datasource</param-name>
         <param-value>jdbc/sensorThings</param-value>
     </context-param>
+    -->
 </web-app>
