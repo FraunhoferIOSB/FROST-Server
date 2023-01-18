@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
-import io.moquette.broker.config.MemoryConfig;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptConnectMessage;
@@ -54,7 +53,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
@@ -85,11 +83,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
     @DefaultValue("memory")
     public static final String TAG_PERSISTENT_STORE_TYPE = "persistentStoreType";
-    @DefaultValueInt(1024)
-    public static final String TAG_SESSION_QUEUE_SIZE = BrokerConstants.SESSION_QUEUE_SIZE;
-    @DefaultValueInt(BrokerConstants.DEFAULT_SESSION_TIMEOUT_SECONDS)
-    public static final String TAG_SESSION_TIMEOUT_SECONDS = BrokerConstants.SESSION_TIMEOUT_SECONDS_NAME;
-
 
     private static final String VALUE_STORE_TYPE_H2 = "h2";
 
@@ -176,21 +169,15 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         mqttBroker = new Server();
         final List<? extends InterceptHandler> userHandlers = Arrays.asList(new AbstractInterceptHandlerImpl());
 
-        IConfig config = new MemoryConfig(new Properties());
         MqttSettings mqttSettings = settings.getMqttSettings();
         Settings customSettings = mqttSettings.getCustomSettings();
+        IConfig config = new ConfigWrapper(customSettings);
 
-        boolean flushImmediate = customSettings.getBoolean(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, true);
-        config.setProperty(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, Boolean.toString(flushImmediate));
+        // Ensure the immediate_flush property has a default of true.
+        customSettings.getBoolean(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, true);
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
-
-        config.setProperty(BrokerConstants.SESSION_QUEUE_SIZE, customSettings.get(TAG_SESSION_QUEUE_SIZE, getClass()));
-        config.setProperty(BrokerConstants.SESSION_TIMEOUT_SECONDS_NAME, customSettings.get(TAG_SESSION_TIMEOUT_SECONDS, getClass()));
-
-        final String nettyMaxMessageSize = customSettings.get(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME, Integer.toString(BrokerConstants.DEFAULT_NETTY_MAX_BYTES_IN_MESSAGE));
-        config.setProperty(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME, nettyMaxMessageSize);
 
         String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
         if (VALUE_STORE_TYPE_H2.equalsIgnoreCase(persistentStoreType)) {
