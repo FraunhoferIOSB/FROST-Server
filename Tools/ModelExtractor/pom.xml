@@ -21,7 +21,7 @@
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
 
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-        <openjfx.version>19</openjfx.version>
+        <openjfx.version>19.0.2.1</openjfx.version>
     </properties>
 
     <build>
@@ -121,17 +121,14 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgres.version}</version>
         </dependency>
         <dependency>
             <groupId>net.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
-            <version>${postgis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
-            <version>${jooq.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -146,27 +143,22 @@
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
             <artifactId>Configurable</artifactId>
-            <version>${configurable.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
             <artifactId>FROST-Client</artifactId>
-            <version>${FROST-Client.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>${commons-csv.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
