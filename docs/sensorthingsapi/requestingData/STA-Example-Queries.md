@@ -17,7 +17,8 @@ All things with an Id greater equal 5 and lessequal 20:
 `v1.1/Things?$filter=id ge 15 and id le 20`
 
 ## Overlapping time frames
-The phenomenonTime and result of the first 1000 observations, ordered by phenomenonTime that overlap with the time frame from 2017-10-10 07:00:00 UTC to 2017-10-11 07:00:00 UTC (1 day):
+The phenomenonTime and result of the first 1000 observations, ordered by phenomenonTime that
+ overlap with the time frame from 2017-10-10 07:00:00 UTC to 2017-10-11 07:00:00 UTC (1 day):
 ```
 v1.1/Observations
   ?$orderby=phenomenonTime asc
@@ -25,6 +26,7 @@ v1.1/Observations
   &$select=phenomenonTime, result
   &$filter=overlaps(phenomenonTime, 2017-10-10T07:00:00Z/2017-10-11T07:00:00Z)
 ```
+Don't forget to URL-Encode.
 
 ## The previous day
 The observations of a Datastream, for the last day:

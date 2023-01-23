@@ -41,6 +41,25 @@ This request provides the following response:
 }
 ```
 
+## Encoding filter parameters
+
+When adding constant values in filters, like the `5` in the example above, care has to be taken that those
+values are properly encoded so the server correctly recognises the value. The following table lists
+how constants are encoded in URLs.
+
+URLs must also be URL-Encoded before being sent to the server. In most cases the browser takes care of this,
+but in case of times with time-zones that contain a `+` character, this URL-Encoding does not always happen
+automatically.
+
+
+Type | encoding | example
+--- | --- | ---
+numbers | direct in URL | `result gt 5`
+strings | quoted with `'`, quotes doubled | `name eq 'Hylke''s Thing'`
+times | direct in URL | `phenomenonTime ge phenomenonTime ge 2022-12-23T13:21:31%2B01:00` (URL Encoded from `2022-12-23T13:21:31+01:00`)
+durations | `duration'<ISO 8601 code>'` | `phenomenonTime gt now() sub duration'P1D'`
+geometries | `geography'<WKT geometry>'` | `st_within(location, geography'POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))')`
+
 
 ## Operators
 
@@ -88,7 +107,10 @@ For example:
 
 ### String Functions
 
-String matches are case sensitive.
+String matches are case sensitive. String constants are quoted with single-quotes (`'`) while single-quotes are doubled:
+```
+name eq 'Bob''s Thing'
+```
 
 Function | Description &amp; Example
 --- | --- 
@@ -146,7 +168,14 @@ Function | Description &amp; Example
 ### Temporal Functions
 
 Temporal functions other than `now()` operate on the time as stored in the server.
-For FROST-Server this is always in the timezone UTC, but for other servers this may also be the timezone of the original value as it was stored.
+For FROST-Server this is always in the time zone UTC, but for other servers this may also be the time zone of the original value as it was stored.
+For time-constants, use ISO8601 format, with time zone, without quotes. Make sure the URL is correctly URL-Encoded so the `+` in the time zone is not lost.
+
+```
+Observations?$filter=phenomenonTime ge 2022-01-01T00:00:00+00:00
+URL-Encodes to
+Observations?$filter=phenomenonTime ge 2022-01-01T00:00:00%2B00:00
+```
 
 Function | Description &amp; Example
 --- | --- 
