@@ -45,7 +45,7 @@
         <httpclient.version>4.5.14</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
         <jackson.version>2.14.1</jackson.version>
-        <jackson-databind.version>${jackson.version}</jackson-databind.version>
+        <jackson-databind.version>2.14.2</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.12</javacc.version>
         <javacc-maven-plugin.version>3.0.1</javacc-maven-plugin.version>
