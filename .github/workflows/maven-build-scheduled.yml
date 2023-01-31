@@ -80,7 +80,7 @@ jobs:
 
 
     - name: Build and push - HTTP
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -93,7 +93,7 @@ jobs:
 
 
     - name: Build and push - MQTTP
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -106,7 +106,7 @@ jobs:
 
 
     - name: Build and push - MQTT
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
