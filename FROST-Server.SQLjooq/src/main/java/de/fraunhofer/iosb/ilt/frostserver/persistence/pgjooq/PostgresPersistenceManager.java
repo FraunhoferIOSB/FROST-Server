@@ -359,7 +359,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException {
+    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException, NoSuchEntityException {
         if (!np.isEntitySet() && np.isRequired()) {
             throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
         }
@@ -370,7 +370,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
         Relation<?> relation = sourceTable.findRelation(np.getName());
         Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getId());
+        if (!entityFactories.entityExists(this, sourceEntity)) {
+            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getId() + ")");
+        }
         Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getId());
+        if (!entityFactories.entityExists(this, targetEntity)) {
+            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getId() + ")");
+        }
         relation.unLink(this, sourceEntity, targetEntity, np);
     }
 

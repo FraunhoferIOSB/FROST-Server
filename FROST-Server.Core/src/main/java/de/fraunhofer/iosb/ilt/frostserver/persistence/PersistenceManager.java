@@ -86,8 +86,10 @@ public interface PersistenceManager extends AutoCloseable {
      * @param target the target entity of the relation.
      * @throws IncompleteEntityException If the relation is required to exist
      * for either the source or target.
+     * @throws NoSuchEntityException If the source or target entity does not
+     * exist.
      */
-    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException;
+    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException, NoSuchEntityException;
 
     /**
      * Update the given entity.

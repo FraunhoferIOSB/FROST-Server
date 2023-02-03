@@ -138,9 +138,12 @@ public class PathParser extends Visitor {
     }
 
     private void addAsEntitySet(NavigationPropertyMain type) {
-        if (type instanceof NavigationPropertyEntitySet) {
-            PathElementEntitySet espa = new PathElementEntitySet((NavigationPropertyEntitySet) type, resourcePath.getLastElement());
-            resourcePath.addPathElement(espa, true, false);
+        if (type instanceof NavigationPropertyEntitySet npEntitySet) {
+            final PathElement lastElement = resourcePath.getLastElement();
+            if (lastElement instanceof PathElementEntity peEntity) {
+                PathElementEntitySet espa = new PathElementEntitySet(npEntitySet, peEntity);
+                resourcePath.addPathElement(espa, true, false);
+            }
         } else {
             throw new IllegalArgumentException("NavigationProperty should be of type NavigationPropertyEntitySet, got: " + StringHelper.cleanForLogging(type));
         }
@@ -214,20 +217,19 @@ public class PathParser extends Visitor {
             throw new IllegalArgumentException("A property name can not follow a set: " + StringHelper.cleanForLogging(node.toString()));
         }
 
-        if (parent instanceof PathElementEntity) {
-            PathElementEntity parentEntity = (PathElementEntity) parent;
+        if (parent instanceof PathElementEntity parentEntity) {
             parentType = parentEntity.getEntityType();
             Property property = parentType.getProperty(name);
-            if (property instanceof EntityPropertyMain) {
-                addAsEntityProperty((EntityPropertyMain) property);
+            if (property instanceof EntityPropertyMain epMain) {
+                addAsEntityProperty(epMain);
                 return;
             }
-            if (property instanceof NavigationPropertyEntity) {
-                addAsEntity((NavigationPropertyEntity) property, null);
+            if (property instanceof NavigationPropertyEntity npEntity) {
+                addAsEntity(npEntity, null);
                 return;
             }
-            if (property instanceof NavigationPropertyEntitySet) {
-                addAsEntitySet((NavigationPropertyEntitySet) property);
+            if (property instanceof NavigationPropertyEntitySet npEntitySet) {
+                addAsEntitySet(npEntitySet);
                 return;
             }
             throw new IllegalArgumentException("EntityType " + parentType + " does not have a property: " + StringHelper.cleanForLogging(node.getImage()));
@@ -269,8 +271,8 @@ public class PathParser extends Visitor {
 
     void handleIdentifierToken(Token node) throws IllegalArgumentException {
         final PathElement parent = resourcePath.getLastElement();
-        if (parent instanceof PathElementEntitySet) {
-            final PathElementEntitySet parentSet = (PathElementEntitySet) parent;
+        if (parent instanceof PathElementEntitySet peEntitySet) {
+            final PathElementEntitySet parentSet = peEntitySet;
             addAsEntity(parentSet.getEntityType(), node.getImage());
         } else {
             throw new IllegalArgumentException("An ID must follow a set: " + StringHelper.cleanForLogging(node.getImage()));

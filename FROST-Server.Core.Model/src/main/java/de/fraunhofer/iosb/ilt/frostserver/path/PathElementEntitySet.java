@@ -29,9 +29,9 @@ public class PathElementEntitySet implements PathElementEntityType {
 
     private final NavigationPropertyEntitySet np;
     private final EntityType entityType;
-    private PathElement parent;
+    private PathElementEntity parent;
 
-    public PathElementEntitySet(NavigationPropertyEntitySet np, PathElement parent) {
+    public PathElementEntitySet(NavigationPropertyEntitySet np, PathElementEntity parent) {
         this.np = np;
         this.entityType = null;
         this.parent = parent;
@@ -64,13 +64,19 @@ public class PathElementEntitySet implements PathElementEntityType {
     }
 
     @Override
-    public PathElement getParent() {
+    public PathElementEntity getParent() {
         return parent;
     }
 
     @Override
     public void setParent(PathElement parent) {
-        this.parent = parent;
+        if (parent instanceof PathElementEntity pathElementEntity) {
+            this.parent = pathElementEntity;
+        } else if (parent == null) {
+            this.parent = null;
+        } else {
+            throw new IllegalArgumentException("The parent of a Set must be an Entity.");
+        }
     }
 
     @Override

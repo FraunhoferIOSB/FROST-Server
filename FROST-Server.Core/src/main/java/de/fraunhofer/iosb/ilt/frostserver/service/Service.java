@@ -851,99 +851,137 @@ public class Service implements AutoCloseable {
         }
     }
 
+    private static record LinkData(
+            PathElementEntity sourceEntity,
+            NavigationPropertyEntitySet navigationProperty,
+            PathElementEntity targetEntity,
+            String message) {
+
+        public static LinkData ok(PathElementEntity sourceEntity, NavigationPropertyEntitySet navigationProperty, PathElementEntity targetEntity) {
+            return new LinkData(sourceEntity, navigationProperty, targetEntity, null);
+        }
+
+        public static LinkData error(String message) {
+            return new LinkData(null, null, null, message);
+        }
+    }
+
     private ServiceResponse executeDeleteRef(ServiceRequest request, ServiceResponse response, ResourcePath path) {
         // Three Options:
         // 1. DELETE http://host/service/Categories(1)/Products/$ref?$id=../../Products(0)
         // 2. DELETE http://host/service/Categories(1)/Products(0)/$ref
         // 3. DELETE http://host/service/Products(0)/Category/$ref  (1-to-many can be deleted from the other side)
-        PersistenceManager pm = getPm();
+        final PersistenceManager pm = getPm();
         if (!pm.validatePath(path)) {
             maybeRollbackAndClose();
             return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
         }
-        PathElementEntity sourceEntity;
-        NavigationPropertyEntitySet navigationProperty;
-        PathElementEntity targetEntity;
-        List<PathElement> pathElements = path.getPathElements();
+
+        final List<PathElement> pathElements = path.getPathElements();
         if (pathElements.size() < 2) {
             return errorResponse(response, 400, "Path must contain at least an Entity and a NavigationProperty to delete a reference.");
         }
 
+        final LinkData linkData;
         final PathElement lastElement = path.getLastElement();
         if (lastElement instanceof PathElementEntitySet containingSet) {
             // Option 1
-            PathElement precedingElement = pathElements.get(pathElements.size() - 2);
-            if (precedingElement instanceof PathElementEntity) {
-                navigationProperty = containingSet.getNavigationProperty();
-                sourceEntity = (PathElementEntity) containingSet.getParent();
-            } else {
-                return errorResponse(response, 400, "NavigationProperty must be preceded by an Entity.");
-            }
-            Query query;
-            try {
-                query = QueryParser
-                        .parseQuery(request.getUrlQuery(), settings, path)
-                        .validate();
-                settings.getPluginManager().parsedQuery(settings, request, query);
-                String targetUrl = query.getId();
-                final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
-                final Version version = request.getVersion();
-                final String versionUrl = version.urlPart;
-                if (!targetUrl.startsWith(serviceRootUrl)) {
-                    // id is a relative url, resolve against the request url.
-                    URL requestUrl = new URL(serviceRootUrl + '/' + versionUrl + request.getUrlPath());
-                    targetUrl = new URL(requestUrl, targetUrl).toString();
-                }
-                if (!targetUrl.startsWith(serviceRootUrl)) {
-                    return errorResponse(response, 400, "$id parameter must be a relative URL or an absolute URL in this service (Thus start with '" + serviceRootUrl + "'.");
-                }
-                targetUrl = targetUrl.substring(serviceRootUrl.length() + 1);
-                if (!targetUrl.startsWith(versionUrl)) {
-                    return errorResponse(response, 400, "$id parameter must use the same version as the request ('" + versionUrl + "').");
-                }
-                targetUrl = targetUrl.substring(versionUrl.length());
-                ResourcePath targetPath = PathParser.parsePath(modelRegistry, serviceRootUrl, version, targetUrl);
-                PathElement lastTargetElement = targetPath.getLastElement();
-                if (lastTargetElement instanceof PathElementEntity pathElementEntity) {
-                    targetEntity = pathElementEntity;
-                } else {
-                    return errorResponse(response, 400, "$id parameter does not point to an Entity.");
-                }
-
-            } catch (IllegalArgumentException | MalformedURLException e) {
-                return errorResponse(response, 400, "Failed to parse query: " + e.getMessage());
-            }
-        } else if ((lastElement instanceof PathElementEntity)) {
+            linkData = parseForRefWithId(request, path, containingSet);
+        } else if ((lastElement instanceof PathElementEntity peEntity)) {
             // Option 2 or 3
-            final int lastIdx = pathElements.size() - 1;
-            PathElement precedingElement = pathElements.get(lastIdx - 1);
-            if (lastElement instanceof PathElementEntity && precedingElement instanceof PathElementEntitySet) {
-                targetEntity = (PathElementEntity) lastElement;
-                PathElementEntitySet containingSet = (PathElementEntitySet) precedingElement;
-                navigationProperty = containingSet.getNavigationProperty();
-                sourceEntity = (PathElementEntity) containingSet.getParent();
-            } else {
-                return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
-            }
-            if (sourceEntity.getId() == null || targetEntity.getId() == null) {
-                return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
-            }
+            linkData = parseForRefInPath(path, peEntity);
         } else {
             return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
         }
-
-        if (!navigationProperty.getEntityType().equals(targetEntity.getEntityType())) {
-            return errorResponse(response, 400, "Target Entity does not match NavigationProperty type: " + targetEntity.getEntityType().entityName + " != " + navigationProperty.getEntityType().entityName);
+        if (linkData.message != null) {
+            return errorResponse(response, 400, linkData.message);
+        }
+        if (!linkData.navigationProperty.getEntityType().equals(linkData.targetEntity.getEntityType())) {
+            return errorResponse(response, 400, "Target Entity does not match NavigationProperty type: " + linkData.targetEntity.getEntityType().entityName + " != " + linkData.navigationProperty.getEntityType().entityName);
         }
 
         try {
-            pm.deleteRelation(sourceEntity, navigationProperty, targetEntity);
+            pm.deleteRelation(linkData.sourceEntity, linkData.navigationProperty, linkData.targetEntity);
             maybeCommitAndClose();
             return successResponse(response, 204, "");
-        } catch (IncompleteEntityException e) {
+        } catch (IncompleteEntityException ex) {
             pm.rollbackAndClose();
-            return errorResponse(response, 405, e.getMessage());
+            return errorResponse(response, 405, ex.getMessage());
+        } catch (NoSuchEntityException ex) {
+            return errorResponse(response, 404, ex.getMessage());
         }
+    }
+
+    private LinkData parseForRefWithId(ServiceRequest request, ResourcePath path, PathElementEntitySet containingSet) {
+        PathElementEntity sourceEntity;
+        NavigationPropertyEntitySet navigationProperty;
+        final List<PathElement> pathElements = path.getPathElements();
+        final PathElement precedingElement = pathElements.get(pathElements.size() - 2);
+        if (precedingElement instanceof PathElementEntity) {
+            navigationProperty = containingSet.getNavigationProperty();
+            sourceEntity = containingSet.getParent();
+        } else {
+            return LinkData.error("NavigationProperty must be preceded by an Entity.");
+        }
+        Query query;
+        try {
+            query = QueryParser
+                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .validate();
+            settings.getPluginManager().parsedQuery(settings, request, query);
+        } catch (IllegalArgumentException ex) {
+            return LinkData.error("Failed to parse query: " + ex.getMessage());
+        }
+        String targetUrl = query.getId();
+        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
+        final Version version = request.getVersion();
+        final String versionUrl = version.urlPart;
+        if (!targetUrl.startsWith(serviceRootUrl)) {
+            try {
+                // id is a relative url, resolve against the request url.
+                URL requestUrl = new URL(serviceRootUrl + '/' + versionUrl + request.getUrlPath());
+                targetUrl = new URL(requestUrl, targetUrl).toString();
+            } catch (MalformedURLException ex) {
+                return LinkData.error("Failed to parse URL in $id: " + ex.getMessage());
+            }
+        }
+        if (!targetUrl.startsWith(serviceRootUrl)) {
+            return LinkData.error("$id parameter must be a relative URL or an absolute URL in this service (Thus start with '" + serviceRootUrl + "'.");
+        }
+        targetUrl = targetUrl.substring(serviceRootUrl.length() + 1);
+        if (!targetUrl.startsWith(versionUrl)) {
+            return LinkData.error("$id parameter must use the same version as the request ('" + versionUrl + "').");
+        }
+        targetUrl = targetUrl.substring(versionUrl.length());
+        ResourcePath targetPath = PathParser.parsePath(modelRegistry, serviceRootUrl, version, targetUrl);
+        PathElement lastTargetElement = targetPath.getLastElement();
+        PathElementEntity targetEntity;
+        if (lastTargetElement instanceof PathElementEntity pathElementEntity) {
+            targetEntity = pathElementEntity;
+        } else {
+            return LinkData.error("$id parameter does not point to an Entity.");
+        }
+
+        return LinkData.ok(sourceEntity, navigationProperty, targetEntity);
+    }
+
+    private LinkData parseForRefInPath(ResourcePath path, PathElementEntity lastElement) {
+        PathElementEntity sourceEntity;
+        NavigationPropertyEntitySet navigationProperty;
+        final List<PathElement> pathElements = path.getPathElements();
+        final int lastIdx = pathElements.size() - 1;
+        PathElement precedingElement = pathElements.get(lastIdx - 1);
+        if (precedingElement instanceof PathElementEntitySet peEntitySet) {
+            PathElementEntitySet containingSet = peEntitySet;
+            navigationProperty = containingSet.getNavigationProperty();
+            sourceEntity = containingSet.getParent();
+        } else {
+            return LinkData.error("Not a valid DELETE-Reference action.");
+        }
+        if (sourceEntity.getId() == null || lastElement.getId() == null) {
+            return LinkData.error("Could not find Id for source or target entity.");
+        }
+        return LinkData.ok(sourceEntity, navigationProperty, lastElement);
     }
 
     public static ServiceResponse successResponse(ServiceResponse response, Version.CannedResponse cr) {

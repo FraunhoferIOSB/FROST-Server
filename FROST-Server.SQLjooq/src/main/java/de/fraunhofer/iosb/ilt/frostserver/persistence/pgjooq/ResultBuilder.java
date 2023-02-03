@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -210,8 +209,8 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
-        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType());
-        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
+        PathElementEntitySet parentCollection = new PathElementEntitySet(entity.getEntityType());
+        PathElementEntity parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
@@ -221,8 +220,8 @@ public class ResultBuilder implements ResourcePathVisitor {
             ePath.addPathElement(childPe, true, false);
         } else {
             PathElementEntity childPe;
-            if (firstNp instanceof NavigationPropertyEntity) {
-                childPe = new PathElementEntity((NavigationPropertyEntity) firstNp, parent);
+            if (firstNp instanceof NavigationPropertyEntity npe) {
+                childPe = new PathElementEntity(npe, parent);
             } else {
                 childPe = new PathElementEntity(firstNp.getEntityType(), parent);
             }
@@ -264,7 +263,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private int timeCountQueryRecord(ResultQuery<Record> query) {
-        try ( Cursor<Record> countCursor = timeQuery(query)) {
+        try (Cursor<Record> countCursor = timeQuery(query)) {
             return countCursor
                     .fetchNext()
                     .get(0, Integer.class);
@@ -272,7 +271,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private int timeCountQuery(ResultQuery<Record1<Integer>> query) {
-        try ( Cursor<Record1<Integer>> countCursor = timeQuery(query)) {
+        try (Cursor<Record1<Integer>> countCursor = timeQuery(query)) {
             return countCursor
                     .fetchNext()
                     .component1();

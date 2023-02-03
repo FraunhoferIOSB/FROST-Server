@@ -42,6 +42,7 @@ import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchTests;
 import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MdDateTimeTests;
+import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamObsPropTests;
 import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests;
 import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
@@ -125,6 +126,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     BatchTests.Implementation11.class,
     MultiDatastreamTests.Implementation10.class,
     MultiDatastreamTests.Implementation11.class,
+    MultiDatastreamObsPropTests.Implementation10.class,
+    MultiDatastreamObsPropTests.Implementation11.class,
     MdDateTimeTests.Implementation10.class,
     MdDateTimeTests.Implementation11.class,
     DataArrayTests.Implementation10.class,
@@ -164,6 +167,7 @@ public class TestSuite {
     public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
     public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_UUID;
     public static final String VAL_ID_TYPE_OBSERVATIONS = Constants.VALUE_ID_TYPE_LONG;
+    public static final String VAL_ID_TYPE_OBSERVEDPROPERTIES = Constants.VALUE_ID_TYPE_LONG;
     public static final String VAL_ID_TYPE_HIST_LOCATIONS = Constants.VALUE_ID_TYPE_LONG;
     public static final String VAL_PG_DB = "sensorthings";
     public static final String VAL_PG_USER = "sensorthings";
@@ -321,6 +325,7 @@ public class TestSuite {
 
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_DEFAULT, VAL_ID_TYPE_DEFAULT);
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBSERVATION, VAL_ID_TYPE_OBSERVATIONS);
+        handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBS_PROPERTY, VAL_ID_TYPE_OBSERVEDPROPERTIES);
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_HIST_LOCATION, VAL_ID_TYPE_HIST_LOCATIONS);
 
         handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
@@ -387,6 +392,7 @@ public class TestSuite {
 
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_DEFAULT, VAL_ID_TYPE_DEFAULT);
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBSERVATION, VAL_ID_TYPE_OBSERVATIONS);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBS_PROPERTY, VAL_ID_TYPE_OBSERVEDPROPERTIES);
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_HIST_LOCATION, VAL_ID_TYPE_HIST_LOCATIONS);
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
