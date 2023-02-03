@@ -52,7 +52,7 @@ To get this data into our map, we first extend the query so that we get the data
   * ObseredProperty
   * Last Observation
 
-To do this, we have to modify the `epand` section of the STAM map configuration.
+To do this, we have to modify the `expand` section of the STAM map configuration.
 At first we only do this for the first zoom level, once we're happy with how it works, we can do it for the rest.
 
 ```
