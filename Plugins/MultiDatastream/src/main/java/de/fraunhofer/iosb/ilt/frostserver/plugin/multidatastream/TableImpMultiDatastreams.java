@@ -165,7 +165,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         );
         final TableImpMultiDatastreamsObsProperties tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
-        registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npObservedPropertiesMDs, this, tableMdOp, tableObsProp)
+        registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npObservedPropertiesMDs, this, tableMdOp, tableObsProp, true)
                 .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties table) -> table.colRank)
                 .setAlwaysDistinct(true)
                 .setSourceFieldAcc(TableImpMultiDatastreams::getId)
@@ -192,7 +192,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         // Now we register the inverse relation on ObservedProperties
         final TableImpMultiDatastreamsObsProperties tableMDsOpsProp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProps = tables.getTableForClass(TableImpObsProperties.class);
-        tableObsProps.registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npMultiDatastreamsObsProp, tableObsProps, tableMDsOpsProp, getThis())
+        tableObsProps.registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npMultiDatastreamsObsProp, tableObsProps, tableMDsOpsProp, getThis(), false)
                 .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties table) -> table.colRank)
                 .setSourceFieldAcc(TableImpObsProperties::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)

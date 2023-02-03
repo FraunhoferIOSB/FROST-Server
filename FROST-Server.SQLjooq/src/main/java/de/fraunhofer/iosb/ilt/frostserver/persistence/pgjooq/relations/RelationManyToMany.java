@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,6 +163,16 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         pm.getDslContext().insertInto(linkTable)
                 .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
                 .set(targetLinkFieldAcc.getField(linkTable), targetId)
+                .execute();
+    }
+
+    @Override
+    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+        final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(source.getId().getValue());
+        final Condition targetCondition = targetLinkFieldAcc.getField(linkTable).eq(target.getId().getValue());
+        pm.getDslContext().deleteFrom(linkTable)
+                .where(sourceCondition.and(targetCondition))
+                .limit(1)
                 .execute();
     }
 

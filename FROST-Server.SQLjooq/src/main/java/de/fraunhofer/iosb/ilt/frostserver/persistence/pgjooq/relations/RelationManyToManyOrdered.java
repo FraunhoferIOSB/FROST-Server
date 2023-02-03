@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -27,6 +28,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table using a link table ordered
@@ -39,14 +44,18 @@ import org.jooq.Field;
  */
 public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaTable<L>, T extends StaMainTable<T>> extends RelationManyToMany<S, L, T> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationManyToManyOrdered.class.getName());
+
     /**
      * The field used for the ordering.
      */
     private FieldAccessor<L> orderFieldAcc;
     private boolean alwaysDistinct = false;
+    private boolean orderOnSource = true;
 
-    public RelationManyToManyOrdered(NavigationPropertyMain navProp, S source, L linkTable, T target) {
+    public RelationManyToManyOrdered(NavigationPropertyMain navProp, S source, L linkTable, T target, boolean orderOnSource) {
         super(navProp, source, linkTable, target);
+        this.orderOnSource = orderOnSource;
     }
 
     public RelationManyToManyOrdered<S, L, T> setOrderFieldAcc(FieldAccessor<L> orderFieldAcc) {
@@ -85,16 +94,53 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
         final Field<Object> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
         final Field<Object> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
         final Field<Integer> orderField = orderFieldAcc.getField(linkTable);
+        final SelectConditionStep<Record1<Integer>> orderValue;
+        if (orderOnSource) {
+            orderValue = dslContext.selectCount()
+                    .from(linkTable)
+                    .where(sourceLinkField.equal(sourceId));
+        } else {
+            orderValue = dslContext.selectCount()
+                    .from(linkTable)
+                    .where(sourceLinkField.equal(targetId));
+        }
         dslContext.insertInto(linkTable)
                 .set(sourceLinkField, sourceId)
                 .set(targetLinkField, targetId)
-                .set(
-                        orderField,
-                        dslContext.selectCount()
-                                .from(linkTable)
-                                .where(sourceLinkField.equal(sourceId))
-                )
+                .set(orderField, orderValue)
                 .execute();
+    }
+
+    @Override
+    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+        final var linkTable = getLinkTable();
+        final var sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
+        final var targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
+        Field<Integer> orderField = orderFieldAcc.getField(linkTable);
+
+        final var sourceCondition = sourceLinkField.eq(source.getId().getValue());
+        final var targetCondition = targetLinkField.eq(target.getId().getValue());
+        final DSLContext dslContext = pm.getDslContext();
+        int deletedOrderIdx = dslContext.deleteFrom(linkTable)
+                .where(sourceCondition.and(targetCondition))
+                .limit(1)
+                .returning(orderField)
+                .execute();
+        int updated;
+        if (orderOnSource) {
+            updated = dslContext.update(linkTable)
+                    .set(orderField, orderField.sub(1))
+                    .where(sourceCondition)
+                    .and(orderField.gt(deletedOrderIdx))
+                    .execute();
+        } else {
+            updated = dslContext.update(linkTable)
+                    .set(orderField, orderField.sub(1))
+                    .where(targetCondition)
+                    .and(orderField.gt(deletedOrderIdx))
+                    .execute();
+        }
+        LOGGER.trace("Updated {} order entries", updated);
     }
 
 }

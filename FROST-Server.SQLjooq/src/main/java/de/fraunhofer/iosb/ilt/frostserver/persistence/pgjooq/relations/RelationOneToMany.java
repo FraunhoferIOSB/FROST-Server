@@ -154,6 +154,11 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         }
     }
 
+    @Override
+    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     /**
      * The name of the relation. For official relations, this is the (singular)
      * entity type name.

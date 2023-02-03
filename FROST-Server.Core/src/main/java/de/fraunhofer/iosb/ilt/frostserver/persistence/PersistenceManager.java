@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -75,6 +76,18 @@ public interface PersistenceManager extends AutoCloseable {
      * @throws NoSuchEntityException If the path does not lead to an entity set.
      */
     public void delete(ResourcePath path, Query query) throws NoSuchEntityException;
+
+    /**
+     * Delete the relation specified by the given NavigationProperty, between
+     * source and target.
+     *
+     * @param source the source entity of the relation.
+     * @param np the NavigationProperty that specifies the relation.
+     * @param target the target entity of the relation.
+     * @throws IncompleteEntityException If the relation is required to exist
+     * for either the source or target.
+     */
+    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException;
 
     /**
      * Update the given entity.

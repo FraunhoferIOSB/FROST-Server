@@ -57,4 +57,12 @@ public interface NavigationProperty<P> extends Property<P> {
      * @return The navigationLink for this property, for the given parent.
      */
     public String getNavigationLink(Entity parent);
+
+    /**
+     * Get the inverse of this NavigationProperty.
+     *
+     * @return The inverse of this NavigationProperty, or null if no inverse
+     * exists.
+     */
+    public NavigationProperty getInverse();
 }

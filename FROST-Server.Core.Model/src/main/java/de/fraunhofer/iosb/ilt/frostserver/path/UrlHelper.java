@@ -310,7 +310,6 @@ public class UrlHelper {
             //  The number of directories we have to backtrack is the length of
             //  the base path MINUS the number of common path elements, minus
             //  one because the last element in the path isn't a directory.
-
             for (int i = 1; i <= (numDirsUp); i++) {
                 relative.append("..").append(pathSeparator);
             }

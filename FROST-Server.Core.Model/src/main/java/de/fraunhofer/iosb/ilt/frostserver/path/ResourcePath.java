@@ -32,37 +32,45 @@ public class ResourcePath {
      * Base root URI of the server, without the version.
      */
     private String serviceRootUrl;
+
     /**
      * The version of the path.
      */
     private Version version;
+
     /**
      * The path following the version, of the url that was used to generate this
      * RecourcePath.
      */
     private String path;
+
     /**
      * Flag indicating there was a $ref at the end of the path.
      */
     private boolean ref;
+
     /**
      * Flag indicating there was a $value at the end of the path.
      */
     private boolean value;
+
     /**
      * Flag indicating the path points to an entityProperty
      * (EntitySet(id)/entityProperty).
      */
     private boolean entityProperty;
+
     /**
      * The elements in this path.
      */
     private final List<PathElement> pathElements;
+
     /**
      * The "main" element specified by this path. This is either an Entity or an
      * EntitySet, so it might not be the last element in the path.
      */
     private PathElement mainElement;
+
     /**
      * The "last" element in this path that had a specified id.
      */
@@ -202,6 +210,10 @@ public class ResourcePath {
     public ResourcePath setIdentifiedElement(PathElementEntity identifiedElement) {
         this.identifiedElement = identifiedElement;
         return this;
+    }
+
+    public List<PathElement> getPathElements() {
+        return pathElements;
     }
 
     /**

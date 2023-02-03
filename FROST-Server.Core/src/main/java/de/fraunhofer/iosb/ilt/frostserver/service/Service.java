@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -36,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
@@ -181,16 +183,18 @@ public class Service implements AutoCloseable {
     }
 
     /**
-     * Explicitly starts a transaction. All subsequent calls to
-     * {@link #execute(ServiceRequest, ServiceResponse)} will run in this
-     * transaction, until either {@link #commitTransaction()} is called, or
-     * {@link #rollbackTransaction()} is called, or a call to
+     * Explicitly starts a transaction.
+     *
+     * All subsequent calls to {@link #execute(ServiceRequest, ServiceResponse)}
+     * will run in this transaction, until either {@link #commitTransaction()}
+     * is called, or {@link #rollbackTransaction()} is called, or a call to
      * {@link #execute(ServiceRequest, ServiceResponse)} fails with an
      * exception.
      *
      * After starting a transaction, it should be {@link #close()}d explicitly
      * too.
      *
+     * @param user The user to use for the transaction.
      * @return this
      */
     public Service startTransaction(Principal user) {
@@ -718,11 +722,14 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + exc.getMessage());
         }
 
+        if (path.isRef()) {
+            return executeDeleteRef(request, response, path);
+        }
         if ((path.getMainElement() instanceof PathElementEntity)) {
             return executeDeleteEntity(request, response, path);
         }
         if (settings.isFilterDeleteEnabled() && (path.getMainElement() instanceof PathElementEntitySet)) {
-            return executeDeleteEntitySet(request, response, path);
+            return executeDeleteSet(request, response, path);
         }
         return errorResponse(response, 400, "Not a valid path for DELETE.");
     }
@@ -748,7 +755,7 @@ public class Service implements AutoCloseable {
                 return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
             }
 
-            return handleDelete(pm, mainEntity, response);
+            return handleDeleteEntity(pm, mainEntity, response);
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
             return errorResponse(response, 401, e.getMessage());
@@ -764,7 +771,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handleDelete(PersistenceManager pm, PathElementEntity mainEntity, ServiceResponse response) {
+    private ServiceResponse handleDeleteEntity(PersistenceManager pm, PathElementEntity mainEntity, ServiceResponse response) {
         try {
             if (pm.delete(mainEntity)) {
                 maybeCommitAndClose();
@@ -780,7 +787,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse executeDeleteEntitySet(ServiceRequest request, ServiceResponse response, ResourcePath path) {
+    private ServiceResponse executeDeleteSet(ServiceRequest request, ServiceResponse response, ResourcePath path) {
         PersistenceManager pm = null;
         try {
             PathElementEntitySet mainEntity = (PathElementEntitySet) path.getMainElement();
@@ -819,7 +826,7 @@ public class Service implements AutoCloseable {
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
-            return errorResponse(response, 404, "Failed to parse query: " + e.getMessage());
+            return errorResponse(response, 400, "Failed to parse query: " + e.getMessage());
         }
         if (query.getCount().isPresent()) {
             return errorResponse(response, 400, "$count not allowed on delete requests.");
@@ -841,6 +848,101 @@ public class Service implements AutoCloseable {
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 404, e.getMessage());
+        }
+    }
+
+    private ServiceResponse executeDeleteRef(ServiceRequest request, ServiceResponse response, ResourcePath path) {
+        // Three Options:
+        // 1. DELETE http://host/service/Categories(1)/Products/$ref?$id=../../Products(0)
+        // 2. DELETE http://host/service/Categories(1)/Products(0)/$ref
+        // 3. DELETE http://host/service/Products(0)/Category/$ref  (1-to-many can be deleted from the other side)
+        PersistenceManager pm = getPm();
+        if (!pm.validatePath(path)) {
+            maybeRollbackAndClose();
+            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+        }
+        PathElementEntity sourceEntity;
+        NavigationPropertyEntitySet navigationProperty;
+        PathElementEntity targetEntity;
+        List<PathElement> pathElements = path.getPathElements();
+        if (pathElements.size() < 2) {
+            return errorResponse(response, 400, "Path must contain at least an Entity and a NavigationProperty to delete a reference.");
+        }
+
+        final PathElement lastElement = path.getLastElement();
+        if (lastElement instanceof PathElementEntitySet containingSet) {
+            // Option 1
+            PathElement precedingElement = pathElements.get(pathElements.size() - 2);
+            if (precedingElement instanceof PathElementEntity) {
+                navigationProperty = containingSet.getNavigationProperty();
+                sourceEntity = (PathElementEntity) containingSet.getParent();
+            } else {
+                return errorResponse(response, 400, "NavigationProperty must be preceded by an Entity.");
+            }
+            Query query;
+            try {
+                query = QueryParser
+                        .parseQuery(request.getUrlQuery(), settings, path)
+                        .validate();
+                settings.getPluginManager().parsedQuery(settings, request, query);
+                String targetUrl = query.getId();
+                final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
+                final Version version = request.getVersion();
+                final String versionUrl = version.urlPart;
+                if (!targetUrl.startsWith(serviceRootUrl)) {
+                    // id is a relative url, resolve against the request url.
+                    URL requestUrl = new URL(serviceRootUrl + '/' + versionUrl + request.getUrlPath());
+                    targetUrl = new URL(requestUrl, targetUrl).toString();
+                }
+                if (!targetUrl.startsWith(serviceRootUrl)) {
+                    return errorResponse(response, 400, "$id parameter must be a relative URL or an absolute URL in this service (Thus start with '" + serviceRootUrl + "'.");
+                }
+                targetUrl = targetUrl.substring(serviceRootUrl.length() + 1);
+                if (!targetUrl.startsWith(versionUrl)) {
+                    return errorResponse(response, 400, "$id parameter must use the same version as the request ('" + versionUrl + "').");
+                }
+                targetUrl = targetUrl.substring(versionUrl.length());
+                ResourcePath targetPath = PathParser.parsePath(modelRegistry, serviceRootUrl, version, targetUrl);
+                PathElement lastTargetElement = targetPath.getLastElement();
+                if (lastTargetElement instanceof PathElementEntity pathElementEntity) {
+                    targetEntity = pathElementEntity;
+                } else {
+                    return errorResponse(response, 400, "$id parameter does not point to an Entity.");
+                }
+
+            } catch (IllegalArgumentException | MalformedURLException e) {
+                return errorResponse(response, 400, "Failed to parse query: " + e.getMessage());
+            }
+        } else if ((lastElement instanceof PathElementEntity)) {
+            // Option 2 or 3
+            final int lastIdx = pathElements.size() - 1;
+            PathElement precedingElement = pathElements.get(lastIdx - 1);
+            if (lastElement instanceof PathElementEntity && precedingElement instanceof PathElementEntitySet) {
+                targetEntity = (PathElementEntity) lastElement;
+                PathElementEntitySet containingSet = (PathElementEntitySet) precedingElement;
+                navigationProperty = containingSet.getNavigationProperty();
+                sourceEntity = (PathElementEntity) containingSet.getParent();
+            } else {
+                return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
+            }
+            if (sourceEntity.getId() == null || targetEntity.getId() == null) {
+                return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
+            }
+        } else {
+            return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
+        }
+
+        if (!navigationProperty.getEntityType().equals(targetEntity.getEntityType())) {
+            return errorResponse(response, 400, "Target Entity does not match NavigationProperty type: " + targetEntity.getEntityType().entityName + " != " + navigationProperty.getEntityType().entityName);
+        }
+
+        try {
+            pm.deleteRelation(sourceEntity, navigationProperty, targetEntity);
+            maybeCommitAndClose();
+            return successResponse(response, 204, "");
+        } catch (IncompleteEntityException e) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 405, e.getMessage());
         }
     }
 

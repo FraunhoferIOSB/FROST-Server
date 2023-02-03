@@ -23,7 +23,7 @@ PARSER_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.queryparser;
 NODE_PACKAGE=de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes;
 BASE_NAME=Q;
 
-<DEFAULT,LS_QUERY,LS_SUBQUERY,LS_FILTER,LS_CONSTANTS,LS_PLAIN_PATH,LS_ORDERBYS,LS_ORDERBY>
+<DEFAULT,LS_REF,LS_QUERY,LS_SUBQUERY,LS_FILTER,LS_CONSTANTS,LS_PLAIN_PATH,LS_ORDERBYS,LS_ORDERBY>
 SKIP : " " | "\n" | "\r" | "\t";
 
 <LS_CONSTANTS> TOKEN [IGNORE_CASE]:
@@ -35,6 +35,14 @@ SKIP : " " | "\n" | "\r" | "\t";
 | <#HOUR: ("0" ["0"-"9"] | "1" ["0"-"9"] | "2" ["0", "1", "2", "3"]) >
 | <#ZERO_FIFTYNINE: (["0"-"5"] ["0"-"9"]) >
 | <#AN_LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
+;
+
+<LS_REF> TOKEN [IGNORE_CASE]:
+  <T_O_ID: "$id=" >
+;
+
+<LS_ANYSTRING> TOKEN [IGNORE_CASE]:
+  <T_STRING: (~["&"])+ >
 ;
 
 <LS_QUERY> TOKEN [IGNORE_CASE]:
@@ -187,7 +195,15 @@ SKIP : " " | "\n" | "\r" | "\t";
 // ***************
 
 Start Start :
-  P_Options <EOF> { return jjtThis; }
+  (P_Options | P_Ref) <EOF> { return jjtThis; }
+;
+
+P_Ref : LS_REF :
+  <T_O_ID> P_AnyString
+;
+
+P_AnyString #void : LS_ANYSTRING :
+  <T_STRING>
 ;
 
 P_Options #void : LS_QUERY :
@@ -379,6 +395,13 @@ P_FunctionNameDouble:
 
 P_FunctionNameDoubleTripple:
     <T_QF_SUBSTRING>
+;
+
+P_Identifier : LS_CONSTANTS :
+    (
+        <T_STR_LIT>
+      | <T_LONG>
+    )
 ;
 
 P_Constant : LS_CONSTANTS :

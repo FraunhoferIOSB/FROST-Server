@@ -63,4 +63,5 @@ public interface Relation<S extends StaMainTable<S>> {
      */
     public void link(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws NoSuchEntityException, IncompleteEntityException;
 
+    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
 }

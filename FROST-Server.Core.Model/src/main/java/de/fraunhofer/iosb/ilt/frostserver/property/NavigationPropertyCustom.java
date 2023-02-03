@@ -175,6 +175,11 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         return link;
     }
 
+    @Override
+    public NavigationProperty getInverse() {
+        return null;
+    }
+
     private static class LinkTargetData {
 
         private Entity entity;

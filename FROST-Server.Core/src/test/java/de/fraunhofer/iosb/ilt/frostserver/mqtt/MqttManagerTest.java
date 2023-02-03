@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -326,6 +327,10 @@ class MqttManagerTest {
 
         @Override
         public void delete(ResourcePath path, Query query) throws NoSuchEntityException {
+        }
+
+        @Override
+        public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) {
         }
 
         @Override

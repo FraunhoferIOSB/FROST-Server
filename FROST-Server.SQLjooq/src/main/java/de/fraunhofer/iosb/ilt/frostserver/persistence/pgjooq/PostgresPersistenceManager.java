@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
@@ -49,6 +50,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -192,8 +194,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         ResourcePath tempPath = new ResourcePath();
         int idCount = 0;
         while (element != null) {
-            if (element instanceof PathElementEntity) {
-                PathElementEntity entityPathElement = (PathElementEntity) element;
+            if (element instanceof PathElementEntity entityPathElement) {
                 Id id = entityPathElement.getId();
                 if (id != null) {
                     idCount++;
@@ -355,6 +356,22 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
         return message;
+    }
+
+    @Override
+    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException {
+        if (!np.isEntitySet() && np.isRequired()) {
+            throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
+        }
+        NavigationPropertyMain inverse = np.getInverse();
+        if (inverse != null && !inverse.isEntitySet() && inverse.isRequired()) {
+            throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
+        }
+        StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        Relation<?> relation = sourceTable.findRelation(np.getName());
+        Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getId());
+        Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getId());
+        relation.unLink(this, sourceEntity, targetEntity, np);
     }
 
     @Override

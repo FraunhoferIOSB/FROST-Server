@@ -10,6 +10,7 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 * Allow BasicAuthProvider to use hashed passwords. (pbaumard)
 * Add FROST_LL_service env variable for log level. (pbaumard)
 * Added option to set PostgreSQL role to enable Row-Level Security for HTTP. (pbaumard)
+* Implemented [unlinking many-to-many relations](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_AddressingReferencesbetweenEntities).
 
 **Internal changes & Bugfixes**
 * Fixed DateTimeConstants sometimes being generated with decimal comma.
@@ -17,7 +18,7 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 * Updated version of moquette allows persistent sessions to time out, avoiding memory leaks.
 * Improved OpenAPI spec generator.
 * Improved handling of required, nullable and non-editable properties.
-* Fixed #1069: GeoJSON output is missing the <type> attribute for the feature elements.
+* Fixed #1069: GeoJSON output is missing the `type` attribute for the feature elements.
 * Changed build system to Java 17.
 * Added Maven wrapper to build without locally installed Maven.
 * (OData) Add support for metadata sub parameter in format parameter.

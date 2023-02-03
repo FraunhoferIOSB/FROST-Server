@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ExpandItem;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_Option;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_PlainPath;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_Ref;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.Start;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_ARRAYINDEX;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_BOOL;
@@ -56,6 +57,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SKIP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SKIPFILTER;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STRING;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -85,10 +87,21 @@ public class QueryParser extends Visitor {
 
     private Query handle(Start node) {
         Query query = new Query(modelRegistry, queryDefaults, path);
+        for (P_Ref child : node.childrenOfType(P_Ref.class)) {
+            handle(child, query);
+        }
         for (P_Option child : node.childrenOfType(P_Option.class)) {
             handle(child, query);
         }
         return query;
+    }
+
+    private void handle(P_Ref ref, Query query) {
+        List<T_STRING> children = ref.childrenOfType(T_STRING.class);
+        if (children.size() != 1) {
+            throw new IllegalArgumentException("$id must be followed by a string");
+        }
+        query.setId(children.get(0).getImage());
     }
 
     private void handle(P_Option option, Query query) {

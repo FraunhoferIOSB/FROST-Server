@@ -53,6 +53,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import net.time4j.PlainTimestamp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
@@ -864,5 +865,16 @@ class QueryParserTest {
         expResult.setFormat("dataArray");
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         assertEquals(expResult, result);
+    }
+
+    @Test
+    void testDeleteRefWithId() {
+        String query = "$id=../../Rooms(1)";
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        assertNotEquals(expResult, result);
+        expResult.setId("../../Rooms(1)");
+        assertEquals(expResult, result);
+
     }
 }

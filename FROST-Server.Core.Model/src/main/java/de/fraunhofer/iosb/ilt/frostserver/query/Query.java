@@ -73,6 +73,8 @@ public class Query {
     private Expression skipFilter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
+    private String id;
+
     private boolean pkOrder = false;
     private String format;
     private Metadata metadata;
@@ -468,7 +470,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        return Objects.hash(top, skip, count, select, filter, skipFilter, format, expand, orderBy, path, selectDistinct);
+        return Objects.hash(top, skip, count, select, filter, skipFilter, format, expand, orderBy, path, selectDistinct, id);
     }
 
     @Override
@@ -493,7 +495,8 @@ public class Query {
                 && Objects.equals(this.format, other.format)
                 && Objects.equals(this.expand, other.expand)
                 && Objects.equals(this.orderBy, other.orderBy)
-                && Objects.equals(this.path, other.path);
+                && Objects.equals(this.path, other.path)
+                && Objects.equals(this.id, other.id);
     }
 
     @Override
@@ -622,6 +625,14 @@ public class Query {
                 }
             }
         }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
 }
