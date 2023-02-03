@@ -30,7 +30,7 @@ public class IdLong implements Id {
      */
     public static final String PERSISTENCE_TYPE_INTEGER = "INTEGER";
 
-    private Long value;
+    private final Long value;
 
     public IdLong(Long value) {
         this.value = value;
@@ -48,11 +48,6 @@ public class IdLong implements Id {
     @Override
     public Object asBasicPersistenceType() {
         return value;
-    }
-
-    @Override
-    public void fromBasicPersitenceType(Object data) {
-        value = Long.parseLong(data.toString());
     }
 
     @Override

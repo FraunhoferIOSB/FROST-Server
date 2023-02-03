@@ -32,7 +32,7 @@ public class IdUuid implements Id {
      */
     public static final String PERSISTENCE_TYPE_BYTEARRAY = "BYTEARRAY";
 
-    private UUID value;
+    private final UUID value;
 
     public IdUuid(UUID value) {
         this.value = value;
@@ -50,15 +50,6 @@ public class IdUuid implements Id {
     @Override
     public Object asBasicPersistenceType() {
         return value;
-    }
-
-    @Override
-    public void fromBasicPersitenceType(Object data) {
-        if (data instanceof UUID) {
-            value = (UUID) data;
-        } else {
-            value = UUID.fromString(data.toString());
-        }
     }
 
     @Override

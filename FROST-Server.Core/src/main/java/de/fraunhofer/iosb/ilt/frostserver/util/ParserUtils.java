@@ -48,11 +48,14 @@ public class ParserUtils {
     }
 
     public static Id idFromObject(Object input) {
-        if (input instanceof UUID) {
-            return new IdUuid((UUID) input);
+        if (input instanceof Id id) {
+            return id;
         }
-        if (input instanceof Number) {
-            return new IdLong(((Number) input).longValue());
+        if (input instanceof UUID uuid) {
+            return new IdUuid(uuid);
+        }
+        if (input instanceof Number number) {
+            return new IdLong(number.longValue());
         }
         if (input instanceof CharSequence) {
             return new IdString(input.toString());

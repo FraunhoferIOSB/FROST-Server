@@ -32,7 +32,7 @@ public class IdString implements Id {
      */
     public static final String PERSISTENCE_TYPE_STRING = "STRING";
 
-    private String value;
+    private final String value;
 
     public IdString(String value) {
         this.value = value;
@@ -46,11 +46,6 @@ public class IdString implements Id {
     @Override
     public Object asBasicPersistenceType() {
         return value;
-    }
-
-    @Override
-    public void fromBasicPersitenceType(Object data) {
-        value = data.toString();
     }
 
     @Override
