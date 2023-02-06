@@ -73,7 +73,7 @@
         <org.json.version>20220924</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2.5.1</postgis.version>
-        <postgres.version>42.5.1</postgres.version>
+        <postgres.version>42.5.3</postgres.version>
         <slf4j-api.version>2.0.6</slf4j-api.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <testcontainers-keycloak.version>1.10.0</testcontainers-keycloak.version>
