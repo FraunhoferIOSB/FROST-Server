@@ -83,7 +83,7 @@ jobs:
 
     - name: Build and push - HTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -97,7 +97,7 @@ jobs:
 
     - name: Build and push - MQTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -111,7 +111,7 @@ jobs:
 
     - name: Build and push - MQTT - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
@@ -127,7 +127,7 @@ jobs:
 
     - name: Build and push - HTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -140,7 +140,7 @@ jobs:
 
     - name: Build and push - MQTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -153,7 +153,7 @@ jobs:
 
     - name: Build and push - MQTT - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
