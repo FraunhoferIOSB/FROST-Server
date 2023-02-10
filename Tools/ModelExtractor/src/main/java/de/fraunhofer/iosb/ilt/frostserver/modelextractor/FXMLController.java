@@ -35,6 +35,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty.Inverse;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBigDecimal;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany;
@@ -339,7 +341,7 @@ public class FXMLController implements Initializable {
         }
 
         public void analyse() {
-            if ((pkSize == 0 || pkSize > 1) && refsToOther.size() == 2) {
+            if ((pkSize == 0 || pkSize > 1) && refsToOther.size() >= 1) {
                 controller.setChoice(TableChoice.LINK_TABLE);
                 return;
             }
@@ -579,6 +581,11 @@ public class FXMLController implements Initializable {
             return false;
         }
         switch (fieldData.typeName.toLowerCase()) {
+            case "boolean":
+                defEp.addHandler(new FieldMapperBoolean().setField(fieldData.name))
+                        .setType("Edm.Boolean");
+                return true;
+
             case "clob":
             case "varchar":
             case "uuid":
@@ -587,12 +594,19 @@ public class FXMLController implements Initializable {
                 return true;
 
             case "smallint":
+            case "integer":
             case "bigint":
             case "float":
                 defEp.addHandler(new FieldMapperBigDecimal().setField(fieldData.name))
                         .setType("BigDecimal");
                 return true;
 
+            case "geometry":
+                defEp.addHandler(new FieldMapperGeometry().setFieldGeom(fieldData.name))
+                        .setType("Edm.Geometry");
+                return true;
+
+            case "json":
             case "jsonb":
                 defEp.addHandler(new FieldMapperJson().setField(fieldData.name)
                         .setIsMap(false))
