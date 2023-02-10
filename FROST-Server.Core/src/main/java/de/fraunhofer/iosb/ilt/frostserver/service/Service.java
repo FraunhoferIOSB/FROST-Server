@@ -79,10 +79,10 @@ import org.slf4j.LoggerFactory;
  * Executes SensorThings commands. Normally, each call of
  * {@link #execute(ServiceRequest, ServiceResponse) } runs in its own
  * transaction (for back-ends that support transactions). If a transaction is
- * explicitly started with {@link #startTransaction()}, then all subsequent
- * calls to {@link #execute(ServiceRequest, ServiceResponse)} will run in this
- * transaction, until either {@link #commitTransaction()} is called, or
- * {@link #rollbackTransaction()} is called, or a call to
+ * explicitly started with {@link #startTransaction(Principal) }, then all
+ * subsequent calls to {@link #execute(ServiceRequest, ServiceResponse)} will
+ * run in this transaction, until either {@link #commitTransaction()} is called,
+ * or {@link #rollbackTransaction()} is called, or a call to
  * {@link #execute(ServiceRequest, ServiceResponse)} fails with an exception.
  *
  * If a call to {@link #execute(ServiceRequest, ServiceResponse)} fails, the
