@@ -518,7 +518,8 @@ public class FXMLController implements Initializable {
             if (fkList.size() == 2
                     && fkList.get(0).myTableName.equals(fkList.get(1).myTableName)
                     && fkList.get(0).otherTableName.equals(fkList.get(1).otherTableName)
-                    && fkList.get(0).fieldTheirs.name.equals(fkList.get(1).fieldTheirs.name)) {
+                    && fkList.get(0).fieldTheirs.name.equals(fkList.get(1).fieldTheirs.name)
+                    && tables.get(fkList.get(0).myTableName).isLinkTable()) {
                 generateSelfRelationLinkTable(fkList, entityType, tableData);
             } else {
                 for (ForeignKeyData fk : fkList) {

@@ -59,8 +59,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     private String plural;
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
-     * PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly
+     * means depends on the PersistenceManager.
      */
     @ConfigurableField(editor = EditorString.class,
             label = "Table", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
@@ -107,8 +107,18 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     private EntityType entityType;
 
     public void init() {
+        int idx = 0;
+        int keyIdx = -1;
         for (DefEntityProperty property : getEntityProperties()) {
             property.init();
+            if ("id".equalsIgnoreCase(property.getType())) {
+                keyIdx = idx;
+            }
+            idx++;
+        }
+        if (keyIdx > 0) {
+            LOGGER.debug("Moving Id column from {} to the front.", keyIdx);
+            entityProperties.add(0, entityProperties.remove(keyIdx));
         }
         for (DefNavigationProperty property : getNavigationProperties()) {
             property.init();
@@ -205,7 +215,12 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     public DefEntityType addEntityProperty(DefEntityProperty entityProperty) {
-        getEntityProperties().add(entityProperty);
+        if ("id".equalsIgnoreCase(entityProperty.getType())) {
+            LOGGER.debug("Inserting ID column at position 0");
+            getEntityProperties().add(0, entityProperty);
+        } else {
+            getEntityProperties().add(entityProperty);
+        }
         return this;
     }
 
@@ -248,8 +263,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
-     * PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly
+     * means depends on the PersistenceManager.
      *
      * @return the table
      */
@@ -258,8 +273,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * The "table" that data for this EntityType is stored in. What this exactly means depends on the
-     * PersistenceManager.
+     * The "table" that data for this EntityType is stored in. What this exactly
+     * means depends on the PersistenceManager.
      *
      * @param table the table to set
      * @return this.

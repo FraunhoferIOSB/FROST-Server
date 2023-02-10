@@ -678,7 +678,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (table instanceof StaLinkTableDynamic) {
             return (StaLinkTableDynamic) table;
         }
-        throw new IllegalStateException("Table already exists, but is not of type StaLinkTableDynamic.");
+        throw new IllegalStateException("Table " + tableName + " already exists, yet is not of type StaLinkTableDynamic but " + table.getClass().getName());
     }
 
     public DataType<?> getDataTypeFor(String type) {
