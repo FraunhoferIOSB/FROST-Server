@@ -86,16 +86,22 @@ public abstract class AbstractContextListener implements ServletContextListener 
             LOGGER.info("Context initialised, loading settings.");
             ServletContext context = sce.getServletContext();
 
-            initCoreSettings(context);
-            context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
+            try {
+                initCoreSettings(context);
+                context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
 
-            setUpCorsFilter(context, coreSettings);
+                setUpCorsFilter(context, coreSettings);
 
-            PersistenceManagerFactory.init(coreSettings);
-            PersistenceManagerFactory.getInstance(coreSettings);
-            MessageBusFactory.createMessageBus(coreSettings);
+                PersistenceManagerFactory.init(coreSettings);
+                PersistenceManagerFactory.getInstance(coreSettings);
+                MessageBusFactory.createMessageBus(coreSettings);
 
-            setupAuthFilter(context, coreSettings);
+                setupAuthFilter(context, coreSettings);
+            } catch (RuntimeException ex) {
+                // We must log-and-rethrow here, because Tomcat eats the exception.
+                LOGGER.error("Failed to initialise.", ex);
+                throw ex;
+            }
         }
     }
 
