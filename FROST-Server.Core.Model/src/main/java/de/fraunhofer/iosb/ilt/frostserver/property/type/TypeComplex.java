@@ -36,6 +36,8 @@ public class TypeComplex extends PropertyType {
 
     public static final String STA_MAP_NAME = "Object";
     public static final String STA_OBJECT_NAME = "ANY";
+    public static final String STA_TIMEINTERVAL_NAME = "TimeInterval";
+    public static final String STA_TIMEVALUE_NAME = "TimeValue";
     public static final String KEY_INTERVAL_START = "start";
     public static final String KEY_INTERVAL_END = "end";
 
@@ -43,10 +45,10 @@ public class TypeComplex extends PropertyType {
     public static final TypeComplex STA_OBJECT = new TypeComplex(STA_OBJECT_NAME, "A free type, can be anything", TypeReferencesHelper.TYPE_REFERENCE_OBJECT, true);
     public static final TypeComplex STA_OBJECT_UNTYPED = new TypeComplex(STA_OBJECT_NAME, "A free type, can be anything", null, true);
 
-    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex("TimeInterval", "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
+    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
             .addProperty(KEY_INTERVAL_START, TypeSimplePrimitive.EDM_DATETIMEOFFSET, true)
             .addProperty(KEY_INTERVAL_END, TypeSimplePrimitive.EDM_DATETIMEOFFSET, true);
-    public static final TypeComplex STA_TIMEVALUE = new TypeComplex("TimeValue", "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
+    public static final TypeComplex STA_TIMEVALUE = new TypeComplex(STA_TIMEVALUE_NAME, "An ISO time instant or time interval.", TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
             .addProperty(KEY_INTERVAL_START, TypeSimplePrimitive.EDM_DATETIMEOFFSET, true)
             .addProperty(KEY_INTERVAL_END, TypeSimplePrimitive.EDM_DATETIMEOFFSET, false);
 

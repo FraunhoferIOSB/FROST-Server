@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -76,7 +77,7 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+        return Arrays.asList(Version.V_1_0, Version.V_1_1, PluginOData.VERSION_ODATA_40, PluginOData.VERSION_ODATA_401);
     }
 
     @Override

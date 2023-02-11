@@ -55,8 +55,8 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader";
 
     /**

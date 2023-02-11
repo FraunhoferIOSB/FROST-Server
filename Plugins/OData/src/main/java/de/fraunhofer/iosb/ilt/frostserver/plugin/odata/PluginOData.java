@@ -63,8 +63,22 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginOData.class.getName());
 
-    public static final Version VERSION_ODATA_40 = new Version("ODATA_4.0");
-    public static final Version VERSION_ODATA_401 = new Version("ODATA_4.01");
+    public static final String VERSION_ODATA_40_NAME = "ODATA_4.0";
+    public static final String VERSION_ODATA_401_NAME = "ODATA_4.01";
+    public static final Version VERSION_ODATA_40 = new Version(
+            VERSION_ODATA_40_NAME,
+            JsonWriterOdata40.AT_COUNT,
+            "id",
+            JsonWriterOdata40.AT_NAVIGATION_LINK,
+            JsonWriterOdata40.AT_NEXT_LINK,
+            JsonWriterOdata40.AT_ID);
+    public static final Version VERSION_ODATA_401 = new Version(
+            VERSION_ODATA_401_NAME,
+            JsonWriterOdata401.AT_COUNT,
+            "id",
+            JsonWriterOdata401.AT_NAVIGATION_LINK,
+            JsonWriterOdata401.AT_NEXT_LINK,
+            JsonWriterOdata401.AT_ID);
     public static final String PARAM_METADATA = "$metadata";
     public static final String PATH_METADATA = '/' + PARAM_METADATA;
     public static final String REQUEST_TYPE_METADATA = PARAM_METADATA;

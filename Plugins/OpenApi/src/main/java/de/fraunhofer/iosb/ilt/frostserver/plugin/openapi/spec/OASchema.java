@@ -19,9 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -75,6 +79,7 @@ public final class OASchema {
     private OASchema items;
     private Map<String, OASchema> properties;
     private Boolean additionalProperties;
+    private Boolean readOnly;
 
     public OASchema(Type type, Format format) {
         this.type = type;
@@ -85,8 +90,25 @@ public final class OASchema {
         this.ref = ref;
     }
 
-    public OASchema(Property property) {
-        switch (property.getType().getName()) {
+    public OASchema(Version version, PropertyType propertyType) {
+        switch (version.urlPart) {
+            case Version.VERSION_STA_V10_NAME:
+            case Version.VERSION_STA_V11_NAME:
+                type = Type.STRING;
+                return;
+
+            case PluginOData.VERSION_ODATA_40_NAME:
+            case PluginOData.VERSION_ODATA_401_NAME:
+                switch (propertyType.getName()) {
+                    case TypeComplex.STA_TIMEINTERVAL_NAME:
+                    case TypeComplex.STA_TIMEVALUE_NAME:
+                        type = Type.OBJECT;
+                        addSubtypeComplex(version, (TypeComplex) propertyType);
+                }
+                return;
+
+        }
+        switch (propertyType.getName()) {
             case TypeSimplePrimitive.EDM_BINARY_NAME:
                 type = Type.STRING;
                 format = Format.BINARY;
@@ -132,9 +154,34 @@ public final class OASchema {
                 type = null;
                 break;
 
-            default:
+            case TypeSimplePrimitive.EDM_STRING_NAME:
                 type = Type.STRING;
                 break;
+
+            case TypeSimplePrimitive.EDM_GEOMETRY_NAME:
+            case TypeSimpleCustom.STA_GEOJSON_NAME:
+                type = Type.OBJECT;
+                break;
+
+            default:
+                if (propertyType instanceof TypeComplex typeComplex) {
+                    type = Type.OBJECT;
+                    addSubtypeComplex(version, typeComplex);
+                } else if (propertyType instanceof TypeSimpleSet typeSimpleSet) {
+                    type = Type.ARRAY;
+                    setItems(new OASchema(version, typeSimpleSet.getContaintedType()));
+                } else {
+                    type = Type.STRING;
+                }
+                break;
+        }
+    }
+
+    private void addSubtypeComplex(Version version, TypeComplex typeComplex) {
+        for (var subPropEntry : typeComplex.getProperties().entrySet()) {
+            var subPropName = subPropEntry.getKey();
+            var subPropType = subPropEntry.getValue();
+            addProperty(subPropName, new OASchema(version, subPropType));
         }
     }
 
@@ -248,6 +295,14 @@ public final class OASchema {
      */
     public void setAdditionalProperties(Boolean additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public Boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 
 }
