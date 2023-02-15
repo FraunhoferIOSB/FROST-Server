@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.1.0
+## Release version 2.1.0
 
 FROST-Server version 2.1 and higher requires Java 17. This is because some libraries that are used now require Java 17.
 
