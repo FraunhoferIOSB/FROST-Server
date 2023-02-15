@@ -54,7 +54,7 @@
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javaee-web-api.version>8.0.1</javaee-web-api.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
-        <jetty.version>10.0.13</jetty.version>
+        <jetty.version>11.0.13</jetty.version>
         <jooq.version>3.17.8</jooq.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.2</junit.version>
