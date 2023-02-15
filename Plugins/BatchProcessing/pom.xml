@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-Server.Plugins</artifactId>
-        <version>1.14.5</version>
+        <version>1.14.6-SNAPSHOT</version>
     </parent>
     <artifactId>FROST-Server.Plugin.BatchProcessing</artifactId>
     <packaging>jar</packaging>
