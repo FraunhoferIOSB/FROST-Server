@@ -78,6 +78,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -146,6 +147,8 @@ public class FXMLController implements Initializable {
     @FXML
     private TextField textFieldSetPostfix;
     @FXML
+    private TextField textFieldSchemas;
+    @FXML
     private ListView<TableData> listViewFound;
     private ObservableList<TableData> tableList;
     @FXML
@@ -164,12 +167,7 @@ public class FXMLController implements Initializable {
     private final Map<String, TableData> tables = new HashMap<>();
     private final Map<String, ConfigEditor<DefModel>> models = new TreeMap<>();
 
-    private static final Set<String> IGNORE_SCHEMAS = new HashSet<>();
-
-    static {
-        IGNORE_SCHEMAS.add("information_schema");
-        IGNORE_SCHEMAS.add("pg_catalog");
-    }
+    private final Set<String> includeSchemas = new HashSet<>();
 
     private ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
@@ -199,6 +197,11 @@ public class FXMLController implements Initializable {
     @FXML
     private void actionRead(ActionEvent event) {
         setPostFix = textFieldSetPostfix.getText();
+        includeSchemas.clear();
+        final String[] schemas = StringUtils.split(textFieldSchemas.getText(), ',');
+        for (String schema : schemas) {
+            includeSchemas.add(schema.trim());
+        }
         readFromDatabase();
     }
 
@@ -415,7 +418,7 @@ public class FXMLController implements Initializable {
         Meta meta = dslContext.meta();
         List<Table<?>> dbTableList = meta.getTables();
         for (Table<?> table : dbTableList) {
-            if (IGNORE_SCHEMAS.contains(table.getSchema().getName())) {
+            if (!includeSchemas.contains(table.getSchema().getName())) {
                 continue;
             }
             TableData tableData = getTable(table.getName());
