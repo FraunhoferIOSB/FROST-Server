@@ -79,7 +79,7 @@ class MqttManagerTest {
     public void init() {
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, "http://localhost/");
-        properties.put(CoreSettings.TAG_TEMP_PATH, "/tmp/");
+        properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
         properties.put(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, "0");
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_IMPLEMENTATION_CLASS, TestMqttServer.class.getName());
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, "20000");
