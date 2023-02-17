@@ -52,8 +52,10 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -129,30 +131,30 @@ public class BasicAuthFilter implements Filter {
         methodCheckers.put(HttpMethod.DELETE, (userData, response) -> requireRole(roleDelete, userData, response));
     }
 
-    private UserNamePass findCredentials(HttpServletRequest request) {
+    private UserData findCredentials(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader == null || !authHeader.startsWith(BASIC_PREFIX)) {
             LOGGER.debug("No basic auth header.");
-            return new UserNamePass(null, null);
+            return new UserData(null, null);
         }
 
         String userPassBase64 = authHeader.substring(BASIC_PREFIX.length());
         String userPassDecoded = new String(Base64.getDecoder().decode(userPassBase64), StringHelper.UTF8);
         if (!userPassDecoded.contains(":")) {
             LOGGER.debug("No username:password in basic auth header.");
-            return new UserNamePass(null, null);
+            return new UserData(null, null);
         }
 
         String[] split = userPassDecoded.split(":", 2);
-        final UserNamePass userData = new UserNamePass(split[0], split[1]);
-        if (databaseHandler.isValidUser(userData.userName, userData.userPass)) {
+        final UserData userData = new UserData(split[0], split[1]);
+        if (databaseHandler.isValidUser(userData)) {
             return userData;
         } else {
-            return new UserNamePass(null, null);
+            return new UserData(null, null);
         }
     }
 
-    private boolean requireRole(String roleName, UserNamePass userData, HttpServletResponse response) {
+    private boolean requireRole(String roleName, UserData userData, HttpServletResponse response) {
         if (userData.isEmpty()) {
             LOGGER.debug("Rejecting request: No user data.");
             throwAuthRequired(response);
@@ -183,7 +185,7 @@ public class BasicAuthFilter implements Filter {
             return;
         }
 
-        UserNamePass userData = findCredentials(request);
+        UserData userData = findCredentials(request);
 
         AuthChecker checker = methodCheckers.get(method);
         if (checker == null) {
@@ -194,11 +196,7 @@ public class BasicAuthFilter implements Filter {
 
         if (checker.isAllowed(userData, response)) {
             boolean admin = databaseHandler.userHasRole(userData.userName, roleAdmin);
-            if (admin) {
-                chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin)), response);
-            } else {
-                chain.doFilter(new RequestWrapper(request, userData::getUserName), response);
-            }
+            chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
         }
     }
 
@@ -242,15 +240,16 @@ public class BasicAuthFilter implements Filter {
          * @param response The response to use for sending errors back.
          * @return False if the request is not allowed.
          */
-        public boolean isAllowed(UserNamePass userData, HttpServletResponse response);
+        public boolean isAllowed(UserData userData, HttpServletResponse response);
     }
 
-    private static class UserNamePass {
+    public static class UserData {
 
         public final String userName;
         public final String userPass;
+        public final List<String> roles = new ArrayList<>();
 
-        public UserNamePass(String userName, String userPass) {
+        public UserData(String userName, String userPass) {
             this.userName = userName;
             this.userPass = userPass;
         }

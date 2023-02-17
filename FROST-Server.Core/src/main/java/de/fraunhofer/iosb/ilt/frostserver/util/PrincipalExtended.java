@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import java.security.Principal;
+import java.util.List;
 
 /**
  *
@@ -27,10 +28,12 @@ public class PrincipalExtended implements Principal {
 
     private final String name;
     private final boolean admin;
+    private final List<String> roles;
 
-    public PrincipalExtended(String name, boolean admin) {
+    public PrincipalExtended(String name, boolean admin, List<String> roles) {
         this.name = name;
         this.admin = admin;
+        this.roles = roles;
     }
 
     @Override
@@ -40,6 +43,10 @@ public class PrincipalExtended implements Principal {
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public List<String> getRoles() {
+        return roles;
     }
 
 }

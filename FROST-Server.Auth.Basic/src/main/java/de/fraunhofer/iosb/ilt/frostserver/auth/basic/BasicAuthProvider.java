@@ -74,7 +74,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @Override
     public boolean isValidUser(String clientId, String userName, String password) {
-        return DatabaseHandler.getInstance(coreSettings).isValidUser(userName, password);
+        return DatabaseHandler.getInstance(coreSettings).isValidUser(new BasicAuthFilter.UserData(userName, password));
     }
 
     @Override
