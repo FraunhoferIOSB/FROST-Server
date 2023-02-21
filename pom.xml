@@ -59,7 +59,7 @@
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.2</junit.version>
         <junit-platform-suite.version>1.9.2</junit-platform-suite.version>
-        <keycloak.version>20.0.3</keycloak.version>
+        <keycloak.version>20.0.5</keycloak.version>
         <liquibase.version>4.19.0</liquibase.version>
         <logback.version>1.4.5</logback.version>
 
