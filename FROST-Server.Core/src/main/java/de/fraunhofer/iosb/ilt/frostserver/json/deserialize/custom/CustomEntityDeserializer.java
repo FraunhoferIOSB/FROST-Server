@@ -121,7 +121,8 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
             PropertyData propertyData = propertyByName.get(fieldName);
             if (propertyData == null) {
                 if (failOnUnknown) {
-                    throw new UnrecognizedPropertyException(parser, "Unknown field: " + fieldName, parser.getCurrentLocation(), DefaultEntity.class, fieldName, null);
+                    final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + propertyByName.keySet();
+                    throw new UnrecognizedPropertyException(parser, message, parser.getCurrentLocation(), DefaultEntity.class, fieldName, null);
                 } else {
                     parser.readValueAsTree();
                 }
