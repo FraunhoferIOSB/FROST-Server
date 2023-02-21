@@ -71,14 +71,24 @@ public final class OASchema {
 
     @JsonProperty(value = "$ref")
     private String ref;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Type type;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Format format;
+
     private String description;
+
     @JsonProperty(value = "default")
     private String deflt;
+
     private OASchema items;
+
     private Map<String, OASchema> properties;
+
     private Boolean additionalProperties;
+
     private Boolean readOnly;
 
     public OASchema(Type type, Format format) {
@@ -104,8 +114,8 @@ public final class OASchema {
                     case TypeComplex.STA_TIMEVALUE_NAME:
                         type = Type.OBJECT;
                         addSubtypeComplex(version, (TypeComplex) propertyType);
+                        return;
                 }
-                return;
 
         }
         switch (propertyType.getName()) {
