@@ -42,7 +42,6 @@ public class FrostMqttServer {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FrostMqttServer.class);
-    private static final String KEY_TEMP_PATH = "tempPath";
     private static final String KEY_WAIT_FOR_ENTER = "WaitForEnter";
     private static final String CONFIG_FILE_NAME = "FrostMqtt.properties";
     private final CoreSettings coreSettings;
@@ -95,7 +94,7 @@ public class FrostMqttServer {
 
     private static CoreSettings loadCoreSettings(String configFileName) throws IOException {
         Properties defaults = new Properties();
-        defaults.setProperty(KEY_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+        defaults.setProperty(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
         Properties properties = new Properties(defaults);
         try (FileInputStream input = new FileInputStream(configFileName)) {
             properties.load(input);
