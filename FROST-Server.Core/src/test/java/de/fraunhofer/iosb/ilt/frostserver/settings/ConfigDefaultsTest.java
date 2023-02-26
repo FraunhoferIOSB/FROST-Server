@@ -45,12 +45,12 @@ public class ConfigDefaultsTest {
     public void testDefaultValueLookupInteger() {
         MqttMessageBus b = new MqttMessageBus();
         // Test valid integer properties
-        assertEquals(2, b.defaultValueInt(TAG_SEND_WORKER_COUNT));
+        assertEquals(4, b.defaultValueInt(TAG_SEND_WORKER_COUNT));
         assertEquals(2, b.defaultValueInt(TAG_RECV_WORKER_COUNT));
-        assertEquals(100, b.defaultValueInt(TAG_SEND_QUEUE_SIZE));
+        assertEquals(1000, b.defaultValueInt(TAG_SEND_QUEUE_SIZE));
         assertEquals(100, b.defaultValueInt(TAG_RECV_QUEUE_SIZE));
         assertEquals(2, b.defaultValueInt(TAG_QOS_LEVEL));
-        assertEquals(50, b.defaultValueInt(TAG_MAX_IN_FLIGHT));
+        assertEquals(500, b.defaultValueInt(TAG_MAX_IN_FLIGHT));
     }
 
     @Test
@@ -75,12 +75,12 @@ public class ConfigDefaultsTest {
     public void testDefaultValueLookupIntegerString() {
         MqttMessageBus b = new MqttMessageBus();
         // Test reading integer properties as strings
-        assertEquals("2", b.defaultValue(TAG_SEND_WORKER_COUNT));
+        assertEquals("4", b.defaultValue(TAG_SEND_WORKER_COUNT));
         assertEquals("2", b.defaultValue(TAG_RECV_WORKER_COUNT));
-        assertEquals("100", b.defaultValue(TAG_SEND_QUEUE_SIZE));
+        assertEquals("1000", b.defaultValue(TAG_SEND_QUEUE_SIZE));
         assertEquals("100", b.defaultValue(TAG_RECV_QUEUE_SIZE));
         assertEquals("2", b.defaultValue(TAG_QOS_LEVEL));
-        assertEquals("50", b.defaultValue(TAG_MAX_IN_FLIGHT));
+        assertEquals("500", b.defaultValue(TAG_MAX_IN_FLIGHT));
 
     }
 
@@ -142,24 +142,24 @@ public class ConfigDefaultsTest {
         Map<String, String> configDefaults = b.configDefaults();
         assertEquals("tcp://127.0.0.1:1884", configDefaults.get(TAG_MQTT_BROKER));
         assertEquals("FROST-Bus", configDefaults.get(TAG_TOPIC_NAME));
-        assertEquals("2", configDefaults.get(TAG_SEND_WORKER_COUNT));
+        assertEquals("4", configDefaults.get(TAG_SEND_WORKER_COUNT));
         assertEquals("2", configDefaults.get(TAG_RECV_WORKER_COUNT));
-        assertEquals("100", configDefaults.get(TAG_SEND_QUEUE_SIZE));
+        assertEquals("1000", configDefaults.get(TAG_SEND_QUEUE_SIZE));
         assertEquals("100", configDefaults.get(TAG_RECV_QUEUE_SIZE));
         assertEquals("2", configDefaults.get(TAG_QOS_LEVEL));
-        assertEquals("50", configDefaults.get(TAG_MAX_IN_FLIGHT));
+        assertEquals("500", configDefaults.get(TAG_MAX_IN_FLIGHT));
     }
 
     @Test
     public void testDefaultValueLookupClassInteger() {
         Class c = MqttMessageBus.class;
         // Test valid integer properties
-        assertEquals(2, ConfigUtils.getDefaultValueInt(c, TAG_SEND_WORKER_COUNT));
+        assertEquals(4, ConfigUtils.getDefaultValueInt(c, TAG_SEND_WORKER_COUNT));
         assertEquals(2, ConfigUtils.getDefaultValueInt(c, TAG_RECV_WORKER_COUNT));
-        assertEquals(100, ConfigUtils.getDefaultValueInt(c, TAG_SEND_QUEUE_SIZE));
+        assertEquals(1000, ConfigUtils.getDefaultValueInt(c, TAG_SEND_QUEUE_SIZE));
         assertEquals(100, ConfigUtils.getDefaultValueInt(c, TAG_RECV_QUEUE_SIZE));
         assertEquals(2, ConfigUtils.getDefaultValueInt(c, TAG_QOS_LEVEL));
-        assertEquals(50, ConfigUtils.getDefaultValueInt(c, TAG_MAX_IN_FLIGHT));
+        assertEquals(500, ConfigUtils.getDefaultValueInt(c, TAG_MAX_IN_FLIGHT));
     }
 
     @Test
@@ -183,12 +183,12 @@ public class ConfigDefaultsTest {
     public void testDefaultValueLookupClassIntegerString() {
         Class c = MqttMessageBus.class;
         // Test reading integer properties as strings
-        assertEquals("2", ConfigUtils.getDefaultValue(c, TAG_SEND_WORKER_COUNT));
+        assertEquals("4", ConfigUtils.getDefaultValue(c, TAG_SEND_WORKER_COUNT));
         assertEquals("2", ConfigUtils.getDefaultValue(c, TAG_RECV_WORKER_COUNT));
-        assertEquals("100", ConfigUtils.getDefaultValue(c, TAG_SEND_QUEUE_SIZE));
+        assertEquals("1000", ConfigUtils.getDefaultValue(c, TAG_SEND_QUEUE_SIZE));
         assertEquals("100", ConfigUtils.getDefaultValue(c, TAG_RECV_QUEUE_SIZE));
         assertEquals("2", ConfigUtils.getDefaultValue(c, TAG_QOS_LEVEL));
-        assertEquals("50", ConfigUtils.getDefaultValue(c, TAG_MAX_IN_FLIGHT));
+        assertEquals("500", ConfigUtils.getDefaultValue(c, TAG_MAX_IN_FLIGHT));
 
     }
 
@@ -248,11 +248,11 @@ public class ConfigDefaultsTest {
         Map<String, String> configDefaults = ConfigUtils.getConfigDefaults(c);
         assertEquals("tcp://127.0.0.1:1884", configDefaults.get(TAG_MQTT_BROKER));
         assertEquals("FROST-Bus", configDefaults.get(TAG_TOPIC_NAME));
-        assertEquals("2", configDefaults.get(TAG_SEND_WORKER_COUNT));
+        assertEquals("4", configDefaults.get(TAG_SEND_WORKER_COUNT));
         assertEquals("2", configDefaults.get(TAG_RECV_WORKER_COUNT));
-        assertEquals("100", configDefaults.get(TAG_SEND_QUEUE_SIZE));
+        assertEquals("1000", configDefaults.get(TAG_SEND_QUEUE_SIZE));
         assertEquals("100", configDefaults.get(TAG_RECV_QUEUE_SIZE));
         assertEquals("2", configDefaults.get(TAG_QOS_LEVEL));
-        assertEquals("50", configDefaults.get(TAG_MAX_IN_FLIGHT));
+        assertEquals("500", configDefaults.get(TAG_MAX_IN_FLIGHT));
     }
 }
