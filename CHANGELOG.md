@@ -1,5 +1,11 @@
 # Changelog
 
+## Release Version 1.15.3
+
+**Internal changes & Bugfixes**
+* Updated dependencies
+
+
 ## Release Version 1.15.2
 
 **Internal changes & Bugfixes**
