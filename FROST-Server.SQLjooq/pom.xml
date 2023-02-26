@@ -16,8 +16,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <jooq.version>3.16.14</jooq.version>
     </properties>
 
     <dependencies>
