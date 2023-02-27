@@ -20,6 +20,16 @@ environment variables that influence basic logging options.
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 * **queueLoggingInterval:**  
   If non-zero, log queue statistics ever x milliseconds. Default: 0 (off)
+* **FROST_LOG_path:** Since 2.2.0, 2.1.1, 2.0.7  
+  The path to log to. Defaults to `${catalina.base}/logs`  
+* **FROST_LOG_filename:** Since 2.2.0, 2.1.1, 2.0.7  
+  The base filename to use for log files. Defaults to `FROST-Server`.
+* **FROST_LOG_maxtotalsize:** Since 2.2.0, 2.1.1, 2.0.7  
+  The maximum total size for all log files. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpTotalSizeCap). Default: `200MB`.
+* **FROST_LOG_maxfilesize:** Since 2.2.0, 2.1.1, 2.0.7  
+  The maximum individual log file size.  See the [logback docs](https://logback.qos.ch/manual/appenders.html#SizeAndTimeBasedRollingPolicy). Default: `50MB`.
+* **FROST_LOG_maxfilecount:** Since 2.2.0, 2.1.1, 2.0.7  
+  The maximum number of log file to keep. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpMaxHistory). Default: `5`.
 * **FROST_LL:**  
   The "root" log level. Default: INFO
 * **FROST_LL_parser:**  
