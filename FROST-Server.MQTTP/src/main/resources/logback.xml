@@ -14,7 +14,7 @@
     <variable name="FROST_LOG_maxfilesize" value="${FROST_LOG_maxfilesize:-50MB}" />
     <variable name="FROST_LOG_maxfilecount" value="${FROST_LOG_maxfilecount:-5}" />
     <variable name="FROST_LOG_path" value="${FROST_LOG_path:-${catalina.base}/logs}" />
-    <variable name="FROST_LOG_filename" value="${FROST_LOG_filename:-FROST-Server" />
+    <variable name="FROST_LOG_filename" value="${FROST_LOG_filename:-FROST-Server}" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
