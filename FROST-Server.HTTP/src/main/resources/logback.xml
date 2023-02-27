@@ -9,6 +9,12 @@
     <variable name="FROST_LL_liquibase" value="${FROST_LL_liquibase:-INFO}" />
     <variable name="FROST_LL_org_jooq" value="${FROST_LL_org_jooq:-INFO}" />
 
+    <variable name="FROST_LOG_maxtotalsize" value="${FROST_LOG_maxtotalsize:-200MB}" />
+    <variable name="FROST_LOG_maxfilesize" value="${FROST_LOG_maxfilesize:-50MB}" />
+    <variable name="FROST_LOG_maxfilecount" value="${FROST_LOG_maxfilecount:-5}" />
+    <variable name="FROST_LOG_path" value="${FROST_LOG_path:-${catalina.base}/logs}" />
+    <variable name="FROST_LOG_filename" value="${FROST_LOG_filename:-FROST-Server}" />
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%20thread] %-5level %35logger{35} - %msg%n</pattern>
@@ -16,15 +22,15 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/SensorThingsService.log</file>
+        <file>${FROST_LOG_path}/${FROST_LOG_filename}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- daily rollover. Make sure the path matches the one in the file element or else
             the rollover logs are placed in the working directory. -->
-            <fileNamePattern>logs/SensorThingsImporter_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>50MB</maxFileSize>
-            <!-- keep 5 days' worth of history -->
-            <maxHistory>5</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
+            <fileNamePattern>${FROST_LOG_path}/${FROST_LOG_filename}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${FROST_LOG_maxfilesize}</maxFileSize>
+            <!-- keep x days' worth of history -->
+            <maxHistory>${FROST_LOG_maxfilecount}</maxHistory>
+            <totalSizeCap>${FROST_LOG_maxtotalsize}</totalSizeCap>
         </rollingPolicy>
 
         <encoder>

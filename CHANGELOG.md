@@ -3,6 +3,7 @@
 ## Development version 2.0.7
 
 **Internal changes & Bugfixes**
+* Improved configuration options for logging.
 
 
 ## Release version 2.0.6
