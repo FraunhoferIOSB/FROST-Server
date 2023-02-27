@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
@@ -161,7 +161,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
@@ -189,7 +189,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
-    public TableImpFeatures asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpFeatures asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);

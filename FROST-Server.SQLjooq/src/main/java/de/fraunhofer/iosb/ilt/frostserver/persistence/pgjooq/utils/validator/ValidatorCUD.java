@@ -21,7 +21,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
@@ -62,7 +62,7 @@ public class ValidatorCUD implements HookValidator {
     private ValidationCheck checkDelete;
 
     @Override
-    public void registerHooks(StaMainTable mainTable, PostgresPersistenceManager ppm) {
+    public void registerHooks(StaMainTable mainTable, JooqPersistenceManager ppm) {
         LOGGER.info("    Registering hooks for {}", mainTable.getName());
         final EntityType entityType = mainTable.getEntityType();
         if (getCheckInsertPreRel() != null) {

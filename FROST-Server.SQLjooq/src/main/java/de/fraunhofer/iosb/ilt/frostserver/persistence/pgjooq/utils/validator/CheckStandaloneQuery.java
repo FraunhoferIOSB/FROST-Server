@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
@@ -61,11 +61,11 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
     private Query parsedQuery;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity contextEntity) {
+    public boolean check(JooqPersistenceManager pm, Entity contextEntity) {
         return isValid(pm);
     }
 
-    private void init(PostgresPersistenceManager pm) {
+    private void init(JooqPersistenceManager pm) {
         entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
         final CoreSettings coreSettings = pm.getCoreSettings();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
@@ -99,7 +99,7 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
     }
 
     @Override
-    public boolean isValid(PostgresPersistenceManager pm) {
+    public boolean isValid(JooqPersistenceManager pm) {
         if (parsedQuery == null) {
             init(pm);
         }

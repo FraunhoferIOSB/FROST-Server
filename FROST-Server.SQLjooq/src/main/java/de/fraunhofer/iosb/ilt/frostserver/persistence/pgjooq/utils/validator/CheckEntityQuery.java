@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
@@ -55,7 +55,7 @@ public class CheckEntityQuery implements ValidationCheck {
     private Query parsedQuery;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity contextEntity) {
+    public boolean check(JooqPersistenceManager pm, Entity contextEntity) {
         if (parsedQuery == null) {
             init(contextEntity, pm);
         }
@@ -71,7 +71,7 @@ public class CheckEntityQuery implements ValidationCheck {
         }
     }
 
-    private void init(Entity contextEntity, PostgresPersistenceManager pm) {
+    private void init(Entity contextEntity, JooqPersistenceManager pm) {
         entityType = contextEntity.getEntityType();
         final CoreSettings coreSettings = pm.getCoreSettings();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();

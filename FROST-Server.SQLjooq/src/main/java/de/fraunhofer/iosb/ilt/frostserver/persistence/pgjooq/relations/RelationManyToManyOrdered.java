@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
@@ -88,7 +88,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
     }
 
     @Override
-    protected void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
+    protected void link(JooqPersistenceManager pm, Object sourceId, Object targetId) {
         final DSLContext dslContext = pm.getDslContext();
         final L linkTable = getLinkTable();
         final Field<Object> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
@@ -112,7 +112,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
     }
 
     @Override
-    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
         final var linkTable = getLinkTable();
         final var sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
         final var targetLinkField = getTargetLinkFieldAcc().getField(linkTable);

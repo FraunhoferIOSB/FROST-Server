@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -111,7 +111,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
@@ -141,7 +141,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
      * @param sourceId The source id of the link.
      * @param targetId The target id of the link.
      */
-    protected void link(PostgresPersistenceManager pm, Object sourceId, Object targetId) {
+    protected void link(JooqPersistenceManager pm, Object sourceId, Object targetId) {
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
@@ -155,7 +155,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

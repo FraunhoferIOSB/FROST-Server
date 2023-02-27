@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -150,7 +150,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public void installSecurityDefinitions(PersistenceManager pm) {
-        if (pm instanceof PostgresPersistenceManager) {
+        if (pm instanceof JooqPersistenceManager) {
             for (String fileName : securityFiles) {
                 SecurityModel secModel = loadSecurityFile(fileName);
                 if (secModel == null) {
@@ -238,7 +238,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         return pluginSettings.get(PLUGIN_NAME + ".idType." + entityTypeName, idTypeDefault).toUpperCase();
     }
 
-    public Map<String, Object> createLiqibaseParams(PostgresPersistenceManager ppm, Map<String, Object> target) {
+    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
         if (target == null) {
             target = new LinkedHashMap<>();
         }
@@ -256,8 +256,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager) {
+                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
                     final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
@@ -274,8 +274,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager) {
+                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
                 for (String file : liquibaseFiles) {
                     final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
                     liquibaseParams.put("searchPath", liquibasePath);

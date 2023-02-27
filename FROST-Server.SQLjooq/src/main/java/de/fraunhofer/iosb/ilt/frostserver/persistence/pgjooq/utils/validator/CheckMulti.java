@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorEnum;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class CheckMulti implements ValidationCheck {
     private List<ValidationCheck> subChecks;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity context) {
+    public boolean check(JooqPersistenceManager pm, Entity context) {
         if (getCombineType() == Type.AND) {
             for (ValidationCheck check : getSubChecks()) {
                 if (!check.check(pm, context)) {

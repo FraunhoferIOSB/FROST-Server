@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -54,7 +54,7 @@ public class FieldMapperTimeValue extends FieldMapperAbstractEp {
     private int fieldEndIdx;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
         final Table<?> dbTable = ppm.getDbTable(tableName);
@@ -63,7 +63,7 @@ public class FieldMapperTimeValue extends FieldMapperAbstractEp {
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T table) {
         final EntityProperty<TimeValue> property = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxStart = fieldStartIdx;

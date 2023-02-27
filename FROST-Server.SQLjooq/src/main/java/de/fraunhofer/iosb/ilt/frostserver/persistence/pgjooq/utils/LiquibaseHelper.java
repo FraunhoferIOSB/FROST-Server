@@ -96,14 +96,10 @@ public class LiquibaseHelper {
         final ResourceAccessor resourceAccessor = new SearchPathResourceAccessor(liquibaseSearchPath)
                 .addResourceAccessor(new ClassLoaderResourceAccessor());
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
-            String dbSearchPath = getSearchPath(connection);
-
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
             liquibase.update(new Contexts());
-
-            setSearchPath(connection, dbSearchPath);
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
             throw new UpgradeFailedException(ex);
@@ -112,7 +108,7 @@ public class LiquibaseHelper {
         }
     }
 
-    private static String getSearchPath(Connection connection) {
+    public static String getSearchPath(Connection connection) {
         try (PreparedStatement call = connection.prepareStatement("show search_path")) {
             call.execute();
             try (ResultSet resultSet = call.getResultSet()) {
@@ -128,7 +124,7 @@ public class LiquibaseHelper {
         return "";
     }
 
-    private static void setSearchPath(Connection connection, String wantedSearchPath) {
+    public static void setSearchPath(Connection connection, String wantedSearchPath) {
         String searchPath = getSearchPath(connection);
         if (wantedSearchPath.equals(searchPath)) {
             return;

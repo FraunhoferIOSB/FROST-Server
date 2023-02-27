@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -72,7 +72,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
     private Query parsedQuery;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity contextEntity) {
+    public boolean check(JooqPersistenceManager pm, Entity contextEntity) {
         if (parsedQuery == null) {
             init(contextEntity, pm);
         }
@@ -118,7 +118,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
         return false;
     }
 
-    private void init(Entity contextEntity, PostgresPersistenceManager pm) {
+    private void init(Entity contextEntity, JooqPersistenceManager pm) {
         try {
             entityType = contextEntity.getEntityType();
             targetNp = entityType.getNavigationProperty(getTargetNavLink());

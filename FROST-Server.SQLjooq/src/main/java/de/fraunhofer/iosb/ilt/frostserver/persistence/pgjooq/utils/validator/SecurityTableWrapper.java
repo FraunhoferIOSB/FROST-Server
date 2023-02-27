@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 import org.jooq.Table;
@@ -41,6 +41,6 @@ public interface SecurityTableWrapper extends SecurityWrapper {
      * access.
      * @return The wrapped table.
      */
-    public Table wrap(StaMainTable table, PostgresPersistenceManager pm);
+    public Table wrap(StaMainTable table, JooqPersistenceManager pm);
 
 }

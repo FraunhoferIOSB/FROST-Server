@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -179,7 +179,7 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
     }
 
     @Override
-    public TableImpTaskingCapabilities asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpTaskingCapabilities asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);

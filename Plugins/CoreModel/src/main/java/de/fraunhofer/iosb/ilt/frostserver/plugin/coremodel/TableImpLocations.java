@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
@@ -187,7 +187,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         EntityType linkedEntityType = linkedSet.getEntityType();
         ModelRegistry modelRegistry = getModelRegistry();
         if (linkedEntityType.equals(pluginCoreModel.etThing)) {
@@ -251,7 +251,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
         final TableCollection tables = getTables();
         // Also delete all historicalLocations that no longer reference any location
@@ -289,7 +289,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public TableImpLocations asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpLocations asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);

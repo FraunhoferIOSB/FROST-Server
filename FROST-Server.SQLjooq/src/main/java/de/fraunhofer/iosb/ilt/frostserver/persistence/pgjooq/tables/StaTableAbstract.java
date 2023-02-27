@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -239,7 +239,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -320,7 +320,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */
-    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         final NavigationPropertyEntitySet navProp = linkedSet.getNavigationProperty();
         final Relation relation = findRelation(navProp.getName());
         if (relation == null) {
@@ -333,7 +333,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -389,7 +389,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
             hookWrapper.getObject().delete(pm, entityId);
         }

@@ -87,7 +87,7 @@ public class QueryBuilder implements ResourcePathVisitor {
     public static final String ALIAS_PREFIX = "e";
     public static final String DEFAULT_PREFIX = QueryBuilder.ALIAS_PREFIX + "0";
 
-    private final PostgresPersistenceManager pm;
+    private final JooqPersistenceManager pm;
     private final CoreSettings coreSettings;
     private final PersistenceSettings settings;
     private final TableCollection tableCollection;
@@ -110,7 +110,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private QueryState<?> queryState;
 
-    public QueryBuilder(PostgresPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
+    public QueryBuilder(JooqPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
         this.pm = pm;
         this.coreSettings = coreSettings;
         this.settings = coreSettings.getPersistenceSettings();

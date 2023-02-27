@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
@@ -122,7 +122,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     }
 
     @Override
-    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
         super.insertIntoDatabase(pm, histLoc);
         EntityFactories entityFactories = pm.getEntityFactories();
         Entity thing = histLoc.getProperty(pluginCoreModel.npThingHistLoc);
@@ -191,7 +191,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     }
 
     @Override
-    public TableImpHistLocations asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpHistLocations asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);

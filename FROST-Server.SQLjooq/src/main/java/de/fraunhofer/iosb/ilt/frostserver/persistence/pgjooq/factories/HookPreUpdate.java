@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
@@ -31,5 +31,5 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  */
 public interface HookPreUpdate {
 
-    public void updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public void updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
 }

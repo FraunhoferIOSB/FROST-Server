@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -136,7 +136,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     }
 
     @Override
-    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, PostgresPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         final ModelRegistry modelRegistry = getModelRegistry();
         EntityType linkedEntityType = linkedSet.getEntityType();
         if (linkedEntityType.equals(pluginCoreModel.etLocation)) {
@@ -220,7 +220,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     }
 
     @Override
-    public TableImpThings asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpThings asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -90,14 +90,14 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
     private int fieldIdx;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         final Table dbTable = ppm.getDbTable(tableName);
         fieldIdx = getOrRegisterField(field, dbTable, staTable);
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T staTable) {
         final StaMainTable staTableOther = (StaMainTable) ppm.getTableCollection().getTableForName(otherTable);
         final Table dbTableOther = ppm.getDbTable(otherTable);
         final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);

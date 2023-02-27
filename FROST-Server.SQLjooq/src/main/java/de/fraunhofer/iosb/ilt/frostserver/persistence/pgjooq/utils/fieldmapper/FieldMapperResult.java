@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -82,7 +82,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
     private int fieldBooleanIdx;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
@@ -94,7 +94,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T table) {
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxType = fieldTypeIdx;
         final int idxString = fieldStringIdx;

@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
@@ -293,7 +293,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     }
 
     @Override
-    public TableImpObservations asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpObservations asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
@@ -376,7 +376,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         }
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
         final Object dsId = datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
         TableCollection tableCollection = getTables();
@@ -394,7 +394,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         return generateFeatureOfInterest(pm, query);
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, ResultQuery<Record3<Object, Object, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, ResultQuery<Record3<Object, Object, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
         final DSLContext dslContext = pm.getDslContext();
         TableImpLocations ql = getTables().getTableForClass(TableImpLocations.class);
         Result<Record3<Object, Object, String>> tuples = locationQuery.fetch();

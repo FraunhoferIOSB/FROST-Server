@@ -31,7 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -349,8 +349,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npHistoricalLocationsThing)
                 .registerProperty(npDatastreamsThing);
 
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+        if (pm instanceof JooqPersistenceManager) {
+            JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
             final DataType dataTypeDstr = ppm.getDataTypeFor(modelSettings.idTypeDatastream);
             final DataType dataTypeFeat = ppm.getDataTypeFor(modelSettings.idTypeFeature);
@@ -375,7 +375,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         return true;
     }
 
-    public Map<String, Object> createLiqibaseParams(PostgresPersistenceManager ppm, Map<String, Object> target) {
+    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
         if (target == null) {
             target = new LinkedHashMap<>();
         }
@@ -394,9 +394,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
+            if (pm instanceof JooqPersistenceManager) {
+                JooqPersistenceManager jpm = (JooqPersistenceManager) pm;
+                return jpm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(jpm, null));
             }
             return "Unknown persistence manager class";
         }
@@ -405,9 +405,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
-                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
+            if (pm instanceof JooqPersistenceManager) {
+                JooqPersistenceManager jpm = (JooqPersistenceManager) pm;
+                return jpm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(jpm, null), out);
             }
             out.append("Unknown persistence manager class");
             return false;

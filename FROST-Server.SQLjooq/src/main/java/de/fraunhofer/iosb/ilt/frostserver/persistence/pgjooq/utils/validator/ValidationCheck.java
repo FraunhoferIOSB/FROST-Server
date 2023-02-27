@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 
 /**
  *
@@ -29,6 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface ValidationCheck extends AnnotatedConfigurable<Void, Void> {
 
-    public boolean check(PostgresPersistenceManager pm, Entity context);
+    public boolean check(JooqPersistenceManager pm, Entity context);
 
 }

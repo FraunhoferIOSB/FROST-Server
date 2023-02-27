@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class CheckNavLinkEmpty implements ValidationCheck {
     private NavigationPropertyMain targetNp;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity contextEntity) {
+    public boolean check(JooqPersistenceManager pm, Entity contextEntity) {
         if (targetType == null) {
             init(contextEntity);
         }

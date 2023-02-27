@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 
@@ -27,5 +27,5 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
  */
 public interface HookValidator extends SecurityWrapper {
 
-    public void registerHooks(StaMainTable mainTable, PostgresPersistenceManager ppm);
+    public void registerHooks(StaMainTable mainTable, JooqPersistenceManager ppm);
 }

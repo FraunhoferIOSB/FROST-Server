@@ -70,7 +70,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
     private static final String ESTIMATE_COUNT = "Estimate: {}, Count: {}";
 
-    private final PostgresPersistenceManager pm;
+    private final JooqPersistenceManager pm;
     private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
     private final Query staQuery;
@@ -97,7 +97,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * @param dataSize The DataSize instance to add size information to.
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder, DataSize dataSize) {
+    public ResultBuilder(JooqPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder, DataSize dataSize) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;

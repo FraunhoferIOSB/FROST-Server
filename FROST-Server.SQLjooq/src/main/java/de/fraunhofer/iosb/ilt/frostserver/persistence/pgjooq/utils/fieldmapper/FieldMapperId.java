@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -45,7 +45,7 @@ public class FieldMapperId extends FieldMapperAbstract {
     private String field;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         if (!(staTable instanceof StaTableDynamic)) {
             throw new IllegalArgumentException("Id fields can only be registered on StaTableDynamic, not on " + staTable.getClass().getName());
         }
@@ -63,7 +63,7 @@ public class FieldMapperId extends FieldMapperAbstract {
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T table) {
         PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         pfReg.addEntryId(StaMainTable::getId);
     }

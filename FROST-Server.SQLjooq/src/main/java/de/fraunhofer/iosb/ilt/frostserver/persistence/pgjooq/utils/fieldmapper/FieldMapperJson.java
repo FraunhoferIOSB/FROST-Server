@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -58,14 +58,14 @@ public class FieldMapperJson extends FieldMapperAbstractEp {
     private int fieldIdx;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
         fieldIdx = getOrRegisterField(field, dbTable, staTable, new JsonBinding());
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T table) {
         final EntityProperty entityProperty = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;

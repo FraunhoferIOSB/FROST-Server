@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import java.util.List;
 import org.jooq.Table;
@@ -67,7 +67,7 @@ public class SecurityWrapperMulti implements SecurityTableWrapper {
     private List<IfConditionThenWrapper> wrappers;
 
     @Override
-    public Table wrap(StaMainTable table, PostgresPersistenceManager pm) {
+    public Table wrap(StaMainTable table, JooqPersistenceManager pm) {
         for (IfConditionThenWrapper ifThen : wrappers) {
             if (ifThen.getCondition().isValid(pm)) {
                 return ifThen.getWrapper().wrap(table, pm);

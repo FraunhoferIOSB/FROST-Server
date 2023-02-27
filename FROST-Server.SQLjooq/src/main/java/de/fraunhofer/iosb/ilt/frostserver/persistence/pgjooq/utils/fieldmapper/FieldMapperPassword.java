@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterPassword;
@@ -49,14 +49,14 @@ public class FieldMapperPassword extends FieldMapperAbstractEp {
     private int fieldIdx;
 
     @Override
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable) {
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
         fieldIdx = getOrRegisterField(field, dbTable, staTable);
     }
 
     @Override
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T table) {
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T table) {
         final boolean plainTextPw = ppm.getCoreSettings().getAuthSettings().getBoolean(TAG_PLAIN_TEXT_PASSWORD, true);
         final EntityProperty entityProperty = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();

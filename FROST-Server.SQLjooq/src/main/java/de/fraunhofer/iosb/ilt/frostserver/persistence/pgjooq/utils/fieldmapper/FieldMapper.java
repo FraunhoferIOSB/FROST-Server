@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 
 /**
@@ -29,8 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
  */
 public interface FieldMapper extends PropertyPersistenceMapper {
 
-    public void registerField(PostgresPersistenceManager ppm, StaMainTable staTable);
+    public void registerField(JooqPersistenceManager ppm, StaMainTable staTable);
 
-    public <T extends StaMainTable<T>> void registerMapping(PostgresPersistenceManager ppm, T staTable);
+    public <T extends StaMainTable<T>> void registerMapping(JooqPersistenceManager ppm, T staTable);
 
 }

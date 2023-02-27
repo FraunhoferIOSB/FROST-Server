@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
@@ -419,7 +419,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     }
 
     @Override
-    public TableImpMultiDatastreams asSecure(String name, PostgresPersistenceManager pm) {
+    public TableImpMultiDatastreams asSecure(String name, JooqPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
         if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
@@ -433,7 +433,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         return this;
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
         final Object dsId = datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
         TableCollection tableCollection = getTables();
@@ -452,7 +452,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         return tblObs.generateFeatureOfInterest(pm, query);
     }
 
-    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager pm) throws IncompleteEntityException {
+    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, JooqPersistenceManager pm) throws IncompleteEntityException {
         if (newObservation.isSetProperty(pluginMultiDatastream.npMultiDatastreamObservation)) {
             final Entity mds = newObservation.getProperty(pluginMultiDatastream.npMultiDatastreamObservation);
             if (mds == null) {
@@ -470,7 +470,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         return mds != null;
     }
 
-    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager pm) throws IncompleteEntityException {
+    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, JooqPersistenceManager pm) throws IncompleteEntityException {
         if (newObservation.isSetProperty(pluginCoreModel.npDatastreamObservation)) {
             final Entity ds = newObservation.getProperty(pluginCoreModel.npDatastreamObservation);
             if (ds == null) {

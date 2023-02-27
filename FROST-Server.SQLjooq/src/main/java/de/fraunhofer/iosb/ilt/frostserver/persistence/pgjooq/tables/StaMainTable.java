@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
@@ -62,7 +62,7 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * @param pm The PersistenceManager to use for any queries.
      * @return The secured, aliased table.
      */
-    public abstract StaMainTable<T> asSecure(String name, PostgresPersistenceManager pm);
+    public abstract StaMainTable<T> asSecure(String name, JooqPersistenceManager pm);
 
     /**
      * Get the SecurityTableWrapper for this table, if any is defined.
@@ -98,11 +98,11 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize);
 
-    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
 
-    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException;
+    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException;
 
     /**
      * Add a hook that runs pre-insert.

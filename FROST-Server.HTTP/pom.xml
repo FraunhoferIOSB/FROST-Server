@@ -118,6 +118,11 @@
                                     <artifactId>postgis-jdbc</artifactId>
                                     <version>${postgis.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.mariadb.jdbc</groupId>
+                                    <artifactId>mariadb-java-client</artifactId>
+                                    <version>3.1.2</version>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>

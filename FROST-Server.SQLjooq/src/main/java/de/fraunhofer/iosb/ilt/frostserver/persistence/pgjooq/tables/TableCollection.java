@@ -25,7 +25,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROL
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
@@ -107,7 +107,7 @@ public class TableCollection {
      * false if the TableCollection was already initialised and the call made no
      * changes.
      */
-    public boolean init(PostgresPersistenceManager ppm) {
+    public boolean init(JooqPersistenceManager ppm) {
         if (initialised) {
             return false;
         }
@@ -173,7 +173,7 @@ public class TableCollection {
         securityWrappers.put(tableName, w);
     }
 
-    public void initSecurityValidators(StaMainTable table, PostgresPersistenceManager ppm) {
+    public void initSecurityValidators(StaMainTable table, JooqPersistenceManager ppm) {
         if (securityValidators == null) {
             return;
         }

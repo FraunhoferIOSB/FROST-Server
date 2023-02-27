@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
@@ -106,7 +106,7 @@ public class EntityFactories {
         return new DefaultEntity(entityType, idFromObject(id));
     }
 
-    public void insertUserDefinedId(PostgresPersistenceManager pm, Map<Field, Object> clause, Field<?> idField, Entity entity) throws IncompleteEntityException {
+    public void insertUserDefinedId(JooqPersistenceManager pm, Map<Field, Object> clause, Field<?> idField, Entity entity) throws IncompleteEntityException {
         if (pm.useClientSuppliedId(entity)) {
             pm.modifyClientSuppliedId(entity);
             clause.put(idField, entity.getId().getValue());
@@ -124,7 +124,7 @@ public class EntityFactories {
      * @throws IncompleteEntityException If the entity has no id, but is not
      * complete and can thus not be created.
      */
-    public void entityExistsOrCreate(PostgresPersistenceManager pm, Entity e) throws NoSuchEntityException, IncompleteEntityException {
+    public void entityExistsOrCreate(JooqPersistenceManager pm, Entity e) throws NoSuchEntityException, IncompleteEntityException {
         if (e == null) {
             throw new NoSuchEntityException("No entity!");
         }
@@ -152,7 +152,7 @@ public class EntityFactories {
         pm.insert(e);
     }
 
-    public boolean entityExists(PostgresPersistenceManager pm, EntityType type, Id entityId, boolean admin) {
+    public boolean entityExists(JooqPersistenceManager pm, EntityType type, Id entityId, boolean admin) {
         Object id = entityId.getValue();
         StaMainTable<?> table = tableCollection.getTableForType(type);
         if (!admin) {
@@ -174,7 +174,7 @@ public class EntityFactories {
 
     }
 
-    public boolean entityExists(PostgresPersistenceManager pm, Entity e, boolean admin) {
+    public boolean entityExists(JooqPersistenceManager pm, Entity e, boolean admin) {
         if (e == null || e.getId() == null) {
             return false;
         }

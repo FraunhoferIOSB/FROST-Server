@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
@@ -61,7 +61,7 @@ public interface Relation<S extends StaMainTable<S>> {
      * @throws IncompleteEntityException if the target entity can not be created
      * because it is not complete.
      */
-    public void link(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws NoSuchEntityException, IncompleteEntityException;
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws NoSuchEntityException, IncompleteEntityException;
 
-    public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
 }

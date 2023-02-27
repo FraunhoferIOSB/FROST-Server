@@ -102,9 +102,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author scf
  */
-public class PostgresPersistenceManager extends AbstractPersistenceManager implements JooqPersistenceManager {
+public class MariadbPersistenceManager extends AbstractPersistenceManager implements JooqPersistenceManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MariadbPersistenceManager.class.getName());
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/core.xml";
 
     public static final String DATETIME_MAX_INSTANT = "9999-12-30T23:59:59.999Z";
@@ -201,7 +201,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public DSLContext getDslContext() {
         if (dslContext == null) {
-            dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
+            dslContext = DSL.using(connectionProvider.get(), SQLDialect.MARIADB);
         }
         return dslContext;
     }

@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 
 /**
  * A check that always return true or false.
@@ -33,12 +33,12 @@ public class CheckFixed implements ValidationCheck, UserCondition {
     private boolean valid;
 
     @Override
-    public boolean check(PostgresPersistenceManager pm, Entity context) {
+    public boolean check(JooqPersistenceManager pm, Entity context) {
         return valid;
     }
 
     @Override
-    public boolean isValid(PostgresPersistenceManager pm) {
+    public boolean isValid(JooqPersistenceManager pm) {
         return valid;
     }
 
