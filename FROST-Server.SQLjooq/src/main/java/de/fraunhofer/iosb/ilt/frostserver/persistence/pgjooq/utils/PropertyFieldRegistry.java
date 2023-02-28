@@ -173,6 +173,12 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             fields.put(key, field);
             return this;
         }
+
+        @Override
+        public String toString() {
+            return property.getName();
+        }
+
     }
 
     public static class PropertyFactoryCombo<T> {

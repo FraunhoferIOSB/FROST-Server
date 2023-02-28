@@ -300,7 +300,11 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
                 .usingQuery(query);
 
         ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
-        lastElement.visit(entityCreator);
+        try {
+            lastElement.visit(entityCreator);
+        } catch (IllegalArgumentException ex) {
+            throw new UnsupportedOperationException("Failed to convert result to entity.", ex);
+        }
         Object entity = entityCreator.getEntity();
 
         if (path.isEntityProperty() && entity instanceof Map) {

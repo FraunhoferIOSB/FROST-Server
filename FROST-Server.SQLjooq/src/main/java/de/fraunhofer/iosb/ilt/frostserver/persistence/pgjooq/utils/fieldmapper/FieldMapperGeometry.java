@@ -77,7 +77,9 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
         if (idxLocation >= 0) {
             sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation));
         } else {
-            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)));
+            sourcePfr = new PropertyFieldRegistry.NFP<>(
+                    "j",
+                    t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
         pfReg.addEntry(
                 property,
@@ -89,7 +91,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                                 locationString = tuple.get(t.field(idxLocation, SQLDataType.CLOB));
                             } else {
                                 locationString = tuple.get(
-                                        DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)));
+                                        DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
                             }
                             dataSize.increase(locationString == null ? 0 : locationString.length());
                             entity.setProperty(property, Utils.locationUnknownEncoding(locationString));
