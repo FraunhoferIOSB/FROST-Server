@@ -44,6 +44,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -682,34 +684,40 @@ public class FXMLController implements Initializable {
         switch (fieldData.typeName.toLowerCase()) {
             case "boolean":
                 defEp.addHandler(new FieldMapperBoolean().setField(fieldData.name))
-                        .setType("Edm.Boolean");
+                        .setType(TypeSimplePrimitive.EDM_BOOLEAN_NAME);
                 return true;
 
             case "clob":
             case "varchar":
             case "uuid":
                 defEp.addHandler(new FieldMapperString().setField(fieldData.name))
-                        .setType("Edm.String");
+                        .setType(TypeSimplePrimitive.EDM_STRING_NAME);
                 return true;
 
             case "smallint":
             case "integer":
             case "bigint":
-            case "float":
                 defEp.addHandler(new FieldMapperBigDecimal().setField(fieldData.name))
-                        .setType("Edm.Decimal");
+                        .setType(TypeSimplePrimitive.EDM_INT64_NAME);
+                return true;
+
+            case "float":
+            case "double":
+            case "decimal":
+                defEp.addHandler(new FieldMapperBigDecimal().setField(fieldData.name))
+                        .setType(TypeSimplePrimitive.EDM_DECIMAL_NAME);
                 return true;
 
             case "geometry":
                 defEp.addHandler(new FieldMapperGeometry().setFieldGeom(fieldData.name))
-                        .setType("Edm.Geometry");
+                        .setType(TypeSimplePrimitive.EDM_GEOMETRY_NAME);
                 return true;
 
             case "json":
             case "jsonb":
                 defEp.addHandler(new FieldMapperJson().setField(fieldData.name)
                         .setIsMap(false))
-                        .setType("Object");
+                        .setType(TypeComplex.STA_MAP_NAME);
                 return true;
 
             case "timestamp with time zone":
@@ -729,7 +737,7 @@ public class FXMLController implements Initializable {
                     return true;
                 }
                 defEp.addHandler(new FieldMapperTimeInstant().setField(fieldData.name))
-                        .setType("TimeInstant");
+                        .setType(TypeSimplePrimitive.EDM_DATETIMEOFFSET_NAME);
                 return true;
 
             default:
