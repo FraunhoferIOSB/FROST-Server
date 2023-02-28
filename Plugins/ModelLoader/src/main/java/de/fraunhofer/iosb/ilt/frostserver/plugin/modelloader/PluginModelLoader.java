@@ -238,17 +238,17 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         return pluginSettings.get(PLUGIN_NAME + ".idType." + entityTypeName, idTypeDefault).toUpperCase();
     }
 
-    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
+    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager jpm, Map<String, Object> target) {
         if (target == null) {
             target = new LinkedHashMap<>();
         }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         if (pCoreModel != null) {
-            pCoreModel.createLiqibaseParams(ppm, target);
+            pCoreModel.createLiqibaseParams(jpm, target);
         }
         for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
             String typeName = entry.getKey();
-            ppm.generateLiquibaseVariables(target, typeName, getTypeFor(settings, typeName));
+            jpm.generateLiquibaseVariables(target, typeName, getTypeFor(settings, typeName));
         }
         return target;
     }
@@ -256,13 +256,12 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager jpm) {
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
-                    final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
+                    final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
                     liquibaseParams.put("searchPath", liquibasePath);
-                    result.append(ppm.checkForUpgrades(file, liquibaseParams));
+                    result.append(jpm.checkForUpgrades(file, liquibaseParams));
                 }
                 return result.toString();
             } else {
@@ -274,12 +273,11 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager jpm) {
                 for (String file : liquibaseFiles) {
-                    final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
+                    final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
                     liquibaseParams.put("searchPath", liquibasePath);
-                    if (!ppm.doUpgrades(file, liquibaseParams, out)) {
+                    if (!jpm.doUpgrades(file, liquibaseParams, out)) {
                         return false;
                     }
                 }
