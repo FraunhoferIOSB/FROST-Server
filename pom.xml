@@ -84,7 +84,7 @@
         <slf4j-api.version>2.0.6</slf4j-api.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <testcontainers-keycloak.version>2.4.0</testcontainers-keycloak.version>
-        <time4j.version>5.9.1</time4j.version>
+        <time4j.version>5.9.2</time4j.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
