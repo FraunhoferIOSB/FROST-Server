@@ -20,10 +20,6 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <include relativeToChangelogFile="true" file="tableActuators.xml" />
-    <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
-    <include relativeToChangelogFile="true" file="tableTasks.xml" />
-    
     <changeSet author="scf" id="2021-01-01-actuation-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
