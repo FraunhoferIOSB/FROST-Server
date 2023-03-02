@@ -500,6 +500,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     public String checkForUpgrades(String liquibaseChangelogFilename, Map<String, Object> params) {
+        LOGGER.info("Checking for upgrades in {}", liquibaseChangelogFilename);
         try {
             Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
             Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
@@ -513,6 +514,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     public boolean doUpgrades(String liquibaseChangelogFilename, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
+        LOGGER.info("Applying upgrades in {}", liquibaseChangelogFilename);
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection;
         try {
