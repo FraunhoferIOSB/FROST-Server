@@ -184,7 +184,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 LOGGER.error("", ex);
                 return;
             }
-            if (!listening) {
+            if (!listeners.isEmpty()) {
                 startListening();
             }
         }

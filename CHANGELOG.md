@@ -4,6 +4,7 @@
 
 **New Features**
 * Improved configuration options for logging.
+* Fixed performance degradation caused by HTTP-instances listening on the message bus.
 
 
 ## Release version 2.1.0
