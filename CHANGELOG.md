@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Improved configuration options for logging.
+* Fixed performance degradation caused by HTTP-instances listening on the message bus.
 
 
 ## Release version 2.0.6
