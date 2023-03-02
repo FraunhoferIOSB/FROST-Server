@@ -1,8 +1,9 @@
 # Changelog
 
-## Development version 2.0.7
+## Release version 2.0.7
 
 **Internal changes & Bugfixes**
+* Updated dependency versions.
 * Improved configuration options for logging.
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
 
