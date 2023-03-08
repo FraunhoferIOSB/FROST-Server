@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        refs: [refs/tags/v2.1.0, refs/tags/v2.0.4, refs/tags/v1.15.2]
+        refs: [refs/tags/v2.1.1, refs/tags/v2.0.7, refs/tags/v1.15.2]
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout Source
