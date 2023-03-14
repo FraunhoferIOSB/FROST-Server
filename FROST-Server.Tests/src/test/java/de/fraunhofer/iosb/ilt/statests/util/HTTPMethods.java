@@ -87,12 +87,29 @@ public class HTTPMethods {
      * be empty.
      */
     public static HttpResponse doGet(String urlString) {
+        return doGet(urlString, null);
+    }
+
+    /**
+     * Send HTTP GET request to the urlString and return response code and
+     * response body
+     *
+     * @param urlString The URL that the GET request should be sent to
+     * @param authorization When not null, the Authorization header value
+     * @return response-code and response(response body) of the HTTP GET in the
+     * MAP format. If the response is not 200, the response(response body) will
+     * be empty.
+     */
+    public static HttpResponse doGet(String urlString, String authorization) {
         HttpResponse result = null;
         LOGGER.debug("Getting: {}", urlString);
         countGet++;
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(urlString);
+            if (authorization != null){
+                request.setHeader("Authorization", authorization);
+            }
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 result = new HttpResponse(response.getStatusLine().getStatusCode());
                 if (result.code == 200) {
@@ -147,6 +164,23 @@ public class HTTPMethods {
      * If response is 200, it will be the HTTP response body String.
      */
     public static HttpResponse doPost(String urlString, String postBody, String contentType) {
+        return doPost(urlString, postBody, contentType, null);
+    }
+
+    /**
+     * Send HTTP POST request to the urlString with postBody and return response
+     * code and response body
+     *
+     * @param urlString The URL that the POST request should be sent to
+     * @param postBody The body of the POST request
+     * @param contentType The POST request content type header value
+     * @param authorization When not null, the Authorization header value
+     * @return response-code and response of the HTTP POST in the MAP format. If
+     * the response is 201, the response will contain the self-link to the
+     * created entity from location header if present, or the response string.
+     * If response is 200, it will be the HTTP response body String.
+     */
+    public static HttpResponse doPost(String urlString, String postBody, String contentType, String authorization) {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
@@ -159,6 +193,9 @@ public class HTTPMethods {
             connection.setDoOutput(true);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("POST");
+            if (authorization != null){
+                connection.setRequestProperty("Authorization", authorization);
+            }
             connection.setRequestProperty("Content-Type", contentType);
             connection.setRequestProperty("charset", "utf-8");
             connection.setRequestProperty("Content-Length", Integer.toString(postDataLength));
