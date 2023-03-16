@@ -62,11 +62,11 @@ import org.slf4j.LoggerFactory;
  */
 public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults {
 
-    @DefaultValueInt(2)
+    @DefaultValueInt(4)
     public static final String TAG_SEND_WORKER_COUNT = "sendWorkerPoolSize";
     @DefaultValueInt(2)
     public static final String TAG_RECV_WORKER_COUNT = "recvWorkerPoolSize";
-    @DefaultValueInt(100)
+    @DefaultValueInt(1000)
     public static final String TAG_SEND_QUEUE_SIZE = "sendQueueSize";
     @DefaultValueInt(100)
     public static final String TAG_RECV_QUEUE_SIZE = "recvQueueSize";
@@ -76,7 +76,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     public static final String TAG_TOPIC_NAME = "topicName";
     @DefaultValueInt(2)
     public static final String TAG_QOS_LEVEL = "qosLevel";
-    @DefaultValueInt(50)
+    @DefaultValueInt(500)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
 
     /**
