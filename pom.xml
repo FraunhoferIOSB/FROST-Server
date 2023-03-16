@@ -61,7 +61,7 @@
         <junit-platform-suite.version>1.9.2</junit-platform-suite.version>
         <keycloak.version>21.0.1</keycloak.version>
         <liquibase.version>4.20.0</liquibase.version>
-        <logback.version>1.4.5</logback.version>
+        <logback.version>1.4.6</logback.version>
 
         <maven-assembly-plugin.version>3.5.0</maven-assembly-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
