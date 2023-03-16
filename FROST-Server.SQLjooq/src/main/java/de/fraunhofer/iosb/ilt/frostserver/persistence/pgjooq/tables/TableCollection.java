@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class TableCollection {
      * not initialised itself using it.
      */
     private List<DefModel> modelDefinitions;
+    private Map<String, SecurityTableWrapper> securityDefinitions;
 
     private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
@@ -89,6 +91,7 @@ public class TableCollection {
                 for (StaMainTable<?> table : getAllTables()) {
                     table.initProperties(entityFactories);
                     table.initRelations();
+                    table.setSecurityWrapper(getSecurityWrapper(table.getName()));
                 }
             }
         }
@@ -121,4 +124,17 @@ public class TableCollection {
         this.modelDefinitions = Collections.emptyList();
     }
 
+    SecurityTableWrapper getSecurityWrapper(String table) {
+        if (securityDefinitions == null) {
+            return null;
+        }
+        return securityDefinitions.get(table);
+    }
+
+    public void addSecurityWrapper(String tableName, SecurityTableWrapper w) {
+        if (securityDefinitions == null) {
+            securityDefinitions = new HashMap<>();
+        }
+        securityDefinitions.put(tableName, w);
+    }
 }

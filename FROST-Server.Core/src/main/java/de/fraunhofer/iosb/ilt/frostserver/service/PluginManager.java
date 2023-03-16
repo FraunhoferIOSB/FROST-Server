@@ -154,6 +154,9 @@ public class PluginManager implements ConfigDefaults {
                 LOGGER.error("    {}", plugin.getClass().getName());
             }
         }
+        for (PluginModel plugin : modelModifiers) {
+            plugin.installSecurityDefinitions(pm);
+        }
         modelRegistry.initFinalise();
     }
 

@@ -42,6 +42,10 @@ public final class ModelLoaderSettings implements ConfigDefaults {
     public static final String TAG_LIQUIBASE_PATH = PLUGIN_NAME + ".liquibasePath";
     @DefaultValue("")
     public static final String TAG_LIQUIBASE_FILES = PLUGIN_NAME + ".liquibaseFiles";
+    @DefaultValue("")
+    public static final String TAG_SECURITY_PATH = PLUGIN_NAME + ".securityPath";
+    @DefaultValue("")
+    public static final String TAG_SECURITY_FILES = PLUGIN_NAME + ".securityFiles";
 
     public final String idTypeDefault;
 

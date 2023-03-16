@@ -15,24 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.model.loader;
+package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 
 /**
+ * The lowest level definition of a SecurityWrapper. Each Persitence Manager
+ * type will have to extend this.
  *
  * @author hylke
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface DefValidator {
+public interface SecurityWrapper extends AnnotatedConfigurable<Void, Void> {
 
-    /**
-     * Create the defined validator(s) for the given EntityType on the model in the given ModelRegistry.
-     *
-     * @param modelRegistry The model to modify.
-     * @param entityType The entity type to create the validator for.
-     */
-    public void createValidators(ModelRegistry modelRegistry, EntityType entityType);
 }

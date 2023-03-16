@@ -15,24 +15,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.model.loader;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
+import org.jooq.Table;
 
 /**
+ * A SecurityTableWrapper wraps a plain table and adds additional joins or
+ * filters so that only the data is visible that the current user is allowed to
+ * see.
  *
  * @author hylke
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface DefValidator {
+public interface SecurityTableWrapper extends SecurityWrapper {
 
-    /**
-     * Create the defined validator(s) for the given EntityType on the model in the given ModelRegistry.
-     *
-     * @param modelRegistry The model to modify.
-     * @param entityType The entity type to create the validator for.
-     */
-    public void createValidators(ModelRegistry modelRegistry, EntityType entityType);
+    public Table wrap(StaMainTable table);
+
 }

@@ -23,12 +23,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -81,13 +83,17 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
      * to.
      */
     public TableImpActuators(DataType<?> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("ACTUATORS"), null);
+        super(idType, DSL.name("ACTUATORS"), null, null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
     }
 
     private TableImpActuators(Name alias, TableImpActuators aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginActuation, pluginCoreModel);
+    }
+
+    private TableImpActuators(Name alias, TableImpActuators aliased, Table updatedSql, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
     }
@@ -125,6 +131,16 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
     @Override
     public TableImpActuators as(Name alias) {
         return new TableImpActuators(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpActuators asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpActuators(DSL.name(name), this, wrappedTable, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

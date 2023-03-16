@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
@@ -57,6 +58,8 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -532,6 +535,17 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public void addModelMapping(DefModel modelDefinition) {
         tableCollection.getModelDefinitions().add(modelDefinition);
+    }
+
+    @Override
+    public void addSecurityDefinition(SecurityEntry entry) {
+        String tableName = entry.getTableName();
+        SecurityWrapper wrapper = entry.getWrapper();
+        if (wrapper instanceof SecurityTableWrapper stw) {
+            tableCollection.addSecurityWrapper(tableName, stw);
+        } else {
+            LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
+        }
     }
 
     private void loadMapping() {

@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeo
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -63,6 +64,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record3;
 import org.jooq.SelectConditionStep;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -157,13 +159,17 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
      * @param pCoreModel the coreModel plugin that this data model links to.
      */
     public TableImpMultiDatastreams(DataType<?> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
-        super(idType, DSL.name("MULTI_DATASTREAMS"), null);
+        super(idType, DSL.name("MULTI_DATASTREAMS"), null, null);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
     }
 
     private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pMultiDs, pCoreModel);
+    }
+
+    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, Table updatedSql, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
     }
@@ -402,6 +408,16 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     @Override
     public TableImpMultiDatastreams as(Name alias) {
         return new TableImpMultiDatastreams(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpMultiDatastreams asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpMultiDatastreams(DSL.name(name), this, wrappedTable, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override

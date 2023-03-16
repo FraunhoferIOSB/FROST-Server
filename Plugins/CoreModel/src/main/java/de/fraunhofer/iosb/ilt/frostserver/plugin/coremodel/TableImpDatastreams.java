@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBind
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -50,6 +51,7 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -178,7 +180,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpDatastreams(DataType<?> idType, DataType<?> idTypeOp, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colSensorId = createField(DSL.name(NAME_COL_SENSORID), idTypeSnsr.nullable(false));
         colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), idTypeOp.nullable(false));
@@ -186,7 +188,11 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     }
 
     private TableImpDatastreams(Name alias, TableImpDatastreams aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpDatastreams(Name alias, TableImpDatastreams aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
         colSensorId = createField(DSL.name(NAME_COL_SENSORID), aliased.colSensorId.getDataType().nullable(false));
         colObsPropertyId = createField(DSL.name(NAME_COL_OBSPROPERTYID), aliased.colObsPropertyId.getDataType().nullable(false));
@@ -320,6 +326,16 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
             return propertyFieldForUoM(field, epCustomSelect);
         }
         return super.handleEntityPropertyCustomSelect(epCustomSelect);
+    }
+
+    @Override
+    public TableImpDatastreams asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpDatastreams(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

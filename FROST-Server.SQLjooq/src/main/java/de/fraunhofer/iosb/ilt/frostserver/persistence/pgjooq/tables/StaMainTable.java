@@ -37,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.impl.DSL;
 
 /**
  *
@@ -52,9 +51,29 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public abstract T as(Name as);
 
     @Override
-    public default StaMainTable<T> as(String name) {
-        return as(DSL.name(name));
-    }
+    public abstract T as(String name);
+
+    /**
+     * Return an aliased version of the table, with security joins active.
+     *
+     * @param name The alias to use.
+     * @return The secured, aliased table.
+     */
+    public abstract StaMainTable<T> asSecure(String name);
+
+    /**
+     * Get the SecurityTableWrapper for this table, if any is defined.
+     *
+     * @return The SecurityTableWrapper for this table, or null.
+     */
+    public abstract SecurityTableWrapper getSecurityWrapper();
+
+    /**
+     * Set the SecurityTableWrapper for this table.
+     *
+     * @param securityWrapper The SecurityTableWrapper to set.
+     */
+    public void setSecurityWrapper(SecurityTableWrapper securityWrapper);
 
     public void initRelations();
 

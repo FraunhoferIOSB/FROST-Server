@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -58,6 +59,7 @@ import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -173,14 +175,18 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObservations(DataType<?> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), idTypeDs);
         colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), idTypeFeature);
     }
 
     private TableImpObservations(Name alias, TableImpObservations aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpObservations(Name alias, TableImpObservations aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
         colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), aliased.colDatastreamId.getDataType());
         colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), aliased.colFeatureId.getDataType());
@@ -279,6 +285,16 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     @Override
     public TableImpObservations as(Name alias) {
         return new TableImpObservations(alias, this, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpObservations asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpObservations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

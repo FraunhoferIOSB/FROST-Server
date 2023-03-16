@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
-
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -31,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
@@ -64,6 +63,7 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -91,14 +91,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
     private final DataType<?> idType;
 
+    private SecurityTableWrapper securityWrapper;
+
     private final transient SortedSet<SortingWrapper<Double, HookPreInsert>> hooksPreInsert;
     private final transient SortedSet<SortingWrapper<Double, HookPreUpdate>> hooksPreUpdate;
     private final transient SortedSet<SortingWrapper<Double, HookPreDelete>> hooksPreDelete;
 
-    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliased) {
-        super(alias, null, aliased);
+    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliasedBase, Table updatedSql) {
+        super(alias, null, updatedSql);
         this.idType = idType;
-        if (aliased == null) {
+        if (aliasedBase == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());
             relations = new HashMap<>();
             hooksPreInsert = new TreeSet<>();
@@ -106,13 +108,13 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             hooksPreDelete = new TreeSet<>();
             customFields = new ArrayList<>();
         } else {
-            init(aliased.getModelRegistry(), aliased.getTables());
-            pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
-            relations = aliased.relations;
-            hooksPreInsert = aliased.hooksPreInsert;
-            hooksPreUpdate = aliased.hooksPreUpdate;
-            hooksPreDelete = aliased.hooksPreDelete;
-            customFields = aliased.customFields;
+            init(aliasedBase.getModelRegistry(), aliasedBase.getTables());
+            pfReg = new PropertyFieldRegistry<>(getThis(), aliasedBase.getPropertyFieldRegistry());
+            relations = aliasedBase.relations;
+            hooksPreInsert = aliasedBase.hooksPreInsert;
+            hooksPreUpdate = aliasedBase.hooksPreUpdate;
+            hooksPreDelete = aliasedBase.hooksPreDelete;
+            customFields = aliasedBase.customFields;
         }
     }
 
@@ -181,6 +183,23 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     @Override
     public void registerHookPreDelete(double priority, HookPreDelete hook) {
         hooksPreDelete.add(new SortingWrapper<>(priority, hook));
+    }
+
+    @Override
+    public SecurityTableWrapper getSecurityWrapper() {
+        return securityWrapper;
+    }
+
+    @Override
+    public void setSecurityWrapper(SecurityTableWrapper securityWrapper) {
+        if (securityWrapper == null) {
+            return;
+        }
+        if (this.securityWrapper != null) {
+            LOGGER.error("Overwriting security wrapper for table {}, old type: {}", getName(), this.securityWrapper.getClass().getName());
+        }
+        LOGGER.info("Applying security wrapper to table {} of type {}", getName(), securityWrapper.getClass().getName());
+        this.securityWrapper = securityWrapper;
     }
 
     @Override
