@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -103,7 +104,7 @@ class HttpRequestDecoder {
                 .withContent(request.getInputStream())
                 .withContentType(request.getContentType())
                 .withParameterMap(parameterMap)
-                .withUserPrincipal(request.getUserPrincipal());
+                .withUserPrincipal(PrincipalExtended.fromPrincipal(request.getUserPrincipal()));
 
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {

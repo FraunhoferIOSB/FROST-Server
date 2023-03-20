@@ -17,7 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.USER_NAME_ANONYMOUS;
+
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,6 +28,8 @@ import java.util.List;
  * @author hylke
  */
 public class PrincipalExtended implements Principal {
+
+    public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptyList());
 
     private final String name;
     private final boolean admin;
@@ -49,4 +54,20 @@ public class PrincipalExtended implements Principal {
         return roles;
     }
 
+    /**
+     * Turns the given principal into a PrincipalExtended. A null value will
+     * turn into an anonymous principal extended.
+     *
+     * @param principal the principal to check, or null.
+     * @return A principalExtended.
+     */
+    public static final PrincipalExtended fromPrincipal(Principal principal) {
+        if (principal == null) {
+            return ANONYMOUS_PRINCIPAL;
+        }
+        if (principal instanceof PrincipalExtended principalExtended) {
+            return principalExtended;
+        }
+        return new PrincipalExtended(principal.getName(), false, Collections.emptyList());
+    }
 }

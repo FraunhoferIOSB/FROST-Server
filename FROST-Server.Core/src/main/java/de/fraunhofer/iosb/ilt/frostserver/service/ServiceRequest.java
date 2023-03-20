@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +50,7 @@ public class ServiceRequest {
     private String contentType;
     private Map<String, List<String>> parameterMap;
     private Map<String, Object> attributeMap;
-    private Principal userPrincipal;
+    private PrincipalExtended userPrincipal;
     private CoreSettings coreSettings;
 
     protected ServiceRequest() {
@@ -199,11 +199,11 @@ public class ServiceRequest {
         }
     }
 
-    public Principal getUserPrincipal() {
+    public PrincipalExtended getUserPrincipal() {
         return userPrincipal;
     }
 
-    public void setUserPrincipal(Principal userPrincipal) {
+    public void setUserPrincipal(PrincipalExtended userPrincipal) {
         this.userPrincipal = userPrincipal;
     }
 

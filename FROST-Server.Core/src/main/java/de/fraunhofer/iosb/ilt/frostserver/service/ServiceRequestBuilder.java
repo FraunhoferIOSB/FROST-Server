@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import java.io.InputStream;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class ServiceRequestBuilder {
     private final Map<String, Object> attributeMap = new HashMap<>();
     private final CoreSettings coreSettings;
     private final Version version;
-    private Principal userPrincipal;
+    private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
     public ServiceRequestBuilder(CoreSettings coreSettings, Version version) {
         this.coreSettings = coreSettings;
@@ -102,7 +102,7 @@ public class ServiceRequestBuilder {
         return this;
     }
 
-    public ServiceRequestBuilder withUserPrincipal(Principal userPrincipal) {
+    public ServiceRequestBuilder withUserPrincipal(PrincipalExtended userPrincipal) {
         this.userPrincipal = userPrincipal;
         return this;
     }
