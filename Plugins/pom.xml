@@ -23,4 +23,8 @@
         <module>OData</module>
         <module>OpenApi</module>
     </modules>
+
+    <properties>
+        <root.basedir>${project.parent.basedir}</root.basedir>
+    </properties>
 </project>

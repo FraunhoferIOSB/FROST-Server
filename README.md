@@ -39,9 +39,9 @@ To compile FROST-Server you need to have a JDK and Maven installed.
 1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/FROST-Server.git`
 2. Go to the project root (The top-most directory with a pom.xml) `cd FROST-Server`
 3. Give the command `mvn clean install`. This should build the war and jar files in:
-  * `FROST-Server.MQTTP/target/`
-  * `FROST-Server.HTTP/target/`
-  * `FROST-Server.MQTT/target/`
+   * `FROST-Server.MQTTP/target/`
+   * `FROST-Server.HTTP/target/`
+   * `FROST-Server.MQTT/target/`
 
 
 ##Contributing

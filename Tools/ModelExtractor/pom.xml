@@ -19,6 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>de.fraunhofer.iosb.ilt.frostserver.modelextractor.MainApp</mainClass>
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
+        <root.basedir>${project.parent.parent.basedir}</root.basedir>
 
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
         <openjfx.version>19.0.2.1</openjfx.version>
@@ -29,7 +30,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -71,7 +71,6 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>${git-commit-id-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -133,12 +132,10 @@
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-meta</artifactId>
-            <version>${jooq.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-codegen</artifactId>
-            <version>${jooq.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
