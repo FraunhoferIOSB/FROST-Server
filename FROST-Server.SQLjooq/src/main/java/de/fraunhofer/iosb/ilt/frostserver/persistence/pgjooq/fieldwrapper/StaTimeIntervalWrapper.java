@@ -105,8 +105,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
                 String template = "(? " + op + " " + INTERVAL_PARAM + ")";
                 return new StaTimeIntervalWrapper(
                         DSL.field(template, Moment.class, start, other.getDuration()),
-                        DSL.field(template, Moment.class, end, other.getDuration())
-                );
+                        DSL.field(template, Moment.class, end, other.getDuration()));
 
             default:
                 throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());

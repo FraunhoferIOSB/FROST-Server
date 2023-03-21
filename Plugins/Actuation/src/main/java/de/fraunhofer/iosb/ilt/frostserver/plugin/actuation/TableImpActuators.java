@@ -98,8 +98,7 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
         final TableImpTaskingCapabilities tableTaskCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesActuator, this, tableTaskCaps)
                 .setSourceFieldAccessor(TableImpActuators::getId)
-                .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
-        );
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId));
     }
 
     @Override

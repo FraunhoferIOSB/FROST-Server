@@ -100,8 +100,7 @@ public class TableImpSensors extends StaTableAbstract<TableImpSensors> {
         TableImpDatastreams tableDs = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsSensor, this, tableDs)
                 .setSourceFieldAccessor(TableImpSensors::getId)
-                .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
-        );
+                .setTargetFieldAccessor(TableImpDatastreams::getSensorId));
     }
 
     @Override

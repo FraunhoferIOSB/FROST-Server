@@ -33,17 +33,14 @@ public enum Extension {
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html",
             "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html",
-            "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"
-    ),
+            "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"),
     MQTT(
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates"
-    ),
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates"),
     ENTITY_LINKING(
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
-            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"
-    );
+            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter");
 
     /**
      * Flag indicating the server feature should be exposed on the index page.

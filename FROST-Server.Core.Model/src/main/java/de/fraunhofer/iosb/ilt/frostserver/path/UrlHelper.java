@@ -146,13 +146,11 @@ public class UrlHelper {
             if (orderby.getType() == OrderBy.OrderType.DESCENDING) {
                 newFilter = new Or(
                         new LessThan(obPath, valueConstant),
-                        newAnd
-                );
+                        newAnd);
             } else {
                 newFilter = new Or(
                         new GreaterThan(obPath, valueConstant),
-                        newAnd
-                );
+                        newAnd);
             }
             if (lastAnd == null) {
                 skipFilter = newFilter;
@@ -349,8 +347,7 @@ public class UrlHelper {
         final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
         return new AbstractMap.SimpleImmutableEntry<>(
                 key == null ? null : URLDecoder.decode(key, StringHelper.UTF8),
-                value == null ? null : URLDecoder.decode(value, StringHelper.UTF8)
-        );
+                value == null ? null : URLDecoder.decode(value, StringHelper.UTF8));
     }
 
     public static Map<String, String> decodePrefer(String input, Map<String, String> output) {

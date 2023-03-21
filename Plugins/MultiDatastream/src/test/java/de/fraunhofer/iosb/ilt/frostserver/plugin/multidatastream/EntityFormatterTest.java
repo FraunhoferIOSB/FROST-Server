@@ -107,8 +107,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicAbs() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
@@ -138,8 +137,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicRel() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -169,8 +167,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingSelect() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
@@ -191,8 +188,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsBasic() throws IOException {
-        String thing
-                = "{\n"
+        String thing = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -206,8 +202,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        String expResult
-                = "{ \"value\":[\n"
+        String expResult = "{ \"value\":[\n"
                 + thing + ",\n"
                 + thing
                 + "]}";
@@ -249,8 +244,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsWithExpandedDatastream() throws IOException {
-        String thing
-                = "{\n"
+        String thing = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Datastreams@iot.count\":1,\n"
@@ -285,8 +279,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        String expResult
-                = "{ "
+        String expResult = "{ "
                 + "\"@iot.count\": 1,\n"
                 + "\"value\":[\n"
                 + thing
@@ -305,13 +298,11 @@ class EntityFormatterTest {
                         .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
-                                .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                        )
+                                .setDefinition("http://unitsofmeasure.org/ucum.html#para-30"))
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                         .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
-                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
-                )
+                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -327,8 +318,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingWithExpandedDatastream1() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
@@ -352,8 +342,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123))
-                )
+                        .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -379,8 +368,7 @@ class EntityFormatterTest {
                 .setId(new IdLong(1))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123))
-                )
+                        .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -407,8 +395,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123))
-                )
+                        .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
@@ -445,8 +432,7 @@ class EntityFormatterTest {
 
     @Test
     void writeMultiDatastreamBasic() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/MultiDatastreams(1)\",\n"
                 + "	\"Thing@iot.navigationLink\": \"MultiDatastreams(1)/Thing\",\n"
@@ -488,12 +474,10 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring wind direction and speed.")
                 .setProperty(epUnitOfMeasurements, Arrays.asList(
                         new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
-                        new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-                ))
+                        new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")))
                 .setProperty(epMultiObservationDataTypes, Arrays.asList(
                         "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
-                ))
+                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"))
                 .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
                 .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC));
         compareJson(expResult, JsonWriter.writeEntity(entity));
@@ -501,8 +485,7 @@ class EntityFormatterTest {
 
     @Test
     void writeSensorBasic() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Sensors(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"Sensors(1)/Datastreams\",\n"
@@ -527,8 +510,7 @@ class EntityFormatterTest {
 
     @Test
     void writeSensorEmptyDatastreamsCollection() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
@@ -551,8 +533,7 @@ class EntityFormatterTest {
 
     @Test
     void writeObservedPropertyBasic() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/ObservedProperties(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"ObservedProperties(1)/Datastreams\",\n"
@@ -575,8 +556,7 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationBasicDs() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
@@ -601,8 +581,7 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationBasicMds() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
@@ -627,8 +606,7 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationBasicWithNullResult() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
@@ -653,8 +631,7 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationWithEmptyResultTime() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
@@ -679,8 +656,7 @@ class EntityFormatterTest {
 
     @Test
     void writeFeatureOfInterstBasic() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/FeaturesOfInterest(1)\",\n"
                 + "	\"Observations@iot.navigationLink\": \"FeaturesOfInterest(1)/Observations\",\n"
@@ -702,8 +678,7 @@ class EntityFormatterTest {
 
     @Test
     void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/FeaturesOfInterest(1)\",\n"
                 + "	\"Observations@iot.navigationLink\": \"FeaturesOfInterest(1)/Observations\",\n"

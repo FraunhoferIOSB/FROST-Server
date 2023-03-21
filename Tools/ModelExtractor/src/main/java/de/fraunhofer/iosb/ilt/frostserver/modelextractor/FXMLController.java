@@ -97,6 +97,7 @@ public class FXMLController implements Initializable {
         IGNORE("-"),
         ENTITY_TYPE("Entity"),
         LINK_TABLE("Link");
+
         private final String label;
 
         private TableChoice(String label) {

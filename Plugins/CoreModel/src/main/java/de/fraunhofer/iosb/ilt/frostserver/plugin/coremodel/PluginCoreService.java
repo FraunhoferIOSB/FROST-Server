@@ -135,7 +135,7 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
                 request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 break;
             default:
-            // Nothing to do.
+                // Nothing to do.
         }
         return mainService.execute(request, response);
     }

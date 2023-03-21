@@ -391,8 +391,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         MomentInterval value = node.getValue();
         return new StaTimeIntervalWrapper(
                 value.getStartAsMoment(),
-                value.getEndAsMoment()
-        );
+                value.getEndAsMoment());
     }
 
     @Override

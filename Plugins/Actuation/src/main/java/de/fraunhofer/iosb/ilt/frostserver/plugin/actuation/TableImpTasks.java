@@ -92,8 +92,7 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
         final TableImpTaskingCapabilities tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilityTask, this, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
-                .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
-        );
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getId));
     }
 
     @Override

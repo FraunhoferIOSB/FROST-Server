@@ -69,9 +69,9 @@ class SerialisationTest {
     void serialiseEmptyProperties() throws IOException {
         String expResult = "{\"foo\":\"bar\"}";
         Map<String, String> props = new HashMap<>();
-        props.put("foo","bar");
-        props.put("nullable",null);
-        props.put("empty","");
+        props.put("foo", "bar");
+        props.put("nullable", null);
+        props.put("empty", "");
         final String result = JsonWriter.writeObject(props);
         assertTrue(jsonEqual(expResult, result), "Empty properties not serialised correctly: " + result);
     }

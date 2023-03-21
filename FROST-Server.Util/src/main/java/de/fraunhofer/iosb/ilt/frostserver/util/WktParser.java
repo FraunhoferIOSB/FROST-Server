@@ -183,8 +183,7 @@ public class WktParser extends Visitor {
         if (children.size() == 2) {
             lastLngLatAlt = new LngLatAlt(
                     Double.valueOf(children.get(0).getImage()),
-                    Double.valueOf(children.get(1).getImage())
-            );
+                    Double.valueOf(children.get(1).getImage()));
         } else {
             throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }
@@ -199,8 +198,7 @@ public class WktParser extends Visitor {
             lastLngLatAlt = new LngLatAlt(
                     Double.valueOf(children.get(0).getImage()),
                     Double.valueOf(children.get(1).getImage()),
-                    Double.valueOf(children.get(2).getImage())
-            );
+                    Double.valueOf(children.get(2).getImage()));
         } else {
             throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }

@@ -145,8 +145,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
                 .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
                 .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
-                .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther))
-        );
+                .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther)));
 
         final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
@@ -159,8 +158,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
                     .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
-                    .setTargetFieldAcc(t -> (TableField) t.field(fieldIdx))
-            );
+                    .setTargetFieldAcc(t -> (TableField) t.field(fieldIdx)));
         }
 
     }

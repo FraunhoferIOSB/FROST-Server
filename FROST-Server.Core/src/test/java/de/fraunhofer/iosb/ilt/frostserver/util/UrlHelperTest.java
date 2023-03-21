@@ -47,6 +47,7 @@ class UrlHelperTest {
 
     public UrlHelperTest() {
     }
+
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
     private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + Version.V_1_1.urlPart;
 

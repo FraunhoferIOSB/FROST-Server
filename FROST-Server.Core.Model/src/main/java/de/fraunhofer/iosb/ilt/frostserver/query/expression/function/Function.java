@@ -129,8 +129,7 @@ public abstract class Function implements Expression {
                 parameters
                         .stream()
                         .map(Expression::compress)
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()));
     }
 
     @Override

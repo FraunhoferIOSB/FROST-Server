@@ -112,8 +112,8 @@ public class DatabaseHandler {
                     .from(TableUsers.USERS)
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(passwordCondition(passwordOrHash))
-                    ).fetchOne();
+                                    .and(passwordCondition(passwordOrHash)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user credentials.", exc);
@@ -144,8 +144,8 @@ public class DatabaseHandler {
                     .where(
                             TableUsers.USERS.userName.eq(userName)
                                     .and(passwordCondition(userPassOrHash))
-                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchOne();
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
@@ -173,8 +173,8 @@ public class DatabaseHandler {
                     .from(TableUsersRoles.USER_ROLES)
                     .where(
                             TableUsersRoles.USER_ROLES.userName.eq(userName)
-                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchOne();
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
@@ -196,7 +196,7 @@ public class DatabaseHandler {
 
     public String checkForUpgrades(Map<String, Object> params) {
         Settings customSettings = coreSettings.getAuthSettings();
-        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+        try (Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
             return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -212,7 +212,7 @@ public class DatabaseHandler {
 
     public boolean doUpgrades(Writer out, Map<String, Object> params) throws UpgradeFailedException, IOException {
         Settings customSettings = coreSettings.getAuthSettings();
-        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+        try (Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
             return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params, out);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);

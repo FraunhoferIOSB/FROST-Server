@@ -292,8 +292,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         DeleteConditionStep<? extends Record> delete = dslContext
                 .deleteFrom(table)
                 .where(
-                        table.getId().in(idSelect)
-                );
+                        table.getId().in(idSelect));
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, delete.getSQL(ParamType.INDEXED));

@@ -135,16 +135,14 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getThingId)
-                .setTargetFieldAcc(TableImpThings::getId)
-        );
+                .setTargetFieldAcc(TableImpThings::getId));
         final TableImpLocationsHistLocations tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpHistLocations tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npHistoricalLocationsLocation, this, tableLocHistLoc, tableHistLoc)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
-                .setTargetFieldAcc(TableImpHistLocations::getId)
-        );
+                .setTargetFieldAcc(TableImpHistLocations::getId));
     }
 
     @Override
@@ -237,8 +235,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
                                 .setEventType(EntityChangedMessage.Type.CREATE)
-                                .setEntity(newHl)
-                );
+                                .setEntity(newHl));
             }
             return;
         }
@@ -258,8 +255,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                         DSL.select(thl.getId())
                                 .from(thl)
                                 .leftJoin(tlhl).on(((TableField) thl.getId()).eq(tlhl.getHistLocationId()))
-                                .where(tlhl.getLocationId().isNull())
-                ))
+                                .where(tlhl.getLocationId().isNull())))
                 .execute();
         LOGGER.debug("Deleted {} HistoricalLocations", count);
 

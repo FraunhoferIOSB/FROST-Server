@@ -206,7 +206,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public String checkForUpgrades() {
-        try ( PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
                 StringBuilder result = new StringBuilder();
@@ -222,7 +222,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        try ( PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
                 for (String file : liquibaseFiles) {

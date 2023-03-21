@@ -193,8 +193,7 @@ public class OpenApiGenerator {
                 oaPath.getPost().setRequestBody(new OARequestBody()
                         .setDescription("Creates a new entity of type " + entityType.entityName)
                         .setRequired(true)
-                        .addContent(CONTENT_TYPE_APPLICATION_JSON, new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName)))
-                );
+                        .addContent(CONTENT_TYPE_APPLICATION_JSON, new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName))));
                 oaPath.getPost().getResponses().put("201", createEntitySetPost201Response(context, entityType));
             }
 

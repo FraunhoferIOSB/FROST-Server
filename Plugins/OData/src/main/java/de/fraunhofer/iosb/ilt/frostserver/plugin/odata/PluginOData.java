@@ -139,8 +139,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
                 RequestTypeUtils.UPDATE_ALL,
                 RequestTypeUtils.UPDATE_CHANGES,
                 RequestTypeUtils.UPDATE_CHANGESET,
-                REQUEST_TYPE_METADATA
-        );
+                REQUEST_TYPE_METADATA);
     }
 
     @Override

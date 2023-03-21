@@ -44,6 +44,7 @@ public class OrderBy {
         }
 
     }
+
     private final Expression expression;
     private final OrderType type;
 

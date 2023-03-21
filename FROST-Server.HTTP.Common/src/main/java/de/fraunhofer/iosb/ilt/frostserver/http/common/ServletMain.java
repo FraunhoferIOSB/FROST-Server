@@ -51,8 +51,7 @@ import org.slf4j.LoggerFactory;
         urlPatterns = {"/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
-        }
-)
+        })
 @MultipartConfig()
 public class ServletMain extends HttpServlet {
 

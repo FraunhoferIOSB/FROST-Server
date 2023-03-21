@@ -39,6 +39,7 @@ public enum EntityTypeMds {
     MULTI_DATASTREAM("MultiDatastream", "MultiDatastreams"),
     FEATURE_OF_INTEREST("FeatureOfInterest", "FeaturesOfInterest"),
     HISTORICAL_LOCATION("HistoricalLocation", "HistoricalLocations");
+
     public final String singular;
     public final String plural;
     private final List<String> properties = new ArrayList<>();

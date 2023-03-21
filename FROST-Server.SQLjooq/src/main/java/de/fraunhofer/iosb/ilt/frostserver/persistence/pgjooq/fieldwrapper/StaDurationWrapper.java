@@ -187,8 +187,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
             StaDurationWrapper cd = (StaDurationWrapper) other;
             String template = "(" + INTERVAL_PARAM + " " + op + " " + INTERVAL_PARAM + ")";
             return new SimpleFieldWrapper(
-                    DSL.condition(template, this.duration, cd.duration)
-            );
+                    DSL.condition(template, this.duration, cd.duration));
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
     }

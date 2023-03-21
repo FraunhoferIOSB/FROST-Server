@@ -1135,6 +1135,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     /**
      * This helper method is checking nested expands two levels deep including
      * select, top, skip and count options. For instance:
+     * 
      * <pre>
      * ObservedProperties(722)?
      *   $select=name,description&

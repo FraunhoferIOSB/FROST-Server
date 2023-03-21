@@ -68,8 +68,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)
-                            .setEntity(newEntity)
-            );
+                            .setEntity(newEntity));
         }
         return result;
     }
@@ -85,8 +84,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.DELETE)
-                            .setEntity(entity)
-            );
+                            .setEntity(entity));
         }
         return result;
     }

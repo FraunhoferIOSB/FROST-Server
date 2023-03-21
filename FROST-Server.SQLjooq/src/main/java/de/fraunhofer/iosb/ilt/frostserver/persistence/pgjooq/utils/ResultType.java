@@ -27,6 +27,7 @@ public enum ResultType {
     BOOLEAN,
     OBJECT_ARRAY,
     STRING;
+
     private final short sqlValue;
 
     private ResultType() {

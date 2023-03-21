@@ -29,6 +29,7 @@ public interface Annotation {
     public enum DocType {
         JSON("json"),
         XML("xml");
+
         private final String defaultExtension;
 
         private DocType(String defaultExtension) {

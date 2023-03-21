@@ -160,8 +160,7 @@ class MqttManagerTest {
                     .setEntity(
                             new DefaultEntity(testModel.ET_ROOM, new IdLong(pubId))
                                     .setProperty(testModel.EP_NAME, "" + pubId)
-                                    .setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId)))
-                    );
+                                    .setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId))));
             topicId++;
             if (topicId >= subscriptionCount) {
                 topicId = 0;

@@ -108,26 +108,22 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
         TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npThingTaskCap, this, tableThings)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         TableImpActuators tableActuators = tables.getTableForClass(TableImpActuators.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npActuatorTaskCap, this, tableActuators)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
-                .setTargetFieldAccessor(TableImpActuators::getId)
-        );
+                .setTargetFieldAccessor(TableImpActuators::getId));
         final TableImpTasks tableTasks = tables.getTableForClass(TableImpTasks.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTasksTaskCap, this, tableTasks)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
-                .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
-        );
+                .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId));
 
         // We add the relation to us to the Things table.
         final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         final TableImpTaskingCapabilities tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         thingsTable.registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesThing, thingsTable, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId));
 
     }
 

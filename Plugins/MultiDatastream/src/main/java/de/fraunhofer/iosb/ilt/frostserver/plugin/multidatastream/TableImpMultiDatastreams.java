@@ -174,13 +174,11 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npThingMDs, this, thingsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         final TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npSensorMDs, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
-                .setTargetFieldAccessor(TableImpSensors::getId)
-        );
+                .setTargetFieldAccessor(TableImpSensors::getId));
         final TableImpMultiDatastreamsObsProperties tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npObservedPropertiesMDs, this, tableMdOp, tableObsProp, true)
@@ -189,8 +187,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 .setSourceFieldAcc(TableImpMultiDatastreams::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
-                .setTargetFieldAcc(TableImpObsProperties::getId)
-        );
+                .setTargetFieldAcc(TableImpObsProperties::getId));
 
         // we have registered the MULTI_DATA column on the Observations table.
         final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
@@ -199,14 +196,12 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         final TableImpObservations tableObs = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npObservationsMDs, this, tableObs)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
-                .setTargetFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
-        );
+                .setTargetFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx)));
 
         // Now we register the inverse relation on Observations
         observationsTable.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamObservation, observationsTable, getThis())
                 .setSourceFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getId));
         // Now we register the inverse relation on ObservedProperties
         final TableImpMultiDatastreamsObsProperties tableMDsOpsProp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProps = tables.getTableForClass(TableImpObsProperties.class);
@@ -215,20 +210,17 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 .setSourceFieldAcc(TableImpObsProperties::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
-                .setTargetFieldAcc(TableImpMultiDatastreams::getId)
-        );
+                .setTargetFieldAcc(TableImpMultiDatastreams::getId));
         // Now we register the inverse relation on Sensors
         final TableImpSensors tableSensors = tables.getTableForClass(TableImpSensors.class);
         tableSensors.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsSensor, tableSensors, getThis())
                 .setSourceFieldAccessor(TableImpSensors::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId));
         // Now we register the inverse relation on Things
         final TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         tableThings.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsThing, tableThings, getThis())
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId));
     }
 
     @Override
@@ -340,9 +332,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             ((TableField) tMd.getId()).in(
                                     DSL.select(tMdOp.getMultiDatastreamId())
                                             .from(tMdOp)
-                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))
-                            )
-                    )
+                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))))
                     .execute();
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });

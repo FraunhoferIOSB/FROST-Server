@@ -20,7 +20,11 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 
 public enum Metadata {
-    FULL, MINIMAL, NONE, OFF, INTERNAL_COMPARE;
+    FULL,
+    MINIMAL,
+    NONE,
+    OFF,
+    INTERNAL_COMPARE;
 
     public static final Metadata DEFAULT = Metadata.FULL;
 

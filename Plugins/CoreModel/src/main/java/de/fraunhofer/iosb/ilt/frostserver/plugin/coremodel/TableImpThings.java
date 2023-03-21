@@ -103,21 +103,18 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
         final TableImpDatastreams tableDs = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsThing, this, tableDs)
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpDatastreams::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpDatastreams::getThingId));
         final TableImpHistLocations tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npHistoricalLocationsThing, this, tableHistLoc)
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpHistLocations::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpHistLocations::getThingId));
         final TableImpThingsLocations tableThingsLocs = tables.getTableForClass(TableImpThingsLocations.class);
         final TableImpLocations tableLocs = tables.getTableForClass(TableImpLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npLocationsThing, this, tableThingsLocs, tableLocs)
                 .setSourceFieldAcc(TableImpThings::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getLocationId)
-                .setTargetFieldAcc(TableImpLocations::getId)
-        );
+                .setTargetFieldAcc(TableImpLocations::getId));
     }
 
     @Override
@@ -193,8 +190,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
                                 .setEventType(EntityChangedMessage.Type.CREATE)
-                                .setEntity(newHl)
-                );
+                                .setEntity(newHl));
             }
             return;
         }

@@ -89,6 +89,7 @@ public enum Requirement {
     FROST_RESULT_FORMAT_GEOJSON("https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.html"),
     FROST_SELECT_DEEP("https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html"),
     FROST_SELECT_DISTINCT("https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html");
+
     private final String name;
 
     private Requirement(String name) {

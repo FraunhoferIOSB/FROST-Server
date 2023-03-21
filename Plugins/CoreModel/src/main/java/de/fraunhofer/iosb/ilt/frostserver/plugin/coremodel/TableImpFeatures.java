@@ -117,8 +117,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
         final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsFeature, this, observationsTable)
                 .setSourceFieldAccessor(TableImpFeatures::getId)
-                .setTargetFieldAccessor(TableImpObservations::getFeatureId)
-        );
+                .setTargetFieldAccessor(TableImpObservations::getFeatureId));
     }
 
     @Override

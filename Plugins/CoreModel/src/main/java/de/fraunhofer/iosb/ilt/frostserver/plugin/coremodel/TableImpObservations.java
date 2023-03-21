@@ -192,13 +192,11 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         final TableImpDatastreams datastreamsTable = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamObservation, getThis(), datastreamsTable)
                 .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
-                .setTargetFieldAccessor(TableImpDatastreams::getId)
-        );
+                .setTargetFieldAccessor(TableImpDatastreams::getId));
         final TableImpFeatures featuresTable = tables.getTableForClass(TableImpFeatures.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npFeatureOfInterestObservation, getThis(), featuresTable)
                 .setSourceFieldAccessor(TableImpObservations::getFeatureId)
-                .setTargetFieldAccessor(TableImpFeatures::getId)
-        );
+                .setTargetFieldAccessor(TableImpFeatures::getId));
     }
 
     @Override

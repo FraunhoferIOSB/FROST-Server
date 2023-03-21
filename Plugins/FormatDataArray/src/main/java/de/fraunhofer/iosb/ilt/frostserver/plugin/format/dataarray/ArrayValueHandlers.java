@@ -69,12 +69,10 @@ public class ArrayValueHandlers {
         handlers.put(AT_IOT_ID, idHandler);
         handlers.put(
                 "result",
-                (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResult, value)
-        );
+                (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResult, value));
         handlers.put(
                 "resultQuality",
-                (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResultQuality, value)
-        );
+                (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResultQuality, value));
         handlers.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
                 target.setProperty(pluginCoreModel.epParameters, (Map) value);

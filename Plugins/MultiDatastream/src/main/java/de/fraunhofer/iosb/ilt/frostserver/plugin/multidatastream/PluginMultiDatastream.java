@@ -89,8 +89,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     public final EntityType etMultiDatastream = new EntityType(MULTI_DATASTREAM, MULTI_DATASTREAMS);
 
     private static final List<String> REQUIREMENTS_MDS_MODEL = Arrays.asList(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
-    );
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream");
 
     private CoreSettings settings;
     private MdsModelSettings modelSettings;

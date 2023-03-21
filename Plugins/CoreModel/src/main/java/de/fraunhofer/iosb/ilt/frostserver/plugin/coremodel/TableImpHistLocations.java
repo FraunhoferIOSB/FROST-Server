@@ -95,24 +95,21 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingHistLoc, this, tableThings)
                 .setSourceFieldAccessor(TableImpHistLocations::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         final TableImpLocationsHistLocations tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpLocations tableLocations = tables.getTableForClass(TableImpLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npLocationsHistLoc, this, tableLocHistLoc, tableLocations)
                 .setSourceFieldAcc(TableImpHistLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
-                .setTargetFieldAcc(TableImpLocations::getId)
-        );
+                .setTargetFieldAcc(TableImpLocations::getId));
     }
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         pfReg.addEntryId(TableImpHistLocations::getId);
         pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
-                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
-        );
+                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time));
         pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId);
         pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
     }

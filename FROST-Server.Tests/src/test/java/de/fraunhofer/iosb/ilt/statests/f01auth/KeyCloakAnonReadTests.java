@@ -105,8 +105,7 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
                         .setTokenServerUrl(keycloak.getAuthServerUrl() + KEYCLOAK_TOKEN_PATH)
                         .setClientId(KEYCLOAK_FROST_CLIENT_ID)
                         .setUserName(username)
-                        .setPassword(password)
-        );
+                        .setPassword(password));
         return service;
     }
 

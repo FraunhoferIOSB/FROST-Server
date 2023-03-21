@@ -83,8 +83,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
         final int fieldIdxOther = getOrRegisterField(otherField, dbTableOther, staTableOther);
         staTable.registerRelation(new RelationOneToMany(navProp, staTable, staTableOther)
                 .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdx))
-                .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
-        );
+                .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdxOther)));
 
         final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
@@ -93,8 +92,7 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther));
             staTableOther.registerRelation(new RelationOneToMany(navPropInverse, staTableOther, staTable)
                     .setSourceFieldAccessor(t -> (TableField) t.field(fieldIdxOther))
-                    .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdx))
-            );
+                    .setTargetFieldAccessor(t -> (TableField) t.field(fieldIdx)));
         }
     }
 

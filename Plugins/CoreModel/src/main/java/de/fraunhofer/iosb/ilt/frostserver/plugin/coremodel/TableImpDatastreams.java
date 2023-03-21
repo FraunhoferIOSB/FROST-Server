@@ -199,23 +199,19 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingDatasteam, this, thingsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npSensorDatastream, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
-                .setTargetFieldAccessor(TableImpSensors::getId)
-        );
+                .setTargetFieldAccessor(TableImpSensors::getId));
         TableImpObsProperties obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservedPropertyDatastream, this, obsPropsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
-                .setTargetFieldAccessor(TableImpObsProperties::getId)
-        );
+                .setTargetFieldAccessor(TableImpObsProperties::getId));
         TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsDatastream, this, observationsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getId)
-                .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
-        );
+                .setTargetFieldAccessor(TableImpObservations::getDatastreamId));
     }
 
     @Override
@@ -272,8 +268,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                         }),
                 new NFP<>("definition", table -> table.colUnitDefinition),
                 new NFP<>("name", table -> table.colUnitName),
-                new NFP<>("symbol", table -> table.colUnitSymbol)
-        );
+                new NFP<>("symbol", table -> table.colUnitSymbol));
         pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId);
         pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId);
         pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId);

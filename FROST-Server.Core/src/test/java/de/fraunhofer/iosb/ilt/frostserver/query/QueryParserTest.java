@@ -157,16 +157,10 @@ class QueryParserTest {
                                                 new IntegerConstant(14),
                                                 new Add(
                                                         new Path(testModel.EP_VALUE),
-                                                        new IntegerConstant(1)
-                                                )
-                                        ),
-                                        new IntegerConstant(3)
-                                ),
-                                new IntegerConstant(3)
-                        ),
-                        new IntegerConstant(3)
-                )
-        );
+                                                        new IntegerConstant(1))),
+                                        new IntegerConstant(3)),
+                                new IntegerConstant(3)),
+                        new IntegerConstant(3)));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -287,8 +281,7 @@ class QueryParserTest {
                                 ModelRegistry.EP_PROPERTIES,
                                 new EntityPropertyCustomLink("building.House", testModel.ET_HOUSE),
                                 testModel.EP_NAME),
-                        new StringConstant("Main")
-                ));
+                        new StringConstant("Main")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -391,9 +384,7 @@ class QueryParserTest {
                         new Path(testModel.EP_TIME),
                         new Add(
                                 DateTimeConstant.parse("2015-10-14T23:30:00.104+02:00"),
-                                DurationConstant.parse("P1D")
-                        )
-                ));
+                                DurationConstant.parse("P1D"))));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -448,11 +439,8 @@ class QueryParserTest {
                         new Round(
                                 new Add(
                                         new Path(testModel.EP_VALUE),
-                                        new DoubleConstant(0.1)
-                                )
-                        ),
-                        new IntegerConstant(2)
-                ));
+                                        new DoubleConstant(0.1))),
+                        new IntegerConstant(2)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -505,8 +493,7 @@ class QueryParserTest {
                         new Path(
                                 modelRegistry.EP_PROPERTIES,
                                 new EntityPropertyCustom("subprop"),
-                                new EntityPropertyCustom("name")
-                        )));
+                                new EntityPropertyCustom("name"))));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -690,9 +677,7 @@ class QueryParserTest {
                                 modelRegistry,
                                 new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
                                         .addToSubPath("sub")
-                                        .addToSubPath("link.House")
-                        )
-                );
+                                        .addToSubPath("link.House")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         assertEquals(expResult, result);
 
@@ -713,9 +698,7 @@ class QueryParserTest {
                             new Expand(
                                     modelRegistry,
                                     new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
-                                            .addToSubPath("link.House")
-                            )
-                    );
+                                            .addToSubPath("link.House")));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             assertEquals(expResult, result);
         }
@@ -726,9 +709,7 @@ class QueryParserTest {
                             new Expand(
                                     modelRegistry,
                                     new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
-                                            .addToSubPath("link.House")
-                            )
-                    )
+                                            .addToSubPath("link.House")))
                     .addExpand(new Expand(modelRegistry, testModel.NP_HOUSES));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             assertEquals(expResult, result);
@@ -782,8 +763,7 @@ class QueryParserTest {
                 .addExpand(new Expand(modelRegistry, testModel.NP_HOUSES)
                         .setSubQuery(new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                                 .addExpand(new Expand(modelRegistry, testModel.NP_ROOMS))
-                                .addExpand(new Expand(modelRegistry, testModel.NP_HOUSE))
-                        ));
+                                .addExpand(new Expand(modelRegistry, testModel.NP_HOUSE))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         assertEquals(expResult, result);
     }
@@ -836,23 +816,17 @@ class QueryParserTest {
                                                 testModel.NP_ROOMS,
                                                 testModel.NP_HOUSE,
                                                 testModel.ET_HOUSE.getPrimaryKey()),
-                                        new StringConstant("FOI_1")
-                                ),
+                                        new StringConstant("FOI_1")),
                                 new GreaterEqual(
                                         new Path(testModel.NP_HOUSE,
                                                 testModel.NP_ROOMS,
                                                 testModel.EP_TIME),
-                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))
-                                )
-                        ),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC)))),
                         new LessEqual(
                                 new Path(testModel.NP_HOUSE,
                                         testModel.NP_ROOMS,
                                         testModel.EP_TIME),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))
-                        )
-                )
-        );
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);

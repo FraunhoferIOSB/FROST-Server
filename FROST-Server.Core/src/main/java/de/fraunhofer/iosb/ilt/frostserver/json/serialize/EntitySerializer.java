@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles serialization of Entity objects. If a field is of type Entity and
- * contains a non-empty navigationLink the field will be renamed with the suffix
- * '@iot.navigationLink' and will only contain the navigationLink as String.
+ * Handles serialization of Entity objects. If a field is of type Entity and contains a non-empty navigationLink the
+ * field will be renamed with the suffix '@iot.navigationLink' and will only contain the navigationLink as String.
  *
  * @author jab
  * @author scf
@@ -108,25 +106,26 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         } else {
             metadata = query.getMetadata();
             navigationProps = switch (metadata) {
-                case OFF, NONE, MINIMAL ->
-                    Collections.emptySet();
-                case INTERNAL_COMPARE ->
-                    query.getSelectNavProperties(query.hasParentExpand());
-                default ->
-                    query.getSelectNavProperties(query.hasParentExpand());
+                case OFF, NONE, MINIMAL -> {
+                    yield Collections.emptySet();
+                }
+                case INTERNAL_COMPARE -> {
+                    yield query.getSelectNavProperties(query.hasParentExpand());
+                }
+                default -> {
+                    yield query.getSelectNavProperties(query.hasParentExpand());
+                }
             };
             entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());
             expand = query.getExpand();
         }
-        for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {
-            EntityPropertyMain ep = it.next();
+        for (EntityPropertyMain ep : entityProps) {
             writeProperty(ep, entity, gen);
         }
         if (expand != null) {
             writeExpand(expand, entity, gen);
         }
-        for (Iterator<NavigationPropertyMain> it = navigationProps.iterator(); it.hasNext();) {
-            NavigationPropertyMain np = it.next();
+        for (NavigationPropertyMain np : navigationProps) {
             String navigationLink = np.getNavigationLink(entity);
             if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
                 gen.writeStringField(np.getName() + navLinkField, navigationLink);

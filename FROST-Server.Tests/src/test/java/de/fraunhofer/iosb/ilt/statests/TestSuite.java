@@ -561,7 +561,7 @@ public class TestSuite {
                     break;
 
                 default:
-                // Nothing special...
+                    // Nothing special...
             }
         }
         if (version == ServerVersion.v_1_0) {

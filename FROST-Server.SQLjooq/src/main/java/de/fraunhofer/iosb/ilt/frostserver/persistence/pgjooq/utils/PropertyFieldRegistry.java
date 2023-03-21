@@ -428,8 +428,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     private void addEntry(Map<Property, Map<String, ExpressionFactory<T>>> map, Property property, String name, ExpressionFactory<T> factory) {
         Map<String, ExpressionFactory<T>> coreMap = map.computeIfAbsent(
                 property,
-                k -> new LinkedHashMap<>()
-        );
+                k -> new LinkedHashMap<>());
         String key = name;
         if (key == null) {
             key = Integer.toString(coreMap.size());
@@ -540,8 +539,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         public void convert(T table, Record input, Entity entity, DataSize dataSize) {
             entity.setProperty(
                     property,
-                    Utils.instantFromTime((Moment) input.get(factory.get(table)))
-            );
+                    Utils.instantFromTime((Moment) input.get(factory.get(table))));
         }
 
         @Override
@@ -576,9 +574,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
                     property,
                     Utils.valueFromTimes(
                             (Moment) input.get(factoryStart.get(table)),
-                            (Moment) input.get(factoryEnd.get(table))
-                    )
-            );
+                            (Moment) input.get(factoryEnd.get(table))));
         }
 
         @Override

@@ -94,8 +94,7 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
         final TableImpDatastreams tableDs = tables.getTableForClass(TableImpDatastreams.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npDatastreamsObsProp, this, tableDs)
                 .setSourceFieldAccessor(TableImpObsProperties::getId)
-                .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
-        );
+                .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId));
     }
 
     @Override

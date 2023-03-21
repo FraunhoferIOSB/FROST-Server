@@ -88,8 +88,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
     public Collection<String> getFormatNames() {
         return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT,
                 FORMAT_NAME_ODATA_JSON,
-                FORMAT_NAME_EMPTY
-        );
+                FORMAT_NAME_EMPTY);
     }
 
     @Override
