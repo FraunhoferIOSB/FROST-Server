@@ -22,11 +22,6 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -57,12 +52,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
+            <artifactId>FROST-Server.Plugin.ModelLoader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
+            <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -72,17 +67,22 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.ModelLoader</artifactId>
+            <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Util</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 

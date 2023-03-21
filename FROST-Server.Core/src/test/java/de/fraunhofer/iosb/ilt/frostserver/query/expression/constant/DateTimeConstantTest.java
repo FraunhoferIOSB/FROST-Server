@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import net.time4j.ClockUnit;
 import net.time4j.PlainTimestamp;
 import net.time4j.ZonalDateTime;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 /**

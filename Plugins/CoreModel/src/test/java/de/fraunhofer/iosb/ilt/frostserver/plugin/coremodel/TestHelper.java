@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
+
+import static net.time4j.tz.ZonalOffset.UTC;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -35,14 +38,12 @@ import java.util.List;
 import java.util.Map;
 import net.time4j.PlainTimestamp;
 import net.time4j.tz.ZonalOffset;
-import static net.time4j.tz.ZonalOffset.UTC;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Helper class for testing JSON de-/serialization.

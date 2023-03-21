@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
-import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_FILTER_DELETE_ENABLE;
+
+import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import java.io.IOException;

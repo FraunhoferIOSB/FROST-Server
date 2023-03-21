@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -53,15 +53,15 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Second;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoDistance;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoIntersects;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Floor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Round;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoDistance;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoIntersects;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.STContains;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.STCrosses;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation.STDisjoint;

@@ -21,12 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Util</artifactId>
+            <artifactId>FROST-Server.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Core</artifactId>
+            <artifactId>FROST-Server.Util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

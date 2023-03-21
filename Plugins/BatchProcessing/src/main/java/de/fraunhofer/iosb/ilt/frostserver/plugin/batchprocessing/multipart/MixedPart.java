@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
+
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartContent.IsFinished;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.regex.Matcher;
 import org.slf4j.Logger;

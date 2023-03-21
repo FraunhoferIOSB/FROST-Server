@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
+
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
@@ -29,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
-import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
