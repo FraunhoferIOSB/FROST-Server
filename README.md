@@ -6,6 +6,7 @@
 A Server implementation of the [OGC SensorThings API](https://github.com/opengeospatial/sensorthings). The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
 is the first complete, open-source official reference implementation of the [OGC SensorThings API Part 1: Sensing 1.0](https://docs.ogc.org/is/15-078r6/15-078r6.html). It also implements [OGC SensorThings API Part 1: Sensing 1.1](https://docs.ogc.org/is/18-088/18-088.html) and [OGC SensorThings API Part 2: Tasking Core 1.1](https://docs.ogc.org/is/17-079r1/17-079r1.html).
 
+
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
@@ -31,12 +32,6 @@ See the [Change Log](CHANGELOG.md).
 See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use the FROST-Server Helm chart for a Kubernetes deployment.
 
 
-## Standalone Spring Boot
-
-If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
-Spring Boot application that makes it easy to run Fraunhofer IOSB FROST-Server in cloud environments.
-
-
 ## Compiling
 
 To compile FROST-Server you need to have a JDK and Maven installed.
@@ -47,6 +42,13 @@ To compile FROST-Server you need to have a JDK and Maven installed.
   * `FROST-Server.MQTTP/target/`
   * `FROST-Server.HTTP/target/`
   * `FROST-Server.MQTT/target/`
+
+
+##Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create.
+Any contributions are greatly appreciated.
+You can read more in our [contribution guidelines](CONTRIBUTING.md).
 
 
 ## Authors
