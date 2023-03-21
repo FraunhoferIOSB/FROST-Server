@@ -367,16 +367,17 @@ public class UrlHelper {
             }
             String[] subParts = StringUtils.split(part, "=", 2);
             switch (subParts.length) {
-                case 2:
+                case 2 -> {
                     output.put(subParts[0].trim(), subParts[1].trim());
-                    break;
+                }
 
-                case 1:
+                case 1 -> {
                     output.put(subParts[0].trim(), "");
-                    break;
+                }
 
-                default:
-                // Nothing to do.
+                default -> {
+                    // Nothing to do.
+                }
             }
         }
         return output;

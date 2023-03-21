@@ -69,8 +69,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
         if (expectedClazz.isAssignableFrom(fieldType)) {
             return defaultField;
         }
-        if (canCast && expectedClazz == String.class
-                && (Number.class.isAssignableFrom(fieldType)
+        if (canCast && expectedClazz == String.class && (Number.class.isAssignableFrom(fieldType)
                 || UUID.class.isAssignableFrom(fieldType)
                 || JsonValue.class.isAssignableFrom(fieldType))) {
             return defaultField.cast(String.class);

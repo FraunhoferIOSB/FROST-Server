@@ -49,8 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Includes various tests of "A.4. SensorThings API Batch Request Extension
- * Tests" conformance class.
+ * Includes various tests of "A.4. SensorThings API Batch Request Extension Tests" conformance class.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class BatchTests extends AbstractTestClass {
@@ -128,15 +127,13 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     /**
-     * Test batch request body example from "OGC SensorThings API Part 1,
-     * Sensing Version 1.1, 11.2.1. Batch request body example" except changes
-     * to get reproducible test not depending on server generated id.
+     * Test batch request body example from "OGC SensorThings API Part 1, Sensing Version 1.1, 11.2.1. Batch request
+     * body example" except changes to get reproducible test not depending on server generated id.
      */
     @Test
     void test01BatchRequest() {
         LOGGER.info("  test01BatchRequest");
-        String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
-                "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+        final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
                 + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
@@ -174,7 +171,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--";
+        String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b", batchContent);
         String thingId = getLastestEntityIdForPath(EntityType.THING);
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
@@ -217,13 +215,12 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     /**
-     * Test batch request body example from "OGC SensorThings API Part 1,
-     * Sensing Version 1.1, 11.2.2. Referencing new entities in a change set
-     * example", except:
+     * Test batch request body example from "OGC SensorThings API Part 1, Sensing Version 1.1, 11.2.2. Referencing new
+     * entities in a change set example", except:
      * <li>added Content-ID for second POST as per OData spec (From
-     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793751
-     * "In addition each request within a change set MUST specify a Content-ID
-     * header with a value unique within the batch request.")
+     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793751 "In
+     * addition each request within a change set MUST specify a Content-ID header with a value unique within the batch
+     * request.")
      * <li>missing mandatory Datastream fields.
      */
     @Test
@@ -247,8 +244,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
-        String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
-                "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+        final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
                 + "\r\n"
                 + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
@@ -272,7 +268,8 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + post2 + "\r\n"
                 + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--";
+        String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b", batchContent);
 
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
@@ -324,13 +321,11 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     /**
-     * Tests Absolute URI with schema, host, port, and absolute resource path.
-     * Example:
+     * Tests Absolute URI with schema, host, port, and absolute resource path. Example:
      *
      * GET https://host:1234/path/service/People(1) HTTP/1.1
      *
-     * See
-     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
+     * See http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
      *
      */
     @Test
@@ -375,8 +370,7 @@ public abstract class BatchTests extends AbstractTestClass {
      *
      * GET People(1) HTTP/1.1
      *
-     * See
-     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
+     * See http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
      *
      */
     @Test
@@ -417,8 +411,7 @@ public abstract class BatchTests extends AbstractTestClass {
     @Test
     void test06JsonBatchRequest() {
         LOGGER.info("  test06JsonBatchRequest");
-        String response = postBatch(null,
-                "{\"requests\":[{"
+        String response = postBatch(null, "{\"requests\":[{"
                 + "\"id\": \"0\","
                 + "\"method\": \"get\","
                 + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
@@ -443,8 +436,7 @@ public abstract class BatchTests extends AbstractTestClass {
         String thingId = getLastestEntityIdForPath(EntityType.THING);
 
         try {
-            BatchResponseJson expected = mapper.readValue(
-                    "{\"responses\":["
+            BatchResponseJson expected = mapper.readValue("{\"responses\":["
                     + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
                     + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
                     + thingId + ")\"},"
@@ -481,8 +473,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
-        String response = postBatch(null,
-                "{\"requests\":[{"
+        String response = postBatch(null, "{\"requests\":[{"
                 + "\"id\": \"sensor1\","
                 + "\"atomicityGroup\": \"group1\","
                 + "\"method\": \"post\","

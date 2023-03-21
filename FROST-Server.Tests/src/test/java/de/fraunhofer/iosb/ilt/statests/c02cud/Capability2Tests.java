@@ -84,58 +84,47 @@ public abstract class Capability2Tests extends AbstractTestClass {
     private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
 
     /**
-     * The list of ids for all the Actuators created during test procedure (will
-     * be used for clean-up)
+     * The list of ids for all the Actuators created during test procedure (will be used for clean-up)
      */
     private static final List<Object> ACTUATOR_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Tasks created during test procedure (will be
-     * used for clean-up)
+     * The list of ids for all the Tasks created during test procedure (will be used for clean-up)
      */
     private static final List<Object> TASK_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the TaskingCapabilities created during test
-     * procedure (will be used for clean-up)
+     * The list of ids for all the TaskingCapabilities created during test procedure (will be used for clean-up)
      */
     private static final List<Object> TASKINGCAPABILITY_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Things created during test procedure (will be
-     * used for clean-up)
+     * The list of ids for all the Things created during test procedure (will be used for clean-up)
      */
     private static final List<Object> THING_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Locations created during test procedure (will
-     * be used for clean-up)
+     * The list of ids for all the Locations created during test procedure (will be used for clean-up)
      */
     private static final List<Object> LOCATION_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the HistoricalLocations created during test
-     * procedure (will be used for clean-up)
+     * The list of ids for all the HistoricalLocations created during test procedure (will be used for clean-up)
      */
     private static final List<Object> HISTORICAL_LOCATION_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Datastreams created during test procedure
-     * (will be used for clean-up)
+     * The list of ids for all the Datastreams created during test procedure (will be used for clean-up)
      */
     private static final List<Object> DATASTREAM_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Observations created during test procedure
-     * (will be used for clean-up)
+     * The list of ids for all the Observations created during test procedure (will be used for clean-up)
      */
     private static final List<Object> OBSERVATION_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the Sensors created during test procedure (will
-     * be used for clean-up)
+     * The list of ids for all the Sensors created during test procedure (will be used for clean-up)
      */
     private static final List<Object> SENSOR_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the ObservedPropeties created during test
-     * procedure (will be used for clean-up)
+     * The list of ids for all the ObservedPropeties created during test procedure (will be used for clean-up)
      */
     private static final List<Object> OBSPROP_IDS = new ArrayList<>();
     /**
-     * The list of ids for all the FeaturesOfInterest created during test
-     * procedure (will be used for clean-up)
+     * The list of ids for all the FeaturesOfInterest created during test procedure (will be used for clean-up)
      */
     private static final List<Object> FOI_IDS = new ArrayList<>();
 
@@ -163,10 +152,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing create or POST with invalid Deep Insert. It makes
-     * sure that if there is any problem in the request body of Deep Insert,
-     * none of the entities in that query is created. The response should be 400
-     * or 409 and the entities should not be accessible using GET.
+     * This method is testing create or POST with invalid Deep Insert. It makes sure that if there is any problem in the
+     * request body of Deep Insert, none of the entities in that query is created. The response should be 400 or 409 and
+     * the entities should not be accessible using GET.
      */
     @Test
     void test01CreateInvalidEntitiesWithDeepInsert() {
@@ -366,9 +354,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing create or POST entities. It only tests simple
-     * create, no deep insert. It makes sure that the response is 201 and use
-     * simple GET to make sure the entity is added to the service.
+     * This method is testing create or POST entities. It only tests simple create, no deep insert. It makes sure that
+     * the response is 201 and use simple GET to make sure the entity is added to the service.
      */
     @Test
     void test02CreateEntities() {
@@ -669,10 +656,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing create or POST in the form of Deep Insert. It
-     * makes sure the response is 201. Also using GET requests, it makes sure
-     * the entity and all its related entities are created and added to the
-     * service.
+     * This method is testing create or POST in the form of Deep Insert. It makes sure the response is 201. Also using
+     * GET requests, it makes sure the entity and all its related entities are created and added to the service.
      */
     @Test
     void test03CreateEntitiesWithDeepInsert() {
@@ -854,8 +839,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing create or POST invalid entities. The response
-     * should be 400 or 409 and the entity should not be accessible using GET.
+     * This method is testing create or POST invalid entities. The response should be 400 or 409 and the entity should
+     * not be accessible using GET.
      */
     @Test
     void test04CreateInvalidEntities() {
@@ -951,9 +936,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing partial update or PATCH. The response should be
-     * 200 and only the properties in the PATCH body should be updated, and the
-     * rest must be unchanged.
+     * This method is testing partial update or PATCH. The response should be 200 and only the properties in the PATCH
+     * body should be updated, and the rest must be unchanged.
      */
     @Test
     void test05PatchEntities() {
@@ -1049,9 +1033,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing update or PUT. The response should be 200 and all
-     * the properties in the PUT body should be updated, and the rest must be
-     * restored to their default value.
+     * This method is testing update or PUT. The response should be 200 and all the properties in the PUT body should be
+     * updated, and the rest must be restored to their default value.
      */
     @Test
     void test06PutEntities() {
@@ -1180,8 +1163,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
 
     //TODO: Add invalid PATCH test for other entities when it is implemented in the service
     /**
-     * This method is testing invalid partial update or PATCH. The PATCH request
-     * is invalid if the body contains related entities as inline content.
+     * This method is testing invalid partial update or PATCH. The PATCH request is invalid if the body contains related
+     * entities as inline content.
      */
     @Test
     void test07InvalidPatchEntities() {
@@ -1269,17 +1252,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "    }\n"
                 + "  ]}";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-
-//        /** Observation **/
-//        Object obsId1 = observationIds.get(0);
-//        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
-//        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
     }
 
     /**
-     * This method is testing DELETE and its integrity constraint. The response
-     * should be 200. After DELETE the GET request to that entity should return
-     * 404.
+     * This method is testing DELETE and its integrity constraint. The response should be 200. After DELETE the GET
+     * request to that entity should return 404.
      */
     @Test
     void test08DeleteEntities() {
@@ -1313,8 +1290,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is testing DELETE request for a nonexistent entity. The
-     * response should be 404.
+     * This method is testing DELETE request for a nonexistent entity. The response should be 404.
      */
     @Test
     void test09DeleteNoneexistentEntities() {
@@ -1325,10 +1301,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This is helper method for checking the integrity containt of DELETE. For
-     * each entity, it checks after deleting, it confirm the deletion of its
-     * related entities mentioned in the integrity constraint of the
-     * specification.
+     * This is helper method for checking the integrity containt of DELETE. For each entity, it checks after deleting,
+     * it confirm the deletion of its related entities mentioned in the integrity constraint of the specification.
      */
     private void checkDeleteIntegrityConstraint() {
         //Thing
@@ -1461,8 +1435,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity with specific id and
-     * then send a GET request to that URL.
+     * This method created the URL string for the entity with specific id and then send a GET request to that URL.
      *
      * @param entityType Entity type in from EntityType enum
      * @param id The id of requested entity
@@ -1486,8 +1459,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity and then POST the
-     * entity with urlParameters to that URL.
+     * This method created the URL string for the entity and then POST the entity with urlParameters to that URL.
      *
      * @param entityType Entity type in from EntityType enum
      * @param urlParameters POST body
@@ -1518,8 +1490,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This helper method is sending invalid POST request and confirm that the
-     * response is correct based on specification.
+     * This helper method is sending invalid POST request and confirm that the response is correct based on
+     * specification.
      *
      * @param entityType Entity type in from EntityType enum
      * @param urlParameters POST body (invalid)
@@ -1535,8 +1507,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity with specific id and
-     * then send DELETE request to that URl.
+     * This method created the URL string for the entity with specific id and then send DELETE request to that URl.
      *
      * @param entityType Entity type in from EntityType enum
      * @param id The id of requested entity
@@ -1555,9 +1526,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method create the URL string for a nonexistent entity and send the
-     * DELETE request to that URL and confirm that the response is correct based
-     * on specification.
+     * This method create the URL string for a nonexistent entity and send the DELETE request to that URL and confirm
+     * that the response is correct based on specification.
      *
      * @param entityType Entity type in from EntityType enum
      */
@@ -1577,8 +1547,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity with specific idand
-     * then PUT the entity with urlParameters to that URL.
+     * This method created the URL string for the entity with specific idand then PUT the entity with urlParameters to
+     * that URL.
      *
      * @param entityType Entity type in from EntityType enum
      * @param urlParameters The PUT body
@@ -1605,8 +1575,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity with specific id and
-     * then PATCH the entity with urlParameters to that URL.
+     * This method created the URL string for the entity with specific id and then PATCH the entity with urlParameters
+     * to that URL.
      *
      * @param entityType Entity type in from EntityType enum
      * @param urlParameters The PATCH body
@@ -1633,9 +1603,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method created the URL string for the entity with specific id and
-     * then PATCH invalid entity with urlParameters to that URL and confirms
-     * that the response is correct based on specification.
+     * This method created the URL string for the entity with specific id and then PATCH invalid entity with
+     * urlParameters to that URL and confirms that the response is correct based on specification.
      *
      * @param entityType Entity type in from EntityType enum
      * @param urlParameters The PATCH body (invalid)
@@ -1657,8 +1626,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param entityType Entity type in from EntityType enum
      * @param oldEntity The old properties of the patched entity
      * @param newEntity The updated properties of the patched entity
-     * @param diffs The properties that supposed to be updated based on the
-     * request due to the specification
+     * @param diffs The properties that supposed to be updated based on the request due to the specification
      */
     private void checkPatch(EntityType entityType, JSONObject oldEntity, JSONObject newEntity, Map diffs) {
         try {
@@ -1690,8 +1658,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param entityType Entity type in from EntityType enum
      * @param oldEntity The old properties of the updated entity
      * @param newEntity The updated properties of the updated entity
-     * @param diffs The properties that supposed to be updated based on the
-     * request due to the specification
+     * @param diffs The properties that supposed to be updated based on the request due to the specification
      */
     private void checkPut(EntityType entityType, JSONObject oldEntity, JSONObject newEntity, Map diffs) {
         try {
@@ -1727,12 +1694,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * Check the FeatureOfInterest is created automatically correctly if not
-     * inserted in Observation
+     * Check the FeatureOfInterest is created automatically correctly if not inserted in Observation
      *
      * @param obsId The observation id
-     * @param locationObj The Location object that the FOI is supposed to be
-     * created based on that
+     * @param locationObj The Location object that the FOI is supposed to be created based on that
      * @param expectedFOIId The id of the FOI linked to the Observation
      * @return The id of FOI
      */
@@ -1880,8 +1845,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
+     * This method is run after all the tests of this class is run and clean the database.
      */
     public static void deleteEverything() {
         deleteEntityType(EntityType.THING);

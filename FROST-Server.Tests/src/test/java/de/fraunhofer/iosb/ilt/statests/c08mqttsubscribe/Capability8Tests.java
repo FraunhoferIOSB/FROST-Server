@@ -129,8 +129,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
+     * This method is run after all the tests of this class is run and clean the database.
      */
     @AfterAll
     public static void tearDown() {
@@ -593,10 +592,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
             for (String relation : relations) {
                 EntityType relatedType = EntityType.getForRelation(relation);
                 if (relatedType.equals(destinationEntityType)) {
-                    return currentElement.path
-                            + (currentElement.path.isEmpty()
-                            ? relation
-                            : "/" + relation);
+                    return currentElement.path + (currentElement.path.isEmpty() ? relation : "/" + relation);
                 } else {
                     queue.offer(new BFSStructure(relatedType, currentElement.path + (currentElement.path.isEmpty() ? relation : "/" + relation)));
                 }
@@ -609,8 +605,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
      * Returns half of all entity properties of the given Entity Type.
      *
      * @param entityType The entity type to get the entity properties for.
-     * @param even If true, return the even-half of the properties, otherwise
-     * the odd-half.
+     * @param even If true, return the even-half of the properties, otherwise the odd-half.
      * @return a list with the property names of half of the entity properties.
      */
     private List<String> getSelectedProperties(EntityType entityType, boolean even) {

@@ -36,9 +36,9 @@ public class GeoJsonDeserializier implements CustomDeserializer {
 
     public static final String APPLICATION_GEOJSON = "application/geo+json";
 
-    public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(APPLICATION_GEOJSON,
-            "application/vnd.geo+json"
-    )));
+    public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            APPLICATION_GEOJSON,
+            "application/vnd.geo+json")));
 
     public Object deserialize(String json) throws IOException {
         return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);

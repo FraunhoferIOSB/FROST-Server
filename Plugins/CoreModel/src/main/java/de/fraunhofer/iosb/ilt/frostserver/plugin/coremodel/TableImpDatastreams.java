@@ -344,17 +344,18 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                                 entity.setProperty(pluginCoreModel.getEpUnitOfMeasurement(), uom);
                             }
                             switch (epCustomSelect.getSubPath().get(0)) {
-                                case "name":
+                                case "name" -> {
                                     uom.setName(value);
-                                    break;
-                                case "symbol":
+                                }
+                                case "symbol" -> {
                                     uom.setSymbol(value);
-                                    break;
-                                case "definition":
+                                }
+                                case "definition" -> {
                                     uom.setSymbol(value);
-                                    break;
-                                default:
-                                // Do nothing.
+                                }
+                                default -> {
+                                    // Do nothing.
+                                }
                             }
                         },
                         null,

@@ -91,19 +91,18 @@ public class SubscriptionFactory {
         if (path.getLastElement() instanceof PathElementEntitySet) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
             return new EntitySetSubscription(settings, topic, path);
-        } else if (path.getLastElement() instanceof PathElementEntity) {
+        }
+        if (path.getLastElement() instanceof PathElementEntity) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
             return new EntitySubscription(settings, topic, path);
-        } else if (size >= 2
+        }
+        if (size >= 2
                 && path.get(size - 2) instanceof PathElementEntity
                 && path.get(size - 1) instanceof PathElementProperty) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
             return new PropertySubscription(topic, path, settings);
-
-        } else {
-            throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
         }
-
+        throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
     }
 
     private ResourcePath parsePath(String serviceRootUrl, Version version, String topic) {

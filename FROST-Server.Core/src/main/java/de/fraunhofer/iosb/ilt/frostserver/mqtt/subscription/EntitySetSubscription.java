@@ -52,8 +52,7 @@ public class EntitySetSubscription extends AbstractSubscription {
         entityType = ((PathElementEntitySet) path.getLastElement()).getEntityType();
 
         query = parseQuery(SubscriptionFactory.getQueryFromTopic(topic));
-        if (query != null
-                && (query.getCount().isPresent()
+        if (query != null && (query.getCount().isPresent()
                 || !query.getExpand().isEmpty()
                 || query.getFilter() != null
                 || !query.getOrderBy().isEmpty()

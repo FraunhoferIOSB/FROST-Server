@@ -50,13 +50,13 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     private static final Map<ModelRegistry, Map<EntityType, CustomEntityDeserializer>> instancePerModelAndType = new HashMap<>();
 
     public static CustomEntityDeserializer getInstance(final ModelRegistry modelRegistry, final EntityType entityType) {
-        return instancePerModelAndType.computeIfAbsent(
-                modelRegistry,
-                t -> new HashMap<>()
-        ).computeIfAbsent(
-                entityType,
-                t -> new CustomEntityDeserializer(modelRegistry, t)
-        );
+        return instancePerModelAndType
+                .computeIfAbsent(
+                        modelRegistry,
+                        t -> new HashMap<>())
+                .computeIfAbsent(
+                        entityType,
+                        t -> new CustomEntityDeserializer(modelRegistry, t));
     }
 
     private final EntityType entityType;

@@ -305,7 +305,7 @@ public class FXMLController implements Initializable {
                 try {
                     FXMLLoader loader = new FXMLLoader(TableDataController.class.getResource("/fxml/TableData.fxml"));
                     node = (Pane) loader.load();
-                    controller = loader.<TableDataController>getController();
+                    controller = loader.getController();
                     controller.setTableName(tableName);
                     String prettyName = CaseUtils.toCamelCase(tableName, true, '_');
                     controller.setSingular(prettyName);

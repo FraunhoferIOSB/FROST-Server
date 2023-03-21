@@ -255,10 +255,10 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 return;
             }
             LOGGER.trace("      Client disconnected: {}", clientId);
-            clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
-                    .stream().forEach(
-                            subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
-                    );
+            clientSubscriptions
+                    .getOrDefault(clientId, new ArrayList<>())
+                    .stream()
+                    .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic)));
             clientSubscriptions.remove(clientId);
         }
 
@@ -270,9 +270,9 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             }
             final String topicFilter = msg.getTopicFilter();
             LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
-            clientSubscriptions.getOrDefault(
-                    clientId, new ArrayList<>()
-            ).add(topicFilter);
+            clientSubscriptions
+                    .getOrDefault(clientId, new ArrayList<>())
+                    .add(topicFilter);
             fireSubscribe(new SubscriptionEvent(topicFilter));
         }
 

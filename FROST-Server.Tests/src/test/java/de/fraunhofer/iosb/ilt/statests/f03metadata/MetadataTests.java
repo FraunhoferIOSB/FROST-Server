@@ -282,9 +282,8 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     private void testMetadataInExpand(String metadata, boolean hasSelfLink, boolean hasNavigationLink) {
-        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING,
-                null, null, "?$filter=id%20eq%20" + THINGS.get(1).getId().getUrl()
-                + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata);
+        String queryString = "?$filter=id%20eq%20" + THINGS.get(1).getId().getUrl() + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata;
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, queryString);
         HttpResponse result = HTTPMethods.doGet(urlString);
         assertEquals(200, result.code);
         JSONObject response = new JSONObject(result.response);
