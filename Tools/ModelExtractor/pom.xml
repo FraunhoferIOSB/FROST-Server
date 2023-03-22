@@ -22,7 +22,7 @@
 
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
         <openjfx.version>19.0.2.1</openjfx.version>
-        <jooq.version>3.16.15</jooq.version>
+        <jooq.version>3.16.16</jooq.version>
     </properties>
 
     <build>
