@@ -128,7 +128,7 @@
         <version.maven.plugin.jar>3.3.0</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.5.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
-        <version.maven.plugin.release>2.5.3</version.maven.plugin.release>
+        <version.maven.plugin.release>3.0.0</version.maven.plugin.release>
         <version.maven.plugin.source>3.2.1</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.35.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.0.0</version.maven.plugin.surefire>
