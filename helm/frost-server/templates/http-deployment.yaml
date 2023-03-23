@@ -331,6 +331,21 @@ spec:
             {{- end }}
             {{- end }}
 
+            # custom extensions
+            {{- if .Values.frost.extension.customLinks.enable }}
+            - name: extension_customLinks_enable
+              value: "{{ .Values.frost.extension.customLinks.enable }}"
+            {{- end }}
+            {{- if .Values.frost.extension.customLinks.recurseDepth }}
+            - name: extension_customLinks_recurseDepth
+              value: "{{ .Values.frost.extension.customLinks.recurseDepth }}"
+            {{- end }}
+            {{- if .Values.frost.extension.filterDelete.enable }}
+            - name: extension_filterDelete_enable
+              value: "{{ .Values.frost.extension.filterDelete.enable }}"
+            {{- end }}
+
+
             # Logging variables
             {{- if .Values.frost.logging.default }}
             - name: FROST_LL

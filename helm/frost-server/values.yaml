@@ -57,6 +57,16 @@ frost:
     openApi:
       enable: false
 
+  ########################################
+  # FROST-Server Extension configuration #
+  ########################################
+  extension:
+    customLinks:
+      enable:
+      recurseDepth:
+    filterDelete:
+      enable:
+
   auth:
     provider:
     allowAnonymousRead: false
