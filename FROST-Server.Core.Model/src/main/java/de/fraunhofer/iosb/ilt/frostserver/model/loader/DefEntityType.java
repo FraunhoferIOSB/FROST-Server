@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
@@ -57,6 +58,15 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
             label = "Plural", description = "The name to use for for sets of this entity type.")
     @EditorString.EdOptsString()
     private String plural;
+
+    /**
+     * Flag indicating only admin users are allowed to see the target entity
+     * type.
+     */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Admin Only", description = "Flag indicating only admin users are allowed to see the target entity type.")
+    @EditorBoolean.EdOptsBool()
+    private boolean adminOnly;
 
     /**
      * The "table" that data for this EntityType is stored in. What this exactly
@@ -127,15 +137,18 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     public EntityType getEntityType(ModelRegistry modelRegistry) {
         if (entityType == null) {
-            entityType = modelRegistry.getEntityTypeForName(name);
+            entityType = modelRegistry.getEntityTypeForName(name, true);
             if (entityType == null) {
-                entityType = new EntityType(name, plural);
+                entityType = new EntityType(name, plural, adminOnly);
+            } else if (adminOnly && !entityType.isAdminOnly()) {
+                entityType.setAdminOnly(adminOnly);
             }
             for (DefValidator validator : validators) {
                 validator.createValidators(modelRegistry, entityType);
             }
             entityType.addAnnotations(annotations);
         }
+
         return entityType;
     }
 
@@ -316,6 +329,26 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     public DefEntityType addAnnotations(List<Annotation> annotations) {
         this.annotations.addAll(annotations);
         return this;
+    }
+
+    /**
+     * Flag indicating only admin users are allowed to see the target entity
+     * type.
+     *
+     * @return the adminOnly
+     */
+    public boolean isAdminOnly() {
+        return adminOnly;
+    }
+
+    /**
+     * Flag indicating only admin users are allowed to see the target entity
+     * type.
+     *
+     * @param adminOnly the adminOnly to set
+     */
+    public void setAdminOnly(boolean adminOnly) {
+        this.adminOnly = adminOnly;
     }
 
 }

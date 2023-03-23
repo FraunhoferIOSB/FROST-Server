@@ -171,6 +171,10 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 securityModel = objectMapper.readValue(data, SecurityModel.class);
             } else {
                 InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                if (stream == null) {
+                    LOGGER.info("  Not found: {}", fullPath);
+                    return null;
+                }
                 securityModel = objectMapper.readValue(stream, SecurityModel.class);
             }
             return securityModel;

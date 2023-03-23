@@ -69,6 +69,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
      * The entityType of entity that this navigation property points to.
      */
     private EntityType entityType;
+
     /**
      * Flag indication the path is to an EntitySet.
      */
@@ -97,6 +98,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
         }
     }
 
+    @Override
     public NavigationPropertyMain getInverse() {
         return inverse;
     }
@@ -123,6 +125,18 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     @Override
     public boolean isEntitySet() {
         return entitySet;
+    }
+
+    /**
+     * Flag indicating only admin users are allowed to see the target entity
+     * type.
+     *
+     * @return true if only admin users are allowed to see the target entity
+     * type.
+     */
+    @Override
+    public boolean isAdminOnly() {
+        return entityType.isAdminOnly();
     }
 
     public void setRequired(boolean required) {

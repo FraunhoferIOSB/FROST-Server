@@ -64,6 +64,11 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     public final String plural;
 
+    /**
+     * Flag indicating only admin users are allowed to see this entity type.
+     */
+    private boolean adminOnly;
+
     private boolean initialised = false;
 
     /**
@@ -75,7 +80,8 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     private final Set<Property> properties = new LinkedHashSet<>();
     /**
-     * The Set of PROPERTIES that Entities of this type have, mapped by their name.
+     * The Set of PROPERTIES that Entities of this type have, mapped by their
+     * name.
      */
     private final Map<String, Property> propertiesByName = new LinkedHashMap<>();
     /**
@@ -113,8 +119,13 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     private ModelRegistry modelRegistry;
 
     public EntityType(String singular, String plural) {
+        this(singular, plural, false);
+    }
+
+    public EntityType(String singular, String plural, boolean adminOnly) {
         this.entityName = singular;
         this.plural = plural;
+        this.adminOnly = adminOnly;
     }
 
     public EntityType registerProperty(Property property) {
@@ -132,6 +143,26 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return this;
     }
 
+    /**
+     * Flag indicating only admin users are allowed to see this entity type.
+     *
+     * @return true if only admin users are allowed to see this entity type.
+     */
+    public boolean isAdminOnly() {
+        return adminOnly;
+    }
+
+    /**
+     * Set the flag indicating only admin users are allowed to see this entity
+     * type.
+     *
+     * @param adminOnly if true, only admin users are allowed to see this entity
+     * type.
+     */
+    public void setAdminOnly(boolean adminOnly) {
+        this.adminOnly = adminOnly;
+    }
+
     public void init() {
         if (initialised) {
             LOGGER.error("Re-Init of EntityType!");
@@ -144,7 +175,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
             if (property instanceof NavigationPropertyMain) {
                 NavigationPropertyMain np = (NavigationPropertyMain) property;
                 if (np.getEntityType() == null) {
-                    np.setEntityType(modelRegistry.getEntityTypeForName(np.getName()));
+                    np.setEntityType(modelRegistry.getEntityTypeForName(np.getName(), true));
                 }
 
                 navigationProperties.add(np);
@@ -156,34 +187,6 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
                 navigationPropertiesByTarget.put(np.getEntityType(), np);
             }
         }
-    }
-
-    /**
-     * Adds a creation-validator to the entity type.
-     *
-     * @param validator The validator to add.
-     * @return this.
-     * @deprecated use {@link #addCreateValidator(String, EntityValidator)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public EntityType addValidator(EntityValidator validator) {
-        return addValidatorForCreate(validator);
-    }
-
-    /**
-     * Adds a creation-validator to the entity type with a generated name.
-     *
-     * @param validator The validator to add
-     * @return this
-     * @deprecated use {@link #addCreateValidator(String, EntityValidator)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public EntityType addValidatorForCreate(EntityValidator validator) {
-        int count = validatorsCreateEntity.size() + 1;
-        while (validatorsCreateEntity.containsKey(Integer.toString(count))) {
-            count++;
-        }
-        return addCreateValidator(Integer.toString(count), validator);
     }
 
     /**
@@ -218,22 +221,6 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     public EntityValidator removeCreateValidator(String name) {
         return validatorsCreateEntity.remove(name);
-    }
-
-    /**
-     * Adds an update-validator to the entity type with a generated name.
-     *
-     * @param validator The validator to add
-     * @return this
-     * @deprecated use {@link #addUpdateValidator(String, EntityValidator)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public EntityType addValidatorForUpdate(EntityValidator validator) {
-        int count = validatorsUpdateEntity.size() + 1;
-        while (validatorsUpdateEntity.containsKey(Integer.toString(count))) {
-            count++;
-        }
-        return addUpdateValidator(Integer.toString(count), validator);
     }
 
     /**
@@ -347,10 +334,12 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * Check if all required properties are non-null on the given Entity.
      *
      * @param entity the Entity to check.
-     * @param entityPropertiesOnly flag indicating only the EntityProperties should be checked.
-     * @throws IncompleteEntityException If any of the required properties are null.
-     * @throws IllegalStateException If any of the required properties are incorrect (i.e. Observation with both a
-     * Datastream and a MultiDatastream.
+     * @param entityPropertiesOnly flag indicating only the EntityProperties
+     * should be checked.
+     * @throws IncompleteEntityException If any of the required properties are
+     * null.
+     * @throws IllegalStateException If any of the required properties are
+     * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
     public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
         for (Property property : getPropertySet()) {

@@ -33,8 +33,6 @@ import java.util.List;
 @ConfigurableClass
 public class SecurityModel {
 
-    public static final String USER_NAME_ANONYMOUS = "anonymous";
-
     @ConfigurableClass
     public static class SecurityEntry {
 

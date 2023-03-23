@@ -157,7 +157,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         formatter = JsonWriter.getObjectMapper();
         final ModelRegistry modelRegistry = settings.getModelRegistry();
-        parser = new JsonReader(modelRegistry);
+        parser = new JsonReader(modelRegistry, true);
 
         long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
         if (queueLoggingInterval > 0) {

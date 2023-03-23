@@ -54,12 +54,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -337,7 +339,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         Entity newEntity;
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(modelRegistry);
+            JsonReader entityParser = new JsonReader(modelRegistry, ServiceRequest.LOCAL_REQUEST.get().getUserPrincipal());
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
@@ -560,9 +562,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             LOGGER.info("Reading Database Tables.");
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
                 final String tableName = entityTypeDef.getTable();
-                LOGGER.info("  Table: {}.", tableName);
-                getDbTable(tableName);
-                getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                if (!StringHelper.isNullOrEmpty(tableName)) {
+                    LOGGER.info("  Table: {}.", tableName);
+                    getDbTable(tableName);
+                    getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                }
             }
         }
 

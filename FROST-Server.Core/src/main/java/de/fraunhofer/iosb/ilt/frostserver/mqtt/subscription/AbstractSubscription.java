@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ANONYMOUS_PRINCIPAL;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -152,7 +154,7 @@ public abstract class AbstractSubscription implements Subscription {
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
-        query = new Query(modelRegistry, queryDefaults, path);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.setFilter(matchExpression);
     }
 

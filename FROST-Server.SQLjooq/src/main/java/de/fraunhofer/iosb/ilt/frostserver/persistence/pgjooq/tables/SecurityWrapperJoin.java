@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.USER_NAME_ANONYMOUS;
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.USER_NAME_ANONYMOUS;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
@@ -27,8 +27,8 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.util.PrincipalExtended;
 import java.security.Principal;
 import java.util.List;
 import org.jooq.Record;

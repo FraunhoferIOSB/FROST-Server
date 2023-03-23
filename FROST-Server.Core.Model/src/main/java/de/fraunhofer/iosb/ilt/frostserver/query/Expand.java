@@ -99,7 +99,9 @@ public class Expand {
 
     public Query getSubQuery() {
         if (subQuery == null) {
-            setSubQuery(new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath()).validate(validatedPath.getEntityType()));
+            final Query newSubQuery = new Query(parentQuery)
+                    .validate(validatedPath.getEntityType());
+            setSubQuery(newSubQuery);
         }
         return subQuery;
     }
@@ -145,7 +147,7 @@ public class Expand {
                     }
                     rawPath.clear();
                     rawPath.add(firstRawPath);
-                    subQuery = new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath());
+                    subQuery = new Query(parentQuery);
                     subQuery.addExpand(subExpand);
                     subQuery.setParentExpand(this);
                 }

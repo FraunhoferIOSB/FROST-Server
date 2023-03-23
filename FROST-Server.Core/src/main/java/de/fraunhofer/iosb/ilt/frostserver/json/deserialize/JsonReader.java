@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -50,7 +51,15 @@ import java.util.Map;
  */
 public class JsonReader {
 
+    /**
+     * The mappers to use for normal users.
+     */
     private static final Map<ModelRegistry, ObjectMapper> mappers = new HashMap<>();
+
+    /**
+     * The mappers to use for admin users.
+     */
+    private static final Map<ModelRegistry, ObjectMapper> mappersAdmin = new HashMap<>();
 
     /**
      * Get an object mapper for the given id Class. If the id class is the same
@@ -60,8 +69,12 @@ public class JsonReader {
      * mapper for.
      * @return The cached or created object mapper.
      */
-    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry) {
-        return mappers.computeIfAbsent(modelRegistry, JsonReader::createObjectMapper);
+    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
+        if (isAdmin) {
+            return mappersAdmin.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, isAdmin));
+        } else {
+            return mappers.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, isAdmin));
+        }
     }
 
     /**
@@ -71,7 +84,7 @@ public class JsonReader {
      * mapper for.
      * @return The created object mapper.
      */
-    private static ObjectMapper createObjectMapper(ModelRegistry modelRegistry) {
+    private static ObjectMapper createObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
         // ToDo: Allow extensions to add deserializers
 
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
@@ -86,7 +99,7 @@ public class JsonReader {
 
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
-        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+        for (EntityType entityType : modelRegistry.getEntityTypes(isAdmin)) {
             CustomEntityDeserializer.getInstance(modelRegistry, entityType);
         }
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer(modelRegistry));
@@ -104,9 +117,34 @@ public class JsonReader {
     private final ObjectMapper mapper;
     private final ModelRegistry modelRegistry;
 
+    /**
+     * Create a non-admin JsonReader.
+     *
+     * @param modelRegistry the model registry to create the json reader for.
+     */
     public JsonReader(ModelRegistry modelRegistry) {
+        this(modelRegistry, false);
+    }
+
+    /**
+     * Create a JsonReader.
+     *
+     * @param modelRegistry the model registry to create the json reader for.
+     * @param user the user to create the reader for.
+     */
+    public JsonReader(ModelRegistry modelRegistry, PrincipalExtended user) {
+        this(modelRegistry, user.isAdmin());
+    }
+
+    /**
+     * Create a JsonReader.
+     *
+     * @param modelRegistry the model registry to create the json reader for.
+     * @param isAdmin flag indicating if the user is an admin.
+     */
+    public JsonReader(ModelRegistry modelRegistry, boolean isAdmin) {
         this.modelRegistry = modelRegistry;
-        mapper = getObjectMapper(modelRegistry);
+        mapper = getObjectMapper(modelRegistry, isAdmin);
     }
 
     public ObjectMapper getMapper() {

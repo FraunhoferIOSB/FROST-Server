@@ -17,11 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ANONYMOUS_PRINCIPAL;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -75,18 +78,24 @@ public class QueryParser extends Visitor {
     private final QueryDefaults queryDefaults;
     private final ModelRegistry modelRegistry;
     private final ResourcePath path;
+    private final PrincipalExtended user;
     private ExpressionParser expressionParser;
     private Query currentQuery;
     private P_Option currentOption;
 
     public QueryParser(QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
+        this(queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL);
+    }
+
+    public QueryParser(QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user) {
         this.queryDefaults = queryDefaults;
         this.modelRegistry = modelRegistry;
         this.path = path;
+        this.user = user;
     }
 
     private Query handle(Start node) {
-        Query query = new Query(modelRegistry, queryDefaults, path);
+        Query query = new Query(modelRegistry, queryDefaults, path, user);
         for (P_Ref child : node.childrenOfType(P_Ref.class)) {
             handle(child, query);
         }
@@ -240,7 +249,7 @@ public class QueryParser extends Visitor {
         }
         List<P_Option> subOptions = expandItem.childrenOfType(P_Option.class);
         if (!subOptions.isEmpty()) {
-            Query subQuery = new Query(modelRegistry, queryDefaults, path);
+            Query subQuery = new Query(modelRegistry, queryDefaults, path, user);
             for (P_Option subOption : subOptions) {
                 handle(subOption, subQuery);
             }
@@ -257,16 +266,28 @@ public class QueryParser extends Visitor {
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path);
+        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path, ANONYMOUS_PRINCIPAL);
+    }
+
+    public static Query parseQuery(String query, CoreSettings settings, ResourcePath path, PrincipalExtended user) {
+        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path, user);
     }
 
     public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path);
+        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL);
+    }
+
+    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user) {
+        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, user);
     }
 
     public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
+        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL);
+    }
+
+    public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user) {
         if (query == null || query.isEmpty()) {
-            return new Query(modelRegistry, queryDefaults, path);
+            return new Query(modelRegistry, queryDefaults, path, user);
         }
         LOGGER.debug("Parsing: {}", query);
 

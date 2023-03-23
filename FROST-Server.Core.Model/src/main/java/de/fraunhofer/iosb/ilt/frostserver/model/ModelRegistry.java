@@ -54,9 +54,24 @@ public class ModelRegistry {
      */
     public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, true, false);
 
+    /**
+     * All entity types, by their entityName (both singular and plural).
+     */
     private final Map<String, EntityType> entityTypesByName = new TreeMap<>();
+
+    /**
+     * All entity types.
+     */
     private final Set<EntityType> entityTypes = new LinkedHashSet<>();
 
+    /**
+     * All entity types accessible to non-admin users.
+     */
+    private final Set<EntityType> entityTypesNonAdmin = new LinkedHashSet<>();
+
+    /**
+     * All property types by their name.
+     */
     private final Map<String, PropertyType> propertyTypes = new TreeMap<>();
 
     private ParserHelper parserHelper;
@@ -66,6 +81,14 @@ public class ModelRegistry {
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
 
+    /**
+     * Register a new entity type. Registering the same type twice is a no-op,
+     * registering a new entity type with a name that already exists causes an
+     * {@link IllegalArgumentException}.
+     *
+     * @param type The entity type to register.
+     * @return this ModelRegistry.
+     */
     public final ModelRegistry registerEntityType(EntityType type) {
         EntityType existing = entityTypesByName.get(type.entityName);
         if (existing == type) {
@@ -79,16 +102,52 @@ public class ModelRegistry {
         entityTypesByName.put(type.entityName, type);
         entityTypesByName.put(type.plural, type);
         entityTypes.add(type);
+        if (!type.isAdminOnly()) {
+            entityTypesNonAdmin.add(type);
+        }
         type.setModelRegistry(this);
         return this;
     }
 
+    /**
+     * Get the entity type with the given name, only taking non-admin-only
+     * entity types into account.
+     *
+     * @param typeName The name of the entity type to find.
+     * @return the entity type with the given name, or null.
+     */
     public final EntityType getEntityTypeForName(String typeName) {
-        return entityTypesByName.get(typeName);
+        return getEntityTypeForName(typeName, false);
+    }
+
+    /**
+     * Get the entity type with the given name. If isAdmin is true, admin only
+     * entity types can also be returned.
+     *
+     * @param typeName The name of the entity type to find.
+     * @param isAdmin Flag indicating if the requester is admin.
+     * @return the entity type with the given name, or null.
+     */
+    public final EntityType getEntityTypeForName(String typeName, boolean isAdmin) {
+        final EntityType type = entityTypesByName.get(typeName);
+        if (type == null) {
+            return null;
+        }
+        if (!isAdmin && type.isAdminOnly()) {
+            return null;
+        }
+        return type;
     }
 
     public final Set<EntityType> getEntityTypes() {
-        return entityTypes;
+        return entityTypesNonAdmin;
+    }
+
+    public final Set<EntityType> getEntityTypes(boolean isAdmin) {
+        if (isAdmin) {
+            return entityTypes;
+        }
+        return entityTypesNonAdmin;
     }
 
     public ModelRegistry registerPropertyType(PropertyType type) {

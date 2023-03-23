@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
-
-import static de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.USER_NAME_ANONYMOUS;
+package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -29,7 +27,9 @@ import java.util.List;
  */
 public class PrincipalExtended implements Principal {
 
+    public static final String USER_NAME_ANONYMOUS = "anonymous";
     public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptyList());
+    public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptyList());
 
     private final String name;
     private final boolean admin;

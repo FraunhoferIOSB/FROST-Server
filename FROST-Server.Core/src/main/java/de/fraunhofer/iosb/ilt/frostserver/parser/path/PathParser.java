@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.UTF8;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -28,10 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.PParser;
@@ -59,56 +63,13 @@ public class PathParser extends Visitor {
 
     private final ModelRegistry modelRegistry;
     private final ResourcePath resourcePath;
+    private final boolean adminUser;
     private boolean foundFirstId;
 
-    /**
-     * Parse the given path, assuming UTF-8 encoding.
-     *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, StringHelper.UTF8);
-    }
-
-    /**
-     * Parse the given path.
-     *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @param encoding The character encoding to use when parsing.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, Charset encoding) {
-        ResourcePath resourcePath = new ResourcePath();
-        resourcePath.setServiceRootUrl(serviceRootUrl);
-        resourcePath.setVersion(version);
-        if (path == null) {
-            resourcePath.setPath("");
-            return resourcePath;
-        }
-        resourcePath.setPath(path);
-        LOGGER.debug("Parsing: {}", path);
-        InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        PParser parser = new PParser(is);
-        try {
-            parser.Start();
-            PathParser pp = new PathParser(modelRegistry, resourcePath);
-            pp.visit(parser.rootNode());
-        } catch (ParseException ex) {
-            throw new IllegalArgumentException("Path " + StringHelper.cleanForLogging(path) + " is not valid: " + ex.getMessage());
-        }
-        return resourcePath;
-    }
-
-    public PathParser(ModelRegistry modelRegistry, ResourcePath resourcePath) {
+    public PathParser(ModelRegistry modelRegistry, ResourcePath resourcePath, boolean adminUser) {
         this.modelRegistry = modelRegistry;
         this.resourcePath = resourcePath;
+        this.adminUser = adminUser;
     }
 
     private void addAsEntity(EntityType type, String id) {
@@ -198,7 +159,7 @@ public class PathParser extends Visitor {
         final String name = node.getImage();
         final PathElement parent = resourcePath.getLastElement();
         if (parent == null) {
-            final EntityType entityType = modelRegistry.getEntityTypeForName(name);
+            final EntityType entityType = modelRegistry.getEntityTypeForName(name, adminUser);
             if (entityType == null) {
                 throw new IllegalArgumentException("Unknown EntityType: '" + StringHelper.cleanForLogging(name) + "'");
             }
@@ -212,27 +173,13 @@ public class PathParser extends Visitor {
             throw new IllegalArgumentException("Second element should be an ID or $ref, not " + StringHelper.cleanForLogging(node.toString()));
         }
 
-        final EntityType parentType;
         if (parent instanceof PathElementEntitySet) {
             throw new IllegalArgumentException("A property name can not follow a set: " + StringHelper.cleanForLogging(node.toString()));
         }
 
         if (parent instanceof PathElementEntity parentEntity) {
-            parentType = parentEntity.getEntityType();
-            Property property = parentType.getProperty(name);
-            if (property instanceof EntityPropertyMain epMain) {
-                addAsEntityProperty(epMain);
-                return;
-            }
-            if (property instanceof NavigationPropertyEntity npEntity) {
-                addAsEntity(npEntity, null);
-                return;
-            }
-            if (property instanceof NavigationPropertyEntitySet npEntitySet) {
-                addAsEntitySet(npEntitySet);
-                return;
-            }
-            throw new IllegalArgumentException("EntityType " + parentType + " does not have a property: " + StringHelper.cleanForLogging(node.getImage()));
+            parentIsEntity(name, parentEntity);
+            return;
         }
 
         if (parent instanceof PathElementProperty) {
@@ -249,6 +196,29 @@ public class PathParser extends Visitor {
         }
 
         throw new IllegalArgumentException("Do not know what to do with: " + StringHelper.cleanForLogging(node.toString()));
+    }
+
+    public void parentIsEntity(final String name, PathElementEntity parentEntity) throws IllegalArgumentException {
+        final EntityType parentType = parentEntity.getEntityType();
+        final Property property = parentType.getProperty(name);
+        if (property instanceof EntityPropertyMain epMain) {
+            addAsEntityProperty(epMain);
+            return;
+        }
+        if (property instanceof NavigationProperty np) {
+            if (np.isAdminOnly() && !adminUser) {
+                throw new IllegalArgumentException("EntityType " + parentType + " does not have a property: " + StringHelper.cleanForLogging(name));
+            }
+            if (np instanceof NavigationPropertyEntity npEntity) {
+                addAsEntity(npEntity, null);
+                return;
+            }
+            if (np instanceof NavigationPropertyEntitySet npEntitySet) {
+                addAsEntitySet(npEntitySet);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("EntityType " + parentType + " does not have a property: " + StringHelper.cleanForLogging(name));
     }
 
     public void visit(T_ARRAYINDEX node) {
@@ -277,6 +247,66 @@ public class PathParser extends Visitor {
         } else {
             throw new IllegalArgumentException("An ID must follow a set: " + StringHelper.cleanForLogging(node.getImage()));
         }
+    }
+
+    /**
+     * Parse the given path, assuming UTF-8 encoding.
+     *
+     * @param modelRegistry The Model Registry to use.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
+     * @param path The path to parse.
+     * @return The parsed ResourcePath.
+     */
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
+        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    }
+
+    /**
+     * Parse the given path.
+     *
+     * @param modelRegistry The Model Registry to use.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
+     * @param path The path to parse.
+     * @param user The principal of the user.
+     * @return The parsed ResourcePath.
+     */
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, PrincipalExtended user) {
+        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, user);
+    }
+
+    /**
+     * Parse the given path.
+     *
+     * @param modelRegistry The Model Registry to use.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
+     * @param path The path to parse.
+     * @param encoding The character encoding to use when parsing.
+     * @param user The principal of the user.
+     * @return The parsed ResourcePath.
+     */
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, Charset encoding, PrincipalExtended user) {
+        ResourcePath resourcePath = new ResourcePath();
+        resourcePath.setServiceRootUrl(serviceRootUrl);
+        resourcePath.setVersion(version);
+        if (path == null) {
+            resourcePath.setPath("");
+            return resourcePath;
+        }
+        resourcePath.setPath(path);
+        LOGGER.debug("Parsing: {}", path);
+        InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
+        PParser parser = new PParser(is);
+        try {
+            parser.Start();
+            PathParser pp = new PathParser(modelRegistry, resourcePath, user.isAdmin());
+            pp.visit(parser.rootNode());
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Path " + StringHelper.cleanForLogging(path) + " is not valid: " + ex.getMessage());
+        }
+        return resourcePath;
     }
 
 }
