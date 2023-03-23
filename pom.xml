@@ -135,7 +135,7 @@
         <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
 
         <version.org.json>20230227</version.org.json>
-        <version.owasp>8.1.2</version.owasp>
+        <version.owasp>8.2.0</version.owasp>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.6.0</version.postgres>
