@@ -216,6 +216,7 @@ frost:
         message_size: 8092
 
     # FROST-Server MQTT business settings
+    serviceHost: "{{ .Values.frost.http.serviceHost }}"
     qos: 2
     subscribeMessageQueueSize: 100
     subscribeThreadPoolSize: 10

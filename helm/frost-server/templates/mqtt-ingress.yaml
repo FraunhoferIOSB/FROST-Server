@@ -24,7 +24,7 @@ spec:
       secretName: {{ .Values.frost.mqtt.ingress.tls.secretName }}
   {{- end }}
   rules:
-  - host: {{ .Values.frost.mqtt.serviceHost }}
+  - host: {{tpl .Values.frost.mqtt.serviceHost . }}
     http:
       paths:
       - path:  {{ .Values.frost.mqtt.ingress.path  }}
