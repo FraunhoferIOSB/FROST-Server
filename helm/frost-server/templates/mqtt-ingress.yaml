@@ -6,7 +6,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   annotations:
-    nginx.org/websocket-services: {{ $fullName }}
+    nginx.org/websocket-services: '"{{ $fullName }}"'
     {{- if .Values.frost.mqtt.ingress.annotations }}
     {{- toYaml .Values.frost.mqtt.ingress.annotations | nindent 4 }}
     {{ end }}
@@ -24,7 +24,7 @@ spec:
       secretName: {{ .Values.frost.mqtt.ingress.tls.secretName }}
   {{- end }}
   rules:
-  - host: {{ .Values.frost.mqtt.serviceHost }}
+  - host: {{tpl .Values.frost.mqtt.serviceHost . }}
     http:
       paths:
       - path:  {{ .Values.frost.mqtt.ingress.path  }}
