@@ -493,7 +493,11 @@ public class Service implements AutoCloseable {
         Entity entity;
         try {
             entity = jsonReader.parseEntity(type, request.getContentReader());
-            entity.complete(mainSet);
+
+            if (mainSet.getParent() != null) {
+                type.setParent(mainSet, entity);
+            }
+            type.validateCreate(entity);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.trace("Post failed.", ex);
@@ -684,7 +688,7 @@ public class Service implements AutoCloseable {
 
             JsonReader entityParser = new JsonReader(modelRegistry, request.getUserPrincipal());
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
-            entity.complete(true);
+            entity.validateUpdate();
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {

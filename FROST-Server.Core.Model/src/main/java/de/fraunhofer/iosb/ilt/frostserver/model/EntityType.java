@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
@@ -169,11 +170,10 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         }
         initialised = true;
         for (Property property : properties) {
-            if (property instanceof EntityPropertyMain) {
-                entityProperties.add((EntityPropertyMain) property);
+            if (property instanceof EntityPropertyMain entityPropertyMain) {
+                entityProperties.add(entityPropertyMain);
             }
-            if (property instanceof NavigationPropertyMain) {
-                NavigationPropertyMain np = (NavigationPropertyMain) property;
+            if (property instanceof NavigationPropertyMain np) {
                 if (np.getEntityType() == null) {
                     np.setEntityType(modelRegistry.getEntityTypeForName(np.getName(), true));
                 }
@@ -241,7 +241,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     /**
      * Get the unmodifiable map of Update-validators.
      *
-     * @return the unmodifiable map of Create-validators.
+     * @return the unmodifiable map of Update-validators.
      */
     public Map<String, EntityValidator> getUpdateValidators() {
         return Collections.unmodifiableMap(validatorsUpdateEntity);
@@ -267,16 +267,16 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
 
     public EntityPropertyMain getEntityProperty(String name) {
         Property property = propertiesByName.get(name);
-        if (property instanceof EntityPropertyMain) {
-            return (EntityPropertyMain) property;
+        if (property instanceof EntityPropertyMain entityPropertyMain) {
+            return entityPropertyMain;
         }
         return null;
     }
 
     public NavigationPropertyMain getNavigationProperty(String name) {
         Property property = propertiesByName.get(name);
-        if (property instanceof NavigationPropertyMain) {
-            return (NavigationPropertyMain) property;
+        if (property instanceof NavigationPropertyMain navigationPropertyMain) {
+            return navigationPropertyMain;
         }
         return null;
     }
@@ -326,26 +326,33 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return navigationSets;
     }
 
+    /**
+     * Find a navigation property that points from this type to the given target
+     * type.
+     *
+     * @param to The entity type to find a link to.
+     * @return A navigation property linking the two types.
+     * @deprecated there may be more than one navigation property linking the
+     * two types. This mathod can only return one at random.
+     */
+    @Deprecated(forRemoval = true)
     public NavigationPropertyMain getNavigationProperty(EntityType to) {
         return navigationPropertiesByTarget.get(to);
     }
 
     /**
-     * Check if all required properties are non-null on the given Entity.
+     * Run Create-validators on the entity. This checks if all required
+     * properties are non-null on the given Entity. This may change the entity
+     * to remove computed or read-only values.
      *
      * @param entity the Entity to check.
-     * @param entityPropertiesOnly flag indicating only the EntityProperties
-     * should be checked.
      * @throws IncompleteEntityException If any of the required properties are
      * null.
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException {
+    public void validateCreate(Entity entity) throws IncompleteEntityException {
         for (Property property : getPropertySet()) {
-            if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
-                continue;
-            }
             if (entity.isSetProperty(property)) {
                 if (property.isReadOnly()) {
                     entity.unsetProperty(property);
@@ -361,47 +368,56 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
             }
         }
         for (EntityValidator validator : validatorsCreateEntity.values()) {
-            validator.validate(entity, entityPropertiesOnly);
+            validator.validate(entity);
         }
-    }
-
-    public void complete(Entity entity, PathElementEntitySet containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != entity.getEntityType()) {
-            throw new IllegalArgumentException("Set of type " + type + " can not contain a " + entity.getEntityType());
-        }
-
-        checkParent(containingSet, entity);
-
-        complete(entity, false);
     }
 
     public void validateUpdate(Entity entity) throws IncompleteEntityException {
+        for (Property property : getPropertySet()) {
+            if (!(property instanceof EntityPropertyMain)) {
+                continue;
+            }
+            if (entity.isSetProperty(property)) {
+                if (property.isReadOnly()) {
+                    entity.unsetProperty(property);
+                    continue;
+                }
+                if (!property.isNullable() && entity.getProperty(property) == null) {
+                    throw new IncompleteEntityException("Property '" + property.getJsonName() + "' must be non-NULL.");
+                }
+            }
+        }
         for (EntityValidator validator : validatorsUpdateEntity.values()) {
-            validator.validate(entity, false);
+            validator.validate(entity);
         }
     }
 
-    private void checkParent(PathElementEntitySet containingSet, Entity entity) throws IncompleteEntityException {
+    public void setParent(PathElementEntitySet containingSet, Entity entity) throws IncompleteEntityException {
+        EntityType setType = containingSet.getEntityType();
+        if (setType != entity.getEntityType()) {
+            throw new IllegalArgumentException("Set of type " + setType + " can not contain a " + entity.getEntityType());
+        }
         PathElement parent = containingSet.getParent();
-        if (parent instanceof PathElementEntity) {
-            PathElementEntity parentEntity = (PathElementEntity) parent;
+        if (parent == null) {
+            throw new IllegalArgumentException("Set does not have a parent entity!");
+        }
+        if (parent instanceof PathElementEntity parentEntity) {
             Id parentId = parentEntity.getId();
             if (parentId == null) {
                 return;
             }
-            checkParent(entity, containingSet.getNavigationProperty().getInverse(), parentId);
+            setParent(entity, containingSet.getNavigationProperty().getInverse(), parentId);
         }
     }
 
-    private void checkParent(Entity entity, NavigationPropertyMain navPropToParent, Id parentId) throws IncompleteEntityException {
+    private void setParent(Entity entity, NavigationPropertyMain navPropToParent, Id parentId) throws IncompleteEntityException {
         if (navPropToParent == null) {
             LOGGER.error("Incorrect 'parent' entity type for {}: {}", entityName, navPropToParent);
             throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + navPropToParent);
         }
         EntityType parentType = navPropToParent.getEntityType();
-        if (navPropToParent.isEntitySet()) {
-            entity.addNavigationEntity(new DefaultEntity(parentType).setId(parentId));
+        if (navPropToParent instanceof NavigationPropertyEntitySet navPropToParentSet) {
+            entity.addNavigationEntity(navPropToParentSet, new DefaultEntity(parentType).setId(parentId));
         } else {
             entity.setProperty(navPropToParent, new DefaultEntity(parentType).setId(parentId));
         }
@@ -478,11 +494,11 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
 
     public Id parsePrimaryKey(String input) {
         Object rawId = primaryKey.getType().parseFromUrl(input);
-        if (rawId instanceof UUID) {
-            return new IdUuid((UUID) rawId);
+        if (rawId instanceof UUID uuid) {
+            return new IdUuid(uuid);
         }
-        if (rawId instanceof Number) {
-            return new IdLong(((Number) rawId).longValue());
+        if (rawId instanceof Number number) {
+            return new IdLong(number.longValue());
         }
         if (rawId instanceof CharSequence) {
             return new IdString(rawId.toString());

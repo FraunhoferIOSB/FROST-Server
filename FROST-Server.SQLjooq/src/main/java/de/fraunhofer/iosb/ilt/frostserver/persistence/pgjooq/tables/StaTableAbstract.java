@@ -297,7 +297,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @param forInsert Flag indicating the update is for a newly inserted
      * entity, and new entities can be created.
      *
-     * @throws IncompleteEntityException If the given entity is not complete.
+     * @throws IncompleteEntityException If the given entity is not validateCreate.
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */

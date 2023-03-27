@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -29,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -182,16 +180,6 @@ public class DefaultEntity implements Entity {
     }
 
     @Override
-    public DefaultEntity addNavigationEntity(Entity linkedEntity) {
-        final EntityType linkedType = linkedEntity.getEntityType();
-        final NavigationPropertyMain navProperty = entityType.getNavigationProperty(linkedType);
-        if (navProperty instanceof NavigationPropertyEntitySet) {
-            return addNavigationEntity((NavigationPropertyEntitySet) navProperty, linkedEntity);
-        }
-        throw new IllegalArgumentException("addNavigationEntity expects an entity type that goes into a set.");
-    }
-
-    @Override
     public DefaultEntity addNavigationEntity(NavigationPropertyEntitySet navProperty, Entity linkedEntity) {
         EntitySet entitySet = getProperty(navProperty);
         if (entitySet == null) {
@@ -233,11 +221,6 @@ public class DefaultEntity implements Entity {
                 message.addNpField(property);
             }
         }
-    }
-
-    @Override
-    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
-        entityType.complete(this, containingSet);
     }
 
     @Override

@@ -203,7 +203,9 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
@@ -254,19 +256,21 @@ class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(1))
-                        .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
-                                .setName("degree Celsius")
-                                .setSymbol("°C")
-                                .setDefinition("http://unitsofmeasure.org/ucum.html#para-30"))
-                        .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                        .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
-                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC)))
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setQuery(query.getExpand().get(0).getSubQuery())
+                                .setId(new IdLong(1))
+                                .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
+                                .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
+                                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
+                                        .setName("degree Celsius")
+                                        .setSymbol("°C")
+                                        .setDefinition("http://unitsofmeasure.org/ucum.html#para-30"))
+                                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                                .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                                .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
+                                .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -303,9 +307,11 @@ class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123)))
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setQuery(query.getExpand().get(0).getSubQuery())
+                                .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -329,9 +335,11 @@ class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123)))
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setQuery(query.getExpand().get(0).getSubQuery())
+                                .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -356,9 +364,11 @@ class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setQuery(query.getExpand().get(0).getSubQuery())
-                        .setId(new IdLong(123)))
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setQuery(query.getExpand().get(0).getSubQuery())
+                                .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")

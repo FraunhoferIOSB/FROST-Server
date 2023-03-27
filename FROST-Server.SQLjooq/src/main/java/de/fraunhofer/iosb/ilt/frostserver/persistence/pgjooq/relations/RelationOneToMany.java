@@ -125,7 +125,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
                 throw new IllegalStateException("Back-link not found for relation " + navProp.getEntityType() + "/" + navProp.getName() + ".");
             }
             target.setProperty(backLink, source);
-            target.complete();
+            target.validateCreate();
             pm.insert(target);
         } else {
             throw new NoSuchEntityException("Linked Entity with no id.");

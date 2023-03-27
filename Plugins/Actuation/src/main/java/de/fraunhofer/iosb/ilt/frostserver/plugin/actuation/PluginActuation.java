@@ -173,7 +173,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epCreationTime)
                 .registerProperty(epTaskingParameters)
                 .registerProperty(npTaskingCapabilityTask)
-                .addCreateValidator("AC-Task-CrationTime", (entity, entityPropertiesOnly) -> {
+                .addCreateValidator("AC-Task-CrationTime", entity -> {
                     if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
                         entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
                     }
@@ -189,8 +189,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npThingTaskCap);
         pluginCoreModel.etThing.registerProperty(npTaskingCapabilitiesThing);
 
-        if (pm instanceof PostgresPersistenceManager) {
-            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+        if (pm instanceof PostgresPersistenceManager ppm) {
             TableCollection tableCollection = ppm.getTableCollection();
             final DataType dataTypeActr = ppm.getDataTypeFor(modelSettings.idTypeActuator);
             final DataType dataTypeTask = ppm.getDataTypeFor(modelSettings.idTypeTask);
@@ -220,8 +219,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            if (pm instanceof PostgresPersistenceManager ppm) {
                 return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
             }
             return "Unknown persistence manager class";
@@ -231,8 +229,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof PostgresPersistenceManager) {
-                PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            if (pm instanceof PostgresPersistenceManager ppm) {
                 return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
             }
             out.append("Unknown persistence manager class");
