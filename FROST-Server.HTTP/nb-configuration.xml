@@ -17,7 +17,6 @@
         <org-netbeans-modules-web-clientproject-api.js_2e_libs_2e_folder>js/libs</org-netbeans-modules-web-clientproject-api.js_2e_libs_2e_folder>
         <org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>Tomcat</org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>
         <org-netbeans-modules-whitelist.whitelist-oracle>false</org-netbeans-modules-whitelist.whitelist-oracle>
-        <netbeans.hint.jdkPlatform>JDK_17</netbeans.hint.jdkPlatform>
         <netbeans.hint.licensePath>${project.parent.basedir}/license-header</netbeans.hint.licensePath>
     </properties>
 </project-shared-configuration>
