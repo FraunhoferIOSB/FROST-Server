@@ -29,7 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 public interface DefValidator {
 
     /**
-     * Create the defined validator(s) for the given EntityType on the model in the given ModelRegistry.
+     * Create the defined validator(s) for the given EntityType on the model in
+     * the given ModelRegistry.
      *
      * @param modelRegistry The model to modify.
      * @param entityType The entity type to create the validator for.
