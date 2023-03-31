@@ -27,6 +27,8 @@ import java.util.List;
  */
 public class PrincipalExtended implements Principal {
 
+    private static final ThreadLocal<PrincipalExtended> LOCAL_PRINCIPAL = new ThreadLocal<>();
+
     public static final String USER_NAME_ANONYMOUS = "anonymous";
     public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptyList());
     public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptyList());
@@ -69,5 +71,17 @@ public class PrincipalExtended implements Principal {
             return principalExtended;
         }
         return new PrincipalExtended(principal.getName(), false, Collections.emptyList());
+    }
+
+    public static PrincipalExtended getLocalPrincipal() {
+        return LOCAL_PRINCIPAL.get();
+    }
+
+    public static void setLocalPrincipal(PrincipalExtended localPrincipal) {
+        LOCAL_PRINCIPAL.set(localPrincipal);
+    }
+
+    public static void removeLocalPrincipal() {
+        LOCAL_PRINCIPAL.remove();
     }
 }

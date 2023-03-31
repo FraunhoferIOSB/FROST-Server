@@ -76,6 +76,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Conca
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.EndsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.IndexOf;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Length;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.StartsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Substring;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.SubstringOf;
@@ -241,4 +242,6 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(ToUpper node);
 
     public O visit(Trim node);
+
+    public O visit(PrincipalName node);
 }

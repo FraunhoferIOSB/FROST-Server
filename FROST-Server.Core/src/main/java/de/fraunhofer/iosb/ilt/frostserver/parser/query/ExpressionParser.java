@@ -78,6 +78,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Conca
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.EndsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.IndexOf;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Length;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.StartsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Substring;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.SubstringOf;
@@ -198,7 +199,9 @@ public class ExpressionParser extends Visitor {
         OP_ST_CROSSES("st_crosses", STCrosses.class),
         OP_ST_INTERSECTS("st_intersects", STIntersects.class),
         OP_ST_CONTAINS("st_contains", STContains.class),
-        OP_ST_RELATE("st_relate", STRelate.class);
+        OP_ST_RELATE("st_relate", STRelate.class),
+        // Current user related
+        OP_PRINCIPAL_NAME("principalName", PrincipalName.class);
 
         private static final Map<String, Operator> BY_KEY = new HashMap<>();
 

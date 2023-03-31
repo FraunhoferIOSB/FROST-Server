@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import java.security.Principal;
 import java.util.List;
 import org.jooq.Record;
@@ -92,7 +91,7 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
 
     @Override
     public Table wrap(StaMainTable table) {
-        final Principal principal = ServiceRequest.LOCAL_REQUEST.get().getUserPrincipal();
+        final Principal principal = PrincipalExtended.getLocalPrincipal();
         final StaMainTable tableT = table.as("t");
         SelectJoinStep<Record> current = DSL.select(tableT.asterisk()).from(tableT);
         for (TableJoin join : joins) {

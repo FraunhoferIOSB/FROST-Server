@@ -176,6 +176,8 @@ SKIP : " " | "\n" | "\r" | "\t";
 | <T_QF_ST_INTERSECTS: "st_intersects" <T_LB> >
 | <T_QF_ST_CONTAINS:   "st_contains" <T_LB> >
 | <T_QF_ST_RELATE:     "st_relate" <T_LB> >
+
+| <T_QF_PRINCIPAL_NAME:"principalName" <T_LB> >
 ;
 
 <LS_CONSTANTS> TOKEN [IGNORE_CASE]:
@@ -365,6 +367,7 @@ P_FunctionNameNone:
     <T_QF_NOW>
   | <T_QF_MINDATETIME>
   | <T_QF_MAXDATETIME>
+  | <T_QF_PRINCIPAL_NAME>
 ;
 
 P_FunctionNameSingle:

@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class ServiceRequest {
 
-    public static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
+    private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
 
     private String requestType;
     private String urlPath;
@@ -223,6 +223,20 @@ public class ServiceRequest {
      */
     public void setVersion(Version version) {
         this.version = version;
+    }
+
+    public static ServiceRequest getLocalRequest() {
+        return LOCAL_REQUEST.get();
+    }
+
+    public static void setLocalRequest(ServiceRequest localRequest) {
+        LOCAL_REQUEST.set(localRequest);
+        PrincipalExtended.setLocalPrincipal(localRequest.getUserPrincipal());
+    }
+
+    public static void removeLocalRequest() {
+        LOCAL_REQUEST.remove();
+        PrincipalExtended.removeLocalPrincipal();
     }
 
 }

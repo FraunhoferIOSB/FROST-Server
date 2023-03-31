@@ -108,11 +108,11 @@ public class ServletMain extends HttpServlet {
             return;
         }
         try (Service service = new Service(coreSettings)) {
-            ServiceRequest.LOCAL_REQUEST.set(serviceRequest);
+            ServiceRequest.setLocalRequest(serviceRequest);
             final ServiceResponseHttpServlet serviceResponse = new ServiceResponseHttpServlet(response);
             plugin.execute(service, serviceRequest, serviceResponse);
             sendResponse(serviceResponse, response);
-            ServiceRequest.LOCAL_REQUEST.remove();
+            ServiceRequest.removeLocalRequest();
         } catch (Exception exc) {
             LOGGER.error("", exc);
             sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);

@@ -108,6 +108,7 @@ public abstract class Function implements Expression {
         this.parameters = Arrays.asList(parameters);
     }
 
+    @Override
     public void addParameter(Expression parameter) {
         parameters.add(parameter);
     }

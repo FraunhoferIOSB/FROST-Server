@@ -103,6 +103,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Conca
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.EndsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.IndexOf;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Length;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.StartsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Substring;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.SubstringOf;
@@ -1165,6 +1166,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.trim(field));
+    }
+
+    @Override
+    public FieldWrapper visit(PrincipalName node) {
+        return new SimpleFieldWrapper(DSL.value(node.getValue()));
     }
 
     private static class PathState {

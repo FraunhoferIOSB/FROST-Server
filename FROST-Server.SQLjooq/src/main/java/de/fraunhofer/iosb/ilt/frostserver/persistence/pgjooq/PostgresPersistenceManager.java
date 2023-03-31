@@ -53,8 +53,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -339,7 +339,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         Entity newEntity;
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(modelRegistry, ServiceRequest.LOCAL_REQUEST.get().getUserPrincipal());
+            JsonReader entityParser = new JsonReader(modelRegistry, PrincipalExtended.getLocalPrincipal());
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
