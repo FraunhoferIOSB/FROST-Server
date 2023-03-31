@@ -201,7 +201,7 @@ public class ExpressionParser extends Visitor {
         OP_ST_CONTAINS("st_contains", STContains.class),
         OP_ST_RELATE("st_relate", STRelate.class),
         // Current user related
-        OP_PRINCIPAL_NAME("principalName", PrincipalName.class);
+        OP_PRINCIPAL_NAME("principalName", PrincipalName.class, true);
 
         private static final Map<String, Operator> BY_KEY = new HashMap<>();
 
@@ -210,12 +210,29 @@ public class ExpressionParser extends Visitor {
                 BY_KEY.put(o.urlKey, o);
             }
         }
+        /**
+         * The operator/function name as it appears in URLs.
+         */
         public final String urlKey;
+
+        /**
+         * The java class implementing the function.
+         */
         public final Class<? extends Function> implementingClass;
 
+        /**
+         * Flag indicating only admin-users may use this function.
+         */
+        public final boolean adminOnly;
+
         private Operator(String urlKey, Class<? extends Function> implementingClass) {
+            this(urlKey, implementingClass, false);
+        }
+
+        private Operator(String urlKey, Class<? extends Function> implementingClass, boolean adminOnly) {
             this.urlKey = urlKey;
             this.implementingClass = implementingClass;
+            this.adminOnly = adminOnly;
         }
 
         public Function instantiate() {
@@ -226,12 +243,12 @@ public class ExpressionParser extends Visitor {
             }
         }
 
-        public static Operator fromKey(String key) {
+        public static Operator fromKey(String key, boolean admin) {
             if (key.endsWith("(")) {
                 key = key.substring(0, key.length() - 1);
             }
             Operator operator = BY_KEY.get(key);
-            if (operator == null) {
+            if (operator == null || operator.adminOnly && !admin) {
                 throw new IllegalArgumentException("Unknown operator: '" + key + "'.");
             }
             return operator;
@@ -239,10 +256,12 @@ public class ExpressionParser extends Visitor {
     }
 
     private final QueryParser queryParser;
+    private final boolean admin;
     private Expression currentExpression;
 
-    public ExpressionParser(QueryParser queryParser) {
+    public ExpressionParser(QueryParser queryParser, boolean admin) {
         this.queryParser = queryParser;
+        this.admin = admin;
     }
 
     public Expression parseExpression(Node node) {
@@ -362,7 +381,7 @@ public class ExpressionParser extends Visitor {
     }
 
     private Function getFunction(String operator) {
-        return Operator.fromKey(operator).instantiate();
+        return Operator.fromKey(operator, admin).instantiate();
     }
 
     public void visit(T_STR_LIT node) {

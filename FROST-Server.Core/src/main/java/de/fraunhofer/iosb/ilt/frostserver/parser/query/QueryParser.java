@@ -260,7 +260,7 @@ public class QueryParser extends Visitor {
 
     private ExpressionParser getExpressionParser() {
         if (expressionParser == null) {
-            expressionParser = new ExpressionParser(this);
+            expressionParser = new ExpressionParser(this, user.isAdmin());
         }
         return expressionParser;
     }
@@ -295,7 +295,7 @@ public class QueryParser extends Visitor {
         QParser t = new QParser(is);
         try {
             Start start = t.Start();
-            QueryParser v = new QueryParser(queryDefaults, modelRegistry, path);
+            QueryParser v = new QueryParser(queryDefaults, modelRegistry, path, user);
             return v.handle(start);
         } catch (ParseException | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));

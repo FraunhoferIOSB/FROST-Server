@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
 import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,6 +52,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.L
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Round;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -442,6 +444,24 @@ class QueryParserTest {
                                         new DoubleConstant(0.1))),
                         new IntegerConstant(2)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterFunctionAdminOnly() {
+        String query = "$filter=name eq principalName()";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Equal(
+                        new Path(testModel.EP_NAME),
+                        new PrincipalName()));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            QueryParser.parseQuery(query, coreSettings, path);
+        });
+
+        Query result = QueryParser.parseQuery(query, coreSettings, path, INTERNAL_ADMIN_PRINCIPAL);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
     }
