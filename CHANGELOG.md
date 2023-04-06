@@ -1,10 +1,19 @@
 # Changelog
 
+## Development version 2.1.2
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
+* Fixed #1541: times not serialised correctly in GeoJSON resultFormat
+
+
 ## Release version 2.1.1
 
 **New Features**
-* Updated dependency versions.
 * Improved configuration options for logging.
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
 
 
