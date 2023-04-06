@@ -100,7 +100,7 @@ public class GjElementSet {
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
             if (property == ModelRegistry.EP_SELFLINK) {
-                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
+                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.getName()));
             }
             if (property instanceof EntityPropertyMain) {
                 initFrom((EntityPropertyMain) property);
@@ -112,10 +112,14 @@ public class GjElementSet {
 
     private void initFrom(EntityPropertyMain property) {
         PropertyType type = property.getType();
-        if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
-            elements.add(new GjComplexProperty(property.name, property));
+        if (type == TypeComplex.STA_TIMEVALUE) {
+            elements.add(new GjEntityProperty(property.getName(), property));
+        } else if (type == TypeComplex.STA_TIMEINTERVAL) {
+            elements.add(new GjEntityProperty(property.getName(), property));
+        } else if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+            elements.add(new GjComplexProperty(property.getName(), property));
         } else {
-            elements.add(new GjEntityProperty(property.name, property));
+            elements.add(new GjEntityProperty(property.getName(), property));
         }
     }
 

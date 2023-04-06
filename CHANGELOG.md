@@ -1,5 +1,12 @@
 # Changelog
 
+## Development version 2.0.8
+
+**Internal changes & Bugfixes**
+* Updated dependency versions.
+* Fixed #1541: times not serialised correctly in GeoJSON resultFormat
+
+
 ## Release version 2.0.7
 
 **Internal changes & Bugfixes**
