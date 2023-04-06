@@ -112,7 +112,11 @@ public class GjElementSet {
 
     private void initFrom(EntityPropertyMain property) {
         PropertyType type = property.getType();
-        if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+        if (type == TypeComplex.STA_TIMEVALUE) {
+            elements.add(new GjEntityProperty(property.getName(), property));
+        } else if (type == TypeComplex.STA_TIMEINTERVAL) {
+            elements.add(new GjEntityProperty(property.getName(), property));
+        } else if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
             elements.add(new GjComplexProperty(property.getName(), property));
         } else {
             elements.add(new GjEntityProperty(property.getName(), property));
