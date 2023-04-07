@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -78,14 +79,14 @@ public class GjElementSet {
 
     public void initFrom(EntityType type) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type.getPropertySet());
+            initFrom(type, type.getPropertySet());
         } else {
-            initFrom(query.getSelect());
+            initFrom(type, query.getSelect());
         }
     }
 
-    public void initFrom(Set<Property> properties) {
-        initProperties(properties);
+    public void initFrom(EntityType type, Set<Property> properties) {
+        initProperties(type, properties);
 
         if (query == null) {
             return;
@@ -97,12 +98,17 @@ public class GjElementSet {
         }
     }
 
-    private void initProperties(Set<Property> properties) {
+    private void initProperties(EntityType type, Set<Property> properties) {
         for (Property property : properties) {
-            if (property == ModelRegistry.EP_SELFLINK) {
+            if (property == type.getPrimaryKey()) {
+                String propName = property.getJsonName();
+                elements.add(new GjEntityId(
+                        topLevel,
+                        SpecialNames.AT_IOT_ID.equals(propName) ? "id" : propName,
+                        property));
+            } else if (property == ModelRegistry.EP_SELFLINK) {
                 elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.getName()));
-            }
-            if (property instanceof EntityPropertyMain) {
+            } else if (property instanceof EntityPropertyMain) {
                 initFrom((EntityPropertyMain) property);
             } else if (property instanceof EntityPropertyCustomSelect) {
                 elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
