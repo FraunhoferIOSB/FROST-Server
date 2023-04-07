@@ -4,7 +4,8 @@
 
 **Internal changes & Bugfixes**
 * Updated dependency versions.
-* Fixed #1541: times not serialised correctly in GeoJSON resultFormat
+* Fixed #1541: times not serialised correctly in GeoJSON resultFormat.
+* Fixed #1542: fixed regression in GeoJSON id property.
 
 
 ## Release version 2.1.1
