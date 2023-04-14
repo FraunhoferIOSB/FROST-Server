@@ -1,11 +1,17 @@
 # Changelog
 
-## Development version 2.1.2
+## Release version 2.1.2
 
 **Internal changes & Bugfixes**
 * Updated dependency versions.
 * Fixed #1541: times not serialised correctly in GeoJSON resultFormat.
 * Fixed #1542: fixed regression in GeoJSON id property.
+* [HELM] Set http rewrite target and path to /FROST-Server/
+* [HELM] Set default ingress class to nginx for mqtt ingress
+* [HELM] Fixed mqtt-ingress definition
+* [HELM] Fixed default value for db image in readme
+* [HELM] Added extension settings to readme
+* [HELM] Added extension settings to chart
 
 
 ## Release version 2.1.1
