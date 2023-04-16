@@ -68,6 +68,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.ContextEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
@@ -1170,6 +1171,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(PrincipalName node) {
+        return new SimpleFieldWrapper(DSL.value(node.getValue()));
+    }
+
+    @Override
+    public FieldWrapper visit(ContextEntityProperty node) {
         return new SimpleFieldWrapper(DSL.value(node.getValue()));
     }
 
