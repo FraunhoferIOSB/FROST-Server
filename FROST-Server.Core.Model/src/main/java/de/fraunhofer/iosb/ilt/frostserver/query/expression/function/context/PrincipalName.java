@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string;
+package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
@@ -25,8 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * A function that returns the principal name of the user executing the current
+ * request.
  */
 public class PrincipalName extends Function {
 
@@ -39,7 +38,7 @@ public class PrincipalName extends Function {
     }
 
     public String getValue() {
-        return PrincipalExtended.getLocalPrincipal().getName();
+        return getContext().getUser().getName();
     }
 
     @Override

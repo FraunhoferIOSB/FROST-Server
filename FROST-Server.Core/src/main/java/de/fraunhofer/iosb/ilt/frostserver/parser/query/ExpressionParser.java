@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
@@ -43,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.FractionalSeconds;
@@ -78,7 +80,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Conca
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.EndsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.IndexOf;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Length;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.StartsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Substring;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.SubstringOf;
@@ -235,9 +236,9 @@ public class ExpressionParser extends Visitor {
             this.adminOnly = adminOnly;
         }
 
-        public Function instantiate() {
+        public Function instantiate(DynamicContext context) {
             try {
-                return implementingClass.getDeclaredConstructor().newInstance();
+                return implementingClass.getDeclaredConstructor().newInstance().setContext(context);
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                 throw new IllegalStateException("problem executing '" + this + "'", ex);
             }
@@ -257,11 +258,13 @@ public class ExpressionParser extends Visitor {
 
     private final QueryParser queryParser;
     private final boolean admin;
+    private final DynamicContext context;
     private Expression currentExpression;
 
-    public ExpressionParser(QueryParser queryParser, boolean admin) {
+    public ExpressionParser(QueryParser queryParser, boolean admin, DynamicContext context) {
         this.queryParser = queryParser;
         this.admin = admin;
+        this.context = context;
     }
 
     public Expression parseExpression(Node node) {
@@ -381,7 +384,7 @@ public class ExpressionParser extends Visitor {
     }
 
     private Function getFunction(String operator) {
-        return Operator.fromKey(operator, admin).instantiate();
+        return Operator.fromKey(operator, admin).instantiate(context);
     }
 
     public void visit(T_STR_LIT node) {

@@ -68,6 +68,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.FractionalSeconds;
@@ -103,7 +104,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Conca
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.EndsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.IndexOf;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Length;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.StartsWith;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.Substring;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string.SubstringOf;
