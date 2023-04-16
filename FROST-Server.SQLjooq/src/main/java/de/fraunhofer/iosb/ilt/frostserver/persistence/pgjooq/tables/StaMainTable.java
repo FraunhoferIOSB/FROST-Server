@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
@@ -98,9 +99,9 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object dsId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
 
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException;
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException;
 
     /**
      * Add a hook that runs pre-insert.

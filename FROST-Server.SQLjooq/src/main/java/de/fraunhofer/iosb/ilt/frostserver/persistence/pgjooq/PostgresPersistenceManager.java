@@ -306,7 +306,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         EntityFactories ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
-        Object id = pathElement.getId().getValue();
+        Id id = pathElement.getId();
         if (!ef.entityExists(this, entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
@@ -356,7 +356,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, id.getValue());
+        table.updateInDatabase(this, newEntity, id);
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -390,7 +390,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         init();
         EntityType type = pathElement.getEntityType();
         StaMainTable<?> table = getTableCollection().getTableForType(type);
-        table.delete(this, pathElement.getId().getValue());
+        table.delete(this, pathElement.getId());
         return true;
     }
 

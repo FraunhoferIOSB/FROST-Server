@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -249,7 +250,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
         final TableCollection tables = getTables();
         // Also delete all historicalLocations that no longer reference any location

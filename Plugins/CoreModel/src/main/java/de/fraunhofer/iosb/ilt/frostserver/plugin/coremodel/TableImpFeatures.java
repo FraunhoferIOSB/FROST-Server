@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -159,7 +160,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
@@ -167,7 +168,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
         pm.getDslContext()
                 .update(tLoc)
                 .setNull(tLoc.getGenFoiId())
-                .where(((TableField) tLoc.getGenFoiId()).eq(entityId))
+                .where(((TableField) tLoc.getGenFoiId()).eq(entityId.getValue()))
                 .execute();
     }
 

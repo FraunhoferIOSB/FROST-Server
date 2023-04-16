@@ -315,7 +315,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object entityId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -354,7 +354,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         if (!updateFields.isEmpty()) {
             count = dslContext.update(thisTable)
                     .set(updateFields)
-                    .where(thisTable.getId().equal(entityId))
+                    .where(thisTable.getId().equal(entityId.getValue()))
                     .execute();
         }
         if (count > 1) {
@@ -371,7 +371,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
             hookWrapper.getObject().delete(pm, entityId);
         }
@@ -379,7 +379,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         final T thisTable = getThis();
         long count = pm.getDslContext()
                 .delete(thisTable)
-                .where(thisTable.getId().eq(entityId))
+                .where(thisTable.getId().eq(entityId.getValue()))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Entity of type " + getEntityType() + " with id " + entityId + " not found.");
