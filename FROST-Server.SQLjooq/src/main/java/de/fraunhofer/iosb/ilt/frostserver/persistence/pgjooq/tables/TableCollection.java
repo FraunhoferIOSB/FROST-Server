@@ -20,7 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +31,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
  */
 public class TableCollection {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableCollection.class);
 
     private ModelRegistry modelRegistry;
     private boolean initialised = false;
@@ -44,6 +53,7 @@ public class TableCollection {
      */
     private List<DefModel> modelDefinitions;
     private Map<String, SecurityTableWrapper> securityDefinitions;
+    private Map<String, List<HookValidator>> hookValidators;
 
     private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
@@ -82,17 +92,20 @@ public class TableCollection {
         tablesByName.put(table.getName(), table);
     }
 
-    public void init(EntityFactories entityFactories) {
+    public void init(PostgresPersistenceManager ppm) {
         if (initialised) {
             return;
         }
         synchronized (this) {
             if (!initialised) {
                 initialised = true;
+                final EntityFactories entityFactories = ppm.getEntityFactories();
                 for (StaMainTable<?> table : getAllTables()) {
+                    LOGGER.info("  Table: {}.", table.getName());
                     table.initProperties(entityFactories);
                     table.initRelations();
-                    table.setSecurityWrapper(getSecurityWrapper(table.getName()));
+                    initSecurityWrapper(table);
+                    initHookValidators(table, ppm);
                 }
             }
         }
@@ -125,11 +138,15 @@ public class TableCollection {
         this.modelDefinitions = Collections.emptyList();
     }
 
-    SecurityTableWrapper getSecurityWrapper(String table) {
+    public void initSecurityWrapper(StaMainTable table) {
         if (securityDefinitions == null) {
-            return null;
+            return;
         }
-        return securityDefinitions.get(table);
+        SecurityTableWrapper stw = securityDefinitions.get(table.getName());
+        if (stw == null) {
+            return;
+        }
+        table.setSecurityWrapper(stw);
     }
 
     public void addSecurityWrapper(String tableName, SecurityTableWrapper w) {
@@ -137,5 +154,26 @@ public class TableCollection {
             securityDefinitions = new HashMap<>();
         }
         securityDefinitions.put(tableName, w);
+    }
+
+    public void initHookValidators(StaMainTable table, PostgresPersistenceManager ppm) {
+        if (hookValidators == null) {
+            return;
+        }
+        final List<HookValidator> hvList = hookValidators.get(table.getName());
+        if (hvList == null) {
+            return;
+        }
+        for (HookValidator hv : hvList) {
+            hv.registerHooks(table, ppm);
+        }
+    }
+
+    public void addHookValidator(String tableName, HookValidator hv) {
+        if (hookValidators == null) {
+            hookValidators = new HashMap<>();
+        }
+        hookValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
+                .add(hv);
     }
 }

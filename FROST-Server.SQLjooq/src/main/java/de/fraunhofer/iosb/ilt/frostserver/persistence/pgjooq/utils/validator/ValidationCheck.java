@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 
 /**
- * The lowest level definition of a SecurityWrapper. Each Persistence Manager
- * type will have to extend this.
  *
- * @author hylke
+ * @author scf
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface SecurityWrapper extends AnnotatedConfigurable<Void, Void> {
+public interface ValidationCheck extends AnnotatedConfigurable<Void, Void> {
+
+    public boolean check(PostgresPersistenceManager pm, Entity context);
 
 }

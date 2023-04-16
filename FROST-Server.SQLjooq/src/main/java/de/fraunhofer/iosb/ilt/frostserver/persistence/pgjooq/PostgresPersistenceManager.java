@@ -50,6 +50,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -158,7 +159,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         synchronized (tableCollection) {
             if (!initialised) {
                 idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
-                tableCollection.init(entityFactories);
+                tableCollection.init(this);
                 loadMapping();
                 initialised = true;
             }
@@ -542,11 +543,15 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public void addSecurityDefinition(SecurityEntry entry) {
         String tableName = entry.getTableName();
-        SecurityWrapper wrapper = entry.getWrapper();
-        if (wrapper instanceof SecurityTableWrapper stw) {
-            tableCollection.addSecurityWrapper(tableName, stw);
-        } else {
-            LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
+        List<SecurityWrapper> wrappers = entry.getWrappers();
+        for (SecurityWrapper wrapper : wrappers) {
+            if (wrapper instanceof SecurityTableWrapper stw) {
+                tableCollection.addSecurityWrapper(tableName, stw);
+            } else if (wrapper instanceof HookValidator hv) {
+                tableCollection.addHookValidator(tableName, hv);
+            } else {
+                LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
+            }
         }
     }
 
@@ -565,7 +570,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                 if (!StringHelper.isNullOrEmpty(tableName)) {
                     LOGGER.info("  Table: {}.", tableName);
                     getDbTable(tableName);
-                    getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                    StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                    tableCollection.initSecurityWrapper(mainTable);
+                    tableCollection.initHookValidators(mainTable, this);
                 }
             }
         }

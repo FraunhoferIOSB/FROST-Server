@@ -23,6 +23,8 @@ import java.util.Objects;
  * A wrapper to sort entities that have no natural sorting order.
  *
  * @author hylke
+ * @param <O> The type of the key to sort on.
+ * @param <T> The type of the value to sort.
  */
 public class SortingWrapper<O extends Comparable<O>, T> implements Comparable<SortingWrapper<O, T>> {
 
