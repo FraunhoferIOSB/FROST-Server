@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.POST_RELATIONS;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -242,12 +244,15 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> insertFields = new HashMap<>();
 
+        // First, run the pre-insert hooks in the PRE_RELATION fase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields)) {
+            if (!hookWrapper.getObject().insertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
                 return false;
             }
         }
 
+        // Second create/validate single-entity navigation links.
+        // this must happen first so the second step can use these in validation
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
@@ -257,8 +262,17 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
+        // Third, run the pre-insert hooks in POST_RELATION fase.
+        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
+            if (!hookWrapper.getObject().insertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
+                return false;
+            }
+        }
+
+        // Fourth, deal with the ID, user-defined or not
         entityFactories.insertUserDefinedId(pm, insertFields, this.getId(), entity);
 
+        // Fifth, deal with the other properties
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
         for (EntityPropertyMain ep : entityProperties) {
@@ -271,6 +285,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
+        // Sixth, do the actual insert.
         DSLContext dslContext = pm.getDslContext();
         Object entityId = dslContext.insertInto(thisTable)
                 .set(insertFields)
@@ -279,6 +294,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         LOGGER.debug("Inserted Entity. Created id = {}.", entityId);
         entity.setId(ParserUtils.idFromObject(entityId));
 
+        // Seventh, deal with set-navigation links.
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
                 updateNavigationPropertySet(entity, entity.getProperty(np), pm, true);
@@ -298,7 +314,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @param forInsert Flag indicating the update is for a newly inserted
      * entity, and new entities can be created.
      *
-     * @throws IncompleteEntityException If the given entity is not validateCreate.
+     * @throws IncompleteEntityException If the given entity is not validate.
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */

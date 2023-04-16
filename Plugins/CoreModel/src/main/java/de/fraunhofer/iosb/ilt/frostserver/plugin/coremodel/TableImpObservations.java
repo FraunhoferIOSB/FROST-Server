@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
@@ -248,7 +249,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId);
         pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId);
 
-        registerHookPreInsert(0, (pm, entity, insertFields) -> {
+        registerHookPreInsert(0, (phase, pm, entity, insertFields) -> {
+            if (phase != PRE_RELATIONS) {
+                return true;
+            }
             Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
             if (f == null) {
                 final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);

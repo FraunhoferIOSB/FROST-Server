@@ -33,6 +33,21 @@ import org.jooq.Field;
 public interface HookPreInsert {
 
     /**
+     * The fase the pre-insert hook is running in.
+     */
+    public static enum Phase {
+        /**
+         * Phase before relations are loaded and maybe created.
+         */
+        PRE_RELATIONS,
+        /**
+         * Phase after relations are loaded / created but before the entity
+         * itself is created.
+         */
+        POST_RELATIONS
+    }
+
+    /**
      *
      * @param pm The Persistence Manager to use for database queries.
      * @param entity The entity that is being inserted.
@@ -42,6 +57,6 @@ public interface HookPreInsert {
      * @throws NoSuchEntityException If a related entity does not exist.
      * @throws IncompleteEntityException If the entity is not complete.
      */
-    public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insertIntoDatabase(Phase fase, PostgresPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
 
 }

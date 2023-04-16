@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 
@@ -313,7 +314,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
 
         // Register hooks to alter behaviour of other tables
         obsPropsTable.registerHookPreInsert(-1,
-                (pm, entity, insertFields) -> {
+                (phase, pm, entity, insertFields) -> {
+                    if (phase != PRE_RELATIONS) {
+                        return true;
+                    }
                     EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
                     if (mds != null && !mds.isEmpty()) {
                         throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
@@ -343,7 +347,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
         // On insert Observation
-        observationsTable.registerHookPreInsert(-1, (pm, entity, insertFields) -> {
+        observationsTable.registerHookPreInsert(-1, (phase, pm, entity, insertFields) -> {
+            if (phase != PRE_RELATIONS) {
+                return true;
+            }
             final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
             final Entity mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamObservation);
             if (ds != null && mds != null) {
