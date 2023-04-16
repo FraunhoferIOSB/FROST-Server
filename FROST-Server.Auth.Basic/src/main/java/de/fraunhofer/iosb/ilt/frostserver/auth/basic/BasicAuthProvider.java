@@ -43,6 +43,9 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueBoolean(true)
     public static final String TAG_PLAIN_TEXT_PASSWORD = "plainTextPassword";
 
+    @DefaultValueBoolean(false)
+    public static final String TAG_AUTHENTICATE_ONLY = "authenticateOnly";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 

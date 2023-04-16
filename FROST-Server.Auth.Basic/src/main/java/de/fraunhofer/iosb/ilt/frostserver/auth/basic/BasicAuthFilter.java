@@ -34,6 +34,7 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTH_REALM_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
@@ -84,6 +85,7 @@ public class BasicAuthFilter implements Filter {
     private static final String AUTHORIZATION_REQUIRED_HEADER = "WWW-Authenticate";
     private static final String BASIC_PREFIX = "Basic ";
 
+    private boolean authenticateOnly;
     private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
     private DatabaseHandler databaseHandler;
@@ -102,6 +104,9 @@ public class BasicAuthFilter implements Filter {
         String rolePut = getInitParamWithDefault(filterConfig, TAG_ROLE_PUT, BasicAuthProvider.class);
         String roleDelete = getInitParamWithDefault(filterConfig, TAG_ROLE_DELETE, BasicAuthProvider.class);
         String anonRead = getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F");
+        String authOnly = getInitParamWithDefault(filterConfig, TAG_AUTHENTICATE_ONLY, "F");
+
+        authenticateOnly = "T".equals(authOnly);
 
         ServletContext context = filterConfig.getServletContext();
         Object attribute = context.getAttribute(TAG_CORE_SETTINGS);
@@ -194,7 +199,7 @@ public class BasicAuthFilter implements Filter {
             return;
         }
 
-        if (checker.isAllowed(userData, response)) {
+        if (authenticateOnly || checker.isAllowed(userData, response)) {
             boolean admin = databaseHandler.userHasRole(userData.userName, roleAdmin);
             chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
         }
