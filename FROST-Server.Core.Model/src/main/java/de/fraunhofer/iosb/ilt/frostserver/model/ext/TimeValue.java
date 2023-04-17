@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+
 import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import java.util.Objects;
 import net.time4j.Moment;
@@ -109,7 +111,10 @@ public class TimeValue implements TimeObject, ComplexValue {
         if (isInterval()) {
             return interval.get(name);
         } else {
-            return instant;
+            if (KEY_INTERVAL_START.equals(name)) {
+                return instant;
+            }
+            return null;
         }
     }
 

@@ -79,7 +79,16 @@ public class GjRowCollector {
     }
 
     /**
-     * Collect a new value for the element with the given index.
+     * Collect the ID for the element.
+     *
+     * @param value The value of the id for the current row.
+     */
+    public void collectId(Object value) {
+        feature.setId(String.valueOf(value));
+    }
+
+    /**
+     * Collect a new value for the element.
      *
      * @param headerName The name of the element.
      * @param value The value of the element for the current row.

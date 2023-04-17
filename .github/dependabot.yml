@@ -25,6 +25,10 @@ updates:
         versions: ["[3.17,)"]
       - dependency-name: "org.liquibase:liquibase-core"
         versions: ["[4.12,)"]
+      - dependency-name: "org.openjfx"
+        versions: ["[19.0,)"]
+      - dependency-name: "org.openjfx"
+        versions: ["[19.0,)"]
 
   # Maintain dependencies for Maven in the v1.15.x branch
   - package-ecosystem: "maven"
