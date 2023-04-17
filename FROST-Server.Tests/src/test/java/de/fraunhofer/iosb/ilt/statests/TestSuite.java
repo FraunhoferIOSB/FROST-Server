@@ -53,6 +53,8 @@ import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
+import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests10;
+import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
 import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests10;
@@ -144,6 +146,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     BasicAuthAnonReadTests.Implementation11.class,
     BasicAuthCryptPwTests.Implementation10.class,
     BasicAuthCryptPwTests.Implementation11.class,
+    FineGrainedAuthTests10.class,
+    FineGrainedAuthTests11.class,
     KeyCloakTests.Implementation10.class,
     KeyCloakTests.Implementation11.class,
     KeyCloakAnonReadTests.Implementation10.class,
