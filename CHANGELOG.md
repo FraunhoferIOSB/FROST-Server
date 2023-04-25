@@ -9,6 +9,7 @@
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
 * Fixed #1541: times not serialised correctly in GeoJSON resultFormat.
 * Fixed #1542: fixed regression in GeoJSON id property.
+* Fixed #1564: NavLinks can have names that are not the name of the target entity type.
 
 
 ## Release version 2.1.0
