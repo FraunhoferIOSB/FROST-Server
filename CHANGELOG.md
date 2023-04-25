@@ -3,6 +3,7 @@
 ## Development version 2.1.3
 
 **Internal changes & Bugfixes**
+* Fixed #1564: NavLinks can have names that are not the name of the target entity type.
 
 
 ## Release version 2.1.2

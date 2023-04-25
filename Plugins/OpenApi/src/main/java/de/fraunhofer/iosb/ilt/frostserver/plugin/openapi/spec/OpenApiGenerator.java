@@ -69,7 +69,7 @@ public class OpenApiGenerator {
         paths.put(context.getBase(), basePath);
 
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            addPathsForSet(context, document, 0, paths, context.getBase(), entityType, context);
+            addPathsForSet(context, document, 0, paths, context.getBase(), entityType, entityType.plural, context);
         }
         return document;
     }
@@ -155,7 +155,7 @@ public class OpenApiGenerator {
         if (version == PluginOData.VERSION_ODATA_40 || version == PluginOData.VERSION_ODATA_401) {
             OASchema odataContext = new OASchema(OASchema.Type.STRING, null);
             odataContext.setReadOnly(true);
-            odataContext.setDescription("The link to the next page of entities");
+            odataContext.setDescription("The link to the OData context");
             document.getComponents().addSchema("context", odataContext);
         }
 
@@ -435,19 +435,19 @@ public class OpenApiGenerator {
         }
     }
 
-    private static void addPathsForSet(GeneratorContext context, OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, GeneratorContext options) {
-        String path = base + "/" + entityType.plural;
+    private static void addPathsForSet(GeneratorContext context, OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, String setName, GeneratorContext options) {
+        String path = base + "/" + setName;
         OAPath pathCollection = createPathForSet(options, path, entityType, level > 0);
         paths.put(path, pathCollection);
 
         if (options.isAddRef()) {
-            String refPath = base + "/" + entityType.plural + "/$ref";
+            String refPath = path + "/$ref";
             OAPath pathRef = createPathForSetRef(options, refPath, entityType, level > 0);
             paths.put(refPath, pathRef);
         }
 
         if (level < options.getRecurse()) {
-            String baseId = base + "/" + entityType.plural + "({entityId})";
+            String baseId = path + "({entityId})";
             OAPath pathBaseId = createPathForEntity(options, baseId, entityType);
             paths.put(baseId, pathBaseId);
             addPathsForEntity(context, document, level, paths, baseId, entityType, options);
@@ -460,13 +460,14 @@ public class OpenApiGenerator {
         }
         for (NavigationProperty navProp : entityType.getNavigationSets()) {
             if (level < options.getRecurse()) {
-                addPathsForSet(context, document, level + 1, paths, base, navProp.getEntityType(), options);
+                final EntityType targetType = navProp.getEntityType();
+                addPathsForSet(context, document, level + 1, paths, base, targetType, navProp.getName(), options);
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationEntities()) {
             if (level < options.getRecurse()) {
                 EntityType type = navProp.getEntityType();
-                String baseName = base + "/" + type.entityName;
+                String baseName = base + "/" + navProp.getName();
                 OAPath paPath = createPathForEntity(options, baseName, type);
                 paths.put(baseName, paPath);
                 addPathsForEntity(context, document, level + 1, paths, baseName, type, options);
