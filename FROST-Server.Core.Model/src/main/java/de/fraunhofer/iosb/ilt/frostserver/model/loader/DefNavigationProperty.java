@@ -137,7 +137,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         } else {
             navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required);
         }
-        targetEntityType = modelRegistry.getEntityTypeForName(entityType);
+        targetEntityType = modelRegistry.getEntityTypeForName(entityType, true);
         if (targetEntityType == null) {
             LOGGER.error("Failed to find target EntityType: {}", entityType);
             throw new IllegalArgumentException("Missing entityType: " + entityType);
