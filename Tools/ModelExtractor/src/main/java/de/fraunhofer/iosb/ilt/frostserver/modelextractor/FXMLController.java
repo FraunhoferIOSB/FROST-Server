@@ -689,7 +689,7 @@ public class FXMLController implements Initializable {
             case "varchar":
             case "uuid":
                 defEp.addHandler(new FieldMapperString().setField(fieldData.name))
-                        .setType("String");
+                        .setType("EDM.String");
                 return true;
 
             case "smallint":
