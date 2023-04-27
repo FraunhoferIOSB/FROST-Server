@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
@@ -74,7 +75,9 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
             collection = true;
             type = nameSpace + "." + et.entityName;
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
-                navPropBinding.put(np.getName(), np.getEntityType().plural);
+                if (!np.isAdminOnly() || PrincipalExtended.getLocalPrincipal().isAdmin()) {
+                    navPropBinding.put(np.getName(), np.getEntityType().plural);
+                }
             }
             return this;
         }
