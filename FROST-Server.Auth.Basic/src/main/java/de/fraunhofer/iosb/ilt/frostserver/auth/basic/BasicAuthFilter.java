@@ -84,7 +84,9 @@ public class BasicAuthFilter implements Filter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_REQUIRED_HEADER = "WWW-Authenticate";
     private static final String BASIC_PREFIX = "Basic ";
+    private static final UserData USER_DATA_NO_USER = new UserData(null, null);
 
+    private boolean allowAnonymous;
     private boolean authenticateOnly;
     private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
@@ -106,6 +108,7 @@ public class BasicAuthFilter implements Filter {
         String anonRead = getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F");
         String authOnly = getInitParamWithDefault(filterConfig, TAG_AUTHENTICATE_ONLY, "F");
 
+        allowAnonymous = "T".equals(anonRead);
         authenticateOnly = "T".equals(authOnly);
 
         ServletContext context = filterConfig.getServletContext();
@@ -124,7 +127,7 @@ public class BasicAuthFilter implements Filter {
         methodCheckers.put(HttpMethod.OPTIONS, allAllowed);
         methodCheckers.put(HttpMethod.HEAD, allAllowed);
 
-        if ("T".equals(anonRead)) {
+        if (allowAnonymous) {
             methodCheckers.put(HttpMethod.GET, allAllowed);
         } else {
             methodCheckers.put(HttpMethod.GET, (userData, response) -> requireRole(roleGet, userData, response));
@@ -140,14 +143,14 @@ public class BasicAuthFilter implements Filter {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader == null || !authHeader.startsWith(BASIC_PREFIX)) {
             LOGGER.debug("No basic auth header.");
-            return new UserData(null, null);
+            return USER_DATA_NO_USER;
         }
 
         String userPassBase64 = authHeader.substring(BASIC_PREFIX.length());
         String userPassDecoded = new String(Base64.getDecoder().decode(userPassBase64), StringHelper.UTF8);
         if (!userPassDecoded.contains(":")) {
             LOGGER.debug("No username:password in basic auth header.");
-            return new UserData(null, null);
+            return USER_DATA_NO_USER;
         }
 
         String[] split = userPassDecoded.split(":", 2);
@@ -155,7 +158,7 @@ public class BasicAuthFilter implements Filter {
         if (databaseHandler.isValidUser(userData)) {
             return userData;
         } else {
-            return new UserData(null, null);
+            return USER_DATA_NO_USER;
         }
     }
 
@@ -166,7 +169,7 @@ public class BasicAuthFilter implements Filter {
             return false;
         }
 
-        if (!databaseHandler.userHasRole(userData.userName, roleName)) {
+        if (!userData.roles.contains(roleName)) {
             LOGGER.debug("Rejecting request: User {} does not have role {}.", userData.userName, roleName);
             throwAuthRequired(response);
             return false;
@@ -192,6 +195,17 @@ public class BasicAuthFilter implements Filter {
 
         UserData userData = findCredentials(request);
 
+        if (authenticateOnly) {
+            if (!allowAnonymous && userData == USER_DATA_NO_USER) {
+                // We only authenticate, there is no user, but we don't allow anonymous.
+                throwAuthRequired(response);
+            } else {
+                boolean admin = userData.roles.contains(roleAdmin);
+                chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
+            }
+            return;
+        }
+
         AuthChecker checker = methodCheckers.get(method);
         if (checker == null) {
             LOGGER.debug("Rejecting request: No checker for method: {}.", request.getMethod());
@@ -199,8 +213,8 @@ public class BasicAuthFilter implements Filter {
             return;
         }
 
-        if (authenticateOnly || checker.isAllowed(userData, response)) {
-            boolean admin = databaseHandler.userHasRole(userData.userName, roleAdmin);
+        if (checker.isAllowed(userData, response)) {
+            boolean admin = userData.roles.contains(roleAdmin);
             chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
         }
     }
