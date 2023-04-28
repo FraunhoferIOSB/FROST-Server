@@ -70,6 +70,11 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      */
     private boolean adminOnly;
 
+    /**
+     * How IDs are generated for this entity type.
+     */
+    private Object idGenerationMode;
+
     private boolean initialised = false;
 
     /**
@@ -459,6 +464,25 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return this;
     }
 
+    /**
+     * How IDs are generated for this entity type. Exact values depend on the
+     * PersistenceManager that is used.
+     *
+     * @return the idGenerationMode
+     */
+    public Object getIdGenerationMode() {
+        return idGenerationMode;
+    }
+
+    /**
+     * How IDs are generated for this entity type.
+     *
+     * @param idGenerationMode the idGenerationMode to set
+     */
+    public void setIdGenerationMode(Object idGenerationMode) {
+        this.idGenerationMode = idGenerationMode;
+    }
+
     @Override
     public String toString() {
         return entityName;
@@ -505,4 +529,5 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         }
         throw new IllegalArgumentException("Can not use " + ((rawId == null) ? "null" : rawId.getClass().getName()) + " (" + input + ") as an Id");
     }
+
 }

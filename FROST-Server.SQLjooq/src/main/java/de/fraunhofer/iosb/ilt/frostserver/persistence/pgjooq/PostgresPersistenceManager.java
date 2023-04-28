@@ -57,6 +57,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
@@ -128,6 +129,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private EntityFactories entityFactories;
 
     private CoreSettings settings;
+    private PersistenceSettings persistenceSettings;
     private IdGenerationType idGenerationMode;
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
@@ -144,9 +146,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
-        this.tableCollection = getTableCollection(settings);
+        tableCollection = getTableCollection(settings);
+        persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
-        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
+        Settings customSettings = persistenceSettings.getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
@@ -158,7 +161,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         synchronized (tableCollection) {
             if (!initialised) {
-                idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
+                idGenerationMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode());
                 tableCollection.init(this);
                 loadMapping();
                 initialised = true;
@@ -440,10 +443,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
-    public IdGenerationType getIdGenerationMode() {
-        return idGenerationMode;
-    }
-
     protected boolean validateClientSuppliedId(Id entityId) {
         return entityId != null && entityId.getValue() != null;
     }
@@ -470,14 +469,16 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      * not supported.
      */
     public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
-        Id entityId = entity.getId();
-        switch (idGenerationMode) {
+        final Id entityId = entity.getId();
+        final EntityType entityType = entity.getEntityType();
+        final IdGenerationType typeIdGenerationMode = (IdGenerationType) entityType.getIdGenerationMode();
+        switch (typeIdGenerationMode) {
             case SERVER_GENERATED_ONLY:
                 if (entityId == null || entityId.getValue() == null) {
                     LOGGER.trace("Using server generated id.");
                     return false;
                 } else {
-                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", idGenerationMode, entityId);
+                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", typeIdGenerationMode, entityId);
                     return false;
                 }
 
@@ -490,15 +491,15 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
             case CLIENT_GENERATED_ONLY:
                 if (!validateClientSuppliedId(entityId)) {
-                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", idGenerationMode);
+                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", typeIdGenerationMode);
                     throw new IncompleteEntityException("Error: no @iot.id");
                 }
                 break;
 
             default:
                 // not a valid generation mode
-                LOGGER.error("idGenerationMode '{}' is not implemented.", idGenerationMode);
-                throw new IllegalArgumentException("idGenerationMode '" + idGenerationMode.toString() + "' is not implemented.");
+                LOGGER.error("idGenerationMode '{}' is not implemented.", typeIdGenerationMode);
+                throw new IllegalArgumentException("idGenerationMode '" + typeIdGenerationMode.toString() + "' is not implemented.");
         }
 
         LOGGER.info("Using client generated id.");
@@ -562,15 +563,16 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         getDslContext();
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
 
+        LOGGER.info("Reading Database Tables.");
         for (DefModel modelDefinition : modelDefinitions) {
-            LOGGER.info("Reading Database Tables.");
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
                 final String tableName = entityTypeDef.getTable();
                 if (!StringHelper.isNullOrEmpty(tableName)) {
                     LOGGER.info("  Table: {}.", tableName);
                     getDbTable(tableName);
-                    StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                    StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
                     tableCollection.initSecurityWrapper(mainTable);
                     tableCollection.initHookValidators(mainTable, this);
                 }
@@ -588,7 +590,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         tableCollection.clearModelDefinitions();
 
         // Validate
-        for (EntityType entityType : settings.getModelRegistry().getEntityTypes()) {
+        for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
+            LOGGER.info("  EntityType: {}.", entityType);
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
             final PropertyFieldRegistry<?> pfReg = tableForType.getPropertyFieldRegistry();
             for (Property property : entityType.getPropertySet()) {
@@ -597,6 +600,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                     LOGGER.error("Property {} is not backed by table {}.", property.getName(), tableForType.getName());
                 }
             }
+            final IdGenerationType idGenMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode(entityType));
+            entityType.setIdGenerationMode(idGenMode);
         }
     }
 

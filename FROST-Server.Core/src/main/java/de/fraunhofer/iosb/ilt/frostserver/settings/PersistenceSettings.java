@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -69,7 +70,8 @@ public class PersistenceSettings implements ConfigDefaults {
     public static final String TAG_TRANSACTION_ROLE = "transactionRole";
 
     /**
-     * Fully-qualified class name of the PersistenceManager implementation class.
+     * Fully-qualified class name of the PersistenceManager implementation
+     * class.
      */
     private String persistenceManagerImplementationClass;
     private String idGenerationMode;
@@ -93,7 +95,8 @@ public class PersistenceSettings implements ConfigDefaults {
      */
     private boolean timeoutQueries;
     /**
-     * Flag indicating role should be set in transaction from HTTP user, typically for Row-Level Security.
+     * Flag indicating role should be set in transaction from HTTP user,
+     * typically for Row-Level Security.
      */
     private boolean transactionRole;
     /**
@@ -136,6 +139,10 @@ public class PersistenceSettings implements ConfigDefaults {
 
     public String getIdGenerationMode() {
         return idGenerationMode;
+    }
+
+    public String getIdGenerationMode(EntityType type) {
+        return customSettings.get(TAG_ID_GENERATION_MODE + "." + type.entityName, idGenerationMode);
     }
 
     public boolean isTransactionRole() {
