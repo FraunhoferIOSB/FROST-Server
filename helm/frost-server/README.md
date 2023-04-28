@@ -185,6 +185,7 @@ The following table lists the configurable parameters of the FROST-Server chart 
 | `frost.http.resources.requests.memory`      | Memory requested by the http module.                                                                                                                                                                                                                                                    | `500m`                                                                                                                         |
 | `frost.http.resources.limits.cpu`           | CPU limit for the http module.                                                                                                                                                                                                                                                          | `NIL`                                                                                                                          |
 | `frost.http.resources.limits.memory`        | Memory limit for the http module.                                                                                                                                                                                                                                                       | `NIL`                                                                                                                          |
+| `frost.http.extraEnv`                       | Extra environment variables for the http module. See below for syntax.                                                                                                                                                                                                                  | `nil`                                                                                                                          |
 | `frost.db.ports.postgresql.servicePort`     | The internal port of the FROST-Server database service.                                                                                                                                                                                                                                 | `5432`                                                                                                                         |
 | `frost.db.persistence.enabled`              | If data persistence needs to be enabled. See [bellow](#persistence) for more information.                                                                                                                                                                                               | `false`                                                                                                                        |
 | `frost.db.enableIntegratedDb`               | If set, the Helm chart will deploy a internal Postgis database server. When disabled, you can use the value below to specify a external connection string.                                                                                                                              | `true`                                                                                                                         |
@@ -253,6 +254,7 @@ The following table lists the configurable parameters of the FROST-Server chart 
 | `frost.mqtt.image.repository`               | Image for the mqtt module.                                                                                                                                                                                                                                                              | `fraunhoferiosb/frost-server-mqtt`                                                                                             |
 | `frost.mqtt.image.tag`                      | Imagetag for the mqtt module.                                                                                                                                                                                                                                                           | `{VERSION}`                                                                                                                    |
 | `frost.mqtt.image.pullPolicy`               | Image pull policy for the mqtt module.                                                                                                                                                                                                                                                  | `IfNotPresent`                                                                                                                 |
+| `frost.mqtt.extraEnv`                       | Extra environment variables for the mqtt module. See below for syntax.                                                                                                                                                                                                                  | `nil`                                                                                                                          |
 | `frost.mqtt.ingress.enabled`                | If Ingress needs to be enabled for the FROST-Server MQTT module. See [bellow](#ingress) for more information.                                                                                                                                                                           | `true`                                                                                                                         |
 | `frost.mqtt.ingress.path`                   | Value for the `path` of the service in the ingress spec. Some clients assume this to be `/mqtt`.                                                                                                                                                                                        | `/mqtt`                                                                                                                        |
 | `frost.mqtt.ingress.annotations`            | Annotations for the ingress definition. E.g. to define the ingress class use ```--set 'frost.http.ingress.annotations.kubernetes\.io/ingress\.class=nginx'```                                                                                                                           | `nginx.ingress.kubernetes.io/proxy-read-timeout: 3600, nginx.ingress.kubernetes.io/proxy-send-timeout: 3600`                   |
@@ -312,6 +314,34 @@ Alternatively, a YAML file that specifies the values for the parameters can be p
 > **Tip**: You can use the default [values.yaml](./values.yaml)
 
 More information about the FROST-Server configuration can be found [here](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/docs/settings.adoc).
+
+
+### ExtraEnv
+
+It is possible to pass extra environment variables to FROST using `frost.http.extraEnv` and `frost.mqtt.extraEnv`.
+This variable accepts a YAML string with the `env` variables.
+
+```
+# values.yaml
+frost:
+  http:
+    extraEnv: |
+      - name: plugins_modelLoader_idType_User
+        value: "string"
+      - name: plugins_modelLoader_idType_Role
+        value: "string"
+```
+
+They can also be passed directly on the command line.
+Since it is not possible to include newline characters in value strings on the command line with escape characters like `\n`,
+the sting must be quoted with newline characters in tact:
+
+```
+helm install --name my-release --set "frost.mqtt.extraEnv=- name: plugins_modelLoader_idType_User
+  value: string
+- name: plugins_modelLoader_idType_Role
+  value: string"
+```
 
 
 ## MQTT

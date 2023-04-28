@@ -383,3 +383,8 @@ spec:
             - name: FROST_LL_org_jooq
               value: "{{ .Values.frost.logging.jooq }}"
             {{- end }}
+
+            # Extra Environment Variables
+            {{- if .Values.frost.http.extraEnv }}
+                {{- .Values.frost.http.extraEnv | nindent 12 }}
+            {{- end }}

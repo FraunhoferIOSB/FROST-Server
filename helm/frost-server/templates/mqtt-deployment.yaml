@@ -386,4 +386,9 @@ spec:
               value: "{{ .Values.frost.logging.jooq }}"
             {{- end }}
 
+            # Extra Environment Variables
+            {{- if .Values.frost.mqtt.extraEnv }}
+                {{- .Values.frost.mqtt.extraEnv | nindent 12 }}
+            {{- end }}
+
 {{- end -}}
