@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEnumeration;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
@@ -49,7 +50,7 @@ public class CsdlSchema {
 
     public CsdlSchema generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings) {
         ModelRegistry mr = settings.getModelRegistry();
-        for (EntityType entityType : mr.getEntityTypes()) {
+        for (EntityType entityType : mr.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, nameSpace, entityType));
         }
         for (Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {

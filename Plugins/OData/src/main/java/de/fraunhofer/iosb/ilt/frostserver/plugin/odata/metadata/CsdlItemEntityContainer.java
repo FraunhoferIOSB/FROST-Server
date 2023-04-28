@@ -41,7 +41,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
     public Map<String, ContainerItem> properties = new LinkedHashMap<>();
 
     public CsdlItemEntityContainer generateFrom(String nameSpace, CoreSettings settings) {
-        for (EntityType et : settings.getModelRegistry().getEntityTypes()) {
+        for (EntityType et : settings.getModelRegistry().getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, et));
         }
         return this;
