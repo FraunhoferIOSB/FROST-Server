@@ -249,7 +249,17 @@ public class DefaultEntity implements Entity {
 
     @Override
     public boolean isEmpty() {
-        return entityProperties.get(entityType.getPrimaryKey()) != null;
+        // An entity is empty (not fully loaded) when the only property it has
+        // is its ID, and the ID is not the only thing selected.
+        // It is not empty when it has more than its ID, or when the ID is the
+        // only thing selected.
+        if (entityProperties.size() != 1) {
+            return false;
+        }
+        if (query == null) {
+            return true;
+        }
+        return !(query.getSelect().size() == 1 && query.getSelect().contains(entityType.getPrimaryKey()));
     }
 
     @Override

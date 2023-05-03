@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
+* Fixed cross-entity-type custom links breaking $expand.
 
 
 ## Release version 2.0.8
