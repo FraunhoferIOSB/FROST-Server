@@ -52,7 +52,8 @@ import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
-import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests;
+import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests10;
+import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests11;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -146,8 +147,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     KeyCloakTests.Implementation11.class,
     KeyCloakAnonReadTests.Implementation10.class,
     KeyCloakAnonReadTests.Implementation11.class,
-    CustomLinksTests.Implementation10.class,
-    CustomLinksTests.Implementation11.class,
+    CustomLinksTests10.class,
+    CustomLinksTests11.class,
     MetadataTests.Implementation10.class,
     MetadataTests.Implementation11.class,
     TestSuite.SuiteFinaliser.class

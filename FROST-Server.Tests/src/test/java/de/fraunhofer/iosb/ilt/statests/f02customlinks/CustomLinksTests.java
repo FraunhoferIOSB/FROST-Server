@@ -52,22 +52,6 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class CustomLinksTests extends AbstractTestClass {
 
-    public static class Implementation10 extends CustomLinksTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends CustomLinksTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomLinksTests.class.getName());
 
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
@@ -117,21 +101,24 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        createThings();
         createLocations();
+        createThings();
     }
 
     private static void createThings() throws ServiceFailureException {
         Thing thing1 = new Thing("Thing 1", "The first thing.");
         Map<String, Object> properties = new HashMap<>();
         thing1.setProperties(properties);
+        thing1.getLocations().add(LOCATIONS.get(0));
         service.create(thing1);
         THINGS.add(thing1);
 
         Thing thing2 = new Thing("Thing 2", "The second thing.");
         properties = new HashMap<>();
         properties.put("parent.Thing@iot.id", thing1.getId().getValue());
+        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getId().getValue());
         thing2.setProperties(properties);
+        thing2.getLocations().add(LOCATIONS.get(1));
         service.create(thing2);
         THINGS.add(thing2);
 
@@ -139,6 +126,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         properties = new HashMap<>();
         properties.put("parent.Thing@iot.id", thing1.getId().getValue());
         thing3.setProperties(properties);
+        thing3.getLocations().add(LOCATIONS.get(2));
         service.create(thing3);
         THINGS.add(thing3);
 
@@ -146,26 +134,48 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         properties = new HashMap<>();
         properties.put("parent.Thing@iot.id", thing2.getId().getValue());
         thing4.setProperties(properties);
+        thing4.getLocations().add(LOCATIONS.get(3));
         service.create(thing4);
         THINGS.add(thing4);
     }
 
     private static void createLocations() throws ServiceFailureException {
-        Point gjo = new Point(8, 51);
-        Location location = new Location("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", gjo);
-        location.getThings().addAll(THINGS);
-        service.create(location);
-        LOCATIONS.add(location);
+        {
+            Location location = new Location("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+            service.create(location);
+            LOCATIONS.add(location);
+        }
+        {
+            Location location = new Location("Location 2.0", "First Location of Thing 2.", "application/vnd.geo+json", new Point(9, 51));
+            service.create(location);
+            LOCATIONS.add(location);
+        }
+        {
+            Location location = new Location("Location 3.0", "First Location of Thing 3.", "application/vnd.geo+json", new Point(8, 50));
+            service.create(location);
+            LOCATIONS.add(location);
+        }
+        {
+            Location location = new Location("Location 4.0", "First Location of Thing 4.", "application/vnd.geo+json", new Point(9, 50));
+            service.create(location);
+            LOCATIONS.add(location);
+        }
     }
 
     @Test
     void testCustomLinks1() throws ServiceFailureException {
         LOGGER.info("  testCustomLinks1");
-        Thing thing = service.things().find(THINGS.get(1).getId());
+        List<Thing> things = service.things().query().orderBy("name asc").list().toList();
+        Thing thing = things.get(1);
         Object navLink = thing.getProperties().get("parent.Thing@iot.navigationLink");
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
                 + THINGS.get(0).getId().getUrl() + ")";
+        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+        navLink = thing.getProperties().get("alternate.Location@iot.navigationLink");
+        expected = getServerSettings().getServiceRootUrl()
+                + "/" + version.urlPart + "/Locations("
+                + LOCATIONS.get(0).getId().getUrl() + ")";
         assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
     }
 
@@ -175,7 +185,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         Thing thing = service.things()
                 .query()
                 .filter("id eq " + THINGS.get(1).getId().getUrl())
-                .expand("properties/parent.Thing")
+                .expand("properties/parent.Thing,properties/alternate.Location")
                 .first();
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
