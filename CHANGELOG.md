@@ -10,6 +10,7 @@
 * Fixed #1541: times not serialised correctly in GeoJSON resultFormat.
 * Fixed #1542: fixed regression in GeoJSON id property.
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
+* Fixed cross-entity-type custom links breaking $expand.
 
 
 ## Release version 2.1.0
