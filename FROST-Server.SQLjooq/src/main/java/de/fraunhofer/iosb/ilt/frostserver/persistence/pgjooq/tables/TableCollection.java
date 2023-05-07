@@ -92,9 +92,17 @@ public class TableCollection {
         tablesByName.put(table.getName(), table);
     }
 
-    public void init(PostgresPersistenceManager ppm) {
+    /**
+     * Initialise the TableCollection.
+     *
+     * @param ppm The PersistenceManager to initialise the TableCollection for.
+     * @return True if the called caused the TableCollection to be initialised,
+     * false if the TableCollection was already initialised and the call made no
+     * changes.
+     */
+    public boolean init(PostgresPersistenceManager ppm) {
         if (initialised) {
-            return;
+            return false;
         }
         synchronized (this) {
             if (!initialised) {
@@ -107,7 +115,9 @@ public class TableCollection {
                     initSecurityWrapper(table);
                     initHookValidators(table, ppm);
                 }
+                return true;
             }
+            return false;
         }
     }
 

@@ -162,8 +162,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         synchronized (tableCollection) {
             if (!initialised) {
                 idGenerationMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode());
-                tableCollection.init(this);
-                loadMapping();
+                if (tableCollection.init(this)) {
+                    loadMapping();
+                    validateMappings();
+                }
                 initialised = true;
             }
         }
@@ -588,8 +590,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
+    }
 
+    private void validateMappings() {
         // Validate
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
             LOGGER.info("  EntityType: {}.", entityType);
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
