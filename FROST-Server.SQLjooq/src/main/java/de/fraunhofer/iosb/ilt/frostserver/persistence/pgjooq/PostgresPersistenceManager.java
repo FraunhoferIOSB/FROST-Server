@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -130,8 +132,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     private CoreSettings settings;
     private PersistenceSettings persistenceSettings;
-    private IdGenerationType idGenerationMode;
     private ConnectionWrapper connectionProvider;
+    private String connectionName;
     private DSLContext dslContext;
 
     /**
@@ -149,8 +151,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         tableCollection = getTableCollection(settings);
         persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
-        Settings customSettings = persistenceSettings.getCustomSettings();
-        connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        final Settings customSettings = persistenceSettings.getCustomSettings();
+        connectionName = customSettings.get(TAG_DB_URL, SOURCE_NAME_FROST, false);
+        connectionProvider = new ConnectionWrapper(customSettings, connectionName);
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
     }
@@ -161,7 +164,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         synchronized (tableCollection) {
             if (!initialised) {
-                idGenerationMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode());
                 if (tableCollection.init(this)) {
                     loadMapping();
                     validateMappings();
@@ -511,8 +513,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     public String checkForUpgrades(String liquibaseChangelogFilename, Map<String, Object> params) {
         LOGGER.info("Checking for upgrades in {}", liquibaseChangelogFilename);
         try {
-            Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-            Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
+            final Settings customSettings = persistenceSettings.getCustomSettings();
+            final Connection connection = ConnectionUtils.getConnection(connectionName, customSettings);
             return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -524,10 +526,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     public boolean doUpgrades(String liquibaseChangelogFilename, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
         LOGGER.info("Applying upgrades in {}", liquibaseChangelogFilename);
-        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        Connection connection;
+        final Settings customSettings = persistenceSettings.getCustomSettings();
+        final Connection connection;
         try {
-            connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
+            connection = ConnectionUtils.getConnection(connectionName, customSettings);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");
