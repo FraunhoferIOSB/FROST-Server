@@ -84,6 +84,8 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
      *
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
+     * @param idTypeActuator The type of the id field for the Actuator table.
+     * @param idTypeThing The type of the id field for the Thing table.
      * @param pluginActuation the actuation plugin this table belongs to.
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.

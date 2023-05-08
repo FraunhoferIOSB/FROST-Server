@@ -144,7 +144,7 @@ public class LiquibaseHelper {
     }
 
     private static void outputError(final Exception exception, final Writer out, final String message) throws IOException {
-        LOGGER.error(message, exception);
+        LOGGER.error(message, exception.getMessage());
         out.append(message + ":\n");
         out.append(exception.getLocalizedMessage());
         out.append("\n");

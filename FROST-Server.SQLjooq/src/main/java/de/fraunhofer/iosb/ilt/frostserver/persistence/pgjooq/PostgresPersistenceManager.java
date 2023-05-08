@@ -504,7 +504,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                 throw new IllegalArgumentException("idGenerationMode '" + typeIdGenerationMode.toString() + "' is not implemented.");
         }
 
-        LOGGER.info("Using client generated id.");
+        LOGGER.debug("Using client generated id.");
         return true;
     }
 
@@ -596,7 +596,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         // Validate
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
-            LOGGER.info("  EntityType: {}.", entityType);
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
             final PropertyFieldRegistry<?> pfReg = tableForType.getPropertyFieldRegistry();
             for (Property property : entityType.getPropertySet()) {

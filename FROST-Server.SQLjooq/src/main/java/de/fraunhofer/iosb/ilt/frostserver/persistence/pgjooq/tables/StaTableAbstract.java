@@ -291,7 +291,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 .set(insertFields)
                 .returningResult(thisTable.getId())
                 .fetchOne(0);
-        LOGGER.debug("Inserted Entity. Created id = {}.", entityId);
+        LOGGER.debug("Inserted {} with id = {}.", entityType, entityId);
         entity.setId(ParserUtils.idFromObject(entityId));
 
         // Seventh, deal with set-navigation links.
