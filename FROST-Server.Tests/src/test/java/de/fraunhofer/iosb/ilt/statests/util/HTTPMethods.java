@@ -30,9 +30,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import org.apache.http.Consts;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -209,6 +211,44 @@ public class HTTPMethods {
         }
     }
 
+    public static HttpResponse doPost(HttpClient httpClient, String urlString, String postBody, String contentType) {
+        try {
+            LOGGER.debug("Posting: {}", urlString);
+            countPost++;
+
+            HttpPost httpPost = new HttpPost(urlString);
+            httpPost.setEntity(new StringEntity(postBody));
+            httpPost.setHeader("Content-Type", contentType);
+            httpPost.setHeader("charset", "utf-8");
+
+            org.apache.http.HttpResponse httpResponse = httpClient.execute(httpPost);
+            final int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+            HttpResponse result = new HttpResponse(statusCode);
+            switch (statusCode) {
+                case 201:
+                    String locationHeader = httpResponse.getFirstHeader("location").getValue();
+                    if (locationHeader == null || locationHeader.isEmpty()) {
+                        result.setResponse(EntityUtils.toString(httpResponse.getEntity()));
+                    } else {
+                        result.setResponse(locationHeader);
+                    }
+                    break;
+                case 200:
+                    result.setResponse(EntityUtils.toString(httpResponse.getEntity()));
+                    break;
+                default:
+                    result.setResponse("");
+                    break;
+            }
+            return result;
+        } catch (IOException | RuntimeException e) {
+            LOGGER.error("Exception: ", e);
+            return null;
+        } finally {
+        }
+    }
+
     /**
      * Send HTTP PUT request to the urlString with putBody and return response
      * code and response body
@@ -355,12 +395,12 @@ public class HTTPMethods {
      * @return The id found in the selfLink.
      */
     public static Object idFromSelfLink(String selfLink) {
-        String idString = selfLink.substring(selfLink.indexOf("(") + 1, selfLink.indexOf(")"));
+        String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
         if (idString.startsWith("'") && idString.endsWith("'")) {
             return idString.substring(1, idString.length() - 1);
         }
         try {
-            return Long.parseLong(idString);
+            return Long.valueOf(idString);
         } catch (NumberFormatException ex) {
             fail("Failed to parse returned ID (" + idString + "). String IDs must start and end with a single quote (').");
         }

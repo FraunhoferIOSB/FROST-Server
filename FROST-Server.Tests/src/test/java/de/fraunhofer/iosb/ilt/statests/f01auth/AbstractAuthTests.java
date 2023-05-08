@@ -17,10 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
+import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
@@ -35,11 +37,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -73,10 +72,6 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE = "anon should NOT be able to update.";
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_DELETE = "anon should NOT be able to delete.";
 
-    private static final int HTTP_CODE_200_OK = 200;
-    private static final int HTTP_CODE_401_UNAUTHORIZED = 401;
-    private static final int HTTP_CODE_403_FORBIDDEN = 403;
-
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
     private static final List<Sensor> SENSORS = new ArrayList<>();
@@ -90,10 +85,12 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static SensorThingsService serviceAnon;
 
     private final boolean anonymousReadAllowed;
+    private final AuthTestHelper ath;
 
     public AbstractAuthTests(ServerVersion serverVersion, Properties properties, boolean anonymousReadAllowed) {
         super(serverVersion, properties);
         this.anonymousReadAllowed = anonymousReadAllowed;
+        this.ath = new AuthTestHelper(serverSettings);
     }
 
     @Override
@@ -166,61 +163,26 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test01AdminUpdateDb() throws IOException {
         LOGGER.info("  test01AdminUpdateDb");
-        getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
+        ath.getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
     }
 
     @Test
     void test02WriteUpdateDb() throws IOException {
         LOGGER.info("  test02WriteUpdateDb");
-        getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test03ReadUpdateDb() throws IOException {
         LOGGER.info("  test03ReadUpdateDb");
-        getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test04AnonUpdateDb() throws IOException {
         LOGGER.info("  test04AnonUpdateDb");
-        getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-    }
-
-    private void getDatabaseStatusIndirect(SensorThingsService service, int... expectedResponse) throws IOException {
-        getDatabaseStatus(service, service.getEndpoint() + "../DatabaseStatus", expectedResponse);
-    }
-
-    private void getDatabaseStatus(SensorThingsService service, int... expectedResponse) throws IOException {
-        getDatabaseStatus(service, serverSettings.getServiceRootUrl() + "/DatabaseStatus", expectedResponse);
-    }
-
-    private void getDatabaseStatus(SensorThingsService service, String url, int... expectedResponse) throws IOException {
-        HttpGet getUpdateDb = new HttpGet(url);
-        CloseableHttpResponse response = service.execute(getUpdateDb);
-        int code = response.getStatusLine().getStatusCode();
-        for (int expected : expectedResponse) {
-            if (expected == code) {
-                return;
-            }
-        }
-        LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
-        fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
-    }
-
-    private void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
-        if (ex instanceof StatusCodeException) {
-            StatusCodeException scex = (StatusCodeException) ex;
-            int got = scex.getStatusCode();
-            for (int want : expected) {
-                if (got == want) {
-                    return;
-                }
-            }
-        }
-        LOGGER.error(failMessage, ex);
-        fail(failMessage);
+        ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -228,12 +190,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test05AdminCreate");
         Thing thing = new Thing("AdminThing", "The Thing made by admin.");
         THINGS.add(thing);
-        try {
-            serviceAdmin.create(thing);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_CREATE, ex);
-            fail(ADMIN_SHOULD_BE_ABLE_TO_CREATE);
-        }
+        ath.createForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_CREATE, serviceAdmin.things(), THINGS);
     }
 
     @Test
@@ -247,13 +204,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test07AdminUpdate");
         Thing thing = THINGS.get(0);
         thing.setDescription("Updated Thing made by admin.");
-        try {
-            serviceAdmin.update(thing);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_UPDATE, ex);
-            fail(ADMIN_SHOULD_BE_ABLE_TO_UPDATE);
-        }
-        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
+        ath.updateForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_UPDATE, serviceAdmin.things(), THINGS);
     }
 
     @Test
@@ -261,13 +212,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test08AdminDelete");
         Thing thing = THINGS.get(0);
         THINGS.remove(0);
-        try {
-            serviceAdmin.delete(thing);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error(ADMIN_SHOULD_BE_ABLE_TO_DELETE, ex);
-            fail(ADMIN_SHOULD_BE_ABLE_TO_DELETE);
-        }
-        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
+        ath.deleteForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_DELETE, serviceAdmin.things(), THINGS);
     }
 
     @Test
@@ -275,12 +220,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test09WriteCreate");
         Thing thing = new Thing("WriteThing", "The Thing made by write.");
         THINGS.add(thing);
-        try {
-            serviceWrite.create(thing);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error(WRITE_SHOULD_BE_ABLE_TO_CREATE, ex);
-            fail(WRITE_SHOULD_BE_ABLE_TO_CREATE);
-        }
+        ath.createForOk(serviceWrite, thing, WRITE_SHOULD_BE_ABLE_TO_CREATE, serviceWrite.things(), THINGS);
     }
 
     @Test
@@ -294,39 +234,24 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test11WriteUpdate");
         Thing thing = THINGS.get(0);
         thing.setDescription("Updated Thing made by write.");
-        try {
-            serviceWrite.update(thing);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error(WRITE_SHOULD_BE_ABLE_TO_UPDATE, ex);
-            fail(WRITE_SHOULD_BE_ABLE_TO_UPDATE);
-        }
-        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
+        ath.updateForOk(serviceWrite, thing, WRITE_SHOULD_BE_ABLE_TO_UPDATE, serviceWrite.things(), THINGS);
     }
 
     @Test
     void test12WriteDelete() {
         LOGGER.info("  test12WriteDelete");
         Thing thing = THINGS.get(0);
-        try {
-            serviceWrite.delete(thing);
-            fail(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
+        ath.deleteForFail(serviceWrite, thing, WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE,
+                serviceWrite.things(), THINGS, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test13ReadCreate() {
         LOGGER.info("  test13ReadCreate");
         Thing thing = new Thing("ReadThing", "The Thing made by read.");
-        try {
-            serviceRead.create(thing);
-            fail(READ_SHOULD_NOT_BE_ABLE_TO_CREATE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.createForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_CREATE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -349,39 +274,27 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test15ReadUpdate");
         Thing thing = THINGS.get(0).withOnlyId();
         thing.setDescription("Read Updated Thing made by Admin.");
-        try {
-            serviceRead.update(thing);
-            fail(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.updateForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_UPDATE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test16ReadDelete() {
         LOGGER.info("  test16ReadDelete");
         Thing thing = THINGS.get(0);
-        try {
-            serviceRead.delete(thing);
-            fail(READ_SHOULD_NOT_BE_ABLE_TO_DELETE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(READ_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.deleteForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_DELETE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test17AnonCreate() {
         LOGGER.info("  test17AnonCreate");
         Thing thing = new Thing("AnonThing", "The Thing made by anonymous.");
-        try {
-            serviceAnon.create(thing);
-            fail(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_CREATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.createForFail(serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_CREATE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -394,7 +307,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
                 serviceAnon.things().query().list();
                 fail(ANON_SHOULD_NOT_BE_ABLE_TO_READ);
             } catch (ServiceFailureException ex) {
-                expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+                ath.expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
             }
         }
     }
@@ -404,26 +317,19 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test19AnonUpdate");
         Thing thing = THINGS.get(0).withOnlyId();
         thing.setDescription("Anon Updated Thing made by Admin.");
-        try {
-            serviceAnon.update(thing);
-            fail(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.updateForFail(
+                serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test20AnonDelete() {
         LOGGER.info("  test20AnonDelete");
         Thing thing = THINGS.get(0);
-        try {
-            serviceAnon.delete(thing);
-            fail(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_DELETE, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        }
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        ath.deleteForFail(serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_DELETE,
+                serviceRead.things(), THINGS,
+                HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
 }

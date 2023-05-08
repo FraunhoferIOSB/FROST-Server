@@ -90,19 +90,19 @@ public class EntityUtils {
             LOGGER.info("Result count ({}) not equal to expected count ({})", count, expected.size());
             return new ResultTestResult(false, "Result count " + count + " not equal to expected count (" + expected.size() + ")");
         }
-        List<? extends Entity> testList = new ArrayList<>(expected);
-        Iterator<? extends Entity> it;
-        for (it = result.fullIterator(); it.hasNext();) {
-            Entity next = it.next();
-            Entity inList = findEntityIn(next, testList);
-            if (!testList.remove(inList)) {
-                LOGGER.info("Entity with id {} found in result that is not expected.", next.getId());
-                return new ResultTestResult(false, "Entity with id " + next.getId() + " found in result that is not expected.");
+        List<? extends Entity> testExpectedList = new ArrayList<>(expected);
+        Iterator<? extends Entity> resultIt;
+        for (resultIt = result.fullIterator(); resultIt.hasNext();) {
+            Entity nextResult = resultIt.next();
+            Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
+            if (!testExpectedList.remove(inExpectedList)) {
+                LOGGER.info("Entity with id {} found in result that is not expected.", nextResult.getId());
+                return new ResultTestResult(false, "Entity with id " + nextResult.getId() + " found in result that is not expected.");
             }
         }
-        if (!testList.isEmpty()) {
+        if (!testExpectedList.isEmpty()) {
             LOGGER.info("Expected entity not found in result.");
-            return new ResultTestResult(false, testList.size() + " expected entities not in result.");
+            return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
         }
         return new ResultTestResult(true, "Check ok.");
     }

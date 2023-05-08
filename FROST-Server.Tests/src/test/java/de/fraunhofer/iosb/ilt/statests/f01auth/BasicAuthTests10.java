@@ -21,11 +21,11 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 
 /**
  *
- * @author scf
+ * @author hylke
  */
-public class FineGrainedAuthTests10 extends FineGrainedAuthTests {
+public class BasicAuthTests10 extends BasicAuthTests {
 
-    public FineGrainedAuthTests10() {
+    public BasicAuthTests10() {
         super(ServerVersion.v_1_0);
     }
 

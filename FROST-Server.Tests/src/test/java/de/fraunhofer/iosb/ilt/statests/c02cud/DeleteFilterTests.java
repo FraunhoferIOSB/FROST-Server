@@ -57,22 +57,6 @@ import org.threeten.extra.Interval;
  */
 public abstract class DeleteFilterTests extends AbstractTestClass {
 
-    public static class Implementation10 extends DeleteFilterTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends DeleteFilterTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */

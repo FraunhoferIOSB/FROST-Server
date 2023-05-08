@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2023-04-26-Table-Roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="HALT">
+            <tableExists tableName="USER_ROLES" />
+            <not>
+                <tableExists tableName="ROLES" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="ROLES">
+            <column name="ROLE_NAME" type="VARCHAR(15)">
+                <constraints primaryKey="true" primaryKeyName="PK_ROLES" />
+            </column>
+            <column name="DESCRIPTION" type="TEXT" />
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+
+        <sql>insert into "ROLES" ("ROLE_NAME","DESCRIPTION") select distinct "ROLE_NAME" rn, "ROLE_NAME" ds from "USER_ROLES"</sql>
+
+        <addForeignKeyConstraint
+            constraintName="FK_USER_ROLES_ROLE_NAME"
+            baseTableName="USER_ROLES" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+    <changeSet author="scf" id="2023-04-26-Table-Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="PROJECTS">
+            <column name="ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="PK_PROJECTS" />
+            </column>
+            <column name="NAME" type="VARCHAR(25)" />
+            <column name="DESCRIPTION" type="TEXT" />
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="THING_PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="THING_PROJECTS">
+            <column name="THING_ID" type="${idType-Thing}" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID"
+            constraintName="PK_THING_PROJECTS" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_THING_PROJECTS_THING_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_THING_PROJECTS_PROJECT_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="USER_PROJECT_ROLE">
+            <column name="ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="PK_USER_PROJECT_ROLE" />
+            </column>
+            <column name="USER_NAME" type="VARCHAR(25)" />
+            <column name="ROLE_NAME" type="VARCHAR(15)" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_USER_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_ROLE_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_PROJECT_ID"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+
+</databaseChangeLog>

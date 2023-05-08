@@ -35,7 +35,8 @@ import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests;
-import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests10;
+import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests11;
 import de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests;
 import de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests;
 import de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests;
@@ -52,8 +53,8 @@ import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
-import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests10;
+import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests10;
+import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests;
@@ -110,8 +111,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     Capability2Tests.Implementation11.class,
     AdditionalTests.Implementation10.class,
     AdditionalTests.Implementation11.class,
-    DeleteFilterTests.Implementation10.class,
-    DeleteFilterTests.Implementation11.class,
+    DeleteFilterTests10.class,
+    DeleteFilterTests11.class,
     JsonPatchTests.Implementation10.class,
     JsonPatchTests.Implementation11.class,
     ResultTypesTests.Implementation10.class,
@@ -140,13 +141,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     Capability7Tests.Implementation11.class,
     Capability8Tests.Implementation10.class,
     Capability8Tests.Implementation11.class,
-    BasicAuthTests.Implementation10.class,
-    BasicAuthTests.Implementation11.class,
+    BasicAuthTests10.class,
+    BasicAuthTests11.class,
     BasicAuthAnonReadTests.Implementation10.class,
     BasicAuthAnonReadTests.Implementation11.class,
     BasicAuthCryptPwTests.Implementation10.class,
     BasicAuthCryptPwTests.Implementation11.class,
-    FineGrainedAuthTests10.class,
     FineGrainedAuthTests11.class,
     KeyCloakTests.Implementation10.class,
     KeyCloakTests.Implementation11.class,

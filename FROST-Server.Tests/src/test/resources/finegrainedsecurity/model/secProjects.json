@@ -1,0 +1,74 @@
+{
+  "entries": [
+    {
+      "tableName": "PROJECTS",
+      "wrappers": [
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",
+          "checkInsert": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "vheckType": "ANY",
+                "roles": [
+                  "admin",
+                  "create"
+                ]
+              }
+            ]
+          },
+          "checkUpdate": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "vheckType": "ANY",
+                "roles": [
+                  "admin",
+                  "update"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+                "combineType": "AND",
+                "subChecks": [
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckQuery",
+                    "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and (Projects/UserProjectRoles/Role/rolename eq \u0027update\u0027 or Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                    "targetNavLink": "Projects",
+                    "query": "$filter\u003dUserProjectRoles/User/username eq principalName() and (UserProjectRoles/Role/rolename eq \u0027update\u0027 or UserProjectRoles/Role/rolename eq \u0027admin\u0027)",
+                    "emptyAllowed": true
+                  }
+                ]
+              }
+            ]
+          },
+          "checkDelete": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "vheckType": "ANY",
+                "roles": [
+                  "admin",
+                  "delete"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckQuery",
+                "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and (Projects/UserProjectRoles/Role/rolename eq \u0027delete\u0027 or Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

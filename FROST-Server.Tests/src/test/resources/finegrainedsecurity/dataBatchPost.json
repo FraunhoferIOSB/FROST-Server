@@ -1,0 +1,417 @@
+{
+    "POST to": "v1.1/$batch",
+    "Headers": "Content-Type: application/json",
+    "requests": [
+        {
+            "id": "roleObsCreater",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Roles",
+            "body": {
+                "rolename": "obscreate",
+                "description": "Can create Observations for the Projects the user is in."
+            }
+        },
+        {
+            "id": "project1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Projects",
+            "body": {
+                "name": "Project 1",
+                "description": "The first test project"
+            }
+        },
+        {
+            "id": "project2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Projects",
+            "body": {
+                "name": "Project 2",
+                "description": "The second test project"
+            }
+        },
+        {
+            "id": "AdminProject1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "AdminProject1",
+                "userpass": "AdminProject1",
+                "UserProjectRoles": [
+                    {"Project":{"@iot.id": "$project1"}, "Role":{"rolename": "admin"}}
+                ]
+            }
+        },
+        {
+            "id": "ObsCreaterProject1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "ObsCreaterProject1",
+                "userpass": "ObsCreaterProject1",
+                "UserProjectRoles": [
+                    {"Project":{"@iot.id": "$project1"}, "Role":{"rolename": "obscreate"}}
+                ]
+            }
+        },
+        {
+            "id": "AdminProject2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "AdminProject2",
+                "userpass": "AdminProject2",
+                "UserProjectRoles": [
+                    {"Project":{"@iot.id": "$project2"}, "Role":{"rolename": "admin"}}
+                ]
+            }
+        },
+        {
+            "id": "ObsCreaterProject2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "ObsCreaterProject2",
+                "userpass": "ObsCreaterProject2",
+                "UserProjectRoles": [
+                    {"Project":{"@iot.id": "$project2"}, "Role":{"rolename": "obscreate"}}
+                ]
+            }
+        },
+        {
+            "id": "location1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Locations",
+            "body": {
+                "name": "Location 1",
+                "description": "The location of the first test thing",
+                "encodingType": "application/geo+json",
+                "location": {"type": "Point", "coordinates": [ 8, 49 ]}
+            }
+        },
+        {
+            "id": "location2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Locations",
+            "body": {
+                "name": "Location 2",
+                "description": "The location of the second test thing",
+                "encodingType": "application/geo+json",
+                "location": {"type": "Point", "coordinates": [ 9, 50 ]}
+            }
+        },
+        {
+            "id": "location3",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Locations",
+            "body": {
+                "name": "Location 3",
+                "description": "The location of the third test thing",
+                "encodingType": "application/geo+json",
+                "location": {"type": "Point", "coordinates": [ 8, 50 ]}
+            }
+        },
+        {
+            "id": "location4",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Locations",
+            "body": {
+                "name": "Location 4",
+                "description": "The location of the fourth test thing",
+                "encodingType": "application/geo+json",
+                "location": {"type": "Point", "coordinates": [ 9, 49 ]}
+            }
+        },
+        {
+            "id": "thing1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Things",
+            "body": {
+                "name": "Thing 1",
+                "description": "The first test thing",
+                "Locations": [{"@iot.id": "$location1"}],
+                "Projects": [{"@iot.id": "$project1"}]
+            }
+        },
+        {
+            "id": "thing2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Things",
+            "body": {
+                "name": "Thing 2",
+                "description": "The second test thing",
+                "Locations": [{"@iot.id": "$location2"}],
+                "Projects": [{"@iot.id": "$project2"}]
+            }
+        },
+        {
+            "id": "thing3",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Things",
+            "body": {
+                "name": "Thing 3",
+                "description": "The third test thing",
+                "Locations": [{"@iot.id": "$location3"}],
+                "Projects": [{"@iot.id": "$project1"},{"@iot.id": "$project2"}]
+            }
+        },
+        {
+            "id": "thing4",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Things",
+            "body": {
+                "name": "Thing 4",
+                "description": "The fourth test thing",
+                "Locations": [{"@iot.id": "$location4"}]
+            }
+        },
+        {
+            "id": "sensor1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Sensors",
+            "body": {
+                "name": "DHT 22",
+                "description": "A cheap temperature/humidity sensor",
+                "encodingType": "PDF",
+                "metadata": "https://cdn.shopify.com/s/files/1/1509/1638/files/DHT_22_-_AM2302_Temperatur_und_Luftfeuchtigkeitssensor_Datenblatt.pdf"
+            }
+        },
+        {
+            "id": "op1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "ObservedProperties",
+            "body": {
+                "name": "Temperature",
+                "description": "How hot it is",
+                "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture"
+            }
+        },
+        {
+            "id": "op2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "ObservedProperties",
+            "body": {
+                "name": "Humidity",
+                "description": "How wet it is",
+                "definition": "http://ucom.org/humidity"
+            }
+        },
+        {
+            "id": "ds-1.1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Temperature of Thing 1",
+                "description": "How hot it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing1"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op1"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-1.2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Humidity of Thing 1",
+                "description": "How wet it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing1"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op2"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-2.1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Temperature of Thing 2",
+                "description": "How hot it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing2"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op1"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-2.2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Humidity of Thing 2",
+                "description": "How wet it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing2"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op2"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-3.1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Temperature of Thing 3",
+                "description": "How hot it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing3"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op1"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-3.2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Humidity of Thing 3",
+                "description": "How wet it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing3"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op2"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-4.1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Temperature of Thing 4",
+                "description": "How hot it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing4"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op1"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        },
+        {
+            "id": "ds-4.2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datastreams",
+            "body": {
+                "name": "Humidity of Thing 4",
+                "description": "How wet it is",
+                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                "unitOfMeasurement": {
+                    "name": "Centigrade",
+                    "symbol": "°C",
+                    "definition": "ucum:T"
+                },
+                "Thing": {"@iot.id": "$thing4"},
+                "Sensor": {"@iot.id": "$sensor1"},
+                "ObservedProperty": {"@iot.id": "$op2"},
+                "Observations": [
+                    {"result": 1, "phenomenonTime": "2023-01-01T12:00:00Z"},
+                    {"result": 2, "phenomenonTime": "2023-01-01T12:01:00Z"},
+                    {"result": 3, "phenomenonTime": "2023-01-01T12:03:00Z"},
+                    {"result": 4, "phenomenonTime": "2023-01-01T12:04:00Z"}
+                ]
+            }
+        }
+    ]
+}

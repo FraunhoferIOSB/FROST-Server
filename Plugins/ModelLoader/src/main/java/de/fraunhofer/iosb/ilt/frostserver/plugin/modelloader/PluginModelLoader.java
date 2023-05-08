@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.File;
 import java.io.IOException;
@@ -116,7 +117,12 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     private void loadModelFile(String fileName) {
-        final Path fullPath = Path.of(modelPath, fileName);
+        final Path fullPath;
+        if (StringHelper.isNullOrEmpty(modelPath)) {
+            fullPath = Path.of(fileName);
+        } else {
+            fullPath = Path.of(modelPath, fileName);
+        }
         LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
         String data;
         try {
