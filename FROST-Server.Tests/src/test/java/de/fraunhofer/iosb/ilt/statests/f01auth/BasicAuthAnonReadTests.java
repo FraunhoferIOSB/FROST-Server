@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import java.util.Properties;
@@ -33,22 +33,6 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  */
 public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
-
-    public static class Implementation10 extends BasicAuthAnonReadTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends BasicAuthAnonReadTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
 
     /**
      * The logger for this class.

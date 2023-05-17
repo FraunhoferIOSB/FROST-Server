@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,21 +27,17 @@ import com.github.fge.jsonpatch.AddOperation;
 import com.github.fge.jsonpatch.CopyOperation;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.MoveOperation;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -52,32 +49,16 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class JsonPatchTests extends AbstractTestClass {
 
-    public static class Implementation10 extends JsonPatchTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends JsonPatchTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPatchTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> OPROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> OPROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
 
     public JsonPatchTests(ServerVersion version) {
         super(version);
@@ -118,50 +99,50 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         {
-            Thing thing = new Thing("Thing 1", "The first thing.");
-            service.create(thing);
+            Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+            sSrvc.create(thing);
             THINGS.add(thing);
         }
         {
-            Location location = new Location("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
-            location.getThings().add(THINGS.get(0));
-            service.create(location);
+            Entity location = sMdl.newLocation("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
+            location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+            sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Sensor sensor1 = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-            service.create(sensor1);
+            Entity sensor1 = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+            sSrvc.create(sensor1);
             SENSORS.add(sensor1);
         }
         {
-            Sensor sensor2 = new Sensor("Sensor 2", "The second sensor", "text", "Some metadata.");
-            service.create(sensor2);
+            Entity sensor2 = sMdl.newSensor("Sensor 2", "The second sensor", "text", "Some metadata.");
+            sSrvc.create(sensor2);
             SENSORS.add(sensor2);
         }
         {
-            ObservedProperty obsProp1 = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-            service.create(obsProp1);
+            Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+            sSrvc.create(obsProp1);
             OPROPS.add(obsProp1);
         }
         {
-            ObservedProperty obsProp2 = new ObservedProperty("Humidity", new URI("http://ucom.org/humidity"), "The humidity of the thing.");
-            service.create(obsProp2);
+            Entity obsProp2 = sMdl.newObservedProperty("Humidity", "http://ucom.org/humidity", "The humidity of the thing.");
+            sSrvc.create(obsProp2);
             OPROPS.add(obsProp2);
         }
         {
-            Datastream datastream1 = new Datastream("Datastream Temp", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream1.setThing(THINGS.get(0).withOnlyId());
-            datastream1.setSensor(SENSORS.get(0).withOnlyId());
-            datastream1.setObservedProperty(OPROPS.get(0).withOnlyId());
-            service.create(datastream1);
+            Entity datastream1 = sMdl.newDatastream("Datastream Temp", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+            datastream1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+            datastream1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+            datastream1.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(0).withOnlyId());
+            sSrvc.create(datastream1);
             DATASTREAMS.add(datastream1);
         }
         {
-            Datastream datastream2 = new Datastream("Datastream LF", "The humidity of thing 1, sensor 2.", "someType", new UnitOfMeasurement("relative humidity", "%", "ucum:Humidity"));
-            datastream2.setThing(THINGS.get(0).withOnlyId());
-            datastream2.setSensor(SENSORS.get(1).withOnlyId());
-            datastream2.setObservedProperty(OPROPS.get(1).withOnlyId());
-            service.create(datastream2);
+            Entity datastream2 = sMdl.newDatastream("Datastream LF", "The humidity of thing 1, sensor 2.", "someType", new UnitOfMeasurement("relative humidity", "%", "ucum:Humidity"));
+            datastream2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+            datastream2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
+            datastream2.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(1).withOnlyId());
+            sSrvc.create(datastream2);
             DATASTREAMS.add(datastream2);
         }
     }
@@ -176,27 +157,28 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     @Test
     void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchThingTest");
-        Thing thingOnlyId = THINGS.get(0).withOnlyId();
+        Entity thingOnlyId = THINGS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
-        service.patch(thingOnlyId, operations);
-        Thing updatedThing = service.things().find(thingOnlyId.getId());
+        sSrvc.patch(thingOnlyId, operations);
+        Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getId());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("key1"), message);
+        assertEquals((Integer) 1, (Integer) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
         operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
-        service.patch(thingOnlyId, operations);
-        updatedThing = service.things().find(thingOnlyId.getId());
+        sSrvc.patch(thingOnlyId, operations);
+        updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getId());
 
+        final Map<String, Object> updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("keyCopy1"), message);
+        assertEquals((Integer) 1, (Integer) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
-        assertEquals(null, updatedThing.getProperties().get("key1"), message);
+        assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("key2"), message);
+        assertEquals((Integer) 1, (Integer) updatedProperties.get("key2"), message);
     }
 
     /**
@@ -209,27 +191,28 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     @Test
     void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchDatastreamTest");
-        Datastream dsOnlyId = DATASTREAMS.get(0).withOnlyId();
+        Entity dsOnlyId = DATASTREAMS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
-        service.patch(dsOnlyId, operations);
-        Datastream updatedDs = service.datastreams().find(dsOnlyId.getId());
+        sSrvc.patch(dsOnlyId, operations);
+        Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getId());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("key1"), message);
+        assertEquals((Integer) 1, (Integer) updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
         operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
-        service.patch(dsOnlyId, operations);
-        updatedDs = service.datastreams().find(dsOnlyId.getId());
+        sSrvc.patch(dsOnlyId, operations);
+        updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getId());
 
+        final Map<String, Object> updatedProperties = updatedDs.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("keyCopy1"), message);
+        assertEquals((Integer) 1, (Integer) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
-        assertEquals(null, updatedDs.getProperties().get("key1"), message);
+        assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals((Integer) 1, (Integer) updatedDs.getProperties().get("key2"), message);
+        assertEquals((Integer) 1, (Integer) updatedProperties.get("key2"), message);
     }
 
 }

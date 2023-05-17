@@ -62,28 +62,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author jab
- */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability8Tests extends AbstractTestClass {
-
-    public static class Implementation10 extends Capability8Tests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends Capability8Tests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
 
     /**
      * The logger for this class.
@@ -129,7 +109,8 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     /**
-     * This method is run after all the tests of this class is run and clean the database.
+     * This method is run after all the tests of this class is run and clean the
+     * database.
      */
     @AfterAll
     public static void tearDown() {
@@ -605,7 +586,8 @@ public abstract class Capability8Tests extends AbstractTestClass {
      * Returns half of all entity properties of the given Entity Type.
      *
      * @param entityType The entity type to get the entity properties for.
-     * @param even If true, return the even-half of the properties, otherwise the odd-half.
+     * @param even If true, return the even-half of the properties, otherwise
+     * the odd-half.
      * @return a list with the property names of half of the entity properties.
      */
     private List<String> getSelectedProperties(EntityType entityType, boolean even) {

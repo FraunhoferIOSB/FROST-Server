@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -89,23 +89,23 @@ public class Utils {
         }
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
+    public static List<Entity> getFromList(List<Entity> list, int... ids) {
+        List<Entity> result = new ArrayList<>();
         for (int i : ids) {
             result.add(list.get(i));
         }
         return result;
     }
 
-    public static <T extends Entity<T>> List<T> getFromListExcept(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>(list);
+    public static List<Entity> getFromListExcept(List<Entity> list, int... ids) {
+        List<Entity> result = new ArrayList<>(list);
         for (int i : ids) {
             result.remove(list.get(i));
         }
         return result;
     }
 
-    public static <T extends Entity<T>> List<T> removeFromList(List<T> sourceList, List<T> remaining, int... ids) {
+    public static List<Entity> removeFromList(List<Entity> sourceList, List<Entity> remaining, int... ids) {
         for (int i : ids) {
             remaining.remove(sourceList.get(i));
         }

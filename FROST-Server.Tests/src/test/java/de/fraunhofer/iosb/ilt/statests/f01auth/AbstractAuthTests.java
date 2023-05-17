@@ -17,19 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
@@ -58,26 +54,18 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuthTests.class);
 
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_CREATE = "Admin should be able to create.";
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_UPDATE = "Admin should be able to update.";
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_DELETE = "Admin should be able to delete.";
-    private static final String WRITE_SHOULD_BE_ABLE_TO_CREATE = "Write should be able to create.";
-    private static final String WRITE_SHOULD_BE_ABLE_TO_UPDATE = "Write should be able to update.";
-    private static final String WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE = "Write should NOT be able to delete.";
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_CREATE = "read should NOT be able to create.";
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_UPDATE = "read should NOT be able to update.";
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_DELETE = "read should NOT be able to delete.";
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_CREATE = "anon should NOT be able to create.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE = "anon should NOT be able to update.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_DELETE = "anon should NOT be able to delete.";
+    private static final String ADMIN = "admin";
+    private static final String WRITE = "write";
+    private static final String READ = "read";
+    private static final String ANONYMOUS = "anonymous";
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> O_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> O_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     private static SensorThingsService serviceAdmin;
     private static SensorThingsService serviceWrite;
@@ -103,7 +91,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
 
     protected SensorThingsService createService() {
         try {
-            return new SensorThingsService(new URL(serverSettings.getServiceUrl(version)));
+            return new SensorThingsService(sSrvc.getModelRegistry(), new URL(serverSettings.getServiceUrl(version)));
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -151,7 +139,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, serviceAdmin);
+        EntityUtils.deleteAll(serverSettings.hasTasking(version), serviceAdmin, sMdl, tMdl);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
@@ -188,69 +176,71 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test05AdminCreate() {
         LOGGER.info("  test05AdminCreate");
-        Thing thing = new Thing("AdminThing", "The Thing made by admin.");
+        Entity thing = sMdl.newThing("AdminThing", "The Thing made by admin.");
         THINGS.add(thing);
-        ath.createForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_CREATE, serviceAdmin.things(), THINGS);
+        ath.createForOk(ADMIN, serviceAdmin, thing, serviceAdmin.dao(sMdl.etThing), THINGS);
     }
 
     @Test
     void test06AdminRead() {
         LOGGER.info("  test06AdminRead");
-        EntityUtils.testFilterResults(serviceAdmin.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceAdmin.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
     void test07AdminUpdate() {
         LOGGER.info("  test07AdminUpdate");
-        Thing thing = THINGS.get(0);
-        thing.setDescription("Updated Thing made by admin.");
-        ath.updateForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_UPDATE, serviceAdmin.things(), THINGS);
+        Entity thing = THINGS.get(0);
+        thing.setProperty(EP_DESCRIPTION, "Updated Thing made by admin.");
+        ath.updateForOk(ADMIN, serviceAdmin, thing, serviceAdmin.dao(sMdl.etThing), THINGS);
     }
 
     @Test
     void test08AdminDelete() {
         LOGGER.info("  test08AdminDelete");
-        Thing thing = THINGS.get(0);
+        Entity thing = THINGS.get(0);
         THINGS.remove(0);
-        ath.deleteForOk(serviceAdmin, thing, ADMIN_SHOULD_BE_ABLE_TO_DELETE, serviceAdmin.things(), THINGS);
+        ath.deleteForOk(ADMIN, serviceAdmin, thing, serviceAdmin.dao(sMdl.etThing), THINGS);
     }
 
     @Test
     void test09WriteCreate() {
         LOGGER.info("  test09WriteCreate");
-        Thing thing = new Thing("WriteThing", "The Thing made by write.");
+        Entity thing = sMdl.newThing("WriteThing", "The Thing made by write.");
         THINGS.add(thing);
-        ath.createForOk(serviceWrite, thing, WRITE_SHOULD_BE_ABLE_TO_CREATE, serviceWrite.things(), THINGS);
+        ath.createForOk(WRITE, serviceWrite, thing, serviceWrite.dao(sMdl.etThing), THINGS);
     }
 
     @Test
     void test10WriteRead() {
         LOGGER.info("  test10WriteRead");
-        EntityUtils.testFilterResults(serviceWrite.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceWrite.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
     void test11WriteUpdate() {
         LOGGER.info("  test11WriteUpdate");
-        Thing thing = THINGS.get(0);
-        thing.setDescription("Updated Thing made by write.");
-        ath.updateForOk(serviceWrite, thing, WRITE_SHOULD_BE_ABLE_TO_UPDATE, serviceWrite.things(), THINGS);
+        Entity thing = THINGS.get(0);
+        thing.setProperty(EP_DESCRIPTION, "Updated Thing made by write.");
+        ath.updateForOk(WRITE, serviceWrite, thing, serviceWrite.dao(sMdl.etThing), THINGS);
     }
 
     @Test
     void test12WriteDelete() {
         LOGGER.info("  test12WriteDelete");
-        Thing thing = THINGS.get(0);
-        ath.deleteForFail(serviceWrite, thing, WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE,
-                serviceWrite.things(), THINGS, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        Entity thing = THINGS.get(0);
+        ath.deleteForFail(
+                WRITE, serviceWrite, thing,
+                serviceWrite.dao(sMdl.etThing), THINGS, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test13ReadCreate() {
         LOGGER.info("  test13ReadCreate");
-        Thing thing = new Thing("ReadThing", "The Thing made by read.");
-        ath.createForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_CREATE,
-                serviceRead.things(), THINGS,
+        Entity thing = sMdl.newThing("ReadThing", "The Thing made by read.");
+        ath.createForFail(
+                READ, serviceRead, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
@@ -258,7 +248,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     void test14ReadRead() {
         LOGGER.info("  test14ReadRead");
         // Make sure there is something to read.
-        Thing thing = new Thing("WriteThing", "The Thing made by write.");
+        Entity thing = sMdl.newThing("WriteThing", "The Thing made by write.");
         THINGS.add(thing);
         try {
             serviceWrite.create(thing);
@@ -266,34 +256,35 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error("Failed to create test entity.");
         }
 
-        EntityUtils.testFilterResults(serviceRead.things(), "", THINGS);
+        EntityUtils.testFilterResults(serviceRead.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
     void test15ReadUpdate() {
         LOGGER.info("  test15ReadUpdate");
-        Thing thing = THINGS.get(0).withOnlyId();
-        thing.setDescription("Read Updated Thing made by Admin.");
-        ath.updateForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_UPDATE,
-                serviceRead.things(), THINGS,
+        Entity thing = THINGS.get(0).withOnlyId();
+        thing.setProperty(EP_DESCRIPTION, "Read Updated Thing made by Admin.");
+        ath.updateForFail(READ, serviceRead, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test16ReadDelete() {
         LOGGER.info("  test16ReadDelete");
-        Thing thing = THINGS.get(0);
-        ath.deleteForFail(serviceRead, thing, READ_SHOULD_NOT_BE_ABLE_TO_DELETE,
-                serviceRead.things(), THINGS,
+        Entity thing = THINGS.get(0);
+        ath.deleteForFail(READ, serviceRead, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test17AnonCreate() {
         LOGGER.info("  test17AnonCreate");
-        Thing thing = new Thing("AnonThing", "The Thing made by anonymous.");
-        ath.createForFail(serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_CREATE,
-                serviceRead.things(), THINGS,
+        Entity thing = sMdl.newThing("AnonThing", "The Thing made by anonymous.");
+        ath.createForFail(
+                ANONYMOUS, serviceAnon, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
@@ -301,10 +292,10 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
-            EntityUtils.testFilterResults(serviceAnon.things(), "", THINGS);
+            EntityUtils.testFilterResults(serviceAnon.dao(sMdl.etThing), "", THINGS);
         } else {
             try {
-                serviceAnon.things().query().list();
+                serviceAnon.dao(sMdl.etThing).query().list();
                 fail(ANON_SHOULD_NOT_BE_ABLE_TO_READ);
             } catch (ServiceFailureException ex) {
                 ath.expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
@@ -315,20 +306,19 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test19AnonUpdate() {
         LOGGER.info("  test19AnonUpdate");
-        Thing thing = THINGS.get(0).withOnlyId();
-        thing.setDescription("Anon Updated Thing made by Admin.");
-        ath.updateForFail(
-                serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE,
-                serviceRead.things(), THINGS,
+        Entity thing = THINGS.get(0).withOnlyId();
+        thing.setProperty(EP_DESCRIPTION, "Anon Updated Thing made by Admin.");
+        ath.updateForFail(ANONYMOUS, serviceAnon, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test20AnonDelete() {
         LOGGER.info("  test20AnonDelete");
-        Thing thing = THINGS.get(0);
-        ath.deleteForFail(serviceAnon, thing, ANON_SHOULD_NOT_BE_ABLE_TO_DELETE,
-                serviceRead.things(), THINGS,
+        Entity thing = THINGS.get(0);
+        ath.deleteForFail(ANONYMOUS, serviceAnon, thing,
+                serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 

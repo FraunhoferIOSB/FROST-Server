@@ -91,7 +91,7 @@
         <sonar.language>java</sonar.language>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
-        <version.FROST-Client>0.44</version.FROST-Client>
+        <version.FROST-Client-Dynamic>2.0</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
         <version.codegen>0.6.8-uuid</version.codegen>
         <version.commons-csv>1.10.0</version.commons-csv>
@@ -201,8 +201,8 @@
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iosb.ilt</groupId>
-                <artifactId>FROST-Client</artifactId>
-                <version>${version.FROST-Client}</version>
+                <artifactId>FROST-Client-Dynamic</artifactId>
+                <version>${version.FROST-Client-Dynamic}</version>
             </dependency>
             <dependency>
                 <groupId>de.grundid.opendatalab</groupId>
@@ -555,7 +555,7 @@
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>version.maven.plugin.gpg</artifactId>
+                        <artifactId>maven-gpg-plugin</artifactId>
                         <version>${version.maven.plugin.gpg}</version>
                         <executions>
                             <execution>

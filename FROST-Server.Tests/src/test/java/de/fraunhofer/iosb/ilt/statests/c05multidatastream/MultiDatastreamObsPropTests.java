@@ -17,29 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11.EP_MULTIOBSERVATIONDATATYPES;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,34 +54,18 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
 
-    public static class Implementation10 extends MultiDatastreamObsPropTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends MultiDatastreamObsPropTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiDatastreamObsPropTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> OBSERVED_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<MultiDatastream> MULTIDATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> OBSERVED_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> MULTIDATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     public MultiDatastreamObsPropTests(ServerVersion version) {
         super(version);
@@ -138,57 +116,57 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
      * @throws URISyntaxException
      */
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        service.create(location);
+        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Thing thing = new Thing("Thing 1", "The first thing.");
-        thing.getLocations().add(location.withOnlyId());
-        service.create(thing);
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = new Thing("Thing 2", "The second thing.");
-        thing.getLocations().add(location.withOnlyId());
-        service.create(thing);
+        thing = sMdl.newThing("Thing 2", "The second thing.");
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        service.create(sensor);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        sensor = new Sensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
-        service.create(sensor);
+        sensor = sMdl.newSensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        ObservedProperty obsProp = new ObservedProperty("ObservedProperty 1", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-        service.create(obsProp);
+        Entity obsProp = sMdl.newObservedProperty("ObservedProperty 1", "http://ucom.org/temperature", "The temperature of the thing.");
+        sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        obsProp = new ObservedProperty("ObservedProperty 2", new URI("http://ucom.org/humidity"), "The humidity of the thing.");
-        service.create(obsProp);
+        obsProp = sMdl.newObservedProperty("ObservedProperty 2", "http://ucom.org/humidity", "The humidity of the thing.");
+        sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        obsProp = new ObservedProperty("ObservedProperty 3", new URI("http://ucom.org/height"), "The height of the thing.");
-        service.create(obsProp);
+        obsProp = sMdl.newObservedProperty("ObservedProperty 3", "http://ucom.org/height", "The height of the thing.");
+        sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        obsProp = new ObservedProperty("ObservedProperty 4", new URI("http://ucom.org/depth"), "The depth of the thing.");
-        service.create(obsProp);
+        obsProp = sMdl.newObservedProperty("ObservedProperty 4", "http://ucom.org/depth", "The depth of the thing.");
+        sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setThing(THINGS.get(0).withOnlyId());
-        datastream.setSensor(SENSORS.get(0).withOnlyId());
-        datastream.setObservedProperty(OBSERVED_PROPS.get(0).withOnlyId());
-        service.create(datastream);
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        sSrvc.create(datastream);
 
-        datastream = new Datastream("Datastream 2", "The temperature of thing 2, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setThing(THINGS.get(1).withOnlyId());
-        datastream.setSensor(SENSORS.get(1).withOnlyId());
-        datastream.setObservedProperty(OBSERVED_PROPS.get(0).withOnlyId());
-        service.create(datastream);
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        sSrvc.create(datastream);
 
     }
 
@@ -196,8 +174,8 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         assertTrue(result.testOk, test + " " + result.message);
     }
 
-    private void checkObservedPropertiesFor(MultiDatastream md, ObservedProperty... expectedObservedProps) throws ServiceFailureException {
-        ObservedProperty[] fetchedObservedProps2 = md.observedProperties().query().list().toArray(new ObservedProperty[0]);
+    private void checkObservedPropertiesFor(Entity md, Entity... expectedObservedProps) throws ServiceFailureException {
+        Entity[] fetchedObservedProps2 = md.query(mMdl.npMultidatastreamObservedproperties).list().toList().toArray(Entity[]::new);
         String message = "Incorrect Observed Properties returned.";
         assertArrayEquals(expectedObservedProps, fetchedObservedProps2, message);
     }
@@ -206,98 +184,75 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test01CreateMultiDatastreams() throws ServiceFailureException {
         LOGGER.info("  test01MultiDatastream");
         // Create a MultiDatastream with one ObservedProperty.
-        MultiDatastream md1 = new MultiDatastream();
-        md1.setName("MultiDatastream 1");
-        md1.setDescription("The first test MultiDatastream.");
-        md1.addUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        Entity md1 = mMdl.newMultiDatastream("MultiDatastream 1", "The first test MultiDatastream.", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
         List<String> dataTypes1 = new ArrayList<>();
         dataTypes1.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        md1.setMultiObservationDataTypes(dataTypes1);
+        md1.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes1);
 
-        md1.setThing(THINGS.get(0).withOnlyId());
-        md1.setSensor(SENSORS.get(0).withOnlyId());
+        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
 
-        List<ObservedProperty> observedProperties = new ArrayList<>();
-        observedProperties.add(OBSERVED_PROPS.get(0).withOnlyId());
-        md1.setObservedProperties(observedProperties);
-
-        service.create(md1);
+        sSrvc.create(md1);
         MULTIDATASTREAMS.add(md1);
 
         // Create a MultiDatastream with two different ObservedProperties.
-        MultiDatastream md2 = new MultiDatastream();
-        md2.setName("MultiDatastream 2");
-        md2.setDescription("The second test MultiDatastream.");
-        md2.addUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        md2.addUnitOfMeasurement(new UnitOfMeasurement("percent", "%", "ucum:%"));
-        md2.addUnitOfMeasurement(new UnitOfMeasurement("Metre", "m", "ucum:m"));
-        md2.addUnitOfMeasurement(new UnitOfMeasurement("Metre", "m", "ucum:m"));
+        Entity md2 = mMdl.newMultiDatastream("MultiDatastream 2", "The second test MultiDatastream.",
+                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
+                new UnitOfMeasurement("percent", "%", "ucum:%"),
+                new UnitOfMeasurement("Metre", "m", "ucum:m"),
+                new UnitOfMeasurement("Metre", "m", "ucum:m"));
 
         List<String> dataTypes2 = new ArrayList<>();
         dataTypes2.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         dataTypes2.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         dataTypes2.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         dataTypes2.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        md2.setMultiObservationDataTypes(dataTypes2);
+        md2.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes2);
 
-        md2.setThing(THINGS.get(0).withOnlyId());
-        md2.setSensor(SENSORS.get(0).withOnlyId());
+        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
 
-        List<ObservedProperty> observedProperties2 = new ArrayList<>();
-        observedProperties2.add(OBSERVED_PROPS.get(0).withOnlyId());
-        observedProperties2.add(OBSERVED_PROPS.get(1).withOnlyId());
-        observedProperties2.add(OBSERVED_PROPS.get(2).withOnlyId());
-        observedProperties2.add(OBSERVED_PROPS.get(3).withOnlyId());
-        md2.setObservedProperties(observedProperties2);
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(2).withOnlyId());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(3).withOnlyId());
 
-        service.create(md2);
+        sSrvc.create(md2);
         MULTIDATASTREAMS.add(md2);
 
         // Create a MultiDatastream with two different ObservedProperties, in the opposite order.
-        MultiDatastream md3 = new MultiDatastream();
-        md3.setName("MultiDatastream 3");
-        md3.setDescription("The third test MultiDatastream.");
-        md3.addUnitOfMeasurement(new UnitOfMeasurement("percent", "%", "ucum:%"));
-        md3.addUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        Entity md3 = mMdl.newMultiDatastream("MultiDatastream 3", "The third test MultiDatastream.",
+                new UnitOfMeasurement("percent", "%", "ucum:%"),
+                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
         List<String> dataTypes3 = new ArrayList<>();
         dataTypes3.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         dataTypes3.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        md3.setMultiObservationDataTypes(dataTypes3);
+        md3.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes3);
 
-        md3.setThing(THINGS.get(0).withOnlyId());
-        md3.setSensor(SENSORS.get(0).withOnlyId());
+        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
 
-        List<ObservedProperty> observedProperties3 = new ArrayList<>();
-        observedProperties3.add(OBSERVED_PROPS.get(1).withOnlyId());
-        observedProperties3.add(OBSERVED_PROPS.get(0).withOnlyId());
-        md3.setObservedProperties(observedProperties3);
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
 
-        service.create(md3);
+        sSrvc.create(md3);
         MULTIDATASTREAMS.add(md3);
 
         // Create a MultiDatastream with two of the same ObservedProperties.
-        MultiDatastream md4 = new MultiDatastream();
-        md4.setName("MultiDatastream 4");
-        md4.setDescription("The fourth test MultiDatastream.");
-        md4.addUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        md4.addUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        Entity md4 = mMdl.newMultiDatastream("MultiDatastream 4", "The fourth test MultiDatastream.",
+                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
+                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
-        List<String> dataTypes4 = new ArrayList<>();
-        dataTypes4.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        dataTypes4.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        md4.setMultiObservationDataTypes(dataTypes4);
+        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
+        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
 
-        md4.setThing(THINGS.get(0).withOnlyId());
-        md4.setSensor(SENSORS.get(1).withOnlyId());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
 
-        List<ObservedProperty> observedProperties4 = new ArrayList<>();
-        observedProperties4.add(OBSERVED_PROPS.get(0).withOnlyId());
-        observedProperties4.add(OBSERVED_PROPS.get(0).withOnlyId());
-        md4.setObservedProperties(observedProperties4);
-
-        service.create(md4);
+        sSrvc.create(md4);
         MULTIDATASTREAMS.add(md4);
         assertEquals(4, MULTIDATASTREAMS.size());
     }
@@ -306,12 +261,12 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test02MultiDatastreamObservedProperties1() throws ServiceFailureException {
         LOGGER.info("  test07MultiDatastreamObservedProperties1");
         // Check if all Datastreams and MultiDatastreams are linked to ObservedProperty 1.
-        ObservedProperty fetchedObservedProp = service.observedProperties().find(OBSERVED_PROPS.get(0).getId());
-        EntityList<Datastream> fetchedDatastreams = fetchedObservedProp.datastreams().query().list();
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(0).getId());
+        EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 1.",
                 EntityUtils.resultContains(fetchedDatastreams, getFromList(DATASTREAMS, 0, 1)));
-        EntityList<MultiDatastream> fetchedMultiDatastreams = fetchedObservedProp.multiDatastreams().query().list();
+        EntitySet fetchedMultiDatastreams = fetchedObservedProp.query(mMdl.npObspropMultidatastreams).list();
         checkResult(
                 "Check MultiDatastreams linked to ObservedProperty 1.",
                 EntityUtils.resultContains(fetchedMultiDatastreams, new ArrayList<>(MULTIDATASTREAMS)));
@@ -321,12 +276,12 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test03MultiDatastreamObservedProperties2() throws ServiceFailureException {
         LOGGER.info("  test08MultiDatastreamObservedProperties2");
         // Check if MultiDatastreams 2 and 3 are linked to ObservedProperty 2.
-        ObservedProperty fetchedObservedProp = service.observedProperties().find(OBSERVED_PROPS.get(1).getId());
-        EntityList<Datastream> fetchedDatastreams = fetchedObservedProp.datastreams().query().list();
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(1).getId());
+        EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 2.",
                 EntityUtils.resultContains(fetchedDatastreams, new ArrayList<>()));
-        EntityList<MultiDatastream> fetchedMultiDatastreams = fetchedObservedProp.multiDatastreams().query().list();
+        EntitySet fetchedMultiDatastreams = fetchedObservedProp.query(mMdl.npObspropMultidatastreams).list();
         checkResult(
                 "Check MultiDatastreams linked to ObservedProperty 2.",
                 EntityUtils.resultContains(fetchedMultiDatastreams, getFromList(MULTIDATASTREAMS, 1, 2)));
@@ -346,9 +301,9 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test05UnLinkObsProp1() throws ServiceFailureException {
         LOGGER.info("  test12IncorrectObservation");
         // Try to delete the first ObservedProperty of MD 2.
-        MultiDatastream md2 = MULTIDATASTREAMS.get(1);
-        ObservedProperty op2 = OBSERVED_PROPS.get(1);
-        ObservedProperty op3 = OBSERVED_PROPS.get(2);
+        Entity md2 = MULTIDATASTREAMS.get(1);
+        Entity op2 = OBSERVED_PROPS.get(1);
+        Entity op3 = OBSERVED_PROPS.get(2);
         String md2Id = md2.getId().getUrl();
         String op2Id = op2.getId().getUrl();
         String op3Id = op3.getId().getUrl();

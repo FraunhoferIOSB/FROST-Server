@@ -17,25 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULT;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
-import de.fraunhofer.iosb.ilt.sta.jackson.ObjectMapperFactory;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,30 +50,14 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ResultTypesTests extends AbstractTestClass {
 
-    public static class Implementation10 extends ResultTypesTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends ResultTypesTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTypesTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     public ResultTypesTests(ServerVersion version) {
         super(version);
@@ -112,19 +92,19 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Thing thing = new Thing("Thing 1", "The first thing.");
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
-        Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        thing.getLocations().add(location);
-        service.create(thing);
+        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        thing.getProperty(sMdl.npThingLocations).add(location);
+        sSrvc.create(thing);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setThing(thing);
-        datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamThing, thing);
+        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
     }
 
@@ -136,22 +116,22 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testBooleanResult() throws ServiceFailureException {
         LOGGER.info("  testBooleanResult");
-        ObservationDao doa = service.observations();
-        Observation b1 = new Observation(Boolean.TRUE, DATASTREAMS.get(0));
-        doa.create(b1);
+        Entity b1 = sMdl.newObservation(Boolean.TRUE, DATASTREAMS.get(0));
+        sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
-        Observation b2 = new Observation(Boolean.FALSE, DATASTREAMS.get(0));
-        doa.create(b2);
+        Entity b2 = sMdl.newObservation(Boolean.FALSE, DATASTREAMS.get(0));
+        sSrvc.create(b2);
         OBSERVATIONS.add(b2);
 
-        Observation found;
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity found;
         found = doa.find(b1.getId());
         String message = "Expected result to be a Boolean.";
-        assertEquals(b1.getResult(), found.getResult(), message);
+        assertEquals(b1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
         found = doa.find(b2.getId());
         message = "Expected result to be a Boolean.";
-        assertEquals(b2.getResult(), found.getResult(), message);
+        assertEquals(b2.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -162,15 +142,15 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testStringResult() throws ServiceFailureException {
         LOGGER.info("  testStringResult");
-        ObservationDao doa = service.observations();
-        Observation b1 = new Observation("fourty two", DATASTREAMS.get(0));
-        doa.create(b1);
+        Entity b1 = sMdl.newObservation("fourty two", DATASTREAMS.get(0));
+        sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
-        Observation found;
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity found;
         found = doa.find(b1.getId());
         String message = "Expected result to be a String.";
-        assertEquals(b1.getResult(), found.getResult(), message);
+        assertEquals(b1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -181,23 +161,22 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testNumericResult() throws ServiceFailureException {
         LOGGER.info("  testNumericResult");
-        ObservationDao doa = service.observations();
-        Observation b1 = new Observation(1, DATASTREAMS.get(0));
-        doa.create(b1);
+        Entity b1 = sMdl.newObservation(1, DATASTREAMS.get(0));
+        sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
-        Observation found;
-        found = doa.find(b1.getId());
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity found1 = doa.find(b1.getId());
         String message = "Expected result to be a Number.";
-        assertEquals(b1.getResult(), found.getResult(), message);
+        assertEquals(b1.getProperty(EP_RESULT), found1.getProperty(EP_RESULT), message);
 
-        Observation b2 = new Observation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
+        Entity b2 = sMdl.newObservation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
         doa.create(b2);
         OBSERVATIONS.add(b2);
 
-        found = doa.find(b2.getId());
+        Entity found2 = doa.find(b2.getId());
         message = "Expected result to be a Number.";
-        assertEquals(b2.getResult(), found.getResult(), message);
+        assertEquals(b2.getProperty(EP_RESULT), found2.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -208,19 +187,18 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testObjectResult() throws ServiceFailureException {
         LOGGER.info("  testObjectResult");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         Map<String, Object> result = new HashMap<>();
         result.put("number", BigDecimal.valueOf(1.23));
         result.put("string", "One comma twentythree");
         result.put("boolean", Boolean.TRUE);
-        Observation o1 = new Observation(result, DATASTREAMS.get(0));
+        Entity o1 = sMdl.newObservation(result, DATASTREAMS.get(0));
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Observation found;
-        found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getId());
         String message = "Expected result Maps are not equal.";
-        assertEquals(o1.getResult(), found.getResult(), message);
+        assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -231,19 +209,18 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testArrayResult() throws ServiceFailureException {
         LOGGER.info("  testArrayResult");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         List<Object> result = new ArrayList<>();
         result.add(BigDecimal.valueOf(1.23));
         result.add("One comma twentythree");
         result.add(Boolean.TRUE);
-        Observation o1 = new Observation(result, DATASTREAMS.get(0));
+        Entity o1 = sMdl.newObservation(result, DATASTREAMS.get(0));
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Observation found;
-        found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getId());
         String message = "Expected result Arrays are not equal.";
-        assertEquals(o1.getResult(), found.getResult(), message);
+        assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -254,27 +231,27 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testNullResult() throws ServiceFailureException {
         LOGGER.info("  testNullResult");
-        ObservationDao doa = service.observations();
-        Observation o1 = new Observation(null, DATASTREAMS.get(0));
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity o1 = sMdl.newObservation(null, DATASTREAMS.get(0));
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Observation found;
+        Entity found;
         found = doa.find(o1.getId());
         String message = "Expected result to be Null.";
-        assertEquals(o1.getResult(), found.getResult(), message);
+        assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
 
-        Observation o2 = new Observation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
+        Entity o2 = sMdl.newObservation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
         doa.create(o2);
         OBSERVATIONS.add(o2);
 
         o2 = o2.withOnlyId();
-        o2.setResult(null);
+        o2.setProperty(EP_RESULT, null);
         doa.update(o2);
 
         found = doa.find(o2.getId());
         message = "Expected result to be Null.";
-        assertEquals(o2.getResult(), found.getResult(), message);
+        assertEquals(o2.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
 
     /**
@@ -285,23 +262,23 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testResultQualityObject() throws ServiceFailureException, IOException {
         LOGGER.info("  testResultQualityObject");
-        ObservationDao doa = service.observations();
-        Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
-        ObjectMapper mapper = ObjectMapperFactory.get();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         String resultQualityString = ""
                 + "{\"DQ_Status\":{"
                 + "  \"code\": \"http://id.eaufrance.fr/nsa/446#2\","
                 + "  \"label\": \"Niveau 1\",\n"
                 + "  \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\""
                 + "}}";
-        o1.setResultQuality(mapper.readTree(resultQualityString));
+        o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Observation found;
+        Entity found;
         found = doa.find(o1.getId());
         String message = "resultQuality not stored correctly.";
-        assertEquals(o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()), message);
+        assertEquals(o1.getProperty(EP_RESULTQUALITY), mapper.valueToTree(found.getProperty(EP_RESULTQUALITY)), message);
     }
 
     /**
@@ -312,9 +289,9 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testResultQualityArray() throws ServiceFailureException, IOException {
         LOGGER.info("  testResultQualityArray");
-        ObservationDao doa = service.observations();
-        Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
-        ObjectMapper mapper = ObjectMapperFactory.get();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         String resultQualityString = "[\n"
                 + "    {\n"
                 + "        \"nameOfMeasure\": \"DQ_Status\",\n"
@@ -334,14 +311,13 @@ public abstract class ResultTypesTests extends AbstractTestClass {
                 + "    }\n"
                 + "\n"
                 + "]";
-        o1.setResultQuality(mapper.readTree(resultQualityString));
+        o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Observation found;
-        found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getId());
         String message = "resultQuality not stored correctly.";
-        assertEquals(o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()), message);
+        assertEquals(o1.getProperty(EP_RESULTQUALITY), mapper.valueToTree(found.getProperty(EP_RESULTQUALITY)), message);
     }
 
 }

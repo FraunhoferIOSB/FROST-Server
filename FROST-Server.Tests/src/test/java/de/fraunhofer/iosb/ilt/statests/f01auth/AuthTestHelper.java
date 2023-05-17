@@ -19,11 +19,11 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
@@ -78,17 +78,19 @@ public class AuthTestHelper {
         fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
     }
 
-    public <T extends Entity<T>> void createForOk(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected) {
+    public void createForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
         try {
             service.create(entity);
         } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to create " + entity.getEntityType();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public <T extends Entity<T>> void createForFail(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected, int... expectedCodes) {
+    public void createForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
+        String failMessage = "User " + user + " should NOT be able to create " + entity.getEntityType();
         try {
             service.create(entity);
             fail(failMessage);
@@ -98,17 +100,19 @@ public class AuthTestHelper {
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public <T extends Entity<T>> void updateForOk(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected) {
+    public void updateForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
         try {
             service.update(entity);
         } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to update " + entity.getEntityType();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public <T extends Entity<T>> void updateForFail(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected, int... expectedCodes) {
+    public void updateForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
+        String failMessage = "User " + user + " should NOT be able to update " + entity.getEntityType();
         try {
             service.update(entity);
             fail(failMessage);
@@ -118,17 +122,19 @@ public class AuthTestHelper {
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public <T extends Entity<T>> void deleteForOk(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected) {
+    public void deleteForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
         try {
             service.delete(entity);
         } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to delete " + entity.getEntityType();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public <T extends Entity<T>> void deleteForFail(SensorThingsService service, T entity, String failMessage, BaseDao<T> validateDoa, List<T> expected, int... expectedCodes) {
+    public void deleteForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
+        String failMessage = "User " + user + " should NOT be able to delete " + entity.getEntityType();
         try {
             service.delete(entity);
             fail(failMessage);

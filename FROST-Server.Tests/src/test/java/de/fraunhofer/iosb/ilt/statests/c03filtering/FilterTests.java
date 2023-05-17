@@ -17,27 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
-import de.fraunhofer.iosb.ilt.sta.dao.ObservedPropertyDao;
-import de.fraunhofer.iosb.ilt.sta.dao.ThingDao;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -46,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
@@ -54,7 +52,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.threeten.extra.Interval;
 
 /**
  * Some odd tests.
@@ -63,33 +60,17 @@ import org.threeten.extra.Interval;
  */
 public abstract class FilterTests extends AbstractTestClass {
 
-    public static class Implementation10 extends FilterTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends FilterTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> O_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> O_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     public FilterTests(ServerVersion version) {
         super(version);
@@ -123,81 +104,81 @@ public abstract class FilterTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Thing thing = new Thing("Thing 1", "The first thing.");
-        service.create(thing);
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = new Thing("Thing 2", "The second thing.");
-        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 2).build());
-        service.create(thing);
+        thing = sMdl.newThing("Thing 2", "The second thing.")
+                .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("field", 2).build());
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = new Thing("Thing 3", "The third thing.");
-        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 3).build());
-        service.create(thing);
+        thing = sMdl.newThing("Thing 3", "The third thing.")
+                .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("field", 3).build());
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = new Thing("Thing 4", "The fourth thing.");
-        service.create(thing);
+        thing = sMdl.newThing("Thing 4", "The fourth thing.");
+        sSrvc.create(thing);
         THINGS.add(thing);
 
         // Locations 0
-        Location location = new Location("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        location.getThings().add(THINGS.get(0));
-        service.create(location);
+        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 1
-        location = new Location("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
-        location.getThings().add(THINGS.get(0));
-        service.create(location);
+        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 2
-        location = new Location("Location 2", "Location of Thing 2.", "application/vnd.geo+json", new Point(8, 53));
-        location.getThings().add(THINGS.get(1));
-        service.create(location);
+        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/vnd.geo+json", new Point(8, 53));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(1));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 3
-        location = new Location("Location 3", "Location of Thing 3.", "application/vnd.geo+json", new Point(8, 54));
-        location.getThings().add(THINGS.get(2));
-        service.create(location);
+        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/vnd.geo+json", new Point(8, 54));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(2));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 4
-        location = new Location("Location 4", "Location of Thing 4.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 4", "Location of Thing 4.", "application/vnd.geo+json",
                 new Polygon(
                         new LngLatAlt(8, 53),
                         new LngLatAlt(7, 52),
                         new LngLatAlt(7, 53),
                         new LngLatAlt(8, 53)));
-        location.getThings().add(THINGS.get(3));
-        service.create(location);
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(3));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 5
-        location = new Location("Location 5", "A line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 5", "A line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(5, 53)));
-        service.create(location);
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 6
-        location = new Location("Location 6", "A longer line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 6", "A longer line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(6, 53)));
-        service.create(location);
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 7
-        location = new Location("Location 7", "The longest line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 7", "The longest line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(4, 52),
                         new LngLatAlt(8, 52)));
-        service.create(location);
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
         createSensor("Sensor 0", "The sensor with idx 0.", "text", "Some metadata.");
@@ -205,10 +186,10 @@ public abstract class FilterTests extends AbstractTestClass {
         createSensor("Sensor 2", "The sensor with idx 0.", "text", "Some metadata.");
         createSensor("Sensor 3", "The sensor with idx 0.", "text", "Some metadata.");
 
-        createObservedProperty("ObservedProperty 0", new URI("http://ucom.org/temperature"), "ObservedProperty with index 0.");
-        createObservedProperty("ObservedProperty 1", new URI("http://ucom.org/humidity"), "ObservedProperty with index 1.");
-        createObservedProperty("ObservedProperty 2", new URI("http://ucom.org/pressure"), "ObservedProperty with index 2.");
-        createObservedProperty("ObservedProperty 3", new URI("http://ucom.org/turbidity"), "ObservedProperty with index 3.");
+        createObservedProperty("ObservedProperty 0", "http://ucom.org/temperature", "ObservedProperty with index 0.");
+        createObservedProperty("ObservedProperty 1", "http://ucom.org/humidity", "ObservedProperty with index 1.");
+        createObservedProperty("ObservedProperty 2", "http://ucom.org/pressure", "ObservedProperty with index 2.");
+        createObservedProperty("ObservedProperty 3", "http://ucom.org/turbidity", "ObservedProperty with index 3.");
 
         UnitOfMeasurement uomTemp = new UnitOfMeasurement("degree celcius", "°C", "ucum:T");
 
@@ -220,7 +201,7 @@ public abstract class FilterTests extends AbstractTestClass {
         createDatastream("Datastream 5", "Datastream 3 of thing 1, sensor 3.", "someType", uomTemp, THINGS.get(1), SENSORS.get(3), O_PROPS.get(3));
 
         ZonedDateTime startTime = ZonedDateTime.parse("2016-01-01T01:00:00.000Z");
-        Interval startInterval = Interval.of(Instant.parse("2016-01-01T01:00:00.000Z"), Instant.parse("2016-01-01T02:00:00.000Z"));
+        TimeInterval startInterval = TimeInterval.create(Instant.parse("2016-01-01T01:00:00.000Z"), Instant.parse("2016-01-01T02:00:00.000Z"));
 
         createObservationSet(DATASTREAMS.get(0), 0, startTime, startInterval, 6);
         createObservationSet(DATASTREAMS.get(1), 3, startTime, startInterval, 6);
@@ -231,68 +212,67 @@ public abstract class FilterTests extends AbstractTestClass {
 
     }
 
-    private static Sensor createSensor(String name, String desc, String type, String metadata) throws ServiceFailureException {
+    private static Entity createSensor(String name, String desc, String type, String metadata) throws ServiceFailureException {
         int idx = SENSORS.size();
         Map<String, Object> properties = new HashMap<>();
         properties.put("idx", idx);
 
-        Sensor sensor = new Sensor(name, desc, type, metadata);
-        sensor.setProperties(properties);
-        service.create(sensor);
+        Entity sensor = sMdl.newSensor(name, desc, type, metadata)
+                .setProperty(EP_PROPERTIES, properties);
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
         return sensor;
     }
 
-    private static Datastream createDatastream(String name, String desc, String type, UnitOfMeasurement uom, Thing thing, Sensor sensor, ObservedProperty op) throws ServiceFailureException {
+    private static Entity createDatastream(String name, String desc, String type, UnitOfMeasurement uom, Entity thing, Entity sensor, Entity op) throws ServiceFailureException {
         int idx = DATASTREAMS.size();
         Map<String, Object> properties = new HashMap<>();
         properties.put("idx", idx);
 
-        Datastream ds = new Datastream(name, desc, type, uom);
-        ds.setProperties(properties);
-        ds.setThing(thing);
-        ds.setSensor(sensor);
-        ds.setObservedProperty(op);
-        service.create(ds);
+        Entity ds = sMdl.newDatastream(name, desc, type, uom)
+                .setProperty(EP_PROPERTIES, properties)
+                .setProperty(sMdl.npDatastreamThing, thing)
+                .setProperty(sMdl.npDatastreamSensor, sensor)
+                .setProperty(sMdl.npDatastreamObservedproperty, op);
+        sSrvc.create(ds);
         DATASTREAMS.add(ds);
         return ds;
     }
 
-    private static ObservedProperty createObservedProperty(String name, URI definition, String description) throws ServiceFailureException {
+    private static Entity createObservedProperty(String name, String definition, String description) throws ServiceFailureException {
         int idx = O_PROPS.size();
         Map<String, Object> properties = new HashMap<>();
         properties.put("idx", idx);
-        ObservedProperty obsProp = new ObservedProperty(name, definition, description);
-        obsProp.setProperties(properties);
-        service.create(obsProp);
+        Entity obsProp = sMdl.newObservedProperty(name, definition, description)
+                .setProperty(EP_PROPERTIES, properties);
+        sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
         return obsProp;
     }
 
-    private static void createObservationSet(Datastream datastream, long resultStart, ZonedDateTime phenomenonTimeStart, Interval validTimeStart, int count) throws ServiceFailureException {
+    private static void createObservationSet(Entity datastream, long resultStart, ZonedDateTime phenomenonTimeStart, TimeInterval validTimeStart, long count) throws ServiceFailureException {
         for (int i = 0; i < count; i++) {
             ZonedDateTime phenTime = phenomenonTimeStart.plus(i, ChronoUnit.HOURS);
-            Interval validTime = Interval.of(
-                    validTimeStart.getStart().plus(count, ChronoUnit.HOURS),
-                    validTimeStart.getEnd().plus(count, ChronoUnit.HOURS));
+            TimeInterval validTime = TimeInterval.create(
+                    validTimeStart.getStart().plus(count, TimeUnit.HOURS),
+                    validTimeStart.getEnd().plus(count, TimeUnit.HOURS));
             createObservation(datastream, resultStart + i, phenTime, validTime);
         }
     }
 
-    private static Observation createObservation(Datastream datastream, long result, ZonedDateTime phenomenonTime, Interval validTime) throws ServiceFailureException {
+    private static Entity createObservation(Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime) throws ServiceFailureException {
         int idx = OBSERVATIONS.size();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("idx", idx);
-        Observation obs = new Observation(result, datastream);
-        obs.setPhenomenonTimeFrom(phenomenonTime);
-        obs.setValidTime(validTime);
-        obs.setParameters(parameters);
+        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
+                .setProperty(EP_VALIDTIME, validTime)
+                .setProperty(EP_PARAMETERS, parameters);
         if (idx % 2 == 0) {
-            obs.setResultQuality(idx);
+            obs.setProperty(EP_RESULTQUALITY, idx);
         } else {
-            obs.setResultQuality("number-" + idx);
+            obs.setProperty(EP_RESULTQUALITY, "number-" + idx);
         }
-        service.create(obs);
+        sSrvc.create(obs);
         OBSERVATIONS.add(obs);
         return obs;
     }
@@ -305,7 +285,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testIndirectFilter() throws ServiceFailureException {
         LOGGER.info("  testIndirectFilter");
-        ThingDao doa = service.things();
+        Dao doa = sSrvc.dao(sMdl.etThing);
         testFilterResults(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
         testFilterResults(doa, "startswith(HistoricalLocations/Locations/name, 'Location 1')", getFromList(THINGS, 0));
     }
@@ -318,7 +298,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testDeepIndirection() throws ServiceFailureException {
         LOGGER.info("  testDeepIndirection");
-        ObservedPropertyDao doa = service.observedProperties();
+        Dao doa = sSrvc.dao(sMdl.etObservedProperty);
 
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
@@ -332,7 +312,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testEqualsNull() throws ServiceFailureException {
         LOGGER.info("  testEqualsNull");
-        ThingDao doa = service.things();
+        Dao doa = sSrvc.dao(sMdl.etThing);
 
         testFilterResults(doa, "properties/field eq null", getFromList(THINGS, 0, 3));
         testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 2, 3));
@@ -346,7 +326,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testNotEqualsNull() throws ServiceFailureException {
         LOGGER.info("  testNotEqualsNull");
-        ThingDao doa = service.things();
+        Dao doa = sSrvc.dao(sMdl.etThing);
 
         testFilterResults(doa, "properties/field ne null", getFromList(THINGS, 1, 2));
         testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1));
@@ -384,7 +364,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testStringResultQualityValue() {
         LOGGER.info("  testStringResultQualityValue");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, "resultQuality eq 'number-1'", getFromList(OBSERVATIONS, 1));
     }
 
@@ -394,7 +374,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testNumericResultQualityValue() {
         LOGGER.info("  testNumericResultQualityValue");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, "resultQuality eq 2", getFromList(OBSERVATIONS, 2));
     }
 

@@ -140,7 +140,7 @@
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
-            <artifactId>FROST-Client</artifactId>
+            <artifactId>FROST-Client-Dynamic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

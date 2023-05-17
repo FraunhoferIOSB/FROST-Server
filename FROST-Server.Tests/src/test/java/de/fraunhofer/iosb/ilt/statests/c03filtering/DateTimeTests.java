@@ -17,28 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
-import de.fraunhofer.iosb.ilt.sta.dao.DatastreamDao;
-import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.TimeObject;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -51,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.threeten.extra.Interval;
 
 /**
  * Tests date and time functions.
@@ -61,30 +56,14 @@ import org.threeten.extra.Interval;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class DateTimeTests extends AbstractTestClass {
 
-    public static class Implementation10 extends DateTimeTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends DateTimeTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DateTimeTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final ZonedDateTime T2014 = ZonedDateTime.parse("2014-01-01T06:00:00.000Z");
     private static final ZonedDateTime T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
     private static final ZonedDateTime T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
@@ -98,27 +77,27 @@ public abstract class DateTimeTests extends AbstractTestClass {
     private static final ZonedDateTime T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
     private static final ZonedDateTime T2017_2 = T2017.plus(1, ChronoUnit.HOURS);
     private static final ZonedDateTime T2018 = ZonedDateTime.parse("2018-01-01T09:00:00.000Z");
-    private static final Interval I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
-    private static final Interval I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
-    private static final Interval I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
-    private static final Interval I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
-    private static final Interval I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
-    private static final Interval I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
-    private static final Interval I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
-    private static final Interval I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
-    private static final Interval I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
-    private static final Interval I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
-    private static final Interval I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
-    private static final Interval I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
-    private static final Interval I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
-    private static final Interval I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
-    private static final Interval I2017 = Interval.of(T2017.toInstant(), T2017_2.toInstant());
-    private static final Interval I2014_2015 = Interval.of(T2014.toInstant(), T2015.toInstant());
-    private static final Interval I2014_2017_2 = Interval.of(T2014.toInstant(), T2017_2.toInstant());
-    private static final Interval I2014_2018 = Interval.of(T2014.toInstant(), T2018.toInstant());
-    private static final Interval I2015_2017_2 = Interval.of(T2015.toInstant(), T2017_2.toInstant());
-    private static final Interval I2015_2018 = Interval.of(T2015.toInstant(), T2018.toInstant());
-    private static final Interval I2017_2_2018 = Interval.of(T2017_2.toInstant(), T2018.toInstant());
+    private static final TimeInterval I2015 = TimeInterval.create(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
+    private static final TimeInterval I600_659 = TimeInterval.create(T600.toInstant(), T659.toInstant());
+    private static final TimeInterval I600_700 = TimeInterval.create(T600.toInstant(), T700.toInstant());
+    private static final TimeInterval I600_701 = TimeInterval.create(T600.toInstant(), T701.toInstant());
+    private static final TimeInterval I700_800 = TimeInterval.create(T700.toInstant(), T800.toInstant());
+    private static final TimeInterval I701_759 = TimeInterval.create(T701.toInstant(), T759.toInstant());
+    private static final TimeInterval I759_900 = TimeInterval.create(T759.toInstant(), T900.toInstant());
+    private static final TimeInterval I800_900 = TimeInterval.create(T800.toInstant(), T900.toInstant());
+    private static final TimeInterval I801_900 = TimeInterval.create(T801.toInstant(), T900.toInstant());
+    private static final TimeInterval I659_801 = TimeInterval.create(T659.toInstant(), T801.toInstant());
+    private static final TimeInterval I700_759 = TimeInterval.create(T700.toInstant(), T759.toInstant());
+    private static final TimeInterval I700_801 = TimeInterval.create(T700.toInstant(), T801.toInstant());
+    private static final TimeInterval I659_800 = TimeInterval.create(T659.toInstant(), T800.toInstant());
+    private static final TimeInterval I701_800 = TimeInterval.create(T701.toInstant(), T800.toInstant());
+    private static final TimeInterval I2017 = TimeInterval.create(T2017.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2014_2015 = TimeInterval.create(T2014.toInstant(), T2015.toInstant());
+    private static final TimeInterval I2014_2017_2 = TimeInterval.create(T2014.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2014_2018 = TimeInterval.create(T2014.toInstant(), T2018.toInstant());
+    private static final TimeInterval I2015_2017_2 = TimeInterval.create(T2015.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2015_2018 = TimeInterval.create(T2015.toInstant(), T2018.toInstant());
+    private static final TimeInterval I2017_2_2018 = TimeInterval.create(T2017_2.toInstant(), T2018.toInstant());
 
     public DateTimeTests(ServerVersion version) {
         super(version);
@@ -149,19 +128,19 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Thing thing = new Thing("Thing 1", "The first thing.");
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
-        Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        thing.getLocations().add(location);
-        service.create(thing);
+        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        thing.getProperty(sMdl.npThingLocations).add(location);
+        sSrvc.create(thing);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setThing(thing);
-        datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamThing, thing);
+        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
         createObservation(0, datastream, T600, T600, null); // 0
@@ -194,32 +173,31 @@ public abstract class DateTimeTests extends AbstractTestClass {
         createObservation(24, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
 
         // A second Datastream, with no observations.
-        Datastream datastream2 = new Datastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream2.setThing(thing);
-        datastream2.setSensor(sensor);
-        datastream2.setObservedProperty(obsProp);
-        service.create(datastream2);
+        Entity datastream2 = sMdl.newDatastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream2.setProperty(sMdl.npDatastreamThing, thing);
+        datastream2.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream2.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream2);
         DATASTREAMS.add(datastream2);
     }
 
-    private static void createObservation(double result, Datastream ds, Interval pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        createObservation(result, ds, new TimeObject(pt), rt, vt);
+    private static void createObservation(double result, Entity ds, TimeInterval pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {
+        createObservation(result, ds, TimeValue.create(pt), TimeInstant.create(rt), vt);
     }
 
-    private static void createObservation(double result, Datastream ds, ZonedDateTime pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        createObservation(result, ds, new TimeObject(pt), rt, vt);
+    private static void createObservation(double result, Entity ds, ZonedDateTime pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {
+        createObservation(result, ds, TimeValue.create(pt), TimeInstant.create(rt), vt);
     }
 
-    private static void createObservation(double result, Datastream ds, TimeObject pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        Observation o = new Observation(result, ds);
-        o.setPhenomenonTime(pt);
-        o.setResultTime(rt);
-        o.setValidTime(vt);
-        service.create(o);
+    private static void createObservation(double result, Entity ds, TimeValue pt, TimeInstant rt, TimeInterval vt) throws ServiceFailureException {
+        Entity o = sMdl.newObservation(result, pt, ds)
+                .setProperty(EP_RESULTTIME, rt)
+                .setProperty(EP_VALIDTIME, vt);
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
     }
 
-    public <T extends Entity<T>> void testFilterResultsDs(BaseDao<T> doa, String filter, List<T> expected) {
+    public void testFilterResultsDs(Dao doa, String filter, List<Entity> expected) {
         if (expected == null) {
             return;
         }
@@ -228,19 +206,19 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     public void testDsTpl(String tpl,
-            List<Datastream> t2014,
-            List<Datastream> t2015,
-            List<Datastream> t700,
-            List<Datastream> t2017_2,
-            List<Datastream> t2018,
-            List<Datastream> i78,
-            List<Datastream> i2014_2015,
-            List<Datastream> i2014_2017_2,
-            List<Datastream> i2014_2018,
-            List<Datastream> i2015_2017_2,
-            List<Datastream> i2015_2018,
-            List<Datastream> i2017_2_2018) {
-        DatastreamDao dsDoa = service.datastreams();
+            List<Entity> t2014,
+            List<Entity> t2015,
+            List<Entity> t700,
+            List<Entity> t2017_2,
+            List<Entity> t2018,
+            List<Entity> i78,
+            List<Entity> i2014_2015,
+            List<Entity> i2014_2017_2,
+            List<Entity> i2014_2018,
+            List<Entity> i2015_2017_2,
+            List<Entity> i2015_2018,
+            List<Entity> i2017_2_2018) {
+        Dao dsDoa = sSrvc.dao(sMdl.etDatastream);
         testFilterResultsDs(dsDoa, String.format(tpl, T2014), t2014);
         testFilterResultsDs(dsDoa, String.format(tpl, T2015), t2015);
         testFilterResultsDs(dsDoa, String.format(tpl, T700), t700);
@@ -256,13 +234,13 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     public void testTimeValue(String tpl,
-            List<Observation> rtOpT7,
-            List<Observation> vtOpT7,
-            List<Observation> ptOpT7,
-            List<Observation> rtOpT78,
-            List<Observation> vtOpT78,
-            List<Observation> ptOpT78) {
-        ObservationDao doa = service.observations();
+            List<Entity> rtOpT7,
+            List<Entity> vtOpT7,
+            List<Entity> ptOpT7,
+            List<Entity> rtOpT78,
+            List<Entity> vtOpT78,
+            List<Entity> ptOpT78) {
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, String.format(tpl, "resultTime", T700), rtOpT7);
         testFilterResults(doa, String.format(tpl, "validTime", T700), vtOpT7);
         testFilterResults(doa, String.format(tpl, "phenomenonTime", T700), ptOpT7);
@@ -273,13 +251,13 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     public void testValueTime(String tpl,
-            List<Observation> rtOpT7,
-            List<Observation> vtOpT7,
-            List<Observation> ptOpT7,
-            List<Observation> rtOpT78,
-            List<Observation> vtOpT78,
-            List<Observation> ptOpT78) {
-        ObservationDao doa = service.observations();
+            List<Entity> rtOpT7,
+            List<Entity> vtOpT7,
+            List<Entity> ptOpT7,
+            List<Entity> rtOpT78,
+            List<Entity> vtOpT78,
+            List<Entity> ptOpT78) {
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, String.format(tpl, T700, "resultTime"), rtOpT7);
         testFilterResults(doa, String.format(tpl, T700, "validTime"), vtOpT7);
         testFilterResults(doa, String.format(tpl, T700, "phenomenonTime"), ptOpT7);
@@ -290,22 +268,22 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     public void testTimeOpValue(String op,
-            List<Observation> rtOpT7,
-            List<Observation> vtOpT7,
-            List<Observation> ptOpT7,
-            List<Observation> rtOpT78,
-            List<Observation> vtOpT78,
-            List<Observation> ptOpT78) {
+            List<Entity> rtOpT7,
+            List<Entity> vtOpT7,
+            List<Entity> ptOpT7,
+            List<Entity> rtOpT78,
+            List<Entity> vtOpT78,
+            List<Entity> ptOpT78) {
         testTimeValue("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
     }
 
     public void testValueOpTime(String op,
-            List<Observation> rtOpT7,
-            List<Observation> vtOpT7,
-            List<Observation> ptOpT7,
-            List<Observation> rtOpT78,
-            List<Observation> vtOpT78,
-            List<Observation> ptOpT78) {
+            List<Entity> rtOpT7,
+            List<Entity> vtOpT7,
+            List<Entity> ptOpT7,
+            List<Entity> rtOpT78,
+            List<Entity> vtOpT78,
+            List<Entity> ptOpT78) {
         testValueTime("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
     }
 
@@ -600,7 +578,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test09During() throws ServiceFailureException {
         LOGGER.info("  test09During");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         filterForException(doa, String.format("during(resultTime,%s)", T700), 400);
         filterForException(doa, String.format("during(validTime,%s)", T700), 400);
         filterForException(doa, String.format("during(phenomenonTime,%s)", T700), 400);
@@ -744,7 +722,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test13Year() throws ServiceFailureException {
         LOGGER.info("  test13Year");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
         testFilterResults(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
         testFilterResults(doa, String.format("year(phenomenonTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
@@ -753,7 +731,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test14Durations() throws ServiceFailureException {
         LOGGER.info("  test14Durations");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         // Durations
         testFilterResults(doa, String.format("resultTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 22, 24));
         testFilterResults(doa, String.format("validTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 15, 24));
@@ -781,7 +759,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test15AlternativeOverlaps() throws ServiceFailureException {
         LOGGER.info("  test15AlternativeOverlaps");
-        ObservationDao doa = service.observations();
+        Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, String.format("not resultTime lt %s and not resultTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4));
         testFilterResults(doa, String.format("not validTime lt %s and not validTime ge %s", T700, T800), getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20));
         testFilterResults(doa, String.format("not phenomenonTime lt %s and not phenomenonTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
@@ -790,10 +768,10 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
         LOGGER.info("  test19PhenomenonTimeAfterDelete");
-        EntityUtils.deleteAll(service.observations());
-        Datastream ds1 = service.datastreams().find(DATASTREAMS.get(0).getId());
-        assertNull(ds1.getPhenomenonTime(), "phenomenonTime should be null");
-        Datastream ds2 = service.datastreams().find(DATASTREAMS.get(1).getId());
-        assertNull(ds2.getPhenomenonTime(), "phenomenonTime should be null");
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
+        Entity ds1 = sSrvc.dao(sMdl.etDatastream).find(DATASTREAMS.get(0).getId());
+        assertNull(ds1.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be null");
+        Entity ds2 = sSrvc.dao(sMdl.etDatastream).find(DATASTREAMS.get(1).getId());
+        assertNull(ds2.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be null");
     }
 }

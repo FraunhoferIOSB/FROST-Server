@@ -25,15 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Id;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.Id;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
@@ -110,16 +106,25 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
     }
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> O_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> O_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
     private static final List<Id> PROJECTS = new ArrayList<>();
     private static final List<Id> USERS = new ArrayList<>();
     private static final List<Id> ROLES = new ArrayList<>();
     private static final List<Id> USER_PROJECT_ROLES = new ArrayList<>();
+
+    private static final String ADMIN = "admin";
+    private static final String WRITE = "write";
+    private static final String READ = "read";
+    private static final String ANONYMOUS = "anonymous";
+    private static final String ADMIN_P1 = "AdminProject1";
+    private static final String ADMIN_P2 = "AdminProject2";
+    private static final String OBS_CREATE_P1 = "ObsCreaterProject1";
+    private static final String OBS_CREATE_P2 = "ObsCreaterProject2";
 
     private static SensorThingsService serviceAdmin;
     private static SensorThingsService serviceWrite;
@@ -165,22 +170,22 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 final String type = typeFromSelfLink(location);
                 switch (type) {
                     case "things":
-                        THINGS.add(serviceAdmin.things().find(id));
+                        THINGS.add(serviceAdmin.dao(sMdl.etThing).find(id));
                         break;
                     case "locations":
-                        LOCATIONS.add(serviceAdmin.locations().find(id));
+                        LOCATIONS.add(serviceAdmin.dao(sMdl.etLocation).find(id));
                         break;
                     case "sensors":
-                        SENSORS.add(serviceAdmin.sensors().find(id));
+                        SENSORS.add(serviceAdmin.dao(sMdl.etSensor).find(id));
                         break;
                     case "observedproperties":
-                        O_PROPS.add(serviceAdmin.observedProperties().find(id));
+                        O_PROPS.add(serviceAdmin.dao(sMdl.etObservedProperty).find(id));
                         break;
                     case "observations":
-                        OBSERVATIONS.add(serviceAdmin.observations().find(id));
+                        OBSERVATIONS.add(serviceAdmin.dao(sMdl.etObservation).find(id));
                         break;
                     case "datastreams":
-                        DATASTREAMS.add(serviceAdmin.datastreams().find(id));
+                        DATASTREAMS.add(serviceAdmin.dao(sMdl.etDatastream).find(id));
                         break;
                     case "users":
                         USERS.add(id);
@@ -201,7 +206,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 }
             }
 
-            OBSERVATIONS.addAll(serviceAdmin.observations().query().top(100).list());
+            OBSERVATIONS.addAll(serviceAdmin.query(sMdl.etObservation).top(100).list().toList());
         } catch (IOException ex) {
             LOGGER.error("Failed to read resource", ex);
         }
@@ -223,7 +228,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private SensorThingsService createService() {
         try {
-            return new SensorThingsService(new URL(serverSettings.getServiceUrl(version)));
+            return new SensorThingsService(sSrvc.getModelRegistry(), new URL(serverSettings.getServiceUrl(version)));
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -295,4 +300,45 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ath.getDatabaseStatus(serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
+    @Test
+    void test09PlainThingCreate() {
+        LOGGER.info("  test09PlainThingCreate");
+        EntityCreator creator = (user) -> sMdl.newThing(user + "Thing", "A Thing made by " + user);
+
+        createForOk(WRITE, serviceWrite, creator, serviceWrite.dao(sMdl.etThing), THINGS);
+        createForFail(READ, serviceRead, creator, serviceRead.dao(sMdl.etThing), THINGS);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceRead.dao(sMdl.etThing), THINGS);
+        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdminProject1.dao(sMdl.etThing), THINGS);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdminProject2.dao(sMdl.etThing), THINGS);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceObsCreaterProject1.dao(sMdl.etThing), THINGS);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceObsCreaterProject2.dao(sMdl.etThing), THINGS);
+    }
+    //    @Test
+    //    void test10Project1ThingCreate() {
+    //        LOGGER.info("  test10Project1ThingCreate");
+    //        EntityCreator<Thing> creator = (user) -> sMdl.newThing(user + "Thing", "A Thing made by " + user);
+    //
+    //        createForOk(WRITE, serviceWrite, creator, serviceWrite.dao(sMdl.etThing), THINGS);
+    //        createForFail(READ, serviceRead, creator, serviceRead.dao(sMdl.etThing), THINGS);
+    //        createForFail(ANONYMOUS, serviceAnon, creator, serviceAnon.dao(sMdl.etThing), THINGS);
+    //        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdminProject1.dao(sMdl.etThing), THINGS);
+    //        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdminProject2.dao(sMdl.etThing), THINGS);
+    //        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceObsCreaterProject1.dao(sMdl.etThing), THINGS);
+    //        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceObsCreaterProject2.dao(sMdl.etThing), THINGS);
+    //    }
+
+    private void createForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
+        final Entity entity = creator.create(user);
+        entityList.add(entity);
+        ath.createForOk(user, service, entity, validateDoa, entityList);
+    }
+
+    private void createForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
+        ath.createForFail(user, service, creator.create(user), validateDoa, entityList, HTTP_CODE_401_UNAUTHORIZED);
+    }
+
+    private static interface EntityCreator {
+
+        public Entity create(String user);
+    }
 }
