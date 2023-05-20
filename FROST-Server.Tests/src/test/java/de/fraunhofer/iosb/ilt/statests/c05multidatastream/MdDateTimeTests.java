@@ -777,9 +777,9 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
         LOGGER.info("  test19PhenomenonTimeAfterDelete");
         EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
-        Entity ds1 = sSrvc.dao(mMdl.etMultiDatastream).find(MULTI_DATASTREAMS.get(0).getId());
+        Entity ds1 = sSrvc.dao(mMdl.etMultiDatastream).find(MULTI_DATASTREAMS.get(0).getPrimaryKeyValues());
         assertNull(ds1.getProperty(EP_PHENOMENONTIMEDS), "phenomenonTime should be null");
-        Entity ds2 = sSrvc.dao(mMdl.etMultiDatastream).find(MULTI_DATASTREAMS.get(1).getId());
+        Entity ds2 = sSrvc.dao(mMdl.etMultiDatastream).find(MULTI_DATASTREAMS.get(1).getPrimaryKeyValues());
         assertNull(ds2.getProperty(EP_PHENOMENONTIMEDS), "phenomenonTime should be null");
     }
 }

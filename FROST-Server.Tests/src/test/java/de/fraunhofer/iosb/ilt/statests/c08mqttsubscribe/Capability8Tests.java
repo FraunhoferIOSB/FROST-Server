@@ -252,7 +252,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
                     try {
                         // coudl return multiple results so make sure we only get the latest
                         Object lastestId = entityHelper.getLastestEntityId(entityType);
-                        String filter = "id%20eq%20" + Utils.quoteIdForUrl(lastestId);
+                        String filter = "id%20eq%20" + Utils.quoteForUrl(lastestId);
                         JSONObject expectedResult = entityHelper.getEntity(entry.getKey() + "?$filter=" + filter).getJSONArray("value").getJSONObject(0);
                         assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
                     } catch (JSONException ex) {
@@ -602,7 +602,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     private JSONObject getSubEntityByRoot(EntityType rootEntityType, Object rootId, EntityType subtEntityType) {
         try {
             String path = getPathToRelatedEntity(subtEntityType, rootEntityType);
-            path = "/" + subtEntityType.getRootEntitySet() + "?$count=true&$filter=" + path + "/id%20eq%20" + Utils.quoteIdForUrl(rootId);
+            path = "/" + subtEntityType.getRootEntitySet() + "?$count=true&$filter=" + path + "/id%20eq%20" + Utils.quoteForUrl(rootId);
             JSONObject result = entityHelper.getEntity(path);
             if (result.getInt("@iot.count") != 1) {
                 fail("Invalid result with size != 1");

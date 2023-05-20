@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.E
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -338,7 +339,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testNullEntityProperty() {
         LOGGER.info("  testNullEntityProperty");
-        String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
+        String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {
             fail("Expected response code 204 on request " + requestUrl);
@@ -351,7 +352,7 @@ public abstract class FilterTests extends AbstractTestClass {
     @Test
     void testNullEntityPropertyValue() {
         LOGGER.info("  testNullEntityPropertyValue");
-        String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";
+        String requestUrl = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/$value";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {
             fail("Expected response code 204 on request " + requestUrl);

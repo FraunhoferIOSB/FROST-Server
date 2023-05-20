@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_TIME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -126,7 +127,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         OBSERVATIONS.add(observation);
 
         Entity found;
-        found = doa.find(observation.getId());
+        found = doa.find(observation.getPrimaryKeyValues());
         Entity featureOfInterest = found.getProperty(sMdl.npObservationFeatureofinterest);
 
         assertNotNull(featureOfInterest, "A FeatureOfInterest should have been generated, but got NULL.");
@@ -141,7 +142,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         OBSERVATIONS.add(observation);
 
         Entity found;
-        found = doa.find(observation.getId());
+        found = doa.find(observation.getPrimaryKeyValues());
         assertNotNull(found.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be auto generated.");
     }
 
@@ -174,7 +175,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.create(location3);
 
         // Give the Thing location 1
-        thing.getProperty(sMdl.npThingLocations).add(location1.withOnlyId());
+        thing.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.update(thing);
 
         // Get the generated HistoricalLocation and change the time to a known value.
@@ -187,7 +188,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.update(histLocation);
 
         // Now create a new HistoricalLocation for the Thing, with a later time.
-        Entity histLocation2 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T07:00:00.000Z"), thing.withOnlyId(), location2);
+        Entity histLocation2 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T07:00:00.000Z"), thing.withOnlyPk(), location2);
         sSrvc.create(histLocation2);
 
         // Check if the Location of the Thing is now Location 2.
@@ -198,7 +199,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         assertEquals(location2, thingLocations.get(0));
 
         // Now create a new HistoricalLocation for the Thing, with an earlier time.
-        Entity histLocation3 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T05:00:00.000Z"), thing.withOnlyId(), location3.withOnlyId());
+        Entity histLocation3 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T05:00:00.000Z"), thing.withOnlyPk(), location3.withOnlyPk());
         sSrvc.create(histLocation3);
 
         // Check if the Location of the Thing is still Location 2.
@@ -225,11 +226,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.create(location1);
 
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyId());
+        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing1);
 
         Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
-        thing2.getProperty(sMdl.npThingLocations).add(location1.withOnlyId());
+        thing2.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing2);
 
         Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
@@ -251,13 +252,13 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         // PUT tests
         String urlObsGood = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing1.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
         String urlObsBad = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing2.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
 
         testPut(urlObsGood, urlObsBad);
         testPatch(urlObsGood, urlObsBad);
@@ -267,16 +268,16 @@ public abstract class AdditionalTests extends AbstractTestClass {
     private void testGet(Entity thing1, Entity datastream1, Entity thing2) {
         // GET tests
         HTTPMethods.HttpResponse response;
-        String url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        String url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(200, response.code, "Get should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(404, response.code, "Get should return 404 Not Found for url " + url);
 
         // POST tests
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         String observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 300\n"
@@ -284,7 +285,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         response = HTTPMethods.doPost(url, observationJson);
         assertEquals(201, response.code, "Post should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
         assertNotEquals(201, response.code, "Post should not return 201 Created for url " + url);
     }
@@ -345,7 +346,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.create(location1);
 
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyId());
+        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing1);
 
         Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
@@ -363,7 +364,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         Entity obs1 = sMdl.newObservation(1.0, datastream1);
         sSrvc.create(obs1);
 
-        Entity foiGenerated1 = sSrvc.dao(sMdl.etObservation).find(obs1.getId()).getProperty(sMdl.npObservationFeatureofinterest);
+        Entity foiGenerated1 = sSrvc.dao(sMdl.etObservation).find(obs1.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
         assertNotNull(foiGenerated1);
 
         sSrvc.delete(foiGenerated1);
@@ -371,7 +372,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         Entity obs2 = sMdl.newObservation(1.0, datastream1);
         sSrvc.create(obs2);
 
-        Entity foiGenerated2 = sSrvc.dao(sMdl.etObservation).find(obs2.getId()).getProperty(sMdl.npObservationFeatureofinterest);
+        Entity foiGenerated2 = sSrvc.dao(sMdl.etObservation).find(obs2.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
         assertNotNull(foiGenerated2);
 
         assertNotEquals(foiGenerated1, foiGenerated2);

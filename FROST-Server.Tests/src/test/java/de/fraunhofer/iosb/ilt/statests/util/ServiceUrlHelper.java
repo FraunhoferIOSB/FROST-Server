@@ -45,7 +45,7 @@ public class ServiceUrlHelper {
         String urlString = rootURI;
         urlString += "/" + parentEntityType.plural;
         if (parentId != null) {
-            urlString += "(" + Utils.quoteIdForUrl(parentId) + ")";
+            urlString += "(" + Utils.quoteForUrl(parentId) + ")";
         }
         if (relationEntityType != null) {
             if (parentEntityType.getRelations(relationEntityType.extension).contains(relationEntityType.singular)) {
@@ -92,7 +92,7 @@ public class ServiceUrlHelper {
                 if (id == null) {
                     urlString += "/";
                 } else {
-                    urlString += "(" + Utils.quoteIdForUrl(id) + ")/";
+                    urlString += "(" + Utils.quoteForUrl(id) + ")/";
                 }
             }
         }

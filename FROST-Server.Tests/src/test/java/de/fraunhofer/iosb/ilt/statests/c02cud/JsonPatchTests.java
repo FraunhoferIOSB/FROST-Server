@@ -131,17 +131,17 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         }
         {
             Entity datastream1 = sMdl.newDatastream("Datastream Temp", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-            datastream1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
-            datastream1.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(0).withOnlyId());
+            datastream1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+            datastream1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+            datastream1.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(0).withOnlyPk());
             sSrvc.create(datastream1);
             DATASTREAMS.add(datastream1);
         }
         {
             Entity datastream2 = sMdl.newDatastream("Datastream LF", "The humidity of thing 1, sensor 2.", "someType", new UnitOfMeasurement("relative humidity", "%", "ucum:Humidity"));
-            datastream2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-            datastream2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
-            datastream2.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(1).withOnlyId());
+            datastream2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+            datastream2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
+            datastream2.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(1).withOnlyPk());
             sSrvc.create(datastream2);
             DATASTREAMS.add(datastream2);
         }
@@ -157,28 +157,28 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     @Test
     void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchThingTest");
-        Entity thingOnlyId = THINGS.get(0).withOnlyId();
+        Entity thingOnlyId = THINGS.get(0).withOnlyPk();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
         sSrvc.patch(thingOnlyId, operations);
-        Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getId());
+        Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals((Integer) 1, (Integer) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
+        assertEquals(1L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
         operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
         sSrvc.patch(thingOnlyId, operations);
-        updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getId());
+        updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         final Map<String, Object> updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals((Integer) 1, (Integer) updatedProperties.get("keyCopy1"), message);
+        assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
         assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals((Integer) 1, (Integer) updatedProperties.get("key2"), message);
+        assertEquals(1L, (Long) updatedProperties.get("key2"), message);
     }
 
     /**
@@ -191,28 +191,28 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     @Test
     void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchDatastreamTest");
-        Entity dsOnlyId = DATASTREAMS.get(0).withOnlyId();
+        Entity dsOnlyId = DATASTREAMS.get(0).withOnlyPk();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
         sSrvc.patch(dsOnlyId, operations);
-        Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getId());
+        Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals((Integer) 1, (Integer) updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
+        assertEquals(1L, (Long) updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
 
         operations.clear();
         operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
         operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
         sSrvc.patch(dsOnlyId, operations);
-        updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getId());
+        updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
         final Map<String, Object> updatedProperties = updatedDs.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals((Integer) 1, (Integer) updatedProperties.get("keyCopy1"), message);
+        assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
         assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals((Integer) 1, (Integer) updatedProperties.get("key2"), message);
+        assertEquals(1L, (Long) updatedProperties.get("key2"), message);
     }
 
 }

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1487,7 +1487,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private static Object postAndGetId(String urlString, String postContent) {
         HttpResponse responseMap = HTTPMethods.doPost(urlString, postContent);
         String response = responseMap.response;
-        return Utils.idObjectFromPostResult(response);
+        return Utils.pkFromPostResult(response)[0];
     }
 
     /**
@@ -1653,7 +1653,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     + "            \"description\": \"datastream 2\",\n"
                     + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                     + "            \"ObservedProperty\": {\n"
-                    + "                \"@iot.id\": " + quoteIdForJson(observedPropertyId2) + "\n"
+                    + "                \"@iot.id\": " + quoteForJson(observedPropertyId2) + "\n"
                     + "            },\n"
                     + "            \"Sensor\": {\n"
                     + "                \"name\": \"sensor 4 \",\n"
@@ -1703,7 +1703,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
-                    + "      \"@iot.id\": " + quoteIdForJson(locationId2) + "\n"
+                    + "      \"@iot.id\": " + quoteForJson(locationId2) + "\n"
                     + "    }\n"
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);
@@ -1711,7 +1711,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
-                    + "      \"@iot.id\": " + quoteIdForJson(locationId1) + "\n"
+                    + "      \"@iot.id\": " + quoteForJson(locationId1) + "\n"
                     + "    }\n"
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);

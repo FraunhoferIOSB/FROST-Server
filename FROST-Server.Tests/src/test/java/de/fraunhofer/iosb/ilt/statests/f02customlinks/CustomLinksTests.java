@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,8 +113,8 @@ public abstract class CustomLinksTests extends AbstractTestClass {
 
         Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
         properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getId().getValue());
-        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getId().getValue());
+        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
+        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0]);
         thing2.setProperty(EP_PROPERTIES, properties);
         thing2.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(1));
         sSrvc.create(thing2);
@@ -121,7 +122,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
 
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
         properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getId().getValue());
+        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
         thing3.setProperty(EP_PROPERTIES, properties);
         thing3.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(2));
         sSrvc.create(thing3);
@@ -129,7 +130,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
 
         Entity thing4 = sMdl.newThing("Thing 4", "The fourt thing.");
         properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing2.getId().getValue());
+        properties.put("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0]);
         thing4.setProperty(EP_PROPERTIES, properties);
         thing4.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(3));
         sSrvc.create(thing4);
@@ -162,16 +163,16 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     @Test
     void testCustomLinks1() throws ServiceFailureException {
         LOGGER.info("  testCustomLinks1");
-        Entity thing = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getId());
+        Entity thing = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
         Object navLink = thing.getProperty(EP_PROPERTIES).get("parent.Thing@iot.navigationLink");
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
-                + THINGS.get(0).getId().getUrl() + ")";
+                + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues()[0]) + ")";
         assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
         navLink = thing.getProperty(EP_PROPERTIES).get("alternate.Location@iot.navigationLink");
         expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Locations("
-                + LOCATIONS.get(0).getId().getUrl() + ")";
+                + Utils.quoteForUrl(LOCATIONS.get(0).getPrimaryKeyValues()[0]) + ")";
         assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
     }
 
@@ -180,12 +181,12 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         LOGGER.info("  testCustomLinks2");
         Entity thing = sSrvc.dao(sMdl.etThing)
                 .query()
-                .filter("id eq " + THINGS.get(1).getId().getUrl())
+                .filter("id eq " + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues()[0]))
                 .expand("properties/parent.Thing,properties/alternate.Location")
                 .first();
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
-                + THINGS.get(0).getId().getUrl() + ")";
+                + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues()[0]) + ")";
         Object navLink = thing.getProperty(EP_PROPERTIES).get("parent.Thing@iot.navigationLink");
         assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
 

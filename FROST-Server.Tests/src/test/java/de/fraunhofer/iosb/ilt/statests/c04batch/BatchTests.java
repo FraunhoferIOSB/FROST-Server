@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -106,8 +107,8 @@ public abstract class BatchTests extends AbstractTestClass {
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getId().getValue()));
-        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getId().getValue()));
+        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues()[0]));
+        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
     }
 
     /**
@@ -121,7 +122,7 @@ public abstract class BatchTests extends AbstractTestClass {
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")?$select=name HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -142,7 +143,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "Content-ID: 2\r\n"
                 + "\r\n"
-                + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n"
+                + "PATCH /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ") HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "Content-Type: application/json\r\n"
                 + "Content-Length: 18\r\n"
@@ -152,7 +153,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + Utils.quoteForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -212,6 +213,7 @@ public abstract class BatchTests extends AbstractTestClass {
     @Test
     void test02BatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test02BatchRequestWithChangeSetReferencingNewEntities");
+
         String post1 = "{\r\n"
                 + "  \"name\": \"DS18B20\",\r\n"
                 + "  \"description\": \"DS18B20 is an air temperature sensor\",\r\n"
@@ -227,7 +229,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
@@ -247,7 +249,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "Content-ID: any\r\n"
                 + "\r\n"
-                + "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams HTTP/1.1\r\n"
+                + "POST /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/Datastreams HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "Content-Type: application/json\r\n"
                 + "Content-Length: " + post2.length() + "\r\n"
@@ -403,7 +405,7 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch(null, "{\"requests\":[{"
                 + "\"id\": \"0\","
                 + "\"method\": \"get\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0))
                 + ")?$select=name\""
                 + "},{"
                 + "\"id\": \"1\","
@@ -415,7 +417,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"id\": \"2\","
                 + "\"atomicityGroup\": \"group1\","
                 + "\"method\": \"patch\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")\","
                 + "\"body\": {\"name\":\"Json Patched\"}"
                 + "},{"
                 + "\"id\": \"3\","
@@ -459,7 +461,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         String response = postBatch(null, "{\"requests\":[{"
@@ -473,7 +475,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"id\": \"any\","
                 + "\"atomicityGroup\": \"group1\","
                 + "\"method\": \"post\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/Datastreams\","
                 + "\"body\":"
                 + post2
                 + "}]}");

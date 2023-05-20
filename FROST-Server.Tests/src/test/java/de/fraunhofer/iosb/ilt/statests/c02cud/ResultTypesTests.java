@@ -126,10 +126,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
 
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity found;
-        found = doa.find(b1.getId());
+        found = doa.find(b1.getPrimaryKeyValues());
         String message = "Expected result to be a Boolean.";
         assertEquals(b1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
-        found = doa.find(b2.getId());
+        found = doa.find(b2.getPrimaryKeyValues());
         message = "Expected result to be a Boolean.";
         assertEquals(b2.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
@@ -148,7 +148,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
 
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity found;
-        found = doa.find(b1.getId());
+        found = doa.find(b1.getPrimaryKeyValues());
         String message = "Expected result to be a String.";
         assertEquals(b1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
@@ -161,12 +161,12 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testNumericResult() throws ServiceFailureException {
         LOGGER.info("  testNumericResult");
-        Entity b1 = sMdl.newObservation(1, DATASTREAMS.get(0));
+        Entity b1 = sMdl.newObservation(1L, DATASTREAMS.get(0));
         sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity found1 = doa.find(b1.getId());
+        Entity found1 = doa.find(b1.getPrimaryKeyValues());
         String message = "Expected result to be a Number.";
         assertEquals(b1.getProperty(EP_RESULT), found1.getProperty(EP_RESULT), message);
 
@@ -174,7 +174,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         doa.create(b2);
         OBSERVATIONS.add(b2);
 
-        Entity found2 = doa.find(b2.getId());
+        Entity found2 = doa.find(b2.getPrimaryKeyValues());
         message = "Expected result to be a Number.";
         assertEquals(b2.getProperty(EP_RESULT), found2.getProperty(EP_RESULT), message);
     }
@@ -196,7 +196,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Entity found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getPrimaryKeyValues());
         String message = "Expected result Maps are not equal.";
         assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
@@ -218,7 +218,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Entity found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getPrimaryKeyValues());
         String message = "Expected result Arrays are not equal.";
         assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
@@ -237,7 +237,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         OBSERVATIONS.add(o1);
 
         Entity found;
-        found = doa.find(o1.getId());
+        found = doa.find(o1.getPrimaryKeyValues());
         String message = "Expected result to be Null.";
         assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
 
@@ -245,11 +245,11 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         doa.create(o2);
         OBSERVATIONS.add(o2);
 
-        o2 = o2.withOnlyId();
+        o2 = o2.withOnlyPk();
         o2.setProperty(EP_RESULT, null);
         doa.update(o2);
 
-        found = doa.find(o2.getId());
+        found = doa.find(o2.getPrimaryKeyValues());
         message = "Expected result to be Null.";
         assertEquals(o2.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
     }
@@ -276,7 +276,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         OBSERVATIONS.add(o1);
 
         Entity found;
-        found = doa.find(o1.getId());
+        found = doa.find(o1.getPrimaryKeyValues());
         String message = "resultQuality not stored correctly.";
         assertEquals(o1.getProperty(EP_RESULTQUALITY), mapper.valueToTree(found.getProperty(EP_RESULTQUALITY)), message);
     }
@@ -315,7 +315,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
-        Entity found = doa.find(o1.getId());
+        Entity found = doa.find(o1.getPrimaryKeyValues());
         String message = "resultQuality not stored correctly.";
         assertEquals(o1.getProperty(EP_RESULTQUALITY), mapper.valueToTree(found.getProperty(EP_RESULTQUALITY)), message);
     }

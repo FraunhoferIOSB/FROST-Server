@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.E
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_UNITOFMEASUREMENT;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -125,7 +126,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         }
 
         Entity location = sMdl.newLocation("Location 1", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).withOnlyId());
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).withOnlyPk());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
@@ -304,35 +305,35 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test01FetchLowLevelThingProperties() {
         LOGGER.info("  test01FetchLowLevelThingProperties");
-        String urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) THINGS.get(0).getProperty(EP_PROPERTIES).get("string"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/boolean";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "boolean", (Boolean) THINGS.get(0).getProperty(EP_PROPERTIES).get("boolean"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/int";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "int", (Integer) THINGS.get(0).getProperty(EP_PROPERTIES).get("int"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intArray";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray", (int[]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intArray"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray[1]", ((int[]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[1]", ((int[][]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[0][1]", ((int[][]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", ((List<Map<String, String>>) THINGS.get(0).getProperty(EP_PROPERTIES).get("objArray")).get(0).get("string"), urlString);
     }
@@ -343,35 +344,35 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test02FetchLowLevelObservationParameters() {
         LOGGER.info("  test02FetchLowLevelObservationParameters");
-        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("string"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/boolean";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "boolean", (Boolean) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("boolean"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/int";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "int", (Integer) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("int"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intArray";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray", (int[]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intArray"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray[1]", ((int[]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[1]", ((int[][]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[0][1]", ((int[][]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", ((List<Map<String, String>>) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("objArray")).get(0).get("string"), urlString);
 

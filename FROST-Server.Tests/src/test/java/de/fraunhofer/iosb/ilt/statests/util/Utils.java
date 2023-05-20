@@ -18,11 +18,13 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,41 +53,41 @@ public class Utils {
     /**
      * Quote the ID for use in json, if needed.
      *
-     * @param id The id to quote.
+     * @param value The id to quote.
      * @return The quoted id.
      */
-    public static String quoteIdForJson(Object id) {
-        if (id instanceof Number) {
-            return id.toString();
+    public static String quoteForJson(Object value) {
+        if (value instanceof Number) {
+            return value.toString();
         }
-        return "\"" + id + "\"";
+        return "\"" + value + "\"";
     }
 
     /**
      * Quote the ID for use in URLs, if needed.
      *
-     * @param id The id to quote.
+     * @param value The id to quote.
      * @return The quoted id.
      */
-    public static String quoteIdForUrl(Object id) {
-        if (id instanceof Number) {
-            return id.toString();
+    public static String quoteForUrl(Object value) {
+        if (value instanceof Number) {
+            return value.toString();
         }
-        return "'" + id + "'";
+        return "'" + StringHelper.escapeForStringConstant(Objects.toString(value)) + "'";
     }
 
-    public static Object idObjectFromPostResult(String postResultLine) {
+    public static Object[] pkFromPostResult(String postResultLine) {
         int pos1 = postResultLine.lastIndexOf("(") + 1;
         int pos2 = postResultLine.lastIndexOf(")");
         String part = postResultLine.substring(pos1, pos2);
         try {
-            return Long.parseLong(part);
+            return new Object[]{Long.parseLong(part)};
         } catch (NumberFormatException exc) {
             // Id was not a long, thus a String.
             if (!part.startsWith("'") || !part.endsWith("'")) {
                 throw new IllegalArgumentException("Strings in urls must be quoted with single quotes.");
             }
-            return part.substring(1, part.length() - 1);
+            return new Object[]{part.substring(1, part.length() - 1)};
         }
     }
 

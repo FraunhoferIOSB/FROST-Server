@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,12 +127,12 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         LOCATIONS.add(location);
 
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
-        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 2", "The second thing.");
-        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
@@ -153,20 +154,20 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
 
         Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyPk());
         sSrvc.create(datastream);
 
         datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyPk());
         sSrvc.create(datastream);
 
-        createObservation(DATASTREAMS.get(0).withOnlyId(), -1);
-        createObservation(DATASTREAMS.get(1).withOnlyId(), 0);
+        createObservation(DATASTREAMS.get(0).withOnlyPk(), -1);
+        createObservation(DATASTREAMS.get(1).withOnlyPk(), 0);
     }
 
     private static void createObservation(Entity ds, double result) throws ServiceFailureException {
@@ -217,9 +218,9 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         // Create a MultiDatastream with one ObservedProperty.
         Entity md1 = mMdl.newMultiDatastream("MultiDatastream 1", "The first test MultiDatastream.", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
-        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
-        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md1);
         MULTIDATASTREAMS.add(md1);
@@ -229,11 +230,11 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
                 new UnitOfMeasurement("percent", "%", "ucum:%"));
 
-        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
 
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
 
         sSrvc.create(md2);
         MULTIDATASTREAMS.add(md2);
@@ -243,11 +244,11 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
                 new UnitOfMeasurement("percent", "%", "ucum:%"),
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
-        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
 
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md3);
         MULTIDATASTREAMS.add(md3);
@@ -257,11 +258,11 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
-        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
+        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
 
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md4);
         MULTIDATASTREAMS.add(md4);
@@ -271,21 +272,21 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     @Test
     void test02ObservationInMultiDatastream() throws ServiceFailureException {
         LOGGER.info("  test02ObservationInMultiDatastream");
-        createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 1);
-        createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 2);
-        createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 3);
+        createObservation(MULTIDATASTREAMS.get(0).withOnlyPk(), 1);
+        createObservation(MULTIDATASTREAMS.get(0).withOnlyPk(), 2);
+        createObservation(MULTIDATASTREAMS.get(0).withOnlyPk(), 3);
 
-        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyId(), 4, 1);
-        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyId(), 5, 2);
-        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyId(), 6, 3);
+        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyPk(), 4, 1);
+        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyPk(), 5, 2);
+        createObservationMds(MULTIDATASTREAMS.get(1).withOnlyPk(), 6, 3);
 
-        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyId(), 7, 4);
-        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyId(), 8, 5);
-        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyId(), 9, 6);
+        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyPk(), 7, 4);
+        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyPk(), 8, 5);
+        createObservationMds(MULTIDATASTREAMS.get(2).withOnlyPk(), 9, 6);
 
-        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyId(), 10, 7);
-        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyId(), 11, 8);
-        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyId(), 12, 9);
+        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyPk(), 10, 7);
+        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyPk(), 11, 8);
+        createObservationMds(MULTIDATASTREAMS.get(3).withOnlyPk(), 12, 9);
         assertEquals(14, OBSERVATIONS.size());
     }
 
@@ -293,19 +294,19 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test03ObservationInMultiDatastreamIncorrect() throws ServiceFailureException {
         LOGGER.info("  test03ObservationInMultiDatastreamIncorrect");
         try {
-            Entity o = mMdl.newObservation(1, MULTIDATASTREAMS.get(1).withOnlyId());
+            Entity o = mMdl.newObservation(1, MULTIDATASTREAMS.get(1).withOnlyPk());
             sSrvc.create(o);
             fail("Service should have rejected posting non-array result to a multidatastream.");
         } catch (ServiceFailureException e) {
         }
 
         try {
-            createObservationMds(MULTIDATASTREAMS.get(0).withOnlyId(), 1, 2);
+            createObservationMds(MULTIDATASTREAMS.get(0).withOnlyPk(), 1, 2);
             fail("Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
         } catch (ServiceFailureException e) {
         }
         try {
-            createObservation(MULTIDATASTREAMS.get(1).withOnlyId(), 1);
+            createObservation(MULTIDATASTREAMS.get(1).withOnlyPk(), 1);
             fail("Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
         } catch (ServiceFailureException e) {
         }
@@ -373,7 +374,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
             entitiesHaveOneOf(json, "MultiDatastreams", relation + "@iot.navigationLink");
         }
 
-        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(5).getId().getUrl() + ")/result[0]";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(5)) + ")/result[0]";
         json = getJsonObject(urlString);
         JsonNode value = json.get("result[0]");
         if (value == null || !value.isNumber()) {
@@ -388,7 +389,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test05MultiDatastreamThings() throws ServiceFailureException {
         LOGGER.info("  test05MultiDatastreamThings");
         // Check if all Datastreams and MultiDatastreams are linked to Thing 1.
-        Entity fetchedThing = sSrvc.dao(sMdl.etThing).find(THINGS.get(0).getId());
+        Entity fetchedThing = sSrvc.dao(sMdl.etThing).find(THINGS.get(0).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedThing.query(sMdl.npThingDatastreams).list();
         checkResult("Check Datastreams linked to Thing 1.", EntityUtils.resultContains(fetchedDatastreams, DATASTREAMS.get(0)));
         EntitySet fetchedMultiDatastreams = fetchedThing.query(mMdl.npThingMultidatastreams).list();
@@ -399,7 +400,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test06MultiDatastreamSensors() throws ServiceFailureException {
         LOGGER.info("  test06MultiDatastreamSensors");
         // Check if all Datastreams and MultiDatastreams are linked to Sensor 1.
-        Entity fetchedSensor = sSrvc.dao(sMdl.etSensor).find(SENSORS.get(0).getId());
+        Entity fetchedSensor = sSrvc.dao(sMdl.etSensor).find(SENSORS.get(0).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedSensor.query(sMdl.npSensorDatastreams).list();
         checkResult("Check Datastreams linked to Sensor 1.", EntityUtils.resultContains(fetchedDatastreams, DATASTREAMS.get(0)));
         EntitySet fetchedMultiDatastreams = fetchedSensor.query(mMdl.npSensorMultidatastreams).list();
@@ -412,7 +413,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test07MultiDatastreamObservedProperties1() throws ServiceFailureException {
         LOGGER.info("  test07MultiDatastreamObservedProperties1");
         // Check if all Datastreams and MultiDatastreams are linked to ObservedProperty 1.
-        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(0).getId());
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(0).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 1.",
@@ -427,7 +428,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test08MultiDatastreamObservedProperties2() throws ServiceFailureException {
         LOGGER.info("  test08MultiDatastreamObservedProperties2");
         // Check if MultiDatastreams 2 and 3 are linked to ObservedProperty 2.
-        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(1).getId());
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(1).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 2.",
@@ -442,11 +443,11 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test09ObservationLinks1() throws ServiceFailureException {
         LOGGER.info("  test09ObservationLinks1");
         // First Observation should have a Datastream but not a MultiDatasteam.
-        Entity fetchedObservation = sSrvc.dao(sMdl.etObservation).find(OBSERVATIONS.get(0).getId());
+        Entity fetchedObservation = sSrvc.dao(sMdl.etObservation).find(OBSERVATIONS.get(0).getPrimaryKeyValues());
         Entity fetchedDatastream = fetchedObservation.getProperty(sMdl.npObservationDatastream);
 
         String message = "Observation has wrong or no Datastream";
-        assertEquals(DATASTREAMS.get(0).withOnlyId(), fetchedDatastream.withOnlyId(), message);
+        assertEquals(DATASTREAMS.get(0).withOnlyPk(), fetchedDatastream.withOnlyPk(), message);
 
         Entity fetchedMultiDatastream = fetchedObservation.getProperty(mMdl.npObservationMultidatastream);
 
@@ -458,7 +459,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test10ObservationLinks2() throws ServiceFailureException {
         LOGGER.info("  test10ObservationLinks2");
         // Second Observation should not have a Datastream but a MultiDatasteam.
-        Entity fetchedObservation = sSrvc.dao(sMdl.etObservation).find(OBSERVATIONS.get(2).getId());
+        Entity fetchedObservation = sSrvc.dao(sMdl.etObservation).find(OBSERVATIONS.get(2).getPrimaryKeyValues());
         Entity fetchedDatastream = fetchedObservation.getProperty(sMdl.npObservationDatastream);
 
         String message = "Observation should not have a Datastream";
@@ -467,7 +468,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         Entity fetchedMultiDatastream = fetchedObservation.getProperty(mMdl.npObservationMultidatastream);
 
         message = "Observation has wrong or no MultiDatastream";
-        assertEquals(MULTIDATASTREAMS.get(0).withOnlyId(), fetchedMultiDatastream.withOnlyId(), message);
+        assertEquals(MULTIDATASTREAMS.get(0).withOnlyPk(), fetchedMultiDatastream.withOnlyPk(), message);
     }
 
     @Test
@@ -484,8 +485,8 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test12IncorrectObservation() throws ServiceFailureException {
         LOGGER.info("  test12IncorrectObservation");
         // Try to give Observation 1 a MultiDatastream without removing the Datastream. Should give an error.
-        Entity modifiedObservation = OBSERVATIONS.get(0).withOnlyId();
-        modifiedObservation.setProperty(mMdl.npObservationMultidatastream, MULTIDATASTREAMS.get(0).withOnlyId());
+        Entity modifiedObservation = OBSERVATIONS.get(0).withOnlyPk();
+        modifiedObservation.setProperty(mMdl.npObservationMultidatastream, MULTIDATASTREAMS.get(0).withOnlyPk());
         updateForException("Linking Observation to Datastream AND MultiDatastream.", modifiedObservation);
     }
 
@@ -493,8 +494,8 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test13IncorrectObservedProperty() throws ServiceFailureException {
         LOGGER.info("  test13IncorrectObservedProperty");
         // Try to add a MultiDatastream to an ObservedProperty. Should give an error.
-        Entity modifiedObservedProp = OBSERVED_PROPS.get(1).withOnlyId();
-        modifiedObservedProp.getProperty(mMdl.npObspropMultidatastreams).add(MULTIDATASTREAMS.get(0).withOnlyId());
+        Entity modifiedObservedProp = OBSERVED_PROPS.get(1).withOnlyPk();
+        modifiedObservedProp.getProperty(mMdl.npObspropMultidatastreams).add(MULTIDATASTREAMS.get(0).withOnlyPk());
         updateForException("Linking MultiDatastream to Observed property.", modifiedObservedProp);
     }
 

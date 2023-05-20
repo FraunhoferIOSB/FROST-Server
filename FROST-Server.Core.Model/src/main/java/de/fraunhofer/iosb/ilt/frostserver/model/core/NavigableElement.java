@@ -20,9 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 /**
  * Should be superclass of all elements which can contain an iot.navigationLink
  * element
- *
- * @author jab
- * @author scf
  */
 public interface NavigableElement {
 

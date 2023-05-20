@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -213,7 +213,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "  \"name\": \"test datastream.\",\n"
                 + "  \"description\": \"test datastream.\",\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
                 + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
@@ -237,7 +237,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "  \"name\": \"test datastream.\",\n"
                 + "  \"description\": \"test datastream.\",\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
                 + "   \"Sensor\": {        \n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
                 + "        \"description\": \"Acme Fluxomatic 1000\",\n"
@@ -300,7 +300,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "  \"name\": \"test datastream.\",\n"
                 + "  \"description\": \"test datastream.\",\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
                 + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
@@ -318,7 +318,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
         urlParameters = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
                 + "  \"result\": 100,\n"
-                + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                 + "}";
         postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
@@ -336,7 +336,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "      ]\n"
                 + "    }\n"
                 + "  },\n"
-                + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                 + "}";
         postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
@@ -444,9 +444,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
                         + "  \"name\": \"test datastream.\",\n"
                         + "  \"description\": \"test datastream.\",\n"
                         + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                        + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(THING_IDS.get(0)) + " },\n"
-                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(OBSPROP_IDS.get(0)) + "},\n"
-                        + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(SENSOR_IDS.get(0)) + " }\n"
+                        + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                        + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
                 Object datastreamId = entity.get(ControlInformation.ID);
@@ -458,8 +458,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 String urlParameters = "{\n"
                         + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
                         + "  \"result\": 8,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(DATASTREAM_IDS.get(0)) + "},\n"
-                        + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteIdForJson(FOI_IDS.get(0)) + "}  \n"
+                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "},\n"
+                        + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
                 Object obsId1 = entity.get(ControlInformation.ID);
@@ -470,14 +470,14 @@ public abstract class Capability2Tests extends AbstractTestClass {
             {
                 //POST Observation without FOI (Automatic creation of FOI)
                 //Add location to the Thing
-                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteIdForJson(LOCATION_IDS.get(0)) + "}]}";
+                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(0)) + "}]}";
                 patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
 
                 urlParameters = "{\n"
                         + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
                         + "  \"resultTime\": \"2015-03-01T01:00:00.000Z\",\n"
                         + "  \"result\": 100,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
                 checkForObservationResultTime(entity, "2015-03-01T01:00:00.000Z");
@@ -492,7 +492,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 String urlParameters = "{\n"
                         + "  \"phenomenonTime\": \"2015-05-01T00:00:00.000Z\",\n"
                         + "  \"result\": 105,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
                 checkForObservationResultTime(entity, null);
@@ -520,7 +520,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
 
             {
                 //Add second location to the Thing
-                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteIdForJson(LOCATION_IDS.get(1)) + "}]}";
+                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(1)) + "}]}";
                 patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
             }
 
@@ -530,7 +530,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                         + "  \"phenomenonTime\": \"2015-03-01T01:00:00.000Z\",\n"
                         + "  \"resultTime\": \"2015-03-01T02:00:00.000Z\",\n"
                         + "  \"result\": 200,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
                 Object obsId4 = entity.get(ControlInformation.ID);
@@ -549,7 +549,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 String urlParameters = "{"
                         + "\"name\":\"Test Thing 2\","
                         + "\"description\":\"This is a second Test Thing From TestNG\","
-                        + "\"Locations\":[{\"@iot.id\": " + quoteIdForJson(LOCATION_IDS.get(0)) + "}]"
+                        + "\"Locations\":[{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]"
                         + "}";
                 JSONObject entity = postEntity(EntityType.THING, urlParameters);
                 thing2Id = entity.get(ControlInformation.ID);
@@ -568,9 +568,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
                         + "  \"name\": \"test datastream 2.\",\n"
                         + "  \"description\": \"test datastream 2.\",\n"
                         + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                        + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thing2Id) + " },\n"
-                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(OBSPROP_IDS.get(0)) + "},\n"
-                        + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(SENSOR_IDS.get(0)) + " }\n"
+                        + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thing2Id) + " },\n"
+                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                        + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
                 datastream2Id = entity.get(ControlInformation.ID);
@@ -583,7 +583,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                         + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                         + "  \"resultTime\": \"2015-03-01T04:00:00.000Z\",\n"
                         + "  \"result\": 300,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastream2Id) + "}\n"
+                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastream2Id) + "}\n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
                 Object obsId5 = entity.get(ControlInformation.ID);
@@ -597,8 +597,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 /* HistoricalLocation */
                 String urlParameters = "{\n"
                         + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
-                        + "  \"Thing\":{\"@iot.id\": " + quoteIdForJson(THING_IDS.get(0)) + "},\n"
-                        + "  \"Locations\": [{\"@iot.id\": " + quoteIdForJson(LOCATION_IDS.get(0)) + "}]  \n"
+                        + "  \"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "},\n"
+                        + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]  \n"
                         + "}";
                 JSONObject entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
                 Object histLocId = entity.get(ControlInformation.ID);
@@ -626,8 +626,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                             + "\"name\":\"Test Thing\","
                             + "\"description\":\"This is a Test Thing From TestNG\","
                             + "\"taskingParameters\":{},"
-                            + "\"Actuator\":{\"@iot.id\": " + quoteIdForJson(ACTUATOR_IDS.get(0)) + "},"
-                            + "\"Thing\":{\"@iot.id\": " + quoteIdForJson(THING_IDS.get(0)) + "}"
+                            + "\"Actuator\":{\"@iot.id\": " + quoteForJson(ACTUATOR_IDS.get(0)) + "},"
+                            + "\"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "}"
                             + "}";
                     JSONObject entity = postEntity(EntityType.TASKING_CAPABILITY, urlParameters);
                     Object id = entity.get(ControlInformation.ID);
@@ -638,7 +638,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     /* Task */
                     String urlParameters = "{"
                             + "\"taskingParameters\":{},"
-                            + "\"TaskingCapability\":{\"@iot.id\": " + quoteIdForJson(TASKINGCAPABILITY_IDS.get(0)) + "}"
+                            + "\"TaskingCapability\":{\"@iot.id\": " + quoteForJson(TASKINGCAPABILITY_IDS.get(0)) + "}"
                             + "}";
                     JSONObject entity = postEntity(EntityType.TASK, urlParameters);
                     Object id = entity.get(ControlInformation.ID);
@@ -751,7 +751,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
                     + "   \"ObservedProperty\": {\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
@@ -811,7 +811,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "      ]\n"
                     + "    }\n"
                     + "  },\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                     + "}";
             entity = postEntity(EntityType.OBSERVATION, urlParameters);
             Object obsId1 = entity.get(ControlInformation.ID);
@@ -856,8 +856,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(THING_IDS.get(0)) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(OBSPROP_IDS.get(0)) + "}\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "}\n"
                     + "}";
             postInvalidEntity(EntityType.DATASTREAM, urlParameters);
             //Without ObservedProperty
@@ -870,8 +870,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(THING_IDS.get(0)) + " },\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(SENSOR_IDS.get(0)) + " }\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
                     + "}";
             postInvalidEntity(EntityType.DATASTREAM, urlParameters);
             //Without Things
@@ -884,8 +884,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(OBSPROP_IDS.get(0)) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(SENSOR_IDS.get(0)) + " }\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
                     + "}";
             postInvalidEntity(EntityType.DATASTREAM, urlParameters);
 
@@ -906,9 +906,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(OBSPROP_IDS.get(0)) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(SENSOR_IDS.get(0)) + " }\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
                     + "}";
             Object datastreamId = postEntity(EntityType.DATASTREAM, urlParameters).get(ControlInformation.ID);
             DATASTREAM_IDS.add(datastreamId);
@@ -916,14 +916,14 @@ public abstract class Capability2Tests extends AbstractTestClass {
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
                     + "  \"result\": 8,\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteIdForJson(FOI_IDS.get(0)) + "}  \n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
                     + "}";
             postInvalidEntity(EntityType.OBSERVATION, urlParameters);
             //Without FOI and without Thing's Location
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
                     + "  \"result\": 100,\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                     + "}";
             postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
@@ -1202,7 +1202,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "        \"name\": \"Lumen\",\n"
                 + "        \"symbol\": \"lm\",\n"
                 + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"}\n"
-                + "        ,\"Thing\":{\"@iot.id\":" + quoteIdForJson(thingId) + "}"
+                + "        ,\"Thing\":{\"@iot.id\":" + quoteForJson(thingId) + "}"
                 + "      }]}";
         invalidPatchEntity(EntityType.SENSOR, urlParameters, sensorId);
 
@@ -1216,7 +1216,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "        \"name\": \"Lumen\",\n"
                 + "        \"symbol\": \"lm\",\n"
                 + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"}\n"
-                + "        ,\"Thing\":{\"@iot.id\":" + quoteIdForJson(thingId) + "}"
+                + "        ,\"Thing\":{\"@iot.id\":" + quoteForJson(thingId) + "}"
                 + "      }]}";
         invalidPatchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
 
@@ -1716,7 +1716,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @return The id of FOI
      */
     private Object checkAutomaticInsertionOfFOI(Object obsId, JSONObject locationObj, Object expectedFOIId) {
-        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + quoteIdForUrl(obsId) + ")/FeatureOfInterest";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + quoteForUrl(obsId) + ")/FeatureOfInterest";
         try {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
@@ -1971,7 +1971,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
             String response = responseMap.response;
-            THING_IDS.add(Utils.idObjectFromPostResult(response));
+            THING_IDS.add(Utils.pkFromPostResult(response)[0]);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
@@ -2009,7 +2009,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     }""";
             responseMap = HTTPMethods.doPost(urlString, urlParameters);
             response = responseMap.response;
-            OBSERVATION_IDS.add(Utils.idObjectFromPostResult(response));
+            OBSERVATION_IDS.add(Utils.pkFromPostResult(response)[0]);
 
             //FeatureOfInterest
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);

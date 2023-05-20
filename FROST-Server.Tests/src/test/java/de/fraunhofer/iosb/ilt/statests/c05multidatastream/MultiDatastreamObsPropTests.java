@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11.EP_MULTIOBSERVATIONDATATYPES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,12 +122,12 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         LOCATIONS.add(location);
 
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
-        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 2", "The second thing.");
-        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyId());
+        thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
@@ -156,16 +157,16 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
 
         Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyPk());
         sSrvc.create(datastream);
 
         datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         DATASTREAMS.add(datastream);
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyId());
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyPk());
         sSrvc.create(datastream);
 
     }
@@ -190,9 +191,9 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         dataTypes1.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         md1.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes1);
 
-        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
-        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md1);
         MULTIDATASTREAMS.add(md1);
@@ -211,13 +212,13 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         dataTypes2.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         md2.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes2);
 
-        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
 
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(2).withOnlyId());
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(3).withOnlyId());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(2).withOnlyPk());
+        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(3).withOnlyPk());
 
         sSrvc.create(md2);
         MULTIDATASTREAMS.add(md2);
@@ -232,11 +233,11 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         dataTypes3.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         md3.setProperty(EP_MULTIOBSERVATIONDATATYPES, dataTypes3);
 
-        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyId());
+        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
 
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyId());
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
+        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md3);
         MULTIDATASTREAMS.add(md3);
@@ -246,11 +247,11 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
                 new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
 
-        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyId());
-        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyId());
+        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
 
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyId());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
 
         sSrvc.create(md4);
         MULTIDATASTREAMS.add(md4);
@@ -261,7 +262,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test02MultiDatastreamObservedProperties1() throws ServiceFailureException {
         LOGGER.info("  test07MultiDatastreamObservedProperties1");
         // Check if all Datastreams and MultiDatastreams are linked to ObservedProperty 1.
-        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(0).getId());
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(0).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 1.",
@@ -276,7 +277,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     void test03MultiDatastreamObservedProperties2() throws ServiceFailureException {
         LOGGER.info("  test08MultiDatastreamObservedProperties2");
         // Check if MultiDatastreams 2 and 3 are linked to ObservedProperty 2.
-        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(1).getId());
+        Entity fetchedObservedProp = sSrvc.dao(sMdl.etObservedProperty).find(OBSERVED_PROPS.get(1).getPrimaryKeyValues());
         EntitySet fetchedDatastreams = fetchedObservedProp.query(sMdl.npObspropDatastreams).list();
         checkResult(
                 "Check Datastreams linked to ObservedProperty 2.",
@@ -304,9 +305,9 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         Entity md2 = MULTIDATASTREAMS.get(1);
         Entity op2 = OBSERVED_PROPS.get(1);
         Entity op3 = OBSERVED_PROPS.get(2);
-        String md2Id = md2.getId().getUrl();
-        String op2Id = op2.getId().getUrl();
-        String op3Id = op3.getId().getUrl();
+        String md2Id = formatKeyValuesForUrl(md2.getPrimaryKeyValues());
+        String op2Id = formatKeyValuesForUrl(op2.getPrimaryKeyValues());
+        String op3Id = formatKeyValuesForUrl(op3.getPrimaryKeyValues());
 
         HttpResponse response = HTTPMethods.doDelete(serverSettings.getServiceUrl(version) + "/MultiDatastreams(" + md2Id + ")/ObservedProperties/$ref?$id=../../Observations(" + op2Id + ")");
         assertEquals(400, response.code);

@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
-import de.fraunhofer.iosb.ilt.frostclient.model.Id;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -38,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -98,8 +96,8 @@ public class EntityUtils {
             Entity nextResult = resultIt.next();
             Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
             if (!testExpectedList.remove(inExpectedList)) {
-                LOGGER.info("Entity with id {} found in result that is not expected.", nextResult.getId());
-                return new ResultTestResult(false, "Entity with id " + nextResult.getId() + " found in result that is not expected.");
+                LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
+                return new ResultTestResult(false, "Entity with pk " + Arrays.toString(nextResult.getPrimaryKeyValues()) + " found in result that is not expected.");
             }
         }
         if (!testExpectedList.isEmpty()) {
@@ -110,9 +108,9 @@ public class EntityUtils {
     }
 
     public static Entity findEntityIn(Entity entity, List<Entity> entities) {
-        Id id = entity.getId();
+        Object[] pk = entity.getPrimaryKeyValues();
         for (Entity inList : entities) {
-            if (Objects.equals(inList.getId(), id)) {
+            if (Arrays.equals(inList.getPrimaryKeyValues(), pk)) {
                 return inList;
             }
         }
@@ -405,13 +403,17 @@ public class EntityUtils {
     public static String listEntities(List<Entity> list) {
         StringBuilder result = new StringBuilder();
         for (Entity item : list) {
-            result.append(item.getId());
+            result.append(Arrays.toString(item.getPrimaryKeyValues()));
             result.append(", ");
         }
         if (result.length() == 0) {
             return "";
         }
         return result.substring(0, result.length() - 2);
+    }
+
+    public static void testFilterResults(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
+        testFilterResults(service.dao(type), filter, expected);
     }
 
     public static void testFilterResults(Dao doa, String filter, List<Entity> expected) {
@@ -430,6 +432,10 @@ public class EntityUtils {
             LOGGER.error("Exception filtering doa {} using {} :", doa, filter, ex);
             fail("Failed to call service: " + ex.getMessage());
         }
+    }
+
+    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int expectedCode) {
+        filterForException(service.dao(type), filter, expectedCode);
     }
 
     public static void filterForException(Dao doa, String filter, int expectedCode) {
