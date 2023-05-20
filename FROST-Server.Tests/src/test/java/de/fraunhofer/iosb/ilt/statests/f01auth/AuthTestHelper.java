@@ -48,6 +48,7 @@ public class AuthTestHelper {
     public static final int HTTP_CODE_200_OK = 200;
     public static final int HTTP_CODE_401_UNAUTHORIZED = 401;
     public static final int HTTP_CODE_403_FORBIDDEN = 403;
+    public static final int HTTP_CODE_404_NOT_FOUND = 404;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthTestHelper.class.getName());
 

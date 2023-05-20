@@ -41,8 +41,8 @@
                   },
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
-                    "targetNavLink": "Projects",
-                    "query": "$filter\u003dUserProjectRoles/User/username eq principalName() and (UserProjectRoles/Role/rolename eq \u0027update\u0027 or UserProjectRoles/Role/rolename eq \u0027admin\u0027)",
+                    "targetNavLink": "Things",
+                    "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and (Projects/UserProjectRoles/Role/rolename eq \u0027update\u0027 or UserProjectRoles/Role/rolename eq \u0027admin\u0027)",
                     "emptyAllowed": true
                   }
                 ]

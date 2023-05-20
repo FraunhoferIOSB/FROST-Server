@@ -39,10 +39,18 @@
             "url": "Users",
             "body": {
                 "username": "AdminProject1",
-                "userpass": "AdminProject1",
-                "UserProjectRoles": [
-                    {"Project":{"@iot.id": "$project1"}, "Role":{"rolename": "admin"}}
-                ]
+                "userpass": "AdminProject1"
+            }
+        },
+        {
+            "id": "upr1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "UserProjectRoles",
+            "body": {
+                "User":{"@iot.id": "$AdminProject1"}, 
+                "Project":{"@iot.id": "$project1"}, 
+                "Role":{"rolename": "admin"}
             }
         },
         {
@@ -52,10 +60,18 @@
             "url": "Users",
             "body": {
                 "username": "ObsCreaterProject1",
-                "userpass": "ObsCreaterProject1",
-                "UserProjectRoles": [
-                    {"Project":{"@iot.id": "$project1"}, "Role":{"rolename": "obscreate"}}
-                ]
+                "userpass": "ObsCreaterProject1"
+            }
+        },
+        {
+            "id": "upr2",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "UserProjectRoles",
+            "body": {
+                "User":{"@iot.id": "$ObsCreaterProject1"}, 
+                "Project":{"@iot.id": "$project1"}, 
+                "Role":{"rolename": "obscreate"}
             }
         },
         {
@@ -65,10 +81,18 @@
             "url": "Users",
             "body": {
                 "username": "AdminProject2",
-                "userpass": "AdminProject2",
-                "UserProjectRoles": [
-                    {"Project":{"@iot.id": "$project2"}, "Role":{"rolename": "admin"}}
-                ]
+                "userpass": "AdminProject2"
+            }
+        },
+        {
+            "id": "upr3",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "UserProjectRoles",
+            "body": {
+                "User":{"@iot.id": "$AdminProject2"}, 
+                "Project":{"@iot.id": "$project2"}, 
+                "Role":{"rolename": "admin"}
             }
         },
         {
@@ -78,10 +102,18 @@
             "url": "Users",
             "body": {
                 "username": "ObsCreaterProject2",
-                "userpass": "ObsCreaterProject2",
-                "UserProjectRoles": [
-                    {"Project":{"@iot.id": "$project2"}, "Role":{"rolename": "obscreate"}}
-                ]
+                "userpass": "ObsCreaterProject2"
+            }
+        },
+        {
+            "id": "upr4",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "UserProjectRoles",
+            "body": {
+                "User":{"@iot.id": "$ObsCreaterProject2"}, 
+                "Project":{"@iot.id": "$project2"}, 
+                "Role":{"rolename": "obscreate"}
             }
         },
         {

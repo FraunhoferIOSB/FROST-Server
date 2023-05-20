@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_404_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -29,11 +30,13 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.model.Id;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchResponseJson;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -106,16 +109,19 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
     }
 
+    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel(mdlSensing);
+
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
-    private static final List<Id> PROJECTS = new ArrayList<>();
-    private static final List<Id> USERS = new ArrayList<>();
-    private static final List<Id> ROLES = new ArrayList<>();
-    private static final List<Id> USER_PROJECT_ROLES = new ArrayList<>();
+    private static final List<Entity> PROJECTS = new ArrayList<>();
+    private static final List<Entity> USERS = new ArrayList<>();
+    private static final List<Entity> ROLES = new ArrayList<>();
+    private static final List<Entity> USER_PROJECT_ROLES = new ArrayList<>();
 
     private static final String ADMIN = "admin";
     private static final String WRITE = "write";
@@ -158,6 +164,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     public void createEntities() throws ServiceFailureException {
+        USERS.add(mdlUsers.newUser("read", "read"));
+        USERS.add(mdlUsers.newUser("write", "write"));
+        USERS.add(mdlUsers.newUser("admin", "admin"));
+        ROLES.add(mdlUsers.newRole("read", ""));
+        ROLES.add(mdlUsers.newRole("create", ""));
+        ROLES.add(mdlUsers.newRole("update", ""));
+        ROLES.add(mdlUsers.newRole("delete", ""));
+        ROLES.add(mdlUsers.newRole("admin", ""));
         try {
             HTTPMethods.doPost(serviceAdmin.getHttpClient(), serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
 
@@ -166,38 +180,38 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             BatchResponseJson result = new ObjectMapper().readValue(response, BatchResponseJson.class);
             for (BatchResponseJson.ResponsePart part : result.getResponses()) {
                 final String location = part.getLocation();
-                final Id id = idFromSelfLink(location);
+                Object[] pk = pkFromSelfLink(location);
                 final String type = typeFromSelfLink(location);
                 switch (type) {
                     case "things":
-                        THINGS.add(serviceAdmin.dao(sMdl.etThing).find(id));
+                        THINGS.add(serviceAdmin.dao(mdlSensing.etThing).find(pk));
                         break;
                     case "locations":
-                        LOCATIONS.add(serviceAdmin.dao(sMdl.etLocation).find(id));
+                        LOCATIONS.add(serviceAdmin.dao(mdlSensing.etLocation).find(pk));
                         break;
                     case "sensors":
-                        SENSORS.add(serviceAdmin.dao(sMdl.etSensor).find(id));
+                        SENSORS.add(serviceAdmin.dao(mdlSensing.etSensor).find(pk));
                         break;
                     case "observedproperties":
-                        O_PROPS.add(serviceAdmin.dao(sMdl.etObservedProperty).find(id));
+                        O_PROPS.add(serviceAdmin.dao(mdlSensing.etObservedProperty).find(pk));
                         break;
                     case "observations":
-                        OBSERVATIONS.add(serviceAdmin.dao(sMdl.etObservation).find(id));
+                        OBSERVATIONS.add(serviceAdmin.dao(mdlSensing.etObservation).find(pk));
                         break;
                     case "datastreams":
-                        DATASTREAMS.add(serviceAdmin.dao(sMdl.etDatastream).find(id));
+                        DATASTREAMS.add(serviceAdmin.dao(mdlSensing.etDatastream).find(pk));
                         break;
                     case "users":
-                        USERS.add(id);
+                        USERS.add(serviceAdmin.dao(mdlUsers.etUser).find(pk));
                         break;
                     case "projects":
-                        PROJECTS.add(id);
+                        PROJECTS.add(serviceAdmin.dao(mdlUsers.etProject).find(pk));
                         break;
                     case "roles":
-                        ROLES.add(id);
+                        ROLES.add(serviceAdmin.dao(mdlUsers.etRole).find(pk));
                         break;
-                    case "userprojectprojects":
-                        USER_PROJECT_ROLES.add(id);
+                    case "userprojectroles":
+                        USER_PROJECT_ROLES.add(serviceAdmin.dao(mdlUsers.etUserProjectRole).find(pk));
                         break;
                     default:
                         LOGGER.error("Type {} should not have been created.", type);
@@ -206,15 +220,15 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 }
             }
 
-            OBSERVATIONS.addAll(serviceAdmin.query(sMdl.etObservation).top(100).list().toList());
+            OBSERVATIONS.addAll(serviceAdmin.query(mdlSensing.etObservation).top(100).list().toList());
         } catch (IOException ex) {
             LOGGER.error("Failed to read resource", ex);
         }
     }
 
-    public static Id idFromSelfLink(String selfLink) {
+    public static Object[] pkFromSelfLink(String selfLink) {
         String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
-        return Id.tryToParse(idString);
+        return ParserUtils.tryToParse(idString);
     }
 
     private String typeFromSelfLink(String selfLink) {
@@ -228,7 +242,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private SensorThingsService createService() {
         try {
-            return new SensorThingsService(sSrvc.getModelRegistry(), new URL(serverSettings.getServiceUrl(version)));
+            return new SensorThingsService(mdlUsers.getModelRegistry(), new URL(serverSettings.getServiceUrl(version)));
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -301,31 +315,81 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test09PlainThingCreate() {
-        LOGGER.info("  test09PlainThingCreate");
-        EntityCreator creator = (user) -> sMdl.newThing(user + "Thing", "A Thing made by " + user);
-
-        createForOk(WRITE, serviceWrite, creator, serviceWrite.dao(sMdl.etThing), THINGS);
-        createForFail(READ, serviceRead, creator, serviceRead.dao(sMdl.etThing), THINGS);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceRead.dao(sMdl.etThing), THINGS);
-        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdminProject1.dao(sMdl.etThing), THINGS);
-        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdminProject2.dao(sMdl.etThing), THINGS);
-        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceObsCreaterProject1.dao(sMdl.etThing), THINGS);
-        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceObsCreaterProject2.dao(sMdl.etThing), THINGS);
+    void test09ReadProjects() {
+        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.testFilterResults(serviceWrite, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.testFilterResults(serviceRead, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.filterForException(serviceAnon, mdlUsers.etProject, "", HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.testFilterResults(serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.testFilterResults(serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
+        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlUsers.etProject, "", PROJECTS);
     }
-    //    @Test
-    //    void test10Project1ThingCreate() {
-    //        LOGGER.info("  test10Project1ThingCreate");
-    //        EntityCreator<Thing> creator = (user) -> sMdl.newThing(user + "Thing", "A Thing made by " + user);
-    //
-    //        createForOk(WRITE, serviceWrite, creator, serviceWrite.dao(sMdl.etThing), THINGS);
-    //        createForFail(READ, serviceRead, creator, serviceRead.dao(sMdl.etThing), THINGS);
-    //        createForFail(ANONYMOUS, serviceAnon, creator, serviceAnon.dao(sMdl.etThing), THINGS);
-    //        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdminProject1.dao(sMdl.etThing), THINGS);
-    //        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdminProject2.dao(sMdl.etThing), THINGS);
-    //        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceObsCreaterProject1.dao(sMdl.etThing), THINGS);
-    //        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceObsCreaterProject2.dao(sMdl.etThing), THINGS);
-    //    }
+
+    @Test
+    void test10ReadUserProjectRole() {
+        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
+        EntityUtils.filterForException(serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+    }
+
+    @Test
+    void test11ReadUser() {
+        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
+        EntityUtils.filterForException(serviceWrite, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceRead, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+    }
+
+    @Test
+    void test12ReadRole() {
+        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etRole, "", ROLES);
+        EntityUtils.filterForException(serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAnon, mdlUsers.etRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+    }
+
+    @Test
+    void test13PlainThingCreate() {
+        LOGGER.info("  test09PlainThingCreate");
+        EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user);
+
+        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+    }
+
+    @Test
+    void test14ThingCreateForProject1() {
+        LOGGER.info("  test10Project1ThingCreate");
+        EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
+                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyId());
+
+        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+    }
 
     private void createForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
         final Entity entity = creator.create(user);
@@ -335,6 +399,15 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private void createForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
         ath.createForFail(user, service, creator.create(user), validateDoa, entityList, HTTP_CODE_401_UNAUTHORIZED);
+    }
+
+    private void updateForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
+        final Entity entity = creator.create(user);
+        ath.updateForOk(user, service, entity, validateDoa, entityList);
+    }
+
+    private void updateForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
+        ath.updateForFail(user, service, creator.create(user), validateDoa, entityList, HTTP_CODE_401_UNAUTHORIZED);
     }
 
     private static interface EntityCreator {
