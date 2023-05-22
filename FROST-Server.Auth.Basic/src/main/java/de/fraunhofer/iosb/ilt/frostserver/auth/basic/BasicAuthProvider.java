@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -49,17 +50,17 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 
-    @DefaultValue("read")
+    @DefaultValue(PrincipalExtended.ROLE_READ)
     public static final String TAG_ROLE_GET = "roleGet";
-    @DefaultValue("update")
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
     public static final String TAG_ROLE_PATCH = "rolePatch";
-    @DefaultValue("create")
+    @DefaultValue(PrincipalExtended.ROLE_CREATE)
     public static final String TAG_ROLE_POST = "rolePost";
-    @DefaultValue("update")
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
     public static final String TAG_ROLE_PUT = "rolePut";
-    @DefaultValue("delete")
+    @DefaultValue(PrincipalExtended.ROLE_DELETE)
     public static final String TAG_ROLE_DELETE = "roleDelete";
-    @DefaultValue("admin")
+    @DefaultValue(PrincipalExtended.ROLE_ADMIN)
     public static final String TAG_ROLE_ADMIN = "roleAdmin";
 
     private CoreSettings coreSettings;

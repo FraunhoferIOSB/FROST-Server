@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -119,15 +120,15 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_AUTH_PROVIDER = "provider";
     @DefaultValueBoolean(false)
     public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
-    @DefaultValue("read")
+    @DefaultValue(PrincipalExtended.ROLE_READ)
     public static final String TAG_AUTH_ROLE_READ = "role.read";
-    @DefaultValue("create")
+    @DefaultValue(PrincipalExtended.ROLE_CREATE)
     public static final String TAG_AUTH_ROLE_CREATE = "role.create";
-    @DefaultValue("update")
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
     public static final String TAG_AUTH_ROLE_UPDATE = "role.update";
-    @DefaultValue("delete")
+    @DefaultValue(PrincipalExtended.ROLE_DELETE)
     public static final String TAG_AUTH_ROLE_DELETE = "role.delete";
-    @DefaultValue("admin")
+    @DefaultValue(PrincipalExtended.ROLE_ADMIN)
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
 
     // Experimental settings

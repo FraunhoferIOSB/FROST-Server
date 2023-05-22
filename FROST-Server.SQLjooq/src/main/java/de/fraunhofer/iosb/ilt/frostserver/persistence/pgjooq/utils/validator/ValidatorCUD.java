@@ -63,10 +63,10 @@ public class ValidatorCUD implements HookValidator {
 
     @Override
     public void registerHooks(StaMainTable mainTable, PostgresPersistenceManager ppm) {
-        LOGGER.info("      Registering hooks for {}", mainTable.getName());
+        LOGGER.info("    Registering hooks for {}", mainTable.getName());
         final EntityType entityType = mainTable.getEntityType();
         if (getCheckInsertPreRel() != null) {
-            LOGGER.info("      - insert pre relations: {}", getCheckInsertPreRel());
+            LOGGER.info("    - insert pre relations: {}", getCheckInsertPreRel());
             mainTable.registerHookPreInsert(-10, (phase, pm, entity, insertFields) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
@@ -80,7 +80,7 @@ public class ValidatorCUD implements HookValidator {
             });
         }
         if (getCheckInsert() != null) {
-            LOGGER.info("      - insert: {}", getCheckInsert());
+            LOGGER.info("    - insert: {}", getCheckInsert());
             mainTable.registerHookPreInsert(-10, (phase, pm, entity, insertFields) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
@@ -94,7 +94,7 @@ public class ValidatorCUD implements HookValidator {
             });
         }
         if (getCheckUpdate() != null) {
-            LOGGER.info("      - update: {}", getCheckUpdate());
+            LOGGER.info("    - update: {}", getCheckUpdate());
             mainTable.registerHookPreUpdate(-10, (pm, entity, id) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return;
@@ -105,7 +105,7 @@ public class ValidatorCUD implements HookValidator {
             });
         }
         if (getCheckDelete() != null) {
-            LOGGER.info("      - delete: {}", getCheckDelete());
+            LOGGER.info("    - delete: {}", getCheckDelete());
             mainTable.registerHookPreDelete(-10, (pm, id) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return;

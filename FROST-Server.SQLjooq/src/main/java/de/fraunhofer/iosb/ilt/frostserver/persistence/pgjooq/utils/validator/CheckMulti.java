@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import java.util.Arrays;
 import java.util.List;
 
 public class CheckMulti implements ValidationCheck {
@@ -78,6 +79,11 @@ public class CheckMulti implements ValidationCheck {
     public CheckMulti setSubChecks(List<ValidationCheck> subChecks) {
         this.subChecks = subChecks;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "CheckMulti: " + combineType + " " + Arrays.toString(subChecks.toArray());
     }
 
 }

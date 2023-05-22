@@ -93,7 +93,7 @@ public class CheckQuery implements ValidationCheck {
 
     @Override
     public String toString() {
-        return entityType.entityName + ": " + query;
+        return "CheckQuery: " + entityType + ": " + query;
     }
 
 }

@@ -30,6 +30,11 @@ public class PrincipalExtended implements Principal {
     private static final ThreadLocal<PrincipalExtended> LOCAL_PRINCIPAL = new ThreadLocal<>();
 
     public static final String USER_NAME_ANONYMOUS = "anonymous";
+    public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_DELETE = "delete";
+    public static final String ROLE_UPDATE = "update";
+    public static final String ROLE_CREATE = "create";
+    public static final String ROLE_READ = "read";
     public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptyList());
     public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptyList());
 

@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
+import java.util.Arrays;
 import java.util.List;
 
 public class CheckUserHasRoles implements ValidationCheck {
@@ -63,16 +64,23 @@ public class CheckUserHasRoles implements ValidationCheck {
         return vheckType;
     }
 
-    public void setVheckType(Type vheckType) {
+    public CheckUserHasRoles setVheckType(Type vheckType) {
         this.vheckType = vheckType;
+        return this;
     }
 
     public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public CheckUserHasRoles setRoles(String... roles) {
+        this.roles = Arrays.asList(roles);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "CheckUserHasRoles: " + vheckType + " " + Arrays.toString(roles.toArray());
     }
 
 }

@@ -17,13 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_ADMIN;
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_CREATE;
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_UPDATE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -172,6 +179,12 @@ public class TableCollection {
         }
         final List<HookValidator> hvList = hookValidators.get(table.getName());
         if (hvList == null) {
+            LOGGER.info("    Adding default security hooks for {}", table.getName());
+            HookValidator hv = new ValidatorCUD()
+                    .setCheckInsertPreRel(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_CREATE))
+                    .setCheckUpdate(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_UPDATE))
+                    .setCheckDelete(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_DELETE));
+            hv.registerHooks(table, ppm);
             return;
         }
         for (HookValidator hv : hvList) {

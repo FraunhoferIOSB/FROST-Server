@@ -151,7 +151,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
 
     @Override
     public String toString() {
-        return targetNavLink + ": " + query;
+        return "CheckNavLinkQuery " + targetNavLink + ": " + query;
     }
 
 }

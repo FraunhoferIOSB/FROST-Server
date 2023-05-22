@@ -84,7 +84,7 @@ public class CheckNavLinkEmpty implements ValidationCheck {
 
     @Override
     public String toString() {
-        return targetNavLink + ": must be empty";
+        return "CheckNavLinkEmpty: " + targetNavLink;
     }
 
 }
