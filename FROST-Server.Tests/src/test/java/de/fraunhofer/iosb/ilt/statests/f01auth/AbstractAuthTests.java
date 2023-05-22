@@ -190,9 +190,11 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test07AdminUpdate() {
         LOGGER.info("  test07AdminUpdate");
-        Entity thing = THINGS.get(0);
-        thing.setProperty(EP_DESCRIPTION, "Updated Thing made by admin.");
-        ath.updateForOk(ADMIN, serviceAdmin, thing, serviceAdmin.dao(sMdl.etThing), THINGS);
+        final Entity original = THINGS.get(0);
+        final Entity thing = original.withOnlyPk()
+                .setProperty(EP_DESCRIPTION, "Thing Updated by admin.");
+        ath.updateForOk(ADMIN, serviceAdmin, thing, EP_DESCRIPTION);
+        original.setProperty(EP_DESCRIPTION, thing.getProperty(EP_DESCRIPTION));
     }
 
     @Test
@@ -220,9 +222,11 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test11WriteUpdate() {
         LOGGER.info("  test11WriteUpdate");
-        Entity thing = THINGS.get(0);
-        thing.setProperty(EP_DESCRIPTION, "Updated Thing made by write.");
-        ath.updateForOk(WRITE, serviceWrite, thing, serviceWrite.dao(sMdl.etThing), THINGS);
+        final Entity original = THINGS.get(0);
+        final Entity thing = original.withOnlyPk()
+                .setProperty(EP_DESCRIPTION, "Thing Updated by write.");
+        ath.updateForOk(WRITE, serviceWrite, thing, EP_DESCRIPTION);
+        original.setProperty(EP_DESCRIPTION, thing.getProperty(EP_DESCRIPTION));
     }
 
     @Test
@@ -264,9 +268,9 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test15ReadUpdate");
         final Entity original = THINGS.get(0);
         Entity thing = original.withOnlyPk()
-                .setProperty(EP_DESCRIPTION, "Read Updated Thing made by Admin.");
+                .setProperty(EP_DESCRIPTION, "Thing Updated by Read.");
         ath.updateForFail(READ, serviceRead, thing,
-                serviceRead.dao(sMdl.etThing), THINGS,
+                serviceRead, original,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
@@ -309,9 +313,9 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         LOGGER.info("  test19AnonUpdate");
         final Entity original = THINGS.get(0);
         final Entity thing = original.withOnlyPk();
-        thing.setProperty(EP_DESCRIPTION, "Anon Updated Thing made by Admin.");
+        thing.setProperty(EP_DESCRIPTION, "Thing Updated by Anon.");
         ath.updateForFail(ANONYMOUS, serviceAnon, thing,
-                serviceRead.dao(sMdl.etThing), THINGS,
+                serviceRead, original,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 

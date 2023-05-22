@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class ValidatorCUD implements HookValidator {
                 }
                 if (phase == HookPreInsert.Phase.PRE_RELATIONS) {
                     if (!checkInsertPreRel.check(pm, entity)) {
-                        throw new UnauthorizedException("Operation not allowed.");
+                        throwUnautorizedOrForbidden("Operation not allowed.");
                     }
                 }
                 return true;
@@ -86,7 +87,7 @@ public class ValidatorCUD implements HookValidator {
                 }
                 if (phase == HookPreInsert.Phase.POST_RELATIONS) {
                     if (!checkInsert.check(pm, entity)) {
-                        throw new UnauthorizedException("Operation not allowed.");
+                        throwUnautorizedOrForbidden("Operation not allowed.");
                     }
                 }
                 return true;
@@ -99,7 +100,7 @@ public class ValidatorCUD implements HookValidator {
                     return;
                 }
                 if (!checkUpdate.check(pm, entity)) {
-                    throw new UnauthorizedException("Operation not allowed.");
+                    throwUnautorizedOrForbidden("Operation not allowed.");
                 }
             });
         }
@@ -111,7 +112,7 @@ public class ValidatorCUD implements HookValidator {
                 }
                 final Entity entity = pm.get(entityType, id);
                 if (!checkDelete.check(pm, entity)) {
-                    throw new UnauthorizedException("Operation not allowed.");
+                    throwUnautorizedOrForbidden("Operation not allowed.");
                 }
             });
         }
@@ -153,4 +154,11 @@ public class ValidatorCUD implements HookValidator {
         return this;
     }
 
+    private void throwUnautorizedOrForbidden(String cause) {
+        if (PrincipalExtended.ANONYMOUS_PRINCIPAL.equals(PrincipalExtended.getLocalPrincipal())) {
+            throw new UnauthorizedException("Operation not allowed.");
+        } else {
+            throw new ForbiddenException("Operation not allowed.");
+        }
+    }
 }

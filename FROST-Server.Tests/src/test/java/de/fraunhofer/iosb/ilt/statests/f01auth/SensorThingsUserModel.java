@@ -152,9 +152,9 @@ public class SensorThingsUserModel {
         return new Entity(etProject);
     }
 
-    public Entity newProject(String rolename, String description) {
+    public Entity newProject(String projectname, String description) {
         return newProject()
-                .setProperty(EP_ROLENAME, rolename)
+                .setProperty(EP_NAME, projectname)
                 .setProperty(EP_DESCRIPTION, description);
     }
 

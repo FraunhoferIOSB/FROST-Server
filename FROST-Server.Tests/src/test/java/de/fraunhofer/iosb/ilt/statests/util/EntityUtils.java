@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -41,6 +42,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -410,6 +412,32 @@ public class EntityUtils {
             return "";
         }
         return result.substring(0, result.length() - 2);
+    }
+
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, EntityPropertyMain... properties) {
+        compareEntityWithRemote(service, expected, Arrays.asList(properties));
+    }
+
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, List<EntityPropertyMain> properties) {
+        try {
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
+            final List<EntityPropertyMain> toCheck = new ArrayList<>(properties);
+            if (toCheck.isEmpty()) {
+                toCheck.addAll(entityType.getEntityProperties());
+            }
+            for (EntityPropertyMain property : toCheck) {
+                if (property.isReadOnly()) {
+                    continue;
+                }
+                assertEquals(expected.getProperty(property), found.getProperty(property), () -> "property: " + property.getName());
+            }
+
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Failed to fetch entity to compare", ex);
+            Assertions.fail("Failed to fetch entity to compare");
+        }
+
     }
 
     public static void testFilterResults(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {

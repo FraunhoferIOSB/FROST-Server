@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
@@ -101,18 +102,18 @@ public class AuthTestHelper {
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public void updateForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
+    public void updateForOk(String user, SensorThingsService service, Entity entity, EntityPropertyMain... properties) {
         try {
             service.update(entity);
         } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to update " + entity.getEntityType();
+            String failMessage = "User " + user + " should be able to update " + entity.getEntityType() + " got " + ex.getMessage();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
-        EntityUtils.testFilterResults(validateDoa, "", expected);
+        EntityUtils.compareEntityWithRemote(service, entity, properties);
     }
 
-    public void updateForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
+    public void updateForFail(String user, SensorThingsService service, Entity entity, SensorThingsService validator, Entity original, int... expectedCodes) {
         String failMessage = "User " + user + " should NOT be able to update " + entity.getEntityType();
         try {
             service.update(entity);
@@ -120,7 +121,7 @@ public class AuthTestHelper {
         } catch (ServiceFailureException ex) {
             expectStatusCodeException(failMessage, ex, expectedCodes);
         }
-        EntityUtils.testFilterResults(validateDoa, "", expected);
+        EntityUtils.compareEntityWithRemote(validator, original);
     }
 
     public void deleteForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
@@ -146,15 +147,17 @@ public class AuthTestHelper {
     }
 
     public void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
+        int got = -1;
         if (ex instanceof StatusCodeException) {
             StatusCodeException scex = (StatusCodeException) ex;
-            int got = scex.getStatusCode();
+            got = scex.getStatusCode();
             for (int want : expected) {
                 if (got == want) {
                     return;
                 }
             }
         }
+        failMessage += " expected one of: " + Arrays.toString(expected) + " got " + got;
         LOGGER.error(failMessage, ex);
         fail(failMessage);
     }
