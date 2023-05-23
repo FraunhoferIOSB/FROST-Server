@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
@@ -100,6 +101,17 @@ public class AuthTestHelper {
             expectStatusCodeException(failMessage, ex, expectedCodes);
         }
         EntityUtils.testFilterResults(validateDoa, "", expected);
+    }
+
+    public void updateForOk(String user, SensorThingsService service, Entity entity, NavigationPropertyEntity property) {
+        try {
+            service.update(entity);
+        } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to update " + entity.getEntityType() + " got " + ex.getMessage();
+            LOGGER.error(failMessage, ex);
+            fail(failMessage);
+        }
+        EntityUtils.compareEntityWithRemote(service, entity, property);
     }
 
     public void updateForOk(String user, SensorThingsService service, Entity entity, EntityPropertyMain... properties) {

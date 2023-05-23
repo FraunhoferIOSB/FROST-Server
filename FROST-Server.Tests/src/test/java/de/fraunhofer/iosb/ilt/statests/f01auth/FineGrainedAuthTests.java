@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -367,8 +368,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_06_PlainThingCreate() {
-        LOGGER.info("  test_06_PlainThingCreate");
+    void test_06a_PlainThingCreate() {
+        LOGGER.info("  test_06a_PlainThingCreate");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
@@ -381,8 +382,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_07_ThingCreateForProject1() {
-        LOGGER.info("  test_07_ThingCreateForProject1");
+    void test_06b_ThingCreateForProject1() {
+        LOGGER.info("  test_06b_ThingCreateForProject1");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
 
@@ -396,23 +397,27 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_08_ThingDelete() {
-        LOGGER.info("  test_08_ThingDelete");
-        EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
-                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
+    void test_07a_DatastreamRelinkToThing2() {
+        LOGGER.info("  test_07a_DatastreamRelinkToThing2");
+        EntityCreator creator = (user) -> DATASTREAMS.get(0).withOnlyPk()
+                .setProperty(mdlSensing.npDatastreamThing, THINGS.get(1).withOnlyPk());
+        EntityCreator reset = (user) -> DATASTREAMS.get(0).withOnlyPk()
+                .setProperty(mdlSensing.npDatastreamThing, THINGS.get(0).withOnlyPk());
+        Entity original = DATASTREAMS.get(0);
 
-        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
-        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
-        createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
-        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        updateForFail(READ, serviceRead, creator, original, H403);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
+        updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
+        updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H403);
+        updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
+        updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
+        updateForOk(WRITE, serviceWrite, creator, mdlSensing.npDatastreamThing);
+        updateForOk(ADMIN, serviceAdmin, reset, mdlSensing.npDatastreamThing);
     }
 
     @Test
     void test_09_ObservedPropertyCreate() {
-        LOGGER.info("  test_06_PlainThingCreate");
+        LOGGER.info("  test_09_ObservedPropertyCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
@@ -422,6 +427,20 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
+    }
+
+    @Test
+    void test_10a_ThingDelete() {
+        LOGGER.info("  test_10a_ThingDelete");
+        EntityCreator creator = (user) -> THINGS.get(0);
+
+        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        deleteForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        deleteForFail(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        deleteForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        deleteForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        deleteForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        deleteForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
     }
 
     private void createForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
@@ -434,6 +453,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ath.createForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
     }
 
+    private void updateForOk(String user, SensorThingsService service, EntityCreator creator, NavigationPropertyEntity property) {
+        final Entity entity = creator.create(user);
+        ath.updateForOk(user, service, entity, property);
+    }
+
     private void updateForOk(String user, SensorThingsService service, EntityCreator creator, EntityPropertyMain... properties) {
         final Entity entity = creator.create(user);
         ath.updateForOk(user, service, entity, properties);
@@ -441,6 +465,16 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private void updateForFail(String user, SensorThingsService service, EntityCreator creator, Entity original, int... expectedCodes) {
         ath.updateForFail(user, service, creator.create(user), serviceAdmin, original, expectedCodes);
+    }
+
+    private void deleteForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {
+        final Entity toDelete = creator.create(user);
+        entityList.remove(EntityUtils.findEntityIn(toDelete, entityList));
+        ath.deleteForOk(user, service, toDelete, validateDoa, entityList);
+    }
+
+    private void deleteForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int expectedCodes) {
+        ath.deleteForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
     }
 
     private static interface EntityCreator {

@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -109,6 +110,14 @@ public class EntityUtils {
         return new ResultTestResult(true, "Check ok.");
     }
 
+    /**
+     * Finds the given entity in the given list, based on its primary key.
+     *
+     * @param entity The List of Entities to search in.
+     * @param entities The entity to find by primary key.
+     * @return The first entity from the list that has the correct primary key,
+     * or null.
+     */
     public static Entity findEntityIn(Entity entity, List<Entity> entities) {
         Object[] pk = entity.getPrimaryKeyValues();
         for (Entity inList : entities) {
@@ -433,6 +442,22 @@ public class EntityUtils {
                 assertEquals(expected.getProperty(property), found.getProperty(property), () -> "property: " + property.getName());
             }
 
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Failed to fetch entity to compare", ex);
+            Assertions.fail("Failed to fetch entity to compare");
+        }
+
+    }
+
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, NavigationPropertyEntity property) {
+        try {
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
+            final Entity linkedExpected = expected.getProperty(property);
+            final Entity linkedFound = found.getProperty(property);
+            for (EntityPropertyMain keyProp : property.getEntityType().getPrimaryKey().getKeyProperties()) {
+                assertEquals(linkedExpected.getProperty(keyProp), linkedFound.getProperty(keyProp));
+            }
         } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to fetch entity to compare", ex);
             Assertions.fail("Failed to fetch entity to compare");
