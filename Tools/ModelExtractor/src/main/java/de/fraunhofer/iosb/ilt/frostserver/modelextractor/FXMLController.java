@@ -689,7 +689,7 @@ public class FXMLController implements Initializable {
             case "varchar":
             case "uuid":
                 defEp.addHandler(new FieldMapperString().setField(fieldData.name))
-                        .setType("EDM.String");
+                        .setType("Edm.String");
                 return true;
 
             case "smallint":
@@ -697,7 +697,7 @@ public class FXMLController implements Initializable {
             case "bigint":
             case "float":
                 defEp.addHandler(new FieldMapperBigDecimal().setField(fieldData.name))
-                        .setType("BigDecimal");
+                        .setType("Edm.Decimal");
                 return true;
 
             case "geometry":
