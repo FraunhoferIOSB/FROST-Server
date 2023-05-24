@@ -525,7 +525,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         StaMainTable<?> target = tableCollection.getTablesByType().get(targetType);
         StaMainTable<?> targetAliased = target.as(queryState.getNextAlias());
         Field<?> targetField = targetAliased.getId();
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }
 

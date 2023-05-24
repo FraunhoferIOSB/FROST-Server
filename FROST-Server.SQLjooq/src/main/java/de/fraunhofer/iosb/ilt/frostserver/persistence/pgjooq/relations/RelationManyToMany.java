@@ -142,8 +142,8 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
         Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
         Field<Object> targetField = targetFieldAcc.getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }

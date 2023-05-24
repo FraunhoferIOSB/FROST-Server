@@ -1,5 +1,27 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservedPropertyDao;
@@ -14,9 +36,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -31,7 +51,6 @@ import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,10 +128,12 @@ public abstract class FilterTests extends AbstractTestClass {
         THINGS.add(thing);
 
         thing = new Thing("Thing 2", "The second thing.");
+        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 2).build());
         service.create(thing);
         THINGS.add(thing);
 
         thing = new Thing("Thing 3", "The third thing.");
+        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 3).build());
         service.create(thing);
         THINGS.add(thing);
 
@@ -301,6 +322,34 @@ public abstract class FilterTests extends AbstractTestClass {
 
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
+    }
+
+    /**
+     * Test equals null.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testEqualsNull() throws ServiceFailureException {
+        LOGGER.info("  testEqualsNull");
+        ThingDao doa = service.things();
+
+        testFilterResults(doa, "properties/field eq null", getFromList(THINGS, 0, 3));
+        testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 2, 3));
+    }
+
+    /**
+     * Test not equals null.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testNotEqualsNull() throws ServiceFailureException {
+        LOGGER.info("  testNotEqualsNull");
+        ThingDao doa = service.things();
+
+        testFilterResults(doa, "properties/field ne null", getFromList(THINGS, 1, 2));
+        testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1));
     }
 
     /**

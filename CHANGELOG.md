@@ -2,6 +2,9 @@
 
 ## Development version 2.1.3
 
+**New Features**
+* Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
+
 **Internal changes & Bugfixes**
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
 * Fixed cross-entity-type custom links breaking $expand.
