@@ -76,8 +76,8 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
         Field<?> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
         Field<?> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
         Field<?> targetField = getTargetFieldAcc().getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(((Field) sourceLinkField).eq(sourceField)));
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(((Field) targetField).eq(targetLinkField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(linkTableAliased).on(((Field) sourceLinkField).eq(sourceField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(((Field) targetField).eq(targetLinkField)));
         if (alwaysDistinct || queryState.isFilter()) {
             queryState.setDistinctRequired(true);
         } else {

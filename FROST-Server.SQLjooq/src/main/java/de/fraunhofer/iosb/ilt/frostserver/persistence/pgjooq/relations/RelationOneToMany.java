@@ -103,7 +103,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         Field<?> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.as(queryState.getNextAlias());
         Field<?> targetField = targetFieldAccessor.getField(targetAliased);
-        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(((Field) targetField).eq(sourceField)));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(((Field) targetField).eq(sourceField)));
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);
         }

@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationCons
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NullConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
@@ -112,6 +113,8 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(IntegerConstant node);
 
     public O visit(LineStringConstant node);
+
+    public O visit(NullConstant node);
 
     public O visit(PointConstant node);
 

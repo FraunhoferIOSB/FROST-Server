@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservedPropertyDao;
@@ -127,10 +128,12 @@ public abstract class FilterTests extends AbstractTestClass {
         THINGS.add(thing);
 
         thing = new Thing("Thing 2", "The second thing.");
+        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 2).build());
         service.create(thing);
         THINGS.add(thing);
 
         thing = new Thing("Thing 3", "The third thing.");
+        thing.setProperties(CollectionsHelper.propertiesBuilder().addProperty("field", 3).build());
         service.create(thing);
         THINGS.add(thing);
 
@@ -319,6 +322,34 @@ public abstract class FilterTests extends AbstractTestClass {
 
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
+    }
+
+    /**
+     * Test equals null.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testEqualsNull() throws ServiceFailureException {
+        LOGGER.info("  testEqualsNull");
+        ThingDao doa = service.things();
+
+        testFilterResults(doa, "properties/field eq null", getFromList(THINGS, 0, 3));
+        testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 2, 3));
+    }
+
+    /**
+     * Test not equals null.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testNotEqualsNull() throws ServiceFailureException {
+        LOGGER.info("  testNotEqualsNull");
+        ThingDao doa = service.things();
+
+        testFilterResults(doa, "properties/field ne null", getFromList(THINGS, 1, 2));
+        testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1));
     }
 
     /**

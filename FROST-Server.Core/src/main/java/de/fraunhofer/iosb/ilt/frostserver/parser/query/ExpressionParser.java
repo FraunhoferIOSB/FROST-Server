@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationCons
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NullConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
@@ -112,6 +113,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DOUBLE;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_DURATION;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_GEO_STR_LIT;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_LONG;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_NULL;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STR_LIT;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_TIME;
 import java.lang.reflect.InvocationTargetException;
@@ -423,6 +425,11 @@ public class ExpressionParser extends Visitor {
     public void visit(T_BOOL node) {
         String image = node.getImage();
         BooleanConstant value = new BooleanConstant(image);
+        addToCurrentExpression(value);
+    }
+
+    public void visit(T_NULL node) {
+        NullConstant value = new NullConstant();
         addToCurrentExpression(value);
     }
 

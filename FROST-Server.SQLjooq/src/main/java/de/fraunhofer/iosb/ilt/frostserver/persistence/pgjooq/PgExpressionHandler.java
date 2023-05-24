@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldL
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.NullWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
@@ -50,6 +51,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NullConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
@@ -406,6 +408,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     }
 
     @Override
+    public FieldWrapper visit(NullConstant node) {
+        return new NullWrapper();
+    }
+
+    @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
         return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
@@ -612,6 +619,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof NullWrapper) {
+            return new SimpleFieldWrapper(p2.getDefaultField().isNull());
+        }
+        if (p2 instanceof NullWrapper) {
+            return new SimpleFieldWrapper(p1.getDefaultField().isNull());
+        }
         if (p1 instanceof TimeFieldWrapper) {
             TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.eq(p2);
@@ -738,6 +751,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof NullWrapper) {
+            return new SimpleFieldWrapper(p2.getDefaultField().isNotNull());
+        }
+        if (p2 instanceof NullWrapper) {
+            return new SimpleFieldWrapper(p1.getDefaultField().isNotNull());
+        }
         if (p1 instanceof TimeFieldWrapper) {
             TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.neq(p2);

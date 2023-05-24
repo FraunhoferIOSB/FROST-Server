@@ -188,6 +188,7 @@ SKIP : " " | "\n" | "\r" | "\t";
 | <T_DATETIME: <T_DATE> "T" <T_TIME> <TIMEZONE> >
 | <T_DATETIMEINTERVAL: (<T_DATETIME> | <DURATIONVALUE>) ["/"] (<T_DATETIME> | <DURATIONVALUE>) >
 | <T_DOUBLE: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
+| <T_NULL: "null" >
 ;
 
 // ***************
@@ -416,6 +417,7 @@ P_Constant : LS_CONSTANTS :
       | <T_LONG>
       | <T_DOUBLE>
       | <T_BOOL>
+      | <T_NULL>
     )
 ;
 
