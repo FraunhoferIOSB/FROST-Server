@@ -233,6 +233,10 @@ spec:
               value: "{{ .Values.frost.plugins.modelLoader.liquibasePath }}"
             - name: plugins_modelLoader_liquibaseFiles
               value: "{{ .Values.frost.plugins.modelLoader.liquibaseFiles }}"
+            - name: plugins_modelLoader_securityPath
+              value: "{{ .Values.frost.plugins.modelLoader.securityPath }}"
+            - name: plugins_modelLoader_securityFiles
+              value: "{{ .Values.frost.plugins.modelLoader.securityFiles }}"
             {{- end }}
 
             # Other Plugins settings
