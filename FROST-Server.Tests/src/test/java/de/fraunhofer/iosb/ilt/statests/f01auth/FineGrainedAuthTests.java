@@ -35,17 +35,20 @@ import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
+import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchResponseJson;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -413,6 +416,33 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
         updateForOk(WRITE, serviceWrite, creator, mdlSensing.npDatastreamThing);
         updateForOk(ADMIN, serviceAdmin, reset, mdlSensing.npDatastreamThing);
+    }
+
+    @Test
+    void test_08a_ObservationRead() {
+        LOGGER.info("  test_08a_ObservationRead");
+        EntityUtils.testFilterResults(serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
+        EntityUtils.testFilterResults(serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
+        EntityUtils.testFilterResults(serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
+        EntityUtils.filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.testFilterResults(serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        EntityUtils.testFilterResults(serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+    }
+
+    @Test
+    void test_08b_ObservationReadFilter() {
+        LOGGER.info("  test_08b_ObservationReadFilter");
+        final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues()[0]);
+        EntityUtils.testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        EntityUtils.testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        EntityUtils.testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        EntityUtils.filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, HTTP_CODE_401_UNAUTHORIZED);
+        EntityUtils.testFilterResults(serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        EntityUtils.testFilterResults(serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
     }
 
     @Test

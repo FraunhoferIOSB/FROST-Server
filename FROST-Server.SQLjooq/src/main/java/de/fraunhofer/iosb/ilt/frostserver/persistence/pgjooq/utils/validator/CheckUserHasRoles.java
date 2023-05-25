@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import java.util.Arrays;
 import java.util.List;
 
-public class CheckUserHasRoles implements ValidationCheck {
+public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
     public enum Type {
         ANY,
@@ -47,6 +47,11 @@ public class CheckUserHasRoles implements ValidationCheck {
 
     @Override
     public boolean check(PostgresPersistenceManager pm, Entity context) {
+        return isValid();
+    }
+
+    @Override
+    public boolean isValid() {
         final List<String> userRoles = PrincipalExtended.getLocalPrincipal().getRoles();
         if (getVheckType() == Type.ANY) {
             for (String checkRole : getRoles()) {

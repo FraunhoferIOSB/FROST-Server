@@ -18,20 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
-import org.jooq.Table;
+import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 
 /**
- * A SecurityTableWrapper wraps a plain table and adds additional joins or
- * filters so that only the data is visible that the current user is allowed to
- * see.
  *
  * @author hylke
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface SecurityTableWrapper extends SecurityWrapper {
+public interface UserCondition extends AnnotatedConfigurable<Void, Void> {
 
-    public Table wrap(StaMainTable table);
+    public boolean isValid();
 
 }

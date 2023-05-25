@@ -17,9 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import org.jooq.Table;
 
+@ConfigurableClass
 public class SecurityWrapperPass implements SecurityTableWrapper {
 
     @Override
