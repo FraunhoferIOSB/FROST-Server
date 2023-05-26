@@ -49,7 +49,7 @@ These are settings affecting both the MQTT and HTTP packages.
   Always add an 'orderby=id asc' to queries to ensure consistent paging.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
-* **queueLoggingInterval:**
+* **queueLoggingInterval:**  
   If non-zero, log queue statistics ever x milliseconds. Default: 0 (off)
 
 

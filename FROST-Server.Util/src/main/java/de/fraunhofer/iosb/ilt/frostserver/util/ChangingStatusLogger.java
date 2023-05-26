@@ -66,6 +66,14 @@ public class ChangingStatusLogger {
          */
         public void logIfChanged(Logger logger);
 
+        /**
+         * Called before each log action. Can be used by an implementation to
+         * gather statistics.
+         */
+        public default void process() {
+            // Do nothing by default
+        }
+
     }
 
     public static class ChangingStatusDefault implements ChangingStatus {
@@ -111,6 +119,7 @@ public class ChangingStatusLogger {
 
         @Override
         public void logIfChanged(Logger logger) {
+            process();
             Object[] currentStatus = getCopyCurrentParams();
             if (!Arrays.deepEquals(currentStatus, previous)) {
                 previous = currentStatus;
