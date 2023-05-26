@@ -4,6 +4,7 @@
 
 **New Features**
 * Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
+* Improved queue-status logging.
 
 **Internal changes & Bugfixes**
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
