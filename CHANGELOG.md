@@ -1,6 +1,12 @@
 # Changelog
 
-## Development version 2.1.3
+## Development version 2.1.4
+
+**Internal changes & Bugfixes**
+
+
+
+## Release version 2.1.3
 
 **New Features**
 * Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
