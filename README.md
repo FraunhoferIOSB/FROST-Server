@@ -11,9 +11,9 @@ preliminary actuation support.
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/2.0.8/FROST-Server.MQTTP-2.0.8.war)
-* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/2.0.8/FROST-Server.HTTP-2.0.8.war)
-* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/2.0.8/FROST-Server.MQTT-2.0.8-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/2.0.9/FROST-Server.MQTTP-2.0.9.war)
+* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/2.0.9/FROST-Server.HTTP-2.0.9.war)
+* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/2.0.9/FROST-Server.MQTT-2.0.9-jar-with-dependencies.jar)
 
 Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
 
