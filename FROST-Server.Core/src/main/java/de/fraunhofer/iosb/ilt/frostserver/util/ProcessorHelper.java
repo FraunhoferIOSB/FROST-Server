@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,11 +43,16 @@ public class ProcessorHelper {
     }
 
     public static <T> ExecutorService createProcessors(int threadCount, BlockingQueue<T> queue, Consumer<T> consumer, String name) {
+        return createProcessors(threadCount, queue, consumer, name, new ArrayList<>());
+    }
+
+    public static <T> ExecutorService createProcessors(int threadCount, BlockingQueue<T> queue, Consumer<T> consumer, String name, List<Processor<T>> processorList) {
         ThreadFactory factory = new BasicThreadFactory.Builder().namingPattern(name + "-%d").build();
         ExecutorService result = Executors.newFixedThreadPool(threadCount, factory);
         for (int i = 0; i < threadCount; i++) {
-
-            result.submit(new Processor(queue, consumer, name));
+            final Processor processor = new Processor(queue, consumer, name);
+            processorList.add(processor);
+            result.submit(processor);
         }
         return result;
     }
@@ -73,12 +81,21 @@ public class ProcessorHelper {
         }
     }
 
-    private static class Processor<T> implements Runnable {
+    public static class Processor<T> implements Runnable {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+
+        public enum Status {
+            STOPPED,
+            WAITING,
+            WORKING
+        }
+
         private final BlockingQueue<T> queue;
         private final Consumer<T> consumer;
         private final String name;
+        private Status status = Status.STOPPED;
+        private Instant workStarted;
 
         private Processor(BlockingQueue<T> queue, Consumer<T> consumer, String name) {
             if (queue == null) {
@@ -102,7 +119,10 @@ public class ProcessorHelper {
             while (!Thread.currentThread().isInterrupted()) {
                 T event;
                 try {
+                    status = Status.WAITING;
                     event = queue.take();
+                    status = Status.WORKING;
+                    workStarted = Instant.now();
                     consumer.accept(event);
                 } catch (InterruptedException ex) {
                     LOGGER.trace("{} interrupted", name, ex);
@@ -113,6 +133,17 @@ public class ProcessorHelper {
                 }
             }
             LOGGER.debug("exiting {}-Thread", name);
+        }
+
+        public Status getStatus() {
+            return status;
+        }
+
+        public boolean isFine(Instant threshold) {
+            if (status != Status.WORKING) {
+                return true;
+            }
+            return workStarted.isAfter(threshold);
         }
     }
 }

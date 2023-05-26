@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WAITING;
+import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WORKING;
+
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -42,9 +45,14 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -71,14 +79,17 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private MqttServer server;
     private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
     private ExecutorService entityChangedExecutorService;
+    private final List<Processor<EntityChangedMessage>> entityChangedProcessors = new ArrayList<>();
+
     private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
     private ExecutorService entityCreateExecutorService;
+    private final List<Processor<EntityCreateEvent>> entityCreateProcessors = new ArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
     private final AtomicInteger topicCount = new AtomicInteger();
     private final AtomicInteger entityChangedQueueSize = new AtomicInteger();
     private final AtomicInteger entityCreateQueueSize = new AtomicInteger();
-    private final LoggingStatus logStatus = new LoggingStatus();
+    private final LoggingStatus logStatus = new LoggingStatus(this::checkWorkers);
 
     private boolean enabledMqtt = false;
     private boolean shutdown = false;
@@ -109,14 +120,16 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     mqttSettings.getSubscribeThreadPoolSize(),
                     entityChangedEventQueue,
                     this::handleEntityChangedEvent,
-                    "Mqtt-EntityChangedProcessor");
+                    "Mqtt-EntityChangedProcessor",
+                    entityChangedProcessors);
             // start watching for EntityCreateEvents
             entityCreateEventQueue = new ArrayBlockingQueue<>(mqttSettings.getCreateMessageQueueSize());
             entityCreateExecutorService = ProcessorHelper.createProcessors(
                     mqttSettings.getCreateThreadPoolSize(),
                     entityCreateEventQueue,
                     this::handleEntityCreateEvent,
-                    "Mqtt-EntityCreateProcessor");
+                    "Mqtt-EntityCreateProcessor",
+                    entityCreateProcessors);
             // start MQTT server
             server = MqttServerFactory.getInstance().get(settings);
             server.addSubscriptionListener(this);
@@ -264,6 +277,58 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
     }
 
+    private void checkWorkers() {
+        int cngWaiting = 0;
+        int cngWorking = 0;
+        int cngBroken = 0;
+        int crtWaiting = 0;
+        int crtWorking = 0;
+        int crtBroken = 0;
+        Instant threshold = Instant.now().minus(2, ChronoUnit.SECONDS);
+        for (Processor<EntityChangedMessage> processor : entityChangedProcessors) {
+            switch (processor.getStatus()) {
+                case WAITING:
+                    cngWaiting++;
+                    break;
+
+                case WORKING:
+                    if (!processor.isFine(threshold)) {
+                        cngBroken++;
+                    } else {
+                        cngWorking++;
+                    }
+                    break;
+
+                default:
+                    LOGGER.trace("Worker not started.");
+            }
+        }
+        for (Processor<EntityCreateEvent> processor : entityCreateProcessors) {
+            switch (processor.getStatus()) {
+                case WAITING:
+                    crtWaiting++;
+                    break;
+
+                case WORKING:
+                    if (!processor.isFine(threshold)) {
+                        crtBroken++;
+                    } else {
+                        crtWorking++;
+                    }
+                    break;
+
+                default:
+                    LOGGER.trace("Worker not started.");
+            }
+        }
+        logStatus.setEntityChangedWaiting(cngWaiting)
+                .setEntityChangedWorking(cngWorking)
+                .setEntityChangedBad(cngBroken)
+                .setEntityCreateWaiting(crtWaiting)
+                .setEntityCreateWorking(crtWorking)
+                .setEntityCreateBad(crtBroken);
+    }
+
     public static Version getVersionFromTopic(CoreSettings settings, String topic) throws UnknownVersionException {
         int pos = topic.indexOf('/');
         if (pos == -1) {
@@ -279,13 +344,20 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
-        public static final String MESSAGE = "entityCreateQueue: {}, entityChangedQueue: {}, topics: {}";
+        public static final String MESSAGE = "entityCreateQueue: {} [{}, {}, {}] entityChangedQueue: {} [{}, {}, {}] topics: {}";
         public final Object[] status;
+        private final Runnable processor;
 
-        public LoggingStatus() {
-            super(MESSAGE, new Object[3]);
+        public LoggingStatus(Runnable processor) {
+            super(MESSAGE, new Object[9]);
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
+            this.processor = processor;
+        }
+
+        @Override
+        public void process() {
+            processor.run();
         }
 
         public LoggingStatus setEntityCreateQueueSize(Integer size) {
@@ -293,13 +365,43 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return this;
         }
 
-        public LoggingStatus setEntityChangedQueueSize(Integer size) {
+        public LoggingStatus setEntityCreateWaiting(Integer size) {
             status[1] = size;
             return this;
         }
 
+        public LoggingStatus setEntityCreateWorking(Integer size) {
+            status[2] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityCreateBad(Integer size) {
+            status[3] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityChangedQueueSize(Integer size) {
+            status[4] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityChangedWaiting(Integer size) {
+            status[5] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityChangedWorking(Integer size) {
+            status[6] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityChangedBad(Integer size) {
+            status[7] = size;
+            return this;
+        }
+
         public LoggingStatus setTopicCount(Integer count) {
-            status[2] = count;
+            status[8] = count;
             return this;
         }
 

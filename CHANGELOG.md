@@ -5,6 +5,7 @@
 **New Features**
 * Improved configuration options for logging.
 * Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
+* Improved queue-status logging.
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.

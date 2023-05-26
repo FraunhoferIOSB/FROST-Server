@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WAITING;
+import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WORKING;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,8 +35,12 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -91,16 +97,21 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private int sendQueueSize;
     private int recvPoolSize;
     private int recvQueueSize;
+
     private BlockingQueue<EntityChangedMessage> sendQueue;
     private ExecutorService sendService;
+    private List<Processor<EntityChangedMessage>> sendProcessors = new ArrayList<>();
+
     private BlockingQueue<EntityChangedMessage> recvQueue;
     private ExecutorService recvService;
+    private List<Processor<EntityChangedMessage>> recvProcessors = new ArrayList<>();
+
     private ScheduledExecutorService maintenanceTimer;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
     private final AtomicInteger sendQueueCount = new AtomicInteger();
-    private final LoggingStatus logStatus = new LoggingStatus();
+    private final LoggingStatus logStatus = new LoggingStatus(this::checkWorkers);
 
     private String broker;
     private final String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
@@ -127,15 +138,16 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 sendPoolSize,
                 sendQueue,
                 this::handleMessageSent,
-                "mqtt-BusS");
-        logStatus.setSendQueueSize(sendQueueSize);
+                "mqtt-BusS",
+                sendProcessors);
 
         recvQueue = new ArrayBlockingQueue<>(recvQueueSize);
         recvService = ProcessorHelper.createProcessors(
                 recvPoolSize,
                 recvQueue,
                 this::handleMessageReceived,
-                "mqtt-BusR");
+                "mqtt-BusR",
+                recvProcessors);
 
         broker = customSettings.get(TAG_MQTT_BROKER, getClass());
         topicName = customSettings.get(TAG_TOPIC_NAME, getClass());
@@ -347,24 +359,113 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         }
     }
 
+    private void checkWorkers() {
+        int recvWaiting = 0;
+        int recvWorking = 0;
+        int recvBroken = 0;
+        int sendWaiting = 0;
+        int sendWorking = 0;
+        int sendBroken = 0;
+        Instant threshold = Instant.now().minus(2, ChronoUnit.SECONDS);
+        for (Processor<EntityChangedMessage> processor : recvProcessors) {
+            switch (processor.getStatus()) {
+                case WAITING:
+                    recvWaiting++;
+                    break;
+
+                case WORKING:
+                    if (!processor.isFine(threshold)) {
+                        recvBroken++;
+                    } else {
+                        recvWorking++;
+                    }
+                    break;
+
+                default:
+                    LOGGER.trace("Worker not started.");
+            }
+        }
+        for (Processor<EntityChangedMessage> processor : sendProcessors) {
+            switch (processor.getStatus()) {
+                case WAITING:
+                    sendWaiting++;
+                    break;
+
+                case WORKING:
+                    if (!processor.isFine(threshold)) {
+                        sendBroken++;
+                    } else {
+                        sendWorking++;
+                    }
+                    break;
+
+                default:
+                    LOGGER.trace("Worker not started.");
+            }
+        }
+        logStatus.setRecvWaiting(recvWaiting)
+                .setRecvWorking(recvWorking)
+                .setRecvBad(recvBroken)
+                .setSendWaiting(sendWaiting)
+                .setSendWorking(sendWorking)
+                .setSendBad(sendBroken);
+    }
+
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
-        public static final String MESSAGE = "sendQueue: {} of {}";
+        public static final String MESSAGE = "RecvQueue: {} [{}, {}, {}] SendQueue: {} [{}, {}, {}] ";
         public final Object[] status;
+        private final Runnable processor;
 
-        public LoggingStatus() {
-            super(MESSAGE, new Object[2]);
+        public LoggingStatus(Runnable processor) {
+            super(MESSAGE, new Object[8]);
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
+            this.processor = processor;
         }
 
-        public LoggingStatus setSendQueueCount(Integer count) {
+        @Override
+        public void process() {
+            processor.run();
+        }
+
+        public LoggingStatus setRecvQueueCount(Integer count) {
             status[0] = count;
             return this;
         }
 
-        public LoggingStatus setSendQueueSize(Integer size) {
+        public LoggingStatus setRecvWaiting(Integer size) {
             status[1] = size;
+            return this;
+        }
+
+        public LoggingStatus setRecvWorking(Integer size) {
+            status[2] = size;
+            return this;
+        }
+
+        public LoggingStatus setRecvBad(Integer size) {
+            status[3] = size;
+            return this;
+        }
+
+        public LoggingStatus setSendQueueCount(Integer count) {
+            status[4] = count;
+            return this;
+        }
+
+        public LoggingStatus setSendWaiting(Integer size) {
+            status[5] = size;
+            return this;
+        }
+
+        public LoggingStatus setSendWorking(Integer size) {
+            status[6] = size;
+            return this;
+        }
+
+        public LoggingStatus setSendBad(Integer size) {
+            status[7] = size;
             return this;
         }
 
