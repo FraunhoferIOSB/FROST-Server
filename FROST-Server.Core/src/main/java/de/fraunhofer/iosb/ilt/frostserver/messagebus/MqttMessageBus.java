@@ -167,12 +167,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .start();
         }
         maintenanceTimer = Executors.newSingleThreadScheduledExecutor();
-        maintenanceTimer.scheduleWithFixedDelay(this::connect, 1, 1, TimeUnit.MINUTES);
+        maintenanceTimer.scheduleWithFixedDelay(this::connect, 60, 20, TimeUnit.SECONDS);
     }
 
     private synchronized void connect() {
         if (client == null) {
             try {
+                LOGGER.info("Creating new paho-client for broker: {} with client-id {}", broker, clientId);
                 client = new MqttClient(broker, clientId, new MemoryPersistence());
                 client.setCallback(this);
             } catch (MqttException ex) {
@@ -246,7 +247,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 });
             }
         } catch (MqttException ex) {
-            LOGGER.error("Failed to start listening.", ex);
+            LOGGER.error("Failed to start listening, removing client.", ex);
+            MqttClient tempclient = client;
+            client = null;
+            try {
+                tempclient.close(true);
+            } catch (MqttException | RuntimeException ex1) {
+            }
         }
     }
 
