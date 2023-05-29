@@ -15,8 +15,8 @@
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
+        <moquette.version>0.15.2</moquette.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <moquette.version>0.15.1</moquette.version>
     </properties>
 
     <dependencies>
