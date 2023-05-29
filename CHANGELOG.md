@@ -1,8 +1,10 @@
 # Changelog
 
-## Development version 2.0.10
+## Release version 2.0.10
 
 **Internal changes & Bugfixes**
+* Greatly improved MQTT broker performance when subscriptions to many topics are present.
+* Updated dependency versions.
 
 
 ## Release version 2.0.9
