@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.create;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.EventObject;
 
 /**
@@ -27,11 +28,17 @@ public class EntityCreateEvent extends EventObject {
 
     private final String topic;
     private final String payload;
+    private final PrincipalExtended principal;
 
     public EntityCreateEvent(Object source, String topic, String payload) {
+        this(source, topic, payload, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    }
+
+    public EntityCreateEvent(Object source, String topic, String payload, PrincipalExtended principal) {
         super(source);
         this.topic = topic;
         this.payload = payload;
+        this.principal = principal;
     }
 
     public String getTopic() {
@@ -40,6 +47,10 @@ public class EntityCreateEvent extends EventObject {
 
     public String getPayload() {
         return payload;
+    }
+
+    public PrincipalExtended getPrincipal() {
+        return principal;
     }
 
 }

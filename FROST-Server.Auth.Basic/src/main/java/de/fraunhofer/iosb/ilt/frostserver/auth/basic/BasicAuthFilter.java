@@ -52,11 +52,10 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -71,8 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A Tomcat filter for Basic Authentication.
  */
 public class BasicAuthFilter implements Filter {
 
@@ -260,26 +258,6 @@ public class BasicAuthFilter implements Filter {
          * @return False if the request is not allowed.
          */
         public boolean isAllowed(UserData userData, HttpServletResponse response);
-    }
-
-    public static class UserData {
-
-        public final String userName;
-        public final String userPass;
-        public final List<String> roles = new ArrayList<>();
-
-        public UserData(String userName, String userPass) {
-            this.userName = userName;
-            this.userPass = userPass;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public boolean isEmpty() {
-            return userName == null;
-        }
     }
 
 }

@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.moquette.broker.security.IAuthenticator;
 import io.moquette.broker.security.IAuthorizatorPolicy;
 import io.moquette.broker.subscriptions.Topic;
@@ -76,6 +77,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
             return false;
         }
+
+        @Override
+        public PrincipalExtended getUserPrincipal(String clientId) {
+            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        }
+
     };
 
     private final AuthProvider authProvider;
@@ -135,4 +142,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         return anonymousRead || authProvider.userHasRole(clientId, user, roleRead);
     }
 
+    public PrincipalExtended getUserPrincipal(String clientId) {
+        return authProvider.getUserPrincipal(clientId);
+    }
 }

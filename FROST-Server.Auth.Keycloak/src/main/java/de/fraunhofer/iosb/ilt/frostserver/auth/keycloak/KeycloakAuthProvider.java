@@ -17,12 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
+
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
@@ -60,14 +67,17 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
      */
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
+
     /**
      * If the client has "access-type" set to "confidential" then a secret is
      * required to download the configuration. This secret can be found in the
      * configuration itself, in Keycloak.
      */
-
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
+
+    @DefaultValueInt(10)
+    public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
 
     /**
      * The logger for this class.
@@ -83,6 +93,11 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     private static final int CUTOFF_HOURS = 24;
 
     private CoreSettings coreSettings;
+    private String roleAdmin;
+    private int maxClientsPerUser;
+
+    private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
+    private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
 
     /**
      * The map of clients. We need those to determine the authorisation.
@@ -95,6 +110,9 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     public void init(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
         OPTIONS.put("keycloak-config-file", FROST_SERVER_KEYCLOAKJSON);
+        final Settings authSettings = coreSettings.getAuthSettings();
+        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
+        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
     }
 
     @Override
@@ -113,30 +131,48 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
             loginModule = new DirectAccessGrantsLoginModuleFrost(coreSettings);
         }
 
-        clientMapCleanup();
+        final UserData userData = new UserData(username, password);
 
-        return checkLogin(loginModule, username, password, clientId);
+        clientMapCleanup();
+        final boolean validUser = checkLogin(loginModule, userData, clientId);
+        if (!validUser) {
+            return false;
+        }
+        boolean admin = userData.roles.contains(roleAdmin);
+
+        final PrincipalExtended userPrincipal = new PrincipalExtended(userData.userName, admin, userData.roles);
+        final UserClientInfo userInfo = usernameToUserinfo.computeIfAbsent(userData.userName, t -> new UserClientInfo());
+        userInfo.setUserPrincipal(userPrincipal);
+
+        String oldClientId = userInfo.addClientId(clientId, maxClientsPerUser);
+        if (oldClientId != null) {
+            clientidToUserinfo.remove(oldClientId);
+        }
+        clientidToUserinfo.put(clientId, userInfo);
+
+        return validUser;
     }
 
-    private boolean checkLogin(AbstractKeycloakLoginModule loginModule, String username, String password, String clientId) {
+    private boolean checkLogin(AbstractKeycloakLoginModule loginModule, UserData userData, String clientId) {
         try {
-            LOGGER.debug("Login for user {} ({})", username, clientId);
+            LOGGER.debug("Login for user {} ({})", userData.userName, clientId);
             Subject subject = new Subject();
             loginModule.initialize(
                     subject,
                     (Callback[] callbacks) -> {
-                        ((NameCallback) callbacks[0]).setName(username);
-                        ((PasswordCallback) callbacks[1]).setPassword(password.toCharArray());
+                        ((NameCallback) callbacks[0]).setName(userData.userName);
+                        ((PasswordCallback) callbacks[1]).setPassword(userData.userPass.toCharArray());
                     },
                     SHARED_STATE,
                     OPTIONS);
             boolean login = loginModule.login();
             if (login) {
                 loginModule.commit();
-                Client client = new Client(username);
+                Client client = new Client(userData.userName);
                 client.setLastSeen(Instant.now());
                 client.setSubject(subject);
                 CLIENTMAP.put(clientId, client);
+                client.getSubject().getPrincipals().stream().forEach(t -> userData.roles.add(t.getName()));
             }
             return login;
         } catch (LoginException ex) {
@@ -156,6 +192,15 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
         boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
         LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
         return hasRole;
+    }
+
+    @Override
+    public PrincipalExtended getUserPrincipal(String clientId) {
+        UserClientInfo userInfo = clientidToUserinfo.get(clientId);
+        if (userInfo == null) {
+            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        }
+        return userInfo.getUserPrincipal();
     }
 
     @Override

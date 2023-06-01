@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -104,7 +105,13 @@ public class DatabaseHandler {
                         "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
     }
 
-    public boolean isValidUser(BasicAuthFilter.UserData userData) {
+    /**
+     * Checks if the user is valid and adds roles to the userData.
+     *
+     * @param userData the user data (username and password)
+     * @return true if the user is value
+     */
+    public boolean isValidUser(UserData userData) {
         maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);

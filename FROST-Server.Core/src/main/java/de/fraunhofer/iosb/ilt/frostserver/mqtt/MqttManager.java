@@ -213,6 +213,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     .withRequestType(RequestTypeUtils.CREATE)
                     .withContent(e.getPayload())
                     .withUrlPath(url)
+                    .withUserPrincipal(e.getPrincipal())
                     .build();
             ServiceRequest.setLocalRequest(serviceRequest);
             service.execute(serviceRequest, serviceResponse);
