@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 

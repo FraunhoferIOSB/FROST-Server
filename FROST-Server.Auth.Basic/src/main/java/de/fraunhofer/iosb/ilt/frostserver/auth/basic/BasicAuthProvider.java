@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -25,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolea
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;

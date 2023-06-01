@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;

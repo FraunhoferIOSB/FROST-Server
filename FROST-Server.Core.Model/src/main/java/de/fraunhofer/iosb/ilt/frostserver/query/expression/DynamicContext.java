@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 
 /**
  * A context object for dynamic data to be used when processing (rendering) a

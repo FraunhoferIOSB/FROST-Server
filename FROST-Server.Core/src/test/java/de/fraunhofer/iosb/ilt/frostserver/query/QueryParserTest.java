@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
 import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

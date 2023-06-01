@@ -15,15 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query;
+package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
 /**
- *
- * @author hylke
+ * A user Principal with role information.
  */
 public class PrincipalExtended implements Principal {
 

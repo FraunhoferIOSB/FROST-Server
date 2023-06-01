@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ANONYMOUS_PRINCIPAL;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;

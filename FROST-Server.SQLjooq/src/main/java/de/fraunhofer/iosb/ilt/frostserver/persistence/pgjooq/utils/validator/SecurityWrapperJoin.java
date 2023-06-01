@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.USER_NAME_ANONYMOUS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.USER_NAME_ANONYMOUS;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
 import java.util.List;
 import org.jooq.Record;

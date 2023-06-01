@@ -17,14 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ANONYMOUS_PRINCIPAL;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
-import de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -62,6 +61,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_SKIPFILTER;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STRING;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;

@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_ADMIN;
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_CREATE;
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.query.PrincipalExtended.ROLE_UPDATE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_ADMIN;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_CREATE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_UPDATE;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
