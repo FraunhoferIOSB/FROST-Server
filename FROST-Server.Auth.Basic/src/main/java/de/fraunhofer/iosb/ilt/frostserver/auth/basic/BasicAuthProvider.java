@@ -50,9 +50,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueBoolean(true)
     public static final String TAG_PLAIN_TEXT_PASSWORD = "plainTextPassword";
 
-    @DefaultValueBoolean(false)
-    public static final String TAG_AUTHENTICATE_ONLY = "authenticateOnly";
-
     @DefaultValueInt(10)
     public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
 
@@ -60,17 +57,15 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 
     @DefaultValue(PrincipalExtended.ROLE_READ)
-    public static final String TAG_ROLE_GET = "roleGet";
+    public static final String TAG_HTTP_ROLE_GET = "roleGet";
     @DefaultValue(PrincipalExtended.ROLE_UPDATE)
-    public static final String TAG_ROLE_PATCH = "rolePatch";
+    public static final String TAG_HTTP_ROLE_PATCH = "rolePatch";
     @DefaultValue(PrincipalExtended.ROLE_CREATE)
-    public static final String TAG_ROLE_POST = "rolePost";
+    public static final String TAG_HTTP_ROLE_POST = "rolePost";
     @DefaultValue(PrincipalExtended.ROLE_UPDATE)
-    public static final String TAG_ROLE_PUT = "rolePut";
+    public static final String TAG_HTTP_ROLE_PUT = "rolePut";
     @DefaultValue(PrincipalExtended.ROLE_DELETE)
-    public static final String TAG_ROLE_DELETE = "roleDelete";
-    @DefaultValue(PrincipalExtended.ROLE_ADMIN)
-    public static final String TAG_ROLE_ADMIN = "roleAdmin";
+    public static final String TAG_HTTP_ROLE_DELETE = "roleDelete";
 
     private CoreSettings coreSettings;
     private String roleAdmin;

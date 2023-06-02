@@ -120,6 +120,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_AUTH_PROVIDER = "provider";
     @DefaultValueBoolean(false)
     public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
+    @DefaultValueBoolean(false)
+    public static final String TAG_AUTHENTICATE_ONLY = "authenticateOnly";
     @DefaultValue(PrincipalExtended.ROLE_READ)
     public static final String TAG_AUTH_ROLE_READ = "role.read";
     @DefaultValue(PrincipalExtended.ROLE_CREATE)
