@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -26,10 +28,13 @@ import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -40,6 +45,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.AuthenticatedActionsHandler;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -51,6 +57,7 @@ import org.keycloak.adapters.servlet.OIDCServletHttpFacade;
 import org.keycloak.adapters.spi.AuthChallenge;
 import org.keycloak.adapters.spi.AuthOutcome;
 import org.keycloak.adapters.spi.InMemorySessionIdMapper;
+import org.keycloak.adapters.spi.KeycloakAccount;
 import org.keycloak.adapters.spi.SessionIdMapper;
 import org.keycloak.adapters.spi.UserSessionManagement;
 import org.slf4j.Logger;
@@ -70,6 +77,9 @@ public class KeycloakFilter implements Filter {
     private final Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
 
     private Map<Role, String> roleMappings;
+    private String roleAdmin;
+    private boolean authenticateOnly;
+
     private AdapterDeploymentContext deploymentContext;
     private NodesRegistrationManagement nodesRegistrationManagement;
     private UserSessionManagement sessionCleaner;
@@ -85,6 +95,8 @@ public class KeycloakFilter implements Filter {
         CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
+        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
+        authenticateOnly = "T".equals(authSettings.get(TAG_AUTHENTICATE_ONLY, "F"));
 
         final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         roleMappersByPath.put("/Data", method -> Role.ADMIN);
@@ -197,6 +209,15 @@ public class KeycloakFilter implements Filter {
                 LOGGER.debug("Request handled by authentication actions.");
                 return;
             } else {
+                if (authenticateOnly) {
+                    final KeycloakAccount account = findKeycloakAccount(httpRequest);
+                    final Principal principalBasic = account.getPrincipal();
+                    final Set<String> roles = account.getRoles();
+                    final PrincipalExtended pe = new PrincipalExtended(principalBasic.getName(), roles.contains(roleAdmin), roles);
+                    chain.doFilter(new RequestWrapper(httpRequest, pe), response);
+                    return;
+                }
+
                 HttpServletRequestWrapper wrapper = tokenStore.buildWrapper();
                 if (wrapper.isUserInRole(roleMappings.get(requiredRole))) {
                     LOGGER.debug("User has correct role.");
@@ -218,6 +239,21 @@ public class KeycloakFilter implements Filter {
         }
         LOGGER.debug("User is not allowed.");
         throwHttpError(403, httpResponse);
+    }
+
+    private KeycloakAccount findKeycloakAccount(HttpServletRequest httpRequest) {
+        final HttpSession session = httpRequest.getSession(false);
+        KeycloakAccount account = null;
+        if (session != null) {
+            account = (KeycloakAccount) session.getAttribute(KeycloakAccount.class.getName());
+            if (account == null) {
+                account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
+            }
+        }
+        if (account == null) {
+            account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
+        }
+        return account;
     }
 
     @Override

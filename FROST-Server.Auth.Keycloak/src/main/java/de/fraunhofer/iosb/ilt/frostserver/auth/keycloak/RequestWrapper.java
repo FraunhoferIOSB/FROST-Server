@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
+package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
