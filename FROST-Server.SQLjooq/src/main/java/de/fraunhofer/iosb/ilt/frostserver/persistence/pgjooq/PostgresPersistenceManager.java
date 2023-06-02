@@ -553,7 +553,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             if (wrapper instanceof SecurityTableWrapper stw) {
                 tableCollection.addSecurityWrapper(tableName, stw);
             } else if (wrapper instanceof HookValidator hv) {
-                tableCollection.addHookValidator(tableName, hv);
+                tableCollection.addSecurityValidator(tableName, hv);
             } else {
                 LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
             }
@@ -578,7 +578,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                     getDbTable(tableName);
                     StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
                     tableCollection.initSecurityWrapper(mainTable);
-                    tableCollection.initHookValidators(mainTable, this);
+                    tableCollection.initSecurityValidators(mainTable, this);
                 }
             }
         }

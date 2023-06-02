@@ -59,8 +59,8 @@ public class TableCollection {
      * not initialised itself using it.
      */
     private List<DefModel> modelDefinitions;
-    private Map<String, SecurityTableWrapper> securityDefinitions;
-    private Map<String, List<HookValidator>> hookValidators;
+    private Map<String, SecurityTableWrapper> securityWrappers;
+    private Map<String, List<HookValidator>> securityValidators;
 
     private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
@@ -120,7 +120,7 @@ public class TableCollection {
                     table.initProperties(entityFactories);
                     table.initRelations();
                     initSecurityWrapper(table);
-                    initHookValidators(table, ppm);
+                    initSecurityValidators(table, ppm);
                 }
                 return true;
             }
@@ -156,10 +156,10 @@ public class TableCollection {
     }
 
     public void initSecurityWrapper(StaMainTable table) {
-        if (securityDefinitions == null) {
+        if (securityWrappers == null) {
             return;
         }
-        SecurityTableWrapper stw = securityDefinitions.get(table.getName());
+        SecurityTableWrapper stw = securityWrappers.get(table.getName());
         if (stw == null) {
             return;
         }
@@ -167,17 +167,17 @@ public class TableCollection {
     }
 
     public void addSecurityWrapper(String tableName, SecurityTableWrapper w) {
-        if (securityDefinitions == null) {
-            securityDefinitions = new HashMap<>();
+        if (securityWrappers == null) {
+            securityWrappers = new HashMap<>();
         }
-        securityDefinitions.put(tableName, w);
+        securityWrappers.put(tableName, w);
     }
 
-    public void initHookValidators(StaMainTable table, PostgresPersistenceManager ppm) {
-        if (hookValidators == null) {
+    public void initSecurityValidators(StaMainTable table, PostgresPersistenceManager ppm) {
+        if (securityValidators == null) {
             return;
         }
-        final List<HookValidator> hvList = hookValidators.get(table.getName());
+        final List<HookValidator> hvList = securityValidators.get(table.getName());
         if (hvList == null) {
             LOGGER.info("    Adding default security hooks for {}", table.getName());
             HookValidator hv = new ValidatorCUD()
@@ -192,11 +192,11 @@ public class TableCollection {
         }
     }
 
-    public void addHookValidator(String tableName, HookValidator hv) {
-        if (hookValidators == null) {
-            hookValidators = new HashMap<>();
+    public void addSecurityValidator(String tableName, HookValidator hv) {
+        if (securityValidators == null) {
+            securityValidators = new HashMap<>();
         }
-        hookValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
+        securityValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
                 .add(hv);
     }
 }
