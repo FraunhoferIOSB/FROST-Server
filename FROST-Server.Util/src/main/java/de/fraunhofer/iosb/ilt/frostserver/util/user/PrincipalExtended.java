@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * A user Principal with role information.
@@ -34,14 +34,14 @@ public class PrincipalExtended implements Principal {
     public static final String ROLE_UPDATE = "update";
     public static final String ROLE_CREATE = "create";
     public static final String ROLE_READ = "read";
-    public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptyList());
-    public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptyList());
+    public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptySet());
+    public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptySet());
 
     private final String name;
     private final boolean admin;
-    private final List<String> roles;
+    private final Set<String> roles;
 
-    public PrincipalExtended(String name, boolean admin, List<String> roles) {
+    public PrincipalExtended(String name, boolean admin, Set<String> roles) {
         this.name = name;
         this.admin = admin;
         this.roles = roles;
@@ -56,7 +56,7 @@ public class PrincipalExtended implements Principal {
         return admin;
     }
 
-    public List<String> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
@@ -74,7 +74,7 @@ public class PrincipalExtended implements Principal {
         if (principal instanceof PrincipalExtended principalExtended) {
             return principalExtended;
         }
-        return new PrincipalExtended(principal.getName(), false, Collections.emptyList());
+        return new PrincipalExtended(principal.getName(), false, Collections.emptySet());
     }
 
     public static PrincipalExtended getLocalPrincipal() {

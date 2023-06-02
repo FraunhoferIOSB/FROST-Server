@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A wrapper for userName, userPass and userRoles.
@@ -27,7 +27,7 @@ public class UserData {
 
     public final String userName;
     public final String userPass;
-    public final List<String> roles = new ArrayList<>();
+    public final Set<String> roles = new LinkedHashSet<>();
 
     public UserData(String userName, String userPass) {
         this.userName = userName;

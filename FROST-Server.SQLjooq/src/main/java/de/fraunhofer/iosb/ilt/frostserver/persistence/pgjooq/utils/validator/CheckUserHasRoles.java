@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
@@ -52,7 +53,7 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
     @Override
     public boolean isValid() {
-        final List<String> userRoles = PrincipalExtended.getLocalPrincipal().getRoles();
+        final Set<String> userRoles = PrincipalExtended.getLocalPrincipal().getRoles();
         if (getVheckType() == Type.ANY) {
             for (String checkRole : getRoles()) {
                 if (userRoles.contains(checkRole)) {
