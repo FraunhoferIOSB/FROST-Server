@@ -7,8 +7,8 @@ order: 21
 
 # Authentication and Authorisation
 
-There are many ways to secure webservices. The most flexible one is to use an external reverse proxy.
-Since this can be tricky to set up, FROST offers some simple auth* options.
+There are many ways to secure webservices. The easiest one is to use an external reverse proxy.
+Since this can be tricky to set up and is limited in what it can do, FROST offers some simple auth* options.
 
 Auth* has to happen in two places: in the HTTP package and in the MQTT package. To make things
 flexible, authentication is handled by classes that implement an interface, just like the
@@ -19,7 +19,14 @@ An example docker-compose file with basic auth set up can be found at:
 
 More fine-grained authorisation rules can be configured using:
 * plugins with `EntityType` validators,
+* plugins with `Security Wrappers` and `Security Validators`,
 * PostgreSQL Row-level security (see `persistence.transactionRole` setting).
+
+Using `Security Wrappers` and `Security Validators` it is possible define in minute detail what a user is allowed to read, create, update and delete.
+The rules for this can take into account what the relations are that each Entity has with other Entities, as deep as required.
+Setting this up correctly is not trivial and a mistake in the authorisation may inadvertently open your data for reading or even editing.
+Therefore, we strongly recommend you contact us for support if your use case requires fine-grained authorisation.
+
 
 ## Roles
 
@@ -51,6 +58,8 @@ These are generic settings for authentication/authorisation.
     An authentication provider that uses a keycloak server for authentication.
 * **auth.allowAnonymousRead:**  
   If true, anonymous users are allowed to read (GET) data.
+* **auth.authenticateOnly:**  
+  Let the auth module only handle authentication, not authorisation. If this is set the auth module attaches the user principal to each request, but no authoristion restrictions are applied. Use this when authorisation is handled by other components. default: false.
 * **auth.autoUpdateDatabase:**  
   Automatically apply database updates.
 * **auth.role.read:**  
@@ -88,7 +97,7 @@ The BasicAuthProvider has the following specific settings:
 
 * **auth.realmName:**  
   The name of the realm that the browser displays when asking for username and password.
-* **auth.plainTextPassword:**
+* **auth.plainTextPassword:**  
   If true (the default), passwords are stored in plain text.
   Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
   for example with Blowfish variant 2a (recommended):
