@@ -49,6 +49,7 @@ public interface HookPreInsert {
 
     /**
      *
+     * @param fase The current insert-fase.
      * @param pm The Persistence Manager to use for database queries.
      * @param entity The entity that is being inserted.
      * @param insertFields The fields being inserted.

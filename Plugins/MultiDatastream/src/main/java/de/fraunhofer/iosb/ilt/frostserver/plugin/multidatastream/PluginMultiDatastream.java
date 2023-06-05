@@ -184,11 +184,13 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .addUpdateValidator("MD-Properties", entity -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
-                    if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + (unitOfMeasurements == null ? "null" : unitOfMeasurements.size()) + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                    if (unitOfMeasurements != null && multiObservationDataTypes != null) {
+                        if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
+                            throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        }
                     }
                     String observationType = entity.getProperty(pluginCoreModel.epObservationType);
-                    if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
+                    if (observationType != null && !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
                         throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
                     }
                 });
