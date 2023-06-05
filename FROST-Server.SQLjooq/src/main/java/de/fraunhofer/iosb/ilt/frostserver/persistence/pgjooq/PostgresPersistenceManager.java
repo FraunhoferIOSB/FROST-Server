@@ -152,7 +152,12 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         final Settings customSettings = persistenceSettings.getCustomSettings();
-        connectionName = customSettings.get(TAG_DB_URL, SOURCE_NAME_FROST, false);
+        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        if (StringHelper.isNullOrEmpty(connectionUrl)) {
+            connectionName = SOURCE_NAME_FROST;
+        } else {
+            connectionName = connectionUrl;
+        }
         connectionProvider = new ConnectionWrapper(customSettings, connectionName);
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
