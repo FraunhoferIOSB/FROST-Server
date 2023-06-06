@@ -81,6 +81,7 @@ public class PluginManager implements ConfigDefaults {
     /**
      * The plugins that supply resultFormatters.
      */
+    private final List<PluginResultFormat> resultFormatPlugins = new ArrayList<>();
     private final Map<Version, Map<String, PluginResultFormat>> resultFormattersByFormat = new HashMap<>();
     private final Map<Version, List<PluginResultFormat>> resultFormatters = new HashMap<>();
 
@@ -132,6 +133,7 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void initPlugins(PersistenceManager pm) {
+        initResultFormatters();
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerEntityTypes();
@@ -186,25 +188,31 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void registerPlugin(Plugin plugin) {
-        if (plugin instanceof PluginService) {
-            registerPlugin((PluginService) plugin);
+        if (plugin instanceof PluginService ps) {
+            registerPlugin(ps);
         }
-        if (plugin instanceof PluginRootDocument) {
-            serviceDocModifiers.add((PluginRootDocument) plugin);
+        if (plugin instanceof PluginRootDocument prd) {
+            serviceDocModifiers.add(prd);
         }
-        if (plugin instanceof PluginModel) {
-            modelModifiers.add((PluginModel) plugin);
+        if (plugin instanceof PluginModel pm) {
+            modelModifiers.add(pm);
         }
-        if (plugin instanceof PluginResultFormat) {
-            registerPlugin((PluginResultFormat) plugin);
+        if (plugin instanceof PluginResultFormat prf) {
+            resultFormatPlugins.add(prf);
         }
-        if (plugin instanceof LiquibaseUser) {
-            settings.addLiquibaseUser((LiquibaseUser) plugin);
+        if (plugin instanceof LiquibaseUser lu) {
+            settings.addLiquibaseUser(lu);
         }
         plugins.put(plugin.getClass(), plugin);
     }
 
-    private void registerPlugin(PluginResultFormat plugin) {
+    private void initResultFormatters() {
+        for (PluginResultFormat plugin : resultFormatPlugins) {
+            initResultFormatter(plugin);
+        }
+    }
+
+    private void initResultFormatter(PluginResultFormat plugin) {
         final Collection<Version> pluginVersions = plugin.getVersions();
         final Collection<String> formatNames = plugin.getFormatNames();
         for (Version version : pluginVersions) {
