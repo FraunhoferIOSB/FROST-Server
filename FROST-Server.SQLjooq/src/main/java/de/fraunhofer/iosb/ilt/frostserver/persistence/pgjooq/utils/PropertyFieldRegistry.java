@@ -50,6 +50,7 @@ import java.util.Set;
 import net.time4j.Moment;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.impl.DSL;
 
 /**
  *
@@ -488,6 +489,46 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             updateFields.put(factory.get(table), entity.getProperty(property));
+            message.addField(property);
+        }
+    }
+
+    public static class ConverterPassword<T> implements ConverterRecord<T> {
+
+        private final boolean plainTextPassword;
+        private final Property property;
+        private final ExpressionFactory<T> factory;
+
+        public ConverterPassword(boolean plainTextPassword, Property property, ExpressionFactory<T> factory) {
+            this.plainTextPassword = plainTextPassword;
+            this.property = property;
+            this.factory = factory;
+        }
+
+        @Override
+        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
+            // Passwords can not be read.
+        }
+
+        @Override
+        public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
+            if (plainTextPassword) {
+                insertFields.put(factory.get(table), entity.getProperty(property));
+            } else {
+                Field<String> password = DSL.field("crypt(?, gen_salt('bf', 12))", String.class, entity.getProperty(property));
+                insertFields.put(factory.get(table), password);
+            }
+        }
+
+        @Override
+        public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            if (plainTextPassword) {
+                updateFields.put(factory.get(table), entity.getProperty(property));
+            } else {
+
+                Field<String> password = DSL.field("crypt(?, gen_salt('bf', 12))", String.class, entity.getProperty(property));
+                updateFields.put(factory.get(table), password);
+            }
             message.addField(property);
         }
     }

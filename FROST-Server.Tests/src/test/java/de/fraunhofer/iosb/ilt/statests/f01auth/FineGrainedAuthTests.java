@@ -23,6 +23,10 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_2
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_404_NOT_FOUND;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERPASS;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -101,6 +105,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
         SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
         SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
         SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
@@ -110,7 +115,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "finegrainedsecurity/liquibase");
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
         SERVER_PROPERTIES.put("plugins.modelLoader.securityPath", "");
-        SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
+        SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secUser.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
         SERVER_PROPERTIES.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
@@ -290,14 +295,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_02a_ReadProjects() {
         LOGGER.info("  test_02a_ReadProjects");
-        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.testFilterResults(serviceWrite, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.testFilterResults(serviceRead, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.filterForException(serviceAnon, mdlUsers.etProject, "", HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.testFilterResults(serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.testFilterResults(serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
-        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceAdmin, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceWrite, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceRead, mdlUsers.etProject, "", PROJECTS);
+        filterForException(serviceAnon, mdlUsers.etProject, "", HTTP_CODE_401_UNAUTHORIZED);
+        testFilterResults(serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(serviceObsCreaterProject2, mdlUsers.etProject, "", PROJECTS);
     }
 
     @Test
@@ -315,8 +320,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_02b_UpdateProject() {
-        LOGGER.info("  test_02b_CreateProject");
+    void test_02c_UpdateProject() {
+        LOGGER.info("  test_02c_UpdateProject");
         final Entity original = PROJECTS.get(0);
         EntityCreator creator = (user) -> original.withOnlyPk().setProperty(EP_NAME, user + "-Edited");
         EntityCreator reset = (user) -> original.withOnlyPk().setProperty(EP_NAME, original.getProperty(EP_NAME));
@@ -334,40 +339,98 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_03_ReadUserProjectRole() {
         LOGGER.info("  test_03_ReadUserProjectRole");
-        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
-        EntityUtils.filterForException(serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
+        filterForException(serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
     }
 
     @Test
-    void test_04_ReadUser() {
-        LOGGER.info("  test_04_ReadUser");
-        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
-        EntityUtils.filterForException(serviceWrite, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceRead, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etUser, "", HTTP_CODE_404_NOT_FOUND);
+    void test_04a_ReadUser() {
+        LOGGER.info("  test_04a_ReadUser");
+        testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
+        testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 1));
+        testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 0));
+        filterForException(serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
+        testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
+        testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
+        testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 4));
+        testFilterResults(serviceObsCreaterProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
+    }
+
+    @Test
+    void test_04b_CreateUser() {
+        LOGGER.info("  test_04b_CreateUser");
+        EntityCreator creator = (user) -> mdlUsers.newUser(user + "-User", user + "-password");
+
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H401);
+        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+    }
+
+    @Test
+    void test_04c_ChangePassword() {
+        LOGGER.info("  test_04c_ChangePassword");
+        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+                .setProperty(EP_USERPASS, user + "2");
+        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+                .withOnlyPk()
+                .setProperty(EP_USERPASS, user + "2");
+
+        serviceRead = testChangePassword(READ, serviceRead, changed);
+        serviceWrite = testChangePassword(WRITE, serviceWrite, changed);
+        serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed);
+        serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed);
+        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed);
+        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed);
+
+        testChangePasswordFail(WRITE, serviceWrite, changedCopy, READ);
+        testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
+    }
+
+    private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
+        try {
+            service.update(creator.create(user2));
+            String failMessage = "User " + user + " should NOT be able to update password for user " + user2 + ".";
+            LOGGER.error(failMessage);
+            fail(failMessage);
+        } catch (ServiceFailureException ex) {
+            // Good!
+        }
+    }
+
+    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator) {
+        final Entity userEntity = creator.create(user);
+        try {
+            service.update(userEntity);
+        } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to update password. Got " + ex.getMessage();
+            LOGGER.error(failMessage, ex);
+            fail(failMessage);
+        }
+        SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
+        testFilterResults(newService, mdlUsers.etUser, "", USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).toList());
+        return newService;
     }
 
     @Test
     void test_05_ReadRole() {
         LOGGER.info("  test_05_ReadRole");
-        EntityUtils.testFilterResults(serviceAdmin, mdlUsers.etRole, "", ROLES);
-        EntityUtils.filterForException(serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAnon, mdlUsers.etRole, "", HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.filterForException(serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        EntityUtils.filterForException(serviceObsCreaterProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        testFilterResults(serviceAdmin, mdlUsers.etRole, "", ROLES);
+        filterForException(serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceAnon, mdlUsers.etRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(serviceObsCreaterProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
     }
 
     @Test
@@ -421,28 +484,28 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_08a_ObservationRead() {
         LOGGER.info("  test_08a_ObservationRead");
-        EntityUtils.testFilterResults(serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
-        EntityUtils.testFilterResults(serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
-        EntityUtils.testFilterResults(serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
-        EntityUtils.filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.testFilterResults(serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
-        EntityUtils.testFilterResults(serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
-        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
-        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
+        testFilterResults(serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
+        testFilterResults(serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
+        filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
+        testFilterResults(serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
     }
 
     @Test
     void test_08b_ObservationReadFilter() {
         LOGGER.info("  test_08b_ObservationReadFilter");
         final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues()[0]);
-        EntityUtils.testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        EntityUtils.testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        EntityUtils.testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        EntityUtils.filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, HTTP_CODE_401_UNAUTHORIZED);
-        EntityUtils.testFilterResults(serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        EntityUtils.testFilterResults(serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
-        EntityUtils.testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        EntityUtils.testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, HTTP_CODE_401_UNAUTHORIZED);
+        testFilterResults(serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
     }
 
     @Test

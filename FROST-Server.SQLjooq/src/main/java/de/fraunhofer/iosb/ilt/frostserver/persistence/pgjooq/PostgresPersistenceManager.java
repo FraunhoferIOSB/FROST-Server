@@ -316,10 +316,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         init();
-        EntityFactories ef = getEntityFactories();
-
-        entity.setId(pathElement.getId());
-        Id id = pathElement.getId();
+        final EntityFactories ef = getEntityFactories();
+        final Id id = pathElement.getId();
+        entity.setId(id);
         if (!ef.entityExists(this, entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
