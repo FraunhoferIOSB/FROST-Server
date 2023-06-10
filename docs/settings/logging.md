@@ -30,23 +30,23 @@ environment variables that influence basic logging options.
   The maximum individual log file size.  See the [logback docs](https://logback.qos.ch/manual/appenders.html#SizeAndTimeBasedRollingPolicy). Default: `50MB`.
 * **FROST_LOG_maxfilecount:** Since 2.2.0, 2.1.1, 2.0.7  
   The maximum number of log file to keep. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpMaxHistory). Default: `5`.
-* **FROST_LL:**  
+* **FROST_LL:** 2.0.0  
   The "root" log level. Default: INFO
-* **FROST_LL_parser:**  
+* **FROST_LL_parser:** 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.parser` package. Default: INFO
-* **FROST_LL_queries:**  
+* **FROST_LL_queries:** 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder` package. Default: INFO
-* **FROST_LL_requests:**  
+* **FROST_LL_requests:** 2.0.0  
   The log level for the request decoder. When set to DEBUG each request with its headers will be logged. Default: INFO
-* **FROST_LL_service:**  
+* **FROST_LL_service:** 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.service` package.
   When set to DEBUG, 4xx error details and 5xx stack traces will be logged. Default: INFO
-* **FROST_LL_settings:**  
+* **FROST_LL_settings:** 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.settings` package. Default: INFO
-* **FROST_LL_io_moquette:**  
+* **FROST_LL_io_moquette:** 2.0.0  
   The log level for the `io.moquette` package. Default: WARN
-* **FROST_LL_liquibase:**  
+* **FROST_LL_liquibase:** 2.0.0  
   The log level for the `liquibase` package. Default: INFO
-* **FROST_LL_org_jooq:**  
+* **FROST_LL_org_jooq:** 2.0.0  
   The log level for the `org.jooq` package. Default: INFO
 

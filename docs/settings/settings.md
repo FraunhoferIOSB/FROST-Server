@@ -169,7 +169,7 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
     Both, server and client generated ids, are allowed.
   * **`ClientGeneratedOnly`:**  
     Client has to provide @iot.id to create entities.
-* **persistence.idGenerationMode.<EntityTypeName>:**  
+* **persistence.idGenerationMode.<EntityTypeName>:** Since 2.2.0  
   Determines how entity ids are generated for this Entity Type. This overrides **persistence.idGenerationMode**.
 * **persistence.transactionRole:**
   If true, [SET LOCAL ROLE](https://www.postgresql.org/docs/current/sql-set-role.html)
@@ -200,7 +200,7 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
   The maximum duration, in seconds, that a query is allowed to take. Default 0 (no timeout). If
   your FROST instance is behind a reverse proxy that will abort the connection after a certain time, set this to the
   same duration.
-* **persistence.countMode:**  
+* **persistence.countMode:** 2.0.0  
   The way to count entities. Allowed values:
   * **`FULL`:** (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
   * **`LIMIT_SAMPLE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
@@ -216,7 +216,7 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
   * **`ESTIMATE_LIMIT`:** First do an estimate using `EXPLAIN` and if the estimate is below the threshold, do a
     count with a limit of countEstimateThreshold. This is the fastest method, but
     if the estimate is inaccurate, it can give an incorrect estimate for low counts.
-* **persistence.countEstimateThreshold:**  
+* **persistence.countEstimateThreshold:** 2.0.0  
   When to switch from counting to estimating. Detailed behaviour depends on the value of
   `persistence.countMode`. Default value: 10000.
 
