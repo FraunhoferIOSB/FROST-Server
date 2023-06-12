@@ -162,10 +162,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
+        final boolean admin = entity.getQuery().getPrincipal().isAdmin();
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
-            if (np instanceof NavigationPropertyMain) {
-                writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
+            if (!np.isAdminOnly() || admin) {
+                if (np instanceof NavigationPropertyMain) {
+                    writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
+                }
             }
         }
     }

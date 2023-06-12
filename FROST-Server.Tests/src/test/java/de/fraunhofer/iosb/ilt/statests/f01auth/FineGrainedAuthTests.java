@@ -115,7 +115,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "finegrainedsecurity/liquibase");
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
         SERVER_PROPERTIES.put("plugins.modelLoader.securityPath", "");
-        SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secUser.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
+        SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secUsers.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
         SERVER_PROPERTIES.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");

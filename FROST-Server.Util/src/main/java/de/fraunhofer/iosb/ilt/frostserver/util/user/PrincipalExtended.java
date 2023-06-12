@@ -60,6 +60,11 @@ public class PrincipalExtended implements Principal {
         return roles;
     }
 
+    @Override
+    public String toString() {
+        return name + " (" + admin + ")";
+    }
+
     /**
      * Turns the given principal into a PrincipalExtended. A null value will
      * turn into an anonymous principal extended.

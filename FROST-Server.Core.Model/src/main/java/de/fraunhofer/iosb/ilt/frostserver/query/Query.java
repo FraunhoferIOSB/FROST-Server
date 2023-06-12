@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -348,8 +350,16 @@ public class Query {
             }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
-                selectNavProp.addAll(entityType.getNavigationEntities());
-                selectNavProp.addAll(entityType.getNavigationSets());
+                for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
+                }
+                for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
+                }
             }
         } else {
             for (Property s : select) {
@@ -358,8 +368,10 @@ public class Query {
                 } else if (s instanceof EntityPropertyCustomSelect) {
                     EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
                     selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
-                } else if (s instanceof NavigationPropertyMain) {
-                    selectNavProp.add((NavigationPropertyMain) s);
+                } else if (s instanceof NavigationPropertyMain np) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
                 }
             }
         }

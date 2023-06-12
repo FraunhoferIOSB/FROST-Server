@@ -137,8 +137,11 @@ public class Expand {
             final String firstRawPath = rawPath.get(0);
             final Property property = entityType.getProperty(firstRawPath);
             final int rawCount = rawPath.size();
-            if (property instanceof NavigationPropertyMain) {
-                validatedPath = (NavigationPropertyMain) property;
+            if (property instanceof NavigationPropertyMain npm) {
+                if (npm.isAdminOnly() && !parentQuery.getPrincipal().isAdmin()) {
+                    throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
+                }
+                validatedPath = npm;
                 if (rawCount > 1) {
                     // Need to re-nest this expand!
                     Expand subExpand = new Expand(modelRegistry, subQuery);
@@ -159,7 +162,7 @@ public class Expand {
                 }
                 validatedPath = tempPath;
             } else {
-                throw new IllegalArgumentException("Invalid custom expand path '" + firstRawPath + "' on entity type " + entityType.entityName);
+                throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
             }
 
         }
