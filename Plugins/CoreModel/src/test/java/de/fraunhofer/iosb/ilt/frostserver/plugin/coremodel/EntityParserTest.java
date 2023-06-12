@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -421,6 +422,17 @@ class EntityParserTest {
     }
 
     @Test
+    void readObservationWithIncorrectLink() throws IOException {
+        String json = "{\n"
+                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
+                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
+                + "  \"result\" : 38,\n"
+                + "  \"Datastream\":[{\"@iot.id\":100}]\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etObservation, json));
+    }
+
+    @Test
     void readObservationWithLinkedFeatureOfInterest() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
@@ -604,6 +616,27 @@ class EntityParserTest {
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(101)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
+    }
+
+    @Test
+    void readSensorWithBadLink() throws IOException {
+        final String json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": {\"@iot.id\":100}\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etSensor, json));
+
+        final String json2 = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [100]\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etSensor, json2));
     }
 
     @Test
