@@ -46,7 +46,8 @@ public class QueryState<T extends StaMainTable<T>> {
     private final T mainTable;
     private final Field<?> sqlMainIdField;
     private Table sqlFrom;
-    private Condition sqlWhere = DSL.trueCondition();
+    private Condition sqlWhere = DSL.noCondition();
+    private Condition sqlSkipWhere;
     private Utils.SortSelectFields sqlSortFields;
 
     private boolean distinctRequired = false;
@@ -140,17 +141,51 @@ public class QueryState<T extends StaMainTable<T>> {
     }
 
     /**
-     * @return the sqlWhere
+     * Get the SQL Where clause, including skipFilter conditions.
+     *
+     * @return the sql where clause with skipFilter.
+     */
+    public Condition getFullSqlWhere() {
+        if (sqlSkipWhere == null) {
+            return sqlWhere;
+        }
+        return sqlWhere.and(sqlSkipWhere);
+    }
+
+    /**
+     * Get the SQL Where clause, excluding skipFilter conditions.
+     *
+     * @return the sql where clause without skipFilter.
      */
     public Condition getSqlWhere() {
         return sqlWhere;
     }
 
     /**
-     * @param sqlWhere the sqlWhere to set
+     * Set the SQL Where clause, excluding skipFilter conditions.
+     *
+     * @param sqlWhere the sql where clause without skipFilter.
      */
     public void setSqlWhere(Condition sqlWhere) {
         this.sqlWhere = sqlWhere;
+    }
+
+    /**
+     * Get the SQL Where clause, for the skipFilter conditions.
+     *
+     * @return the sql where clause for the skipFilter.
+     */
+    public Condition getSqlSkipWhere() {
+        return sqlSkipWhere == null ? DSL.noCondition() : sqlSkipWhere;
+    }
+
+    /**
+     * Set the SQL Where clause, for the skipFilter conditions.
+     *
+     * @param sqlSkipWhere the sql where clause for the skipFilter.
+     */
+    public void setSqlSkipWhere(Condition sqlSkipWhere) {
+        this.sqlSkipWhere = sqlSkipWhere;
     }
 
     /**

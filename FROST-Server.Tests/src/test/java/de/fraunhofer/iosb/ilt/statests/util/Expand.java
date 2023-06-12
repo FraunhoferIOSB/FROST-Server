@@ -28,6 +28,7 @@ public class Expand implements Cloneable {
 
     private final List<PathElement> path = new ArrayList<>();
     private final Query query;
+    private EntityType entityType;
 
     public Expand() {
         query = new Query();
@@ -49,11 +50,19 @@ public class Expand implements Cloneable {
     }
 
     public boolean isCollection() {
-        return path.get(path.size() - 1).isCollection();
+        return path.isEmpty() || path.get(path.size() - 1).isCollection();
     }
 
     public EntityType getEntityType() {
-        return path.get(path.size() - 1).getEntityType();
+        if (entityType == null) {
+            entityType = path.get(path.size() - 1).getEntityType();
+        }
+        return entityType;
+    }
+
+    public Expand setEntityType(EntityType entityType) {
+        this.entityType = entityType;
+        return this;
     }
 
     public Query getQuery() {
