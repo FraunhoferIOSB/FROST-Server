@@ -3,6 +3,7 @@
 ## Development version 2.0.11
 
 **Internal changes & Bugfixes**
+* Fixed #1554: Count incorrect after following nextLink.
 
 
 ## Release version 2.0.10
@@ -26,13 +27,10 @@
 * Updated dependency versions.
 * Fixed #1541: times not serialised correctly in GeoJSON resultFormat.
 * Fixed #1542: fixed regression in GeoJSON id property.
-* [HELM] Set http rewrite target and path to /FROST-Server/
-* [HELM] Set default ingress class to nginx for mqtt ingress
-* [HELM] Fixed mqtt-ingress definition
-* [HELM] Fixed default value for db image in readme
-* [HELM] Added extension settings to readme
-* [HELM] Added extension settings to chart
-
+==== BASE ====
+* Fixed #1564: NavLinks can have names that are not the name of the target entity type.
+* Fixed cross-entity-type custom links breaking $expand.
+==== BASE ====
 
 ## Release version 2.0.7
 

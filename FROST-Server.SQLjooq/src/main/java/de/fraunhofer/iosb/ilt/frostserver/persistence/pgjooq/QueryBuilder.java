@@ -39,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.HashSet;
@@ -148,7 +147,7 @@ public class QueryBuilder implements ResourcePathVisitor {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
         }
         var whereStep = selectStep.from(queryState.getSqlFrom())
-                .where(queryState.getSqlWhere());
+                .where(queryState.getFullSqlWhere());
 
         final var sortFields = queryState.getSqlSortFields().getSqlSortFields();
         final var orderByStep = whereStep.orderBy(sortFields.toArray(OrderField[]::new));
@@ -410,19 +409,14 @@ public class QueryBuilder implements ResourcePathVisitor {
     public void parseFilter(Query query) {
         if (query != null) {
             queryState.setFilter(true);
-            Expression filter = query.getFilter();
-            Expression skipFilter = query.getSkipFilter();
-            Expression fullFilter = null;
-            if (filter != null && skipFilter != null) {
-                fullFilter = new And(filter, skipFilter);
-            } else if (filter != null) {
-                fullFilter = filter;
-            } else if (skipFilter != null) {
-                fullFilter = skipFilter;
+            final Expression filter = query.getFilter();
+            final Expression skipFilter = query.getSkipFilter();
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
+            if (filter != null) {
+                queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
-            if (fullFilter != null) {
-                PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
-                queryState.setSqlWhere(handler.addFilterToWhere(fullFilter, queryState.getSqlWhere()));
+            if (skipFilter != null) {
+                queryState.setSqlSkipWhere(handler.addFilterToWhere(skipFilter, queryState.getSqlSkipWhere()));
             }
         }
     }

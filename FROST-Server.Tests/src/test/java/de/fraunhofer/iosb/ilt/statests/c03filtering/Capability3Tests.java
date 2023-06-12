@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1212,8 +1213,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private void checkCountForEntityType(EntityType entityType) {
         Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
-        request.getQuery().setCount(true);
-        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
+        request.getQuery()
+                .setCount(true)
+                .setTop(1l);
+        final JSONObject response = request.executeGet();
+        String nextLink = EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
+
+        Assertions.assertNotNull(nextLink, "NextLink should not have been null for " + entityType);
+
+        Request nextRequest = new Request(nextLink);
+        nextRequest.setEntityType(request.getEntityType());
+        EntityUtils.checkResponse(serverSettings.getExtensions(), nextRequest.executeGet(), nextRequest, ENTITYCOUNTS);
 
         request.getQuery().setCount(false);
         EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
