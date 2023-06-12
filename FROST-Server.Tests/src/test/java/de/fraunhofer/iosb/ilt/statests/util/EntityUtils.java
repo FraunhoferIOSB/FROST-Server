@@ -208,8 +208,10 @@ public class EntityUtils {
      * @param response The response object to check.
      * @param request The request to check the response against.
      * @param entityCounts The object with the expected entity counts.
+     * @return the nextLink, or null.
      */
-    public static void checkResponse(Set<Extension> extensions, JSONObject response, Request request, EntityCounts entityCounts) {
+    public static String checkResponse(Set<Extension> extensions, JSONObject response, Request request, EntityCounts entityCounts) {
+        String nextLink = null;
         try {
             if (request.isCollection()) {
                 checkCollection(extensions, response.getJSONArray("value"), request, entityCounts);
@@ -235,6 +237,10 @@ public class EntityUtils {
                     assertEquals(expectedCount, foundCount, message);
                 }
                 Long top = expandQuery.getTop();
+                String nextLinkProperty = "@iot.nextLink";
+                if (response.has(nextLinkProperty)) {
+                    nextLink = response.getString(nextLinkProperty);
+                }
                 if (top != null && expectedCount != -1) {
                     int foundNumber = response.getJSONArray("value").length();
                     long skip = expandQuery.getSkip() == null ? 0 : expandQuery.getSkip();
@@ -244,7 +250,6 @@ public class EntityUtils {
                         fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
                     }
 
-                    String nextLinkProperty = "@iot.nextLink";
                     if (foundNumber + skip < expectedCount) {
                         // should have nextLink
                         String message = "Entity should have " + nextLinkProperty + " for request: '" + request.toString() + "'";
@@ -265,6 +270,7 @@ public class EntityUtils {
             LOGGER.error(message, ex);
             fail(message);
         }
+        return nextLink;
     }
 
     /**
