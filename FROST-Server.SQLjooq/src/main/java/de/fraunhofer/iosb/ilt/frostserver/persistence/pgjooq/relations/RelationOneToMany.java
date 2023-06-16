@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -111,22 +112,18 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) throws IncompleteEntityException, NoSuchEntityException {
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
         EntityFactories entityFactories = pm.getEntityFactories();
         if (entityFactories.entityExists(pm, target, true)) {
             link(pm, source.getId().getValue(), target.getId().getValue());
-        } else if (forInsert) {
-            NavigationPropertyMain backLink = navProp.getInverse();
-            if (backLink == null) {
-                LOGGER.error("Back-link not found for relation {}/{}.", navProp.getEntityType(), navProp.getName());
-                throw new IllegalStateException("Back-link not found for relation " + navProp.getEntityType() + "/" + navProp.getName() + ".");
-            }
-            target.setProperty(backLink, source);
-            target.validateCreate();
-            pm.insert(target);
         } else {
             throw new NoSuchEntityException("Linked Entity with no id.");
         }

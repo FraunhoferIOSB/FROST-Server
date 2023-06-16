@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -174,9 +175,11 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
+        boolean isOdata401 = false;
         if (request.getVersion() == VERSION_ODATA_40) {
             response.addHeader("OData-Version", "4.0");
         } else {
+            isOdata401 = true;
             response.addHeader("OData-Version", "4.01");
         }
         switch (request.getRequestType()) {
@@ -187,12 +190,19 @@ public class PluginOData implements PluginService, ConfigDefaults {
                 return executeGetCapabilities(request, response);
 
             case CREATE:
+                if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
+                    request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                }
+                request.setUpdateMode(isOdata401 ? UpdateMode.INSERT_ODATA_401 : UpdateMode.INSERT_ODATA_40);
+                return mainService.execute(request, response);
+
             case UPDATE_ALL:
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
+                request.setUpdateMode(isOdata401 ? UpdateMode.UPDATE_ODATA_401 : UpdateMode.UPDATE_ODATA_40);
                 return mainService.execute(request, response);
 
             default:

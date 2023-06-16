@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -136,7 +137,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     }
 
     @Override
-    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
         final ModelRegistry modelRegistry = getModelRegistry();
         EntityType linkedEntityType = linkedSet.getEntityType();
         if (linkedEntityType.equals(pluginCoreModel.etLocation)) {
@@ -146,18 +147,17 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
             EntityFactories entityFactories = pm.getEntityFactories();
             TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
 
-            if (!forInsert) {
-                // Unlink old Locations from Thing.
-                long count = dslContext.delete(ttl).where(((TableField) ttl.getThingId()).eq(thingId)).execute();
-                LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
-            }
+            // Unlink old Locations from Thing.
+            long count = dslContext.delete(ttl).where(((TableField) ttl.getThingId()).eq(thingId)).execute();
+            LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
 
             // Maybe Create new Locations and link them to this Thing.
             List<Object> locationIds = new ArrayList<>();
+            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
             for (Entity l : linkedSet) {
-                if (forInsert) {
-                    entityFactories.entityExistsOrCreate(pm, l);
-                } else if (!entityFactories.entityExists(pm, l, true)) {
+                if (updateMode.createAndLinkNew) {
+                    entityFactories.entityExistsOrCreate(pm, l, updateMode);
+                } else if (!entityFactories.entityExists(pm, l, admin)) {
                     throw new NoSuchEntityException("Linked Location with no id.");
                 }
                 Object lId = l.getId().getValue();
@@ -201,7 +201,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
             }
             return;
         }
-        super.updateNavigationPropertySet(thing, linkedSet, pm, forInsert);
+        super.updateNavigationPropertySet(thing, linkedSet, pm, updateMode);
     }
 
     @Override

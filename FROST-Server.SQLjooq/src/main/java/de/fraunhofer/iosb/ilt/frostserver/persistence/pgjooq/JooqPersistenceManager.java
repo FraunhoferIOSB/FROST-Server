@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -54,9 +55,9 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     void doDelete(ResourcePath path, Query query);
 
-    boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
-    EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
 

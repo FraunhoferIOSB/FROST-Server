@@ -40,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
@@ -211,6 +212,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
             final ServiceRequest serviceRequest = new ServiceRequestBuilder(settings, version)
                     .withRequestType(RequestTypeUtils.CREATE)
+                    .withUpdateMode(UpdateMode.INSERT_STA_11)
                     .withContent(e.getPayload())
                     .withUrlPath(url)
                     .withUserPrincipal(e.getPrincipal())

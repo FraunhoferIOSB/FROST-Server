@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -122,8 +123,8 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     }
 
     @Override
-    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
-        super.insertIntoDatabase(pm, histLoc);
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity histLoc, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        super.insertIntoDatabase(pm, histLoc, updateMode);
         EntityFactories entityFactories = pm.getEntityFactories();
         Entity thing = histLoc.getProperty(pluginCoreModel.npThingHistLoc);
         Object thingId = thing.getId().getValue();

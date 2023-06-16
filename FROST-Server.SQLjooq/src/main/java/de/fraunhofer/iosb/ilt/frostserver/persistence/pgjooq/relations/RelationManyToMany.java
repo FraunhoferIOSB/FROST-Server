@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
@@ -160,13 +160,20 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp, boolean forInsert) throws NoSuchEntityException, IncompleteEntityException {
-        EntityFactories entityFactories = pm.getEntityFactories();
-        if (forInsert) {
-            entityFactories.entityExistsOrCreate(pm, target);
-        } else if (!entityFactories.entityExists(pm, target, true)) {
-            throw new NoSuchEntityException("Linked Entity with no id.");
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
+        final Object sourceId = source.getId().getValue();
+        int count = pm.getDslContext().deleteFrom(linkTable)
+                .where(sourceLinkFieldAcc.getField(linkTable).eq(sourceId))
+                .execute();
+        LOGGER.debug("Removed {} relations from {}", count, linkTable.getName());
+        for (Entity target : targets) {
+            link(pm, sourceId, target.getId().getValue());
         }
+
+    }
+
+    @Override
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
         link(pm, source.getId().getValue(), target.getId().getValue());
     }
 

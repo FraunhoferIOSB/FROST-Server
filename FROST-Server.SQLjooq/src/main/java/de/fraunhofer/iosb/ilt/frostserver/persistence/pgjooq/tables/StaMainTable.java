@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
@@ -98,9 +99,9 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize);
 
-    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException;
 

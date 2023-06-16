@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -124,7 +125,7 @@ public class EntityFactories {
      * @throws IncompleteEntityException If the entity has no id, but is not
      * complete and can thus not be created.
      */
-    public void entityExistsOrCreate(JooqPersistenceManager pm, Entity e) throws NoSuchEntityException, IncompleteEntityException {
+    public void entityExistsOrCreate(JooqPersistenceManager pm, Entity e, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         if (e == null) {
             throw new NoSuchEntityException("No entity!");
         }
@@ -132,7 +133,7 @@ public class EntityFactories {
         if (e.getId() == null) {
             e.validateCreate();
             // no id but complete -> create
-            pm.insert(e);
+            pm.insert(e, updateMode);
             return;
         }
 
@@ -149,7 +150,7 @@ public class EntityFactories {
         }
 
         // complete with id -> create
-        pm.insert(e);
+        pm.insert(e, updateMode);
     }
 
     public boolean entityExists(JooqPersistenceManager pm, EntityType type, Id entityId, boolean admin) {

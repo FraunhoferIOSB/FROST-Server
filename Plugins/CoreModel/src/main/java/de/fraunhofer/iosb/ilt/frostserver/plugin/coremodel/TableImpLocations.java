@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -187,7 +188,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
         EntityType linkedEntityType = linkedSet.getEntityType();
         ModelRegistry modelRegistry = getModelRegistry();
         if (linkedEntityType.equals(pluginCoreModel.etThing)) {
@@ -198,10 +199,11 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
             TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
 
             // Maybe Create new Things and link them to this Location.
+            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
             for (Entity t : linkedSet) {
-                if (forInsert) {
-                    entityFactories.entityExistsOrCreate(pm, t);
-                } else if (!entityFactories.entityExists(pm, t, true)) {
+                if (updateMode.createAndLinkNew) {
+                    entityFactories.entityExistsOrCreate(pm, t, updateMode);
+                } else if (!entityFactories.entityExists(pm, t, admin)) {
                     throw new NoSuchEntityException("Thing not found.");
                 }
 
@@ -247,7 +249,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
             }
             return;
         }
-        super.updateNavigationPropertySet(location, linkedSet, pm, forInsert);
+        super.updateNavigationPropertySet(location, linkedSet, pm, updateMode);
     }
 
     @Override

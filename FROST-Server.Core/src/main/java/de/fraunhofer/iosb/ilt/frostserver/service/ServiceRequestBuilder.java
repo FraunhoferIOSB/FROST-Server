@@ -44,6 +44,7 @@ public class ServiceRequestBuilder {
     private final CoreSettings coreSettings;
     private final Version version;
     private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
+    private UpdateMode updateMode;
 
     public ServiceRequestBuilder(CoreSettings coreSettings, Version version) {
         this.coreSettings = coreSettings;
@@ -55,6 +56,7 @@ public class ServiceRequestBuilder {
         this.contentBinary = Optional.empty();
         this.contentType = Optional.empty();
         this.parameterMap = Optional.empty();
+        this.updateMode = UpdateMode.INSERT_STA_11;
     }
 
     public ServiceRequestBuilder withUrl(String url) {
@@ -107,6 +109,11 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withUpdateMode(UpdateMode updateMode) {
+        this.updateMode = updateMode;
+        return this;
+    }
+
     public ServiceRequest build() {
         ServiceRequest result = new ServiceRequest();
         result.setVersion(version);
@@ -136,6 +143,7 @@ public class ServiceRequestBuilder {
         }
         result.setAttributeMap(attributeMap);
         result.setUserPrincipal(userPrincipal);
+        result.setUpdateMode(updateMode);
         return result;
     }
 }

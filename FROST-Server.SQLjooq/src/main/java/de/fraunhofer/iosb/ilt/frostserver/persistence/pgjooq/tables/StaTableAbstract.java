@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -51,6 +52,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -84,6 +86,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTableAbstract.class.getName());
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
+    private static final String UNKNOWN_UPDATE_LINK_EXISTING_FALSE = "Unknown update mode, don't know how to handle linkExisting=false";
 
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
@@ -239,7 +242,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -257,7 +260,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
-                entityFactories.entityExistsOrCreate(pm, ne);
+                entityFactories.entityExistsOrCreate(pm, ne, updateMode);
                 PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
                 registry.converter.convert(thisTable, entity, insertFields);
             }
@@ -299,7 +302,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
                 LOGGER.debug("  Linking {}", np);
-                updateNavigationPropertySet(entity, entity.getProperty(np), pm, true);
+                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
             }
         }
 
@@ -313,27 +316,57 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @param entity The entity to link to
      * @param linkedSet The set of entities to link to the given entity
      * @param pm The PersistenceManager to use for queries
-     * @param forInsert Flag indicating the update is for a newly inserted
+     * @param updateMode Flag indicating the update is for a newly inserted
      * entity, and new entities can be created.
      *
      * @throws IncompleteEntityException If the given entity is not validate.
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */
-    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, JooqPersistenceManager pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
         final NavigationPropertyEntitySet navProp = linkedSet.getNavigationProperty();
         final Relation relation = findRelation(navProp.getName());
         if (relation == null) {
             LOGGER.error("Unknown relation: {}", navProp.getName());
             throw new IllegalStateException("Unknown relation: " + navProp.getName());
         }
-        for (Entity child : linkedSet) {
-            relation.link(pm, entity, child, navProp, forInsert);
+        // Sanity check.
+        if (!updateMode.linkExisting) {
+            LOGGER.error(UNKNOWN_UPDATE_LINK_EXISTING_FALSE);
+            throw new IllegalStateException(UNKNOWN_UPDATE_LINK_EXISTING_FALSE);
+        }
+        if (updateMode.deepUpdate) {
+            EntityFactories ef = pm.getEntityFactories();
+            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
+            for (Entity child : linkedSet) {
+                if (ef.entityExists(pm, child, admin)) {
+                    final PathElementEntity childPe = new PathElementEntity(child.getId(), child.getEntityType(), null);
+                    pm.update(childPe, child, updateMode);
+                }
+            }
+        }
+        if (updateMode.createAndLinkNew) {
+            EntityFactories ef = pm.getEntityFactories();
+            for (Entity child : linkedSet) {
+                final NavigationPropertyMain backLink = navProp.getInverse();
+                if (!backLink.isEntitySet()) {
+                    child.setProperty(backLink, entity);
+                }
+                ef.entityExistsOrCreate(pm, child, updateMode);
+            }
+        }
+
+        if (updateMode.removeMissing) {
+            relation.link(pm, entity, linkedSet, navProp);
+        } else {
+            for (Entity child : linkedSet) {
+                relation.link(pm, entity, child, navProp);
+            }
         }
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -382,7 +415,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
-                updateNavigationPropertySet(entity, entity.getProperty(np), pm, false);
+                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
             }
         }
         return message;

@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -35,8 +36,7 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- *
- * @author jab
+ * The interface for persistence managers.
  */
 public interface PersistenceManager extends AutoCloseable {
 
@@ -46,13 +46,14 @@ public interface PersistenceManager extends AutoCloseable {
      * Entity pre-filled with context of URL
      *
      * @param entity The entity to insert.
+     * @param updateMode The rules to follow wen inserting.
      * @return true if the entity was successfully inserted.
      *
      * @throws NoSuchEntityException If any of the required navigation links
      * point to a non-existing entity.
      * @throws IncompleteEntityException If an in-line entity is incomplete.
      */
-    public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     public Entity get(EntityType entityType, Id id);
 
@@ -97,12 +98,13 @@ public interface PersistenceManager extends AutoCloseable {
      *
      * @param pathElement The path to the entity.
      * @param entity The entity.
+     * @param updateMode The rules to follow when updating.
      * @return True if the update was successful.
      * @throws NoSuchEntityException If the entity does not exist.
      * @throws IncompleteEntityException If the given entity is missing required
      * fields.
      */
-    public boolean update(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean update(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Update the given entity using the given (rfc6902) JSON Patch.

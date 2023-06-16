@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -444,7 +445,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
                     .setProperty(pluginCoreModel.epFeature, locObject)
                     .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
-            pm.insert(foi);
+            pm.insert(foi, UpdateMode.INSERT_STA_11);
             Object foiId = foi.getId().getValue();
             dslContext.update(ql)
                     .set(((TableField) ql.getGenFoiId()), foi.getId().getValue())

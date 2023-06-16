@@ -52,6 +52,7 @@ public class ServiceRequest {
     private Map<String, Object> attributeMap;
     private PrincipalExtended userPrincipal;
     private CoreSettings coreSettings;
+    private UpdateMode updateMode;
 
     protected ServiceRequest() {
         // empty by design.
@@ -133,6 +134,14 @@ public class ServiceRequest {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public UpdateMode getUpdateMode() {
+        return updateMode;
+    }
+
+    public void setUpdateMode(UpdateMode updateMode) {
+        this.updateMode = updateMode;
     }
 
     public Map<String, List<String>> getParameterMap() {

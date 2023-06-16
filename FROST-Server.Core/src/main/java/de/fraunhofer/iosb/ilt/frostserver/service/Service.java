@@ -505,7 +505,7 @@ public class Service implements AutoCloseable {
         }
 
         try {
-            if (!pm.insert(entity)) {
+            if (!pm.insert(entity, request.getUpdateMode())) {
                 LOGGER.debug("No need to insert entity.");
             }
             maybeCommitAndClose();
@@ -582,7 +582,7 @@ public class Service implements AutoCloseable {
         }
 
         try {
-            if (pm.update(mainElement, entity)) {
+            if (pm.update(mainElement, entity, request.getUpdateMode())) {
                 maybeCommitAndClose();
                 response.setCode(200);
                 return response;
@@ -702,7 +702,7 @@ public class Service implements AutoCloseable {
         }
 
         try {
-            if (pm.update(mainElement, entity)) {
+            if (pm.update(mainElement, entity, request.getUpdateMode())) {
                 maybeCommitAndClose();
                 return successResponse(response, 200, "Updated.");
             } else {

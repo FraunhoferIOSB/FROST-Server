@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -73,8 +74,23 @@ public class BatchProcessor<C extends Content> {
                 version,
                 httpRequest.getPath(),
                 httpRequest.getHttpHeaders().get(CONTENT_TYPE));
+        boolean isCreate = RequestTypeUtils.CREATE.equals(type);
+        UpdateMode updateMode;
+        switch (version.urlPart) {
+            case "ODATA_4.0":
+                updateMode = isCreate ? UpdateMode.INSERT_ODATA_40 : UpdateMode.UPDATE_ODATA_40;
+                break;
+
+            case "ODATA_4.01":
+                updateMode = isCreate ? UpdateMode.INSERT_ODATA_401 : UpdateMode.UPDATE_ODATA_401;
+                break;
+
+            default:
+                updateMode = isCreate ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11;
+        }
         final ServiceRequest serviceRequest = new ServiceRequestBuilder(coreSettings, version)
                 .withRequestType(type)
+                .withUpdateMode(updateMode)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData())
                 .withUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()))

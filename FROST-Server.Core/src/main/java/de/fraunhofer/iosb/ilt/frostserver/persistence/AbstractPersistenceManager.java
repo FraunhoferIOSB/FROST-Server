@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.ArrayList;
@@ -58,8 +59,8 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        boolean result = doInsert(entity);
+    public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        boolean result = doInsert(entity, updateMode);
         if (result) {
             Entity newEntity = fetchEntity(
                     entity.getEntityType(),
@@ -73,7 +74,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         return result;
     }
 
-    public abstract boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public abstract boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     @Override
     public boolean delete(PathElementEntity pathElement) throws NoSuchEntityException {
@@ -107,8 +108,8 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     public abstract void doDelete(ResourcePath path, Query query);
 
     @Override
-    public boolean update(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityChangedMessage result = doUpdate(pathElement, entity);
+    public boolean update(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        EntityChangedMessage result = doUpdate(pathElement, entity, updateMode);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
             final EntityType entityType = entity.getEntityType();
@@ -122,18 +123,19 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     /**
      * Update the given entity and return a message with the fields that were
-     * changed. The entity is added to the message by the
+     * changed.The entity is added to the message by the
      * AbstractPersistenceManager.
      *
      * @param pathElement The path to the entity to update.
      * @param entity The updated entity.
+     * @param updateMode the rules to follow regarding navigation links.
      * @return A message with the fields that were changed. The entity is added
      * by the AbstractPersistenceManager.
      * @throws NoSuchEntityException If the entity does not exist.
      * @throws IncompleteEntityException If the entity does not have all the
      * required fields.
      */
-    public abstract EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public abstract EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     @Override
     public boolean update(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {

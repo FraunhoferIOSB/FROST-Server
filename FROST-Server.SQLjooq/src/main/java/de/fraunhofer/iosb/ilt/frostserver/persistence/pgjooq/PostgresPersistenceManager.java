@@ -59,6 +59,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -266,8 +267,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
         init();
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection());
-        ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
+        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection());
+        ResultQuery sqlQuery = queryBuilder.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
@@ -276,7 +277,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (result == null) {
             return null;
         }
-        return psb.getQueryState().entityFromQuery(result, dataSize)
+        return queryBuilder.getQueryState().entityFromQuery(result, dataSize)
                 .setQuery(query);
     }
 
@@ -318,14 +319,14 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
-        return table.insertIntoDatabase(this, entity);
+        return table.insertIntoDatabase(this, entity, updateMode);
     }
 
     @Override
-    public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         final EntityFactories ef = getEntityFactories();
         final Id id = pathElement.getId();
@@ -336,7 +337,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
-        return table.updateInDatabase(this, entity, id);
+        return table.updateInDatabase(this, entity, id, updateMode);
     }
 
     @Override
@@ -380,7 +381,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, id);
+        table.updateInDatabase(this, newEntity, id, UpdateMode.UPDATE_ODATA_40);
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
