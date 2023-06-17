@@ -569,6 +569,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (modelDefinitions.isEmpty()) {
             return;
         }
+        LOGGER.info("Loading Database Mappings...");
 
         getDslContext();
         final ModelRegistry modelRegistry = settings.getModelRegistry();
@@ -600,6 +601,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     private void validateMappings() {
         // Validate
+        LOGGER.info("Validating Database Mappings...");
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
