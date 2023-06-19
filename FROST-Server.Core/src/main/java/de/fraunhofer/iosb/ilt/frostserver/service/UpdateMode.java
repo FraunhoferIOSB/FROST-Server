@@ -20,7 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 /**
  * How updates should behave.
  *
- * {@linkplain https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateRelatedEntitiesWhenUpdatinganE}
+ * @see <a
+ * href="https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateRelatedEntitiesWhenUpdatinganE">OData
+ * v4.01 Part 1</a>
  *
  */
 public class UpdateMode {
