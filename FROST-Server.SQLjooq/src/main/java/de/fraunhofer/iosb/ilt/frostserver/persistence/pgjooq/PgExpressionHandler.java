@@ -324,7 +324,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             }
             // We can not accept json, so the subProperty must be a known direction.
             state.finished = true;
-            return new SimpleFieldWrapper(pathExpressions.get(subProperty.getName()));
+            return WrapperHelper.wrapField(pathExpressions.get(subProperty.getName()));
         }
         if (pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START)
                 && pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END)) {

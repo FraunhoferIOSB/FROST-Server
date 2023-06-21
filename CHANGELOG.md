@@ -7,6 +7,8 @@
 * Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
 * Improved queue-status logging.
 * Implemented FineGrained Authorization.
+* Many-to-Many Self-Relations can be symmetrical.
+* Improved handling of sub-properties of complex properties.
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
