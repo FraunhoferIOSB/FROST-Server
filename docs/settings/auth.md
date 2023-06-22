@@ -18,7 +18,7 @@ An example docker-compose file with basic auth set up can be found at:
 [docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/v2.x/scripts/docker-compose-separated-basicauth.yaml)
 
 More fine-grained authorisation rules can be configured using:
-* plugins with `EntityType` validators,
+* plugins with `EntityType` validators (for example [STAplus](https://github.com/securedimensions/FROST-Server-PLUS)),
 * PostgreSQL Row-level security (see `persistence.transactionRole` setting).
 
 ## Roles
