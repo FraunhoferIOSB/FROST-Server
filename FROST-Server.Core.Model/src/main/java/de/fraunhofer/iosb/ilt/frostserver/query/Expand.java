@@ -161,7 +161,7 @@ public class Expand {
             }
 
         }
-        if (subQuery != null && validatedPath instanceof NavigationPropertyMain) {
+        if (subQuery != null && validatedPath != null) {
             if (!subQuery.hasMetadata()) {
                 subQuery.setMetadata(parentQuery.getMetadata());
             }
