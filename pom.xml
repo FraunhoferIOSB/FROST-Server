@@ -121,9 +121,10 @@
         <version.maven.plugin.assembly>3.6.0</version.maven.plugin.assembly>
         <version.maven.plugin.compiler>3.11.0</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.5.0</version.maven.plugin.dependency>
+        <version.maven.plugin.dependency-check>8.3.1</version.maven.plugin.dependency-check>
         <version.maven.plugin.git-commit-id>6.0.0</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.0.1</version.maven.plugin.gpg>
-        <version.maven.plugin.jacoco>0.8.8</version.maven.plugin.jacoco>
+        <version.maven.plugin.jacoco>0.8.10</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.3.0</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.5.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
@@ -134,7 +135,6 @@
         <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
 
         <version.org.json>20230618</version.org.json>
-        <version.owasp>8.2.1</version.owasp>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.6.0</version.postgres>
@@ -367,6 +367,11 @@
                     <version>${version.maven.plugin.jar}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${version.maven.plugin.dependency}</version>
+                </plugin>
+                <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${version.maven.plugin.spotless}</version>
@@ -437,7 +442,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>${version.owasp}</version>
+                    <version>${version.maven.plugin.dependency-check}</version>
                     <configuration>
                         <suppressionFiles>
                             <suppressionFile>owaspSuppressions.xml</suppressionFile>
