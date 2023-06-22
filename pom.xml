@@ -102,7 +102,7 @@
         <version.congocc>2022-05-31</version.congocc>
         <version.dbcp2>2.9.0</version.dbcp2>
         <version.geolatte-common>0.8</version.geolatte-common>
-        <version.guava>31.1-jre</version.guava>
+        <version.guava>32.0.0-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
         <version.jackson>2.14.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
