@@ -17,9 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f02customlinks;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_ID;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -197,6 +199,30 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         }
         Object name = ((Map) parent).get("name");
         assertEquals(expected, name, "Custom link does not have (correct) navigationLink.");
+    }
+
+    @Test
+    void testCustomLinks3() throws ServiceFailureException {
+        LOGGER.info("  testCustomLinks3");
+        Entity thing = sSrvc.dao(sMdl.etThing)
+                .query()
+                .filter("id eq " + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues()[0]))
+                .expand("properties/parent.Thing($select=id),properties/alternate.Location")
+                .first();
+        String expected = getServerSettings().getServiceRootUrl()
+                + "/" + version.urlPart + "/Things("
+                + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues()[0]) + ")";
+        Object navLink = thing.getProperty(EP_PROPERTIES).get("parent.Thing@iot.navigationLink");
+        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+
+        Object parent = thing.getProperty(EP_PROPERTIES).get("parent.Thing");
+        if (!(parent instanceof Map)) {
+            fail("parent.Thing did not expand.");
+        }
+        Map<String, Object> properties = (Map<String, Object>) parent;
+        assertFalse(properties.containsKey("name"), "Name should not have been expanded.");
+        assertEquals(THINGS.get(0).getProperty(EP_ID), properties.get("@iot.id"), "id not correctly expanded.");
+
     }
 
 }

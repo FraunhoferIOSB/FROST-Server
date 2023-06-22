@@ -9,6 +9,7 @@
 * Implemented FineGrained Authorization.
 * Many-to-Many Self-Relations can be symmetrical.
 * Improved handling of sub-properties of complex properties.
+* Fixed subQueries on expands on custom links.
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
