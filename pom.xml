@@ -35,56 +35,55 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <annotation-api.version>1.3.1</annotation-api.version>
-        <codegen.version>0.6.8-uuid</codegen.version>
         <commons-csv.version>1.10.0</commons-csv.version>
-        <commons-io.version>2.11.0</commons-io.version>
+        <commons-io.version>2.13.0</commons-io.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-text.version>1.10.0</commons-text.version>
         <configurable.version>0.34</configurable.version>
         <congocc.version>2022-05-31</congocc.version>
         <congocc.sha512>2fd26af4c42bf49573bbffd68426d45ddc11f5478545a295781436b24e27d37c3e2274b6b477abe4f0cb99d8328ab4e58f1b4daf8cb70490bb553aab98df18bf</congocc.sha512>
         <FROST-Client.version>0.44</FROST-Client.version>
-        <git-commit-id-plugin.version>5.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
-        <guava.version>31.1-jre</guava.version>
+        <guava.version>32.0.1-jre</guava.version>
         <httpclient.version>4.5.14</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
-        <jackson.version>2.15.1</jackson.version>
+        <jackson.version>2.15.2</jackson.version>
         <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javaee-web-api.version>8.0.1</javaee-web-api.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <jetty.version>10.0.15</jetty.version>
-        <jooq.version>3.18.3</jooq.version>
+        <jooq.version>3.18.5</jooq.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.9.3</junit.version>
         <junit-platform-suite.version>1.9.3</junit-platform-suite.version>
-        <keycloak.version>21.1.1</keycloak.version>
-        <liquibase.version>4.21.1</liquibase.version>
-        <logback.version>1.4.7</logback.version>
+        <keycloak.version>21.1.2</keycloak.version>
+        <liquibase.version>4.22.0</liquibase.version>
+        <logback.version>1.4.8</logback.version>
 
-        <maven-assembly-plugin.version>3.5.0</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-        <maven-gpg-plugin>3.0.1</maven-gpg-plugin>
-        <maven-jacoco-plugin.version>0.8.9</maven-jacoco-plugin.version>
+        <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
+        <maven-git-commit-id-plugin.version>6.0.0</maven-git-commit-id-plugin.version>
+        <maven-gpg-plugin>3.1.0</maven-gpg-plugin>
+        <maven-jacoco-plugin.version>0.8.10</maven-jacoco-plugin.version>
         <maven-jar-plugin>3.3.0</maven-jar-plugin>
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
         <maven-nexus-staging-plugin>1.6.13</maven-nexus-staging-plugin>
-        <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>3.1.0</maven-surefire-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <owasp.version>8.2.1</owasp.version>
 
-        <org.json.version>20230227</org.json.version>
+        <org.json.version>20230618</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2021.1.0</postgis.version>
         <postgres.version>42.6.0</postgres.version>
         <slf4j-api.version>2.0.7</slf4j-api.version>
-        <testcontainers.version>1.18.0</testcontainers.version>
+        <testcontainers.version>1.18.3</testcontainers.version>
         <testcontainers-keycloak.version>2.5.0</testcontainers-keycloak.version>
-        <time4j.version>5.9.2</time4j.version>
+        <time4j.version>5.9.3</time4j.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
