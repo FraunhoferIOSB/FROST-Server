@@ -20,7 +20,7 @@
         <mainClass>de.fraunhofer.iosb.ilt.frostserver.modelextractor.MainApp</mainClass>
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
 
-        <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
         <openjfx.version>20.0.1</openjfx.version>
     </properties>
 
@@ -71,7 +71,6 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>${git-commit-id-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>

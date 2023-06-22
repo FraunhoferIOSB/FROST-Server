@@ -5,10 +5,12 @@
 *~
 .idea/
 *.iml
+nbactions.xml
 
 pom.xml.versionsBackup
 pom.xml.releaseBackup
 release.properties
+dependency-reduced-pom.xml
 
 .mvn/wrapper/maven-wrapper.jar
 
