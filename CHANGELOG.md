@@ -6,6 +6,7 @@
 * Fixed #1554: Count incorrect after following nextLink.
 * Fixed subQueries on expands on custom links.
 * Disallow wild-cards in MQTT topics.
+* Updated dependency versions.
 
 
 ## Release version 2.0.10
