@@ -32,6 +32,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +131,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     public boolean canRead(Topic topic, String user, String clientId) {
         if (frostClientId.equalsIgnoreCase(clientId)) {
             return true;
+        }
+        if (StringUtils.containsAny(topic.toString(), '#', '+')) {
+            return false;
         }
         return anonymousRead || authProvider.userHasRole(clientId, user, roleRead);
     }
