@@ -78,6 +78,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     private boolean required;
 
     /**
+     * If the relation is symmetrical, on insert both [A,B] and [B,A] tuples are
+     * inserted, and on delete both are deleted. It is also its own inverse.
+     */
+    @ConfigurableField(editor = EditorBoolean.class,
+            label = "Symmetrical", description = "The relation is its own inverse")
+    @EditorBoolean.EdOptsBool()
+    private boolean symmetrical;
+
+    /**
      * The inverse of this relation.
      */
     @ConfigurableField(editor = EditorClass.class,
@@ -137,7 +146,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         } else {
             navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required);
         }
-        targetEntityType = modelRegistry.getEntityTypeForName(entityType);
+        targetEntityType = modelRegistry.getEntityTypeForName(entityType, true);
         if (targetEntityType == null) {
             LOGGER.error("Failed to find target EntityType: {}", entityType);
             throw new IllegalArgumentException("Missing entityType: " + entityType);
@@ -146,7 +155,14 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         sourceEntityType.registerProperty(navProp);
         navProp.addAnnotations(annotations);
 
-        if (inverse == null) {
+        if (symmetrical) {
+            navPropInverse = targetEntityType.getNavigationProperty(name);
+            if (navPropInverse == null) {
+                navPropInverse = navProp;
+            }
+            LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
+            navProp.setInverses(navPropInverse);
+        } else if (inverse == null) {
             LOGGER.debug("    {} -> {}", name, targetEntityType.entityName);
             LOGGER.warn("No inverse for navigation property {}", name);
         } else {
@@ -284,11 +300,40 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     }
 
     /**
+     * If the relation is symmetrical, on insert both [A,B] and [B,A] tuples are
+     * inserted, and on delete both are deleted. It is also its own inverse.
+     *
+     * @return the symmetrical
+     */
+    public boolean isSymmetrical() {
+        return symmetrical;
+    }
+
+    /**
+     * If the relation is symmetrical, on insert both [A,B] and [B,A] tuples are
+     * inserted, and on delete both are deleted.It is also its own inverse.
+     *
+     * @param symmetrical the symmetrical to set
+     * @return this.
+     */
+    public DefNavigationProperty setSymmetrical(boolean symmetrical) {
+        this.symmetrical = symmetrical;
+        return this;
+    }
+
+    /**
      * Handlers used to map the property to a persistence manager.
      *
      * @return the inverse.
      */
     public Inverse getInverse() {
+        if (symmetrical) {
+            return new Inverse()
+                    .setName(name)
+                    .setEntitySet(entitySet)
+                    .setRequired(required)
+                    .addAnnotations(annotations);
+        }
         return inverse;
     }
 
@@ -299,7 +344,11 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
      * @return this.
      */
     public DefNavigationProperty setInverse(Inverse inverse) {
-        this.inverse = inverse;
+        if (symmetrical) {
+            LOGGER.error("NavigationProperty {} set to be symmetrical, inverse is ignored!");
+        } else {
+            this.inverse = inverse;
+        }
         return this;
     }
 

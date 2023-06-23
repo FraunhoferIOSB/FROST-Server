@@ -20,10 +20,13 @@ package de.fraunhofer.iosb.ilt.statests;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_FILTER_DELETE_ENABLE;
 
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -55,7 +58,11 @@ public abstract class AbstractTestClass {
     /**
      * A FROST-Client instance that can be used to access the server.
      */
-    protected static SensorThingsService service;
+    protected static StaService service;
+    protected static SensorThingsService sSrvc;
+    protected static SensorThingsSensingV11 sMdl;
+    protected static SensorThingsMultiDatastreamV11 mMdl;
+    protected static SensorThingsTaskingV11 tMdl;
 
     private static final Properties defaultProperties = new Properties();
 
@@ -85,7 +92,11 @@ public abstract class AbstractTestClass {
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
-                    service = new SensorThingsService(new URL(serverSettings.getServiceUrl(version)));
+                    service = new StaService(new URL(serverSettings.getServiceUrl(version)));
+                    sSrvc = service.service;
+                    sMdl = service.modelSensing;
+                    mMdl = service.modelMultiDatastream;
+                    tMdl = service.modelTasking;
                 } catch (MalformedURLException ex) {
                     LOGGER.error("Failed to create URL", ex);
                 }
@@ -132,7 +143,7 @@ public abstract class AbstractTestClass {
      *
      * @return the service
      */
-    public static SensorThingsService getService() {
+    public static StaService getService() {
         return service;
     }
 

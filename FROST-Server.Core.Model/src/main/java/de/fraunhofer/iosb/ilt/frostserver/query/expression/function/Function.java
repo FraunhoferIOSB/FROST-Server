@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
@@ -56,6 +57,11 @@ public abstract class Function implements Expression {
     protected List<Expression> parameters = new ArrayList<>();
     protected List<FunctionTypeBinding> allowedTypeBindings;
     private final String functionName;
+
+    /**
+     * The context to use when rendering the function.
+     */
+    private DynamicContext context;
 
     protected Function() {
         allowedTypeBindings = new ArrayList<>();
@@ -108,12 +114,33 @@ public abstract class Function implements Expression {
         this.parameters = Arrays.asList(parameters);
     }
 
+    @Override
     public void addParameter(Expression parameter) {
         parameters.add(parameter);
     }
 
     public List<Expression> getParameters() {
         return parameters;
+    }
+
+    /**
+     * The context to use when rendering the function.
+     *
+     * @return the context
+     */
+    public DynamicContext getContext() {
+        return context;
+    }
+
+    /**
+     * The context to use when rendering the function.
+     *
+     * @param context the context to set
+     * @return this.
+     */
+    public Function setContext(DynamicContext context) {
+        this.context = context;
+        return this;
     }
 
     /**
@@ -248,4 +275,5 @@ public abstract class Function implements Expression {
         result.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, returnType));
         return result;
     }
+
 }

@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -36,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -45,6 +47,7 @@ import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -117,12 +120,16 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpLocations(DataType<?> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
     }
 
     private TableImpLocations(Name alias, TableImpLocations aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpLocations(Name alias, TableImpLocations aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
     }
 
@@ -243,7 +250,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
         final TableCollection tables = getTables();
         // Also delete all historicalLocations that no longer reference any location
@@ -278,6 +285,16 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     @Override
     public TableImpLocations as(Name alias) {
         return new TableImpLocations(alias, this, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpLocations asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpLocations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

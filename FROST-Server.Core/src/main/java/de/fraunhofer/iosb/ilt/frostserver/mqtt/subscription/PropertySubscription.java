@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
+
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -58,7 +60,7 @@ public class PropertySubscription extends AbstractSubscription {
             Id id = path.getIdentifiedElement().getId();
             matcher = x -> x.getProperty(entityType.getPrimaryKey()).equals(id);
         }
-        query = new Query(modelRegistry, queryDefaults, path);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.addSelect(property);
         generateFilter(2);
     }

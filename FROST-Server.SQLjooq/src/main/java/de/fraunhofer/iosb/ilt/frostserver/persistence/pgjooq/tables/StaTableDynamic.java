@@ -19,9 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 
 /**
@@ -35,13 +37,17 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
     private int idFieldIdx;
 
     public StaTableDynamic(Name tableName, EntityType entityType, DataType<?> idType) {
-        super(idType, tableName, null);
+        super(idType, tableName, null, null);
         this.tableName = tableName;
         this.entityType = entityType;
     }
 
     private StaTableDynamic(Name alias, StaTableDynamic aliased, int idFieldIdx) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, idFieldIdx);
+    }
+
+    private StaTableDynamic(Name alias, StaTableDynamic aliased, Table updatedSql, int idFieldIdx) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.tableName = aliased.getTableName();
         this.idFieldIdx = idFieldIdx;
         this.entityType = aliased.getEntityType();
@@ -63,6 +69,16 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
     @Override
     public StaTableDynamic as(Name as) {
         return new StaTableDynamic(as, this, idFieldIdx).initCustomFields();
+    }
+
+    @Override
+    public StaTableDynamic asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new StaTableDynamic(DSL.name(name), this, wrappedTable, idFieldIdx).initCustomFields();
     }
 
     @Override

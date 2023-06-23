@@ -41,6 +41,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.ContextEntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.FractionalSeconds;
@@ -93,6 +95,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Sta
 /**
  *
  * @author Hylke van der Schaaf
+ * @param <O> the return type for the visit calls.
  */
 public interface ExpressionVisitor<O extends Object> {
 
@@ -241,4 +244,8 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(ToUpper node);
 
     public O visit(Trim node);
+
+    public O visit(PrincipalName node);
+
+    public O visit(ContextEntityProperty node);
 }

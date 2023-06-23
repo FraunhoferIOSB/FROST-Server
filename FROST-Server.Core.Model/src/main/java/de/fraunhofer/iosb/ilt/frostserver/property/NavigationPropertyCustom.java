@@ -88,6 +88,11 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     }
 
     @Override
+    public boolean isAdminOnly() {
+        return type.isAdminOnly();
+    }
+
+    @Override
     public boolean validFor(EntityType entityType) {
         return entityType.getProperty(entityProperty.getName()) != null;
     }

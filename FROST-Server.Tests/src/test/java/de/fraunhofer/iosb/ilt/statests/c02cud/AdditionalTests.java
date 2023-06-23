@@ -17,22 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_TIME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.builder.HistoricalLocationBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
@@ -56,30 +52,14 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class AdditionalTests extends AbstractTestClass {
 
-    public static class Implementation10 extends AdditionalTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends AdditionalTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     public AdditionalTests(ServerVersion version) {
         super(version);
@@ -119,36 +99,36 @@ public abstract class AdditionalTests extends AbstractTestClass {
         LOGGER.info("  test01MultipleLocations");
         EntityUtils.deleteAll(version, serverSettings, service);
 
-        Thing thing = new Thing("Thing 1", "The first thing.");
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
 
-        Location location1 = new Location("Location 1.0, Address", "The address of Thing 1.", "text/plain", "");
-        thing.getLocations().add(location1);
-        Location location2 = new Location("Location 1.0", "Location of Thing 1.", "application/geo+json", new Point(8, 51));
-        thing.getLocations().add(location2);
-        Location location3 = new Location("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "");
-        thing.getLocations().add(location3);
+        Entity location1 = sMdl.newLocation("Location 1.0, Address", "The address of Thing 1.", "text/plain", "");
+        thing.getProperty(sMdl.npThingLocations).add(location1);
+        Entity location2 = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/geo+json", new Point(8, 51));
+        thing.getProperty(sMdl.npThingLocations).add(location2);
+        Entity location3 = sMdl.newLocation("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "");
+        thing.getProperty(sMdl.npThingLocations).add(location3);
 
-        service.create(thing);
+        sSrvc.create(thing);
         THINGS.add(thing);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        ObservedProperty obsProp = new ObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
-        datastream.setThing(thing);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        datastream.setProperty(sMdl.npDatastreamThing, thing);
 
-        service.create(datastream);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        ObservationDao doa = service.observations();
-        Observation observation = new Observation(1.0, DATASTREAMS.get(0));
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         doa.create(observation);
         OBSERVATIONS.add(observation);
 
-        Observation found;
-        found = doa.find(observation.getId());
-        FeatureOfInterest featureOfInterest = found.getFeatureOfInterest();
+        Entity found;
+        found = doa.find(observation.getPrimaryKeyValues());
+        Entity featureOfInterest = found.getProperty(sMdl.npObservationFeatureofinterest);
 
         assertNotNull(featureOfInterest, "A FeatureOfInterest should have been generated, but got NULL.");
     }
@@ -156,14 +136,14 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test02GeneratePhenomenonTime() throws ServiceFailureException {
         LOGGER.info("  test02GeneratePhenomenonTime");
-        ObservationDao doa = service.observations();
-        Observation observation = new Observation(1.0, DATASTREAMS.get(0));
+        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         doa.create(observation);
         OBSERVATIONS.add(observation);
 
-        Observation found;
-        found = doa.find(observation.getId());
-        assertNotNull(found.getPhenomenonTime(), "phenomenonTime should be auto generated.");
+        Entity found;
+        found = doa.find(observation.getPrimaryKeyValues());
+        assertNotNull(found.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be auto generated.");
     }
 
     /**
@@ -183,55 +163,47 @@ public abstract class AdditionalTests extends AbstractTestClass {
         EntityUtils.deleteAll(version, serverSettings, service);
 
         // Create a thing
-        Thing thing = new Thing("Thing 1", "The first thing.");
-        service.create(thing);
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        sSrvc.create(thing);
 
         // Create three locations.
-        Location location1 = new Location("Location 1.0", "Location Number 1.", "application/vnd.geo+json", new Point(8, 50));
-        Location location2 = new Location("Location 2.0", "Location Number 2.", "application/vnd.geo+json", new Point(8, 51));
-        Location location3 = new Location("Location 3.0", "Location Number 3.", "application/vnd.geo+json", new Point(8, 52));
-        service.create(location1);
-        service.create(location2);
-        service.create(location3);
+        Entity location1 = sMdl.newLocation("Location 1.0", "Location Number 1.", "application/vnd.geo+json", new Point(8, 50));
+        Entity location2 = sMdl.newLocation("Location 2.0", "Location Number 2.", "application/vnd.geo+json", new Point(8, 51));
+        Entity location3 = sMdl.newLocation("Location 3.0", "Location Number 3.", "application/vnd.geo+json", new Point(8, 52));
+        sSrvc.create(location1);
+        sSrvc.create(location2);
+        sSrvc.create(location3);
 
         // Give the Thing location 1
-        thing.getLocations().add(location1.withOnlyId());
-        service.update(thing);
+        thing.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
+        sSrvc.update(thing);
 
         // Get the generated HistoricalLocation and change the time to a known value.
-        List<HistoricalLocation> histLocations = thing.historicalLocations().query().list().toList();
+        List<Entity> histLocations = thing.query(sMdl.npThingHistoricallocations).list().toList();
 
         assertEquals(1, histLocations.size(), "Incorrect number of HistoricalLocations for Thing.");
 
-        HistoricalLocation histLocation = histLocations.get(0);
-        histLocation.setTime(ZonedDateTime.parse("2016-01-01T06:00:00.000Z"));
-        service.update(histLocation);
+        Entity histLocation = histLocations.get(0);
+        histLocation.setProperty(EP_TIME, TimeInstant.create(ZonedDateTime.parse("2016-01-01T06:00:00.000Z")));
+        sSrvc.update(histLocation);
 
         // Now create a new HistoricalLocation for the Thing, with a later time.
-        HistoricalLocation histLocation2 = HistoricalLocationBuilder.builder()
-                .location(location2)
-                .time(ZonedDateTime.parse("2016-01-01T07:00:00.000Z"))
-                .thing(thing.withOnlyId())
-                .build();
-        service.create(histLocation2);
+        Entity histLocation2 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T07:00:00.000Z"), thing.withOnlyPk(), location2);
+        sSrvc.create(histLocation2);
 
         // Check if the Location of the Thing is now Location 2.
-        List<Location> thingLocations = thing.locations().query().list().toList();
+        List<Entity> thingLocations = thing.query(sMdl.npThingLocations).list().toList();
 
         assertEquals(1, thingLocations.size(), "Incorrect number of Locations for Thing.");
 
         assertEquals(location2, thingLocations.get(0));
 
         // Now create a new HistoricalLocation for the Thing, with an earlier time.
-        HistoricalLocation histLocation3 = HistoricalLocationBuilder.builder()
-                .location(location3)
-                .time(ZonedDateTime.parse("2016-01-01T05:00:00.000Z"))
-                .thing(thing.withOnlyId())
-                .build();
-        service.create(histLocation3);
+        Entity histLocation3 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T05:00:00.000Z"), thing.withOnlyPk(), location3.withOnlyPk());
+        sSrvc.create(histLocation3);
 
         // Check if the Location of the Thing is still Location 2.
-        thingLocations = thing.locations().query().list().toList();
+        thingLocations = thing.query(sMdl.npThingLocations).list().toList();
 
         assertEquals(1, thingLocations.size(), "Incorrect number of Locations for Thing.");
 
@@ -250,62 +222,62 @@ public abstract class AdditionalTests extends AbstractTestClass {
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
-        Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
-        service.create(location1);
+        Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        sSrvc.create(location1);
 
-        Thing thing1 = new Thing("Thing 1", "The first thing.");
-        thing1.getLocations().add(location1.withOnlyId());
-        service.create(thing1);
+        Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
+        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
+        sSrvc.create(thing1);
 
-        Thing thing2 = new Thing("Thing 2", "The second thing.");
-        thing2.getLocations().add(location1.withOnlyId());
-        service.create(thing2);
+        Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
+        thing2.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
+        sSrvc.create(thing2);
 
-        Sensor sensor1 = new Sensor("Test Thermometre", "Test Sensor", "None", "-");
-        service.create(sensor1);
+        Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
+        sSrvc.create(sensor1);
 
-        ObservedProperty obsProp1 = new ObservedProperty("Temperature", "http://example.org", "-");
-        service.create(obsProp1);
+        Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://example.org", "-");
+        sSrvc.create(obsProp1);
 
-        Datastream datastream1 = new Datastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream1.setThing(thing1);
-        datastream1.setSensor(sensor1);
-        datastream1.setObservedProperty(obsProp1);
-        service.create(datastream1);
+        Entity datastream1 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
+        datastream1.setProperty(sMdl.npDatastreamThing, thing1);
+        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1);
+        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1);
+        sSrvc.create(datastream1);
 
-        Observation obs1 = new Observation(1.0, datastream1);
-        service.create(obs1);
+        Entity obs1 = sMdl.newObservation(1.0, datastream1);
+        sSrvc.create(obs1);
 
         testGet(thing1, datastream1, thing2);
 
         // PUT tests
         String urlObsGood = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing1.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
         String urlObsBad = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing2.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
 
         testPut(urlObsGood, urlObsBad);
         testPatch(urlObsGood, urlObsBad);
         testDelete(urlObsBad, urlObsGood);
     }
 
-    private void testGet(Thing thing1, Datastream datastream1, Thing thing2) {
+    private void testGet(Entity thing1, Entity datastream1, Entity thing2) {
         // GET tests
         HTTPMethods.HttpResponse response;
-        String url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        String url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(200, response.code, "Get should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(404, response.code, "Get should return 404 Not Found for url " + url);
 
         // POST tests
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         String observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 300\n"
@@ -313,7 +285,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         response = HTTPMethods.doPost(url, observationJson);
         assertEquals(201, response.code, "Post should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
         assertNotEquals(201, response.code, "Post should not return 201 Created for url " + url);
     }
@@ -370,37 +342,37 @@ public abstract class AdditionalTests extends AbstractTestClass {
         EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
-        Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
-        service.create(location1);
+        Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        sSrvc.create(location1);
 
-        Thing thing1 = new Thing("Thing 1", "The first thing.");
-        thing1.getLocations().add(location1.withOnlyId());
-        service.create(thing1);
+        Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
+        thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
+        sSrvc.create(thing1);
 
-        Sensor sensor1 = new Sensor("Test Thermometre", "Test Sensor", "None", "-");
-        service.create(sensor1);
+        Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
+        sSrvc.create(sensor1);
 
-        ObservedProperty obsProp1 = new ObservedProperty("Temperature", "http://example.org", "-");
-        service.create(obsProp1);
+        Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://example.org", "-");
+        sSrvc.create(obsProp1);
 
-        Datastream datastream1 = new Datastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream1.setThing(thing1);
-        datastream1.setSensor(sensor1);
-        datastream1.setObservedProperty(obsProp1);
-        service.create(datastream1);
+        Entity datastream1 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
+        datastream1.setProperty(sMdl.npDatastreamThing, thing1);
+        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1);
+        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1);
+        sSrvc.create(datastream1);
 
-        Observation obs1 = new Observation(1.0, datastream1);
-        service.create(obs1);
+        Entity obs1 = sMdl.newObservation(1.0, datastream1);
+        sSrvc.create(obs1);
 
-        FeatureOfInterest foiGenerated1 = service.observations().find(obs1.getId()).getFeatureOfInterest();
+        Entity foiGenerated1 = sSrvc.dao(sMdl.etObservation).find(obs1.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
         assertNotNull(foiGenerated1);
 
-        service.delete(foiGenerated1);
+        sSrvc.delete(foiGenerated1);
 
-        Observation obs2 = new Observation(1.0, datastream1);
-        service.create(obs2);
+        Entity obs2 = sMdl.newObservation(1.0, datastream1);
+        sSrvc.create(obs2);
 
-        FeatureOfInterest foiGenerated2 = service.observations().find(obs2.getId()).getFeatureOfInterest();
+        Entity foiGenerated2 = sSrvc.dao(sMdl.etObservation).find(obs2.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
         assertNotNull(foiGenerated2);
 
         assertNotEquals(foiGenerated1, foiGenerated2);

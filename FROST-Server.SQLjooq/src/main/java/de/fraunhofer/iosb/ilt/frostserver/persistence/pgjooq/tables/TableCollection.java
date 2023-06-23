@@ -17,21 +17,39 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_ADMIN;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_CREATE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ROLE_UPDATE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
  */
 public class TableCollection {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableCollection.class);
 
     private ModelRegistry modelRegistry;
     private boolean initialised = false;
@@ -41,6 +59,8 @@ public class TableCollection {
      * not initialised itself using it.
      */
     private List<DefModel> modelDefinitions;
+    private Map<String, SecurityTableWrapper> securityWrappers;
+    private Map<String, List<HookValidator>> securityValidators;
 
     private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
@@ -79,18 +99,32 @@ public class TableCollection {
         tablesByName.put(table.getName(), table);
     }
 
-    public void init(EntityFactories entityFactories) {
+    /**
+     * Initialise the TableCollection.
+     *
+     * @param ppm The PersistenceManager to initialise the TableCollection for.
+     * @return True if the called caused the TableCollection to be initialised,
+     * false if the TableCollection was already initialised and the call made no
+     * changes.
+     */
+    public boolean init(PostgresPersistenceManager ppm) {
         if (initialised) {
-            return;
+            return false;
         }
         synchronized (this) {
             if (!initialised) {
                 initialised = true;
+                final EntityFactories entityFactories = ppm.getEntityFactories();
                 for (StaMainTable<?> table : getAllTables()) {
+                    LOGGER.info("  Table: {}.", table.getName());
                     table.initProperties(entityFactories);
                     table.initRelations();
+                    initSecurityWrapper(table);
+                    initSecurityValidators(table, ppm);
                 }
+                return true;
             }
+            return false;
         }
     }
 
@@ -121,4 +155,48 @@ public class TableCollection {
         this.modelDefinitions = Collections.emptyList();
     }
 
+    public void initSecurityWrapper(StaMainTable table) {
+        if (securityWrappers == null) {
+            return;
+        }
+        SecurityTableWrapper stw = securityWrappers.get(table.getName());
+        if (stw == null) {
+            return;
+        }
+        table.setSecurityWrapper(stw);
+    }
+
+    public void addSecurityWrapper(String tableName, SecurityTableWrapper w) {
+        if (securityWrappers == null) {
+            securityWrappers = new HashMap<>();
+        }
+        securityWrappers.put(tableName, w);
+    }
+
+    public void initSecurityValidators(StaMainTable table, PostgresPersistenceManager ppm) {
+        if (securityValidators == null) {
+            return;
+        }
+        final List<HookValidator> hvList = securityValidators.get(table.getName());
+        if (hvList == null) {
+            LOGGER.info("    Adding default security hooks for {}", table.getName());
+            HookValidator hv = new ValidatorCUD()
+                    .setCheckInsertPreRel(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_CREATE))
+                    .setCheckUpdate(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_UPDATE))
+                    .setCheckDelete(new CheckUserHasRoles().setVheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_DELETE));
+            hv.registerHooks(table, ppm);
+            return;
+        }
+        for (HookValidator hv : hvList) {
+            hv.registerHooks(table, ppm);
+        }
+    }
+
+    public void addSecurityValidator(String tableName, HookValidator hv) {
+        if (securityValidators == null) {
+            securityValidators = new HashMap<>();
+        }
+        securityValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
+                .add(hv);
+    }
 }

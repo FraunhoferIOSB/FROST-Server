@@ -15,29 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
+package de.fraunhofer.iosb.ilt.statests.c02cud;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import java.io.IOException;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 
-/**
- * Deserializes JSON as simple String even if expected format is something else.
- *
- * @author jab
- */
-public class ToStringDeserializer extends StdDeserializer<Object> {
+public class ResultTypesTests11 extends ResultTypesTests {
 
-    public ToStringDeserializer() {
-        super(Object.class);
-    }
-
-    @Override
-    public Object deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        TreeNode tree = jp.getCodec().readTree(jp);
-        return tree.toString();
+    public ResultTypesTests11() {
+        super(ServerVersion.v_1_1);
     }
 
 }

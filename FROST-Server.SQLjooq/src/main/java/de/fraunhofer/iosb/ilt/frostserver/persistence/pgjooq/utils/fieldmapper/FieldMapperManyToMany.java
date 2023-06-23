@@ -107,11 +107,14 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
         final int fieldIdxLinkOur = getOrRegisterField(linkOurField, dbTableLink, staTableLink);
         final int fieldIdxLinkOther = getOrRegisterField(linkOtherField, dbTableLink, staTableLink);
 
-        final NavigationPropertyMain navProp = getParent().getNavigationProperty();
+        final DefNavigationProperty parent = getParent();
+        boolean symmetrical = parent.isSymmetrical();
+
+        final NavigationPropertyMain navProp = parent.getNavigationProperty();
         final PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         pfReg.addEntry(navProp, t -> t.field(fieldIdx));
 
-        staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther)
+        staTable.registerRelation(new RelationManyToMany(navProp, staTable, staTableLink, staTableOther, symmetrical)
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
                 .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
                 .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
@@ -122,7 +125,7 @@ public class FieldMapperManyToMany extends FieldMapperAbstractNp {
             final NavigationPropertyMain navPropInverse = getParent().getNavigationPropertyInverse();
             final PropertyFieldRegistry<?> pfRegOther = staTableOther.getPropertyFieldRegistry();
             pfRegOther.addEntry(navPropInverse, t -> t.field(fieldIdxOther));
-            staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable)
+            staTableOther.registerRelation(new RelationManyToMany(navPropInverse, staTableOther, staTableLink, staTable, symmetrical)
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
                     .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))

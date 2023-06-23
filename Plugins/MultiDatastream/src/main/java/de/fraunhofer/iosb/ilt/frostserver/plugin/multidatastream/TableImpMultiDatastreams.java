@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 
@@ -40,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObsProperties;
@@ -63,6 +65,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record3;
 import org.jooq.SelectConditionStep;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -157,13 +160,17 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
      * @param pCoreModel the coreModel plugin that this data model links to.
      */
     public TableImpMultiDatastreams(DataType<?> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
-        super(idType, DSL.name("MULTI_DATASTREAMS"), null);
+        super(idType, DSL.name("MULTI_DATASTREAMS"), null, null);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
     }
 
     private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pMultiDs, pCoreModel);
+    }
+
+    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, Table updatedSql, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
     }
@@ -307,7 +314,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
 
         // Register hooks to alter behaviour of other tables
         obsPropsTable.registerHookPreInsert(-1,
-                (pm, entity, insertFields) -> {
+                (phase, pm, entity, insertFields) -> {
+                    if (phase != PRE_RELATIONS) {
+                        return true;
+                    }
                     EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
                     if (mds != null && !mds.isEmpty()) {
                         throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
@@ -337,7 +347,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
         // On insert Observation
-        observationsTable.registerHookPreInsert(-1, (pm, entity, insertFields) -> {
+        observationsTable.registerHookPreInsert(-1, (phase, pm, entity, insertFields) -> {
+            if (phase != PRE_RELATIONS) {
+                return true;
+            }
             final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
             final Entity mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamObservation);
             if (ds != null && mds != null) {
@@ -402,6 +415,16 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     @Override
     public TableImpMultiDatastreams as(Name alias) {
         return new TableImpMultiDatastreams(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpMultiDatastreams asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpMultiDatastreams(DSL.name(name), this, wrappedTable, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override

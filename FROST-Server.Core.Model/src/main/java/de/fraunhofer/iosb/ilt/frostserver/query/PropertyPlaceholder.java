@@ -57,4 +57,9 @@ public class PropertyPlaceholder {
         return subPath;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

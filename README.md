@@ -17,6 +17,20 @@ Instead of compiling the server yourself, you can also download pre-built war an
 Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
 
 
+## Extendable Data Model and pluggable APIs
+
+FROST-Server implements the SensorThings API data model and API, but is not limited to these.
+Using plugins the data model can be extended or even completely replaced depending on your specific requirements.
+APIs and result formats can also be added using plugins.
+By default, FROST-Server comes with experimental plugins for the OData 4.0 and 4.01 APIs and for CSV and GeoJSON result formats.
+
+
+## Fine-grained Authorisation
+
+Authorisation rules can either be simple with Read, Create, Update and Delete on a service level,
+or they can be very fine-grained with, for instance, certain users being able to read or create only Observations in Datastreams of certain Things.
+
+
 ## Documentation
 
 Documentation can be found on the [documentation site](https://fraunhoferiosb.github.io/FROST-Server/)
@@ -44,7 +58,7 @@ To compile FROST-Server you need to have a JDK and Maven installed.
    * `FROST-Server.MQTT/target/`
 
 
-##Contributing
+## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create.
 Any contributions are greatly appreciated.
@@ -61,7 +75,7 @@ frost@iosb.fraunhofer.de
 
 ## License
 
-Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
 Karlsruhe, Germany.
 
 This program is free software: you can redistribute it and/or modify

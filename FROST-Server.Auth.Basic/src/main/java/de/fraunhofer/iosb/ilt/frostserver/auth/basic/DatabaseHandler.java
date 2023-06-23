@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -39,6 +40,7 @@ import java.util.Map;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -103,18 +105,29 @@ public class DatabaseHandler {
                         "crypt", String.class, DSL.val(passwordOrHash), TableUsers.USERS.userPass));
     }
 
-    public boolean isValidUser(String userName, String passwordOrHash) {
+    /**
+     * Checks if the user is valid and adds roles to the userData.
+     *
+     * @param userData the user data (username and password)
+     * @return true if the user is value
+     */
+    public boolean isValidUser(UserData userData) {
         maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
-            Record1<Integer> one = dslContext
-                    .selectOne()
+            Result<Record1<String>> roles = dslContext
+                    .select(TableUsersRoles.USER_ROLES.roleName)
                     .from(TableUsers.USERS)
+                    .leftJoin(TableUsersRoles.USER_ROLES).on(TableUsers.USERS.userName.eq(TableUsersRoles.USER_ROLES.userName))
                     .where(
-                            TableUsers.USERS.userName.eq(userName)
-                                    .and(passwordCondition(passwordOrHash)))
-                    .fetchOne();
-            return one != null;
+                            TableUsers.USERS.userName.eq(userData.userName)
+                                    .and(passwordCondition(userData.userPass)))
+                    .fetch();
+            roles.getValues(TableUsersRoles.USER_ROLES.roleName)
+                    .stream()
+                    .filter((t) -> t != null)
+                    .forEach(t -> userData.roles.add(t));
+            return !roles.isEmpty();
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user credentials.", exc);
             return false;

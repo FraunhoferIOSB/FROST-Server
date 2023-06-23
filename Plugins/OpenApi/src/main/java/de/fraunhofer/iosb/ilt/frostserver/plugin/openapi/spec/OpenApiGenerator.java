@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,7 +70,7 @@ public class OpenApiGenerator {
         OAPath basePath = new OAPath();
         paths.put(context.getBase(), basePath);
 
-        for (EntityType entityType : modelRegistry.getEntityTypes()) {
+        for (EntityType entityType : modelRegistry.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             addPathsForSet(context, document, 0, paths, context.getBase(), entityType, entityType.plural, context);
         }
         return document;

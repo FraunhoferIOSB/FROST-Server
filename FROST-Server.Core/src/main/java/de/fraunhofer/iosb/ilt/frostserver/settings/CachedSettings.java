@@ -92,11 +92,31 @@ public class CachedSettings extends Settings {
     }
 
     @Override
+    public String get(String name, String defaultValue, boolean nonSensitiveValue) {
+        if (valuesString.containsKey(name)) {
+            return valuesString.get(name);
+        }
+        String value = super.get(name, defaultValue, nonSensitiveValue);
+        valuesString.put(name, value);
+        return value;
+    }
+
+    @Override
     public String get(String name, Class<? extends ConfigDefaults> defaultsProvider) {
         if (valuesString.containsKey(name)) {
             return valuesString.get(name);
         }
         String value = super.get(name, defaultsProvider);
+        valuesString.put(name, value);
+        return value;
+    }
+
+    @Override
+    public String get(String name, Class<? extends ConfigDefaults> defaultsProvider, boolean nonSensitiveValue) {
+        if (valuesString.containsKey(name)) {
+            return valuesString.get(name);
+        }
+        String value = super.get(name, defaultsProvider, nonSensitiveValue);
         valuesString.put(name, value);
         return value;
     }

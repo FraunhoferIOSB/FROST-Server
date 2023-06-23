@@ -54,10 +54,6 @@
             <artifactId>Configurable</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.fraunhofer.iosb.ilt</groupId>
-            <artifactId>FROST-Client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
         </dependency>

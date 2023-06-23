@@ -47,22 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Capability7Tests extends AbstractTestClass {
 
-    public static class Implementation10 extends Capability7Tests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends Capability7Tests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */

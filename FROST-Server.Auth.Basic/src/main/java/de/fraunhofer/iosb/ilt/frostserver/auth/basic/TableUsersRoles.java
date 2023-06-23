@@ -34,7 +34,7 @@ public class TableUsersRoles extends TableImpl<Record2<String, String>> {
     private static final String TABLE_NAME = "USER_ROLES";
 
     /**
-     * The reference instance of <code>public.USERS</code>
+     * The reference instance of <code>public.USER_ROLES</code>
      */
     public static final TableUsersRoles USER_ROLES = new TableUsersRoles();
 

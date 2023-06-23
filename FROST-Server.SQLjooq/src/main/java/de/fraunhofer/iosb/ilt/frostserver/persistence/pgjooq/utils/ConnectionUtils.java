@@ -67,7 +67,7 @@ public class ConnectionUtils implements ConfigDefaults {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionUtils.class);
 
-    private static final Map<String, ConnectionSource> EXISTING_POOLS = new HashMap<>();
+    private static final Map<String, DataSource> EXISTING_POOLS = new HashMap<>();
 
     private ConnectionUtils() {
         // Utility class, should not be instantiated.
@@ -89,16 +89,16 @@ public class ConnectionUtils implements ConfigDefaults {
      * @throws SQLException when there is a problem.
      */
     public static Connection getPoolingConnection(String name, Settings settings) throws SQLException {
-        ConnectionSource source = EXISTING_POOLS.get(name);
+        DataSource source = EXISTING_POOLS.get(name);
         if (source == null) {
             source = createPoolingConnection(name, settings);
         }
         return source.getConnection();
     }
 
-    private static ConnectionSource createPoolingConnection(String name, Settings settings) {
+    private static DataSource createPoolingConnection(String name, Settings settings) {
         synchronized (EXISTING_POOLS) {
-            ConnectionSource source = EXISTING_POOLS.get(name);
+            DataSource source = EXISTING_POOLS.get(name);
             if (source == null) {
                 if (!settings.get(TAG_DB_URL, ConnectionUtils.class, false).isEmpty()) {
                     source = setupBasicDataSource(settings);
@@ -111,7 +111,7 @@ public class ConnectionUtils implements ConfigDefaults {
         }
     }
 
-    private static ConnectionSource setupBasicDataSource(Settings settings) {
+    private static DataSource setupBasicDataSource(Settings settings) {
         LOGGER.info("Setting up BasicDataSource for database connections.");
         String driver = settings.get(TAG_DB_DRIVER, ConnectionUtils.class);
         if (driver.isEmpty()) {
@@ -126,13 +126,13 @@ public class ConnectionUtils implements ConfigDefaults {
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
-            return new ConnectionSourceBasicDataSource(ds);
+            return ds;
         } catch (ClassNotFoundException exc) {
             throw new IllegalArgumentException(exc);
         }
     }
 
-    private static ConnectionSource setupDataSource(Settings settings) {
+    private static DataSource setupDataSource(Settings settings) {
         LOGGER.info("Setting up DataSource for database connections.");
         try {
             String dataSourceName = settings.get(TAG_DATA_SOURCE, ConnectionUtils.class);
@@ -144,7 +144,7 @@ public class ConnectionUtils implements ConfigDefaults {
             if (ds == null) {
                 throw new IllegalStateException("Data source not found!");
             }
-            return new ConnectionSourceDataSource(ds);
+            return ds;
         } catch (NamingException exc) {
             throw new IllegalArgumentException("Failed to load context.", exc);
         }
@@ -172,40 +172,6 @@ public class ConnectionUtils implements ConfigDefaults {
         Class.forName("org.apache.commons.dbcp2.PoolingDriver");
         PoolingDriver driver = (PoolingDriver) DriverManager.getDriver("jdbc:apache:commons:dbcp:");
         driver.registerPool(name, connectionPool);
-    }
-
-    private static interface ConnectionSource {
-
-        public Connection getConnection() throws SQLException;
-    }
-
-    private static class ConnectionSourceDataSource implements ConnectionSource {
-
-        private final DataSource ds;
-
-        public ConnectionSourceDataSource(DataSource ds) {
-            this.ds = ds;
-        }
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            return ds.getConnection();
-        }
-    }
-
-    private static class ConnectionSourceBasicDataSource implements ConnectionSource {
-
-        private final BasicDataSource dataSource;
-
-        public ConnectionSourceBasicDataSource(BasicDataSource dataSource) {
-            this.dataSource = dataSource;
-        }
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            return dataSource.getConnection();
-        }
-
     }
 
     public static class ConnectionWrapper implements Supplier<Connection>, AutoCloseable {

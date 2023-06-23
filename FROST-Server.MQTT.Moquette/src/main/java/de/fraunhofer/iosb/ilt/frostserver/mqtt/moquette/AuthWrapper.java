@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.moquette.broker.security.IAuthenticator;
 import io.moquette.broker.security.IAuthorizatorPolicy;
 import io.moquette.broker.subscriptions.Topic;
@@ -33,6 +34,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +78,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
             return false;
         }
+
+        @Override
+        public PrincipalExtended getUserPrincipal(String clientId) {
+            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        }
+
     };
 
     private final AuthProvider authProvider;
@@ -132,7 +140,13 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         if (frostClientId.equalsIgnoreCase(clientId)) {
             return true;
         }
+        if (StringUtils.containsAny(topic.toString(), '#', '+')) {
+            return false;
+        }
         return anonymousRead || authProvider.userHasRole(clientId, user, roleRead);
     }
 
+    public PrincipalExtended getUserPrincipal(String clientId) {
+        return authProvider.getUserPrincipal(clientId);
+    }
 }

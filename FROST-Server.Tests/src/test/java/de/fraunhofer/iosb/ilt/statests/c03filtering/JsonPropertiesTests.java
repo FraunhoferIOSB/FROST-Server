@@ -17,6 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_UNITOFMEASUREMENT;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,22 +30,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.jackson.ObjectMapperFactory;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,33 +63,17 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class JsonPropertiesTests extends AbstractTestClass {
 
-    public static class Implementation10 extends JsonPropertiesTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends JsonPropertiesTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPropertiesTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> O_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> O_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     public JsonPropertiesTests(ServerVersion version) {
         super(version);
@@ -136,33 +119,33 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
             properties.put("intArray", generateIntArray(i + 8, 5));
             properties.put("intIntArray", generateIntIntArray(i + 8, 3));
             properties.put("objArray", generateObjectList(i + 8, 3));
-            Thing thing = new Thing("Thing " + i, "It's a thing.");
-            thing.setProperties(properties);
-            service.create(thing);
+            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
+            thing.setProperty(EP_PROPERTIES, properties);
+            sSrvc.create(thing);
             THINGS.add(thing);
         }
 
-        Location location = new Location("Location 1", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
-        location.getThings().add(THINGS.get(0).withOnlyId());
-        service.create(location);
+        Entity location = sMdl.newLocation("Location 1", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).withOnlyPk());
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        service.create(sensor);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-        service.create(obsProp);
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
 
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "Cel"));
-        datastream.setThing(THINGS.get(0));
-        datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "Cel"));
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
+        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        ObjectMapper mapper = ObjectMapperFactory.get();
+        ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         String resultQualityObjectString = ""
                 + "{\"DQ_Status\":{"
                 + "  \"code\": 2,"
@@ -193,62 +176,62 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
 
         for (int i = 0; i <= 12; i++) {
             Map<String, Object> parameters = new HashMap<>();
-            Observation o = new Observation(i, datastream);
+            Entity o = sMdl.newObservation(i, datastream);
             parameters.put("string", generateString(i, 10));
             parameters.put("boolean", i % 2 == 0);
             parameters.put("int", i);
             parameters.put("intArray", generateIntArray(i, 5));
             parameters.put("intIntArray", generateIntIntArray(i, 3));
             parameters.put("objArray", generateObjectList(i, 3));
-            o.setParameters(parameters);
-            o.setResultQuality(i % 2 == 0 ? rqObject : rqArray);
-            service.create(o);
+            o.setProperty(EP_PARAMETERS, parameters);
+            o.setProperty(EP_RESULTQUALITY, i % 2 == 0 ? rqObject : rqArray);
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
         {
             // 13
             Map<String, Object> parameters = new HashMap<>();
-            Observation o = new Observation("badVales1", datastream);
+            Entity o = sMdl.newObservation("badVales1", datastream);
             parameters.put("int", generateString(13, 10));
             parameters.put("string", 13 % 2 == 0);
             parameters.put("boolean", 13);
             parameters.put("objArray", generateIntArray(13, 5));
             parameters.put("intArray", generateIntIntArray(13, 3));
             parameters.put("intIntArray", generateObjectList(13, 3));
-            o.setParameters(parameters);
-            service.create(o);
+            o.setProperty(EP_PARAMETERS, parameters);
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
         {
             // 14
             Map<String, Object> parameters = new HashMap<>();
-            Observation o = new Observation("badVales2", datastream);
+            Entity o = sMdl.newObservation("badVales2", datastream);
             parameters.put("boolean", generateString(14, 10));
             parameters.put("int", 14 % 2 == 0);
             parameters.put("string", 14);
             parameters.put("intIntArray", generateIntArray(14, 5));
             parameters.put("objArray", generateIntIntArray(14, 3));
             parameters.put("intArray", generateObjectList(14, 3));
-            o.setParameters(parameters);
-            service.create(o);
+            o.setProperty(EP_PARAMETERS, parameters);
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
         {
             // 15
             Map<String, Object> parameters = new HashMap<>();
-            Observation o = new Observation("badVales3", datastream);
+            Entity o = sMdl.newObservation("badVales3", datastream);
             parameters.put("boolean", "true");
             parameters.put("int", "5");
-            o.setParameters(parameters);
-            service.create(o);
+            o.setProperty(EP_PARAMETERS, parameters);
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
 
-        datastream = new Datastream("Datastream 2", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree Fahrenheit", "°F", "[degF]"));
-        datastream.setThing(THINGS.get(0));
-        datastream.setSensor(sensor);
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree Fahrenheit", "°F", "[degF]"));
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
+        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
     }
 
@@ -322,37 +305,37 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test01FetchLowLevelThingProperties() {
         LOGGER.info("  test01FetchLowLevelThingProperties");
-        String urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "string", (String) THINGS.get(0).getProperties().get("string"), urlString);
+        testResponseProperty(json, "string", (String) THINGS.get(0).getProperty(EP_PROPERTIES).get("string"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/boolean";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "boolean", (Boolean) THINGS.get(0).getProperties().get("boolean"), urlString);
+        testResponseProperty(json, "boolean", (Boolean) THINGS.get(0).getProperty(EP_PROPERTIES).get("boolean"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/int";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "int", (Integer) THINGS.get(0).getProperties().get("int"), urlString);
+        testResponseProperty(json, "int", (Integer) THINGS.get(0).getProperty(EP_PROPERTIES).get("int"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intArray";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intArray", (int[]) THINGS.get(0).getProperties().get("intArray"), urlString);
+        testResponseProperty(json, "intArray", (int[]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intArray"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intArray[1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intArray[1]", ((int[]) THINGS.get(0).getProperties().get("intArray"))[1], urlString);
+        testResponseProperty(json, "intArray[1]", ((int[]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intIntArray[1]", ((int[][]) THINGS.get(0).getProperties().get("intIntArray"))[1], urlString);
+        testResponseProperty(json, "intIntArray[1]", ((int[][]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intIntArray[0][1]", ((int[][]) THINGS.get(0).getProperties().get("intIntArray"))[0][1], urlString);
+        testResponseProperty(json, "intIntArray[0][1]", ((int[][]) THINGS.get(0).getProperty(EP_PROPERTIES).get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/properties/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "string", ((List<Map<String, String>>) THINGS.get(0).getProperties().get("objArray")).get(0).get("string"), urlString);
+        testResponseProperty(json, "string", ((List<Map<String, String>>) THINGS.get(0).getProperty(EP_PROPERTIES).get("objArray")).get(0).get("string"), urlString);
     }
 
     /**
@@ -361,37 +344,37 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test02FetchLowLevelObservationParameters() {
         LOGGER.info("  test02FetchLowLevelObservationParameters");
-        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getParameters().get("string"), urlString);
+        testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("string"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/boolean";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "boolean", (Boolean) OBSERVATIONS.get(0).getParameters().get("boolean"), urlString);
+        testResponseProperty(json, "boolean", (Boolean) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("boolean"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/int";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "int", (Integer) OBSERVATIONS.get(0).getParameters().get("int"), urlString);
+        testResponseProperty(json, "int", (Integer) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("int"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intArray";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intArray", (int[]) OBSERVATIONS.get(0).getParameters().get("intArray"), urlString);
+        testResponseProperty(json, "intArray", (int[]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intArray"), urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intArray[1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intArray[1]", ((int[]) OBSERVATIONS.get(0).getParameters().get("intArray"))[1], urlString);
+        testResponseProperty(json, "intArray[1]", ((int[]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intIntArray[1]", ((int[][]) OBSERVATIONS.get(0).getParameters().get("intIntArray"))[1], urlString);
+        testResponseProperty(json, "intIntArray[1]", ((int[][]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "intIntArray[0][1]", ((int[][]) OBSERVATIONS.get(0).getParameters().get("intIntArray"))[0][1], urlString);
+        testResponseProperty(json, "intIntArray[0][1]", ((int[][]) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + formatKeyValuesForUrl(OBSERVATIONS.get(0)) + ")/parameters/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
-        testResponseProperty(json, "string", ((List<Map<String, String>>) OBSERVATIONS.get(0).getParameters().get("objArray")).get(0).get("string"), urlString);
+        testResponseProperty(json, "string", ((List<Map<String, String>>) OBSERVATIONS.get(0).getProperty(EP_PARAMETERS).get("objArray")).get(0).get("string"), urlString);
 
     }
 
@@ -402,16 +385,16 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test03StringFilter() {
         LOGGER.info("  test03StringFilter");
-        testFilterResults(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
-        testFilterResults(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/string eq '" + THINGS.get(2).getProperty(EP_PROPERTIES).get("string") + "'", getFromList(THINGS, 2));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/string eq '" + OBSERVATIONS.get(2).getProperty(EP_PARAMETERS).get("string") + "'", getFromList(OBSERVATIONS, 2));
 
-        testFilterResults(service.things(), "substringof('cdefgh', properties/string)", getFromList(THINGS, 0, 1, 2));
-        testFilterResults(service.observations(), "substringof('cdefgh', parameters/string)", getFromList(OBSERVATIONS, 0, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "substringof('cdefgh', properties/string)", getFromList(THINGS, 0, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "substringof('cdefgh', parameters/string)", getFromList(OBSERVATIONS, 0, 1, 2));
 
-        testFilterResults(service.things(), "properties/objArray[0]/string eq 'jklmnopqrs'", getFromList(THINGS, 1));
-        testFilterResults(service.observations(), "parameters/objArray[0]/string eq 'jklmnopqrs'", getFromList(OBSERVATIONS, 9));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[0]/string eq 'jklmnopqrs'", getFromList(THINGS, 1));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[0]/string eq 'jklmnopqrs'", getFromList(OBSERVATIONS, 9));
 
-        testFilterResults(service.observations(), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
     }
 
     /**
@@ -421,26 +404,26 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test04NumberFilter() {
         LOGGER.info("  test04NumberFilter");
-        testFilterResults(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
-        testFilterResults(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int eq " + THINGS.get(2).getProperty(EP_PROPERTIES).get("int"), getFromList(THINGS, 2));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq " + OBSERVATIONS.get(2).getProperty(EP_PARAMETERS).get("int"), getFromList(OBSERVATIONS, 2));
 
-        testFilterResults(service.things(), "properties/int gt 9", getFromList(THINGS, 2, 3));
-        testFilterResults(service.observations(), "parameters/int gt 8", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int gt 9", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int gt 8", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        testFilterResults(service.things(), "properties/int lt 9", getFromList(THINGS, 0));
-        testFilterResults(service.observations(), "parameters/int lt 8", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int lt 9", getFromList(THINGS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int lt 8", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
-        testFilterResults(service.things(), "properties/intArray[1] gt 10", getFromList(THINGS, 2, 3));
-        testFilterResults(service.observations(), "parameters/intArray[1] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intArray[1] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intArray[1] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        testFilterResults(service.things(), "properties/intArray[1] lt 10", getFromList(THINGS, 0));
-        testFilterResults(service.observations(), "parameters/intArray[1] lt 9", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intArray[1] lt 10", getFromList(THINGS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intArray[1] lt 9", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
-        testFilterResults(service.things(), "properties/intIntArray[1][0] gt 10", getFromList(THINGS, 2, 3));
-        testFilterResults(service.observations(), "parameters/intIntArray[1][0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intIntArray[1][0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intIntArray[1][0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
-        testFilterResults(service.things(), "properties/objArray[1]/intArray[0] gt 10", getFromList(THINGS, 2, 3));
-        testFilterResults(service.observations(), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[1]/intArray[0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
     }
 
     /**
@@ -450,17 +433,17 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test05BooleanFilter() {
         LOGGER.info("  test05BooleanFilter");
-        testFilterResults(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
-        testFilterResults(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/boolean eq " + THINGS.get(1).getProperty(EP_PROPERTIES).get("boolean"), getFromList(THINGS, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean eq " + OBSERVATIONS.get(1).getProperty(EP_PARAMETERS).get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
-        testFilterResults(service.things(), "properties/boolean", getFromList(THINGS, 0, 2));
-        testFilterResults(service.observations(), "parameters/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/boolean", getFromList(THINGS, 0, 2));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
 
-        testFilterResults(service.things(), "not properties/boolean", getFromList(THINGS, 1, 3));
-        testFilterResults(service.observations(), "not parameters/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "not properties/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "not parameters/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
-        testFilterResults(service.things(), "properties/objArray[1]/boolean", getFromList(THINGS, 1, 3));
-        testFilterResults(service.observations(), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[1]/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
     /**
@@ -469,12 +452,12 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test06UnitOfMeasurementFilter() {
         LOGGER.info("  test06UnitOfMeasurementFilter");
-        testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
-        testFilterResults(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
-        testFilterResults(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 0));
-        testFilterResults(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 1));
-        testFilterResults(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 0));
-        testFilterResults(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getSymbol() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getProperty(EP_UNITOFMEASUREMENT).getSymbol() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getName() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/name eq '" + DATASTREAMS.get(1).getProperty(EP_UNITOFMEASUREMENT).getName() + "'", getFromList(DATASTREAMS, 1));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getDefinition() + "'", getFromList(DATASTREAMS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(1).getProperty(EP_UNITOFMEASUREMENT).getDefinition() + "'", getFromList(DATASTREAMS, 1));
     }
 
     /**
@@ -483,9 +466,9 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test07PropertyCompare() {
         LOGGER.info("  test07PropertyCompare");
-        testFilterResults(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
-        testFilterResults(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
-        testFilterResults(service.observations(), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
     }
 
     /**
@@ -494,8 +477,8 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Test
     void test20ResultQualityFilter() {
         LOGGER.info("  test20ResultQualityFilter");
-        testFilterResults(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
-        testFilterResults(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
     private JsonNode getJsonObjectForResponse(String urlString) {

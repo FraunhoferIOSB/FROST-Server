@@ -68,6 +68,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.ContextEntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.FractionalSeconds;
@@ -322,7 +324,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             }
             // We can not accept json, so the subProperty must be a known direction.
             state.finished = true;
-            return new SimpleFieldWrapper(pathExpressions.get(subProperty.getName()));
+            return WrapperHelper.wrapField(pathExpressions.get(subProperty.getName()));
         }
         if (pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START)
                 && pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END)) {
@@ -1165,6 +1167,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.trim(field));
+    }
+
+    @Override
+    public FieldWrapper visit(PrincipalName node) {
+        return new SimpleFieldWrapper(DSL.value(node.getValue()));
+    }
+
+    @Override
+    public FieldWrapper visit(ContextEntityProperty node) {
+        return new SimpleFieldWrapper(DSL.value(node.getValue()));
     }
 
     private static class PathState {

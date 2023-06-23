@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
@@ -49,6 +49,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -60,22 +61,6 @@ import org.slf4j.LoggerFactory;
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability3Tests extends AbstractTestClass {
-
-    public static class Implementation10 extends Capability3Tests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends Capability3Tests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
 
     /**
      * The logger for this class.
@@ -1135,7 +1120,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     /**
      * This helper method is checking nested expands two levels deep including
      * select, top, skip and count options. For instance:
-     * 
+     *
      * <pre>
      * ObservedProperties(722)?
      *   $select=name,description&
@@ -1253,8 +1238,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private void checkCountForEntityType(EntityType entityType) {
         Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
-        request.getQuery().setCount(true);
-        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
+        request.getQuery()
+                .setCount(true)
+                .setTop(1l);
+        final JSONObject response = request.executeGet();
+        String nextLink = EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
+
+        Assertions.assertNotNull(nextLink, "NextLink should not have been null for " + entityType);
+
+        Request nextRequest = new Request(nextLink);
+        nextRequest.setEntityType(request.getEntityType());
+        EntityUtils.checkResponse(serverSettings.getExtensions(), nextRequest.executeGet(), nextRequest, ENTITYCOUNTS);
 
         request.getQuery().setCount(false);
         EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
@@ -1503,7 +1497,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private static Object postAndGetId(String urlString, String postContent) {
         HttpResponse responseMap = HTTPMethods.doPost(urlString, postContent);
         String response = responseMap.response;
-        return Utils.idObjectFromPostResult(response);
+        return Utils.pkFromPostResult(response)[0];
     }
 
     /**
@@ -1669,7 +1663,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     + "            \"description\": \"datastream 2\",\n"
                     + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                     + "            \"ObservedProperty\": {\n"
-                    + "                \"@iot.id\": " + quoteIdForJson(observedPropertyId2) + "\n"
+                    + "                \"@iot.id\": " + quoteForJson(observedPropertyId2) + "\n"
                     + "            },\n"
                     + "            \"Sensor\": {\n"
                     + "                \"name\": \"sensor 4 \",\n"
@@ -1719,7 +1713,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
-                    + "      \"@iot.id\": " + quoteIdForJson(locationId2) + "\n"
+                    + "      \"@iot.id\": " + quoteForJson(locationId2) + "\n"
                     + "    }\n"
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);
@@ -1727,7 +1721,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
-                    + "      \"@iot.id\": " + quoteIdForJson(locationId1) + "\n"
+                    + "      \"@iot.id\": " + quoteForJson(locationId1) + "\n"
                     + "    }\n"
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);
@@ -1748,71 +1742,83 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
             //Observations
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                    + "  \"result\": 1 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-01T00:00:00Z",
+                        "result": 1
+                    }""";
             observationId1 = postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-02T00:00:00Z\",\n"
-                    + "  \"result\": 2 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-02T00:00:00Z",
+                        "result": 2
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-03T00:00:00Z\",\n"
-                    + "  \"result\": 3 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-03T00:00:00Z",
+                        "result": 3
+                    }""";
             postAndGetId(urlString, urlParameters);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, null);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-04T00:00:00Z\",\n"
-                    + "  \"result\": 4 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-04T00:00:00Z",
+                        "result": 4
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-05T00:00:00Z\",\n"
-                    + "  \"result\": 5 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-05T00:00:00Z",
+                        "result": 5
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-06T00:00:00Z\",\n"
-                    + "  \"result\": 6 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-06T00:00:00Z",
+                        "result": 6
+                    }""";
             postAndGetId(urlString, urlParameters);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, null);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-07T00:00:00Z\",\n"
-                    + "  \"result\": 7 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-07T00:00:00Z",
+                        "result": 7
+                    }""";
             observationId7 = postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-08T00:00:00Z\",\n"
-                    + "  \"result\": 8 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-08T00:00:00Z",
+                        "result": 8
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-09T00:00:00Z\",\n"
-                    + "  \"result\": 9 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-09T00:00:00Z",
+                        "result": 9
+                    }""";
             postAndGetId(urlString, urlParameters);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, null);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-10T00:00:00Z\",\n"
-                    + "  \"result\": 10 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-10T00:00:00Z",
+                       "result": 10
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-11T00:00:00Z\",\n"
-                    + "  \"result\": 11 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-11T00:00:00Z",
+                        "result": 11
+                    }""";
             postAndGetId(urlString, urlParameters);
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-12T00:00:00Z\",\n"
-                    + "  \"result\": 12 \n"
-                    + "   }";
+            urlParameters = """
+                    {
+                        "phenomenonTime": "2015-03-12T00:00:00Z",
+                        "result": 12
+                    }""";
             postAndGetId(urlString, urlParameters);
 
             //FeatureOfInterest

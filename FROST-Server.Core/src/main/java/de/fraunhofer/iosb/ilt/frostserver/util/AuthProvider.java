@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 
 /**
  * An interface for classes that can configure a Filter on a ServletContext.
@@ -56,4 +57,14 @@ public interface AuthProvider extends LiquibaseUser {
      * @return true if the given user has the given role, false otherwise.
      */
     public boolean userHasRole(String clientId, String userName, String roleName);
+
+    /**
+     * Get the extended princial for the given clientId. If the clientId is
+     * unknown, the anonymous user principal is returned.
+     *
+     * @param clientId the clientId of the connection to get the userPrincipal
+     * for.
+     * @return The userPrincipal.
+     */
+    public PrincipalExtended getUserPrincipal(String clientId);
 }

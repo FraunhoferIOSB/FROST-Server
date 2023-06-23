@@ -95,7 +95,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
 
     private EntityType handleEntityType(JsonParser parser, Entity entity, EntityChangedMessage message) throws IOException {
         final String typeString = parser.getValueAsString();
-        EntityType type = modelRegistry.getEntityTypeForName(typeString);
+        EntityType type = modelRegistry.getEntityTypeForName(typeString, true);
         if (type == null) {
             throw new IllegalArgumentException("Unknown EntityType: " + typeString);
         }

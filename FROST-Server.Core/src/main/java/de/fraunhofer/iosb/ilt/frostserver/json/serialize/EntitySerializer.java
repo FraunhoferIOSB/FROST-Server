@@ -45,8 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles serialization of Entity objects. If a field is of type Entity and contains a non-empty navigationLink the
- * field will be renamed with the suffix '@iot.navigationLink' and will only contain the navigationLink as String.
+ * Handles serialization of Entity objects. If a field is of type Entity and
+ * contains a non-empty navigationLink the field will be renamed with the suffix
+ * '@iot.navigationLink' and will only contain the navigationLink as String.
  *
  * @author jab
  * @author scf
@@ -127,7 +128,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
         for (NavigationPropertyMain np : navigationProps) {
             String navigationLink = np.getNavigationLink(entity);
-            if (navigationLink != null && (np.isEntitySet() || entity.getProperty(np) != null)) {
+            if (navigationLink != null
+                    && (np.isEntitySet() || entity.getProperty(np) != null)
+                    && (!np.isAdminOnly() || query.getPrincipal().isAdmin())) {
                 gen.writeStringField(np.getName() + navLinkField, navigationLink);
             }
             if (metadata == Metadata.INTERNAL_COMPARE) {
@@ -159,10 +162,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
+        final boolean admin = entity.getQuery().getPrincipal().isAdmin();
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
-            if (np instanceof NavigationPropertyMain) {
-                writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
+            if (!np.isAdminOnly() || admin) {
+                if (np instanceof NavigationPropertyMain) {
+                    writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
+                }
             }
         }
     }

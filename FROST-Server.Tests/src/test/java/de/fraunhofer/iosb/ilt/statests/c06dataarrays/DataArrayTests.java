@@ -17,33 +17,25 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c06dataarrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.sta.model.Id;
-import de.fraunhofer.iosb.ilt.sta.model.IdLong;
-import de.fraunhofer.iosb.ilt.sta.model.IdString;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -67,22 +59,6 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class DataArrayTests extends AbstractTestClass {
 
-    public static class Implementation10 extends DataArrayTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends DataArrayTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
@@ -96,14 +72,14 @@ public abstract class DataArrayTests extends AbstractTestClass {
         "validTime",
         "parameters"};
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Location> LOCATIONS = new ArrayList<>();
-    private static final List<Sensor> SENSORS = new ArrayList<>();
-    private static final List<ObservedProperty> O_PROPS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<MultiDatastream> MULTIDATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
-    private static final List<FeatureOfInterest> FEATURES = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> LOCATIONS = new ArrayList<>();
+    private static final List<Entity> SENSORS = new ArrayList<>();
+    private static final List<Entity> O_PROPS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> MULTIDATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> FEATURES = new ArrayList<>();
 
     public DataArrayTests(ServerVersion version) {
         super(version);
@@ -151,15 +127,15 @@ public abstract class DataArrayTests extends AbstractTestClass {
     @Test
     void test03PostDataArray() {
         LOGGER.info("  test03PostDataArray");
-        Datastream ds1 = DATASTREAMS.get(0);
-        Datastream ds2 = DATASTREAMS.get(1);
-        FeatureOfInterest foi1 = FEATURES.get(0);
+        Entity ds1 = DATASTREAMS.get(0);
+        Entity ds2 = DATASTREAMS.get(1);
+        Entity foi1 = FEATURES.get(0);
         // Try to create four observations
         // The second one should return "error".
         String jsonString = "[\n"
                 + "  {\n"
                 + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": " + ds1.getId().getJson() + "\n"
+                + "      \"@iot.id\": " + Utils.quoteForJson(ds1.getPrimaryKeyValues()[0]) + "\n"
                 + "    },\n"
                 + "    \"components\": [\n"
                 + "      \"phenomenonTime\",\n"
@@ -171,7 +147,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
                 + "      [\n"
                 + "        \"2010-12-23T10:20:00-07:00\",\n"
                 + "        20,\n"
-                + "        " + foi1.getId().getJson() + "\n"
+                + "        " + Utils.quoteForJson(foi1.getPrimaryKeyValues()[0]) + "\n"
                 + "      ],\n"
                 + "      [\n"
                 + "        \"2010-12-23T10:21:00-07:00\",\n"
@@ -182,7 +158,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
                 + "  },\n"
                 + "  {\n"
                 + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": " + ds2.getId().getJson() + "\n"
+                + "      \"@iot.id\": " + Utils.quoteForJson(ds2.getPrimaryKeyValues()[0]) + "\n"
                 + "    },\n"
                 + "    \"components\": [\n"
                 + "      \"phenomenonTime\",\n"
@@ -239,10 +215,10 @@ public abstract class DataArrayTests extends AbstractTestClass {
                 continue;
             }
 
-            Id obsId = idFromPostResult(textValue);
-            Observation obs;
+            Object[] obsPk = Utils.pkFromPostResult(textValue);
+            Entity obs;
             try {
-                obs = service.observations().find(obsId);
+                obs = sSrvc.dao(sMdl.etObservation).find(obsPk);
             } catch (ServiceFailureException ex) {
                 fail("Failed to retrieve created observation for request: " + urlString);
                 return;
@@ -250,35 +226,34 @@ public abstract class DataArrayTests extends AbstractTestClass {
 
             OBSERVATIONS.add(obs);
         }
-        Observation obs7 = OBSERVATIONS.get(5);
-        Observation obs8 = OBSERVATIONS.get(6);
-        FeatureOfInterest foiObs7;
-        FeatureOfInterest foiObs8;
+        Entity obs7 = OBSERVATIONS.get(5);
+        Entity obs8 = OBSERVATIONS.get(6);
+        Entity foiObs7;
+        Entity foiObs8;
         try {
-            foiObs7 = obs7.getFeatureOfInterest();
-            foiObs8 = obs8.getFeatureOfInterest();
+            foiObs7 = obs7.getProperty(sMdl.npObservationFeatureofinterest);
+            foiObs8 = obs8.getProperty(sMdl.npObservationFeatureofinterest);
         } catch (ServiceFailureException ex) {
             fail("Failed to retrieve feature of interest for created observation for request: " + urlString);
             return;
         }
         message = "Autogenerated Features of interest should be equal.";
-        assertEquals(foiObs8.getId(), foiObs7.getId(), message);
+        assertArrayEquals(foiObs8.getPrimaryKeyValues(), foiObs7.getPrimaryKeyValues(), message);
     }
 
     @Test
     void test04PostDataArrayMultiDatastream() {
         LOGGER.info("  test04PostDataArrayMultiDatastream");
-        if (!serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
+        if (!serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
             return;
         }
-        MultiDatastream mds1 = MULTIDATASTREAMS.get(0);
-        FeatureOfInterest foi1 = FEATURES.get(0);
+        Entity mds1 = MULTIDATASTREAMS.get(0);
         // Try to create four observations
         // The second one should return "error".
         String jsonString = "[\n"
                 + "  {\n"
                 + "    \"MultiDatastream\": {\n"
-                + "      \"@iot.id\": " + mds1.getId().getJson() + "\n"
+                + "      \"@iot.id\": " + Utils.quoteForJson(mds1.getPrimaryKeyValues()[0]) + "\n"
                 + "    },\n"
                 + "    \"components\": [\n"
                 + "      \"phenomenonTime\",\n"
@@ -335,10 +310,10 @@ public abstract class DataArrayTests extends AbstractTestClass {
                 continue;
             }
 
-            Id obsId = idFromPostResult(textValue);
-            Observation obs;
+            Object[] obsId = Utils.pkFromPostResult(textValue);
+            Entity obs;
             try {
-                obs = service.observations().find(obsId);
+                obs = sSrvc.dao(sMdl.etObservation).find(obsId);
             } catch (ServiceFailureException ex) {
                 fail("Failed to retrieve created observation for request: " + urlString);
                 return;
@@ -446,136 +421,110 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Thing thing = new Thing("Thing 1", "The first thing.");
-        service.create(thing);
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        sSrvc.create(thing);
         THINGS.add(thing);
 
         // Locations 0
-        Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        location.getThings().add(THINGS.get(0));
-        service.create(location);
+        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+        sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        service.create(sensor);
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        sensor = new Sensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
-        service.create(sensor);
+        sensor = sMdl.newSensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
+        sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://dbpedia.org/page/Temperature"), "The temperature of the thing.");
-        service.create(obsProp);
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://dbpedia.org/page/Temperature", "The temperature of the thing.");
+        sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
 
-        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setThing(THINGS.get(0));
-        datastream.setSensor(SENSORS.get(0));
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = new Datastream("Datastream 2", "The temperature of thing 1, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setThing(THINGS.get(0));
-        datastream.setSensor(SENSORS.get(1));
-        datastream.setObservedProperty(obsProp);
-        service.create(datastream);
+        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 1, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1));
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        FeatureOfInterest foi = new FeatureOfInterest("Feature 1", "Feature 1 for thing 1, sensor 1", "application/vnd.geo+json", new Point(8, 51));
-        service.create(foi);
+        Entity foi = sMdl.newFeatureOfInterest("Feature 1", "Feature 1 for thing 1, sensor 1", "application/vnd.geo+json", new Point(8, 51));
+        sSrvc.create(foi);
         FEATURES.add(foi);
 
-        foi = new FeatureOfInterest("Feature 2", "Feature 2 for thing 1, sensor 2", "application/vnd.geo+json", new Point(8, 51));
-        service.create(foi);
+        foi = sMdl.newFeatureOfInterest("Feature 2", "Feature 2 for thing 1, sensor 2", "application/vnd.geo+json", new Point(8, 51));
+        sSrvc.create(foi);
         FEATURES.add(foi);
 
-        Observation o = new Observation(1, DATASTREAMS.get(0));
-        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-01T01:01:01.000Z"));
-        o.setFeatureOfInterest(FEATURES.get(0));
-        service.create(o);
+        Entity o = sMdl.newObservation(1, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), DATASTREAMS.get(0));
+        o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = new Observation(2, DATASTREAMS.get(1));
-        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-02T01:01:01.000Z"));
-        o.setFeatureOfInterest(FEATURES.get(0));
-        service.create(o);
+        o = sMdl.newObservation(2, ZonedDateTime.parse("2016-01-02T01:01:01.000Z"), DATASTREAMS.get(1));
+        o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = new Observation(3, DATASTREAMS.get(0));
-        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-03T01:01:01.000Z"));
-        o.setFeatureOfInterest(FEATURES.get(1));
-        service.create(o);
+        o = sMdl.newObservation(3, ZonedDateTime.parse("2016-01-03T01:01:01.000Z"), DATASTREAMS.get(0));
+        o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(1));
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = new Observation(4, DATASTREAMS.get(1));
-        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-04T01:01:01.000Z"));
-        o.setFeatureOfInterest(FEATURES.get(1));
-        service.create(o);
+        o = sMdl.newObservation(4, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), DATASTREAMS.get(1));
+        o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(1));
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
 
         if (serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
-            ObservedProperty obsProp1 = new ObservedProperty("Wind speed", new URI("http://dbpedia.org/page/Wind_speed"), "The wind speed.");
-            service.create(obsProp1);
+            Entity obsProp1 = sMdl.newObservedProperty("Wind speed", "http://dbpedia.org/page/Wind_speed", "The wind speed.");
+            sSrvc.create(obsProp1);
             O_PROPS.add(obsProp1);
 
-            ObservedProperty obsProp2 = new ObservedProperty("Wind direction", new URI("http://dbpedia.org/page/Wind_direction"), "The wind direction.");
-            service.create(obsProp2);
+            Entity obsProp2 = sMdl.newObservedProperty("Wind direction", "http://dbpedia.org/page/Wind_direction", "The wind direction.");
+            sSrvc.create(obsProp2);
             O_PROPS.add(obsProp2);
 
-            MultiDatastream multiDatastream = new MultiDatastream();
-            multiDatastream.setName("MultiDatastream 1");
-            multiDatastream.setDescription("The wind at thing 1.");
-            multiDatastream.addMultiObservationDataTypes("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-            multiDatastream.addMultiObservationDataTypes("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-            multiDatastream.addUnitOfMeasurement(new UnitOfMeasurement("m/s", "m/s", "m/s"));
-            multiDatastream.addUnitOfMeasurement(new UnitOfMeasurement("degrees", "deg", "deg"));
-            multiDatastream.setThing(THINGS.get(0));
-            multiDatastream.setSensor(SENSORS.get(0));
-            multiDatastream.getObservedProperties().add(obsProp1);
-            multiDatastream.getObservedProperties().add(obsProp2);
-            service.create(multiDatastream);
+            Entity multiDatastream = mMdl.newMultiDatastream("MultiDatastream 1", "The wind at thing 1.",
+                    new UnitOfMeasurement("m/s", "m/s", "m/s"),
+                    new UnitOfMeasurement("degrees", "deg", "deg"));
+            multiDatastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
+            multiDatastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
+            multiDatastream.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp1);
+            multiDatastream.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp2);
+            sSrvc.create(multiDatastream);
             MULTIDATASTREAMS.add(multiDatastream);
 
-            o = new Observation(new Double[]{5.0, 45.0}, MULTIDATASTREAMS.get(0));
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-01T01:01:01.000Z"));
-            o.setFeatureOfInterest(FEATURES.get(0));
-            service.create(o);
+            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
+                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = new Observation(new Double[]{5.0, 45.0}, MULTIDATASTREAMS.get(0));
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-02T01:01:01.000Z"));
-            o.setFeatureOfInterest(FEATURES.get(0));
-            service.create(o);
+            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-02T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
+                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = new Observation(new Double[]{5.0, 45.0}, MULTIDATASTREAMS.get(0));
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-03T01:01:01.000Z"));
-            o.setFeatureOfInterest(FEATURES.get(0));
-            service.create(o);
+            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-03T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
+                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = new Observation(new Double[]{6.0, 50.0}, MULTIDATASTREAMS.get(0));
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-04T01:01:01.000Z"));
-            o.setFeatureOfInterest(FEATURES.get(0));
-            service.create(o);
+            o = mMdl.newObservation(new Double[]{6.0, 50.0}, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
+                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
 
     }
 
-    private Id idFromPostResult(String postResultLine) {
-        int pos1 = postResultLine.lastIndexOf("(") + 1;
-        int pos2 = postResultLine.lastIndexOf(")");
-        String part = postResultLine.substring(pos1, pos2);
-        try {
-            return new IdLong(Long.parseLong(part));
-        } catch (NumberFormatException exc) {
-            // Id was not a long, thus a String.
-            if (!part.startsWith("'") || !part.endsWith("'")) {
-                throw new IllegalArgumentException("Strings in urls must be quoted with single quotes.");
-            }
-            return new IdString(part.substring(1, part.length() - 1));
-        }
-    }
 }

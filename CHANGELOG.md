@@ -6,6 +6,11 @@
 * Improved configuration options for logging.
 * Implemented comparing to null: `$filter=property eq null` and `$filter=property ne null`.
 * Improved queue-status logging.
+* Implemented FineGrained Authorization.
+* Many-to-Many Self-Relations can be symmetrical.
+* Improved handling of sub-properties of complex properties.
+* Fixed subQueries on expands on custom links.
+* Disallow wild-cards in MQTT topics.
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
@@ -13,6 +18,7 @@
 * Fixed #1542: fixed regression in GeoJSON id property.
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
 * Fixed cross-entity-type custom links breaking $expand.
+* Fixed #1554: Count incorrect after following nextLink.
 
 
 ## Release version 2.1.0

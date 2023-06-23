@@ -44,6 +44,8 @@ frost:
       modelFiles:
       liquibasePath:
       liquibaseFiles:
+      securityPath:
+      securityFiles:
     dataArray:
       enable: true
     csv:

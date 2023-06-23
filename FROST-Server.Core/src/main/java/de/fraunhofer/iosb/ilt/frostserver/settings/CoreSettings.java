@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -119,15 +120,17 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_AUTH_PROVIDER = "provider";
     @DefaultValueBoolean(false)
     public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
-    @DefaultValue("read")
+    @DefaultValueBoolean(false)
+    public static final String TAG_AUTHENTICATE_ONLY = "authenticateOnly";
+    @DefaultValue(PrincipalExtended.ROLE_READ)
     public static final String TAG_AUTH_ROLE_READ = "role.read";
-    @DefaultValue("create")
+    @DefaultValue(PrincipalExtended.ROLE_CREATE)
     public static final String TAG_AUTH_ROLE_CREATE = "role.create";
-    @DefaultValue("update")
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
     public static final String TAG_AUTH_ROLE_UPDATE = "role.update";
-    @DefaultValue("delete")
+    @DefaultValue(PrincipalExtended.ROLE_DELETE)
     public static final String TAG_AUTH_ROLE_DELETE = "role.delete";
-    @DefaultValue("admin")
+    @DefaultValue(PrincipalExtended.ROLE_ADMIN)
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
 
     // Experimental settings

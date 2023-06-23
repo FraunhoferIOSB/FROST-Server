@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -33,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +60,7 @@ public class Query {
 
     private final QueryDefaults settings;
     private final ModelRegistry modelRegistry;
+    private final PrincipalExtended principal;
     private ResourcePath path;
     private Expand parentExpand;
     private EntityType entityType;
@@ -79,10 +83,41 @@ public class Query {
     private String format;
     private Metadata metadata;
 
+    /**
+     * Create a Query for an anonymous user, with the given model registry,
+     * settings and path.
+     *
+     * @param modelRegistry the model registry to use.
+     * @param settings the setting to use.
+     * @param path the path the query is for.
+     */
     public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path) {
+        this(modelRegistry, settings, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    }
+
+    /**
+     * Create a new Query using the modelRegistry, Settings, Path and Principal
+     * form the given query.
+     *
+     * @param expandParent The parent query to use as a basis.
+     */
+    public Query(Query expandParent) {
+        this(expandParent.getModelRegistry(), expandParent.getSettings(), expandParent.getPath(), expandParent.getPrincipal());
+    }
+
+    /**
+     * Create a Query with the given model registry, settings, path and user.
+     *
+     * @param modelRegistry the model registry to use.
+     * @param settings the setting to use.
+     * @param path the path the query is for.
+     * @param principal the user principal.
+     */
+    public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path, PrincipalExtended principal) {
         this.modelRegistry = modelRegistry;
         this.path = path;
         this.settings = settings;
+        this.principal = principal;
         this.top = Optional.empty();
         this.skip = Optional.empty();
         this.count = Optional.empty();
@@ -161,6 +196,10 @@ public class Query {
 
     public Version getVersion() {
         return path.getVersion();
+    }
+
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
     }
 
     public QueryDefaults getSettings() {
@@ -311,8 +350,16 @@ public class Query {
             }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {
-                selectNavProp.addAll(entityType.getNavigationEntities());
-                selectNavProp.addAll(entityType.getNavigationSets());
+                for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
+                }
+                for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
+                }
             }
         } else {
             for (Property s : select) {
@@ -321,8 +368,10 @@ public class Query {
                 } else if (s instanceof EntityPropertyCustomSelect) {
                     EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
                     selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
-                } else if (s instanceof NavigationPropertyMain) {
-                    selectNavProp.add((NavigationPropertyMain) s);
+                } else if (s instanceof NavigationPropertyMain np) {
+                    if (!np.isAdminOnly() || principal.isAdmin()) {
+                        selectNavProp.add(np);
+                    }
                 }
             }
         }
@@ -633,6 +682,10 @@ public class Query {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public PrincipalExtended getPrincipal() {
+        return principal;
     }
 
 }

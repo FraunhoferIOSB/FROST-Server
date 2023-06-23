@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class BatchProcessor<C extends Content> {
                 .withRequestType(type)
                 .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .withContent(httpRequest.getData())
-                .withUserPrincipal(httpRequest.getUserPrincipal())
+                .withUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()))
                 .build();
         PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();

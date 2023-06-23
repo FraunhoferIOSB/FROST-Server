@@ -19,15 +19,10 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import java.net.URL;
 import java.util.Properties;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +33,6 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  */
 public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
-
-    public static class Implementation10 extends BasicAuthAnonReadTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends BasicAuthAnonReadTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
 
     /**
      * The logger for this class.
@@ -86,37 +65,22 @@ public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
 
     @Override
     public SensorThingsService getServiceAdmin() {
-        return setAuth(createService(), "admin", "admin");
+        return AuthTestHelper.setAuthBasic(createService(), "admin", "admin");
     }
 
     @Override
     public SensorThingsService getServiceWrite() {
-        return setAuth(createService(), "write", "write");
+        return AuthTestHelper.setAuthBasic(createService(), "write", "write");
     }
 
     @Override
     public SensorThingsService getServiceRead() {
-        return setAuth(createService(), "read", "read");
+        return AuthTestHelper.setAuthBasic(createService(), "read", "read");
     }
 
     @Override
     public SensorThingsService getServiceAnonymous() {
         return createService();
-    }
-
-    public static SensorThingsService setAuth(SensorThingsService service, String username, String password) {
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        URL url = service.getEndpoint();
-
-        credsProvider.setCredentials(
-                new AuthScope(url.getHost(), url.getPort()),
-                new UsernamePasswordCredentials(username, password));
-
-        service.getClientBuilder()
-                .setDefaultCredentialsProvider(credsProvider);
-
-        service.rebuildHttpClient();
-        return service;
     }
 
 }

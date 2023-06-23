@@ -17,16 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 class RequestWrapper extends HttpServletRequestWrapper {
 
-    private final Principal userPrincipal;
+    private final PrincipalExtended userPrincipal;
     private final HttpServletRequest wrapped;
 
-    RequestWrapper(HttpServletRequest wrapped, Principal userPrincipal) {
+    RequestWrapper(HttpServletRequest wrapped, PrincipalExtended userPrincipal) {
         super(wrapped);
         this.wrapped = wrapped;
         this.userPrincipal = userPrincipal;
@@ -35,6 +36,11 @@ class RequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Principal getUserPrincipal() {
         return userPrincipal == null ? wrapped.getUserPrincipal() : userPrincipal;
+    }
+
+    @Override
+    public boolean isUserInRole(String role) {
+        return userPrincipal.getRoles().contains(role);
     }
 
 }

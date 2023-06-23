@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -117,13 +118,13 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.FIELD_NAME) {
             String fieldName = parser.getCurrentName();
-            parser.nextValue();
             PropertyData propertyData = propertyByName.get(fieldName);
             if (propertyData == null) {
                 if (failOnUnknown) {
                     final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + propertyByName.keySet();
                     throw new UnrecognizedPropertyException(parser, message, parser.getCurrentLocation(), DefaultEntity.class, fieldName, null);
                 } else {
+                    parser.nextValue();
                     parser.readValueAsTree();
                 }
             } else {
@@ -161,6 +162,11 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
             deserialiseEntitySet(parser, ctxt, (NavigationPropertyEntitySet) navPropertyMain, result);
         } else {
             final EntityType targetEntityType = navPropertyMain.getEntityType();
+            JsonToken nextToken = parser.nextToken();
+            if (nextToken != JsonToken.START_OBJECT) {
+                final String message = "Expected start of object for: " + propertyData.property.getName() + " on " + entityType.entityName + " but found: " + nextToken;
+                throw MismatchedInputException.from(parser, DefaultEntity.class, message);
+            }
             Object value = getInstance(modelRegistry, targetEntityType)
                     .deserialize(parser, ctxt);
             navPropertyMain.setOn(result, value);
@@ -168,6 +174,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     }
 
     private DelayedField deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, PropertyData propertyData, Entity result, DelayedField delayedField) throws IOException {
+        parser.nextValue();
         EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
         if (propertyData.valueTypeRef == null) {
             Object encodingType = ModelRegistry.EP_ENCODINGTYPE.getFrom(result);
@@ -194,6 +201,15 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType);
         result.setProperty(navPropertyMain, entitySet);
         JsonToken curToken = parser.nextToken();
+        if (curToken != JsonToken.START_ARRAY) {
+            final String message = "Expected start of array for: " + navPropertyMain.getName() + " on " + entityType.entityName + " but found: " + curToken;
+            throw MismatchedInputException.from(parser, DefaultEntity.class, message);
+        }
+        curToken = parser.nextToken();
+        if (curToken != JsonToken.START_OBJECT && curToken != JsonToken.END_ARRAY) {
+            final String message = "Expected object in array for: " + navPropertyMain.getName() + " on " + entityType.entityName + " but found: " + curToken;
+            throw MismatchedInputException.from(parser, DefaultEntity.class, message);
+        }
         while (curToken != null && curToken != JsonToken.END_ARRAY) {
             entitySet.add(setEntityDeser.deserialize(parser, ctxt));
             curToken = parser.nextToken();

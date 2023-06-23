@@ -140,7 +140,7 @@
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
-            <artifactId>FROST-Client</artifactId>
+            <artifactId>FROST-Client-Dynamic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -228,7 +228,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>${maven-assembly-plugin.version}</version>
                         <configuration>
                             <skip>true</skip>
                         </configuration>

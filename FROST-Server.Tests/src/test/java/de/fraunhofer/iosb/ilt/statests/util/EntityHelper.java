@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -128,9 +128,9 @@ public class EntityHelper {
                     + "  \"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                     + "  \"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteIdForJson(observedPropertyId) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteIdForJson(sensorId) + " }\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(observedPropertyId) + "},\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(sensorId) + " }\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
             return entity.get(ControlInformation.ID);
@@ -151,7 +151,7 @@ public class EntityHelper {
                     + "  \"name\": \"test datastream.\",\n"
                     + "  \"description\": \"test datastream.\",\n"
                     + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteIdForJson(thingId) + " },\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
                     + "   \"ObservedProperty\": {\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
@@ -205,8 +205,8 @@ public class EntityHelper {
         try {
             String urlParameters = "{\n"
                     + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"Thing\":{\"@iot.id\": " + quoteIdForJson(thingId) + "},\n"
-                    + "  \"Locations\": [{\"@iot.id\": " + quoteIdForJson(locationId) + "}]  \n"
+                    + "  \"Thing\":{\"@iot.id\": " + quoteForJson(thingId) + "},\n"
+                    + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(locationId) + "}]  \n"
                     + "}";
             JSONObject entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
             return entity.get(ControlInformation.ID);
@@ -222,7 +222,7 @@ public class EntityHelper {
                     + "  \"name\": \"bow river\",\n"
                     + "  \"description\": \"bow river\",\n"
                     + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"Things\":[{\"@iot.id\": " + quoteIdForJson(thingId) + "}],\n"
+                    + "  \"Things\":[{\"@iot.id\": " + quoteForJson(thingId) + "}],\n"
                     + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.LOCATION, urlParameters);
@@ -240,8 +240,8 @@ public class EntityHelper {
                     + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
                     + "  \"result\": 8,\n"
                     + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteIdForJson(featureOfInterstId) + "}\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "},\n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(featureOfInterstId) + "}\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);
@@ -258,7 +258,7 @@ public class EntityHelper {
                     + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
                     + "  \"result\": 8,\n"
                     + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);
@@ -285,7 +285,7 @@ public class EntityHelper {
                     + "      ]\n"
                     + "    }\n"
                     + "  },\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);

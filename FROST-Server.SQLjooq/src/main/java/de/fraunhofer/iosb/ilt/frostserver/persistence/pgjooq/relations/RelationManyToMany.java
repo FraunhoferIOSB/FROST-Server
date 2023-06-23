@@ -75,7 +75,17 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
      */
     private FieldAccessor<T> targetFieldAcc;
 
+    /**
+     * If the relation is symmetrical, on insert both [A,B] and [B,A] tuples are
+     * inserted, and on delete both are deleted.
+     */
+    private boolean symmetrical;
+
     public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target) {
+        this(navProp, source, linkTable, target, false);
+    }
+
+    public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target, boolean symmetrical) {
         if (source == null) {
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
@@ -84,6 +94,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         this.target = target;
         this.targetType = navProp.getEntityType();
         this.name = navProp.getName();
+        this.symmetrical = symmetrical;
     }
 
     public FieldAccessor<S> getSourceFieldAcc() {
@@ -137,7 +148,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     @Override
     public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
-        T targetAliased = (T) target.as(queryState.getNextAlias());
+        T targetAliased = (T) target.asSecure(queryState.getNextAlias());
         Field<Object> sourceField = sourceFieldAcc.getField(source);
         Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
         Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
@@ -164,16 +175,32 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
                 .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
                 .set(targetLinkFieldAcc.getField(linkTable), targetId)
                 .execute();
+        if (symmetrical && !sourceId.equals(targetId)) {
+            pm.getDslContext().insertInto(linkTable)
+                    .set(sourceLinkFieldAcc.getField(linkTable), targetId)
+                    .set(targetLinkFieldAcc.getField(linkTable), sourceId)
+                    .execute();
+        }
     }
 
     @Override
     public void unLink(PostgresPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
-        final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(source.getId().getValue());
-        final Condition targetCondition = targetLinkFieldAcc.getField(linkTable).eq(target.getId().getValue());
+        final Object sourceId = source.getId().getValue();
+        final Object targetId = target.getId().getValue();
+        final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(sourceId);
+        final Condition targetCondition = targetLinkFieldAcc.getField(linkTable).eq(targetId);
         pm.getDslContext().deleteFrom(linkTable)
                 .where(sourceCondition.and(targetCondition))
                 .limit(1)
                 .execute();
+        if (symmetrical) {
+            final Condition sourceConditionInv = sourceLinkFieldAcc.getField(linkTable).eq(targetId);
+            final Condition targetConditionInv = targetLinkFieldAcc.getField(linkTable).eq(sourceId);
+            pm.getDslContext().deleteFrom(linkTable)
+                    .where(sourceConditionInv.and(targetConditionInv))
+                    .limit(1)
+                    .execute();
+        }
     }
 
     /**

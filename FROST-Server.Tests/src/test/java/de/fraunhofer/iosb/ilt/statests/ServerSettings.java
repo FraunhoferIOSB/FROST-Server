@@ -107,6 +107,10 @@ public class ServerSettings {
         this.mqttUrl = mqttUrl;
     }
 
+    public boolean hasTasking(ServerVersion version) {
+        return implementsRequirement(version, ServerSettings.TASKING_REQ);
+    }
+
     public void addImplementedRequirement(ServerVersion version, Requirement requirement) {
         implementedRequirements
                 .computeIfAbsent(version, t -> new HashSet<>())

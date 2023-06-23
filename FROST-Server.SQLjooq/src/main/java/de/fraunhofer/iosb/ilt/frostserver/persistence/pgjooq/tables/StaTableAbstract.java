@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.POST_RELATIONS;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -44,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -64,6 +67,7 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -91,14 +95,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
     private final DataType<?> idType;
 
+    private SecurityTableWrapper securityWrapper;
+
     private final transient SortedSet<SortingWrapper<Double, HookPreInsert>> hooksPreInsert;
     private final transient SortedSet<SortingWrapper<Double, HookPreUpdate>> hooksPreUpdate;
     private final transient SortedSet<SortingWrapper<Double, HookPreDelete>> hooksPreDelete;
 
-    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliased) {
-        super(alias, null, aliased);
+    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliasedBase, Table updatedSql) {
+        super(alias, null, updatedSql);
         this.idType = idType;
-        if (aliased == null) {
+        if (aliasedBase == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());
             relations = new HashMap<>();
             hooksPreInsert = new TreeSet<>();
@@ -106,13 +112,13 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             hooksPreDelete = new TreeSet<>();
             customFields = new ArrayList<>();
         } else {
-            init(aliased.getModelRegistry(), aliased.getTables());
-            pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
-            relations = aliased.relations;
-            hooksPreInsert = aliased.hooksPreInsert;
-            hooksPreUpdate = aliased.hooksPreUpdate;
-            hooksPreDelete = aliased.hooksPreDelete;
-            customFields = aliased.customFields;
+            init(aliasedBase.getModelRegistry(), aliasedBase.getTables());
+            pfReg = new PropertyFieldRegistry<>(getThis(), aliasedBase.getPropertyFieldRegistry());
+            relations = aliasedBase.relations;
+            hooksPreInsert = aliasedBase.hooksPreInsert;
+            hooksPreUpdate = aliasedBase.hooksPreUpdate;
+            hooksPreDelete = aliasedBase.hooksPreDelete;
+            customFields = aliasedBase.customFields;
         }
     }
 
@@ -184,6 +190,23 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
+    public SecurityTableWrapper getSecurityWrapper() {
+        return securityWrapper;
+    }
+
+    @Override
+    public void setSecurityWrapper(SecurityTableWrapper securityWrapper) {
+        if (securityWrapper == null) {
+            return;
+        }
+        if (this.securityWrapper != null) {
+            LOGGER.error("Overwriting security wrapper for table {}, old type: {}", getName(), this.securityWrapper.getClass().getName());
+        }
+        LOGGER.info("Applying security wrapper to table {} of type {}", getName(), securityWrapper.getClass().getName());
+        this.securityWrapper = securityWrapper;
+    }
+
+    @Override
     public Relation<T> findRelation(String name) {
         Relation<T> relation = relations.get(name);
         if (relation == null) {
@@ -221,12 +244,15 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> insertFields = new HashMap<>();
 
+        // First, run the pre-insert hooks in the PRE_RELATION fase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields)) {
+            if (!hookWrapper.getObject().insertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
                 return false;
             }
         }
 
+        // Second create/validate single-entity navigation links.
+        // this must happen first so the second step can use these in validation
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
@@ -236,8 +262,17 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
+        // Third, run the pre-insert hooks in POST_RELATION fase.
+        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
+            if (!hookWrapper.getObject().insertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
+                return false;
+            }
+        }
+
+        // Fourth, deal with the ID, user-defined or not
         entityFactories.insertUserDefinedId(pm, insertFields, this.getId(), entity);
 
+        // Fifth, deal with the other properties
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
         for (EntityPropertyMain ep : entityProperties) {
@@ -250,14 +285,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
+        // Sixth, do the actual insert.
         DSLContext dslContext = pm.getDslContext();
         Object entityId = dslContext.insertInto(thisTable)
                 .set(insertFields)
                 .returningResult(thisTable.getId())
                 .fetchOne(0);
-        LOGGER.debug("Inserted Entity. Created id = {}.", entityId);
+        LOGGER.debug("Inserted {} with id = {}.", entityType, entityId);
         entity.setId(ParserUtils.idFromObject(entityId));
 
+        // Seventh, deal with set-navigation links.
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
                 updateNavigationPropertySet(entity, entity.getProperty(np), pm, true);
@@ -277,7 +314,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @param forInsert Flag indicating the update is for a newly inserted
      * entity, and new entities can be created.
      *
-     * @throws IncompleteEntityException If the given entity is not complete.
+     * @throws IncompleteEntityException If the given entity is not validate.
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */
@@ -294,7 +331,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object entityId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -333,7 +370,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         if (!updateFields.isEmpty()) {
             count = dslContext.update(thisTable)
                     .set(updateFields)
-                    .where(thisTable.getId().equal(entityId))
+                    .where(thisTable.getId().equal(entityId.getValue()))
                     .execute();
         }
         if (count > 1) {
@@ -350,7 +387,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException {
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException {
         for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
             hookWrapper.getObject().delete(pm, entityId);
         }
@@ -358,7 +395,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         final T thisTable = getThis();
         long count = pm.getDslContext()
                 .delete(thisTable)
-                .where(thisTable.getId().eq(entityId))
+                .where(thisTable.getId().eq(entityId.getValue()))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Entity of type " + getEntityType() + " with id " + entityId + " not found.");

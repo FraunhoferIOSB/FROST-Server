@@ -91,6 +91,36 @@ This plugin requires the CoreModel plugin.
   The type of the primary key column of the Datastream table. Defaults to the value of **plugins.coreModel.idType**.
 
 
+### ModelLoader
+
+The ModelLoader plugin can load data models and security definitions from files.
+The models loaded by this plugin may require other data model plugins.
+Data model files and security definition files can be edited with the ModelEditor.
+Data model files can be initially generated from an existing database using the ModelExtractor.
+
+Using `Security Wrappers` and `Security Validators` it is possible define in minute detail what a user is allowed to read, create, update and delete.
+The rules for this can take into account what the relations are that each Entity has with other Entities, as deep as required.
+Setting this up correctly is not trivial and a mistake in the authorisation may inadvertently open your data for reading or even editing.
+Therefore, we strongly recommend you contact us for support if your use case requires fine-grained authorisation.
+
+* **plugins.modelLoader.enable:** Since 2.0.0  
+  Toggle indicating the MultiDatastream plugin should be enabled. Default: `false`.
+* **plugins.modelLoader.idType.<EntityTypeName>:**  
+  The type of the primary key column of the table for the given Entity Type. Defaults to the value of **plugins.coreModel.idType**.
+* **plugins.modelLoader.modelPath:** 2.0.0  
+  The file path where model definition files are located. This path is prepended to each entry in **plugins.modelLoader.modelFiles**.
+* **plugins.modelLoader.modelFiles:** 2.0.0  
+  A comma-separated list of model files to load. Each entry is prefixed with **plugins.modelLoader.modelPath**.
+* **plugins.modelLoader.liquibasePath:** 2.0.0  
+  The file path where Liquibase (database definition) files are located. This path is prepended to each entry in **plugins.modelLoader.liquibaseFiles**.
+* **plugins.modelLoader.liquibaseFiles:** 2.0.0  
+  A comma-separated list of Liquibase (database definition) files to load. Each entry is prefixed with **plugins.modelLoader.liquibasePath**.
+* **plugins.modelLoader.securityPath:** Since 2.2.0  
+  The file path where security definition files are located. This path is prepended to each entry in **plugins.modelLoader.securityFiles**.
+* **plugins.modelLoader.securityFiles:** Since 2.2.0  
+  A comma-separated list of security files to load. Each entry is prefixed with **plugins.modelLoader.securityPath**.
+
+
 ## Response Format Plugins
 
 These plugins enable various response formats.

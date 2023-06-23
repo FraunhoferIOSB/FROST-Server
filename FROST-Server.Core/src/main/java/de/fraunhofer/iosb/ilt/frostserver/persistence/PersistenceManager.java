@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.security.Principal;
@@ -158,6 +159,10 @@ public interface PersistenceManager extends AutoCloseable {
     }
 
     public default void addModelMapping(DefModel modelDefinition) {
+        // Optional method.
+    }
+
+    public default void addSecurityDefinition(SecurityModel.SecurityEntry entry) {
         // Optional method.
     }
 }

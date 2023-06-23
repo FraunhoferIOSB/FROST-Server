@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
@@ -43,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Day;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.FractionalSeconds;
@@ -198,7 +200,9 @@ public class ExpressionParser extends Visitor {
         OP_ST_CROSSES("st_crosses", STCrosses.class),
         OP_ST_INTERSECTS("st_intersects", STIntersects.class),
         OP_ST_CONTAINS("st_contains", STContains.class),
-        OP_ST_RELATE("st_relate", STRelate.class);
+        OP_ST_RELATE("st_relate", STRelate.class),
+        // Current user related
+        OP_PRINCIPAL_NAME("principalName", PrincipalName.class, true);
 
         private static final Map<String, Operator> BY_KEY = new HashMap<>();
 
@@ -207,28 +211,45 @@ public class ExpressionParser extends Visitor {
                 BY_KEY.put(o.urlKey, o);
             }
         }
+        /**
+         * The operator/function name as it appears in URLs.
+         */
         public final String urlKey;
+
+        /**
+         * The java class implementing the function.
+         */
         public final Class<? extends Function> implementingClass;
 
+        /**
+         * Flag indicating only admin-users may use this function.
+         */
+        public final boolean adminOnly;
+
         private Operator(String urlKey, Class<? extends Function> implementingClass) {
-            this.urlKey = urlKey;
-            this.implementingClass = implementingClass;
+            this(urlKey, implementingClass, false);
         }
 
-        public Function instantiate() {
+        private Operator(String urlKey, Class<? extends Function> implementingClass, boolean adminOnly) {
+            this.urlKey = urlKey;
+            this.implementingClass = implementingClass;
+            this.adminOnly = adminOnly;
+        }
+
+        public Function instantiate(DynamicContext context) {
             try {
-                return implementingClass.getDeclaredConstructor().newInstance();
+                return implementingClass.getDeclaredConstructor().newInstance().setContext(context);
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                 throw new IllegalStateException("problem executing '" + this + "'", ex);
             }
         }
 
-        public static Operator fromKey(String key) {
+        public static Operator fromKey(String key, boolean admin) {
             if (key.endsWith("(")) {
                 key = key.substring(0, key.length() - 1);
             }
             Operator operator = BY_KEY.get(key);
-            if (operator == null) {
+            if (operator == null || operator.adminOnly && !admin) {
                 throw new IllegalArgumentException("Unknown operator: '" + key + "'.");
             }
             return operator;
@@ -236,10 +257,14 @@ public class ExpressionParser extends Visitor {
     }
 
     private final QueryParser queryParser;
+    private final boolean admin;
+    private final DynamicContext context;
     private Expression currentExpression;
 
-    public ExpressionParser(QueryParser queryParser) {
+    public ExpressionParser(QueryParser queryParser, boolean admin, DynamicContext context) {
         this.queryParser = queryParser;
+        this.admin = admin;
+        this.context = context;
     }
 
     public Expression parseExpression(Node node) {
@@ -359,7 +384,7 @@ public class ExpressionParser extends Visitor {
     }
 
     private Function getFunction(String operator) {
-        return Operator.fromKey(operator).instantiate();
+        return Operator.fromKey(operator, admin).instantiate(context);
     }
 
     public void visit(T_STR_LIT node) {

@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
@@ -78,13 +80,17 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpHistLocations(DataType<?> idType, DataType<?> idTypeThing, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colThingId = createField(DSL.name(NAME_COL_THINGID), idTypeThing);
     }
 
     private TableImpHistLocations(Name alias, TableImpHistLocations aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpHistLocations(Name alias, TableImpHistLocations aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
         colThingId = createField(DSL.name(NAME_COL_THINGID), aliased.colThingId.getDataType());
     }
@@ -181,6 +187,16 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     @Override
     public TableImpHistLocations as(Name alias) {
         return new TableImpHistLocations(alias, this, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpHistLocations asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpHistLocations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

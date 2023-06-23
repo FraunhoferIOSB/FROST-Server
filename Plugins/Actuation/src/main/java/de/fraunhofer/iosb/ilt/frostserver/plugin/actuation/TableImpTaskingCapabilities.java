@@ -25,11 +25,13 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -82,12 +84,14 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
      *
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
+     * @param idTypeActuator The type of the id field for the Actuator table.
+     * @param idTypeThing The type of the id field for the Thing table.
      * @param pluginActuation the actuation plugin this table belongs to.
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.
      */
     public TableImpTaskingCapabilities(DataType<?> idType, DataType<?> idTypeActuator, DataType<?> idTypeThing, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("TASKINGCAPABILITIES"), null);
+        super(idType, DSL.name("TASKINGCAPABILITIES"), null, null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
         colActuatorId = createField(DSL.name("ACTUATOR_ID"), idTypeActuator);
@@ -95,7 +99,11 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
     }
 
     private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginActuation, pluginCoreModel);
+    }
+
+    private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities aliased, Table updatedSql, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
         colActuatorId = createField(DSL.name("ACTUATOR_ID"), aliased.colActuatorId.getDataType());
@@ -166,6 +174,16 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
     @Override
     public TableImpTaskingCapabilities as(Name alias) {
         return new TableImpTaskingCapabilities(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpTaskingCapabilities asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpTaskingCapabilities(DSL.name(name), this, wrappedTable, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

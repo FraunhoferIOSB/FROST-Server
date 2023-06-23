@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -188,13 +190,13 @@ public class EntityChangedMessage {
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
-                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName))
+                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName), INTERNAL_ADMIN_PRINCIPAL)
                         .setMetadata(Metadata.INTERNAL_COMPARE);
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                     query.addSelect(ep);
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                    Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
+                    Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()), INTERNAL_ADMIN_PRINCIPAL)
                             .addSelect(np.getEntityType().getPrimaryKey())
                             .setMetadata(Metadata.INTERNAL_COMPARE);
                     query.addExpand(new Expand(t.getModelRegistry(), np).setSubQuery(subQuery));

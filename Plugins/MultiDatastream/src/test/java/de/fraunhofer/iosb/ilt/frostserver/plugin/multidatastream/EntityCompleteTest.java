@@ -98,7 +98,10 @@ class EntityCompleteTest {
 
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
-            entity.complete(containingSet);
+            if (containingSet.getParent() != null) {
+                entity.getEntityType().setParent(containingSet, entity);
+            }
+            entity.validateCreate();
             return true;
         } catch (IncompleteEntityException | IllegalArgumentException e) {
             return false;
@@ -146,7 +149,7 @@ class EntityCompleteTest {
         assertFalse(isEntityComplete(entity, containingSet));
         assertTrue(isEntityComplete(entity, new PathElementEntitySet(npMultiDatastreamsThing, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
 
-        assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream)));
+        assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
@@ -182,7 +185,8 @@ class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         assertTrue(isEntityComplete(entity, containingSet));
 
-        assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream)));
+        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, null));
+        assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
         entity.setProperty(npMultiDatastreamObservation, null);

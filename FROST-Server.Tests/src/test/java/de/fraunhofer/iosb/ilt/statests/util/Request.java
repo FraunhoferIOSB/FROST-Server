@@ -83,7 +83,10 @@ public class Request extends Expand {
         for (PathElement element : getPath()) {
             urlString.append('/').append(element.toString());
         }
-        urlString.append('?').append(getQuery().toString(false));
+        final Query query = getQuery();
+        if (!query.isEmpty()) {
+            urlString.append('?').append(query.toString(false));
+        }
         lastUrl = urlString.toString();
         return lastUrl;
     }

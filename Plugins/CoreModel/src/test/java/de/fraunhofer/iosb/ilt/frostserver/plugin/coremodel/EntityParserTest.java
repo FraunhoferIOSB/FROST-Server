@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -421,6 +422,17 @@ class EntityParserTest {
     }
 
     @Test
+    void readObservationWithIncorrectLink() throws IOException {
+        String json = "{\n"
+                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
+                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
+                + "  \"result\" : 38,\n"
+                + "  \"Datastream\":[{\"@iot.id\":100}]\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etObservation, json));
+    }
+
+    @Test
     void readObservationWithLinkedFeatureOfInterest() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
@@ -513,8 +525,10 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsObsProp,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
 
@@ -572,8 +586,10 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -592,12 +608,35 @@ class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
                 .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(101)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
+    }
+
+    @Test
+    void readSensorWithBadLink() throws IOException {
+        final String json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": {\"@iot.id\":100}\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etSensor, json));
+
+        final String json2 = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [100]\n"
+                + "}";
+        assertThrows(MismatchedInputException.class, () -> entityParser.parseEntity(pluginCoreModel.etSensor, json2));
     }
 
     @Test
@@ -732,11 +771,13 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.epName, "my backyard")
-                        .setProperty(pluginCoreModel.epDescription, "my backyard")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
+                .addNavigationEntity(
+                        pluginCoreModel.npLocationsThing,
+                        new DefaultEntity(pluginCoreModel.etLocation)
+                                .setProperty(pluginCoreModel.epName, "my backyard")
+                                .setProperty(pluginCoreModel.epDescription, "my backyard")
+                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -762,8 +803,10 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npLocationsThing,
+                        new DefaultEntity(pluginCoreModel.etLocation)
+                                .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -789,8 +832,10 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -844,28 +889,33 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.epName, "my backyard")
-                        .setProperty(pluginCoreModel.epDescription, "my backyard")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
-                                new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
-                        .setProperty(pluginCoreModel.epName, "Temperature measurement")
-                        .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                        .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(pluginCoreModel.npObservedPropertyDatastream,
-                                new DefaultEntity(pluginCoreModel.etObservedProperty)
-                                        .setProperty(pluginCoreModel.epName, "Temperature")
-                                        .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                        .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site"))
-                        .setProperty(pluginCoreModel.npSensorDatastream,
-                                new DefaultEntity(pluginCoreModel.etSensor)
-                                        .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
-                                        .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")
-                                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")));
+                .addNavigationEntity(
+                        pluginCoreModel.npLocationsThing,
+                        new DefaultEntity(pluginCoreModel.etLocation)
+                                .setProperty(pluginCoreModel.epName, "my backyard")
+                                .setProperty(pluginCoreModel.epDescription, "my backyard")
+                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)))
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
+                                .setProperty(pluginCoreModel.epName, "Temperature measurement")
+                                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
+                                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                                .setProperty(
+                                        pluginCoreModel.npObservedPropertyDatastream,
+                                        new DefaultEntity(pluginCoreModel.etObservedProperty)
+                                                .setProperty(pluginCoreModel.epName, "Temperature")
+                                                .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                                .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site"))
+                                .setProperty(
+                                        pluginCoreModel.npSensorDatastream,
+                                        new DefaultEntity(pluginCoreModel.etSensor)
+                                                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
+                                                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")
+                                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                                                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")));
         final Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertEquals(expectedResult, result);
     }

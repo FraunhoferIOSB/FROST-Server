@@ -177,11 +177,11 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "Wind")
                 .setProperty(pluginCoreModel.epDescription, "Wind direction and speed")
                 .setProperty(epMultiObservationDataTypes, observationTypes)
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .addNavigationEntity(npObservedPropertiesMds, new DefaultEntity(pluginCoreModel.etObservedProperty)
                         .setProperty(pluginCoreModel.epName, "Wind Direction")
                         .setProperty(pluginCoreModel.epDefinition, "SomeDefinition")
                         .setProperty(pluginCoreModel.epDescription, "Direction the wind blows, 0=North, 90=East."))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .addNavigationEntity(npObservedPropertiesMds, new DefaultEntity(pluginCoreModel.etObservedProperty)
                         .setProperty(pluginCoreModel.epName, "Wind Speed")
                         .setProperty(pluginCoreModel.epDefinition, "SomeDefinition")
                         .setProperty(pluginCoreModel.epDescription, "Wind Speed"))
@@ -336,7 +336,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsObsProp, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
@@ -352,7 +352,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
+                .addNavigationEntity(npMultiDatastreamsObsProp, new DefaultEntity(etMultiDatastream)
                         .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
@@ -371,9 +371,9 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsObsProp, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
+                .addNavigationEntity(npMultiDatastreamsObsProp, new DefaultEntity(etMultiDatastream)
                         .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
@@ -432,8 +432,10 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -452,9 +454,11 @@ class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
                 .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(101)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
@@ -473,8 +477,10 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        npMultiDatastreamsSensor,
+                        new DefaultEntity(etMultiDatastream)
+                                .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -494,10 +500,14 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsSensor,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
+                .addNavigationEntity(
+                        npMultiDatastreamsSensor,
+                        new DefaultEntity(etMultiDatastream)
+                                .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
 
@@ -633,11 +643,13 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.epName, "my backyard")
-                        .setProperty(pluginCoreModel.epDescription, "my backyard")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
+                .addNavigationEntity(
+                        pluginCoreModel.npLocationsThing,
+                        new DefaultEntity(pluginCoreModel.etLocation)
+                                .setProperty(pluginCoreModel.epName, "my backyard")
+                                .setProperty(pluginCoreModel.epDescription, "my backyard")
+                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -663,8 +675,10 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npLocationsThing,
+                        new DefaultEntity(pluginCoreModel.etLocation)
+                                .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -690,8 +704,10 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -717,8 +733,10 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        npMultiDatastreamsThing,
+                        new DefaultEntity(etMultiDatastream)
+                                .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -747,10 +765,14 @@ class EntityParserTest {
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
-                .addNavigationEntity(new DefaultEntity(etMultiDatastream)
-                        .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
+                .addNavigationEntity(
+                        pluginCoreModel.npDatastreamsThing,
+                        new DefaultEntity(pluginCoreModel.etDatastream)
+                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
+                .addNavigationEntity(
+                        npMultiDatastreamsThing,
+                        new DefaultEntity(etMultiDatastream)
+                                .setProperty(pluginMultiDatastream.etMultiDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 

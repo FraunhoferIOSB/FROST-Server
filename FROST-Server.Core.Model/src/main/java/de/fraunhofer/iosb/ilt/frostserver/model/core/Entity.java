@@ -18,11 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -102,9 +100,17 @@ public interface Entity extends NavigableElement {
 
     public Entity unsetProperty(Property property);
 
-    public Entity addNavigationEntity(Entity linkedEntity);
-
-    public DefaultEntity addNavigationEntity(NavigationPropertyEntitySet navProperty, Entity linkedEntity);
+    /**
+     * Add the given linked Entity to the entity set identified by the given
+     * navigation property.
+     *
+     * @param navProperty The navigation property that identifies the EntitySet
+     * to add the given entity to.
+     * @param linkedEntity The entity to add to the EntitySet identified by the
+     * given navigation property.
+     * @return this.
+     */
+    public Entity addNavigationEntity(NavigationPropertyEntitySet navProperty, Entity linkedEntity);
 
     /**
      * Toggle all Entity Properties to "set". Both EntityProperties and
@@ -139,43 +145,29 @@ public interface Entity extends NavigableElement {
     public void setEntityPropertiesSet(Entity comparedTo, EntityChangedMessage message);
 
     /**
-     * Complete the element.
-     *
-     * @param containingSet The pathElement of the set this entity will belong
-     * to. This pathElement and any of its parents will be used to supply
-     * additional information to the element.
-     *
-     * @throws IncompleteEntityException If the entity can not be completed.
-     * @throws IllegalStateException If the containing set is not of the type
-     * that can contain this entity.
-     */
-    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException;
-
-    /**
-     * Checks if all required properties are non-null.
+     * Checks if the entity is valid (complete) for creation. If all required
+     * properties are non-null.
      *
      * @throws IncompleteEntityException If any of the required properties are
      * null.
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete() throws IncompleteEntityException {
-        complete(false);
+    public default void validateCreate() throws IncompleteEntityException {
+        getEntityType().validateCreate(this);
     }
 
     /**
-     * Checks if all required properties are non-null.
+     * Checks if the entity is valid (complete) for updates. If all required
+     * properties are non-null.
      *
-     * @param entityPropertiesOnly flag indicating only the EntityProperties
-     * should be checked.
      * @throws IncompleteEntityException If any of the required properties are
      * null.
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
-        EntityType type = getEntityType();
-        type.complete(this, entityPropertiesOnly);
+    public default void validateUpdate() throws IncompleteEntityException {
+        getEntityType().validateUpdate(this);
     }
 
     /**

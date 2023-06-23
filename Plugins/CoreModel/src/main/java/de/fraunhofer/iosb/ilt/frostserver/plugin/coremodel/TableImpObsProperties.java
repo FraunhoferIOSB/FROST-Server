@@ -25,9 +25,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -79,12 +81,16 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObsProperties(DataType<?> idType, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
     }
 
     private TableImpObsProperties(Name alias, TableImpObsProperties aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpObsProperties(Name alias, TableImpObsProperties aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
     }
 
@@ -120,6 +126,16 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
     @Override
     public TableImpObsProperties as(Name alias) {
         return new TableImpObsProperties(alias, this, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpObsProperties asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpObsProperties(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

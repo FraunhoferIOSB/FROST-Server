@@ -17,14 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
@@ -34,7 +35,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.IdType;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,30 +49,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Includes various tests of "A.4. SensorThings API Batch Request Extension Tests" conformance class.
+ * Includes various tests of "A.4. SensorThings API Batch Request Extension
+ * Tests" conformance class.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class BatchTests extends AbstractTestClass {
 
-    public static class Implementation10 extends BatchTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends BatchTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchTests.class);
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<ObservedProperty> OBSERVED_PROPS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> OBSERVED_PROPS = new ArrayList<>();
     private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
     private final ObjectMapper mapper;
 
@@ -112,23 +97,24 @@ public abstract class BatchTests extends AbstractTestClass {
         for (int i = 0; i < 6; i++) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("int", i + 8);
-            Thing thing = new Thing("Thing " + i, "It's a thing.");
-            thing.setProperties(properties);
-            service.create(thing);
+            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
+            thing.setProperty(EP_PROPERTIES, properties);
+            sSrvc.create(thing);
             THINGS.add(thing);
         }
-        ObservedProperty obsProp = new ObservedProperty("ObservedProperty 1", new URI("http://ucom.org/temperature"),
+        Entity obsProp = sMdl.newObservedProperty("ObservedProperty 1", "http://ucom.org/temperature",
                 "The temperature of the thing.");
-        service.create(obsProp);
+        sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getId().getValue()));
-        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getId().getValue()));
+        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues()[0]));
+        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
     }
 
     /**
-     * Test batch request body example from "OGC SensorThings API Part 1, Sensing Version 1.1, 11.2.1. Batch request
-     * body example" except changes to get reproducible test not depending on server generated id.
+     * Test batch request body example from "OGC SensorThings API Part 1,
+     * Sensing Version 1.1, 11.2.1. Batch request body example" except changes
+     * to get reproducible test not depending on server generated id.
      */
     @Test
     void test01BatchRequest() {
@@ -136,7 +122,7 @@ public abstract class BatchTests extends AbstractTestClass {
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")?$select=name HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -157,7 +143,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "Content-ID: 2\r\n"
                 + "\r\n"
-                + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n"
+                + "PATCH /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ") HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "Content-Type: application/json\r\n"
                 + "Content-Length: 18\r\n"
@@ -167,7 +153,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
+                + "GET /" + version.urlPart + "/Things(" + Utils.quoteForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "\r\n"
                 + "\r\n"
@@ -215,17 +201,19 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     /**
-     * Test batch request body example from "OGC SensorThings API Part 1, Sensing Version 1.1, 11.2.2. Referencing new
-     * entities in a change set example", except:
+     * Test batch request body example from "OGC SensorThings API Part 1,
+     * Sensing Version 1.1, 11.2.2. Referencing new entities in a change set
+     * example", except:
      * <li>added Content-ID for second POST as per OData spec (From
-     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793751 "In
-     * addition each request within a change set MUST specify a Content-ID header with a value unique within the batch
-     * request.")
+     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793751
+     * "In addition each request within a change set MUST specify a Content-ID
+     * header with a value unique within the batch request.")
      * <li>missing mandatory Datastream fields.
      */
     @Test
     void test02BatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test02BatchRequestWithChangeSetReferencingNewEntities");
+
         String post1 = "{\r\n"
                 + "  \"name\": \"DS18B20\",\r\n"
                 + "  \"description\": \"DS18B20 is an air temperature sensor\",\r\n"
@@ -241,7 +229,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
@@ -261,7 +249,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "Content-ID: any\r\n"
                 + "\r\n"
-                + "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams HTTP/1.1\r\n"
+                + "POST /" + version.urlPart + "/Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/Datastreams HTTP/1.1\r\n"
                 + "Host: localhost\r\n"
                 + "Content-Type: application/json\r\n"
                 + "Content-Length: " + post2.length() + "\r\n"
@@ -321,11 +309,13 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     /**
-     * Tests Absolute URI with schema, host, port, and absolute resource path. Example:
+     * Tests Absolute URI with schema, host, port, and absolute resource path.
+     * Example:
      *
      * GET https://host:1234/path/service/People(1) HTTP/1.1
      *
-     * See http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
+     * See
+     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
      *
      */
     @Test
@@ -370,7 +360,8 @@ public abstract class BatchTests extends AbstractTestClass {
      *
      * GET People(1) HTTP/1.1
      *
-     * See http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
+     * See
+     * http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793750
      *
      */
     @Test
@@ -414,7 +405,7 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch(null, "{\"requests\":[{"
                 + "\"id\": \"0\","
                 + "\"method\": \"get\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0))
                 + ")?$select=name\""
                 + "},{"
                 + "\"id\": \"1\","
@@ -426,7 +417,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"id\": \"2\","
                 + "\"atomicityGroup\": \"group1\","
                 + "\"method\": \"patch\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")\","
                 + "\"body\": {\"name\":\"Json Patched\"}"
                 + "},{"
                 + "\"id\": \"3\","
@@ -470,7 +461,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + OBSERVED_PROPS.get(0).getId().getJson() + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         String response = postBatch(null, "{\"requests\":[{"
@@ -484,7 +475,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\"id\": \"any\","
                 + "\"atomicityGroup\": \"group1\","
                 + "\"method\": \"post\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
+                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/Datastreams\","
                 + "\"body\":"
                 + post2
                 + "}]}");

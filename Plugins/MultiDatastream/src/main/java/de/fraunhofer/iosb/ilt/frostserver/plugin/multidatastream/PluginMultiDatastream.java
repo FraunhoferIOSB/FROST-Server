@@ -165,19 +165,32 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .registerProperty(npSensorMDs)
                 .registerProperty(npThingMDs)
                 .registerProperty(npObservationsMDs)
-                .addCreateValidator("MD-Properties", (entity, entityPropertiesOnly) -> {
+                .addCreateValidator("MD-Properties", entity -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     EntitySet observedProperties = entity.getProperty(npObservedPropertiesMDs);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
                         throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + (unitOfMeasurements == null ? "null" : unitOfMeasurements.size()) + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
-                    if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
+                    if (observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
                         final int opSize = observedProperties == null ? 0 : observedProperties.size();
                         throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
                     String observationType = entity.getProperty(pluginCoreModel.epObservationType);
                     if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
+                        throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
+                    }
+                })
+                .addUpdateValidator("MD-Properties", entity -> {
+                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
+                    List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
+                    if (unitOfMeasurements != null && multiObservationDataTypes != null) {
+                        if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
+                            throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        }
+                    }
+                    String observationType = entity.getProperty(pluginCoreModel.epObservationType);
+                    if (observationType != null && !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
                         throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
                     }
                 });
@@ -193,27 +206,24 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         pluginCoreModel.npDatastreamObservation.setRequired(false);
         pluginCoreModel.etObservation
                 .registerProperty(npMultiDatastreamObservation)
-                .addCreateValidator("MD-Obs-DsOrMds", (entity, entityPropertiesOnly) -> {
-                    if (!entityPropertiesOnly) {
-                        Entity datastream = entity.getProperty(pluginCoreModel.npDatastreamObservation);
-                        Entity multiDatastream = entity.getProperty(npMultiDatastreamObservation);
-                        if (datastream != null && multiDatastream != null) {
-                            throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
-                        }
-                        if (datastream == null && multiDatastream == null) {
-                            throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
-                        }
-                        if (multiDatastream != null) {
-                            Object result = entity.getProperty(pluginCoreModel.epResult);
-                            if (!(result instanceof List)) {
-                                throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
-                            }
+                .addCreateValidator("MD-Obs-DsOrMds", entity -> {
+                    Entity datastream = entity.getProperty(pluginCoreModel.npDatastreamObservation);
+                    Entity multiDatastream = entity.getProperty(npMultiDatastreamObservation);
+                    if (datastream != null && multiDatastream != null) {
+                        throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
+                    }
+                    if (datastream == null && multiDatastream == null) {
+                        throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
+                    }
+                    if (multiDatastream != null) {
+                        Object result = entity.getProperty(pluginCoreModel.epResult);
+                        if (!(result instanceof List)) {
+                            throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
                         }
                     }
                 });
 
-        if (pm instanceof PostgresPersistenceManager) {
-            final PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+        if (pm instanceof PostgresPersistenceManager ppm) {
             final TableCollection tableCollection = ppm.getTableCollection();
             final DataType dataTypeMds = ppm.getDataTypeFor(modelSettings.idTypeMultiDatastream);
             final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getId().getDataType();

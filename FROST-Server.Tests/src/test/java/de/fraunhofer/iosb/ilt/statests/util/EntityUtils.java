@@ -22,25 +22,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.Id;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.StaService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +76,7 @@ public class EntityUtils {
 
     }
 
-    public static ResultTestResult resultContains(EntityList<? extends Entity> result, Entity... entities) {
+    public static ResultTestResult resultContains(EntitySet result, Entity... entities) {
         return resultContains(result, new ArrayList(Arrays.asList(entities)));
     }
 
@@ -84,64 +87,76 @@ public class EntityUtils {
      * @param expected the expected entities.
      * @return the result of the comparison.
      */
-    public static ResultTestResult resultContains(EntityList<? extends Entity> result, List<? extends Entity> expected) {
+    public static ResultTestResult resultContains(EntitySet result, List<Entity> expected) {
         long count = result.getCount();
         if (count != -1 && count != expected.size()) {
             LOGGER.info("Result count ({}) not equal to expected count ({})", count, expected.size());
             return new ResultTestResult(false, "Result count " + count + " not equal to expected count (" + expected.size() + ")");
         }
-        List<? extends Entity> testList = new ArrayList<>(expected);
-        Iterator<? extends Entity> it;
-        for (it = result.fullIterator(); it.hasNext();) {
-            Entity next = it.next();
-            Entity inList = findEntityIn(next, testList);
-            if (!testList.remove(inList)) {
-                LOGGER.info("Entity with id {} found in result that is not expected.", next.getId());
-                return new ResultTestResult(false, "Entity with id " + next.getId() + " found in result that is not expected.");
+        List<Entity> testExpectedList = new ArrayList<>(expected);
+        Iterator<Entity> resultIt;
+        for (resultIt = result.iterator(); resultIt.hasNext();) {
+            Entity nextResult = resultIt.next();
+            Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
+            if (!testExpectedList.remove(inExpectedList)) {
+                LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
+                return new ResultTestResult(false, "Entity with pk " + Arrays.toString(nextResult.getPrimaryKeyValues()) + " found in result that is not expected.");
             }
         }
-        if (!testList.isEmpty()) {
+        if (!testExpectedList.isEmpty()) {
             LOGGER.info("Expected entity not found in result.");
-            return new ResultTestResult(false, testList.size() + " expected entities not in result.");
+            return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
         }
         return new ResultTestResult(true, "Check ok.");
     }
 
-    public static Entity findEntityIn(Entity entity, List<? extends Entity> entities) {
-        Id id = entity.getId();
+    /**
+     * Finds the given entity in the given list, based on its primary key.
+     *
+     * @param entity The List of Entities to search in.
+     * @param entities The entity to find by primary key.
+     * @return The first entity from the list that has the correct primary key,
+     * or null.
+     */
+    public static Entity findEntityIn(Entity entity, List<Entity> entities) {
+        Object[] pk = entity.getPrimaryKeyValues();
         for (Entity inList : entities) {
-            if (Objects.equals(inList.getId(), id)) {
+            if (Arrays.equals(inList.getPrimaryKeyValues(), pk)) {
                 return inList;
             }
         }
         return null;
     }
 
-    public static void deleteAll(ServerVersion version, ServerSettings serverSettings, SensorThingsService sts) throws ServiceFailureException {
-        deleteAll(sts.things());
-        deleteAll(sts.locations());
-        deleteAll(sts.sensors());
-        deleteAll(sts.featuresOfInterest());
-        deleteAll(sts.observedProperties());
-        deleteAll(sts.observations());
-        if (serverSettings.implementsRequirement(version, serverSettings.TASKING_REQ)) {
-            deleteAll(sts.actuators());
-            deleteAll(sts.taskingCapabilities());
-            deleteAll(sts.tasks());
+    public static void deleteAll(ServerVersion version, ServerSettings serverSettings, StaService sts) throws ServiceFailureException {
+        deleteAll(serverSettings.hasTasking(version), sts.service, sts.modelSensing, sts.modelTasking);
+    }
+
+    public static void deleteAll(boolean tasking, SensorThingsService service, SensorThingsSensingV11 mdlSns, SensorThingsTaskingV11 mdlTsk) throws ServiceFailureException {
+        deleteAll(service.dao(mdlSns.etThing));
+        deleteAll(service.dao(mdlSns.etLocation));
+        deleteAll(service.dao(mdlSns.etSensor));
+        deleteAll(service.dao(mdlSns.etFeatureOfInterest));
+        deleteAll(service.dao(mdlSns.etObservedProperty));
+        deleteAll(service.dao(mdlSns.etObservation));
+        if (tasking) {
+            deleteAll(service.dao(mdlTsk.etActuator));
+            deleteAll(service.dao(mdlTsk.etTaskingCapability));
+            deleteAll(service.dao(mdlTsk.etTask));
         }
     }
 
-    public static <T extends Entity<T>> void deleteAll(BaseDao<T> doa) throws ServiceFailureException {
+    public static void deleteAll(Dao doa) throws ServiceFailureException {
         boolean more = true;
         int count = 0;
         while (more) {
-            EntityList<T> entities = doa.query().list();
+            EntitySet entities = doa.query().list();
             if (entities.getCount() > 0) {
                 LOGGER.debug("{} to go.", entities.getCount());
             } else {
                 more = false;
             }
-            for (T entity : entities) {
+            for (Entity entity : entities) {
                 doa.delete(entity);
                 count++;
             }
@@ -193,8 +208,10 @@ public class EntityUtils {
      * @param response The response object to check.
      * @param request The request to check the response against.
      * @param entityCounts The object with the expected entity counts.
+     * @return the nextLink, or null.
      */
-    public static void checkResponse(Set<Extension> extensions, JSONObject response, Request request, EntityCounts entityCounts) {
+    public static String checkResponse(Set<Extension> extensions, JSONObject response, Request request, EntityCounts entityCounts) {
+        String nextLink = null;
         try {
             if (request.isCollection()) {
                 checkCollection(extensions, response.getJSONArray("value"), request, entityCounts);
@@ -220,6 +237,10 @@ public class EntityUtils {
                     assertEquals(expectedCount, foundCount, message);
                 }
                 Long top = expandQuery.getTop();
+                String nextLinkProperty = "@iot.nextLink";
+                if (response.has(nextLinkProperty)) {
+                    nextLink = response.getString(nextLinkProperty);
+                }
                 if (top != null && expectedCount != -1) {
                     int foundNumber = response.getJSONArray("value").length();
                     long skip = expandQuery.getSkip() == null ? 0 : expandQuery.getSkip();
@@ -229,7 +250,6 @@ public class EntityUtils {
                         fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
                     }
 
-                    String nextLinkProperty = "@iot.nextLink";
                     if (foundNumber + skip < expectedCount) {
                         // should have nextLink
                         String message = "Entity should have " + nextLinkProperty + " for request: '" + request.toString() + "'";
@@ -250,6 +270,7 @@ public class EntityUtils {
             LOGGER.error(message, ex);
             fail(message);
         }
+        return nextLink;
     }
 
     /**
@@ -396,14 +417,10 @@ public class EntityUtils {
         }
     }
 
-    public static String listEntities(List<? extends Entity> list) {
+    public static String listEntities(List<Entity> list) {
         StringBuilder result = new StringBuilder();
         for (Entity item : list) {
-            if (item instanceof Observation) {
-                result.append(((Observation) item).getResult());
-            } else {
-                result.append(item.getId());
-            }
+            result.append(Arrays.toString(item.getPrimaryKeyValues()));
             result.append(", ");
         }
         if (result.length() == 0) {
@@ -412,9 +429,55 @@ public class EntityUtils {
         return result.substring(0, result.length() - 2);
     }
 
-    public static <T extends Entity<T>> void testFilterResults(BaseDao<T> doa, String filter, List<T> expected) {
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, EntityPropertyMain... properties) {
+        compareEntityWithRemote(service, expected, Arrays.asList(properties));
+    }
+
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, List<EntityPropertyMain> properties) {
         try {
-            EntityList<T> result = doa.query().filter(filter).list();
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
+            final List<EntityPropertyMain> toCheck = new ArrayList<>(properties);
+            if (toCheck.isEmpty()) {
+                toCheck.addAll(entityType.getEntityProperties());
+            }
+            for (EntityPropertyMain property : toCheck) {
+                if (property.isReadOnly()) {
+                    continue;
+                }
+                assertEquals(expected.getProperty(property), found.getProperty(property), () -> "property: " + property.getName());
+            }
+
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Failed to fetch entity to compare", ex);
+            Assertions.fail("Failed to fetch entity to compare");
+        }
+
+    }
+
+    public static void compareEntityWithRemote(SensorThingsService service, Entity expected, NavigationPropertyEntity property) {
+        try {
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
+            final Entity linkedExpected = expected.getProperty(property);
+            final Entity linkedFound = found.getProperty(property);
+            for (EntityPropertyMain keyProp : property.getEntityType().getPrimaryKey().getKeyProperties()) {
+                assertEquals(linkedExpected.getProperty(keyProp), linkedFound.getProperty(keyProp));
+            }
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Failed to fetch entity to compare", ex);
+            Assertions.fail("Failed to fetch entity to compare");
+        }
+
+    }
+
+    public static void testFilterResults(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
+        testFilterResults(service.dao(type), filter, expected);
+    }
+
+    public static void testFilterResults(Dao doa, String filter, List<Entity> expected) {
+        try {
+            EntitySet result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             if (!check.testOk) {
@@ -430,7 +493,11 @@ public class EntityUtils {
         }
     }
 
-    public static void filterForException(BaseDao doa, String filter, int expectedCode) {
+    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int expectedCode) {
+        filterForException(service.dao(type), filter, expectedCode);
+    }
+
+    public static void filterForException(Dao doa, String filter, int expectedCode) {
         try {
             doa.query().filter(filter).list();
         } catch (StatusCodeException e) {

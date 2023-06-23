@@ -15,31 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
-import java.security.Principal;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 
-/**
- *
- * @author hylke
- */
-public class PrincipalExtended implements Principal {
+public class GeoTests10 extends GeoTests {
 
-    private final String name;
-    private final boolean admin;
-
-    public PrincipalExtended(String name, boolean admin) {
-        this.name = name;
-        this.admin = admin;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public boolean isAdmin() {
-        return admin;
+    public GeoTests10() {
+        super(ServerVersion.v_1_0);
     }
 
 }

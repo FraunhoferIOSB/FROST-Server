@@ -43,6 +43,15 @@ public interface NavigationProperty<P> extends Property<P> {
     public boolean isEntitySet();
 
     /**
+     * Flag indicating only admin users are allowed to see the target entity
+     * type.
+     *
+     * @return true if only admin users are allowed to see the target entity
+     * type.
+     */
+    public boolean isAdminOnly();
+
+    /**
      * Check if the given entityType has this Property.
      *
      * @param entityType The EntityType to check.

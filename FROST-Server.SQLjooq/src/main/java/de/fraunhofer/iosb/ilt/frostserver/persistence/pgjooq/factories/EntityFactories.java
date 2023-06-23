@@ -130,7 +130,7 @@ public class EntityFactories {
         }
 
         if (e.getId() == null) {
-            e.complete();
+            e.validateCreate();
             // no id but complete -> create
             pm.insert(e);
             return;
@@ -142,7 +142,7 @@ public class EntityFactories {
 
         // check if this is an incomplete entity
         try {
-            e.complete();
+            e.validateCreate();
         } catch (IncompleteEntityException exc) {
             // not complete and link entity does not exist
             throw new NoSuchEntityException("No such entity '" + e.getEntityType() + "' with id " + e.getId().getValue());

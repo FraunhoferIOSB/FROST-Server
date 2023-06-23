@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class ServiceRequest {
 
-    public static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
+    private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
 
     private String requestType;
     private String urlPath;
@@ -50,7 +50,7 @@ public class ServiceRequest {
     private String contentType;
     private Map<String, List<String>> parameterMap;
     private Map<String, Object> attributeMap;
-    private Principal userPrincipal;
+    private PrincipalExtended userPrincipal;
     private CoreSettings coreSettings;
 
     protected ServiceRequest() {
@@ -199,11 +199,11 @@ public class ServiceRequest {
         }
     }
 
-    public Principal getUserPrincipal() {
+    public PrincipalExtended getUserPrincipal() {
         return userPrincipal;
     }
 
-    public void setUserPrincipal(Principal userPrincipal) {
+    public void setUserPrincipal(PrincipalExtended userPrincipal) {
         this.userPrincipal = userPrincipal;
     }
 
@@ -223,6 +223,20 @@ public class ServiceRequest {
      */
     public void setVersion(Version version) {
         this.version = version;
+    }
+
+    public static ServiceRequest getLocalRequest() {
+        return LOCAL_REQUEST.get();
+    }
+
+    public static void setLocalRequest(ServiceRequest localRequest) {
+        LOCAL_REQUEST.set(localRequest);
+        PrincipalExtended.setLocalPrincipal(localRequest.getUserPrincipal());
+    }
+
+    public static void removeLocalRequest() {
+        LOCAL_REQUEST.remove();
+        PrincipalExtended.removeLocalPrincipal();
     }
 
 }

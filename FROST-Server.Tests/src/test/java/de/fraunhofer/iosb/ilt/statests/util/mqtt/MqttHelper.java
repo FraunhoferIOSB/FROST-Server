@@ -227,11 +227,11 @@ public class MqttHelper {
     }
 
     public String getTopic(EntityType entityType, Object id, String property) {
-        return getTopic(entityType) + "(" + Utils.quoteIdForUrl(id) + ")/" + property;
+        return getTopic(entityType) + "(" + Utils.quoteForUrl(id) + ")/" + property;
     }
 
     public String getTopic(EntityType entityType, Object id) {
-        return getTopic(entityType) + "(" + Utils.quoteIdForUrl(id) + ")";
+        return getTopic(entityType) + "(" + Utils.quoteForUrl(id) + ")";
     }
 
     public String getTopic(EntityType entityType) {

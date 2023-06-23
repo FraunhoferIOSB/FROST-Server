@@ -56,7 +56,7 @@ public class PathElement implements Cloneable {
         StringBuilder value = new StringBuilder();
         value.append(plural ? entityType.plural : entityType.singular);
         if (id != null) {
-            value.append('(').append(Utils.quoteIdForUrl(id)).append(')');
+            value.append('(').append(Utils.quoteForUrl(id)).append(')');
         }
         return value.toString();
     }

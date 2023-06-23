@@ -48,7 +48,10 @@ class EntityCompleteTest {
 
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
-            entity.complete(containingSet);
+            if (containingSet.getParent() != null) {
+                entity.getEntityType().setParent(containingSet, entity);
+            }
+            entity.validateCreate();
             return true;
         } catch (IncompleteEntityException | IllegalArgumentException e) {
             return false;

@@ -26,11 +26,13 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import net.time4j.Moment;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -73,14 +75,18 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
      * to.
      */
     public TableImpTasks(DataType<?> idType, DataType<?> idTypeTaskingCap, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name("TASKS"), null);
+        super(idType, DSL.name("TASKS"), null, null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
         colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), idTypeTaskingCap);
     }
 
     private TableImpTasks(Name alias, TableImpTasks aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginActuation, pluginCoreModel);
+    }
+
+    private TableImpTasks(Name alias, TableImpTasks aliased, Table updatedSql, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
         colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), aliased.colTaskingCapabilityId.getDataType());
@@ -121,6 +127,16 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
     @Override
     public TableImpTasks as(Name alias) {
         return new TableImpTasks(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpTasks asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpTasks(DSL.name(name), this, wrappedTable, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
     public Map<String, ContainerItem> properties = new LinkedHashMap<>();
 
     public CsdlItemEntityContainer generateFrom(String nameSpace, CoreSettings settings) {
-        for (EntityType et : settings.getModelRegistry().getEntityTypes()) {
+        for (EntityType et : settings.getModelRegistry().getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, et));
         }
         return this;
@@ -74,7 +75,9 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
             collection = true;
             type = nameSpace + "." + et.entityName;
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
-                navPropBinding.put(np.getName(), np.getEntityType().plural);
+                if (!np.isAdminOnly() || PrincipalExtended.getLocalPrincipal().isAdmin()) {
+                    navPropBinding.put(np.getName(), np.getEntityType().plural);
+                }
             }
             return this;
         }

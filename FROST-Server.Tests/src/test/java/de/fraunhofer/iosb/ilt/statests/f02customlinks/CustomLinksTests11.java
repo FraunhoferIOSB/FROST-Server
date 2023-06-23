@@ -24,4 +24,5 @@ public class CustomLinksTests11 extends CustomLinksTests {
     public CustomLinksTests11() {
         super(ServerVersion.v_1_1);
     }
+
 }

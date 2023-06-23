@@ -46,4 +46,14 @@ public interface PluginModel extends Plugin {
      * {@link #linkEntityTypes(PersistenceManager)} have successfully executed.
      */
     public boolean isFullyInitialised();
+
+    /**
+     * Install low-level security definitions into the active
+     * PersistenceManager.
+     *
+     * @param pm The PersistenceManager to install the security definitions
+     * into.
+     */
+    public default void installSecurityDefinitions(PersistenceManager pm) {
+    }
 }

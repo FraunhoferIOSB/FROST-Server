@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
@@ -96,6 +97,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     protected EventListenerList entityCreateListeners = new EventListenerList();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
+    private AuthWrapper authWrapper;
 
     /**
      * The MQTT Id used by the FROST server to connect to the MQTT broker.
@@ -197,7 +199,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }
 
-        AuthWrapper authWrapper = createAuthWrapper();
+        authWrapper = createAuthWrapper();
 
         mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
     }
@@ -235,7 +237,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             }
             LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
             String payload = msg.getPayload().toString(StringHelper.UTF8);
-            fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload));
+            PrincipalExtended userPrincipal;
+            if (authWrapper == null) {
+                userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
+            } else {
+                userPrincipal = authWrapper.getUserPrincipal(msg.getClientID());
+            }
+            fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload, userPrincipal));
         }
 
         @Override

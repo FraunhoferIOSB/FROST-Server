@@ -238,7 +238,7 @@ class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
+                .addNavigationEntity(pluginCoreModel.npDatastreamsThing, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
@@ -290,7 +290,7 @@ class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsThing, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(1))
                         .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
@@ -340,7 +340,7 @@ class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsThing, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
@@ -366,7 +366,7 @@ class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsThing, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
@@ -393,7 +393,7 @@ class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                .addNavigationEntity(pluginCoreModel.npDatastreamsThing, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123)))
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))

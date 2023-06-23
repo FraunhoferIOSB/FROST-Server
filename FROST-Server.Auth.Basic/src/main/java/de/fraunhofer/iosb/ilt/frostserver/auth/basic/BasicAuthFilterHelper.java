@@ -17,13 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_ADMIN;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_GET;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_GET;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PATCH;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_POST;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PUT;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -52,13 +53,15 @@ public class BasicAuthFilterHelper {
         if (!(context instanceof ServletContext)) {
             throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
         }
-        ServletContext servletContext = (ServletContext) context;
-        Settings authSettings = coreSettings.getAuthSettings();
-        Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
-        String filterClass = BasicAuthFilter.class.getName();
+        final ServletContext servletContext = (ServletContext) context;
+        final Settings authSettings = coreSettings.getAuthSettings();
+        final boolean authOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
 
-        Map<String, Version> versions = coreSettings.getPluginManager().getVersions();
-        List<String> urlPatterns = new ArrayList<>();
+        final Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
+        final String filterClass = BasicAuthFilter.class.getName();
+
+        final Map<String, Version> versions = coreSettings.getPluginManager().getVersions();
+        final List<String> urlPatterns = new ArrayList<>();
         for (Version version : versions.values()) {
             urlPatterns.add("/" + version.urlPart);
             urlPatterns.add("/" + version.urlPart + "/*");
@@ -66,27 +69,28 @@ public class BasicAuthFilterHelper {
 
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+        final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+        authFilterSta.setInitParameter(TAG_AUTHENTICATE_ONLY, authOnly ? "T" : "F");
         authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, anonRead ? "T" : "F");
-        authFilterSta.setInitParameter(TAG_ROLE_GET, roleMapping.get(Role.READ));
-        authFilterSta.setInitParameter(TAG_ROLE_PATCH, roleMapping.get(Role.UPDATE));
-        authFilterSta.setInitParameter(TAG_ROLE_POST, roleMapping.get(Role.CREATE));
-        authFilterSta.setInitParameter(TAG_ROLE_PUT, roleMapping.get(Role.UPDATE));
-        authFilterSta.setInitParameter(TAG_ROLE_DELETE, roleMapping.get(Role.DELETE));
-        authFilterSta.setInitParameter(TAG_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
+        authFilterSta.setInitParameter(TAG_HTTP_ROLE_GET, roleMapping.get(Role.READ));
+        authFilterSta.setInitParameter(TAG_HTTP_ROLE_PATCH, roleMapping.get(Role.UPDATE));
+        authFilterSta.setInitParameter(TAG_HTTP_ROLE_POST, roleMapping.get(Role.CREATE));
+        authFilterSta.setInitParameter(TAG_HTTP_ROLE_PUT, roleMapping.get(Role.UPDATE));
+        authFilterSta.setInitParameter(TAG_HTTP_ROLE_DELETE, roleMapping.get(Role.DELETE));
+        authFilterSta.setInitParameter(TAG_AUTH_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
 
         authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns.toArray(String[]::new));
 
         filterName = "AuthFilterAdmin";
         FilterRegistration.Dynamic authFilterAdmin = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, "F");
+        authFilterAdmin.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, "F");
         String adminRoleString = roleMapping.get(Role.ADMIN);
-        authFilterAdmin.setInitParameter(TAG_ROLE_GET, adminRoleString);
-        authFilterAdmin.setInitParameter(TAG_ROLE_PATCH, adminRoleString);
-        authFilterAdmin.setInitParameter(TAG_ROLE_POST, adminRoleString);
-        authFilterAdmin.setInitParameter(TAG_ROLE_PUT, adminRoleString);
-        authFilterAdmin.setInitParameter(TAG_ROLE_DELETE, adminRoleString);
-        authFilterAdmin.setInitParameter(TAG_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
+        authFilterAdmin.setInitParameter(TAG_HTTP_ROLE_GET, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_HTTP_ROLE_PATCH, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_HTTP_ROLE_POST, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_HTTP_ROLE_PUT, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_HTTP_ROLE_DELETE, adminRoleString);
+        authFilterAdmin.setInitParameter(TAG_AUTH_ROLE_ADMIN, roleMapping.get(Role.ADMIN));
         authFilterAdmin.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/DatabaseStatus");
     }
 }

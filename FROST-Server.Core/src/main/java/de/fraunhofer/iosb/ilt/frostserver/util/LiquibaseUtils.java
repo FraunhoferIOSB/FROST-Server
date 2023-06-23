@@ -54,7 +54,7 @@ public class LiquibaseUtils {
                 logger.info("Database-update not successful, trying again later.");
             }
         } catch (UpgradeFailedException ex) {
-            logger.error("Database upgrade failed.", ex);
+            logger.error("Database upgrade failed: {}", ex.getMessage());
             retry = false;
         } catch (IOException ex) {
             // Should not happen, StringWriter does not throw IOExceptions.

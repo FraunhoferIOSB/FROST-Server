@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -50,16 +52,23 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
@@ -122,8 +131,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private EntityFactories entityFactories;
 
     private CoreSettings settings;
-    private IdGenerationType idGenerationMode;
+    private PersistenceSettings persistenceSettings;
     private ConnectionWrapper connectionProvider;
+    private String connectionName;
     private DSLContext dslContext;
 
     /**
@@ -138,10 +148,17 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
-        this.tableCollection = getTableCollection(settings);
+        tableCollection = getTableCollection(settings);
+        persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
-        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        final Settings customSettings = persistenceSettings.getCustomSettings();
+        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        if (StringHelper.isNullOrEmpty(connectionUrl)) {
+            connectionName = SOURCE_NAME_FROST;
+        } else {
+            connectionName = connectionUrl;
+        }
+        connectionProvider = new ConnectionWrapper(customSettings, connectionName);
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
     }
@@ -152,9 +169,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         synchronized (tableCollection) {
             if (!initialised) {
-                idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
-                tableCollection.init(entityFactories);
-                loadMapping();
+                if (tableCollection.init(this)) {
+                    loadMapping();
+                    validateMappings();
+                }
                 initialised = true;
             }
         }
@@ -298,10 +316,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         init();
-        EntityFactories ef = getEntityFactories();
-
-        entity.setId(pathElement.getId());
-        Object id = pathElement.getId().getValue();
+        final EntityFactories ef = getEntityFactories();
+        final Id id = pathElement.getId();
+        entity.setId(id);
         if (!ef.entityExists(this, entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
@@ -334,7 +351,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         Entity newEntity;
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(modelRegistry);
+            JsonReader entityParser = new JsonReader(modelRegistry, PrincipalExtended.getLocalPrincipal());
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
@@ -351,7 +368,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, id.getValue());
+        table.updateInDatabase(this, newEntity, id);
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -385,7 +402,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         init();
         EntityType type = pathElement.getEntityType();
         StaMainTable<?> table = getTableCollection().getTableForType(type);
-        table.delete(this, pathElement.getId().getValue());
+        table.delete(this, pathElement.getId());
         return true;
     }
 
@@ -434,10 +451,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
-    public IdGenerationType getIdGenerationMode() {
-        return idGenerationMode;
-    }
-
     protected boolean validateClientSuppliedId(Id entityId) {
         return entityId != null && entityId.getValue() != null;
     }
@@ -464,14 +477,16 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      * not supported.
      */
     public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
-        Id entityId = entity.getId();
-        switch (idGenerationMode) {
+        final Id entityId = entity.getId();
+        final EntityType entityType = entity.getEntityType();
+        final IdGenerationType typeIdGenerationMode = (IdGenerationType) entityType.getIdGenerationMode();
+        switch (typeIdGenerationMode) {
             case SERVER_GENERATED_ONLY:
                 if (entityId == null || entityId.getValue() == null) {
                     LOGGER.trace("Using server generated id.");
                     return false;
                 } else {
-                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", idGenerationMode, entityId);
+                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", typeIdGenerationMode, entityId);
                     return false;
                 }
 
@@ -484,26 +499,26 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
             case CLIENT_GENERATED_ONLY:
                 if (!validateClientSuppliedId(entityId)) {
-                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", idGenerationMode);
+                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", typeIdGenerationMode);
                     throw new IncompleteEntityException("Error: no @iot.id");
                 }
                 break;
 
             default:
                 // not a valid generation mode
-                LOGGER.error("idGenerationMode '{}' is not implemented.", idGenerationMode);
-                throw new IllegalArgumentException("idGenerationMode '" + idGenerationMode.toString() + "' is not implemented.");
+                LOGGER.error("idGenerationMode '{}' is not implemented.", typeIdGenerationMode);
+                throw new IllegalArgumentException("idGenerationMode '" + typeIdGenerationMode.toString() + "' is not implemented.");
         }
 
-        LOGGER.info("Using client generated id.");
+        LOGGER.debug("Using client generated id.");
         return true;
     }
 
     public String checkForUpgrades(String liquibaseChangelogFilename, Map<String, Object> params) {
         LOGGER.info("Checking for upgrades in {}", liquibaseChangelogFilename);
         try {
-            Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-            Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
+            final Settings customSettings = persistenceSettings.getCustomSettings();
+            final Connection connection = ConnectionUtils.getConnection(connectionName, customSettings);
             return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -515,10 +530,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     public boolean doUpgrades(String liquibaseChangelogFilename, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
         LOGGER.info("Applying upgrades in {}", liquibaseChangelogFilename);
-        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        Connection connection;
+        final Settings customSettings = persistenceSettings.getCustomSettings();
+        final Connection connection;
         try {
-            connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
+            connection = ConnectionUtils.getConnection(connectionName, customSettings);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");
@@ -534,21 +549,42 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         tableCollection.getModelDefinitions().add(modelDefinition);
     }
 
+    @Override
+    public void addSecurityDefinition(SecurityEntry entry) {
+        String tableName = entry.getTableName();
+        List<SecurityWrapper> wrappers = entry.getWrappers();
+        for (SecurityWrapper wrapper : wrappers) {
+            if (wrapper instanceof SecurityTableWrapper stw) {
+                tableCollection.addSecurityWrapper(tableName, stw);
+            } else if (wrapper instanceof HookValidator hv) {
+                tableCollection.addSecurityValidator(tableName, hv);
+            } else {
+                LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
+            }
+        }
+    }
+
     private void loadMapping() {
         final List<DefModel> modelDefinitions = tableCollection.getModelDefinitions();
         if (modelDefinitions.isEmpty()) {
             return;
         }
+        LOGGER.info("Loading Database Mappings...");
 
         getDslContext();
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
 
+        LOGGER.info("Reading Database Tables.");
         for (DefModel modelDefinition : modelDefinitions) {
-            LOGGER.info("Reading Database Tables.");
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
                 final String tableName = entityTypeDef.getTable();
-                LOGGER.info("  Table: {}.", tableName);
-                getDbTable(tableName);
-                getOrCreateMainTable(entityTypeDef.getEntityType(settings.getModelRegistry()), entityTypeDef.getTable());
+                if (!StringHelper.isNullOrEmpty(tableName)) {
+                    LOGGER.info("  Table: {}.", tableName);
+                    getDbTable(tableName);
+                    StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
+                    tableCollection.initSecurityWrapper(mainTable);
+                    tableCollection.initSecurityValidators(mainTable, this);
+                }
             }
         }
 
@@ -561,9 +597,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
+    }
 
+    private void validateMappings() {
         // Validate
-        for (EntityType entityType : settings.getModelRegistry().getEntityTypes()) {
+        LOGGER.info("Validating Database Mappings...");
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
             final PropertyFieldRegistry<?> pfReg = tableForType.getPropertyFieldRegistry();
             for (Property property : entityType.getPropertySet()) {
@@ -572,6 +612,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                     LOGGER.error("Property {} is not backed by table {}.", property.getName(), tableForType.getName());
                 }
             }
+            final IdGenerationType idGenMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode(entityType));
+            entityType.setIdGenerationMode(idGenMode);
         }
     }
 

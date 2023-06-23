@@ -233,6 +233,10 @@ spec:
               value: "{{ .Values.frost.plugins.modelLoader.liquibasePath }}"
             - name: plugins_modelLoader_liquibaseFiles
               value: "{{ .Values.frost.plugins.modelLoader.liquibaseFiles }}"
+            - name: plugins_modelLoader_securityPath
+              value: "{{ .Values.frost.plugins.modelLoader.securityPath }}"
+            - name: plugins_modelLoader_securityFiles
+              value: "{{ .Values.frost.plugins.modelLoader.securityFiles }}"
             {{- end }}
 
             # Other Plugins settings
@@ -382,4 +386,9 @@ spec:
             {{- if .Values.frost.logging.jooq }}
             - name: FROST_LL_org_jooq
               value: "{{ .Values.frost.logging.jooq }}"
+            {{- end }}
+
+            # Extra Environment Variables
+            {{- if .Values.frost.http.extraEnv }}
+                {{- .Values.frost.http.extraEnv | nindent 12 }}
             {{- end }}

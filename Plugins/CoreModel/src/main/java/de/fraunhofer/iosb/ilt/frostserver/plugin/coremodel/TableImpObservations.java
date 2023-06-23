@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
@@ -43,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -58,6 +60,7 @@ import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -173,14 +176,18 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObservations(DataType<?> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
-        super(idType, DSL.name(NAME_TABLE), null);
+        super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), idTypeDs);
         colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), idTypeFeature);
     }
 
     private TableImpObservations(Name alias, TableImpObservations aliased, PluginCoreModel pluginCoreModel) {
-        super(aliased.getIdType(), alias, aliased);
+        this(alias, aliased, aliased, pluginCoreModel);
+    }
+
+    private TableImpObservations(Name alias, TableImpObservations aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
+        super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginCoreModel = pluginCoreModel;
         colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), aliased.colDatastreamId.getDataType());
         colFeatureId = createField(DSL.name(NAME_COL_FEATUREID), aliased.colFeatureId.getDataType());
@@ -242,7 +249,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId);
         pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId);
 
-        registerHookPreInsert(0, (pm, entity, insertFields) -> {
+        registerHookPreInsert(0, (phase, pm, entity, insertFields) -> {
+            if (phase != PRE_RELATIONS) {
+                return true;
+            }
             Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
             if (f == null) {
                 final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
@@ -279,6 +289,16 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     @Override
     public TableImpObservations as(Name alias) {
         return new TableImpObservations(alias, this, pluginCoreModel).initCustomFields();
+    }
+
+    @Override
+    public TableImpObservations asSecure(String name) {
+        final SecurityTableWrapper securityWrapper = getSecurityWrapper();
+        if (securityWrapper == null) {
+            return as(name);
+        }
+        final Table wrappedTable = securityWrapper.wrap(this);
+        return new TableImpObservations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 
     @Override

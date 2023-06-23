@@ -36,6 +36,8 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.File;
 import java.io.IOException;
@@ -72,9 +74,11 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private Map<String, DefEntityProperty> primaryKeys;
 
     private String liquibasePath;
-    private String filesPath;
+    private String modelPath;
+    private String securityPath;
     private final List<String> conformance = new ArrayList<>();
     private final List<String> liquibaseFiles = new ArrayList<>();
+    private final List<String> securityFiles = new ArrayList<>();
 
     public PluginModelLoader() {
         LOGGER.info("Creating new ModelLoader Plugin.");
@@ -90,12 +94,12 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             settings.getPluginManager().registerPlugin(this);
 
             String liquibaseString = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_FILES, ModelLoaderSettings.class);
-            liquibaseFiles.addAll(Arrays.asList(StringUtils.split(liquibaseString)));
-
+            liquibaseFiles.addAll(Arrays.asList(StringUtils.split(liquibaseString.trim(), ", ")));
             liquibasePath = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_PATH, ModelLoaderSettings.class);
-            filesPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
+
+            modelPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
             String modelFilesString = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_FILES, ModelLoaderSettings.class);
-            String[] modelFiles = StringUtils.split(modelFilesString, ',');
+            String[] modelFiles = StringUtils.split(modelFilesString.trim(), ", ");
 
             primaryKeys = new HashMap<>();
             for (String fileName : modelFiles) {
@@ -105,16 +109,21 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 String typeName = entry.getKey();
                 primaryKeys.get(typeName).setType(getTypeFor(settings, typeName));
             }
+
+            securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
+            String securityFilesString = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_FILES, ModelLoaderSettings.class);
+            securityFiles.addAll(Arrays.asList(StringUtils.split(securityFilesString.trim(), ", ")));
         }
     }
 
     private void loadModelFile(String fileName) {
-        final Path fullPath = Path.of(filesPath, fileName);
-        LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
-        if (!fullPath.toFile().exists()) {
-            LOGGER.error("File not found: {}", fullPath);
-            return;
+        final Path fullPath;
+        if (StringHelper.isNullOrEmpty(modelPath)) {
+            fullPath = Path.of(fileName);
+        } else {
+            fullPath = Path.of(modelPath, fileName);
         }
+        LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
         String data;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -138,6 +147,47 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         } catch (IOException ex) {
             LOGGER.error("Failed to load model definition", ex);
         }
+    }
+
+    @Override
+    public void installSecurityDefinitions(PersistenceManager pm) {
+        if (pm instanceof PostgresPersistenceManager) {
+            for (String fileName : securityFiles) {
+                SecurityModel secModel = loadSecurityFile(fileName);
+                if (secModel == null) {
+                    continue;
+                }
+
+                for (SecurityModel.SecurityEntry secEntry : secModel.getEntries()) {
+                    pm.addSecurityDefinition(secEntry);
+                }
+            }
+        }
+    }
+
+    private SecurityModel loadSecurityFile(String fileName) {
+        final Path fullPath = Path.of(securityPath, fileName);
+        LOGGER.info("Loading security definition from {}", fullPath.toAbsolutePath());
+        String data;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            SecurityModel securityModel;
+            if (fullPath.toFile().exists()) {
+                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+                securityModel = objectMapper.readValue(data, SecurityModel.class);
+            } else {
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                if (stream == null) {
+                    LOGGER.info("  Not found: {}", fullPath);
+                    return null;
+                }
+                securityModel = objectMapper.readValue(stream, SecurityModel.class);
+            }
+            return securityModel;
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load model definition", ex);
+        }
+        return null;
     }
 
     @Override

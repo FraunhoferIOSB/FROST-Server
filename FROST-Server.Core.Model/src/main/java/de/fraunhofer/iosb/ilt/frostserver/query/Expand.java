@@ -99,7 +99,9 @@ public class Expand {
 
     public Query getSubQuery() {
         if (subQuery == null) {
-            setSubQuery(new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath()).validate(validatedPath.getEntityType()));
+            final Query newSubQuery = new Query(parentQuery)
+                    .validate(validatedPath.getEntityType());
+            setSubQuery(newSubQuery);
         }
         return subQuery;
     }
@@ -135,8 +137,11 @@ public class Expand {
             final String firstRawPath = rawPath.get(0);
             final Property property = entityType.getProperty(firstRawPath);
             final int rawCount = rawPath.size();
-            if (property instanceof NavigationPropertyMain) {
-                validatedPath = (NavigationPropertyMain) property;
+            if (property instanceof NavigationPropertyMain npm) {
+                if (npm.isAdminOnly() && !parentQuery.getPrincipal().isAdmin()) {
+                    throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
+                }
+                validatedPath = npm;
                 if (rawCount > 1) {
                     // Need to re-nest this expand!
                     Expand subExpand = new Expand(modelRegistry, subQuery);
@@ -145,7 +150,7 @@ public class Expand {
                     }
                     rawPath.clear();
                     rawPath.add(firstRawPath);
-                    subQuery = new Query(modelRegistry, parentQuery.getSettings(), parentQuery.getPath());
+                    subQuery = new Query(parentQuery);
                     subQuery.addExpand(subExpand);
                     subQuery.setParentExpand(this);
                 }
@@ -157,11 +162,11 @@ public class Expand {
                 }
                 validatedPath = tempPath;
             } else {
-                throw new IllegalArgumentException("Invalid custom expand path '" + firstRawPath + "' on entity type " + entityType.entityName);
+                throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
             }
 
         }
-        if (subQuery != null && validatedPath instanceof NavigationPropertyMain) {
+        if (subQuery != null && validatedPath != null) {
             if (!subQuery.hasMetadata()) {
                 subQuery.setMetadata(parentQuery.getMetadata());
             }

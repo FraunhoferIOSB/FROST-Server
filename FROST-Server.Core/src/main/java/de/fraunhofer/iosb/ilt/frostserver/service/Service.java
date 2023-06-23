@@ -283,7 +283,7 @@ public class Service implements AutoCloseable {
         final List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
         try {
-            for (EntityType entityType : modelRegistry.getEntityTypes()) {
+            for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
                 URL collectionUri = URI.create(settings.getQueryDefaults().getServiceRootUrl()
                         + "/" + version.urlPart
                         + "/" + entityType.plural).normalize().toURL();
@@ -370,9 +370,11 @@ public class Service implements AutoCloseable {
         final ResourcePath path;
         final Version version = request.getVersion();
         try {
-            path = PathParser.parsePath(modelRegistry,
+            path = PathParser.parsePath(
+                    modelRegistry,
                     settings.getQueryDefaults().getServiceRootUrl(), version,
-                    request.getUrlPath());
+                    request.getUrlPath(),
+                    request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
         }
@@ -380,7 +382,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = settings.getFormatter(version, query.getFormat());
@@ -459,7 +461,8 @@ public class Service implements AutoCloseable {
                     modelRegistry,
                     settings.getQueryDefaults().getServiceRootUrl(),
                     version,
-                    urlPath);
+                    urlPath,
+                    request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException e) {
             return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
         }
@@ -471,7 +474,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = findFormatter(query, request, version);
@@ -486,11 +489,15 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        JsonReader jsonReader = new JsonReader(modelRegistry);
+        JsonReader jsonReader = new JsonReader(modelRegistry, request.getUserPrincipal());
         Entity entity;
         try {
             entity = jsonReader.parseEntity(type, request.getContentReader());
-            entity.complete(mainSet);
+
+            if (mainSet.getParent() != null) {
+                type.setParent(mainSet, entity);
+            }
+            type.validateCreate(entity);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.trace("Post failed.", ex);
@@ -560,7 +567,7 @@ public class Service implements AutoCloseable {
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            JsonReader entityParser = new JsonReader(modelRegistry);
+            JsonReader entityParser = new JsonReader(modelRegistry, request.getUserPrincipal());
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
@@ -626,7 +633,8 @@ public class Service implements AutoCloseable {
                     modelRegistry,
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
-                    request.getUrlPath());
+                    request.getUrlPath(),
+                    request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException exc) {
             throw new NoSuchEntityException(NOT_A_VALID_PATH + ": " + exc.getMessage());
         }
@@ -678,9 +686,9 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
 
-            JsonReader entityParser = new JsonReader(modelRegistry);
+            JsonReader entityParser = new JsonReader(modelRegistry, request.getUserPrincipal());
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
-            entity.complete(true);
+            entity.validateUpdate();
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
@@ -718,7 +726,8 @@ public class Service implements AutoCloseable {
                     modelRegistry,
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
-                    request.getUrlPath());
+                    request.getUrlPath(),
+                    request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException exc) {
             return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + exc.getMessage());
         }
@@ -823,7 +832,7 @@ public class Service implements AutoCloseable {
         Query query;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
@@ -927,7 +936,7 @@ public class Service implements AutoCloseable {
         Query query;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path)
+                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException ex) {
@@ -954,7 +963,7 @@ public class Service implements AutoCloseable {
             return LinkData.error("$id parameter must use the same version as the request ('" + versionUrl + "').");
         }
         targetUrl = targetUrl.substring(versionUrl.length());
-        ResourcePath targetPath = PathParser.parsePath(modelRegistry, serviceRootUrl, version, targetUrl);
+        ResourcePath targetPath = PathParser.parsePath(modelRegistry, serviceRootUrl, version, targetUrl, request.getUserPrincipal());
         PathElement lastTargetElement = targetPath.getLastElement();
         PathElementEntity targetEntity;
         if (lastTargetElement instanceof PathElementEntity pathElementEntity) {

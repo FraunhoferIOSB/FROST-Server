@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
@@ -31,13 +32,13 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.impl.DSL;
 
 /**
  *
@@ -52,9 +53,29 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public abstract T as(Name as);
 
     @Override
-    public default StaMainTable<T> as(String name) {
-        return as(DSL.name(name));
-    }
+    public abstract T as(String name);
+
+    /**
+     * Return an aliased version of the table, with security joins active.
+     *
+     * @param name The alias to use.
+     * @return The secured, aliased table.
+     */
+    public abstract StaMainTable<T> asSecure(String name);
+
+    /**
+     * Get the SecurityTableWrapper for this table, if any is defined.
+     *
+     * @return The SecurityTableWrapper for this table, or null.
+     */
+    public abstract SecurityTableWrapper getSecurityWrapper();
+
+    /**
+     * Set the SecurityTableWrapper for this table.
+     *
+     * @param securityWrapper The SecurityTableWrapper to set.
+     */
+    public void setSecurityWrapper(SecurityTableWrapper securityWrapper);
 
     public void initRelations();
 
@@ -78,9 +99,9 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public boolean insertIntoDatabase(PostgresPersistenceManager pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Object dsId) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
 
-    public void delete(PostgresPersistenceManager pm, Object entityId) throws NoSuchEntityException;
+    public void delete(PostgresPersistenceManager pm, Id entityId) throws NoSuchEntityException;
 
     /**
      * Add a hook that runs pre-insert.

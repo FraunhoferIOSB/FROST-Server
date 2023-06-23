@@ -17,27 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.TimeObject;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -48,7 +45,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.threeten.extra.Interval;
 
 /**
  * Tests additional details not part of the official tests.
@@ -57,30 +53,14 @@ import org.threeten.extra.Interval;
  */
 public abstract class DeleteFilterTests extends AbstractTestClass {
 
-    public static class Implementation10 extends DeleteFilterTests {
-
-        public Implementation10() {
-            super(ServerVersion.v_1_0);
-        }
-
-    }
-
-    public static class Implementation11 extends DeleteFilterTests {
-
-        public Implementation11() {
-            super(ServerVersion.v_1_1);
-        }
-
-    }
-
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteFilterTests.class);
 
-    private static final List<Thing> THINGS = new ArrayList<>();
-    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Entity> THINGS = new ArrayList<>();
+    private static final List<Entity> DATASTREAMS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     private static final ZonedDateTime T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
     private static final ZonedDateTime T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
@@ -92,21 +72,21 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     private static final ZonedDateTime T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
     private static final ZonedDateTime T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
     private static final ZonedDateTime T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
-    private static final Interval I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
-    private static final Interval I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
-    private static final Interval I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
-    private static final Interval I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
-    private static final Interval I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
-    private static final Interval I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
-    private static final Interval I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
-    private static final Interval I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
-    private static final Interval I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
-    private static final Interval I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
-    private static final Interval I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
-    private static final Interval I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
-    private static final Interval I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
-    private static final Interval I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
-    private static final Interval I2017 = Interval.of(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
+    private static final TimeInterval I2015 = TimeInterval.create(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
+    private static final TimeInterval I600_659 = TimeInterval.create(T600.toInstant(), T659.toInstant());
+    private static final TimeInterval I600_700 = TimeInterval.create(T600.toInstant(), T700.toInstant());
+    private static final TimeInterval I600_701 = TimeInterval.create(T600.toInstant(), T701.toInstant());
+    private static final TimeInterval I700_800 = TimeInterval.create(T700.toInstant(), T800.toInstant());
+    private static final TimeInterval I701_759 = TimeInterval.create(T701.toInstant(), T759.toInstant());
+    private static final TimeInterval I759_900 = TimeInterval.create(T759.toInstant(), T900.toInstant());
+    private static final TimeInterval I800_900 = TimeInterval.create(T800.toInstant(), T900.toInstant());
+    private static final TimeInterval I801_900 = TimeInterval.create(T801.toInstant(), T900.toInstant());
+    private static final TimeInterval I659_801 = TimeInterval.create(T659.toInstant(), T801.toInstant());
+    private static final TimeInterval I700_759 = TimeInterval.create(T700.toInstant(), T759.toInstant());
+    private static final TimeInterval I700_801 = TimeInterval.create(T700.toInstant(), T801.toInstant());
+    private static final TimeInterval I659_800 = TimeInterval.create(T659.toInstant(), T800.toInstant());
+    private static final TimeInterval I701_800 = TimeInterval.create(T701.toInstant(), T800.toInstant());
+    private static final TimeInterval I2017 = TimeInterval.create(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
 
     public DeleteFilterTests(ServerVersion version) {
         super(version);
@@ -134,40 +114,40 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        Thing thing = new Thing("Thing 1", "The first thing.");
+        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
-        Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        thing.getLocations().add(location);
-        service.create(thing);
+        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        thing.getProperty(sMdl.npThingLocations).add(location);
+        sSrvc.create(thing);
 
-        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
+        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         {
-            Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setThing(thing);
-            datastream.setSensor(sensor);
-            datastream.setObservedProperty(obsProp);
-            service.create(datastream);
+            Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+            datastream.setProperty(sMdl.npDatastreamThing, thing);
+            datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+            datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+            sSrvc.create(datastream);
             DATASTREAMS.add(datastream);
         }
         {
-            Datastream datastream = new Datastream("Datastream 2", "The alternate temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setThing(thing);
-            datastream.setSensor(sensor);
-            datastream.setObservedProperty(obsProp);
-            service.create(datastream);
+            Entity datastream = sMdl.newDatastream("Datastream 2", "The alternate temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+            datastream.setProperty(sMdl.npDatastreamThing, thing);
+            datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+            datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+            sSrvc.create(datastream);
             DATASTREAMS.add(datastream);
         }
     }
 
     private void recreateObservations() throws ServiceFailureException {
-        EntityUtils.deleteAll(service.observations());
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         OBSERVATIONS.clear();
         recreateObservations(DATASTREAMS.get(0));
         recreateObservations(DATASTREAMS.get(1));
     }
 
-    private void recreateObservations(Datastream datastream) throws ServiceFailureException {
+    private void recreateObservations(Entity datastream) throws ServiceFailureException {
         createObservation(0, datastream, T600, T600, null); // 0
         createObservation(1, datastream, T659, T659, null); // 1
         createObservation(2, datastream, T700, T700, null); // 2
@@ -198,28 +178,27 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
         createObservation(24, datastream, I2017, null, I2017); // 24
     }
 
-    private void createObservation(double result, Datastream ds, Interval pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        createObservation(result, ds, new TimeObject(pt), rt, vt);
+    private void createObservation(double result, Entity ds, TimeInterval pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {
+        createObservation(result, ds, TimeValue.create(pt), TimeInstant.create(rt), vt);
     }
 
-    private void createObservation(double result, Datastream ds, ZonedDateTime pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        createObservation(result, ds, new TimeObject(pt), rt, vt);
+    private void createObservation(double result, Entity ds, ZonedDateTime pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {
+        createObservation(result, ds, TimeValue.create(pt), TimeInstant.create(rt), vt);
     }
 
-    private void createObservation(double result, Datastream ds, TimeObject pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
-        Observation o = new Observation(result, ds);
-        o.setPhenomenonTime(pt);
-        o.setResultTime(rt);
-        o.setValidTime(vt);
-        service.create(o);
+    private void createObservation(double result, Entity ds, TimeValue pt, TimeInstant rt, TimeInterval vt) throws ServiceFailureException {
+        Entity o = sMdl.newObservation(result, pt, ds)
+                .setProperty(EP_RESULTTIME, rt)
+                .setProperty(EP_VALIDTIME, vt);
+        sSrvc.create(o);
         OBSERVATIONS.add(o);
     }
 
-    public void deleteAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
+    public void deleteAndCheck(Dao doa, String filter, List<Entity> expected) {
         try {
             doa.query().filter(filter).delete();
 
-            EntityList<Observation> result = service.observations().query().list();
+            EntitySet result = sSrvc.query(sMdl.etObservation).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             assertTrue(check.testOk, message);
@@ -242,10 +221,10 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     void testDeleteByTime() throws ServiceFailureException {
         LOGGER.info("  testDeleteByTime");
         recreateObservations();
-        Datastream ds1 = DATASTREAMS.get(0);
-        BaseDao<Observation> doaDs1 = ds1.observations();
+        Entity ds1 = DATASTREAMS.get(0);
+        Dao doaDs1 = ds1.dao(sMdl.npDatastreamObservations);
 
-        List<Observation> remaining = Utils.getFromListExcept(OBSERVATIONS, 0, 1, 21);
+        List<Entity> remaining = Utils.getFromListExcept(OBSERVATIONS, 0, 1, 21);
         deleteAndCheck(doaDs1, String.format("resultTime lt %s", T700), remaining);
         deleteAndCheck(doaDs1, String.format("validTime lt %s", T700), Utils.removeFromList(OBSERVATIONS, remaining, 8, 9, 23));
         deleteAndCheck(doaDs1, String.format("%s lt phenomenonTime", T800), Utils.removeFromList(OBSERVATIONS, remaining, 6, 7, 15, 22, 24));

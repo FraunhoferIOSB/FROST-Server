@@ -70,7 +70,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
 
     @Override
     public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
-        T targetAliased = (T) getTarget().as(queryState.getNextAlias());
+        T targetAliased = (T) getTarget().asSecure(queryState.getNextAlias());
         L linkTableAliased = (L) getLinkTable().as(queryState.getNextAlias());
         Field<?> sourceField = getSourceFieldAcc().getField(source);
         Field<?> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);

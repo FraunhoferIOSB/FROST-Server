@@ -17,21 +17,28 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
+
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
- * @author scf
+ * A FROST Auth implementation for Basic Authentication.
  */
 public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
@@ -43,28 +50,37 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueBoolean(true)
     public static final String TAG_PLAIN_TEXT_PASSWORD = "plainTextPassword";
 
+    @DefaultValueInt(10)
+    public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 
-    @DefaultValue("read")
-    public static final String TAG_ROLE_GET = "roleGet";
-    @DefaultValue("update")
-    public static final String TAG_ROLE_PATCH = "rolePatch";
-    @DefaultValue("create")
-    public static final String TAG_ROLE_POST = "rolePost";
-    @DefaultValue("update")
-    public static final String TAG_ROLE_PUT = "rolePut";
-    @DefaultValue("delete")
-    public static final String TAG_ROLE_DELETE = "roleDelete";
-    @DefaultValue("admin")
-    public static final String TAG_ROLE_ADMIN = "roleAdmin";
+    @DefaultValue(PrincipalExtended.ROLE_READ)
+    public static final String TAG_HTTP_ROLE_GET = "roleGet";
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
+    public static final String TAG_HTTP_ROLE_PATCH = "rolePatch";
+    @DefaultValue(PrincipalExtended.ROLE_CREATE)
+    public static final String TAG_HTTP_ROLE_POST = "rolePost";
+    @DefaultValue(PrincipalExtended.ROLE_UPDATE)
+    public static final String TAG_HTTP_ROLE_PUT = "rolePut";
+    @DefaultValue(PrincipalExtended.ROLE_DELETE)
+    public static final String TAG_HTTP_ROLE_DELETE = "roleDelete";
 
     private CoreSettings coreSettings;
+    private String roleAdmin;
+    private int maxClientsPerUser;
+
+    private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
+    private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
 
     @Override
     public void init(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
         DatabaseHandler.init(coreSettings);
+        final Settings authSettings = coreSettings.getAuthSettings();
+        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
+        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
     }
 
     @Override
@@ -74,12 +90,39 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @Override
     public boolean isValidUser(String clientId, String userName, String password) {
-        return DatabaseHandler.getInstance(coreSettings).isValidUser(userName, password);
+        final UserData userData = new UserData(userName, password);
+        final boolean validUser = DatabaseHandler.getInstance(coreSettings)
+                .isValidUser(userData);
+        if (!validUser) {
+            return false;
+        }
+        boolean admin = userData.roles.contains(roleAdmin);
+
+        final PrincipalExtended userPrincipal = new PrincipalExtended(userData.userName, admin, userData.roles);
+        final UserClientInfo userInfo = usernameToUserinfo.computeIfAbsent(userData.userName, t -> new UserClientInfo());
+        userInfo.setUserPrincipal(userPrincipal);
+
+        String oldClientId = userInfo.addClientId(clientId, maxClientsPerUser);
+        if (oldClientId != null) {
+            clientidToUserinfo.remove(oldClientId);
+        }
+        clientidToUserinfo.put(clientId, userInfo);
+        return validUser;
     }
 
     @Override
     public boolean userHasRole(String clientId, String userName, String roleName) {
-        return DatabaseHandler.getInstance(coreSettings).userHasRole(userName, roleName);
+        return DatabaseHandler.getInstance(coreSettings)
+                .userHasRole(userName, roleName);
+    }
+
+    @Override
+    public PrincipalExtended getUserPrincipal(String clientId) {
+        UserClientInfo userInfo = clientidToUserinfo.get(clientId);
+        if (userInfo == null) {
+            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        }
+        return userInfo.getUserPrincipal();
     }
 
     public Map<String, Object> createLiqibaseParams(DatabaseHandler dbHandler, Map<String, Object> target) {
