@@ -26,10 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,12 @@ public class ModelRegistry {
     /**
      * All entity types.
      */
-    private final Set<EntityType> entityTypes = new LinkedHashSet<>();
+    private final Set<EntityType> entityTypes = new TreeSet<>();
 
     /**
      * All entity types accessible to non-admin users.
      */
-    private final Set<EntityType> entityTypesNonAdmin = new LinkedHashSet<>();
+    private final Set<EntityType> entityTypesNonAdmin = new TreeSet<>();
 
     /**
      * All property types by their name.
