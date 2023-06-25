@@ -24,10 +24,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FO
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.MxGraphGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +60,14 @@ public class MetaDataGenerator {
             if (idxJson == -1) {
                 idxJson = Integer.MAX_VALUE;
             }
-            if (idxJson < idxXml || "json".equalsIgnoreCase(format)) {
+            if ("drawio".equalsIgnoreCase(format)) {
+                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
+                new MxGraphGenerator().generate(
+                        response.getWriter(),
+                        settings.getModelRegistry(),
+                        PrincipalExtended.getLocalPrincipal().isAdmin());
+                response.setCode(200);
+            } else if (idxJson < idxXml || "json".equalsIgnoreCase(format)) {
                 response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
                 SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
                 response.setCode(200);

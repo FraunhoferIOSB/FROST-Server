@@ -131,7 +131,7 @@
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
         <version.maven.plugin.source>3.2.1</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.37.0</version.maven.plugin.spotless>
-        <version.maven.plugin.surefire>3.1.0</version.maven.plugin.surefire>
+        <version.maven.plugin.surefire>3.1.2</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
 
         <version.org.json>20230618</version.org.json>
@@ -165,6 +165,11 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${version.jackson-databind}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${version.jackson}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.dasniko</groupId>

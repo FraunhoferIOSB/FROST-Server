@@ -11,6 +11,7 @@
 * Improved handling of sub-properties of complex properties.
 * Fixed subQueries on expands on custom links.
 * Disallow wild-cards in MQTT topics.
+* Added DrawIO output to OData metadata page using '$metadata?$format=drawio'
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.
