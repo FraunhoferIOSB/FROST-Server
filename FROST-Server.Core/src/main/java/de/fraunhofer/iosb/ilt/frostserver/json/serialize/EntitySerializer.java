@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +140,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
     }
 
-    public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException {
+    public void writeProperty(EntityPropertyMain<?> ep, Entity entity, JsonGenerator gen) throws IOException {
         SimplePropertySerializer ser = propertySerializers.get(ep);
         if (ser != null) {
             ser.writeProperty(ep, entity, gen);
@@ -153,11 +154,28 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         final Object value = entity.getProperty(ep);
         if (serialiseAllNulls || value != null || ep.serialiseNull) {
             final String name = ep.getName();
-            if (serialiseAllNulls && "@iot.id".equals(name)) {
-                gen.writeObjectField("id", value);
-            } else {
-                gen.writeObjectField(name, value);
+            Collection<String> aliases = ep.getAliases();
+            if (aliases.size() > 1) {
+                if (serialiseAllNulls) {
+                    // OData: find the first alias that does not start with an @
+                    for (String alias : aliases) {
+                        if (!alias.startsWith("@")) {
+                            gen.writeObjectField(alias, value);
+                            return;
+                        }
+                    }
+                } else {
+                    // STA: Find the first alias that starts with an @
+                    for (String alias : aliases) {
+                        if (alias.startsWith("@")) {
+                            gen.writeObjectField(alias, value);
+                            return;
+                        }
+                    }
+                }
             }
+            // Either no aliases, or no matching found.
+            gen.writeObjectField(name, value);
         }
     }
 
