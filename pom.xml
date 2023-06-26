@@ -70,7 +70,7 @@
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.1.0</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-        <owasp.version>8.2.1</owasp.version>
+        <owasp.version>8.3.1</owasp.version>
 
         <org.json.version>20230618</org.json.version>
         <paho.version>1.2.5</paho.version>
