@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_SCHEMA_PRIORITY;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -81,6 +83,7 @@ import java.util.List;
 import java.util.Map;
 import net.time4j.Moment;
 import net.time4j.format.expert.Iso8601Format;
+import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Delete;
@@ -90,6 +93,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
+import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
@@ -135,6 +139,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     private ConnectionWrapper connectionProvider;
     private String connectionName;
     private DSLContext dslContext;
+    private String schemaPriority;
 
     /**
      * Tracker for the amount of data fetched form the DB by this PM.
@@ -161,6 +166,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         connectionProvider = new ConnectionWrapper(customSettings, connectionName);
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
+        schemaPriority = customSettings.get(TAG_DB_SCHEMA_PRIORITY, ConnectionUtils.class);
     }
 
     private void init() {
@@ -691,7 +697,18 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             throw new IllegalArgumentException("Table " + tableName + " not found.");
         }
         if (tables.size() != 1) {
-            LOGGER.error("Table name {} found {} times.", tableName, tables.size());
+            String[] schemas = StringUtils.split(schemaPriority, ',');
+            for (String schema : schemas) {
+                for (Table<?> table : tables) {
+                    final Schema tableSchema = table.getSchema();
+                    if (tableSchema != null && schema.trim().equalsIgnoreCase(tableSchema.getName())) {
+                        LOGGER.warn("Table name {} found {} times, using version from schema {}.", tableName, tables.size(), schema);
+                        return table;
+                    }
+                }
+            }
+            LOGGER.error("Table name {} found {} times, none in schemas '{}'. Use setting {}.{} to specify schema priority.",
+                    tableName, tables.size(), schemaPriority, PREFIX_PERSISTENCE, TAG_DB_SCHEMA_PRIORITY);
             throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
         }
         return tables.get(0);

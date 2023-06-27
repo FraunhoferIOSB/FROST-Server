@@ -46,6 +46,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ConnectionUtils implements ConfigDefaults {
 
+    @DefaultValue("public")
+    public static final String TAG_DB_SCHEMA_PRIORITY = "db.schemaPriority";
+
     @DefaultValue("")
     public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
     @DefaultValue("")

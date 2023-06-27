@@ -58,7 +58,7 @@ These are generic settings for authentication/authorisation.
     An authentication provider that uses a keycloak server for authentication.
 * **auth.allowAnonymousRead:**  
   If true, anonymous users are allowed to read (GET) data.
-* **auth.authenticateOnly:**  
+* **auth.authenticateOnly:** since 2.2.0  
   Let the auth module only handle authentication, not authorisation. If this is set the auth module attaches the user principal to each request, but no authoristion restrictions are applied. Use this when authorisation is handled by other components. default: false.
 * **auth.autoUpdateDatabase:**  
   Automatically apply database updates.
@@ -97,7 +97,7 @@ The BasicAuthProvider has the following specific settings:
 
 * **auth.realmName:**  
   The name of the realm that the browser displays when asking for username and password.
-* **auth.plainTextPassword:**  
+* **auth.plainTextPassword:** since 2.1.0  
   If true (the default), passwords are stored in plain text.
   Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
   for example with Blowfish variant 2a (recommended):

@@ -194,13 +194,16 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
   The maximum number of idle database connections to keep open, when not using JNDI.
 * **persistence.db.conn.idle.min:**  
   The minimum number of idle database connections to keep open, when not using JNDI.
+* **persistence.db.schemaPriority:** Since 2.2.0  
+  When searching table definitions, if a table with a given name is found in multiple schemas,
+  use this comma-separated list of schemas to determine which table to use.
 * **persistence.slowQueryThreshold:**  
   The duration threshold in ms after which queries are considered slow and are logged. Default 200, set to 0 to disable.
 * **persistence.queryTimeout:**  
   The maximum duration, in seconds, that a query is allowed to take. Default 0 (no timeout). If
   your FROST instance is behind a reverse proxy that will abort the connection after a certain time, set this to the
   same duration.
-* **persistence.countMode:** 2.0.0  
+* **persistence.countMode:** Since 2.0.0  
   The way to count entities. Allowed values:
   * **`FULL`:** (default) Fully count all entities. Can be very slow on large result sets, but always gives accurate results.
   * **`LIMIT_SAMPLE`:** First do a count, with a limit of `countEstimateThreshold`. If the limit is reached, do an
@@ -216,7 +219,7 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
   * **`ESTIMATE_LIMIT`:** First do an estimate using `EXPLAIN` and if the estimate is below the threshold, do a
     count with a limit of countEstimateThreshold. This is the fastest method, but
     if the estimate is inaccurate, it can give an incorrect estimate for low counts.
-* **persistence.countEstimateThreshold:** 2.0.0  
+* **persistence.countEstimateThreshold:** Since 2.0.0  
   When to switch from counting to estimating. Detailed behaviour depends on the value of
   `persistence.countMode`. Default value: 10000.
 
