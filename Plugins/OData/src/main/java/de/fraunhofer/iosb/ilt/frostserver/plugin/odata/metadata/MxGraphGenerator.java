@@ -52,7 +52,7 @@ public class MxGraphGenerator {
     private static final String STYLE_LIST = "swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#98D095;strokeColor=#82b366;swimlaneFillColor=#E3F7E2;";
     private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;";
     private static final String STYLE_CONNECTOR = "endArrow=classic;startArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;";
-    private static final String STYLE_LABEL = "edgeLabel;html=1;resizable=0;points=[];labelBackgroundColor=none;fontSize=10;spacingLeft=1;spacing=3;spacingRight=2;";
+    private static final String STYLE_LABEL = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=10;spacingLeft=1;spacing=3;spacingRight=2;";
 
     private static final String AS_SOURCEPOINT = "sourcePoint";
     private static final String AS_TARGETPOINT = "targetPoint";
@@ -179,29 +179,38 @@ public class MxGraphGenerator {
         EntityType etTarget = np.getEntityType();
         MxCell targetCell = typeCells.get(etTarget);
         if (etTarget == et) {
-            // Add self-relation
+            // Avoid adding non-symetrical self-relations twice
+            if (np.getName().compareTo(np.getInverse().getName()) >= 0) {
+                createLink(typeCell, typeCell, cellOne, root, np);
+            }
         } else if (targetCell != null) {
-            MxGeometry linkGeom = new MxGeometry()
-                    .setWidth(50)
-                    .setHeight(50)
-                    .setRelative(1)
-                    .addMxPoint(new MxPoint()
-                            .setX(typeCell.getMxGeometry().getX())
-                            .setY(typeCell.getMxGeometry().getY())
-                            .setAs(AS_SOURCEPOINT))
-                    .addMxPoint(new MxPoint()
-                            .setX(targetCell.getMxGeometry().getX())
-                            .setY(targetCell.getMxGeometry().getY())
-                            .setAs(AS_TARGETPOINT));
-            MxCell linkCell = new MxCell()
-                    .setStyle(STYLE_CONNECTOR)
-                    .setParent(cellOne.getId())
-                    .setSource(typeCell.getId())
-                    .setTarget(targetCell.getId())
-                    .setEdge(1)
-                    .setMxGeometry(linkGeom);
-            root.addMxCell(linkCell);
-            root.addMxCell(createLabelCell(np.getInverse(), linkCell, false));
+            createLink(typeCell, targetCell, cellOne, root, np);
+        }
+    }
+
+    private void createLink(MxCell sourceCell, MxCell targetCell, MxCell cellOne, Root root, NavigationProperty np) {
+        MxGeometry linkGeom = new MxGeometry()
+                .setWidth(50)
+                .setHeight(50)
+                .setRelative(1)
+                .addMxPoint(new MxPoint()
+                        .setX(sourceCell.getMxGeometry().getX())
+                        .setY(sourceCell.getMxGeometry().getY())
+                        .setAs(AS_SOURCEPOINT))
+                .addMxPoint(new MxPoint()
+                        .setX(targetCell.getMxGeometry().getX())
+                        .setY(targetCell.getMxGeometry().getY())
+                        .setAs(AS_TARGETPOINT));
+        MxCell linkCell = new MxCell()
+                .setStyle(STYLE_CONNECTOR)
+                .setParent(cellOne.getId())
+                .setSource(sourceCell.getId())
+                .setTarget(targetCell.getId())
+                .setEdge(1)
+                .setMxGeometry(linkGeom);
+        root.addMxCell(linkCell);
+        root.addMxCell(createLabelCell(np.getInverse(), linkCell, false));
+        if (np.getInverse() != np) {
             root.addMxCell(createLabelCell(np, linkCell, true));
         }
     }
