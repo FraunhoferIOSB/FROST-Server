@@ -66,15 +66,9 @@
               },
               "wrapper": {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
-                "joins": [
-                  {
-                    "targetTable": "USERS",
-                    "targetAlias": "u",
-                    "joinOnSql": "t.\"USER_NAME\" \u003d u.\"USER_NAME\" and u.\"USER_NAME\" \u003d ?",
-                    "usernameParameter": true,
-                    "groupSetParameter": false
-                  }
-                ]
+                "joins": [],
+                "where": "t.\"USER_NAME\" \u003d ?",
+                "usernameParameter": true
               }
             }
           ]

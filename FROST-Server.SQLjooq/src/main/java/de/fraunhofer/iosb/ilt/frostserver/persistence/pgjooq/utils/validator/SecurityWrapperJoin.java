@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.USER_NAME_ANONYMOUS;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
@@ -28,6 +26,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
 import java.util.List;
@@ -84,10 +83,25 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     }
 
     @ConfigurableField(editor = EditorList.class,
-            label = "Joins", description = "The list of joins to apply.")
+            label = "Joins", description = "The list of joins to apply. The main table is aliassed to 't'.")
     @EditorList.EdOptsList(editor = EditorClass.class)
     @EditorClass.EdOptsClass(clazz = TableJoin.class)
     private List<TableJoin> joins;
+
+    @ConfigurableField(editor = EditorString.class, optional = true,
+            label = "Where", description = "A final where for the query. The main table is aliassed to 't'.")
+    @EditorString.EdOptsString()
+    private String where;
+
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "Username", description = "Flag indicating there is a parameter ? in the SQL that should be replaced with the principal.")
+    @EditorBoolean.EdOptsBool()
+    private boolean usernameParameter;
+
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "Groups", description = "Flag indicating there is a parameter ? in the SQL that should be replaces with the group-set.")
+    @EditorBoolean.EdOptsBool()
+    private boolean groupSetParameter;
 
     @Override
     public Table wrap(StaMainTable table) {
@@ -97,35 +111,60 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
         for (TableJoin join : joins) {
             SQL joinPart;
             if (join.usernameParameter) {
-                final String name;
-                if (principal == null) {
-                    name = USER_NAME_ANONYMOUS;
-                } else {
-                    name = principal.getName();
-                }
-                joinPart = DSL.sql(join.joinOnSql, name);
+                joinPart = DSL.sql(join.joinOnSql, principal.getName());
             } else if (join.groupSetParameter) {
                 final String[] groups;
-                if (principal == null) {
-                    groups = new String[]{USER_NAME_ANONYMOUS};
-                } else {
-                    groups = ((PrincipalExtended) principal).getRoles().toArray(String[]::new);
-                }
+                groups = ((PrincipalExtended) principal).getRoles().toArray(String[]::new);
                 joinPart = DSL.sql(join.joinOnSql, (Object) groups);
             } else {
                 joinPart = DSL.sql(join.joinOnSql);
             }
             current = current.join(join.getTargetTable()).on(joinPart);
         }
+        if (!StringHelper.isNullOrEmpty(where)) {
+            if (usernameParameter) {
+                return current.where(where, principal.getName()).asTable();
+            }
+            return current.where(where).asTable();
+        }
         return current.asTable();
+
     }
 
     public List<TableJoin> getJoins() {
         return joins;
     }
 
-    public void setJoins(List<TableJoin> joins) {
+    public SecurityWrapperJoin setJoins(List<TableJoin> joins) {
         this.joins = joins;
+        return this;
+    }
+
+    public String getWhere() {
+        return where;
+    }
+
+    public SecurityWrapperJoin setWhere(String where) {
+        this.where = where;
+        return this;
+    }
+
+    public boolean isUsernameParameter() {
+        return usernameParameter;
+    }
+
+    public SecurityWrapperJoin setUsernameParameter(boolean usernameParameter) {
+        this.usernameParameter = usernameParameter;
+        return this;
+    }
+
+    public boolean isGroupSetParameter() {
+        return groupSetParameter;
+    }
+
+    public SecurityWrapperJoin setGroupSetParameter(boolean groupSetParameter) {
+        this.groupSetParameter = groupSetParameter;
+        return this;
     }
 
 }

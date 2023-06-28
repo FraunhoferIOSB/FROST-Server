@@ -171,7 +171,7 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
     Client has to provide @iot.id to create entities.
 * **persistence.idGenerationMode.<EntityTypeName>:** Since 2.2.0  
   Determines how entity ids are generated for this Entity Type. This overrides **persistence.idGenerationMode**.
-* **persistence.transactionRole:**
+* **persistence.transactionRole:**  
   If true, [SET LOCAL ROLE](https://www.postgresql.org/docs/current/sql-set-role.html)
   is used for each query and set as HTTP user name or `anonymous` for anonymous HTTP users,
   to be used typically with [Row-Level Security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html).
