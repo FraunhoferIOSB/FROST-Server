@@ -120,7 +120,7 @@
 
         <version.maven.plugin.assembly>3.6.0</version.maven.plugin.assembly>
         <version.maven.plugin.compiler>3.11.0</version.maven.plugin.compiler>
-        <version.maven.plugin.dependency>3.5.0</version.maven.plugin.dependency>
+        <version.maven.plugin.dependency>3.6.0</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>8.3.1</version.maven.plugin.dependency-check>
         <version.maven.plugin.git-commit-id>6.0.0</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.0.1</version.maven.plugin.gpg>
@@ -129,11 +129,13 @@
         <version.maven.plugin.javadoc>3.5.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
+        <version.maven.plugin.shade>3.4.1</version.maven.plugin.shade>
         <version.maven.plugin.source>3.2.1</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.37.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.1.2</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
 
+        <version.openjfx>19.0.2.1</version.openjfx>
         <version.org.json>20230618</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
@@ -321,6 +323,34 @@
                 <version>${version.liquibase}</version>
             </dependency>
             <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>${version.openjfx}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-fxml</artifactId>
+                <version>${version.openjfx}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-graphics</artifactId>
+                <version>${version.openjfx}</version>
+                <classifier>win</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-graphics</artifactId>
+                <version>${version.openjfx}</version>
+                <classifier>linux</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-graphics</artifactId>
+                <version>${version.openjfx}</version>
+                <classifier>mac</classifier>
+            </dependency>
+            <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${version.postgres}</version>
@@ -375,6 +405,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${version.maven.plugin.dependency}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${version.maven.plugin.shade}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>

@@ -19,8 +19,6 @@
         <docker-image-name>fraunhoferiosb/frost-importer</docker-image-name>
         <mainClass>de.fraunhofer.iosb.ilt.frostserver.modelextractor.MainApp</mainClass>
 
-        <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-        <openjfx.version>19.0.2.1</openjfx.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <root.basedir>${project.parent.parent.basedir}</root.basedir>
     </properties>
@@ -87,12 +85,25 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${openjfx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <classifier>mac</classifier>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -109,7 +120,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
