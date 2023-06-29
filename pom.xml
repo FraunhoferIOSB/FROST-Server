@@ -133,7 +133,7 @@
         <version.maven.plugin.source>3.2.1</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.37.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.1.2</version.maven.plugin.surefire>
-        <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
+        <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
         <version.openjfx>19.0.2.1</version.openjfx>
         <version.org.json>20230618</version.org.json>
