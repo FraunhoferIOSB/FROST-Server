@@ -200,7 +200,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
             for (Entity t : linkedSet) {
                 if (forInsert) {
                     entityFactories.entityExistsOrCreate(pm, t);
-                } else if (!entityFactories.entityExists(pm, t)) {
+                } else if (!entityFactories.entityExists(pm, t, true)) {
                     throw new NoSuchEntityException("Thing not found.");
                 }
 

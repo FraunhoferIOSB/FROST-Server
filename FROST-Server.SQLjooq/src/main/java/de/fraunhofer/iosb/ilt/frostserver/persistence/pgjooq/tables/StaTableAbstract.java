@@ -54,6 +54,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -345,7 +346,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
-                if (!entityFactories.entityExists(pm, ne)) {
+                if (!entityFactories.entityExists(pm, ne, PrincipalExtended.getLocalPrincipal().isAdmin())) {
                     throw new NoSuchEntityException("Linked " + ne.getEntityType() + " not found.");
                 }
                 PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);

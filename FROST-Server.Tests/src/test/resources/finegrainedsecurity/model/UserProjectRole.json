@@ -9,9 +9,9 @@
       "table": "USER_PROJECT_ROLE",
       "entityProperties": [
         {
-          "name": "@iot.id",
+          "name": "id",
           "aliases": [
-            "id"
+            "@iot.id"
           ],
           "type": "Id",
           "handlers": [

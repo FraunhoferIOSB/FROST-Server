@@ -154,7 +154,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
 
             // Link new locations to Thing.
             for (Entity l : histLoc.getProperty(pluginCoreModel.npLocationsHistLoc)) {
-                if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
+                if (l.getId() == null || !entityFactories.entityExists(pm, l, true)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
                 Object locationId = l.getId().getValue();

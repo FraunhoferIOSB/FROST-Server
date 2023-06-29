@@ -164,7 +164,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         EntityFactories entityFactories = pm.getEntityFactories();
         if (forInsert) {
             entityFactories.entityExistsOrCreate(pm, target);
-        } else if (!entityFactories.entityExists(pm, target)) {
+        } else if (!entityFactories.entityExists(pm, target, true)) {
             throw new NoSuchEntityException("Linked Entity with no id.");
         }
         link(pm, source.getId().getValue(), target.getId().getValue());

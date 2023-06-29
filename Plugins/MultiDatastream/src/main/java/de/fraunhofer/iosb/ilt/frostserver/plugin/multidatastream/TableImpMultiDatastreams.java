@@ -53,6 +53,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.util.List;
 import net.time4j.Moment;
@@ -458,7 +459,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 // MultiDatastream explicitly set to null, to remove old value.
                 return false;
             } else {
-                if (!pm.getEntityFactories().entityExists(pm, mds)) {
+                final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+                if (!pm.getEntityFactories().entityExists(pm, mds, userIsAdmin)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 return true;
@@ -475,7 +477,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 // MultiDatastream explicitly set to null, to remove old value.
                 return false;
             } else {
-                if (!pm.getEntityFactories().entityExists(pm, ds)) {
+                final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+                if (!pm.getEntityFactories().entityExists(pm, ds, userIsAdmin)) {
                     throw new IncompleteEntityException("Datastream not found.");
                 }
                 return true;

@@ -222,7 +222,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
                 Id id = entityPathElement.getId();
                 if (id != null) {
                     idCount++;
-                    if (!getEntityFactories().entityExists(this, entityPathElement.getEntityType(), id)) {
+                    final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+                    if (!entityFactories.entityExists(this, entityPathElement.getEntityType(), id, userIsAdmin)) {
                         return false;
                     }
                 }
@@ -325,7 +326,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         final EntityFactories ef = getEntityFactories();
         final Id id = pathElement.getId();
         entity.setId(id);
-        if (!ef.entityExists(this, entity)) {
+        final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        if (!ef.entityExists(this, entity, userIsAdmin)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
@@ -390,14 +392,15 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (inverse != null && !inverse.isEntitySet() && inverse.isRequired()) {
             throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
         }
-        StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
-        Relation<?> relation = sourceTable.findRelation(np.getName());
-        Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getId());
-        if (!entityFactories.entityExists(this, sourceEntity)) {
+        final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        final Relation<?> relation = sourceTable.findRelation(np.getName());
+        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getId());
+        if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getId() + ")");
         }
-        Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getId());
-        if (!entityFactories.entityExists(this, targetEntity)) {
+        final Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getId());
+        if (!entityFactories.entityExists(this, targetEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getId() + ")");
         }
         relation.unLink(this, sourceEntity, targetEntity, np);

@@ -77,6 +77,69 @@
               }
             ]
           }
+        },
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperMulti",
+          "wrappers": [
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "read"
+                ]
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"
+              }
+            },
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckFixed",
+                "valid": true
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
+                "joins": [
+                  {
+                    "targetTable": "THINGS",
+                    "targetAlias": "th",
+                    "joinOnSql": "t.\"THING_ID\" \u003d th.\"ID\"",
+                    "usernameParameter": false,
+                    "groupSetParameter": false
+                  },
+                  {
+                    "targetTable": "THING_PROJECTS",
+                    "targetAlias": "tp",
+                    "joinOnSql": "th.\"ID\" \u003d tp.\"THING_ID\"",
+                    "usernameParameter": false,
+                    "groupSetParameter": false
+                  },
+                  {
+                    "targetTable": "PROJECTS",
+                    "targetAlias": "pr",
+                    "joinOnSql": "tp.\"PROJECT_ID\" \u003d pr.\"ID\"",
+                    "usernameParameter": false,
+                    "groupSetParameter": false
+                  },
+                  {
+                    "targetTable": "USER_PROJECT_ROLE",
+                    "targetAlias": "upr",
+                    "joinOnSql": "pr.\"ID\" \u003d upr.\"PROJECT_ID\"",
+                    "usernameParameter": false,
+                    "groupSetParameter": false
+                  },
+                  {
+                    "targetTable": "USERS",
+                    "targetAlias": "u",
+                    "joinOnSql": "upr.\"USER_NAME\" \u003d u.\"USER_NAME\" and u.\"USER_NAME\" \u003d ?",
+                    "usernameParameter": true,
+                    "groupSetParameter": false
+                  }
+                ]
+              }
+            }
+          ]
         }
       ]
     }

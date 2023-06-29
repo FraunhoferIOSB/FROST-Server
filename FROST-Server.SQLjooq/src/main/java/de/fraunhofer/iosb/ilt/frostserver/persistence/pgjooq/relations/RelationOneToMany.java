@@ -116,7 +116,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
         EntityFactories entityFactories = pm.getEntityFactories();
-        if (entityFactories.entityExists(pm, target)) {
+        if (entityFactories.entityExists(pm, target, true)) {
             link(pm, source.getId().getValue(), target.getId().getValue());
         } else if (forInsert) {
             NavigationPropertyMain backLink = navProp.getInverse();

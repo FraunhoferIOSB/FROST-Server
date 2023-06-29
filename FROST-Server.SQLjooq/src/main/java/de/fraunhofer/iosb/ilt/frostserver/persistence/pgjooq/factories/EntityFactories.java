@@ -136,7 +136,7 @@ public class EntityFactories {
             return;
         }
 
-        if (entityExists(pm, e)) {
+        if (entityExists(pm, e, true)) {
             return;
         }
 
@@ -152,9 +152,12 @@ public class EntityFactories {
         pm.insert(e);
     }
 
-    public boolean entityExists(PostgresPersistenceManager pm, EntityType type, Id entityId) {
+    public boolean entityExists(PostgresPersistenceManager pm, EntityType type, Id entityId, boolean admin) {
         Object id = entityId.getValue();
         StaMainTable<?> table = tableCollection.getTableForType(type);
+        if (!admin) {
+            table = table.asSecure("t");
+        }
 
         DSLContext dslContext = pm.getDslContext();
 
@@ -171,11 +174,11 @@ public class EntityFactories {
 
     }
 
-    public boolean entityExists(PostgresPersistenceManager pm, Entity e) {
+    public boolean entityExists(PostgresPersistenceManager pm, Entity e, boolean admin) {
         if (e == null || e.getId() == null) {
             return false;
         }
-        return entityExists(pm, e.getEntityType(), e.getId());
+        return entityExists(pm, e.getEntityType(), e.getId(), admin);
     }
 
     public static void insertTimeValue(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeValue time) {

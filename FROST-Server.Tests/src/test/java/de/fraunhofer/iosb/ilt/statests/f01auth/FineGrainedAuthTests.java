@@ -49,16 +49,21 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -75,6 +80,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private final int H401 = HTTP_CODE_401_UNAUTHORIZED;
     private final int H403 = HTTP_CODE_403_FORBIDDEN;
+    private final int H404 = HTTP_CODE_404_NOT_FOUND;
     /**
      * The logger for this class.
      */
@@ -474,9 +480,9 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         updateForFail(READ, serviceRead, creator, original, H403);
         updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
-        updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H403);
+        updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H404);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
-        updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
+        updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H404);
         updateForOk(WRITE, serviceWrite, creator, mdlSensing.npDatastreamThing);
         updateForOk(ADMIN, serviceAdmin, reset, mdlSensing.npDatastreamThing);
     }
@@ -509,6 +515,36 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
+    void test_08c_DatastreamFromObservationRead() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("  test_08c_DatastreamFromObservationRead");
+
+        URL link = serviceAdmin.getFullPath(OBSERVATIONS.get(0), mdlSensing.npObservationDatastream);
+        fetchForCode(ADMIN, serviceAdmin, link, 200);
+        fetchForCode(WRITE, serviceWrite, link, 200);
+        fetchForCode(READ, serviceRead, link, 200);
+        fetchForCode(ANONYMOUS, serviceAnon, link, 401);
+        fetchForCode(ADMIN_P1, serviceAdminProject1, link, 200);
+        fetchForCode(ADMIN_P2, serviceAdminProject2, link, 404);
+        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, 200);
+        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, 404);
+    }
+
+    @Test
+    void test_08d_ObservationsFromDatastreamRead() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("  test_08d_ObservationsFromDatastreamRead");
+
+        URL link = serviceAdmin.getFullPath(DATASTREAMS.get(0), mdlSensing.npDatastreamObservations);
+        fetchForCode(ADMIN, serviceAdmin, link, 200);
+        fetchForCode(WRITE, serviceWrite, link, 200);
+        fetchForCode(READ, serviceRead, link, 200);
+        fetchForCode(ANONYMOUS, serviceAnon, link, 401);
+        fetchForCode(ADMIN_P1, serviceAdminProject1, link, 200);
+        fetchForCode(ADMIN_P2, serviceAdminProject2, link, 404);
+        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, 200);
+        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, 404);
+    }
+
+    @Test
     void test_09_ObservedPropertyCreate() {
         LOGGER.info("  test_09_ObservedPropertyCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
@@ -534,6 +570,21 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         deleteForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+    }
+
+    private void fetchForCode(String user, SensorThingsService service, URL link, int... codesWant) throws URISyntaxException {
+        HttpGet get = new HttpGet(link.toURI());
+        try (CloseableHttpResponse response = service.getHttpClient().execute(get)) {
+            int codeGot = response.getStatusLine().getStatusCode();
+            for (int codeWant : codesWant) {
+                if (codeWant == codeGot) {
+                    return;
+                }
+            }
+            Assertions.fail("Expected one of " + Arrays.toString(codesWant) + " but got " + codeGot + " when " + user + " fetched " + link);
+        } catch (IOException ex) {
+            Assertions.fail(ex);
+        }
     }
 
     private void createForOk(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList) {

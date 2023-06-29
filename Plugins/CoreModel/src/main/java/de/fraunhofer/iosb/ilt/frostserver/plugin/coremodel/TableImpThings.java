@@ -156,7 +156,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
             for (Entity l : linkedSet) {
                 if (forInsert) {
                     entityFactories.entityExistsOrCreate(pm, l);
-                } else if (!entityFactories.entityExists(pm, l)) {
+                } else if (!entityFactories.entityExists(pm, l, true)) {
                     throw new NoSuchEntityException("Linked Location with no id.");
                 }
                 Object lId = l.getId().getValue();
