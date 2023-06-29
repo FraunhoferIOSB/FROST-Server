@@ -38,7 +38,7 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
     @ConfigurableField(editor = EditorEnum.class,
             label = "Check Type", description = "Should the user be in ANY of the listed groups, or in ALL of the groups.")
     @EditorEnum.EdOptsEnum(sourceType = Type.class, dflt = "ANY")
-    private Type vheckType;
+    private Type checkType;
 
     @ConfigurableField(editor = EditorList.class,
             label = "Groups", description = "The groups to check the user's groups against.")
@@ -54,7 +54,7 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
     @Override
     public boolean isValid() {
         final Set<String> userRoles = PrincipalExtended.getLocalPrincipal().getRoles();
-        if (getVheckType() == Type.ANY) {
+        if (getCheckType() == Type.ANY) {
             for (String checkRole : getRoles()) {
                 if (userRoles.contains(checkRole)) {
                     return true;
@@ -66,12 +66,12 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
         }
     }
 
-    public Type getVheckType() {
-        return vheckType;
+    public Type getCheckType() {
+        return checkType;
     }
 
-    public CheckUserHasRoles setVheckType(Type vheckType) {
-        this.vheckType = vheckType;
+    public CheckUserHasRoles setCheckType(Type vheckType) {
+        this.checkType = vheckType;
         return this;
     }
 
@@ -86,7 +86,7 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
     @Override
     public String toString() {
-        return "CheckUserHasRoles: " + vheckType + " " + Arrays.toString(roles.toArray());
+        return "CheckUserHasRoles: " + checkType + " " + Arrays.toString(roles.toArray());
     }
 
 }

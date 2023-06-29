@@ -7,14 +7,14 @@
           "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",
           "checkInsertPreRel": {
             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
-            "vheckType": "ANY",
+            "checkType": "ANY",
             "roles": [
               "admin"
             ]
           },
           "checkInsert": {
             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
-            "vheckType": "ANY",
+            "checkType": "ANY",
             "roles": [
               "admin"
             ]
@@ -25,7 +25,7 @@
             "subChecks": [
               {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
-                "vheckType": "ANY",
+                "checkType": "ANY",
                 "roles": [
                   "admin"
                 ]
@@ -38,7 +38,7 @@
           },
           "checkDelete": {
             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
-            "vheckType": "ANY",
+            "checkType": "ANY",
             "roles": [
               "admin"
             ]
@@ -50,7 +50,7 @@
             {
               "condition": {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
-                "vheckType": "ANY",
+                "checkType": "ANY",
                 "roles": [
                   "admin"
                 ]
