@@ -41,7 +41,7 @@
         <FROST-Client.version>0.44</FROST-Client.version>
         <git-commit-id-plugin.version>6.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
-        <guava.version>32.0.1-jre</guava.version>
+        <guava.version>32.1.0-jre</guava.version>
         <httpclient.version>4.5.14</httpclient.version>
         <dbcp2.version>2.9.0</dbcp2.version>
         <jackson.version>2.15.2</jackson.version>
