@@ -39,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -261,7 +260,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
-                    result.append(ppm.checkForUpgrades(liquibasePath + File.separatorChar + file, createLiqibaseParams(ppm, null)));
+                    final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
+                    liquibaseParams.put("searchPath", liquibasePath);
+                    result.append(ppm.checkForUpgrades(file, liquibaseParams));
                 }
                 return result.toString();
             } else {
@@ -276,7 +277,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             if (pm instanceof PostgresPersistenceManager) {
                 PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
                 for (String file : liquibaseFiles) {
-                    if (!ppm.doUpgrades(liquibasePath + File.separatorChar + file, createLiqibaseParams(ppm, null), out)) {
+                    final Map<String, Object> liquibaseParams = createLiqibaseParams(ppm, null);
+                    liquibaseParams.put("searchPath", liquibasePath);
+                    if (!ppm.doUpgrades(file, liquibaseParams, out)) {
                         return false;
                     }
                 }

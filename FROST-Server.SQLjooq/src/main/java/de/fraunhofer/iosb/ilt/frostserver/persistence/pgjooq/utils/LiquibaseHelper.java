@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -34,6 +35,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.SearchPathResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +75,10 @@ public class LiquibaseHelper {
     }
 
     private static void runLiquibaseCheck(String liquibaseChangelogFilename, Map<String, Object> params, Database database, StringWriter out) {
-        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
+        final String searchPath = Objects.toString(params.get("searchPath"), null);
+        final ResourceAccessor resourceAccessor = new SearchPathResourceAccessor(searchPath)
+                .addResourceAccessor(new ClassLoaderResourceAccessor());
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
@@ -86,15 +92,18 @@ public class LiquibaseHelper {
 
     private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Map<String, Object> params, Connection connection, Writer out) throws UpgradeFailedException, IOException, DatabaseException {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
-            String searchPath = getSearchPath(connection);
+        final String liquibaseSearchPath = Objects.toString(params.get("searchPath"), null);
+        final ResourceAccessor resourceAccessor = new SearchPathResourceAccessor(liquibaseSearchPath)
+                .addResourceAccessor(new ClassLoaderResourceAccessor());
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
+            String dbSearchPath = getSearchPath(connection);
 
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
             liquibase.update(new Contexts());
 
-            setSearchPath(connection, searchPath);
+            setSearchPath(connection, dbSearchPath);
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
             throw new UpgradeFailedException(ex);
