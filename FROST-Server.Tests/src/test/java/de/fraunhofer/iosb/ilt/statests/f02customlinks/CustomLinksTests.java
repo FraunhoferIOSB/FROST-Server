@@ -20,12 +20,16 @@ package de.fraunhofer.iosb.ilt.statests.f02customlinks;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_ID;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_EXTENSION;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -64,7 +68,11 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     private static final Properties SERVER_PROPERTIES = new Properties();
 
     static {
-        SERVER_PROPERTIES.put(CoreSettings.PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_ENABLE, "true");
+        SERVER_PROPERTIES.put(CoreSettings.TAG_ALWAYS_ORDERBY_ID, "false");
+        SERVER_PROPERTIES.put(PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_ENABLE, "true");
+        SERVER_PROPERTIES.put(PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, "1");
+        SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_THING, VALUE_ID_TYPE_LONG);
+        SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VALUE_ID_TYPE_LONG);
     }
 
     public CustomLinksTests(ServerVersion version) {
@@ -108,6 +116,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     private static void createThings() throws ServiceFailureException {
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
         Map<String, Object> properties = new HashMap<>();
+        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0]);
         thing1.setProperty(EP_PROPERTIES, properties);
         thing1.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(0));
         sSrvc.create(thing1);
@@ -125,6 +134,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
         properties = new HashMap<>();
         properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
+        properties.put("alternate.Location@iot.id", -1);
         thing3.setProperty(EP_PROPERTIES, properties);
         thing3.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(2));
         sSrvc.create(thing3);
@@ -179,8 +189,8 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Test
-    void testCustomLinks2() throws ServiceFailureException {
-        LOGGER.info("  testCustomLinks2");
+    void testCustomLinksExpand() throws ServiceFailureException {
+        LOGGER.info("  testCustomLinksExpand");
         Entity thing = sSrvc.dao(sMdl.etThing)
                 .query()
                 .filter("id eq " + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues()[0]))
@@ -202,12 +212,12 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Test
-    void testCustomLinks3() throws ServiceFailureException {
-        LOGGER.info("  testCustomLinks3");
+    void testCustomLinksExpandSelect() throws ServiceFailureException {
+        LOGGER.info("  testCustomLinksExpandSelect");
         Entity thing = sSrvc.dao(sMdl.etThing)
                 .query()
                 .filter("id eq " + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues()[0]))
-                .expand("properties/parent.Thing($select=id),properties/alternate.Location")
+                .expand("properties/parent.Thing($select=id),properties/alternate.Location($select=name)")
                 .first();
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
@@ -222,7 +232,20 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         Map<String, Object> properties = (Map<String, Object>) parent;
         assertFalse(properties.containsKey("name"), "Name should not have been expanded.");
         assertEquals(THINGS.get(0).getProperty(EP_ID), properties.get("@iot.id"), "id not correctly expanded.");
+    }
 
+    @Test
+    void testCustomLinksExpandSelect2() throws ServiceFailureException {
+        LOGGER.info("  testCustomLinksExpandSelect2");
+        List<Entity> things = sSrvc.dao(sMdl.etThing)
+                .query()
+                .expand("properties/alternate.Location($select=name)")
+                .orderBy("id asc")
+                .list()
+                .toList();
+        String expected = LOCATIONS.get(0).getProperty(EP_NAME);
+        Map<String, Object> alternateLocation = (Map<String, Object>) things.get(0).getProperty(EP_PROPERTIES).get("alternate.Location");
+        assertEquals(expected, alternateLocation.get("name"), "Expanded custom Location does not have correct name.");
     }
 
 }

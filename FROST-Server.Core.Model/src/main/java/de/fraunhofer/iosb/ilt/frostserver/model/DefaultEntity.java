@@ -246,7 +246,10 @@ public class DefaultEntity implements Entity {
         if (query == null) {
             return true;
         }
-        return !(query.getSelect().size() == 1 && query.getSelect().contains(entityType.getPrimaryKey()));
+        if (query.getSelect().size() == 1) {
+            return !isSetProperty(query.getSelect().iterator().next());
+        }
+        return true;
     }
 
     @Override
