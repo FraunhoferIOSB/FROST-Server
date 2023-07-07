@@ -84,6 +84,10 @@ public class AuthTestHelper {
     public void createForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {
         try {
             service.create(entity);
+        } catch (StatusCodeException ex) {
+            String failMessage = "User " + user + " should be able to create " + entity.getEntityType() + ". Response:\n" + ex.getReturnedContent();
+            LOGGER.error(failMessage, ex);
+            fail(failMessage);
         } catch (ServiceFailureException ex) {
             String failMessage = "User " + user + " should be able to create " + entity.getEntityType();
             LOGGER.error(failMessage, ex);

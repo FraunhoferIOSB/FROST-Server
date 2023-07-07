@@ -18,10 +18,20 @@
                 ]
               },
               {
-                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
-                "targetNavLink": "Thing",
-                "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and (Projects/UserProjectRoles/Role/rolename eq \u0027create\u0027 or Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)",
-                "emptyAllowed": false
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+                "combineType": "AND",
+                "subChecks": [
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                    "targetNavLink": "Thing",
+                    "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and (Projects/UserProjectRoles/Role/rolename eq \u0027create\u0027 or Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)",
+                    "emptyAllowed": false
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkEmpty",
+                    "targetNavLink": "Observations"
+                  }
+                ]
               }
             ]
           },

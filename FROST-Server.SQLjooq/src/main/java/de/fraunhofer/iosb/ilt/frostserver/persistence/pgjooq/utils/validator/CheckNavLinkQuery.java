@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -84,9 +85,10 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     LOGGER.debug("  Check on {}.{} (empty): {}", entityType, targetNp, isEmptyAllowed());
                     return isEmptyAllowed();
                 }
-                final Entity result = pm.get(targetType, targetEntity.getId(), parsedQuery);
+                final Id targetId = targetEntity.getId();
+                final Entity result = pm.get(targetType, targetId, parsedQuery);
                 final boolean valid = result != null;
-                LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
+                LOGGER.debug("  Check on {}.{}({}): {}", entityType, targetNp, targetId, valid);
                 return valid;
             }
             if (targetNp instanceof NavigationPropertyMain.NavigationPropertyEntitySet targetNpEntitySet) {
@@ -96,10 +98,15 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     return isEmptyAllowed();
                 }
                 for (Entity te : targetEntities) {
-                    Entity result = pm.get(targetType, te.getId(), parsedQuery);
-                    if (result == null) {
-                        LOGGER.debug("  Check on {}.{}({}): false", entityType, targetNp, te.getId());
-                        return false;
+                    final Id targetId = te.getId();
+                    if (targetId == null) {
+                        // Entity does not exist yet. Will be checked wen it is created.
+                    } else {
+                        Entity result = pm.get(targetType, targetId, parsedQuery);
+                        if (result == null) {
+                            LOGGER.debug("  Check on {}.{}({}): false", entityType, targetNp, targetId);
+                            return false;
+                        }
                     }
                 }
                 LOGGER.debug("  Checks ({}) on {}.{}: true", targetEntities.size(), entityType, targetNp);
@@ -112,16 +119,21 @@ public class CheckNavLinkQuery implements ValidationCheck {
     }
 
     private void init(Entity contextEntity, PostgresPersistenceManager pm) {
-        entityType = contextEntity.getEntityType();
-        targetNp = entityType.getNavigationProperty(getTargetNavLink());
-        targetType = targetNp.getEntityType();
-        final CoreSettings coreSettings = pm.getCoreSettings();
-        final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + targetType.plural).addPathElement(new PathElementEntitySet(targetType));
-        context = new DynamicContext();
-        parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                .validate(targetType);
-        LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
+        try {
+            entityType = contextEntity.getEntityType();
+            targetNp = entityType.getNavigationProperty(getTargetNavLink());
+            targetType = targetNp.getEntityType();
+            final CoreSettings coreSettings = pm.getCoreSettings();
+            final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
+            path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + targetType.plural).addPathElement(new PathElementEntitySet(targetType));
+            context = new DynamicContext();
+            parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+                    .validate(targetType);
+            LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
+        } catch (RuntimeException ex) {
+            LOGGER.error("Failed to initialise check.", ex);
+            throw new IllegalStateException("Failed to initialise Check Query.");
+        }
     }
 
     public String getTargetNavLink() {

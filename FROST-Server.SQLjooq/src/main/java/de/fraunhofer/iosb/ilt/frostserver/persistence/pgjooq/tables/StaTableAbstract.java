@@ -298,6 +298,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         // Seventh, deal with set-navigation links.
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
+                LOGGER.debug("  Linking {}", np);
                 updateNavigationPropertySet(entity, entity.getProperty(np), pm, true);
             }
         }

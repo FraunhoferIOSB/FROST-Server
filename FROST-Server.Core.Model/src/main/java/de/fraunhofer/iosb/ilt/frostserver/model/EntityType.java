@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,19 +94,19 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     /**
      * The set of Entity properties.
      */
-    private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
+    private final Set<EntityPropertyMain> entityProperties = new TreeSet<>();
     /**
      * The set of Navigation properties.
      */
-    private final Set<NavigationPropertyMain> navigationProperties = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain> navigationProperties = new TreeSet<>();
     /**
      * The set of Navigation properties pointing to single entities.
      */
-    private final Set<NavigationPropertyMain<Entity>> navigationEntities = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<Entity>> navigationEntities = new TreeSet<>();
     /**
      * The set of Navigation properties pointing to entity sets.
      */
-    private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new TreeSet<>();
     /**
      * The map of NavigationProperties by their target EntityTypes.
      */

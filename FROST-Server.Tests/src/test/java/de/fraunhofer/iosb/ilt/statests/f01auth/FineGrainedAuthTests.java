@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
@@ -458,6 +459,26 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         LOGGER.info("  test_06b_ThingCreateForProject1");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
+
+        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
+    }
+
+    @Test
+    void test_06c_ThingCreateForProject1WithDatastream() {
+        LOGGER.info("  test_06c_ThingCreateForProject1WithDatastream");
+        EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
+                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk())
+                .addNavigationEntity(
+                        mdlSensing.npThingDatastreams,
+                        mdlSensing.newDatastream("DeepInsertDs", "Ds created by deep insert", new UnitOfMeasurement("%", "%", "%"))
+                                .setProperty(mdlSensing.npDatastreamSensor, SENSORS.get(0).withOnlyPk())
+                                .setProperty(mdlSensing.npDatastreamObservedproperty, O_PROPS.get(0).withOnlyPk()));
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);

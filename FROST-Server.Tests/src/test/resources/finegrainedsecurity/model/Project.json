@@ -67,6 +67,7 @@
             "name": "Projects",
             "entitySet": true,
             "required": false,
+            "priority": -10,
             "annotations": []
           },
           "handlers": [

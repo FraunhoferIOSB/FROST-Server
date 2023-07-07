@@ -157,8 +157,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     private EntityPropertyMain<?> epIdSensor;
     private EntityPropertyMain<?> epIdThing;
 
-    public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM, true);
-    public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
+    public final NavigationPropertyEntity npDatastreamObservation = new NavigationPropertyEntity(NAME_NP_DATASTREAM, true, -10);
+    public final NavigationPropertyEntitySet npDatastreamsThing = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS, 10);
     public final NavigationPropertyEntitySet npDatastreamsSensor = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
     public final NavigationPropertyEntitySet npDatastreamsObsProp = new NavigationPropertyEntitySet(NAME_NP_DATASTREAMS);
 

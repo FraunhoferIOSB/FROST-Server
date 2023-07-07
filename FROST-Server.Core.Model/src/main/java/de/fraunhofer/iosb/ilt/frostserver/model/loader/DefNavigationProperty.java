@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorInt;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
@@ -87,6 +88,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     private boolean symmetrical;
 
     /**
+     * The priority for ordering. For navigation properties this determines the
+     * order in which they are inserted.
+     */
+    @ConfigurableField(editor = EditorInt.class,
+            label = "Priority", description = "The priority for ordering.")
+    @EditorInt.EdOptsInt(min = -999, max = 999)
+    private int priority;
+
+    /**
      * The inverse of this relation.
      */
     @ConfigurableField(editor = EditorClass.class,
@@ -142,9 +152,9 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         }
 
         if (entitySet) {
-            navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name);
+            navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name, priority);
         } else {
-            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required);
+            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required, priority);
         }
         targetEntityType = modelRegistry.getEntityTypeForName(entityType, true);
         if (targetEntityType == null) {
@@ -170,9 +180,9 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
 
             if (navPropInverse == null) {
                 if (inverse.entitySet) {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp);
+                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp, inverse.priority);
                 } else {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.required);
+                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.required, inverse.priority);
                 }
                 navPropInverse.setEntityType(sourceEntityType);
                 navPropInverse.addAnnotations(inverse.annotations);
@@ -297,6 +307,26 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     public DefNavigationProperty addHandler(PropertyPersistenceMapper handler) {
         getHandlers().add(handler);
         return this;
+    }
+
+    /**
+     * The priority for ordering. For navigation properties this determines the
+     * order in which they are inserted.
+     *
+     * @return the priority
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * The priority for ordering. For navigation properties this determines the
+     * order in which they are inserted.
+     *
+     * @param priority the priority to set
+     */
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     /**
@@ -425,6 +455,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         private boolean required;
 
         /**
+         * The priority for ordering. For navigation properties this determines
+         * the order in which they are inserted.
+         */
+        @ConfigurableField(editor = EditorInt.class,
+                label = "Priority", description = "The priority for ordering.")
+        @EditorInt.EdOptsInt(min = -999, max = 999)
+        private int priority;
+
+        /**
          * The (OData)annotations for this Element.
          */
         @ConfigurableField(editor = EditorList.class,
@@ -491,6 +530,26 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         public Inverse setRequired(boolean required) {
             this.required = required;
             return this;
+        }
+
+        /**
+         * The priority for ordering. For navigation properties this determines
+         * the order in which they are inserted.
+         *
+         * @return the priority
+         */
+        public int getPriority() {
+            return priority;
+        }
+
+        /**
+         * The priority for ordering. For navigation properties this determines
+         * the order in which they are inserted.
+         *
+         * @param priority the priority to set
+         */
+        public void setPriority(int priority) {
+            this.priority = priority;
         }
 
         public List<Annotation> getAnnotations() {

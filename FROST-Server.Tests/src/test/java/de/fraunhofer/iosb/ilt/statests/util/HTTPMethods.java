@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -128,10 +129,21 @@ public class HTTPMethods {
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
-        if (connection.getInputStream().available() == 0) {
+        final InputStream is = connection.getInputStream();
+        if (is.available() == 0) {
             return "";
         }
-        try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.name())) {
+        try (Scanner scanner = new Scanner(is, StandardCharsets.UTF_8.name())) {
+            return scanner.useDelimiter("\\A").next();
+        }
+    }
+
+    private static String errorToString(HttpURLConnection connection) throws IOException {
+        final InputStream es = connection.getErrorStream();
+        if (es.available() == 0) {
+            return "";
+        }
+        try (Scanner scanner = new Scanner(es, StandardCharsets.UTF_8.name())) {
             return scanner.useDelimiter("\\A").next();
         }
     }
@@ -147,11 +159,7 @@ public class HTTPMethods {
      * created entity. Otherwise, it will be empty String.
      */
     public static HttpResponse doPost(String urlString, String postBody) {
-        HttpResponse response = doPost(urlString, postBody, CONTENT_TYPE_APPLICATION_JSON);
-        if (response != null && response.code != 201) {
-            response.setResponse("");
-        }
-        return response;
+        return doPost(urlString, postBody, CONTENT_TYPE_APPLICATION_JSON);
     }
 
     /**
@@ -188,17 +196,25 @@ public class HTTPMethods {
             }
 
             HttpResponse result = new HttpResponse(connection.getResponseCode());
-            if (connection.getResponseCode() == 201) {
-                String locationHeader = connection.getHeaderField("location");
-                if (locationHeader == null || locationHeader.isEmpty()) {
+            switch (connection.getResponseCode()) {
+                case 201:
+                    String locationHeader = connection.getHeaderField("location");
+                    if (locationHeader == null || locationHeader.isEmpty()) {
+                        result.setResponse(responseToString(connection));
+                    } else {
+                        result.setResponse(locationHeader);
+                    }
+                    break;
+                case 200:
                     result.setResponse(responseToString(connection));
-                } else {
-                    result.setResponse(locationHeader);
-                }
-            } else if (connection.getResponseCode() == 200) {
-                result.setResponse(responseToString(connection));
-            } else {
-                result.setResponse("");
+                    break;
+                case 400:
+                case 500:
+                    result.setResponse(errorToString(connection));
+                    break;
+                default:
+                    result.setResponse("");
+                    break;
             }
             return result;
         } catch (Exception e) {

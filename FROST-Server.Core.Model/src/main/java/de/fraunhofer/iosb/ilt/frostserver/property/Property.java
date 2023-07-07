@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import java.util.Comparator;
 
 /**
  *
@@ -64,7 +65,8 @@ public interface Property<P> extends Comparable<Property<?>> {
     public boolean isNullable();
 
     /**
-     * Flag indicating the property is system generated and can not be edited by the user.
+     * Flag indicating the property is system generated and can not be edited by
+     * the user.
      *
      * @return the readOnly flag.
      */
@@ -94,9 +96,26 @@ public interface Property<P> extends Comparable<Property<?>> {
      */
     public boolean isSetOn(Entity entity);
 
+    /**
+     * The priority used for ordering. Important when a property needs to be
+     * handled before another property.
+     *
+     * @return the priority of this Property.
+     */
+    public default int getPriority() {
+        return 0;
+    }
+
+    /**
+     * A comparator for comparing Property Objects.
+     */
+    public static final Comparator<Property> COMPARATOR = Comparator
+            .comparingInt((Property p) -> p.getPriority())
+            .thenComparing((Property p) -> p.getName());
+
     @Override
     public default int compareTo(Property o) {
-        return getName().compareTo(o.getName());
+        return COMPARATOR.compare(this, o);
     }
 
 }

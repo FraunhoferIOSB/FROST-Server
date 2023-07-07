@@ -44,24 +44,44 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
         public NavigationPropertyEntity(String propertyName, boolean required) {
-            super(propertyName, false, required, !required);
+            this(propertyName, null, required, 0);
+        }
+
+        public NavigationPropertyEntity(String propertyName, boolean required, int priority) {
+            this(propertyName, null, required, priority);
         }
 
         public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, boolean required) {
-            super(propertyName, false, required, !required);
-            setInverses(inverse);
+            this(propertyName, inverse, required, 0);
+        }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, boolean required, int priority) {
+            super(propertyName, false, required, !required, priority);
+            if (inverse != null) {
+                setInverses(inverse);
+            }
         }
     }
 
     public static class NavigationPropertyEntitySet extends NavigationPropertyMain<EntitySet> {
 
         public NavigationPropertyEntitySet(String propertyName) {
-            super(propertyName, true, false, true);
+            this(propertyName, null, 0);
+        }
+
+        public NavigationPropertyEntitySet(String propertyName, int priority) {
+            this(propertyName, null, priority);
         }
 
         public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse) {
-            super(propertyName, true, false, true);
-            setInverses(inverse);
+            this(propertyName, inverse, 0);
+        }
+
+        public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse, int priority) {
+            super(propertyName, true, false, true, priority);
+            if (inverse != null) {
+                setInverses(inverse);
+            }
         }
     }
 
@@ -81,12 +101,17 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
      * The (OData)annotations for this Navigation Property.
      */
     private final List<Annotation> annotations = new ArrayList<>();
+    /**
+     * The priority used for ordering.
+     */
+    private final int priority;
 
-    private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable) {
+    private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable, int priority) {
         super(propertyName, TypeComplex.STA_OBJECT, required, nullable, false);
         this.entitySet = isSet;
         this.required = required;
         this.nullable = nullable;
+        this.priority = priority;
     }
 
     public void setEntityType(EntityType entityType) {
@@ -179,6 +204,11 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     }
 
     @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
     public List<Annotation> getAnnotations() {
         return annotations;
     }
@@ -211,6 +241,11 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     @Override
     public int hashCode() {
         return Objects.hashCode(getName());
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
 }

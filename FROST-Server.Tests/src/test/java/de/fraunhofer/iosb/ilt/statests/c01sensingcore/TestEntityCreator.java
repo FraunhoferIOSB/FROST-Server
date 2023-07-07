@@ -66,9 +66,12 @@ public class TestEntityCreator {
     private static void createTestEntities(String rootUri, boolean actuation) {
         String urlParameters = getEntitiesJson();
         String urlString = ServiceUrlHelper.buildURLString(rootUri, EntityType.THING, null, null, null);
-        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
-        String response = responseMap.response;
-        Object id = HTTPMethods.idFromSelfLink(response);
+        HttpResponse response = HTTPMethods.doPost(urlString, urlParameters);
+        if (response.code != 201) {
+            LOGGER.error("Failed to create entities: {}, {}", response.code, response.response);
+        }
+        String data = response.response;
+        Object id = HTTPMethods.idFromSelfLink(data);
         if (actuation) {
             String postContent = getActuationJson();
             urlString = ServiceUrlHelper.buildURLString(rootUri, EntityType.THING, id, EntityType.TASKING_CAPABILITY, null);
