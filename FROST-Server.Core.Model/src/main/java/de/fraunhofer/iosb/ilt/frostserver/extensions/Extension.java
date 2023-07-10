@@ -40,7 +40,8 @@ public enum Extension {
     ENTITY_LINKING(
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
-            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter");
+            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"),
+    FILTERED_DELETES("https://fraunhoferiosb.github.io/FROST-Server/extensions/FilteredDelete.html");
 
     /**
      * Flag indicating the server feature should be exposed on the index page.

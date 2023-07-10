@@ -297,6 +297,9 @@ public class CoreSettings implements ConfigDefaults {
         if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
         }
+        if (isFilterDeleteEnabled()) {
+            enabledExtensions.add(Extension.FILTERED_DELETES);
+        }
     }
 
     /**
