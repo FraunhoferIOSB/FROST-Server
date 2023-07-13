@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.EntitySetJooqCurser;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
@@ -42,6 +43,7 @@ import org.jooq.impl.DSL;
  */
 public class QueryState<T extends StaMainTable<T>> {
 
+    private final PostgresPersistenceManager persistenceManager;
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
@@ -56,11 +58,16 @@ public class QueryState<T extends StaMainTable<T>> {
 
     private int aliasNr = 0;
 
-    public QueryState(T table, Set<PropertyFields<T>> sqlSelectFields) {
+    public QueryState(PostgresPersistenceManager pm, T table, Set<PropertyFields<T>> sqlSelectFields) {
+        this.persistenceManager = pm;
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         mainTable = table;
         sqlMainIdField = table.getId();
+    }
+
+    public PostgresPersistenceManager getPersistenceManager() {
+        return persistenceManager;
     }
 
     public T getMainTable() {

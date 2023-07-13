@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -35,18 +36,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A check that runs a stand-alone query.
  */
-public class CheckQuery implements ValidationCheck {
+public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CheckQuery.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckStandaloneQuery.class);
 
     @ConfigurableField(editor = EditorString.class,
-            label = "Query", description = "The Query runs against the entity being edited.")
+            label = "EntityType", description = "The EntityType to query.")
+    @EditorString.EdOptsString
+    private String entityTypeName;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Query", description = "The Query runs without direct context.")
     @EditorString.EdOptsString
     private String query;
 
@@ -57,26 +62,15 @@ public class CheckQuery implements ValidationCheck {
 
     @Override
     public boolean check(PostgresPersistenceManager pm, Entity contextEntity) {
-        if (parsedQuery == null) {
-            init(contextEntity, pm);
-        }
-        try {
-            context.setEntity(contextEntity);
-            context.setUser(PrincipalExtended.getLocalPrincipal());
-            final Entity result = pm.get(entityType, contextEntity.getId(), parsedQuery);
-            final boolean valid = result != null;
-            LOGGER.debug("  Check on {}: {}", entityType, valid);
-            return valid;
-        } finally {
-            context.clear();
-        }
+        return isValid(pm);
     }
 
-    private void init(Entity contextEntity, PostgresPersistenceManager pm) {
-        entityType = contextEntity.getEntityType();
+    private void init(PostgresPersistenceManager pm) {
+        entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
         final CoreSettings coreSettings = pm.getCoreSettings();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + entityType.plural).addPathElement(new PathElementEntitySet(entityType));
+        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + entityType.plural)
+                .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                 .validate(entityType);
@@ -91,9 +85,38 @@ public class CheckQuery implements ValidationCheck {
         this.query = query;
     }
 
+    public String getEntityTypeName() {
+        return entityTypeName;
+    }
+
+    public void setEntityTypeName(String entityTypeName) {
+        this.entityTypeName = entityTypeName;
+    }
+
     @Override
     public String toString() {
         return "CheckQuery: " + entityType + ": " + query;
+    }
+
+    @Override
+    public boolean isValid(PostgresPersistenceManager pm) {
+        if (parsedQuery == null) {
+            init(pm);
+        }
+        try {
+            final PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
+            context.setUser(userPrincipal);
+            // Run the Query as Admin user.
+            PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
+            EntitySet result = pm.get(path, parsedQuery, EntitySet.class);
+            // Restore the non-admin user as current user.
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
+            final boolean valid = result != null && !result.isEmpty();
+            LOGGER.debug("  Check on {}: {}", entityType, valid);
+            return valid;
+        } finally {
+            context.clear();
+        }
     }
 
 }

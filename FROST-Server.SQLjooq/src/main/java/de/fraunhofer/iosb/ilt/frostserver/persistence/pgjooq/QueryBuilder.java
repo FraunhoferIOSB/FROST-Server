@@ -462,8 +462,8 @@ public class QueryBuilder implements ResourcePathVisitor {
 
         TableRef result;
         if (last == null) {
-            StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX);
-            queryState = new QueryState(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
+            StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX, pm);
+            queryState = new QueryState(pm, tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = createJoinedRef(null, entityType, tableForType);
         } else {
             if (entityType.equals(last.getType()) && lastNavProp == null) {
@@ -516,7 +516,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     public TableRef queryEntityType(EntityType targetType, TableRef sourceRef, Field sourceIdField) {
         StaMainTable<?> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias());
+        StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
         Field<?> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);

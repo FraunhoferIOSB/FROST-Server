@@ -26,6 +26,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A check the consists of one or more sub-checks.
+ */
 public class CheckMulti implements ValidationCheck {
 
     public enum Type {

@@ -18,8 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -72,12 +74,12 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
     }
 
     @Override
-    public StaTableDynamic asSecure(String name) {
+    public StaTableDynamic asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new StaTableDynamic(DSL.name(name), this, wrappedTable, idFieldIdx).initCustomFields();
     }
 

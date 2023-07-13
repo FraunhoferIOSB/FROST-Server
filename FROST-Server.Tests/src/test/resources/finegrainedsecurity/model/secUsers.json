@@ -31,7 +31,7 @@
                 ]
               },
               {
-                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckQuery",
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
                 "query": "$filter\u003dusername eq principalName()"
               }
             ]
@@ -54,6 +54,16 @@
                 "roles": [
                   "admin"
                 ]
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"
+              }
+            },
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckStandaloneQuery",
+                "entityTypeName": "UserProjectRole",
+                "query": "$filter=User/username eq principalName() and Role/rolename eq 'admin'&$top=1"
               },
               "wrapper": {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"

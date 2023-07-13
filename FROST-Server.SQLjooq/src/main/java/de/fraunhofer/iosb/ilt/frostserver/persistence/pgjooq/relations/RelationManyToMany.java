@@ -148,7 +148,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     @Override
     public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
-        T targetAliased = (T) target.asSecure(queryState.getNextAlias());
+        T targetAliased = (T) target.asSecure(queryState.getNextAlias(), queryState.getPersistenceManager());
         Field<Object> sourceField = sourceFieldAcc.getField(source);
         Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
         Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);

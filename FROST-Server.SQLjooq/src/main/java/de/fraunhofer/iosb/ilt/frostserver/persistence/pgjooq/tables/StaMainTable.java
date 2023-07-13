@@ -59,9 +59,10 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * Return an aliased version of the table, with security joins active.
      *
      * @param name The alias to use.
+     * @param pm The PersistenceManager to use for any queries.
      * @return The secured, aliased table.
      */
-    public abstract StaMainTable<T> asSecure(String name);
+    public abstract StaMainTable<T> asSecure(String name, PostgresPersistenceManager pm);
 
     /**
      * Get the SecurityTableWrapper for this table, if any is defined.

@@ -39,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A check that runs a query against a NavigationLink (NavigationEntity or
+ * NavigationEntitySet).
  */
 public class CheckNavLinkQuery implements ValidationCheck {
 

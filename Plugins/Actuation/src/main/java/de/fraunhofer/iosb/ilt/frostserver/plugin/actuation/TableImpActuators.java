@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -27,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -134,12 +136,12 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
     }
 
     @Override
-    public TableImpActuators asSecure(String name) {
+    public TableImpActuators asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new TableImpActuators(DSL.name(name), this, wrappedTable, pluginActuation, pluginCoreModel).initCustomFields();
     }
 

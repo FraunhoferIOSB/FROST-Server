@@ -101,7 +101,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     @Override
     public TableRef join(S joinSource, QueryState<?> queryState, TableRef sourceRef) {
         Field<?> sourceField = sourceFieldAccessor.getField(joinSource);
-        T targetAliased = (T) target.asSecure(queryState.getNextAlias());
+        T targetAliased = (T) target.asSecure(queryState.getNextAlias(), queryState.getPersistenceManager());
         Field<?> targetField = targetFieldAccessor.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(((Field) targetField).eq(sourceField)));
         if (distinctRequired) {

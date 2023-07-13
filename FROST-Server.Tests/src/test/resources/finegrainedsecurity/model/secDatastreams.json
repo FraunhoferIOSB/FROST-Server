@@ -52,7 +52,7 @@
                 "combineType": "AND",
                 "subChecks": [
                   {
-                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckQuery",
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
                     "query": "$filter\u003dThing/Projects/UserProjectRoles/User/username eq principalName() and (Thing/Projects/UserProjectRoles/Role/rolename eq \u0027update\u0027 or Thing/Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
                   },
                   {
@@ -82,7 +82,7 @@
                 ]
               },
               {
-                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckQuery",
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
                 "query": "$filter\u003dThing/Projects/UserProjectRoles/User/username eq principalName() and (Thing/Projects/UserProjectRoles/Role/rolename eq \u0027delete\u0027 or Thing/Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
               }
             ]

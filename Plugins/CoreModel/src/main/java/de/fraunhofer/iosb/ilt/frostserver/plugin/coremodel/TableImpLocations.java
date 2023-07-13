@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import net.time4j.Moment;
 import org.geolatte.geom.Geometry;
 import org.jooq.DSLContext;
@@ -288,12 +289,12 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public TableImpLocations asSecure(String name) {
+    public TableImpLocations asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new TableImpLocations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 

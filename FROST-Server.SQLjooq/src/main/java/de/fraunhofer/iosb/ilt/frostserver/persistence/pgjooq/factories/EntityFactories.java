@@ -156,7 +156,7 @@ public class EntityFactories {
         Object id = entityId.getValue();
         StaMainTable<?> table = tableCollection.getTableForType(type);
         if (!admin) {
-            table = table.asSecure("t");
+            table = table.asSecure("t", pm);
         }
 
         DSLContext dslContext = pm.getDslContext();

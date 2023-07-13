@@ -38,7 +38,7 @@ public class CheckFixed implements ValidationCheck, UserCondition {
     }
 
     @Override
-    public boolean isValid() {
+    public boolean isValid(PostgresPersistenceManager pm) {
         return valid;
     }
 

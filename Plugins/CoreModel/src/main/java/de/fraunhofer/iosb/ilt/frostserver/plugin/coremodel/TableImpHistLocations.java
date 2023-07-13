@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Collections;
 import net.time4j.Moment;
 import org.jooq.DSLContext;
@@ -190,12 +191,12 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     }
 
     @Override
-    public TableImpHistLocations asSecure(String name) {
+    public TableImpHistLocations asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new TableImpHistLocations(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 

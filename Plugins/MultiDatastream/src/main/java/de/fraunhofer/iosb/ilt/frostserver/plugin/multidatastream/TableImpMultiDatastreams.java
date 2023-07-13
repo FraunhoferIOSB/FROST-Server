@@ -419,12 +419,12 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     }
 
     @Override
-    public TableImpMultiDatastreams asSecure(String name) {
+    public TableImpMultiDatastreams asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new TableImpMultiDatastreams(DSL.name(name), this, wrappedTable, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 

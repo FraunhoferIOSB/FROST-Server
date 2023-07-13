@@ -363,8 +363,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 1));
         testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 0));
         filterForException(serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
-        testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
-        testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
+        testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", USERS);
+        testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 4));
         testFilterResults(serviceObsCreaterProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
     }
@@ -391,18 +391,19 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 
-        serviceRead = testChangePassword(READ, serviceRead, changed);
-        serviceWrite = testChangePassword(WRITE, serviceWrite, changed);
-        serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed);
-        serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed);
-        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed);
-        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed);
+        serviceRead = testChangePassword(READ, serviceRead, changed, Utils.getFromList(USERS, 0));
+        serviceWrite = testChangePassword(WRITE, serviceWrite, changed, Utils.getFromList(USERS, 1));
+        serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed, USERS);
+        serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed, USERS);
+        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed, Utils.getFromList(USERS, 4));
+        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed, Utils.getFromList(USERS, 6));
 
         testChangePasswordFail(WRITE, serviceWrite, changedCopy, READ);
         testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
     }
 
     private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
+        LOGGER.debug("    {}", user);
         try {
             service.update(creator.create(user2));
             String failMessage = "User " + user + " should NOT be able to update password for user " + user2 + ".";
@@ -413,7 +414,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
     }
 
-    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator) {
+    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator, List<Entity> entityList) {
+        LOGGER.debug("    {}", user);
         final Entity userEntity = creator.create(user);
         try {
             service.update(userEntity);
@@ -423,7 +425,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             fail(failMessage);
         }
         SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
-        testFilterResults(newService, mdlUsers.etUser, "", USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).toList());
+        testFilterResults(newService, mdlUsers.etUser, "", entityList);
         return newService;
     }
 

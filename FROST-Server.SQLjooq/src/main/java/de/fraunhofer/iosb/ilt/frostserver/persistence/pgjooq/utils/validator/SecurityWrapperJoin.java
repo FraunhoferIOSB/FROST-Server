@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -104,7 +105,7 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     private boolean groupSetParameter;
 
     @Override
-    public Table wrap(StaMainTable table) {
+    public Table wrap(StaMainTable table, PostgresPersistenceManager pm) {
         final Principal principal = PrincipalExtended.getLocalPrincipal();
         final StaMainTable tableT = table.as("t");
         SelectJoinStep<Record> current = DSL.select(tableT.asterisk()).from(tableT);

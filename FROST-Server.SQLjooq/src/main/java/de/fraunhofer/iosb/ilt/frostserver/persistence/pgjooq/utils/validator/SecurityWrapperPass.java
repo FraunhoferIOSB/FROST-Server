@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import org.jooq.Table;
 
@@ -25,7 +26,7 @@ import org.jooq.Table;
 public class SecurityWrapperPass implements SecurityTableWrapper {
 
     @Override
-    public Table wrap(StaMainTable table) {
+    public Table wrap(StaMainTable table, PostgresPersistenceManager pm) {
         return table;
     }
 

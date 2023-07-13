@@ -28,6 +28,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A check that succeeds if the logged in user has (ANY/ALL) of the given roles.
+ */
 public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
     public enum Type {
@@ -48,11 +51,11 @@ public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
     @Override
     public boolean check(PostgresPersistenceManager pm, Entity context) {
-        return isValid();
+        return isValid(pm);
     }
 
     @Override
-    public boolean isValid() {
+    public boolean isValid(PostgresPersistenceManager pm) {
         final Set<String> userRoles = PrincipalExtended.getLocalPrincipal().getRoles();
         if (getCheckType() == Type.ANY) {
             for (String checkRole : getRoles()) {

@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import org.geolatte.geom.Geometry;
 import org.jooq.DataType;
 import org.jooq.Name;
@@ -188,12 +189,12 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
-    public TableImpFeatures asSecure(String name) {
+    public TableImpFeatures asSecure(String name, PostgresPersistenceManager pm) {
         final SecurityTableWrapper securityWrapper = getSecurityWrapper();
-        if (securityWrapper == null) {
+        if (securityWrapper == null || PrincipalExtended.getLocalPrincipal().isAdmin()) {
             return as(name);
         }
-        final Table wrappedTable = securityWrapper.wrap(this);
+        final Table wrappedTable = securityWrapper.wrap(this, pm);
         return new TableImpFeatures(DSL.name(name), this, wrappedTable, pluginCoreModel).initCustomFields();
     }
 

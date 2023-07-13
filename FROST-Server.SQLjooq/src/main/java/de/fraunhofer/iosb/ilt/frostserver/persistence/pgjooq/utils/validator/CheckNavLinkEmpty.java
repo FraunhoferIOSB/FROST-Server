@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A check that succeeds if a NavigationLink of a new or updated Entity is empty
+ * and fails if it is not empty.
  */
 public class CheckNavLinkEmpty implements ValidationCheck {
 
