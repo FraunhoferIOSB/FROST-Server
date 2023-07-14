@@ -64,11 +64,11 @@ To have a view about the deployed FROST-Server resources in the `my-release` dep
 
 To visualize logs about deployed Helm release's pods, execute:
 
-    $ kubeclt logs -l release=my-release
+    $ kubectl logs -l release=my-release
 
 Or, more precisely:
 
-    $ kubeclt get pods -l release=my-release
+    $ kubectl get pods -l release=my-release
     $ kubectl logs <pod name>
 
 Where `<pod name>` is your desired pod name
