@@ -21,6 +21,7 @@
 * Fixed #1564: NavLinks can have names that are not the name of the target entity type.
 * Fixed cross-entity-type custom links breaking $expand.
 * Fixed #1554: Count incorrect after following nextLink.
+* Fixed unknown version giving 200 instead of 404.
 
 
 ## Release version 2.1.0

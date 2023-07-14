@@ -101,7 +101,7 @@
         <version.congocc>2022-05-31</version.congocc>
         <version.dbcp2>2.9.0</version.dbcp2>
         <version.geolatte-common>0.8</version.geolatte-common>
-        <version.guava>32.0.1-jre</version.guava>
+        <version.guava>32.1.1-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
         <version.jackson>2.15.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
@@ -110,18 +110,21 @@
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
         <version.jetty>10.0.15</version.jetty>
-        <version.jooq>3.18.4</version.jooq>
+        <version.jooq>3.18.5</version.jooq>
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.9.3</version.junit>
         <version.junit-platform-suite>1.9.3</version.junit-platform-suite>
-        <version.keycloak>21.1.1</version.keycloak>
-        <version.liquibase>4.22.0</version.liquibase>
+        <version.keycloak>21.1.2</version.keycloak>
+        <version.liquibase>4.23.0</version.liquibase>
         <version.logback>1.4.8</version.logback>
 
         <version.maven.plugin.assembly>3.6.0</version.maven.plugin.assembly>
+        <version.maven.plugin.build-helper>3.4.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.11.0</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.6.0</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>8.3.1</version.maven.plugin.dependency-check>
+        <version.maven.plugin.download>1.6.8</version.maven.plugin.download>
+        <version.maven.plugin.exec>3.1.0</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>6.0.0</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.0.1</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.10</version.maven.plugin.jacoco>
@@ -129,11 +132,11 @@
         <version.maven.plugin.javadoc>3.5.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
-        <version.maven.plugin.shade>3.4.1</version.maven.plugin.shade>
-        <version.maven.plugin.source>3.2.1</version.maven.plugin.source>
+        <version.maven.plugin.shade>3.5.0</version.maven.plugin.shade>
+        <version.maven.plugin.source>3.3.0</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.37.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.1.2</version.maven.plugin.surefire>
-        <version.maven.plugin.war>3.3.2</version.maven.plugin.war>
+        <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
         <version.openjfx>19.0.2.1</version.openjfx>
         <version.org.json>20230618</version.org.json>
@@ -382,6 +385,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.googlecode.maven-download-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>${version.maven.plugin.download}</version>
+                </plugin>
+                <plugin>
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
                     <version>${version.maven.plugin.git-commit-id}</version>
@@ -410,6 +418,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${version.maven.plugin.shade}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${version.maven.plugin.build-helper}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${version.maven.plugin.exec}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
