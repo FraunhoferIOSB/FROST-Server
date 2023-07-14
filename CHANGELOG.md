@@ -7,6 +7,7 @@
 * Fixed subQueries on expands on custom links.
 * Disallow wild-cards in MQTT topics.
 * Fixed unknown version giving 200 instead of 404.
+* [HELM] Added mqtt.exposedEndpoints to http service so it can list correct urls
 
 
 ## Release version 2.1.4
