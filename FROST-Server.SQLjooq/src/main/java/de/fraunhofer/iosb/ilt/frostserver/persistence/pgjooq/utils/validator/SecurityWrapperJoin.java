@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorEnum;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -43,6 +44,12 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     @ConfigurableClass
     public static class TableJoin implements AnnotatedConfigurable<Void, Void> {
 
+        public enum JoinType {
+            INNER,
+            LEFT,
+            RIGHT
+        }
+
         @ConfigurableField(editor = EditorString.class,
                 label = "Target Table", description = "The name of the target table to join.")
         @EditorString.EdOptsString()
@@ -58,15 +65,20 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
         @EditorString.EdOptsString()
         public String joinOnSql;
 
-        @ConfigurableField(editor = EditorBoolean.class,
+        @ConfigurableField(editor = EditorBoolean.class, optional = true,
                 label = "Username", description = "Flag indicating there is a parameter :username in the SQL.")
         @EditorBoolean.EdOptsBool()
         public boolean usernameParameter;
 
-        @ConfigurableField(editor = EditorBoolean.class,
+        @ConfigurableField(editor = EditorBoolean.class, optional = true,
                 label = "Groups", description = "Flag indicating there is a parameter :usergroups in the SQL.")
         @EditorBoolean.EdOptsBool()
         public boolean groupSetParameter;
+
+        @ConfigurableField(editor = EditorEnum.class,
+                label = "Join Type", description = "The type of join to use.")
+        @EditorEnum.EdOptsEnum(sourceType = JoinType.class, dflt = "INNER")
+        public JoinType joinType = JoinType.INNER;
 
         @JsonIgnore
         public Table<Record> aliassedTable;
@@ -120,7 +132,20 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
             } else {
                 joinPart = DSL.sql(join.joinOnSql);
             }
-            current = current.join(join.getTargetTable()).on(joinPart);
+            switch (join.joinType) {
+                case LEFT:
+                    current = current.leftJoin(join.getTargetTable()).on(joinPart);
+                    break;
+
+                case RIGHT:
+                    current = current.rightJoin(join.getTargetTable()).on(joinPart);
+                    break;
+
+                case INNER:
+                default:
+                    current = current.innerJoin(join.getTargetTable()).on(joinPart);
+                    break;
+            }
         }
         if (!StringHelper.isNullOrEmpty(where)) {
             if (usernameParameter) {
