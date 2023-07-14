@@ -59,7 +59,7 @@ public class ServletMain extends HttpServlet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
-    private static final String NOT_FOUND = "Not Found";
+    private static final String NOT_FOUND = "{\"error\":\"Version Not Found\"}";
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -122,6 +122,7 @@ public class ServletMain extends HttpServlet {
     private void sendResponse(ServiceResponse serviceResponse, HttpServletResponse httpResponse) {
         try {
             if (!serviceResponse.isSuccessful() && !StringHelper.isNullOrEmpty(serviceResponse.getMessage())) {
+                httpResponse.setStatus(serviceResponse.getCode());
                 httpResponse.getWriter().write(serviceResponse.getMessage());
             }
         } catch (IOException ex) {
