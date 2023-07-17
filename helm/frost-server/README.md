@@ -40,7 +40,7 @@ Before to go, declare the Helm repo or update it
 
 Then, to install the chart with the [release name](https://docs.helm.sh/using_helm/#quickstart-guide) `my-release`
 
-    $ helm install --name my-release fraunhoferiosb/frost-server
+    $ helm install my-release fraunhoferiosb/frost-server
 
 This command deploys FROST-Server on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
@@ -305,14 +305,14 @@ The following table lists the configurable parameters of the FROST-Server chart 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm` `install|upgrade`. For example,
 
-    $ helm install --name my-release \
+    $ helm install my-release \
         --set key_1=value_1,key_2=value_2 \
         fraunhoferiosb/frost-server
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
     # example for staging
-    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server
+    $ helm install my-release -f values.yaml fraunhoferiosb/frost-server
 
 > **Tip**: You can use the default [values.yaml](./values.yaml)
 
@@ -340,7 +340,7 @@ Since it is not possible to include newline characters in value strings on the c
 the sting must be quoted with newline characters in tact:
 
 ```
-helm install --name my-release --set "frost.mqtt.extraEnv=- name: plugins_modelLoader_idType_User
+helm install my-release --set "frost.mqtt.extraEnv=- name: plugins_modelLoader_idType_User
   value: string
 - name: plugins_modelLoader_idType_Role
   value: string"
