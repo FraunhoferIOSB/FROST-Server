@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
@@ -48,6 +49,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.S
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.In;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
@@ -268,6 +270,44 @@ class QueryParserTest {
                 new Equal(
                         new Path(testModel.EP_NAME),
                         new StringConstant("utf-8: 水位高度")));
+        result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterIn() {
+        String query = "$filter=value in ('3', '4')";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new In(
+                        new Path(testModel.EP_VALUE),
+                        new ConstantList()
+                                .addItem(new StringConstant("3"))
+                                .addItem(new StringConstant("4"))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+
+        query = "$filter=value in (3, 4)";
+        expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new In(
+                        new Path(testModel.EP_VALUE),
+                        new ConstantList()
+                                .addItem(new IntegerConstant(3))
+                                .addItem(new IntegerConstant(4))));
+        result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+
+        query = "$filter='tag' in properties/tags";
+        expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new In(
+                        new StringConstant("tag"),
+                        new Path(ModelRegistry.EP_PROPERTIES,
+                                new EntityPropertyCustom("tags"))));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);

@@ -82,7 +82,7 @@ SKIP : " " | "\n" | "\r" | "\t";
   <T_LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
 ;
 
-<LS_EXPAND,LS_SELECT,LS_FILTER,LS_ORDERBYS> TOKEN [IGNORE_CASE]:
+<LS_EXPAND,LS_SELECT,LS_FILTER,LS_ORDERBYS,LS_CONSTANTS> TOKEN [IGNORE_CASE]:
   <T_VALUE_SEPARATOR: "," >
 ;
 
@@ -104,7 +104,7 @@ SKIP : " " | "\n" | "\r" | "\t";
   <T_CHARSEQ: (["a"-"z", "0"-"9", ".", "@", "-", "_"])+ >
 ;
 
-<LS_FILTER,LS_EXPAND> TOKEN [IGNORE_CASE]:
+<LS_FILTER,LS_EXPAND,LS_CONSTANTS> TOKEN [IGNORE_CASE]:
   <T_LB: "(">
 | <T_RB: ")">
 ;
@@ -116,6 +116,7 @@ SKIP : " " | "\n" | "\r" | "\t";
 | <T_QO_GE:       "ge" >
 | <T_QO_LT:       "lt" >
 | <T_QO_LE:       "le" >
+| <T_QO_IN:       "in" >
 
 | <T_QO_AND:      "and" >
 | <T_QO_NOT:      "not" >
@@ -319,7 +320,10 @@ P_BoolFunctionNameThree:
 ;
 
 P_ComparativeExpression :
-    P_AdditiveExpression (P_Compare P_AdditiveExpression )?
+    P_AdditiveExpression (
+          (P_Compare P_AdditiveExpression) 
+        | (<T_QO_IN> (P_ConstantsList | P_PlainPath))
+    )?
 ;
 
 P_Compare :
@@ -424,4 +428,9 @@ P_Constant : LS_CONSTANTS :
     )
 ;
 
+P_ConstantsList : LS_CONSTANTS :
+    (
+       <T_LB> P_Constant (<T_VALUE_SEPARATOR> P_Constant)* <T_RB>
+    )
+;
 

@@ -213,6 +213,12 @@ public class JsonFieldFactory {
             }
         }
 
+        public FieldWrapper contains(Field item) {
+            String template = "? @> to_jsonb(?)";
+            Condition result = DSL.condition(template, jsonExpression, item);
+            return new SimpleFieldWrapper(result);
+        }
+
         private CompareType getOtherType(FieldWrapper other) {
             materialise();
             if (other instanceof JsonFieldWrapper) {

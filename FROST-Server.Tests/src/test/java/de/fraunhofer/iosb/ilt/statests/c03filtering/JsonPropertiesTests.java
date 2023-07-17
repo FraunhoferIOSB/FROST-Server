@@ -117,6 +117,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
             properties.put("boolean", i % 2 == 0);
             properties.put("int", i + 8);
             properties.put("intArray", generateIntArray(i + 8, 5));
+            properties.put("strArray", generateStringArray(i + 8, 5));
             properties.put("intIntArray", generateIntIntArray(i + 8, 3));
             properties.put("objArray", generateObjectList(i + 8, 3));
             Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
@@ -269,6 +270,24 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         int curVal = startValue;
         for (int i = 0; i < length; i++) {
             value[i] = curVal;
+            curVal++;
+        }
+        return value;
+    }
+
+    /**
+     * Generates an array of Strings of 's{nr}', with the given length, starting
+     * at the given number.
+     *
+     * @param startValue the starting number.
+     * @param length The length of the array to generate.
+     * @return The string.
+     */
+    public static String[] generateStringArray(int startValue, int length) {
+        String[] value = new String[length];
+        int curVal = startValue;
+        for (int i = 0; i < length; i++) {
+            value[i] = "s" + curVal;
             curVal++;
         }
         return value;
@@ -469,6 +488,18 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
+    }
+
+    /**
+     * Test if filtering Things/properties and Observations/parameters against a
+     * numeric constant works.
+     */
+    @Test
+    void test08InNumberFilter() {
+        LOGGER.info("  test08InNumberFilter");
+        testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int in (8,9)", getFromList(THINGS, 0, 1));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "9 in properties/intArray", getFromList(THINGS, 0, 1));
+        testFilterResults(sSrvc.dao(sMdl.etThing), "'s10' in properties/strArray", getFromList(THINGS, 0, 1, 2));
     }
 
     /**

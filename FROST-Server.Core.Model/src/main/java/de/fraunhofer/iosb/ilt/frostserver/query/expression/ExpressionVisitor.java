@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
@@ -38,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.S
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.In;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
@@ -127,6 +129,8 @@ public interface ExpressionVisitor<O extends Object> {
 
     public O visit(TimeConstant node);
 
+    public O visit(ConstantList node);
+
     public O visit(Before node);
 
     public O visit(After node);
@@ -162,6 +166,8 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(LessThan node);
 
     public O visit(NotEqual node);
+
+    public O visit(In node);
 
     public O visit(Date node);
 

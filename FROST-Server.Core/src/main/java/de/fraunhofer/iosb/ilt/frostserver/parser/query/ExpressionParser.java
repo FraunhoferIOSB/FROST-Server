@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
@@ -41,6 +42,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.S
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.In;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
@@ -100,6 +102,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Token;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_AdditiveExpression;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_BoolFunction;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ComparativeExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ConstantsList;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_LogicalAnd;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_LogicalExpression;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_MathFunction;
@@ -151,6 +154,7 @@ public class ExpressionParser extends Visitor {
         OP_GREATER_EQUAL("ge", GreaterEqual.class),
         OP_LESS_THAN("lt", LessThan.class),
         OP_LESS_EQUAL("le", LessEqual.class),
+        OP_IN("in", In.class),
         // String
         OP_SUBSTRING_OF("substringof", SubstringOf.class),
         OP_ENDS_WITH("endswith", EndsWith.class),
@@ -385,6 +389,17 @@ public class ExpressionParser extends Visitor {
 
     private Function getFunction(String operator) {
         return Operator.fromKey(operator, admin).instantiate(context);
+    }
+
+    public void visit(P_ConstantsList node) {
+        Expression previousExpression = currentExpression;
+        ConstantList<Object> cl = new ConstantList<>();
+        currentExpression = cl;
+        for (Node child : node.children()) {
+            visit(child);
+        }
+        currentExpression = previousExpression;
+        addToCurrentExpression(cl);
     }
 
     public void visit(T_STR_LIT node) {

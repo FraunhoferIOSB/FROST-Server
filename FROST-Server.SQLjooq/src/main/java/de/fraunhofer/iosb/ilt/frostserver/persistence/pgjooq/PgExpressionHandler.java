@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.ArrayConstandFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
@@ -43,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
@@ -65,6 +67,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.S
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.GreaterThan;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.In;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
@@ -447,6 +450,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     }
 
     @Override
+    public FieldWrapper visit(ConstantList node) {
+        return new ArrayConstandFieldWrapper(node);
+    }
+
+    @Override
     public FieldWrapper visit(Before node) {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
@@ -777,6 +785,22 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
         Field[] pair = findPair(p1, p2);
         return new SimpleFieldWrapper(pair[0].ne(pair[1]));
+    }
+
+    @Override
+    public FieldWrapper visit(In node) {
+        List<Expression> params = node.getParameters();
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p2 instanceof ArrayConstandFieldWrapper clP2) {
+            return new SimpleFieldWrapper(p1.getDefaultField().in(clP2.getValueList()));
+        }
+        Field[] pair = findPair(p1, p2);
+        if (p2 instanceof JsonFieldWrapper jP2) {
+            return jP2.contains(pair[0]);
+        } else {
+            return new SimpleFieldWrapper(pair[0].in(pair[1]));
+        }
     }
 
     @Override
