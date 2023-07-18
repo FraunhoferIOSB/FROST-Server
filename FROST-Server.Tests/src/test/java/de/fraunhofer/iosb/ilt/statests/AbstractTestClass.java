@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Properties;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 import org.junit.jupiter.api.AfterAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public abstract class AbstractTestClass {
     protected static SensorThingsMultiDatastreamV11 mMdl;
     protected static SensorThingsTaskingV11 tMdl;
 
-    private static final Properties defaultProperties = new Properties();
+    private static final Map<String, String> defaultProperties = new TreeMap<>();
 
     static {
         defaultProperties.put(PREFIX_PLUGINS + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
@@ -76,11 +78,11 @@ public abstract class AbstractTestClass {
         init(serverVersion, defaultProperties);
     }
 
-    public AbstractTestClass(ServerVersion serverVersion, Properties properties) {
-        init(serverVersion, properties);
+    public AbstractTestClass(ServerVersion serverVersion, Map<String, String> properties) {
+        init(serverVersion, Collections.unmodifiableMap(properties));
     }
 
-    private void init(ServerVersion serverVersion, Properties properties) {
+    private void init(ServerVersion serverVersion, Map<String, String> properties) {
         try {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
             if (!serverVersion.equals(version)) {

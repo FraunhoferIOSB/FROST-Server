@@ -22,7 +22,8 @@ import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import java.util.Properties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public abstract class BasicAuthCryptPwTests extends AbstractAuthTests {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthCryptPwTests.class);
 
-    private static final Properties SERVER_PROPERTIES = new Properties();
+    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     static {
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");

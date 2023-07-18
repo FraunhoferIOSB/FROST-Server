@@ -34,7 +34,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -75,7 +75,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
 
-    public AbstractAuthTests(ServerVersion serverVersion, Properties properties, boolean anonymousReadAllowed) {
+    public AbstractAuthTests(ServerVersion serverVersion, Map<String, String> properties, boolean anonymousReadAllowed) {
         super(serverVersion, properties);
         this.anonymousReadAllowed = anonymousReadAllowed;
         this.ath = new AuthTestHelper(serverSettings);

@@ -38,9 +38,9 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -65,7 +65,8 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
-    private static final Properties SERVER_PROPERTIES = new Properties();
+
+    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     static {
         SERVER_PROPERTIES.put(CoreSettings.TAG_ALWAYS_ORDERBY_ID, "false");

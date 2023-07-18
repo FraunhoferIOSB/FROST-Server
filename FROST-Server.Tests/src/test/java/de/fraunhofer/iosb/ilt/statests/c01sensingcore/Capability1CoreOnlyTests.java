@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +55,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability1CoreOnlyTests.class);
-    private static final Properties properties = new Properties();
+    private static final Map<String, String> properties = new TreeMap<>();
 
     static {
         properties.put("plugins.actuation.enable", "false");

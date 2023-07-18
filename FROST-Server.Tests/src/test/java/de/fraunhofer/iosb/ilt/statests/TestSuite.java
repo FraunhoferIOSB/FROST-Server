@@ -94,6 +94,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -207,9 +208,9 @@ public class TestSuite {
 
     private static TestSuite instance;
 
-    private final Map<Properties, Server> httpServers = new HashMap<>();
-    private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
-    private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
+    private final Map<Integer, Server> httpServers = new HashMap<>();
+    private final Map<Integer, FrostMqttServer> mqttServers = new HashMap<>();
+    private final Map<Integer, ServerSettings> serverSettings = new HashMap<>();
 
     private final AtomicInteger nextBusId = new AtomicInteger(1);
     private final AtomicInteger nextDbId = new AtomicInteger(1);
@@ -268,14 +269,14 @@ public class TestSuite {
         getInstance().stopAllServers();
     }
 
-    public ServerSettings getServerSettings(Properties parameters) throws IOException, InterruptedException {
-        maybeStartServers(parameters);
-        return serverSettings.get(parameters);
+    public ServerSettings getServerSettings(Map<String, String> parameters) throws IOException, InterruptedException {
+        int key = maybeStartServers(parameters);
+        return serverSettings.get(key);
     }
 
-    public Server getServer(Properties parameters) throws IOException, InterruptedException {
-        maybeStartServers(parameters);
-        return httpServers.get(parameters);
+    public Server getServer(Map<String, String> parameters) throws IOException, InterruptedException {
+        int key = maybeStartServers(parameters);
+        return httpServers.get(key);
     }
 
     public KeycloakContainer getKeycloak() {
@@ -291,14 +292,21 @@ public class TestSuite {
         }
     }
 
-    private synchronized void maybeStartServers(Properties parameters) throws IOException, InterruptedException {
-        if (!serverSettings.containsKey(parameters)) {
-            startServers(parameters);
+    private synchronized int maybeStartServers(Map<String, String> parameters) throws IOException, InterruptedException {
+        int key = keyFromProperties(parameters);
+        LOGGER.warn("Checking for parameters key {}", key);
+        if (!serverSettings.containsKey(key)) {
+            startServers(key, new HashMap<>(parameters));
         }
+        return key;
     }
 
-    private synchronized void startServers(Properties parameters) throws IOException, InterruptedException {
-        if (serverSettings.containsKey(parameters)) {
+    private int keyFromProperties(Map<String, String> props) {
+        return Objects.hashCode(props);
+    }
+
+    private synchronized void startServers(int key, Map<String, String> parameters) throws IOException, InterruptedException {
+        if (serverSettings.containsKey(key)) {
             return;
         }
         maybeStartMessagebus();
@@ -316,17 +324,17 @@ public class TestSuite {
             throw new RuntimeException("Failed to connect to bus!", ex);
         }
 
-        startHttpServer(parameters);
-        startMqttServer(parameters);
+        startHttpServer(key, parameters);
+        startMqttServer(key, parameters);
     }
 
-    private void startHttpServer(Properties parameters) {
+    private void startHttpServer(int key, Map<String, String> parameters) {
         // Set common properties shared by HTTP and MQTT
         parameters.put("bus." + MqttMessageBus.TAG_TOPIC_NAME, "FROST-BUS-" + nextBusId.getAndIncrement());
 
         LOGGER.info("HTTP Server starting...");
         ServerSettings serverSetting = new ServerSettings();
-        serverSettings.put(parameters, serverSetting);
+        serverSettings.put(key, serverSetting);
 
         Map<String, String> paramsMap = new HashMap<>();
         parameters.forEach((t, u) -> paramsMap.put(t.toString(), u.toString()));
@@ -360,7 +368,7 @@ public class TestSuite {
         handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         handler.setInitParameter("persistence.autoUpdateDatabase", "true");
         handler.setInitParameter("persistence.db.driver", "org.postgresql.Driver");
-        handler.setInitParameter("persistence.db.url", createDbUrl(parameters.getProperty(KEY_DB_NAME)));
+        handler.setInitParameter("persistence.db.url", createDbUrl(parameters.get(KEY_DB_NAME)));
         handler.setInitParameter("persistence.db.username", VAL_PG_USER);
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
@@ -384,7 +392,7 @@ public class TestSuite {
         }
 
         LOGGER.info("Server started.");
-        httpServers.put(parameters, myServer);
+        httpServers.put(key, myServer);
 
         findImplementedVersions(serverSetting);
         checkServiceRootUri(serverSetting);
@@ -395,9 +403,9 @@ public class TestSuite {
         return DATABASE_CONNECT_URL_BASE + dbName + DATABASE_CONNECT_URL_POSTFIX;
     }
 
-    private void startMqttServer(Properties parameters) throws IOException {
+    private void startMqttServer(int key, Map<String, String> parameters) throws IOException {
         LOGGER.info("MQTT Server starting...");
-        ServerSettings serverSetting = serverSettings.get(parameters);
+        ServerSettings serverSetting = serverSettings.get(key);
 
         int mqttPort = findRandomPort();
         int mqttWsPort = findRandomPort();
@@ -427,28 +435,26 @@ public class TestSuite {
 
         properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
-        properties.put("persistence.db.url", createDbUrl(parameters.getProperty(KEY_DB_NAME)));
+        properties.put("persistence.db.url", createDbUrl(parameters.get(KEY_DB_NAME)));
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
-        if (parameters != null) {
-            properties.putAll(parameters);
-        }
+        properties.putAll(parameters);
 
         CoreSettings coreSettings = new CoreSettings(properties);
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
         serverSetting.setMqttUrl("tcp://localhost:" + mqttPort);
         LOGGER.info("MQTT Server started on port {}", mqttPort);
-        mqttServers.put(parameters, server);
+        mqttServers.put(key, server);
     }
 
-    public void stopServer(Properties parameters) {
-        if (!httpServers.containsKey(parameters)) {
+    public void stopServer(int key) {
+        if (!httpServers.containsKey(key)) {
             return;
         }
-        Server httpServer = httpServers.get(parameters);
+        Server httpServer = httpServers.get(key);
         if (httpServer != null) {
             try {
                 httpServer.stop();
@@ -457,8 +463,8 @@ public class TestSuite {
                 throw new IllegalStateException(ex);
             }
         }
-        httpServers.remove(parameters);
-        FrostMqttServer mqttServer = mqttServers.get(parameters);
+        httpServers.remove(key);
+        FrostMqttServer mqttServer = mqttServers.get(key);
         if (mqttServer != null) {
             try {
                 mqttServer.stop();
@@ -467,15 +473,16 @@ public class TestSuite {
                 throw new IllegalStateException(ex);
             }
         }
-        mqttServers.remove(parameters);
-        serverSettings.remove(parameters);
+        mqttServers.remove(key);
+        serverSettings.remove(key);
     }
 
     public synchronized void stopAllServers() {
         List<Thread> shutdownThreads = new ArrayList<>();
-        for (Properties props : httpServers.keySet().toArray(new Properties[httpServers.size()])) {
+        // we copy the keys since the set is changed during shutdown.
+        for (Integer key : httpServers.keySet().toArray(new Integer[httpServers.size()])) {
             Thread t = new Thread(() -> {
-                stopServer(props);
+                stopServer(key);
             });
             shutdownThreads.add(t);
             t.start();

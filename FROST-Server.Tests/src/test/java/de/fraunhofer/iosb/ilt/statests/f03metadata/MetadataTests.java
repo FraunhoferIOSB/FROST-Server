@@ -43,9 +43,9 @@ import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.geojson.Point;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
@@ -71,7 +71,8 @@ public abstract class MetadataTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
-    private static final Properties SERVER_PROPERTIES = new Properties();
+
+    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     static {
         SERVER_PROPERTIES.put(CoreSettings.PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_ENABLE, "true");

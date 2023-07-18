@@ -56,8 +56,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -87,7 +88,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTests.class);
 
-    private static final Properties SERVER_PROPERTIES = new Properties();
+    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     private static String modelUrl(String name) {
         return resourceUrl("finegrainedsecurity/model/", name);

@@ -22,7 +22,8 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import java.util.Properties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyCloakTests.class);
 
-    private static final Properties SERVER_PROPERTIES = new Properties();
+    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     public static final String KEYCLOAK_FROST_CLIENT_ID = "frost-server";
     public static final String KEYCLOAK_FROST_CONFIG_SECRET = "5aa9087d-817f-47b6-92a1-2b5f7caac967";
