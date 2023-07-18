@@ -139,7 +139,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(serverSettings.hasTasking(version), serviceAdmin, sMdl, tMdl);
+        EntityUtils.deleteAll(serviceAdmin);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

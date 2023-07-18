@@ -24,16 +24,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
+import de.fraunhofer.iosb.ilt.frostclient.exception.NotFoundException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.StaService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,21 +126,22 @@ public class EntityUtils {
         return null;
     }
 
-    public static void deleteAll(ServerVersion version, ServerSettings serverSettings, StaService sts) throws ServiceFailureException {
-        deleteAll(serverSettings.hasTasking(version), sts.service, sts.modelSensing, sts.modelTasking);
+    public static void deleteAll(StaService sts) throws ServiceFailureException {
+        deleteAll(sts.service);
     }
 
-    public static void deleteAll(boolean tasking, SensorThingsService service, SensorThingsSensingV11 mdlSns, SensorThingsTaskingV11 mdlTsk) throws ServiceFailureException {
-        deleteAll(service.dao(mdlSns.etThing));
-        deleteAll(service.dao(mdlSns.etLocation));
-        deleteAll(service.dao(mdlSns.etSensor));
-        deleteAll(service.dao(mdlSns.etFeatureOfInterest));
-        deleteAll(service.dao(mdlSns.etObservedProperty));
-        deleteAll(service.dao(mdlSns.etObservation));
-        if (tasking) {
-            deleteAll(service.dao(mdlTsk.etActuator));
-            deleteAll(service.dao(mdlTsk.etTaskingCapability));
-            deleteAll(service.dao(mdlTsk.etTask));
+    public static void deleteAll(SensorThingsService service) throws ServiceFailureException {
+        ModelRegistry mr = service.getModelRegistry();
+        if (mr.getEntityTypeForName("Thing") != null) {
+            // First delete Things, for efficiency
+            deleteAll(service.dao(mr.getEntityTypeForName("Thing")));
+        }
+        for (de.fraunhofer.iosb.ilt.frostclient.model.EntityType et : mr.getEntityTypes()) {
+            try {
+                deleteAll(service.dao(et));
+            } catch (NotFoundException exc) {
+                // the model has entity types that dont exist on the server.
+            }
         }
     }
 

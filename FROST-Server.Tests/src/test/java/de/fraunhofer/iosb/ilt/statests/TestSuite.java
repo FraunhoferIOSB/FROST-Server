@@ -337,7 +337,7 @@ public class TestSuite {
         serverSettings.put(key, serverSetting);
 
         Map<String, String> paramsMap = new HashMap<>();
-        parameters.forEach((t, u) -> paramsMap.put(t.toString(), u.toString()));
+        parameters.forEach((t, u) -> paramsMap.put(t, u));
 
         Server myServer = new Server(0);
         HandlerCollection contextHandlerCollection = new HandlerCollection(true);

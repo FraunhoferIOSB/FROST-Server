@@ -98,7 +98,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
     @Override
     protected void tearDownVersion() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         ENTITYCOUNTS.clear();
     }
 
@@ -111,7 +111,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         ENTITYCOUNTS.clear();
     }
 

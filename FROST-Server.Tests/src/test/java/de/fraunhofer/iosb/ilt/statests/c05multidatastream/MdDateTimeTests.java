@@ -122,7 +122,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         THINGS.clear();
         MULTI_DATASTREAMS.clear();
         OBSERVATIONS.clear();

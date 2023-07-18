@@ -75,7 +75,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         THINGS.clear();
         DATASTREAMS.clear();
         DATASTREAMS.clear();

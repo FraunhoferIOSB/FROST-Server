@@ -82,7 +82,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
@@ -97,7 +97,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test01MultipleLocations() throws ServiceFailureException {
         LOGGER.info("  test01MultipleLocations");
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
 
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
 
@@ -160,7 +160,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test03HistoricalLocationThing() throws ServiceFailureException {
         LOGGER.info("  test03HistoricalLocationThing");
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
 
         // Create a thing
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
@@ -219,7 +219,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test04PostInvalidPath() throws ServiceFailureException {
         LOGGER.info("  test04PostInvalidPath");
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         // Create two things
 
         Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
@@ -339,7 +339,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test05RecreateAutomaticFoi() throws ServiceFailureException {
         LOGGER.info("  test05RecreateAutomaticFoi");
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         // Create two things
 
         Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));

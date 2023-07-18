@@ -11,7 +11,7 @@
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
     <logger name="io.moquette" level="WARN"/>
     <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
-    <logger name="io.moquette.broker.SessionEventLoop" level="INFO"/>
+    <logger name="io.moquette.broker.SessionEventLoop" level="WARN"/>
     <logger name="liquibase" level="WARN"/>
     <logger name="org.jooq" level="WARN"/>
 

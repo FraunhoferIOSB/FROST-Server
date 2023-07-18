@@ -95,7 +95,7 @@ public abstract class FilterTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

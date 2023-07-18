@@ -101,7 +101,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(version, serverSettings, service);
+        EntityUtils.deleteAll(service);
         THINGS.clear();
         FEATURES.clear();
         LOCATIONS.clear();
