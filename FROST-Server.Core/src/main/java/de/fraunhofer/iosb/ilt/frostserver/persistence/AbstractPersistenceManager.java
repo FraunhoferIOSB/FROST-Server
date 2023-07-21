@@ -141,6 +141,10 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     public boolean update(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
         EntityChangedMessage result = doUpdate(pathElement, patch);
         if (result != null) {
+            if (result.getFields().isEmpty()) {
+                // Successful update, but no changes.
+                return true;
+            }
             result.setEventType(EntityChangedMessage.Type.UPDATE);
 
             Entity entity = result.getEntity();

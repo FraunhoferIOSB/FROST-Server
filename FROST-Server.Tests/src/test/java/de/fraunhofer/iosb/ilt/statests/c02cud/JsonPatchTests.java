@@ -17,12 +17,14 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import com.github.fge.jsonpatch.AddOperation;
 import com.github.fge.jsonpatch.CopyOperation;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.MoveOperation;
+import com.github.fge.jsonpatch.ReplaceOperation;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
@@ -195,6 +197,28 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         assertEquals(null, updatedThing.getProperties().get("key1"), message);
         message = "properties/key2 does not exist after move.";
         assertEquals((Integer) 1, (Integer) updatedThing.getProperties().get("key2"), message);
+    }
+
+    @Test
+    void jsonPatchThingNoOpTest() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  jsonPatchThingNoOpTest");
+        Thing thingOnlyId = THINGS.get(0).withOnlyId();
+        List<JsonPatchOperation> operations = new ArrayList<>();
+        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 2}")));
+        service.patch(thingOnlyId, operations);
+        Thing updatedThing = service.things().find(thingOnlyId.getId());
+
+        String message = "properties/key1 was not added correctly.";
+        assertEquals((Integer) 2, (Integer) updatedThing.getProperties().get("key1"), message);
+
+        // This patch should result in no change.
+        operations.clear();
+        operations.add(new ReplaceOperation(new JsonPointer("/properties/key1"), new IntNode(2)));
+        service.patch(thingOnlyId, operations);
+        updatedThing = service.things().find(thingOnlyId.getId());
+
+        message = "properties/key1 does not have the correct value.";
+        assertEquals((Integer) 2, (Integer) updatedThing.getProperties().get("key1"), message);
     }
 
     /**

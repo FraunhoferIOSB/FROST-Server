@@ -345,9 +345,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
         EntityChangedMessage message = new EntityChangedMessage();
         newEntity.setEntityPropertiesSet(original, message);
-        if (message.getEpFields().isEmpty() && message.getNpFields().isEmpty()) {
-            LOGGER.warn("Patch did not change anything.");
-            throw new IllegalArgumentException("Patch did not change anything.");
+        if (message.getFields().isEmpty()) {
+            return message;
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
