@@ -23,6 +23,7 @@
 * Fixed cross-entity-type custom links breaking $expand.
 * Fixed #1554: Count incorrect after following nextLink.
 * Fixed unknown version giving 200 instead of 404.
+* Fixed JSON-Patch that changed nothing giving an error back.
 
 
 ## Release version 2.1.0

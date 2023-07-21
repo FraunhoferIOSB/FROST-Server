@@ -21,12 +21,14 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.E
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import com.github.fge.jsonpatch.AddOperation;
 import com.github.fge.jsonpatch.CopyOperation;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.MoveOperation;
+import com.github.fge.jsonpatch.ReplaceOperation;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
@@ -179,6 +181,29 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
         assertEquals(1L, (Long) updatedProperties.get("key2"), message);
+    }
+
+    @Test
+    void jsonPatchThingNoOpTest() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  jsonPatchThingTest");
+        Entity thingOnlyId = THINGS.get(0).withOnlyPk();
+        List<JsonPatchOperation> operations = new ArrayList<>();
+        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 2}")));
+        sSrvc.patch(thingOnlyId, operations);
+        Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
+
+        String message = "properties/key1 was not added correctly.";
+        assertEquals(2L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
+
+        // This patch should result in no change.
+        operations.clear();
+        operations.add(new ReplaceOperation(new JsonPointer("/properties/key1"), new IntNode(2)));
+        sSrvc.patch(thingOnlyId, operations);
+        updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
+
+        final Map<String, Object> updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
+        message = "properties/key1 does not have the correct value.";
+        assertEquals(2L, updatedProperties.get("key1"), message);
     }
 
     /**
