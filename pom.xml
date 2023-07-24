@@ -55,7 +55,7 @@
         <jetty.version>10.0.15</jetty.version>
         <jooq.version>3.18.5</jooq.version>
         <json-patch.version>1.13</json-patch.version>
-        <junit.version>5.9.3</junit.version>
+        <junit.version>5.10.0</junit.version>
         <junit-platform-suite.version>1.9.3</junit-platform-suite.version>
         <keycloak.version>21.1.2</keycloak.version>
         <liquibase.version>4.23.0</liquibase.version>
