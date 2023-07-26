@@ -110,7 +110,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     @ConfigurableField(editor = EditorList.class,
             label = "Handlers")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class", shortenClassNames = true)
     private List<PropertyPersistenceMapper> handlers;
 
     /**
@@ -119,7 +119,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     @ConfigurableField(editor = EditorList.class,
             label = "Annotations", description = "The (OData)annotations for this Element.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class", shortenClassNames = true)
     private final List<Annotation> annotations = new ArrayList<>();
 
     @JsonIgnore
@@ -469,7 +469,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         @ConfigurableField(editor = EditorList.class,
                 label = "Annotations", description = "The (OData)annotations for this Element.")
         @EditorList.EdOptsList(editor = EditorSubclass.class)
-        @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+        @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class", shortenClassNames = true)
         private final List<Annotation> annotations = new ArrayList<>();
 
         /**

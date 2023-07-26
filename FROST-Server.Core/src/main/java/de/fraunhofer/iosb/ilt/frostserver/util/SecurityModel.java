@@ -44,7 +44,7 @@ public class SecurityModel {
         @ConfigurableField(editor = EditorList.class,
                 label = "Wrappers", description = "The wrappers to apply to this table.")
         @EditorList.EdOptsList(editor = EditorSubclass.class)
-        @EditorSubclass.EdOptsSubclass(iface = SecurityWrapper.class, merge = true, nameField = "@class")
+        @EditorSubclass.EdOptsSubclass(iface = SecurityWrapper.class, merge = true, nameField = "@class", shortenClassNames = true)
         private List<SecurityWrapper> wrappers;
 
         public String getTableName() {

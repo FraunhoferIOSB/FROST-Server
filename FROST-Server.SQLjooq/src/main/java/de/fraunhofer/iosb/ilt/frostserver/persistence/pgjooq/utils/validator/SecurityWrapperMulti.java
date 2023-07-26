@@ -35,11 +35,11 @@ public class SecurityWrapperMulti implements SecurityTableWrapper {
     public static class IfConditionThenWrapper implements AnnotatedConfigurable<Void, Void> {
 
         @ConfigurableField(editor = EditorSubclass.class, label = "If", description = "The condition in which to apply the Wrapper")
-        @EditorSubclass.EdOptsSubclass(iface = UserCondition.class, merge = true, nameField = "@class")
+        @EditorSubclass.EdOptsSubclass(iface = UserCondition.class, merge = true, nameField = "@class", shortenClassNames = true)
         private UserCondition condition;
 
         @ConfigurableField(editor = EditorSubclass.class, label = "Then", description = "The wrapper to use of the condition is valid")
-        @EditorSubclass.EdOptsSubclass(iface = SecurityTableWrapper.class, merge = true, nameField = "@class")
+        @EditorSubclass.EdOptsSubclass(iface = SecurityTableWrapper.class, merge = true, nameField = "@class", shortenClassNames = true)
         private SecurityTableWrapper wrapper;
 
         public UserCondition getCondition() {

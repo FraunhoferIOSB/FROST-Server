@@ -101,7 +101,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorList.class, optional = true,
             label = "NavProps")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = DefValidator.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = DefValidator.class, merge = true, nameField = "@class", shortenClassNames = true)
     private List<DefValidator> validators = new ArrayList<>();
 
     /**
@@ -110,7 +110,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorList.class,
             label = "Annotations", description = "The (OData)annotations for this Element.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class", shortenClassNames = true)
     private final List<Annotation> annotations = new ArrayList<>();
 
     @JsonIgnore

@@ -43,22 +43,22 @@ public class ValidatorCUD implements HookValidator {
 
     @ConfigurableField(editor = EditorSubclass.class,
             label = "Early Insert Check", description = "The check to validate if the user can insert. Runs before required relations are validated.")
-    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class", shortenClassNames = true)
     private ValidationCheck checkInsertPreRel;
 
     @ConfigurableField(editor = EditorSubclass.class,
             label = "Insert Check", description = "The check to validate if the user can insert. Runs after required relations are validated.")
-    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class", shortenClassNames = true)
     private ValidationCheck checkInsert;
 
     @ConfigurableField(editor = EditorSubclass.class,
             label = "Update Check", description = "The check to validate if the user can insert.")
-    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class", shortenClassNames = true)
     private ValidationCheck checkUpdate;
 
     @ConfigurableField(editor = EditorSubclass.class,
             label = "Delete Check", description = "The check to validate if the user can insert.")
-    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class", shortenClassNames = true)
     private ValidationCheck checkDelete;
 
     @Override

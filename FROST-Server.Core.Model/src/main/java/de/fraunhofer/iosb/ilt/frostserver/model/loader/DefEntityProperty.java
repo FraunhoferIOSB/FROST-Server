@@ -114,7 +114,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorList.class,
             label = "Handlers", description = "The handler(s) defining the database access.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = PropertyPersistenceMapper.class, merge = true, nameField = "@class", shortenClassNames = true)
     private List<PropertyPersistenceMapper> handlers;
 
     /**
@@ -123,7 +123,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorList.class,
             label = "Annotations", description = "The (OData)annotations for this Element.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class", shortenClassNames = true)
     private final List<Annotation> annotations = new ArrayList<>();
 
     @JsonIgnore

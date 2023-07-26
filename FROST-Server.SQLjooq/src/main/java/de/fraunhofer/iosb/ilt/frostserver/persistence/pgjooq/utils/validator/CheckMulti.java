@@ -44,7 +44,7 @@ public class CheckMulti implements ValidationCheck {
     @ConfigurableField(editor = EditorList.class,
             label = "Sub Checks", description = "The sub-checks to execute.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class")
+    @EditorSubclass.EdOptsSubclass(iface = ValidationCheck.class, merge = true, nameField = "@class", shortenClassNames = true)
     private List<ValidationCheck> subChecks;
 
     @Override
