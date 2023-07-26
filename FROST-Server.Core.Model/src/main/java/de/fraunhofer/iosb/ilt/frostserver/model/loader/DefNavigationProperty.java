@@ -132,7 +132,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
     private NavigationPropertyMain navPropInverse;
 
     public void init() {
-        if (inverse == null) {
+        if (!symmetrical && inverse == null) {
             LOGGER.error("Inverse relation not defined for navLink {} on entityType {}", name, entityType);
         }
         if (handlers == null) {
@@ -374,8 +374,8 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
      * @return this.
      */
     public DefNavigationProperty setInverse(Inverse inverse) {
-        if (symmetrical) {
-            LOGGER.error("NavigationProperty {} set to be symmetrical, inverse is ignored!");
+        if (symmetrical && inverse != null) {
+            LOGGER.error("NavigationProperty {} set to be symmetrical, inverse is ignored!", name);
         } else {
             this.inverse = inverse;
         }
