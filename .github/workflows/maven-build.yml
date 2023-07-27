@@ -107,6 +107,8 @@ jobs:
         tags: |
           fraunhoferiosb/frost-server-mqttp:latest
           fraunhoferiosb/frost-server-mqttp:${{ env.DOCKER_TAG_MASTER }}
+          fraunhoferiosb/frost-server:latest
+          fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_MASTER }}
 
 
     - name: Build and push - MQTT - Master branch latest
@@ -149,6 +151,7 @@ jobs:
           ARTIFACT_FILE=${{ env.MQTTP_ARTIFACT }}
         tags: |
           fraunhoferiosb/frost-server:${{ env.DOCKER_TAG_BRANCH }}
+          fraunhoferiosb/frost-server-mqttp:${{ env.DOCKER_TAG_BRANCH }}
 
 
     - name: Build and push - MQTT - Develop branch latest
