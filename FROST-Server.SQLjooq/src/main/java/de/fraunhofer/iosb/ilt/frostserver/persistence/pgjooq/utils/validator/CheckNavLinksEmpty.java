@@ -121,12 +121,20 @@ public class CheckNavLinksEmpty implements ValidationCheck {
         LOGGER.info("Initialised check on {}.{}", entityType, targetNps);
     }
 
-    public List<String> getTargetNavLink() {
+    public List<String> getTargetNavLinks() {
         return targetNavLinks;
     }
 
-    public void setTargetNavLink(List<String> targetNavLinks) {
+    public void setTargetNavLinks(List<String> targetNavLinks) {
         this.targetNavLinks = targetNavLinks;
+    }
+
+    public CheckMulti.Type getCombineType() {
+        return combineType;
+    }
+
+    public void setCombineType(CheckMulti.Type combineType) {
+        this.combineType = combineType;
     }
 
     public EmptyState getRequiredState() {
