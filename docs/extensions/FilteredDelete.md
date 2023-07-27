@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Select Distinct
+title: Filtered Delete
 category: extensions
 order: 9
 ---
