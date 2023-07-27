@@ -19,12 +19,18 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorEnum;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkEmpty.EmptyState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,81 +38,95 @@ import org.slf4j.LoggerFactory;
  * A check that succeeds if a NavigationLink of a new or updated Entity is empty
  * and fails if it is not empty.
  */
-public class CheckNavLinkEmpty implements ValidationCheck {
+public class CheckNavLinksEmpty implements ValidationCheck {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinkEmpty.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinksEmpty.class);
 
-    public static enum EmptyState {
-        MUST_BE_EMPTY("Must be Empty"),
-        MUST_BE_FILLED("Must be Filled (non Empty)");
-
-        public final String name;
-
-        private EmptyState(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-
-    }
-
-    @ConfigurableField(editor = EditorString.class,
-            label = "Target NavLink", description = "The navLink that must be (not) set.")
+    @ConfigurableField(editor = EditorList.class,
+            label = "Target NavLinks", description = "The navLinks that must be (not) set.")
+    @EditorList.EdOptsList(editor = EditorString.class)
     @EditorString.EdOptsString
-    private String targetNavLink;
+    private List<String> targetNavLinks;
 
     @ConfigurableField(editor = EditorEnum.class,
             label = "Req. State", description = "The required state: empty or filled (non-empty)")
     @EditorEnum.EdOptsEnum(sourceType = EmptyState.class, dflt = "MUST_BE_EMPTY")
     private EmptyState requiredState = EmptyState.MUST_BE_EMPTY;
 
+    @ConfigurableField(editor = EditorEnum.class,
+            label = "Combine Type", description = "How to combine checks. Executed as fail-fast.")
+    @EditorEnum.EdOptsEnum(sourceType = CheckMulti.Type.class, dflt = "AND")
+    private CheckMulti.Type combineType;
+
     private EntityType entityType;
-    private EntityType targetType;
-    private NavigationPropertyMain targetNp;
+    private List<NavigationPropertyMain> targetNps;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {
-        if (targetType == null) {
+        if (targetNps == null) {
             init(contextEntity);
         }
         final boolean emptyRequired = requiredState == EmptyState.MUST_BE_EMPTY;
         final boolean filledRequired = requiredState == EmptyState.MUST_BE_FILLED;
-        if (targetNp instanceof NavigationPropertyMain.NavigationPropertyEntity targetNpEntity) {
+        if (combineType == CheckMulti.Type.AND) {
+            for (NavigationPropertyMain targetNp : targetNps) {
+                boolean valid = checkNavLink(targetNp, contextEntity, emptyRequired, filledRequired);
+                if (!valid) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            for (NavigationPropertyMain targetNp : targetNps) {
+                boolean valid = checkNavLink(targetNp, contextEntity, emptyRequired, filledRequired);
+                if (valid) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private boolean checkNavLink(NavigationPropertyMain targetNp, Entity contextEntity, final boolean emptyRequired, final boolean filledRequired) {
+        boolean valid;
+        if (targetNp instanceof NavigationPropertyEntity targetNpEntity) {
             final Entity targetEntity = contextEntity.getProperty(targetNpEntity);
             final boolean empty = targetEntity == null;
-            final boolean valid = (emptyRequired && empty) || (filledRequired && !empty);
+            valid = (emptyRequired && empty) || (filledRequired && !empty);
             LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
-            return valid;
-        }
-        if (targetNp instanceof NavigationPropertyMain.NavigationPropertyEntitySet targetNpEntitySet) {
+        } else if (targetNp instanceof NavigationPropertyEntitySet targetNpEntitySet) {
             EntitySet targetEntities = contextEntity.getProperty(targetNpEntitySet);
             final boolean empty = targetEntities == null || targetEntities.isEmpty();
-            final boolean valid = (emptyRequired && empty) || (filledRequired && !empty);
+            valid = (emptyRequired && empty) || (filledRequired && !empty);
             LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
-            return valid;
+        } else {
+            valid = false;
         }
-        return false;
+        return valid;
     }
 
-    private void init(Entity contextEntity) {
+    private synchronized void init(Entity contextEntity) {
+        if (targetNps != null) {
+            return;
+        }
         entityType = contextEntity.getEntityType();
-        targetNp = entityType.getNavigationProperty(getTargetNavLink());
-        targetType = targetNp.getEntityType();
-        LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
+        targetNps = new ArrayList<>();
+        for (String targetNavLink : targetNavLinks) {
+            NavigationPropertyMain targetNp = entityType.getNavigationProperty(targetNavLink);
+            targetNps.add(targetNp);
+        }
+        LOGGER.info("Initialised check on {}.{}", entityType, targetNps);
     }
 
-    public String getTargetNavLink() {
-        return targetNavLink;
+    public List<String> getTargetNavLink() {
+        return targetNavLinks;
     }
 
-    public void setTargetNavLink(String targetNavLink) {
-        this.targetNavLink = targetNavLink;
+    public void setTargetNavLink(List<String> targetNavLinks) {
+        this.targetNavLinks = targetNavLinks;
     }
 
     public EmptyState getRequiredState() {
@@ -119,7 +139,7 @@ public class CheckNavLinkEmpty implements ValidationCheck {
 
     @Override
     public String toString() {
-        return "CheckNavLinkEmpty: " + targetNavLink;
+        return "CheckNavLinkEmpty: " + targetNavLinks;
     }
 
 }
