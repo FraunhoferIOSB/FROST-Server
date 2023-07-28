@@ -25,10 +25,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSetStatus;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -37,6 +40,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +86,22 @@ public class LiquibaseHelper {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
-            liquibase.update(new Contexts(), out);
+            final List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
+            int toRunCount = 0;
+            for (ChangeSetStatus status : changeSetStatuses) {
+                if (status.getWillRun()) {
+                    toRunCount++;
+                    String[] actions = StringUtils.stripAll(StringUtils.split(status.getDescription(), ';'));
+                    out.append(status.getChangeSet().getId()).append('\n');
+                    for (String action : actions) {
+                        out.append('\t').append(action).append('\n');
+                    }
+                    out.append('\n');
+                }
+            }
+            if (toRunCount == 0) {
+                out.append("Up to date, no changes to apply.");
+            }
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
         } catch (Exception ex) {
@@ -99,7 +118,8 @@ public class LiquibaseHelper {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
-            liquibase.update(new Contexts());
+            liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
+            out.append("Update Completed.");
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database");
             throw new UpgradeFailedException(ex);

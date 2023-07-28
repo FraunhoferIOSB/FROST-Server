@@ -294,7 +294,7 @@ public class TestSuite {
 
     private synchronized int maybeStartServers(Map<String, String> parameters) throws IOException, InterruptedException {
         int key = keyFromProperties(parameters);
-        LOGGER.warn("Checking for parameters key {}", key);
+        LOGGER.debug("Checking for parameters key {}", key);
         if (!serverSettings.containsKey(key)) {
             startServers(key, new HashMap<>(parameters));
         }
