@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -68,8 +68,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)
-                            .setEntity(newEntity)
-            );
+                            .setEntity(newEntity));
         }
         return result;
     }
@@ -85,8 +84,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.DELETE)
-                            .setEntity(entity)
-            );
+                            .setEntity(entity));
         }
         return result;
     }

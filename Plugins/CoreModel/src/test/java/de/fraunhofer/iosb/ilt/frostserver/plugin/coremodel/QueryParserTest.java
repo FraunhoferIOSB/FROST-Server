@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -31,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
-import static de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant.TIMEZONE_UTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
@@ -53,10 +58,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Ove
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import net.time4j.PlainTimestamp;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -173,16 +174,10 @@ class QueryParserTest {
                                                 new IntegerConstant(14),
                                                 new Add(
                                                         new Path(pluginCoreModel.epResult),
-                                                        new IntegerConstant(1)
-                                                )
-                                        ),
-                                        new IntegerConstant(3)
-                                ),
-                                new IntegerConstant(3)
-                        ),
-                        new IntegerConstant(3)
-                )
-        );
+                                                        new IntegerConstant(1))),
+                                        new IntegerConstant(3)),
+                                new IntegerConstant(3)),
+                        new IntegerConstant(3)));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         assertEquals(expResult, result);
@@ -292,8 +287,7 @@ class QueryParserTest {
                                     modelRegistry.EP_PROPERTIES,
                                     new EntityPropertyCustomLink("building.Thing", pluginCoreModel.etThing),
                                     pluginCoreModel.epName),
-                            new StringConstant("Main")
-                    ));
+                            new StringConstant("Main")));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etThing);
             assertEquals(expResult, result);
@@ -399,8 +393,7 @@ class QueryParserTest {
                                     pluginCoreModel.epLocation,
                                     new EntityPropertyCustom("properties"),
                                     new EntityPropertyCustom("4frost")),
-                            new IntegerConstant(3)
-                    ));
+                            new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
             assertEquals(expResult, result);
@@ -414,8 +407,7 @@ class QueryParserTest {
                                     pluginCoreModel.epLocation,
                                     new EntityPropertyCustom("properties"),
                                     new EntityPropertyCustom("4")),
-                            new IntegerConstant(3)
-                    ));
+                            new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
             assertEquals(expResult, result);
@@ -458,9 +450,7 @@ class QueryParserTest {
                         new Path(pluginCoreModel.epTime),
                         new Add(
                                 DateTimeConstant.parse("2015-10-14T23:30:00.104+02:00"),
-                                DurationConstant.parse("P1D")
-                        )
-                ));
+                                DurationConstant.parse("P1D"))));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etHistoricalLocation);
         assertEquals(expResult, result);
@@ -515,11 +505,8 @@ class QueryParserTest {
                         new Round(
                                 new Add(
                                         new Path(pluginCoreModel.epResult),
-                                        new DoubleConstant(0.1)
-                                )
-                        ),
-                        new IntegerConstant(2)
-                ));
+                                        new DoubleConstant(0.1))),
+                        new IntegerConstant(2)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etObservation);
         assertEquals(expResult, result);
@@ -572,8 +559,7 @@ class QueryParserTest {
                         new Path(
                                 modelRegistry.EP_PROPERTIES,
                                 new EntityPropertyCustom("subprop"),
-                                new EntityPropertyCustom("name")
-                        )));
+                                new EntityPropertyCustom("name"))));
         result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
         assertEquals(expResult, result);
@@ -747,9 +733,7 @@ class QueryParserTest {
                                 modelRegistry,
                                 new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
                                         .addToSubPath("sub")
-                                        .addToSubPath("link.Thing")
-                        )
-                );
+                                        .addToSubPath("link.Thing")));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etDatastream);
         assertEquals(expResult, result);
@@ -771,9 +755,7 @@ class QueryParserTest {
                             new Expand(
                                     modelRegistry,
                                     new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
-                                            .addToSubPath("link.Thing")
-                            )
-                    );
+                                            .addToSubPath("link.Thing")));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
             assertEquals(expResult, result);
@@ -785,9 +767,7 @@ class QueryParserTest {
                             new Expand(
                                     modelRegistry,
                                     new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
-                                            .addToSubPath("link.Thing")
-                            )
-                    )
+                                            .addToSubPath("link.Thing")))
                     .addExpand(new Expand(modelRegistry, pluginCoreModel.npThingsLocation));
             Query result = QueryParser.parseQuery(query, coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
@@ -843,8 +823,7 @@ class QueryParserTest {
                 .addExpand(new Expand(modelRegistry, pluginCoreModel.npDatastreamsThing)
                         .setSubQuery(new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                                 .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservationsDatastream))
-                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream))
-                        ));
+                                .addExpand(new Expand(modelRegistry, pluginCoreModel.npObservedPropertyDatastream))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
         assertEquals(expResult, result);
@@ -898,23 +877,17 @@ class QueryParserTest {
                                                 pluginCoreModel.npObservationsDatastream,
                                                 pluginCoreModel.npFeatureOfInterestObservation,
                                                 pluginCoreModel.etFeatureOfInterest.getPrimaryKey()),
-                                        new StringConstant("FOI_1")
-                                ),
+                                        new StringConstant("FOI_1")),
                                 new GreaterEqual(
                                         new Path(pluginCoreModel.npDatastreamsThing,
                                                 pluginCoreModel.npObservationsDatastream,
                                                 pluginCoreModel.epResultTime),
-                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC))
-                                )
-                        ),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 06, 01, 0, 0).inZonalView(TIMEZONE_UTC)))),
                         new LessEqual(
                                 new Path(pluginCoreModel.npDatastreamsThing,
                                         pluginCoreModel.npObservationsDatastream,
                                         pluginCoreModel.epResultTime),
-                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))
-                        )
-                )
-        );
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(pluginCoreModel.etThing);
         assertEquals(expResult, result);

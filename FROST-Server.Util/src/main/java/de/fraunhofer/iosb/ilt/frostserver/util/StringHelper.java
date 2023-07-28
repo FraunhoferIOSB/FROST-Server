@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import static net.time4j.PlainTime.HOUR_FROM_0_TO_24;
+import static net.time4j.PlainTime.MINUTE_OF_HOUR;
+import static net.time4j.PlainTime.NANO_OF_SECOND;
+import static net.time4j.PlainTime.SECOND_OF_MINUTE;
+import static net.time4j.format.expert.IsoDateStyle.EXTENDED_CALENDAR_DATE;
+import static net.time4j.format.expert.IsoDecimalStyle.DOT;
+import static net.time4j.tz.ZonalOffset.UTC;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -29,10 +37,6 @@ import java.util.Objects;
 import net.time4j.Moment;
 import net.time4j.PlainDate;
 import net.time4j.PlainTime;
-import static net.time4j.PlainTime.HOUR_FROM_0_TO_24;
-import static net.time4j.PlainTime.MINUTE_OF_HOUR;
-import static net.time4j.PlainTime.NANO_OF_SECOND;
-import static net.time4j.PlainTime.SECOND_OF_MINUTE;
 import net.time4j.engine.ChronoCondition;
 import net.time4j.engine.ChronoDisplay;
 import net.time4j.engine.ChronoElement;
@@ -44,12 +48,9 @@ import net.time4j.format.expert.ChronoFormatter;
 import net.time4j.format.expert.ChronoPrinter;
 import net.time4j.format.expert.Iso8601Format;
 import net.time4j.format.expert.IsoDateStyle;
-import static net.time4j.format.expert.IsoDateStyle.EXTENDED_CALENDAR_DATE;
 import net.time4j.format.expert.IsoDecimalStyle;
-import static net.time4j.format.expert.IsoDecimalStyle.DOT;
 import net.time4j.range.MomentInterval;
 import net.time4j.tz.ZonalOffset;
-import static net.time4j.tz.ZonalOffset.UTC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

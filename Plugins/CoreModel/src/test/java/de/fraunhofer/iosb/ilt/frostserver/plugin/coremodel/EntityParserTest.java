@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TestHelper.createTimeInstantUTC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -28,7 +33,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TestHelper.createTimeInstantUTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
@@ -38,9 +42,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -213,14 +214,12 @@ class EntityParserTest {
                         new DefaultEntity(pluginCoreModel.etObservedProperty)
                                 .setProperty(pluginCoreModel.epName, "Temperature")
                                 .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
-                )
+                                .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site"))
                 .setProperty(pluginCoreModel.npSensorDatastream,
                         new DefaultEntity(pluginCoreModel.etSensor)
                                 .setProperty(pluginCoreModel.epDescription, "Sensor 101")
                                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11")
-                );
+                                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11"));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
@@ -461,8 +460,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
-                        .setProperty(pluginCoreModel.epFeature, "tarmac")
-                )
+                        .setProperty(pluginCoreModel.epFeature, "tarmac"))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
@@ -516,8 +514,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100))
-                );
+                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
 
@@ -576,8 +573,7 @@ class EntityParserTest {
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100))
-                );
+                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -740,8 +736,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "my backyard")
                         .setProperty(pluginCoreModel.epDescription, "my backyard")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
-                );
+                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -768,8 +763,7 @@ class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
-                        .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100))
-                );
+                        .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -796,8 +790,7 @@ class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100))
-                );
+                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -855,8 +848,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "my backyard")
                         .setProperty(pluginCoreModel.epDescription, "my backyard")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
-                )
+                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)))
                 .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
                                 new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
@@ -867,16 +859,13 @@ class EntityParserTest {
                                 new DefaultEntity(pluginCoreModel.etObservedProperty)
                                         .setProperty(pluginCoreModel.epName, "Temperature")
                                         .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                        .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
-                        )
+                                        .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site"))
                         .setProperty(pluginCoreModel.npSensorDatastream,
                                 new DefaultEntity(pluginCoreModel.etSensor)
                                         .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
                                         .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")
                                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")
-                        )
-                );
+                                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")));
         final Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertEquals(expectedResult, result);
     }
@@ -950,8 +939,7 @@ class EntityParserTest {
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing).
-                    setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(id));
+            Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing).setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(id));
             assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
         }
         {

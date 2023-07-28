@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
+import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.http.auth.AuthScope;

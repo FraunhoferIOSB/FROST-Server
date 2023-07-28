@@ -1,4 +1,24 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
+
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -12,8 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
@@ -156,13 +174,11 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npThingMDs, this, thingsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         final TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npSensorMDs, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
-                .setTargetFieldAccessor(TableImpSensors::getId)
-        );
+                .setTargetFieldAccessor(TableImpSensors::getId));
         final TableImpMultiDatastreamsObsProperties tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationManyToManyOrdered<>(pluginMultiDatastream.npObservedPropertiesMDs, this, tableMdOp, tableObsProp, true)
@@ -171,8 +187,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 .setSourceFieldAcc(TableImpMultiDatastreams::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
-                .setTargetFieldAcc(TableImpObsProperties::getId)
-        );
+                .setTargetFieldAcc(TableImpObsProperties::getId));
 
         // we have registered the MULTI_DATA column on the Observations table.
         final TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
@@ -181,14 +196,12 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         final TableImpObservations tableObs = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npObservationsMDs, this, tableObs)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
-                .setTargetFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
-        );
+                .setTargetFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx)));
 
         // Now we register the inverse relation on Observations
         observationsTable.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamObservation, observationsTable, getThis())
                 .setSourceFieldAccessor(table -> (TableField<Record, ?>) table.field(obsMultiDsIdIdx))
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getId));
         // Now we register the inverse relation on ObservedProperties
         final TableImpMultiDatastreamsObsProperties tableMDsOpsProp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties tableObsProps = tables.getTableForClass(TableImpObsProperties.class);
@@ -197,20 +210,17 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 .setSourceFieldAcc(TableImpObsProperties::getId)
                 .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
-                .setTargetFieldAcc(TableImpMultiDatastreams::getId)
-        );
+                .setTargetFieldAcc(TableImpMultiDatastreams::getId));
         // Now we register the inverse relation on Sensors
         final TableImpSensors tableSensors = tables.getTableForClass(TableImpSensors.class);
         tableSensors.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsSensor, tableSensors, getThis())
                 .setSourceFieldAccessor(TableImpSensors::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId));
         // Now we register the inverse relation on Things
         final TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         tableThings.registerRelation(new RelationOneToMany<>(pluginMultiDatastream.npMultiDatastreamsThing, tableThings, getThis())
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId));
     }
 
     @Override
@@ -322,9 +332,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             ((TableField) tMd.getId()).in(
                                     DSL.select(tMdOp.getMultiDatastreamId())
                                             .from(tMdOp)
-                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))
-                            )
-                    )
+                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))))
                     .execute();
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });

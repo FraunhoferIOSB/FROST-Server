@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -105,8 +105,7 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
                         .setTokenServerUrl(keycloak.getAuthServerUrl() + KEYCLOAK_TOKEN_PATH)
                         .setClientId(KEYCLOAK_FROST_CLIENT_ID)
                         .setUserName(username)
-                        .setPassword(password)
-        );
+                        .setPassword(password));
         return service;
     }
 

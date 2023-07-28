@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
+
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -34,9 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -257,8 +257,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             LOGGER.trace("      Client disconnected: {}", clientId);
             clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
                     .stream().forEach(
-                            subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
-                    );
+                            subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic)));
             clientSubscriptions.remove(clientId);
         }
 
@@ -271,8 +270,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             final String topicFilter = msg.getTopicFilter();
             LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
             clientSubscriptions.getOrDefault(
-                    clientId, new ArrayList<>()
-            ).add(topicFilter);
+                    clientId, new ArrayList<>()).add(topicFilter);
             fireSubscribe(new SubscriptionEvent(topicFilter));
         }
 

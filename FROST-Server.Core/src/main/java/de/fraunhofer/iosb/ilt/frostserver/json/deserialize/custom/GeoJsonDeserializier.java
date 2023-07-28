@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,8 +37,7 @@ public class GeoJsonDeserializier implements CustomDeserializer {
     public static final String APPLICATION_GEOJSON = "application/geo+json";
 
     public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(APPLICATION_GEOJSON,
-            "application/vnd.geo+json"
-    )));
+            "application/vnd.geo+json")));
 
     public Object deserialize(String json) throws IOException {
         return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);

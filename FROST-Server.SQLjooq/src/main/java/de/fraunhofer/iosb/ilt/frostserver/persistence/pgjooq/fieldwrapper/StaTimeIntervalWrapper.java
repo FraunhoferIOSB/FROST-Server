@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
+
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Map;
 import net.time4j.Moment;
@@ -104,8 +105,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
                 String template = "(? " + op + " " + INTERVAL_PARAM + ")";
                 return new StaTimeIntervalWrapper(
                         DSL.field(template, Moment.class, start, other.getDuration()),
-                        DSL.field(template, Moment.class, end, other.getDuration())
-                );
+                        DSL.field(template, Moment.class, end, other.getDuration()));
 
             default:
                 throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());

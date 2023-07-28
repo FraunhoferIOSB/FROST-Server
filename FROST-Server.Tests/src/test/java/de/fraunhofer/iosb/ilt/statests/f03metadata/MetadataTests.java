@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021 Meo Limited.
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.statests.f03metadata;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,10 +56,6 @@ import java.util.Properties;
 import org.geojson.Point;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -282,7 +284,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     private void testMetadataInExpand(String metadata, boolean hasSelfLink, boolean hasNavigationLink) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING,
                 null, null, "?$filter=id%20eq%20" + THINGS.get(1).getId().getUrl()
-                + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata);
+                        + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata);
         HttpResponse result = HTTPMethods.doGet(urlString);
         assertEquals(200, result.code);
         JSONObject response = new JSONObject(result.response);

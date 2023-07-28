@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
+
+import static net.time4j.tz.ZonalOffset.UTC;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,8 +42,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static net.time4j.tz.ZonalOffset.UTC;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -75,8 +76,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicAbs() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
@@ -106,8 +106,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicRel() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -137,8 +136,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingSelect() throws IOException {
-        String expResult
-                = "{\n"
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
@@ -159,8 +157,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsBasic() throws IOException {
-        String thing
-                = "{\n"
+        String thing = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -174,8 +171,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        String expResult
-                = "{ \"value\":[\n"
+        String expResult = "{ \"value\":[\n"
                 + thing + ",\n"
                 + thing
                 + "]}";
@@ -217,8 +213,7 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsWithExpandedDatastream() throws IOException {
-        String thing
-                = "{\n"
+        String thing = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Datastreams@iot.count\":1,\n"
@@ -253,8 +248,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        String expResult
-                = "{ "
+        String expResult = "{ "
                 + "\"@iot.count\": 1,\n"
                 + "\"value\":[\n"
                 + thing
@@ -273,13 +267,11 @@ class EntityFormatterTest {
                         .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
-                                .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                        )
+                                .setDefinition("http://unitsofmeasure.org/ucum.html#para-30"))
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                         .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
-                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
-                )
+                        .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()

@@ -1,4 +1,29 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
+
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -11,8 +36,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.IdType;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
-import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +48,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -1252,10 +1270,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "  ]}";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
 
-//        /** Observation **/
-//        Object obsId1 = observationIds.get(0);
-//        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
-//        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
+        //        /** Observation **/
+        //        Object obsId1 = observationIds.get(0);
+        //        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
+        //        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
     }
 
     /**

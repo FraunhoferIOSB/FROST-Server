@@ -1,24 +1,22 @@
 /*
- * Copyright 2016 Open Geospatial Consortium.
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe;
 
-import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
-import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
-import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.DATASTREAM;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.FEATURE_OF_INTEREST;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.HISTORICAL_LOCATION;
@@ -27,12 +25,19 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityType.OBSERVATION;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.OBSERVED_PROPERTY;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.SENSOR;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.THING;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_CLEANUP;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
+import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttBatchResult;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_CLEANUP;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
@@ -51,8 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -592,8 +595,8 @@ public abstract class Capability8Tests extends AbstractTestClass {
                 if (relatedType.equals(destinationEntityType)) {
                     return currentElement.path
                             + (currentElement.path.isEmpty()
-                            ? relation
-                            : "/" + relation);
+                                    ? relation
+                                    : "/" + relation);
                 } else {
                     queue.offer(new BFSStructure(relatedType, currentElement.path + (currentElement.path.isEmpty() ? relation : "/" + relation)));
                 }

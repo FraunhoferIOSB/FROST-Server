@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -78,24 +95,21 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingHistLoc, this, tableThings)
                 .setSourceFieldAccessor(TableImpHistLocations::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         final TableImpLocationsHistLocations tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpLocations tableLocations = tables.getTableForClass(TableImpLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npLocationsHistLoc, this, tableLocHistLoc, tableLocations)
                 .setSourceFieldAcc(TableImpHistLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
-                .setTargetFieldAcc(TableImpLocations::getId)
-        );
+                .setTargetFieldAcc(TableImpLocations::getId));
     }
 
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         pfReg.addEntryId(TableImpHistLocations::getId);
         pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
-                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
-        );
+                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time));
         pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId);
         pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -291,8 +291,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         DeleteConditionStep<? extends Record> delete = dslContext
                 .deleteFrom(table)
                 .where(
-                        table.getId().in(idSelect)
-                );
+                        table.getId().in(idSelect));
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, delete.getSQL(ParamType.INDEXED));

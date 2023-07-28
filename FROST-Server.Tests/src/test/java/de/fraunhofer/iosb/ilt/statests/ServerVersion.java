@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,9 @@ import java.util.Map;
  * @author scf
  */
 public enum ServerVersion {
-    v_1_0("v1.0"), v_1_1("v1.1");
+    v_1_0("v1.0"),
+    v_1_1("v1.1");
+
     public final String urlPart;
     public static final Map<String, ServerVersion> urlMap = new HashMap<>();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -33,8 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
@@ -88,8 +89,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     public final EntityType etMultiDatastream = new EntityType(MULTI_DATASTREAM, MULTI_DATASTREAMS);
 
     private static final List<String> REQUIREMENTS_MDS_MODEL = Arrays.asList(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
-    );
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream");
 
     private CoreSettings settings;
     private MdsModelSettings modelSettings;

@@ -1,4 +1,23 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
+
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -17,7 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -117,16 +135,14 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getThingId)
-                .setTargetFieldAcc(TableImpThings::getId)
-        );
+                .setTargetFieldAcc(TableImpThings::getId));
         final TableImpLocationsHistLocations tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpHistLocations tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
         registerRelation(new RelationManyToMany<>(pluginCoreModel.npHistoricalLocationsLocation, this, tableLocHistLoc, tableHistLoc)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
-                .setTargetFieldAcc(TableImpHistLocations::getId)
-        );
+                .setTargetFieldAcc(TableImpHistLocations::getId));
     }
 
     @Override
@@ -219,8 +235,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
                                 .setEventType(EntityChangedMessage.Type.CREATE)
-                                .setEntity(newHl)
-                );
+                                .setEntity(newHl));
             }
             return;
         }
@@ -240,8 +255,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                         DSL.select(thl.getId())
                                 .from(thl)
                                 .leftJoin(tlhl).on(((TableField) thl.getId()).eq(tlhl.getHistLocationId()))
-                                .where(tlhl.getLocationId().isNull())
-                ))
+                                .where(tlhl.getLocationId().isNull())))
                 .execute();
         LOGGER.debug("Deleted {} HistoricalLocations", count);
 

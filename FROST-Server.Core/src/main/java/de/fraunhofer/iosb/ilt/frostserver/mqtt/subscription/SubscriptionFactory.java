@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -97,12 +97,12 @@ public class SubscriptionFactory {
         } else if (size >= 2
                 && path.get(size - 2) instanceof PathElementEntity
                 && path.get(size - 1) instanceof PathElementProperty) {
-            // SensorThings Standard 14.2.3 - Subscribe to Property
-            return new PropertySubscription(topic, path, settings);
+                    // SensorThings Standard 14.2.3 - Subscribe to Property
+                    return new PropertySubscription(topic, path, settings);
 
-        } else {
-            throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
-        }
+                } else {
+                    throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
+                }
 
     }
 

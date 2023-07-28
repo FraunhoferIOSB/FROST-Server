@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see http://www.gnu.org/licenses/.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
@@ -145,8 +145,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
                 .setSourceFieldAcc(t -> (TableField) t.field(fieldIdx))
                 .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
                 .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
-                .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther))
-        );
+                .setTargetFieldAcc(t -> (TableField) t.field(fieldIdxOther)));
 
         final DefNavigationProperty.Inverse inverse = getParent().getInverse();
         if (inverse != null) {
@@ -159,8 +158,7 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
                     .setSourceFieldAcc(t -> (TableField) t.field(fieldIdxOther))
                     .setSourceLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOther))
                     .setTargetLinkFieldAcc(t -> (TableField) t.field(fieldIdxLinkOur))
-                    .setTargetFieldAcc(t -> (TableField) t.field(fieldIdx))
-            );
+                    .setTargetFieldAcc(t -> (TableField) t.field(fieldIdx)));
         }
 
     }

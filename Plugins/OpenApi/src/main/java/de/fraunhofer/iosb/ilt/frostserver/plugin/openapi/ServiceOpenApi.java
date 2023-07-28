@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.GeneratorContext;
@@ -26,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.List;

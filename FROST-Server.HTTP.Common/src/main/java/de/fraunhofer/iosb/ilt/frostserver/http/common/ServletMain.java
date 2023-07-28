@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import static de.fraunhofer.iosb.ilt.frostserver.http.common.HttpRequestDecoder.serviceRequestFromHttpRequest;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
+
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,8 +51,7 @@ import org.slf4j.LoggerFactory;
         urlPatterns = {"/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
-        }
-)
+        })
 @MultipartConfig()
 public class ServletMain extends HttpServlet {
 

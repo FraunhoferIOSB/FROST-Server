@@ -1,4 +1,24 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
+
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -9,8 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
@@ -181,23 +199,19 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npThingDatasteam, this, thingsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         TableImpSensors sensorsTable = tables.getTableForClass(TableImpSensors.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npSensorDatastream, this, sensorsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
-                .setTargetFieldAccessor(TableImpSensors::getId)
-        );
+                .setTargetFieldAccessor(TableImpSensors::getId));
         TableImpObsProperties obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservedPropertyDatastream, this, obsPropsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
-                .setTargetFieldAccessor(TableImpObsProperties::getId)
-        );
+                .setTargetFieldAccessor(TableImpObsProperties::getId));
         TableImpObservations observationsTable = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(pluginCoreModel.npObservationsDatastream, this, observationsTable)
                 .setSourceFieldAccessor(TableImpDatastreams::getId)
-                .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
-        );
+                .setTargetFieldAccessor(TableImpObservations::getDatastreamId));
     }
 
     @Override
@@ -254,8 +268,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                         }),
                 new NFP<>("definition", table -> table.colUnitDefinition),
                 new NFP<>("name", table -> table.colUnitName),
-                new NFP<>("symbol", table -> table.colUnitSymbol)
-        );
+                new NFP<>("symbol", table -> table.colUnitSymbol));
         pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId);
         pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId);
         pfReg.addEntry(pluginCoreModel.npThingDatasteam, TableImpDatastreams::getThingId);
@@ -336,7 +349,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                                     uom.setSymbol(value);
                                     break;
                                 default:
-                                // Do nothing.
+                                    // Do nothing.
                             }
                         },
                         null,

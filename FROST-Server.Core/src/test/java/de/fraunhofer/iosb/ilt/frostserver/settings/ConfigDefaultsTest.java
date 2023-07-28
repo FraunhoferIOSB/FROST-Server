@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MAX_IN_FLIGHT;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MQTT_BROKER;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_QOS_LEVEL;
@@ -9,13 +25,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_R
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_SEND_QUEUE_SIZE;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_SEND_WORKER_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_TOPIC_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

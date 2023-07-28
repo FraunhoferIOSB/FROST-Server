@@ -1,4 +1,24 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.statests.c04batch;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -119,44 +137,44 @@ public abstract class BatchTests extends AbstractTestClass {
         LOGGER.info("  test01BatchRequest");
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
                 "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: 1\r\n"
-                + "\r\n"
-                + "POST /" + version.urlPart + "/Things HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: 36\r\n"
-                + "\r\n"
-                + "{\"name\":\"New\",\"description\":\"Thing\"}\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: 2\r\n"
-                + "\r\n"
-                + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: 18\r\n"
-                + "\r\n"
-                + "{\"name\":\"Patched\"}\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                        + "Content-Type: application/http\r\n"
+                        + "\r\n"
+                        + "GET /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")?$select=name HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "\r\n"
+                        + "\r\n"
+                        + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+                        + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "Content-Type: application/http\r\n"
+                        + "Content-ID: 1\r\n"
+                        + "\r\n"
+                        + "POST /" + version.urlPart + "/Things HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 36\r\n"
+                        + "\r\n"
+                        + "{\"name\":\"New\",\"description\":\"Thing\"}\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "Content-Type: application/http\r\n"
+                        + "Content-ID: 2\r\n"
+                        + "\r\n"
+                        + "PATCH /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ") HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 18\r\n"
+                        + "\r\n"
+                        + "{\"name\":\"Patched\"}\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
+                        + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
+                        + "Content-Type: application/http\r\n"
+                        + "\r\n"
+                        + "GET /" + version.urlPart + "/Things(" + Utils.quoteIdForUrl(ID_TYPES.get(EntityType.THING).generateUnlikely()) + ") HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "\r\n"
+                        + "\r\n"
+                        + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
         String thingId = getLastestEntityIdForPath(EntityType.THING);
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
@@ -231,30 +249,30 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "}";
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b",
                 "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
-                + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: sensor1\r\n"
-                + "\r\n"
-                + "POST /" + version.urlPart + "/Sensors HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: " + post1.length() + "\r\n"
-                + "\r\n"
-                + post1 + "\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
-                + "Content-Type: application/http\r\n"
-                + "Content-ID: any\r\n"
-                + "\r\n"
-                + "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams HTTP/1.1\r\n"
-                + "Host: localhost\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: " + post2.length() + "\r\n"
-                + "\r\n"
-                + post2 + "\r\n"
-                + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
-                + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
+                        + "Content-Type: multipart/mixed;boundary=changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "Content-Type: application/http\r\n"
+                        + "Content-ID: sensor1\r\n"
+                        + "\r\n"
+                        + "POST /" + version.urlPart + "/Sensors HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: " + post1.length() + "\r\n"
+                        + "\r\n"
+                        + post1 + "\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd\r\n"
+                        + "Content-Type: application/http\r\n"
+                        + "Content-ID: any\r\n"
+                        + "\r\n"
+                        + "POST /" + version.urlPart + "/Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams HTTP/1.1\r\n"
+                        + "Host: localhost\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: " + post2.length() + "\r\n"
+                        + "\r\n"
+                        + post2 + "\r\n"
+                        + "--changeset_77162fcd-b8da-41ac-a9f8-9357efbbd--\r\n"
+                        + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--");
 
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
@@ -401,38 +419,38 @@ public abstract class BatchTests extends AbstractTestClass {
         LOGGER.info("  test06JsonBatchRequest");
         String response = postBatch(null,
                 "{\"requests\":[{"
-                + "\"id\": \"0\","
-                + "\"method\": \"get\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
-                + ")?$select=name\""
-                + "},{"
-                + "\"id\": \"1\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Things\","
-                + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
-                + "},{"
-                + "\"id\": \"2\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"patch\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
-                + "\"body\": {\"name\":\"Json Patched\"}"
-                + "},{"
-                + "\"id\": \"3\","
-                + "\"method\": \"get\","
-                + "\"url\": \"Things(null)\""
-                + "}]}");
+                        + "\"id\": \"0\","
+                        + "\"method\": \"get\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl()
+                        + ")?$select=name\""
+                        + "},{"
+                        + "\"id\": \"1\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Things\","
+                        + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
+                        + "},{"
+                        + "\"id\": \"2\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"patch\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")\","
+                        + "\"body\": {\"name\":\"Json Patched\"}"
+                        + "},{"
+                        + "\"id\": \"3\","
+                        + "\"method\": \"get\","
+                        + "\"url\": \"Things(null)\""
+                        + "}]}");
         String thingId = getLastestEntityIdForPath(EntityType.THING);
 
         try {
             BatchResponseJson expected = mapper.readValue(
                     "{\"responses\":["
-                    + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
-                    + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
-                    + thingId + ")\"},"
-                    + "{\"id\":\"2\",\"status\":200},"
-                    + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
-                    + "]}",
+                            + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
+                            + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
+                            + thingId + ")\"},"
+                            + "{\"id\":\"2\",\"status\":200},"
+                            + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
+                            + "]}",
                     BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
@@ -465,20 +483,20 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "}";
         String response = postBatch(null,
                 "{\"requests\":[{"
-                + "\"id\": \"sensor1\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Sensors\","
-                + "\"body\":"
-                + post1
-                + "},{"
-                + "\"id\": \"any\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
-                + "\"body\":"
-                + post2
-                + "}]}");
+                        + "\"id\": \"sensor1\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Sensors\","
+                        + "\"body\":"
+                        + post1
+                        + "},{"
+                        + "\"id\": \"any\","
+                        + "\"atomicityGroup\": \"group1\","
+                        + "\"method\": \"post\","
+                        + "\"url\": \"Things(" + THINGS.get(0).getId().getUrl() + ")/Datastreams\","
+                        + "\"body\":"
+                        + post2
+                        + "}]}");
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
 

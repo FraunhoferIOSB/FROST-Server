@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,9 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_PLAIN_TEXT_PASSWORD;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -111,8 +112,8 @@ public class DatabaseHandler {
                     .from(TableUsers.USERS)
                     .where(
                             TableUsers.USERS.userName.eq(userName)
-                                    .and(passwordCondition(passwordOrHash))
-                    ).fetchOne();
+                                    .and(passwordCondition(passwordOrHash)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user credentials.", exc);
@@ -143,8 +144,8 @@ public class DatabaseHandler {
                     .where(
                             TableUsers.USERS.userName.eq(userName)
                                     .and(passwordCondition(userPassOrHash))
-                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchOne();
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
@@ -172,8 +173,8 @@ public class DatabaseHandler {
                     .from(TableUsersRoles.USER_ROLES)
                     .where(
                             TableUsersRoles.USER_ROLES.userName.eq(userName)
-                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchOne();
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName)))
+                    .fetchOne();
             return one != null;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
@@ -195,7 +196,7 @@ public class DatabaseHandler {
 
     public String checkForUpgrades(Map<String, Object> params) {
         Settings customSettings = coreSettings.getAuthSettings();
-        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+        try (Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
             return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -211,7 +212,7 @@ public class DatabaseHandler {
 
     public boolean doUpgrades(Writer out, Map<String, Object> params) throws UpgradeFailedException, IOException {
         Settings customSettings = coreSettings.getAuthSettings();
-        try ( Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
+        try (Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
             return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params, out);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);

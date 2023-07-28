@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -91,26 +108,22 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
         TableImpThings tableThings = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npThingTaskCap, this, tableThings)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
-                .setTargetFieldAccessor(TableImpThings::getId)
-        );
+                .setTargetFieldAccessor(TableImpThings::getId));
         TableImpActuators tableActuators = tables.getTableForClass(TableImpActuators.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npActuatorTaskCap, this, tableActuators)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
-                .setTargetFieldAccessor(TableImpActuators::getId)
-        );
+                .setTargetFieldAccessor(TableImpActuators::getId));
         final TableImpTasks tableTasks = tables.getTableForClass(TableImpTasks.class);
         registerRelation(new RelationOneToMany<>(pluginActuation.npTasksTaskCap, this, tableTasks)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
-                .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
-        );
+                .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId));
 
         // We add the relation to us to the Things table.
         final TableImpThings thingsTable = tables.getTableForClass(TableImpThings.class);
         final TableImpTaskingCapabilities tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
         thingsTable.registerRelation(new RelationOneToMany<>(pluginActuation.npTaskingCapabilitiesThing, thingsTable, tableTaskingCaps)
                 .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
-        );
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId));
 
     }
 

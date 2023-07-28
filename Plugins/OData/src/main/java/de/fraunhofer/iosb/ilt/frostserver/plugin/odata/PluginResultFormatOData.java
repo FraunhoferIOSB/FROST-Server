@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
+
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
@@ -26,8 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
@@ -37,8 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,8 +88,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
     public Collection<String> getFormatNames() {
         return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT,
                 FORMAT_NAME_ODATA_JSON,
-                FORMAT_NAME_EMPTY
-        );
+                FORMAT_NAME_EMPTY);
     }
 
     @Override
