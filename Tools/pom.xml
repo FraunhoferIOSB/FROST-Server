@@ -9,9 +9,13 @@
     </parent>
     <artifactId>FROST-Server.Tools</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>ModelEditor</module>
         <module>ModelExtractor</module>
     </modules>
-</project>
 
+    <properties>
+        <root.basedir>${project.parent.basedir}</root.basedir>
+    </properties>
+</project>

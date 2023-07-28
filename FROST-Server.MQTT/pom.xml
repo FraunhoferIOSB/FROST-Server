@@ -15,15 +15,21 @@
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer</mainClass>
         <docker-image-name>fraunhoferiosb/frost-server-mqtt</docker-image-name>
+        <mainClass>de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer</mainClass>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Util</artifactId>
+            <artifactId>FROST-Server.Auth.Basic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Auth.Keycloak</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -33,22 +39,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.SQLjooq</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.MQTT.Moquette</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Auth.Basic</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Auth.Keycloak</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -78,12 +69,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
+            <artifactId>FROST-Server.Plugin.ModelLoader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
+            <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -93,8 +84,26 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.Plugin.ModelLoader</artifactId>
+            <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.SQLjooq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.postgis</groupId>
+            <artifactId>postgis-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -106,20 +115,12 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.postgis</groupId>
-            <artifactId>postgis-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -143,11 +144,13 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <id>make-assembly</id>
+                        <!-- bind to the packaging phase -->
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <!-- this is used for inheritance merges -->
+                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>

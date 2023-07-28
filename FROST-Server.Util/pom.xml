@@ -16,16 +16,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>de.grundid.opendatalab</groupId>
+            <artifactId>geojson-jackson</artifactId>
+        </dependency>
         <dependency>
             <groupId>net.time4j</groupId>
             <artifactId>time4j-base</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.grundid.opendatalab</groupId>
-            <artifactId>geojson-jackson</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -35,10 +40,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 
@@ -51,39 +52,39 @@
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>fetch-files</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <url>https://github.com/hylkevds/CongoCC-Versions/releases/download/v${congocc.version}/javacc-full-${congocc.version}.jar</url>
+                    <url>https://github.com/hylkevds/CongoCC-Versions/releases/download/v${version.congocc}/javacc-full-${version.congocc}.jar</url>
                     <unpack>false</unpack>
                     <outputDirectory>${project.build.directory}/scripts</outputDirectory>
                     <sha512>${congocc.sha512}</sha512>
                     <alwaysVerifyChecksum>true</alwaysVerifyChecksum>
                 </configuration>
-            </plugin>        
+                <executions>
+                    <execution>
+                        <id>fetch-files</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>generatePathParser</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <executable>java</executable>
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/pathParser.ccc</argument>
                                 <argument>-d</argument>
@@ -93,16 +94,16 @@
                     </execution>
                     <execution>
                         <id>generateQueryParser</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <executable>java</executable>
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/queryParser.ccc</argument>
                                 <argument>-d</argument>
@@ -112,16 +113,16 @@
                     </execution>
                     <execution>
                         <id>generateWktParser</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <executable>java</executable>
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${congocc.version}.jar</argument>
+                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/wktParser.ccc</argument>
                                 <argument>-d</argument>
@@ -136,10 +137,10 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/congocc</source>
