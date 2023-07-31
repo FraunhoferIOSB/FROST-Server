@@ -43,10 +43,17 @@ import org.slf4j.LoggerFactory;
 public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable<T>> implements Relation<S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationOneToMany.class.getName());
+
+    /**
+     * The navigation property this relation represents.
+     */
+    private final NavigationPropertyMain navProp;
+
     /**
      * The target entity type of the relation.
      */
     private final EntityType targetType;
+
     /**
      * The name of the relation. For official relations, this is the (singular)
      * entity type name.
@@ -75,17 +82,18 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     private final boolean distinctRequired;
 
     public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
-        this(navProp.getName(), source, target, navProp.getEntityType(), navProp.isEntitySet());
+        this(navProp, source, target, navProp.getEntityType(), navProp.isEntitySet());
     }
 
-    public RelationOneToMany(String name, S source, T target, EntityType targetType, boolean distinctRequired) {
+    public RelationOneToMany(NavigationPropertyMain navProp, S source, T target, EntityType targetType, boolean distinctRequired) {
         if (source == null) {
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
         }
+        this.navProp = navProp;
         this.target = target;
         this.targetType = targetType;
-        this.name = name;
+        this.name = navProp.getName();
         this.distinctRequired = distinctRequired;
     }
 
@@ -108,7 +116,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);
         }
-        return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+        return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased);
     }
 
     @Override

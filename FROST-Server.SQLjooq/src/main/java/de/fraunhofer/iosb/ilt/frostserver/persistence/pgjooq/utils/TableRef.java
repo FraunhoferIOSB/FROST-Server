@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class TableRef {
 
     private final EntityType type;
     private final StaMainTable<?> table;
-    private final Map<EntityType, TableRef> joins = new HashMap<>();
+    private final Map<NavigationProperty, TableRef> joins = new HashMap<>();
 
     public TableRef(EntityType type, StaMainTable<?> table) {
         this.type = type;
@@ -48,11 +49,11 @@ public class TableRef {
         return table;
     }
 
-    public void addJoin(EntityType link, TableRef joinedTable) {
+    public void addJoin(NavigationProperty link, TableRef joinedTable) {
         joins.put(link, joinedTable);
     }
 
-    public TableRef getJoin(EntityType link) {
+    public TableRef getJoin(NavigationProperty link) {
         return joins.get(link);
     }
 

@@ -47,9 +47,15 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationManyToMany.class.getName());
 
     /**
+     * The navigation property this relation represents.
+     */
+    private final NavigationPropertyMain navProp;
+
+    /**
      * The target entity type of the relation.
      */
     private final EntityType targetType;
+
     /**
      * The name of the relation. For official relations, this is the (singular)
      * entity type name.
@@ -90,6 +96,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
         }
+        this.navProp = navProp;
         this.linkTable = linkTable;
         this.target = target;
         this.targetType = navProp.getEntityType();
@@ -141,6 +148,10 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         return target;
     }
 
+    public NavigationPropertyMain getNavProp() {
+        return navProp;
+    }
+
     public EntityType getTargetType() {
         return targetType;
     }
@@ -156,7 +167,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);
-        return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+        return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased);
     }
 
     @Override

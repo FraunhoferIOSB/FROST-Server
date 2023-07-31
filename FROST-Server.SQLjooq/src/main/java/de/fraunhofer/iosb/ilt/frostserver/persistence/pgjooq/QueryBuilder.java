@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -453,8 +454,7 @@ public class QueryBuilder implements ResourcePathVisitor {
     public TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
         if (last != null) {
-            // TODO: fix to use navProp, not entityType
-            TableRef existingJoin = last.getJoin(entityType);
+            TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
             if (existingJoin != null) {
                 return existingJoin;
             }
@@ -464,7 +464,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         if (last == null) {
             StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX, pm);
             queryState = new QueryState(pm, tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
-            result = createJoinedRef(null, entityType, tableForType);
+            result = new TableRef(entityType, tableForType);
         } else {
             if (entityType.equals(last.getType()) && lastNavProp == null) {
                 result = last;
@@ -501,35 +501,40 @@ public class QueryBuilder implements ResourcePathVisitor {
             throw new IllegalStateException("last result should not be null");
         }
 
-        final EntityType entityType = np.getEntityType();
-        TableRef existingJoin = last.getJoin(entityType);
+        TableRef existingJoin = last.getJoin(np);
         if (existingJoin != null) {
             return existingJoin;
         }
 
-        if (entityType.equals(last.getType()) && np instanceof PathElementEntity && ((PathElementEntity) np).getId() != null) {
-            return last;
-        } else {
-            return last.createJoin(np.getName(), queryState);
-        }
+        return last.createJoin(np.getName(), queryState);
     }
 
-    public TableRef queryEntityType(EntityType targetType, TableRef sourceRef, Field sourceIdField) {
-        StaMainTable<?> target = tableCollection.getTablesByType().get(targetType);
+    /**
+     * Directly query an entity type. Used for custom linking.
+     *
+     * @param epcl the custom link.
+     * @param sourceRef The source table ref.
+     * @param sourceIdField The source ID field.
+     * @return A new table ref with the target entity type table joined.
+     */
+    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
+        StaMainTable<?> target = tableCollection.getTablesByType().get(epcl.getTargetEntityType());
         StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
         Field<?> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
-        return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+        TableRef newRef = new TableRef(epcl.getEntityType(), targetAliased);
+        sourceRef.addJoin(epcl, newRef);
+        return newRef;
     }
 
     public TableCollection getTableCollection() {
         return tableCollection;
     }
 
-    public static TableRef createJoinedRef(TableRef base, EntityType type, StaMainTable<?> table) {
-        TableRef newRef = new TableRef(type, table);
+    public static TableRef createJoinedRef(TableRef base, NavigationProperty np, StaMainTable<?> table) {
+        TableRef newRef = new TableRef(np.getEntityType(), table);
         if (base != null) {
-            base.addJoin(type, newRef);
+            base.addJoin(np, newRef);
         }
         return newRef;
     }

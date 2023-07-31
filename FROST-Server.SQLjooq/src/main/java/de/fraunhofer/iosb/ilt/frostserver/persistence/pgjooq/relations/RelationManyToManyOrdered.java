@@ -84,7 +84,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
             Field<Integer> orderField = orderFieldAcc.getField(linkTableAliased);
             queryState.getSqlSortFields().add(orderField, OrderBy.OrderType.ASCENDING);
         }
-        return QueryBuilder.createJoinedRef(sourceRef, getTargetType(), targetAliased);
+        return QueryBuilder.createJoinedRef(sourceRef, getNavProp(), targetAliased);
     }
 
     @Override

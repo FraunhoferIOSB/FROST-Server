@@ -40,5 +40,11 @@ public interface PathElementEntityType extends PathElement {
      */
     public String getName();
 
+    /**
+     * Get the navigation property that this PathElement represents.
+     *
+     * @return the navigation property that this PathElement represents, or null
+     * if this PathElement does not represent a navigation property.
+     */
     public NavigationPropertyMain getNavigationProperty();
 }

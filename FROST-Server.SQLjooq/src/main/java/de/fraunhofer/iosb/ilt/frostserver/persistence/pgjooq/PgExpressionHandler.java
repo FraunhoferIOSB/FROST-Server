@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.ArrayConstandFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
@@ -271,10 +270,10 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         for (; state.curIndex < state.elements.size(); state.curIndex++) {
             final Property property = state.elements.get(state.curIndex);
             String name = property.getName();
-            if (property instanceof EntityPropertyCustomLink) {
+            if (property instanceof EntityPropertyCustomLink epcl) {
                 int maxDepth = state.curIndex + maxCustomLinkDepth;
                 if (state.curIndex <= maxDepth) {
-                    handleCustomLink(property, jsonFactory, name, state);
+                    handleCustomLink(epcl, jsonFactory, name, state);
                     return;
                 } else {
                     jsonFactory.addToPath(name);
@@ -287,11 +286,10 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         state.finished = true;
     }
 
-    private void handleCustomLink(final Property property, JsonFieldWrapper jsonFactory, String name, PathState state) {
-        EntityType targetEntityType = ((EntityPropertyCustomLink) property).getTargetEntityType();
+    private void handleCustomLink(final EntityPropertyCustomLink epcl, JsonFieldWrapper jsonFactory, String name, PathState state) {
         JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).materialise();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
-        state.pathTableRef = queryBuilder.queryEntityType(targetEntityType, state.pathTableRef, sourceIdField);
+        state.pathTableRef = queryBuilder.queryEntityType(epcl, state.pathTableRef, sourceIdField);
         state.finalExpression = null;
     }
 

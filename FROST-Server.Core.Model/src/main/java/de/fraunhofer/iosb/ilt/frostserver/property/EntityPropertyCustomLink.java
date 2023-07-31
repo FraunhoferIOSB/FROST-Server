@@ -26,7 +26,7 @@ import java.util.Objects;
  *
  * @author hylke
  */
-public class EntityPropertyCustomLink extends PropertyAbstract<Entity> {
+public class EntityPropertyCustomLink extends PropertyAbstract<Entity> implements NavigationProperty<Entity> {
 
     private static final String UNSUPPORTED = "Not supported on custom properties.";
 
@@ -75,6 +75,36 @@ public class EntityPropertyCustomLink extends PropertyAbstract<Entity> {
     @Override
     public int hashCode() {
         return Objects.hash(getName(), targetEntityType);
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return targetEntityType;
+    }
+
+    @Override
+    public boolean isEntitySet() {
+        return false;
+    }
+
+    @Override
+    public boolean isAdminOnly() {
+        return false;
+    }
+
+    @Override
+    public boolean validFor(EntityType entityType) {
+        return true;
+    }
+
+    @Override
+    public String getNavigationLink(Entity parent) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    public NavigationProperty getInverse() {
+        throw new UnsupportedOperationException("Not supported.");
     }
 
 }
