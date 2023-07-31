@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -37,7 +39,6 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,34 +117,38 @@ public abstract class CustomLinksTests extends AbstractTestClass {
 
     private static void createThings() throws ServiceFailureException {
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0]);
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0])
+                .build();
         thing1.setProperty(EP_PROPERTIES, properties);
         thing1.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(0));
         sSrvc.create(thing1);
         THINGS.add(thing1);
 
         Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
-        properties.put("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0]);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues()[0])
+                .build();
         thing2.setProperty(EP_PROPERTIES, properties);
         thing2.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(1));
         sSrvc.create(thing2);
         THINGS.add(thing2);
 
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
-        properties.put("alternate.Location@iot.id", -1);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .addItem("alternate.Location@iot.id", -1)
+                .build();
         thing3.setProperty(EP_PROPERTIES, properties);
         thing3.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(2));
         sSrvc.create(thing3);
         THINGS.add(thing3);
 
         Entity thing4 = sMdl.newThing("Thing 4", "The fourt thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0]);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0])
+                .build();
         thing4.setProperty(EP_PROPERTIES, properties);
         thing4.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(3));
         sSrvc.create(thing4);

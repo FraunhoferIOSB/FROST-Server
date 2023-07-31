@@ -34,6 +34,8 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
@@ -112,14 +114,15 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException, IOException {
         for (int i = 0; i < 4; i++) {
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("string", generateString(i, 10));
-            properties.put("boolean", i % 2 == 0);
-            properties.put("int", i + 8);
-            properties.put("intArray", generateIntArray(i + 8, 5));
-            properties.put("strArray", generateStringArray(i + 8, 5));
-            properties.put("intIntArray", generateIntIntArray(i + 8, 3));
-            properties.put("objArray", generateObjectList(i + 8, 3));
+            MapValue properties = CollectionsHelper.propertiesBuilder()
+                    .addItem("string", generateString(i, 10))
+                    .addItem("boolean", i % 2 == 0)
+                    .addItem("int", i + 8)
+                    .addItem("intArray", generateIntArray(i + 8, 5))
+                    .addItem("strArray", generateStringArray(i + 8, 5))
+                    .addItem("intIntArray", generateIntIntArray(i + 8, 3))
+                    .addItem("objArray", generateObjectList(i + 8, 3))
+                    .build();
             Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
             thing.setProperty(EP_PROPERTIES, properties);
             sSrvc.create(thing);

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypeSimplePrimitive.EDM_STRING;
+import static de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypePrimitive.EDM_STRING;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_ID;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import java.util.Map;
 
 /**
@@ -143,9 +144,13 @@ public class SensorThingsUserModel {
                 .setProperty(EP_DESCRIPTION, description);
     }
 
-    public Entity newRole(String rolename, String description, Map<String, Object> properties) {
+    public Entity newRole(String rolename, String description, MapValue properties) {
         return newRole(rolename, description)
                 .setProperty(EP_PROPERTIES, properties);
+    }
+
+    public Entity newRole(String rolename, String description, Map<String, Object> properties) {
+        return newRole(rolename, description, new MapValue(properties));
     }
 
     public Entity newProject() {
@@ -158,9 +163,13 @@ public class SensorThingsUserModel {
                 .setProperty(EP_DESCRIPTION, description);
     }
 
-    public Entity newProject(String rolename, String description, Map<String, Object> properties) {
+    public Entity newProject(String rolename, String description, MapValue properties) {
         return newProject(rolename, description)
                 .setProperty(EP_PROPERTIES, properties);
+    }
+
+    public Entity newProject(String rolename, String description, Map<String, Object> properties) {
+        return newProject(rolename, description, new MapValue(properties));
     }
 
     public Entity newUserProjectRole() {

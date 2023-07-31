@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -42,7 +44,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,28 +114,31 @@ public abstract class MetadataTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        Map<String, Object> properties = new HashMap<>();
+        MapValue properties = new MapValue();
         thing1.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing1);
         THINGS.add(thing1);
 
         Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .build();
         thing2.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing2);
         THINGS.add(thing2);
 
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0]);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .build();
         thing3.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing3);
         THINGS.add(thing3);
 
         Entity thing4 = sMdl.newThing("Thing 4", "The fourth thing.");
-        properties = new HashMap<>();
-        properties.put("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0]);
+        properties = CollectionsHelper.propertiesBuilder()
+                .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0])
+                .build();
         thing4.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing4);
         THINGS.add(thing4);

@@ -263,7 +263,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private SensorThingsService createService() {
         try {
-            return new SensorThingsService(mdlUsers.getModelRegistry(), new URL(serverSettings.getServiceUrl(version)));
+            return new SensorThingsService(mdlUsers.getModelRegistry())
+                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }

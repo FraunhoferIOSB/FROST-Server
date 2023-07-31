@@ -26,6 +26,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
@@ -95,8 +97,9 @@ public abstract class BatchTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         for (int i = 0; i < 6; i++) {
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("int", i + 8);
+            MapValue properties = CollectionsHelper.propertiesBuilder()
+                    .addItem("int", i + 8)
+                    .build();
             Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
             thing.setProperty(EP_PROPERTIES, properties);
             sSrvc.create(thing);

@@ -32,6 +32,7 @@ import com.github.fge.jsonpatch.ReplaceOperation;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
@@ -39,7 +40,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -174,7 +174,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         sSrvc.patch(thingOnlyId, operations);
         updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
-        final Map<String, Object> updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
+        final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
         assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
@@ -201,7 +201,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         sSrvc.patch(thingOnlyId, operations);
         updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
-        final Map<String, Object> updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
+        final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/key1 does not have the correct value.";
         assertEquals(2L, updatedProperties.get("key1"), message);
     }
@@ -231,7 +231,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         sSrvc.patch(dsOnlyId, operations);
         updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
-        final Map<String, Object> updatedProperties = updatedDs.getProperty(EP_PROPERTIES);
+        final MapValue updatedProperties = updatedDs.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
         assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";

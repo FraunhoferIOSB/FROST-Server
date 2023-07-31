@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -215,8 +216,9 @@ public abstract class FilterTests extends AbstractTestClass {
 
     private static Entity createSensor(String name, String desc, String type, String metadata) throws ServiceFailureException {
         int idx = SENSORS.size();
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("idx", idx);
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
 
         Entity sensor = sMdl.newSensor(name, desc, type, metadata)
                 .setProperty(EP_PROPERTIES, properties);
@@ -227,8 +229,9 @@ public abstract class FilterTests extends AbstractTestClass {
 
     private static Entity createDatastream(String name, String desc, String type, UnitOfMeasurement uom, Entity thing, Entity sensor, Entity op) throws ServiceFailureException {
         int idx = DATASTREAMS.size();
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("idx", idx);
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
 
         Entity ds = sMdl.newDatastream(name, desc, type, uom)
                 .setProperty(EP_PROPERTIES, properties)
@@ -242,8 +245,9 @@ public abstract class FilterTests extends AbstractTestClass {
 
     private static Entity createObservedProperty(String name, String definition, String description) throws ServiceFailureException {
         int idx = O_PROPS.size();
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("idx", idx);
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
         Entity obsProp = sMdl.newObservedProperty(name, definition, description)
                 .setProperty(EP_PROPERTIES, properties);
         sSrvc.create(obsProp);

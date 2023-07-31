@@ -40,9 +40,9 @@ public class StaService {
 
     public StaService(URL url) throws MalformedURLException {
         this.modelSensing = new SensorThingsSensingV11();
-        this.modelMultiDatastream = new SensorThingsMultiDatastreamV11(modelSensing);
-        this.modelTasking = new SensorThingsTaskingV11(modelSensing);
-        this.service = new SensorThingsService(modelSensing.getModelRegistry(), url);
+        this.modelMultiDatastream = new SensorThingsMultiDatastreamV11();
+        this.modelTasking = new SensorThingsTaskingV11();
+        this.service = new SensorThingsService(url, modelSensing, modelMultiDatastream, modelTasking);
     }
 
     public StaService(SensorThingsService service, SensorThingsSensingV11 modelSensing, SensorThingsTaskingV11 modelTasking, SensorThingsMultiDatastreamV11 modelMds) {
