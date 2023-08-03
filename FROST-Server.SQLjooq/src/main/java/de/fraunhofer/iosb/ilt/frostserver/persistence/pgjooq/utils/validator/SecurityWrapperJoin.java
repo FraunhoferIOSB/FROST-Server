@@ -120,7 +120,8 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     public Table wrap(StaMainTable table, JooqPersistenceManager pm) {
         final Principal principal = PrincipalExtended.getLocalPrincipal();
         final StaMainTable tableT = table.as("t");
-        SelectJoinStep<Record> current = DSL.select(tableT.asterisk()).from(tableT);
+        SelectJoinStep<Record> current = DSL.select(tableT.asterisk()).distinctOn(tableT.getId()).from(tableT);
+
         for (TableJoin join : joins) {
             SQL joinPart;
             if (join.usernameParameter) {
