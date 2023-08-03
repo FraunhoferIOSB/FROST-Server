@@ -33,7 +33,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
 import java.util.List;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SQL;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -119,9 +121,8 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     @Override
     public Table wrap(StaMainTable table, JooqPersistenceManager pm) {
         final Principal principal = PrincipalExtended.getLocalPrincipal();
-        final StaMainTable tableT = table.as("t");
-        SelectJoinStep<Record> current = DSL.select(tableT.asterisk()).distinctOn(tableT.getId()).from(tableT);
-
+        final StaMainTable tableIn = table.as("t");
+        SelectJoinStep<Record1<Integer>> exists = DSL.select(DSL.one()).from(tableIn);
         for (TableJoin join : joins) {
             SQL joinPart;
             if (join.usernameParameter) {
@@ -135,27 +136,30 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
             }
             switch (join.joinType) {
                 case LEFT:
-                    current = current.leftJoin(join.getTargetTable()).on(joinPart);
+                    exists = exists.leftJoin(join.getTargetTable()).on(joinPart);
                     break;
 
                 case RIGHT:
-                    current = current.rightJoin(join.getTargetTable()).on(joinPart);
+                    exists = exists.rightJoin(join.getTargetTable()).on(joinPart);
                     break;
 
                 case INNER:
                 default:
-                    current = current.innerJoin(join.getTargetTable()).on(joinPart);
+                    exists = exists.innerJoin(join.getTargetTable()).on(joinPart);
                     break;
             }
         }
         if (!StringHelper.isNullOrEmpty(where)) {
             if (usernameParameter) {
-                return current.where(where, principal.getName()).asTable();
+                SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where, principal.getName());
+                return table.whereExists(finalExists).asTable("tOut");
             }
-            return current.where(where).asTable();
+            SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where);
+            return table.whereExists(finalExists).asTable("tOut");
         }
-        return current.asTable();
 
+        SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId()));
+        return table.whereExists(finalExists).asTable("tOut");
     }
 
     public List<TableJoin> getJoins() {
