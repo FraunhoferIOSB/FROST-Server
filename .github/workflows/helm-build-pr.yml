@@ -35,7 +35,7 @@ jobs:
       id: kube-lint-scan
       uses: stackrox/kube-linter-action@v1
       with:
-        directory: yamls
+        directory: ./helm/frost-server
         config: ./helm/.kube-linter/config.yaml
 
     - name: Build Helm
