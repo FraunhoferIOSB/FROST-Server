@@ -14,6 +14,7 @@
 * Added DrawIO output to OData metadata page using '$metadata?$format=drawio'.
 * Added option to specify schema priority if the same table name exists in multiple schemas.
 * Added support for OData `in` keyword.
+* Return a 400 error when navigation properties have conflicting values.
 
 **Internal changes & Bugfixes**
 * Fixed performance degradation caused by HTTP-instances listening on the message bus.

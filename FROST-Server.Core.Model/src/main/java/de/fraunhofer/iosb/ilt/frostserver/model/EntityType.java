@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -424,8 +425,14 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         EntityType parentType = navPropToParent.getEntityType();
         if (navPropToParent instanceof NavigationPropertyEntitySet navPropToParentSet) {
             entity.addNavigationEntity(navPropToParentSet, new DefaultEntity(parentType).setId(parentId));
-        } else {
+        } else if (navPropToParent instanceof NavigationPropertyEntity navPropToParentEntity) {
+            Entity parent = entity.getProperty(navPropToParentEntity);
+            if (parent != null && !parentId.equals(parent.getId())) {
+                throw new IllegalArgumentException("Navigation property " + navPropToParent.getName() + " set in both JSON and URL.");
+            }
             entity.setProperty(navPropToParent, new DefaultEntity(parentType).setId(parentId));
+        } else {
+            throw new IllegalStateException("Unknown navigation property type: " + navPropToParent);
         }
     }
 

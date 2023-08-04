@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -340,6 +342,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     void test05RecreateAutomaticFoi() throws ServiceFailureException {
         LOGGER.info("  test05RecreateAutomaticFoi");
         EntityUtils.deleteAll(service);
+        DATASTREAMS.clear();
         // Create two things
 
         Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
@@ -356,10 +359,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.create(obsProp1);
 
         Entity datastream1 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream1.setProperty(sMdl.npDatastreamThing, thing1);
-        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1);
-        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1);
+        datastream1.setProperty(sMdl.npDatastreamThing, thing1.withOnlyPk());
+        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1.withOnlyPk());
+        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1.withOnlyPk());
         sSrvc.create(datastream1);
+        DATASTREAMS.add(datastream1);
 
         Entity obs1 = sMdl.newObservation(1.0, datastream1);
         sSrvc.create(obs1);
@@ -376,5 +380,41 @@ public abstract class AdditionalTests extends AbstractTestClass {
         assertNotNull(foiGenerated2);
 
         assertNotEquals(foiGenerated1, foiGenerated2);
+
+        Entity datastream2 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
+        datastream2.setProperty(sMdl.npDatastreamThing, thing1.withOnlyPk());
+        datastream2.setProperty(sMdl.npDatastreamSensor, sensor1.withOnlyPk());
+        datastream2.setProperty(sMdl.npDatastreamObservedproperty, obsProp1.withOnlyPk());
+        sSrvc.create(datastream2);
+        DATASTREAMS.add(datastream2);
+    }
+
+    @Test
+    void test06DoubleConflictingNavProp() {
+        LOGGER.info("  test06DoubleConflictingNavProp");
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
+        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(1));
+        try {
+            doa.create(observation);
+            Assertions.fail("Creating an Observation with conflicting Datastreams should have failed.");
+            OBSERVATIONS.add(observation);
+        } catch (StatusCodeException exc) {
+            assertEquals(400, exc.getStatusCode(), "Unexpected status code.");
+        } catch (ServiceFailureException ex) {
+            Assertions.fail("Creating an Observation with conflicting Datastreams should have given a 400 error.");
+        }
+    }
+
+    @Test
+    void test07DoubleNonConflictingNavProp() throws ServiceFailureException {
+        LOGGER.info("  test07DoubleNonConflictingNavProp");
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
+        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        doa.create(observation);
+        OBSERVATIONS.add(observation);
+
+        Entity found;
+        found = doa.find(observation.getPrimaryKeyValues());
+        assertNotNull(found.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be auto generated.");
     }
 }
