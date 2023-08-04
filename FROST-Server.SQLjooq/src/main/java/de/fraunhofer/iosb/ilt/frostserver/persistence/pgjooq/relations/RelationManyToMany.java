@@ -192,11 +192,13 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         pm.getDslContext().insertInto(linkTable)
                 .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
                 .set(targetLinkFieldAcc.getField(linkTable), targetId)
+                .onConflictDoNothing()
                 .execute();
         if (symmetrical && !sourceId.equals(targetId)) {
             pm.getDslContext().insertInto(linkTable)
                     .set(sourceLinkFieldAcc.getField(linkTable), targetId)
                     .set(targetLinkFieldAcc.getField(linkTable), sourceId)
+                    .onConflictDoNothing()
                     .execute();
         }
     }
