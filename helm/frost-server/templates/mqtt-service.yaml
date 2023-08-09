@@ -44,8 +44,8 @@ spec:
       port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
       targetPort: websocket
   {{- end }}
-  {{- if eq .Values.frost.mqtt.serviceType "ClusterIp" }}
-  type: ClusterIp
+  {{- if eq .Values.frost.mqtt.serviceType "ClusterIP" }}
+  type: ClusterIP
   ports:
     - name: mqtt
       port: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
