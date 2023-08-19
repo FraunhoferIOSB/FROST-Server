@@ -236,6 +236,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
             String payload = msg.getPayload().toString(StringHelper.UTF8);
             fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload));
+            super.onPublish(msg);
         }
 
         @Override
