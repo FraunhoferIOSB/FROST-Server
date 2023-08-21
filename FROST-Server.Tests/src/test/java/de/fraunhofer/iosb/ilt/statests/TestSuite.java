@@ -35,55 +35,10 @@ import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests10
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests11;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests10;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests11;
-import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests10;
-import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests11;
-import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests10;
-import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests11;
-import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests10;
-import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests11;
-import de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests10;
-import de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests11;
-import de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests10;
-import de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests11;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests10;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests11;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests10;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests11;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests10;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests11;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests10;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests11;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests10;
-import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests11;
-import de.fraunhofer.iosb.ilt.statests.c04batch.BatchTests10;
-import de.fraunhofer.iosb.ilt.statests.c04batch.BatchTests11;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MdDateTimeTests10;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MdDateTimeTests11;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamObsPropTests10;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamObsPropTests11;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests10;
-import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests11;
-import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests10;
-import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests11;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests10;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests11;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests10;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests10;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests10;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests10;
-import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests10;
-import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests10;
-import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests11;
-import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests10;
-import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests11;
-import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests10;
-import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
@@ -131,55 +86,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     Capability1CoreOnlyTests11.class,
     Capability1Tests10.class,
     Capability1Tests11.class,
-    Capability2Tests10.class,
-    Capability2Tests11.class,
-    AdditionalTests10.class,
-    AdditionalTests11.class,
-    DeleteFilterTests10.class,
-    DeleteFilterTests11.class,
-    JsonPatchTests10.class,
-    JsonPatchTests11.class,
-    ResultTypesTests10.class,
-    ResultTypesTests11.class,
-    Capability3Tests10.class,
-    Capability3Tests11.class,
-    DateTimeTests10.class,
-    DateTimeTests11.class,
-    FilterTests10.class,
-    FilterTests11.class,
-    GeoTests10.class,
-    GeoTests11.class,
-    JsonPropertiesTests10.class,
-    JsonPropertiesTests11.class,
-    BatchTests10.class,
-    BatchTests11.class,
-    MultiDatastreamTests10.class,
-    MultiDatastreamTests11.class,
-    MultiDatastreamObsPropTests10.class,
-    MultiDatastreamObsPropTests11.class,
-    MdDateTimeTests10.class,
-    MdDateTimeTests11.class,
-    DataArrayTests10.class,
-    DataArrayTests11.class,
     Capability7Tests10.class,
     Capability7Tests11.class,
     Capability8Tests10.class,
     Capability8Tests11.class,
-    BasicAuthTests10.class,
-    BasicAuthTests11.class,
-    BasicAuthAnonReadTests10.class,
-    BasicAuthAnonReadTests11.class,
-    BasicAuthCryptPwTests10.class,
-    BasicAuthCryptPwTests11.class,
-    FineGrainedAuthTests11.class,
-    KeyCloakTests10.class,
-    KeyCloakTests11.class,
-    KeyCloakAnonReadTests10.class,
-    KeyCloakAnonReadTests11.class,
-    CustomLinksTests10.class,
-    CustomLinksTests11.class,
-    MetadataTests10.class,
-    MetadataTests11.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite

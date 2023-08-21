@@ -129,7 +129,7 @@ public class MqttHelper {
             waitMillis(WAIT_AFTER_SUBSCRIBE);
 
             try {
-                LOGGER.debug("  Calling action...");
+                LOGGER.debug("        Calling action...");
                 result.setActionResult(action.call());
             } catch (Exception ex) {
                 LOGGER.error("Exception on server {} :", mqttServerUri, ex);

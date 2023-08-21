@@ -18,6 +18,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostclient.query.Query" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

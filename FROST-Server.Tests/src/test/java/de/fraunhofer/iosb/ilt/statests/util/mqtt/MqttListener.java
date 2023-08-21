@@ -81,9 +81,9 @@ public class MqttListener implements Callable<JSONObject> {
                             if (barrier.getCount() > 0) {
                                 result = new JSONObject(new String(mm.getPayload(), StandardCharsets.UTF_8));
                                 barrier.countDown();
-                                LOGGER.debug("Received on {}. To go: {}", topic, barrier.getCount());
+                                LOGGER.debug("          Received on {}. To go: {}", topic, barrier.getCount());
                             } else {
-                                LOGGER.error("Received on {}. Barrier already empty!", topic);
+                                LOGGER.error("          Received on {}. Barrier already empty!", topic);
                             }
                         }
 
@@ -96,7 +96,7 @@ public class MqttListener implements Callable<JSONObject> {
                         mqttClient.subscribe(topic, MqttHelper.QOS, null, new IMqttActionListener() {
                             @Override
                             public void onSuccess(IMqttToken imt) {
-                                LOGGER.debug("Subscribed to {}", topic);
+                                LOGGER.debug("      Subscribed to {}", topic);
                                 connectBarrier.countDown();
                             }
 
