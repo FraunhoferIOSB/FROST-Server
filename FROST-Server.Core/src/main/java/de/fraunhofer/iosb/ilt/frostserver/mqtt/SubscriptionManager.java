@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A manger for subscriptions for a single entity type.
@@ -34,6 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author scf
  */
 class SubscriptionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionManager.class.getName());
 
     /**
      * The main entity type of the subscriptions in this manager.
@@ -75,6 +79,7 @@ class SubscriptionManager {
     }
 
     public synchronized void addSubscription(Subscription subscription) {
+        LOGGER.debug("Adding subscription to {}", subscription);
         NavigationPropertyMain parentRelation = subscription.getParentRelation();
         if (parentRelation != null) {
             SubscriptionSetDirectParent parentSet = parentedSubscriptions.computeIfAbsent(parentRelation, t -> new SubscriptionSetDirectParent(mqttManager, parentRelation, topicCount));
