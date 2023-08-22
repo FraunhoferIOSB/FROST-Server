@@ -20,6 +20,7 @@
     <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt" level="DEBUG"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="DEBUG"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager" level="DEBUG"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

@@ -319,6 +319,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 connect();
             }
             client.publish(topicName, bytes, qosLevel, false);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("          Sent a {} message for a {}", message.getEventType(), message.getEntityType());
+            }
         } catch (MqttException | JsonProcessingException ex) {
             LOGGER.error("Failed to publish message to bus.", ex);
         }
@@ -344,6 +347,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
             return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("          Received a {} message for a {}", ecMessage.getEventType(), ecMessage.getEntityType());
         }
         if (!recvQueue.offer(ecMessage)) {
             LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
