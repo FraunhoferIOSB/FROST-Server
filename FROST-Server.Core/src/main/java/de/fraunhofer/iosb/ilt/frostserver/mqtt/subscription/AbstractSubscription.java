@@ -208,4 +208,9 @@ public abstract class AbstractSubscription implements Subscription {
         return this.entityType == other.entityType;
     }
 
+    @Override
+    public String toString() {
+        return getTopic();
+    }
+
 }

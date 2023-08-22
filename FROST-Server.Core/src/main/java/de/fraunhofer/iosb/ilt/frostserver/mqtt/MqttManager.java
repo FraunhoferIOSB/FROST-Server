@@ -167,7 +167,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         logStatus.setEntityChangedQueueSize(entityChangedQueueSize.decrementAndGet());
         final EntityChangedMessage.Type eventType = message.getEventType();
         EntityType entityType = message.getEntityType();
-        LOGGER.trace("Received a {} message for a {}.", eventType, entityType);
+        LOGGER.debug("          Received a {} message for a {}.", eventType, entityType);
         if (eventType == EntityChangedMessage.Type.DELETE) {
             // v1.0 does not do delete notification.
             return;

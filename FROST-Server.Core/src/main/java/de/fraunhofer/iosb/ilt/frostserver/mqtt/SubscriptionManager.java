@@ -79,7 +79,7 @@ class SubscriptionManager {
     }
 
     public synchronized void addSubscription(Subscription subscription) {
-        LOGGER.debug("Adding subscription to {}", subscription);
+        LOGGER.debug("      Adding subscription to {}", subscription);
         NavigationPropertyMain parentRelation = subscription.getParentRelation();
         if (parentRelation != null) {
             SubscriptionSetDirectParent parentSet = parentedSubscriptions.computeIfAbsent(parentRelation, t -> new SubscriptionSetDirectParent(mqttManager, parentRelation, topicCount));
