@@ -36,6 +36,11 @@ public class ServerSettings {
     public static final Requirement MULTIDATA_REQ = Requirement.IOT_SENSING_1_1_MULTI_DATASTREAM_CONSTRAINTS;
 
     /**
+     * The timeout to use when waiting for MQTT messages.
+     */
+    public static final long MQTT_TIMEOUT = 30000;
+
+    /**
      * The root of FROST, without the v1.0.
      */
     private String serviceRootUrl = "";
@@ -47,11 +52,6 @@ public class ServerSettings {
 
     private final Set<Extension> extensions = EnumSet.noneOf(Extension.class);
     private final Set<EntityType> enabledEntityTypes = EnumSet.noneOf(EntityType.class);
-
-    /**
-     * The timeout to use when waiting for MQTT messages.
-     */
-    private final long mqttTimeOut = 30000;
 
     public void setServiceRootUrl(String serviceRootUrl) {
         if (serviceRootUrl.endsWith("/")) {
@@ -177,7 +177,7 @@ public class ServerSettings {
      * @return the mqttTimeOut
      */
     public long getMqttTimeOut() {
-        return mqttTimeOut;
+        return MQTT_TIMEOUT;
     }
 
 }

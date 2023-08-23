@@ -27,6 +27,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityType.SENSOR;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.THING;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
@@ -61,7 +62,6 @@ public class MqttHelper {
      */
     public static final int WAIT_AFTER_INSERT = 100;
     public static final int WAIT_AFTER_CLEANUP = 500;
-    public static final int WAIT_AFTER_SUBSCRIBE = 200;
     public static final int QOS = 2;
     public static final String CLIENT_ID = "STA-test_suite";
     private final String mqttServerUri;
@@ -125,9 +125,6 @@ public class MqttHelper {
                 tempResult.put(topic, executor.submit(listener));
             }
 
-            // Give the MQTT server time to process the subscriptions.
-            waitMillis(WAIT_AFTER_SUBSCRIBE);
-
             try {
                 LOGGER.debug("  Calling action...");
                 result.setActionResult(action.call());
@@ -148,6 +145,7 @@ public class MqttHelper {
         } finally {
             executor.shutdownNow();
         }
+        MqttManager.clearTestSubscriptionListeners();
         return result;
     }
 
