@@ -19,6 +19,10 @@ package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -62,10 +66,22 @@ public class MqttListener implements Callable<JSONObject> {
 
     public void connect() {
         try {
-            final CountDownLatch connectBarrier = new CountDownLatch(1);
+            final CountDownLatch connectBarrier = new CountDownLatch(2);
             mqttClient = new MqttAsyncClient(mqttServerUri, MqttHelper.CLIENT_ID + "-" + topic + "-" + UUID.randomUUID(), new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
+            MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
+                @Override
+                public void onSubscribe(SubscriptionEvent subscription) {
+                    if (topic.equals(subscription.getTopic())) {
+                        connectBarrier.countDown();
+                    }
+                }
+
+                @Override
+                public void onUnsubscribe(SubscriptionEvent subscription) {
+                }
+            });
             mqttClient.connect(connOpts, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
@@ -119,7 +135,7 @@ public class MqttListener implements Callable<JSONObject> {
                 }
             });
             try {
-                connectBarrier.await();
+                connectBarrier.await(ServerSettings.MQTT_TIMEOUT, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOGGER.error("Exception:", ex);
             }

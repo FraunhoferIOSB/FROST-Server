@@ -73,6 +73,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
 
+    /**
+     * Listeners for integration-test use only. Not thread safe.
+     */
+    private static List<SubscriptionListener> TEST_LISTENERS;
+
     private final Map<EntityType, SubscriptionManager> subscriptions = new HashMap<>();
     private final CoreSettings settings;
     private final SubscriptionFactory subscriptionFactory;
@@ -249,6 +254,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         subscriptions.get(subscription.getEntityType())
                 .addSubscription(subscription);
         logStatus.setTopicCount(topicCount.get());
+        fireTestSubscriptionAdded(e);
     }
 
     @Override
@@ -409,4 +415,46 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
 
     }
+
+    private static void fireTestSubscriptionAdded(SubscriptionEvent s) {
+        if (TEST_LISTENERS == null) {
+            return;
+        }
+        for (SubscriptionListener l : TEST_LISTENERS) {
+            l.onSubscribe(s);
+        }
+
+    }
+
+    /**
+     * For test use only.
+     *
+     * @param l the listener to add.
+     */
+    public static void addTestSubscriptionListener(SubscriptionListener l) {
+        if (TEST_LISTENERS == null) {
+            TEST_LISTENERS = new ArrayList<>();
+        }
+        TEST_LISTENERS.add(l);
+    }
+
+    /**
+     * For test use only.
+     *
+     * @param l the listener to remove.
+     */
+    public static void removeTestSubscriptionListener(SubscriptionListener l) {
+        if (TEST_LISTENERS == null) {
+            return;
+        }
+        TEST_LISTENERS.remove(l);
+    }
+
+    /**
+     * For test use only.
+     */
+    public static void clearTestSubscriptionListeners() {
+        TEST_LISTENERS = null;
+    }
+
 }
