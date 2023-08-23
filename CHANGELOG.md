@@ -7,7 +7,8 @@
 * Fixed subQueries on expands on custom links.
 * Disallow wild-cards in MQTT topics.
 * Fixed unknown version giving 200 instead of 404.
-* [HELM] Added mqtt.exposedEndpoints to http service so it can list correct urls
+* [HELM] Added mqtt.exposedEndpoints to http service so it can list correct urls.
+* [HELM] fixed de db connectionb string for mqtt when using dbExternalConnectionString.
 * Fixed JSON-Patch that changed nothing giving an error back.
 * Fixed memory leak when creating Entities using MQTT.
 
