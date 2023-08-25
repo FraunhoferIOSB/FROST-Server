@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.0.11
+## Release version 2.0.11
 
 **Internal changes & Bugfixes**
 * Fixed #1554: Count incorrect after following nextLink.
