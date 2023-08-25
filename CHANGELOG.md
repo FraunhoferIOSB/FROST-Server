@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.1.5
+## Release version 2.1.5
 
 **Internal changes & Bugfixes**
 * Fixed #1554: Count incorrect after following nextLink.
@@ -11,6 +11,7 @@
 * [HELM] fixed de db connectionb string for mqtt when using dbExternalConnectionString.
 * Fixed JSON-Patch that changed nothing giving an error back.
 * Fixed memory leak when creating Entities using MQTT.
+* Updated dependency versions.
 
 
 ## Release version 2.1.4
