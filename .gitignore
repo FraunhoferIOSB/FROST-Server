@@ -1,12 +1,18 @@
 *.autosave
 /nbproject/
+*/nbproject/
+*/*/nbproject/
 *~
 .idea/
 *.iml
+nbactions.xml
 
 pom.xml.versionsBackup
 pom.xml.releaseBackup
 release.properties
+dependency-reduced-pom.xml
+
+.mvn/wrapper/maven-wrapper.jar
 
 /target
 /*/target/
@@ -15,3 +21,5 @@ release.properties
 FROST-Server.HTTP/keycloak.json
 FROST-Server.MQTT/FrostMqtt.properties
 logs
+Tools/ModelExtractor/examples
+
