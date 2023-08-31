@@ -135,13 +135,13 @@ spec:
             - name: persistence_db_username
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.username
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.secretUsernameKey }}
             - name: persistence_db_password
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.password
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.secretPasswordKey }}
 
             # Plugin-Loading settings
             {{- if .Values.frost.plugins.providedPlugins }}
@@ -304,13 +304,13 @@ spec:
             - name: auth_db_username
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.username
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.secretUsernameKey }}
             - name: auth_db_password
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.password
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.secretPasswordKey }}
             {{- else if contains "keycloak" (lower .Values.frost.auth.provider) }}
             # KeyCloak auth requested
             - name: auth_provider
