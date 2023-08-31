@@ -264,19 +264,19 @@ spec:
               value: "{{ .Values.frost.auth.role.read }}"
             {{- end }}
             {{- if .Values.frost.auth.role.create }}
-            - name: auth_role_read
+            - name: auth_role_create
               value: "{{ .Values.frost.auth.role.create }}"
             {{- end }}
             {{- if .Values.frost.auth.role.update }}
-            - name: auth_role_read
+            - name: auth_role_update
               value: "{{ .Values.frost.auth.role.update }}"
             {{- end }}
             {{- if .Values.frost.auth.role.delete }}
-            - name: auth_role_read
+            - name: auth_role_delete
               value: "{{ .Values.frost.auth.role.delete }}"
             {{- end }}
             {{- if .Values.frost.auth.role.admin }}
-            - name: auth_role_read
+            - name: auth_role_admin
               value: "{{ .Values.frost.auth.role.admin }}"
             {{- end }}
             {{- if contains "basic" (lower .Values.frost.auth.provider) }}
@@ -320,15 +320,15 @@ spec:
               value: "{{ .Values.frost.auth.keycloakConfig }}"
             {{- end }}
             {{- if .Values.frost.auth.keycloakConfigFile }}
-            - name: auth_keycloakConfig
+            - name: auth_keycloakConfigFile
               value: "{{ .Values.frost.auth.keycloakConfigFile }}"
             {{- end }}
             {{- if .Values.frost.auth.keycloakConfigUrl }}
-            - name: auth_keycloakConfig
+            - name: auth_keycloakConfigUrl
               value: "{{ .Values.frost.auth.keycloakConfigUrl }}"
             {{- end }}
             {{- if .Values.frost.auth.keycloakConfigSecret }}
-            - name: auth_keycloakConfig
+            - name: auth_keycloakConfigSecret
               value: "{{ .Values.frost.auth.keycloakConfigSecret }}"
             {{- end }}
             {{- else }}
