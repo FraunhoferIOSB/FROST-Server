@@ -392,5 +392,5 @@ spec:
 
             # Extra Environment Variables
             {{- if .Values.frost.http.extraEnv }}
-                {{- .Values.frost.http.extraEnv | nindent 12 }}
+                {{- toYaml .Values.frost.http.extraEnv | nindent 12 }}
             {{- end }}
