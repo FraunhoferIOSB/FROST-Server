@@ -286,6 +286,10 @@ frost:
     transactionRole: false
     countMode: "FULL"
     database: sensorthings
+    # Set this to your own created secret if needed
+    existingSecret:
+    secretUsernameKey: db.username
+    secretPasswordKey: db.password
     username: c2Vuc29ydGhpbmdz
     password: bm93eW91Y2FuY2hhbmdlaXQ=
     securityContext:

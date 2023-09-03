@@ -27,15 +27,26 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-Get the HTTP service API version
+Get the HTTP service API version.
 */}}
 {{- define "frost-server.http.apiVersion" -}}
 v1.0
 {{- end -}}
 
 {{/*
-Get the HTTP service root URL
+Get the HTTP service root URL.
 */}}
 {{- define "frost-server.http.serviceRootUrl" -}}
 {{ .Values.frost.http.serviceProtocol }}://{{ .Values.frost.http.serviceHost }}{{ if .Values.frost.http.servicePort }}:{{ .Values.frost.http.servicePort }}{{ else if not .Values.frost.http.ingress.enabled }}:{{ .Values.frost.http.ports.http.nodePort }}{{ end }}{{ if .Values.frost.http.urlSubPath }}/{{ .Values.frost.http.urlSubPath }}{{ end }}
+{{- end -}}
+
+{{/*
+Get the DB secret.
+*/}}
+{{- define "frost-server.db.secret" -}}
+{{- if .Values.frost.db.existingSecret -}}
+{{ .Values.frost.db.existingSecret }}
+{{- else -}}
+{{ include "frost-server.fullName" . }}
+{{- end -}}
 {{- end -}}

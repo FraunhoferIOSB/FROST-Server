@@ -62,13 +62,13 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.username
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.db.secretUsernameKey }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.password
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.db.secretPasswordKey }}
       {{- if .Values.frost.db.persistence.enabled }}
       volumes:
         - name: {{ $fullName }}

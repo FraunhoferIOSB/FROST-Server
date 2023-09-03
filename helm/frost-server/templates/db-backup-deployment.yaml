@@ -45,15 +45,15 @@ spec:
             - name: POSTGRES_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.password
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.db.secretPasswordKey }}
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "frost-server.fullName" . }}
-                  key: db.username
+                  name: {{ include "frost-server.db.secret" . }}
+                  key: {{ .Values.frost.db.secretUsernameKey }}
             - name: REMOVE_BEFORE
               value: "{{ .Values.frost.backup.removeBefore }}"
       volumes:
