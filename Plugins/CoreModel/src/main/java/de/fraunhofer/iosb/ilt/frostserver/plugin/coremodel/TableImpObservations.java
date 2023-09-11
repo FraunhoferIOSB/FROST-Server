@@ -445,7 +445,14 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
                     .setProperty(pluginCoreModel.epFeature, locObject)
                     .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
+
+            // Switch to ADMIN user
+            PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
+            PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
             pm.insert(foi, UpdateMode.INSERT_STA_11);
+            // Switch back to normal user
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
+
             Object foiId = foi.getId().getValue();
             dslContext.update(ql)
                     .set(((TableField) ql.getGenFoiId()), foi.getId().getValue())

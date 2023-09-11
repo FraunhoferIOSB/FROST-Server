@@ -64,6 +64,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.geojson.Point;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -567,6 +568,29 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, 404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, 200);
         fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, 404);
+    }
+
+    @Test
+    void test_08e_ObservationCreate() {
+        LOGGER.info("  test_08e_ObservationCreate");
+        EntityCreator creator = (user) -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
+        createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
+    }
+
+    @Test
+    void test_08f_ObservationCreateNewFoi() throws ServiceFailureException {
+        LOGGER.info("  test_08f_ObservationCreateNewFoi");
+        // Create a new Location for Thing 1, so a new FoI must be generated.
+        Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
+                .addNavigationEntity(mdlSensing.npLocationThings, THINGS.get(0));
+        serviceAdmin.create(newLocation);
+
+        EntityCreator creator = (user) -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
+        createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
     }
 
     @Test
