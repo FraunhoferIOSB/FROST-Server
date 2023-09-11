@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -94,21 +95,32 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     protected void generateFilter(int pathElementOffset) {
-        EntityType lastType = getEntityType();
-        List<Property> properties = new ArrayList<>();
+        final List<Property> properties = new ArrayList<>();
         boolean direct = true;
-        for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
+        final int size = path.size();
+        final int startIdx = size - 1 - pathElementOffset;
+        if (startIdx < 0) {
+            return;
+        }
+        PathElement nextPathElement = startIdx < size ? path.get(startIdx + 1) : null;
+        for (int i = startIdx; i >= 0; i--) {
             PathElement element = path.get(i);
-            if (element instanceof PathElementEntitySet) {
-                final PathElementEntitySet pees = (PathElementEntitySet) element;
-                final NavigationPropertyMain navProp = lastType.getNavigationProperty(pees.getEntityType());
-                properties.add(navProp);
-                lastType = pees.getEntityType();
+            if (element instanceof PathElementEntitySet pees) {
+                NavigationPropertyMain navPropInverse = null;
+                if (nextPathElement instanceof PathElementEntityType peet) {
+                    final NavigationPropertyMain navProp = peet.getNavigationProperty();
+                    if (navProp != null) {
+                        navPropInverse = navProp.getInverse();
+                    }
+                }
+                properties.add(navPropInverse);
                 direct = false;
 
-            } else if (element instanceof PathElementEntity) {
-                final PathElementEntity epe = (PathElementEntity) element;
-                final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
+            } else if (element instanceof PathElementEntity epe) {
+                NavigationPropertyMain navProp = null;
+                if (nextPathElement instanceof PathElementEntityType peet) {
+                    navProp = peet.getNavigationProperty().getInverse();
+                }
 
                 final Id id = epe.getId();
                 if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
@@ -118,7 +130,6 @@ public abstract class AbstractSubscription implements Subscription {
                 }
 
                 properties.add(navProp);
-                lastType = epe.getEntityType();
 
                 if (id != null) {
                     createMatchExpression(properties, epe);
@@ -127,6 +138,7 @@ public abstract class AbstractSubscription implements Subscription {
                     return;
                 }
             }
+            nextPathElement = element;
         }
     }
 

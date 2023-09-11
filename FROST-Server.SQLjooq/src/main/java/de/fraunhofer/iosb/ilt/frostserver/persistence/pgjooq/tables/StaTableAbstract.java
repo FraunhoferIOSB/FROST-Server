@@ -214,7 +214,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     public Relation<T> findRelation(String name) {
         Relation<T> relation = relations.get(name);
         if (relation == null) {
-            throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + getName() + " " + getClass().getName());
+            throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + getName() + " " + getEntityType() + " " + getClass().getName());
         }
         return relation;
     }

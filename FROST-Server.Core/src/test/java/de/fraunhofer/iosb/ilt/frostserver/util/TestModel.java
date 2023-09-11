@@ -54,10 +54,10 @@ public class TestModel implements PluginService {
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
     public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_HOUSE = new NavigationPropertyEntity("House", true);
-    public final NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyEntitySet("Houses");
+    public final NavigationPropertyEntity NP_ROOM_HOUSE = new NavigationPropertyEntity("House", true);
+    public final NavigationPropertyEntitySet NP_HOUSE_ROOMS = new NavigationPropertyEntitySet("Rooms", NP_ROOM_HOUSE);
 
-    public final NavigationPropertyEntitySet NP_ROOMS = new NavigationPropertyEntitySet("Rooms");
+    public final NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyEntitySet("Houses");
 
     public final EntityType ET_HOUSE = new EntityType("House", "Houses");
     public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
@@ -68,15 +68,15 @@ public class TestModel implements PluginService {
                 .registerProperty(EP_NAME)
                 .registerProperty(EP_VALUE)
                 .registerProperty(ModelRegistry.EP_PROPERTIES)
-                .registerProperty(NP_ROOMS);
+                .registerProperty(NP_HOUSE_ROOMS);
         modelRegistry.registerEntityType(ET_ROOM);
         ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
                 .registerProperty(EP_NAME)
                 .registerProperty(EP_VALUE)
                 .registerProperty(EP_TIME)
                 .registerProperty(ModelRegistry.EP_PROPERTIES)
-                .registerProperty(NP_ROOMS)
-                .registerProperty(NP_HOUSE);
+                .registerProperty(NP_HOUSE_ROOMS)
+                .registerProperty(NP_ROOM_HOUSE);
     }
 
     public Entity createHouse(int id, String name, double value) {
@@ -120,17 +120,17 @@ public class TestModel implements PluginService {
         propertyValuesRoom.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
 
         int nextId = 100;
-        propertyValuesRoom.put(NP_HOUSE, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        propertyValuesRoom.put(NP_ROOM_HOUSE, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
 
         EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
         rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
         rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
-        propertyValuesHouse.put(NP_ROOMS, rooms);
+        propertyValuesHouse.put(NP_HOUSE_ROOMS, rooms);
 
         EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
         houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
         houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
-        propertyValuesRoom.put(NP_ROOMS, houses);
+        propertyValuesRoom.put(NP_HOUSE_ROOMS, houses);
         return propertyValues;
     }
 

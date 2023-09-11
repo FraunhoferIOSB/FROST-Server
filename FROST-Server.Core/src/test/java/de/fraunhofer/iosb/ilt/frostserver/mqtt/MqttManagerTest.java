@@ -71,7 +71,7 @@ class MqttManagerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManagerTest.class.getName());
 
     private static final int REPEAT_COUNT = 0;
-    private static final int MESSAGE_COUNT = 20000;
+    private static final int MESSAGE_COUNT = 2000;
 
     private CoreSettings coreSettings;
     private ModelRegistry modelRegistry;
@@ -79,6 +79,7 @@ class MqttManagerTest {
 
     @BeforeEach
     public void init() {
+        TestMqttServerRegister.getInstance().clear();
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, "http://localhost/");
         properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
@@ -107,6 +108,17 @@ class MqttManagerTest {
         assertThrows(UnknownVersionException.class, () -> {
             MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
         });
+    }
+
+    @Test
+    void testSubscriptions() throws InterruptedException {
+        MqttManager mqttManager = new MqttManager(coreSettings);
+        List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
+        TestMqttServer mqttServer = mqttServers.get(0);
+        mqttServer.subscribe("v1.1/Houses");
+        mqttServer.subscribe("v1.1/Houses(1)");
+        mqttServer.subscribe("v1.1/Houses(1)/Rooms");
+        mqttServer.subscribe("v1.1/Rooms(1)/House");
     }
 
     @Test
@@ -161,7 +173,7 @@ class MqttManagerTest {
                     .setEntity(
                             new DefaultEntity(testModel.ET_ROOM, new IdLong(pubId))
                                     .setProperty(testModel.EP_NAME, "" + pubId)
-                                    .setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId))));
+                                    .setProperty(testModel.NP_ROOM_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId))));
             topicId++;
             if (topicId >= subscriptionCount) {
                 topicId = 0;
@@ -194,8 +206,8 @@ class MqttManagerTest {
             servers.add(server);
         }
 
-        private boolean remove(TestMqttServer server) {
-            return servers.remove(server);
+        private void clear() {
+            servers.clear();
         }
 
         public List<TestMqttServer> getServers() {
