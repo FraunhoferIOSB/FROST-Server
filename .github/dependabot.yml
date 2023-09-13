@@ -64,4 +64,8 @@ updates:
     target-branch: v2.x
     schedule:
       interval: "daily"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
 
