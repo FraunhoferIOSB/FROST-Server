@@ -101,7 +101,7 @@
         <version.commons-text>1.10.0</version.commons-text>
         <version.configurable>0.34</version.configurable>
         <version.congocc>2022-05-31</version.congocc>
-        <version.dbcp2>2.9.0</version.dbcp2>
+        <version.dbcp2>2.10.0</version.dbcp2>
         <version.geolatte-common>0.8</version.geolatte-common>
         <version.guava>32.1.2-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
@@ -116,8 +116,8 @@
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.10.0</version.junit>
         <version.junit-platform-suite>1.10.0</version.junit-platform-suite>
-        <version.keycloak>22.0.1</version.keycloak>
-        <version.liquibase>4.23.1</version.liquibase>
+        <version.keycloak>22.0.3</version.keycloak>
+        <version.liquibase>4.23.2</version.liquibase>
         <version.logback>1.4.11</version.logback>
 
         <version.maven.plugin.assembly>3.6.0</version.maven.plugin.assembly>
@@ -131,7 +131,7 @@
         <version.maven.plugin.gpg>3.1.0</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.10</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.3.0</version.maven.plugin.jar>
-        <version.maven.plugin.javadoc>3.5.0</version.maven.plugin.javadoc>
+        <version.maven.plugin.javadoc>3.6.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.5.0</version.maven.plugin.shade>
@@ -140,12 +140,12 @@
         <version.maven.plugin.surefire>3.1.2</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
-        <version.openjfx>20.0.2</version.openjfx>
+        <version.openjfx>21</version.openjfx>
         <version.org.json>20230618</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.6.0</version.postgres>
-        <version.slf4j-api>2.0.7</version.slf4j-api>
+        <version.slf4j-api>2.0.9</version.slf4j-api>
         <version.testcontainers>1.19.0</version.testcontainers>
         <version.testcontainers-keycloak>3.0.0</version.testcontainers-keycloak>
         <version.time4j>5.9.3</version.time4j>
