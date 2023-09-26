@@ -108,7 +108,7 @@ frost:
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-http
-      tag: latest
+      tag: 2.2.0
       pullPolicy: IfNotPresent
     # FROST-Server HTTP deployment settings
     replicas: 1
@@ -186,7 +186,7 @@ frost:
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-mqtt
-      tag: latest
+      tag: 2.2.0
       pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true

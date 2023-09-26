@@ -11,8 +11,8 @@ jobs:
   build:
     strategy:
       matrix:
-        refs: [refs/tags/v2.1.2, refs/tags/v2.0.8, refs/tags/v1.15.2]
-    runs-on: ubuntu-20.04
+        refs: [refs/tags/v2.2.0, refs/tags/v2.1.5, refs/tags/v2.0.11]
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
       uses: actions/checkout@v4

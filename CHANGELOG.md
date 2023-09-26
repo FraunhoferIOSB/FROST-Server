@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.2.0
+## Release version 2.2.0
 
 **New Features**
 * Improved configuration options for logging.

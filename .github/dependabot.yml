@@ -11,6 +11,17 @@ updates:
         patterns:
           - "*"
 
+  # Maintain dependencies for Maven in the v2.2.x branch
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: v2.2.x
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   # Maintain dependencies for Maven in the v2.1.x branch
   - package-ecosystem: "maven"
     directory: "/"
@@ -39,24 +50,6 @@ updates:
         versions: ["[4.12,)"]
       - dependency-name: "org.openjfx"
         versions: ["[19.0,)"]
-
-  # Maintain dependencies for Maven in the v1.15.x branch
-  - package-ecosystem: "maven"
-    directory: "/"
-    target-branch: v1.15.x
-    schedule:
-      interval: "weekly"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-    ignore:
-      - dependency-name: "com.github.dasniko:testcontainers-keycloak"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "org.jooq:jooq"
-        versions: ["[3.17,)"]
-      - dependency-name: "org.liquibase:liquibase-core"
-        versions: ["[4.12,)"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
