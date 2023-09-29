@@ -69,7 +69,7 @@ public class JsonRequest extends Request {
         try {
             return JsonWriter.writeObject(
                     new ODataResponse(getContentId(), status, data.length() > 0 ? data.toString() : null,
-                            getHttpHeaders().get("Location")));
+                            getInnerHeaders().get("Location")));
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to generate JSON.", ex);
         }

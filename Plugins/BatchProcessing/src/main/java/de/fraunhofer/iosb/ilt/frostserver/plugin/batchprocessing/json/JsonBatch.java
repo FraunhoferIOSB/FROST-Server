@@ -89,6 +89,15 @@ public class JsonBatch extends Batch<Content> {
                     if (req.has("body")) {
                         request.addData(OBJECT_MAPPER.writeValueAsString(req.get("body")));
                     }
+                    if (req.has("headers") && req.get("headers").isObject()) {
+                        JsonNode headers = req.get("headers");
+                        Map<String, String> innerHeaders = request.getInnerHeaders();
+                        Iterator<Map.Entry<String, JsonNode>> fields = headers.fields();
+                        while (fields.hasNext()) {
+                            Map.Entry<String, JsonNode> next = fields.next();
+                            innerHeaders.put(next.getKey(), next.getValue().asText());
+                        }
+                    }
                 }
             }
             return true;
