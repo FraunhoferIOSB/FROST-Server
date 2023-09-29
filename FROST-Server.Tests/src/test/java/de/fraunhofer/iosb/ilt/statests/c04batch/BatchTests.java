@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -403,43 +405,66 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    void test06JsonBatchRequest() {
+    void test06JsonBatchRequest() throws ServiceFailureException {
         LOGGER.info("  test06JsonBatchRequest");
-        String response = postBatch(null, "{\"requests\":[{"
-                + "\"id\": \"0\","
-                + "\"method\": \"get\","
-                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0))
-                + ")?$select=name\""
-                + "},{"
-                + "\"id\": \"1\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Things\","
-                + "\"body\": {\"name\":\"New\",\"description\":\"Thing\"}"
-                + "},{"
-                + "\"id\": \"2\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"patch\","
-                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")\","
-                + "\"body\": {\"name\":\"Json Patched\"}"
-                + "},{"
-                + "\"id\": \"3\","
-                + "\"method\": \"get\","
-                + "\"url\": \"Things(null)\""
-                + "}]}");
+        String request = """
+                {
+                    "requests":[{
+                        "id": "0",
+                        "method": "get",
+                        "url": "Things($thing0)?$select=name"
+                    },{
+                        "id": "1",
+                        "atomicityGroup": "group1",
+                        "method": "post",
+                        "url": "Things",
+                        "body": {"name":"New","description":"Thing"}
+                    },{
+                        "id": "2",
+                        "atomicityGroup": "group1",
+                        "method": "patch",
+                        "url": "Things($thing0)",
+                        "body": {"name":"Json Patched"}
+                    },{
+                        "id": "3",
+                        "atomicityGroup": "group1",
+                        "method": "patch",
+                        "headers": {
+                            "content-type": "application/json-patch+json"
+                        },
+                        "url": "Things($thing1)",
+                        "body": [
+                          { "op": "replace", "path": "/name", "value": "Thing 1 Updated" },
+                          { "op": "add", "path": "/properties/new", "value": "Changes" }
+                        ]
+                    },{
+                        "id": "4",
+                        "method": "get",
+                        "url": "Things(null)"
+                    }]}""";
+        request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
+        request = StringUtils.replace(request, "$thing1", formatKeyValuesForUrl(THINGS.get(1)));
+        String response = postBatch(null, request);
         String thingId = getLastestEntityIdForPath(EntityType.THING);
 
         try {
-            BatchResponseJson expected = mapper.readValue("{\"responses\":["
-                    + "{\"id\":\"0\",\"status\":200,\"body\":{\"name\":\"Patched\"}},"
-                    + "{\"id\":\"1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version) + "/Things("
-                    + thingId + ")\"},"
-                    + "{\"id\":\"2\",\"status\":200},"
-                    + "{\"id\":\"3\",\"status\":404,\"body\":{\"code\":404,\"type\":\"error\",\"message\":\"Not a valid id: Path is not valid.\"}}"
-                    + "]}",
-                    BatchResponseJson.class);
+            String expResponse = """
+                    {"responses":[
+                        {"id":"0","status":200,"body":{"name":"Patched"}},
+                        {"id":"1","status":201,"location":"$serviceUrl/Things($newThingId)"},
+                        {"id":"2","status":200},
+                        {"id":"3","status":200},
+                        {"id":"4","status":404,"body":{"code":404,"type":"error","message":"Not a valid id: Path is not valid."}}
+                    ]}""";
+            expResponse = StringUtils.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
+            expResponse = StringUtils.replace(expResponse, "$newThingId", thingId);
+            BatchResponseJson expected = mapper.readValue(expResponse, BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
+
+            Entity updatedThing1 = service.service.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
+            assertEquals("Thing 1 Updated", updatedThing1.getProperty(SensorThingsSensingV11.EP_NAME));
+            assertEquals("Changes", updatedThing1.getProperty(SensorThingsSensingV11.EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {
             fail("Failed to parse response as json.");
         }
@@ -449,39 +474,48 @@ public abstract class BatchTests extends AbstractTestClass {
     @Test
     void test07JsonBatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntities");
-        String post1 = "{\r\n"
-                + "  \"name\": \"DS18B20\",\r\n"
-                + "  \"description\": \"DS18B20 is an air temperature sensor\",\r\n"
-                + "  \"encodingType\": \"application/pdf\",\r\n"
-                + "  \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\r\n"
-                + "}";
-        String post2 = "{\r\n"
-                + "  \"name\": \"Temperature Thing 5\",\r\n"
-                + "  \"description\": \"The temperature of thing 5\",\r\n"
-                + "  \"unitOfMeasurement\": {\r\n"
-                + "    \"name\": \"degree Celsius\",\r\n"
-                + "    \"symbol\": \"°C\",\r\n"
-                + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
-                + "  },\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
-                + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
-                + "}";
-        String response = postBatch(null, "{\"requests\":[{"
-                + "\"id\": \"sensor1\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Sensors\","
-                + "\"body\":"
-                + post1
-                + "},{"
-                + "\"id\": \"any\","
-                + "\"atomicityGroup\": \"group1\","
-                + "\"method\": \"post\","
-                + "\"url\": \"Things(" + formatKeyValuesForUrl(THINGS.get(0)) + ")/Datastreams\","
-                + "\"body\":"
-                + post2
-                + "}]}");
+        String post1 = """
+                {
+                  "name": "DS18B20",
+                  "description": "DS18B20 is an air temperature sensor",
+                  "encodingType": "application/pdf",
+                  "metadata": "http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf"
+                }""";
+        String post2 = """
+                {\r
+                  "name": "Temperature Thing 5",
+                  "description": "The temperature of thing 5",
+                  "unitOfMeasurement": {
+                    "name": "degree Celsius",
+                    "symbol": "\u00b0C",
+                    "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                  },
+                  "observationType": "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement",
+                  "ObservedProperty": {"@iot.id": $ObservedProperty0},
+                  "Sensor": {"@iot.id": "$sensor1"}
+                }""";
+        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
+        String request = """
+                {
+                    "requests":[{
+                        "id": "sensor1",
+                        "atomicityGroup": "group1",
+                        "method": "post",
+                        "url": "Sensors",
+                        "body":$post1
+                    },{
+                        "id": "any",
+                        "atomicityGroup": "group1",
+                        "method": "post",
+                        "url": "Things($thing0)/Datastreams",
+                        "body": $post2
+                    }]
+                }""";
+        request = StringUtils.replace(request, "$post1", post1);
+        request = StringUtils.replace(request, "$post2", post2);
+        request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
+        String response = postBatch(null, request);
+
         String sensorId = getLastestEntityIdForPath(EntityType.SENSOR);
         String datastreamId = getLastestEntityIdForPath(EntityType.DATASTREAM);
 

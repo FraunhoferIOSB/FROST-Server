@@ -73,7 +73,7 @@ public class BatchProcessor<C extends Content> {
                 httpRequest.getMethod(),
                 version,
                 httpRequest.getPath(),
-                httpRequest.getHttpHeaders().get(CONTENT_TYPE));
+                httpRequest.getInnerHeaders().get(CONTENT_TYPE));
         boolean isCreate = RequestTypeUtils.CREATE.equals(type);
         UpdateMode updateMode;
         switch (version.urlPart) {
@@ -116,7 +116,7 @@ public class BatchProcessor<C extends Content> {
         int statusCode = serviceResponse.getCode();
         httpResponse.setStatus(statusCode, "no text");
 
-        Map<String, String> headers = httpResponse.getHttpHeaders();
+        Map<String, String> headers = httpResponse.getInnerHeaders();
         serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
 
         String resultFormatted = serviceResponse.getWriter().toString();

@@ -145,7 +145,7 @@ public abstract class Request implements Content {
      *
      * @return the headers of the individual batch request.
      */
-    public Map<String, String> getHttpHeaders() {
+    public Map<String, String> getInnerHeaders() {
         return headersInner;
     }
 

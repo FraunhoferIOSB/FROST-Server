@@ -91,7 +91,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      *
-     * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
+     * @throws de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
      */
     @AfterAll
     public static void deleteEverything() throws ServiceFailureException {
