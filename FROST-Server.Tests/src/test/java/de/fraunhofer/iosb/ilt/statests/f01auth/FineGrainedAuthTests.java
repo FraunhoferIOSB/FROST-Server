@@ -132,7 +132,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
-    private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel(mdlSensing);
+    private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
+    private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
 
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
@@ -264,7 +265,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private SensorThingsService createService() {
         try {
-            return new SensorThingsService(mdlUsers.getModelRegistry())
+            return new SensorThingsService(baseService.getModelRegistry())
                     .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
