@@ -28,17 +28,18 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.N
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.DataModel;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import java.util.Map;
 
 /**
  *
  */
-public class SensorThingsUserModel {
+public class SensorThingsUserModel implements DataModel {
 
     private static final String NAME_USER = "User";
     private static final String NAME_USERS = "Users";
@@ -53,9 +54,9 @@ public class SensorThingsUserModel {
     private static final String NAME_EP_USERPASS = "userpass";
     private static final String NAME_EP_ROLENAME = "rolename";
 
-    public static final EntityPropertyMain<String> EP_USERNAME = new EntityPropertyMain<>(NAME_EP_USERNAME, EDM_STRING);
-    public static final EntityPropertyMain<String> EP_USERPASS = new EntityPropertyMain<>(NAME_EP_USERPASS, EDM_STRING);
-    public static final EntityPropertyMain<String> EP_ROLENAME = new EntityPropertyMain<>(NAME_EP_ROLENAME, EDM_STRING);
+    public static final EntityProperty<String> EP_USERNAME = new EntityPropertyMain<>(NAME_EP_USERNAME, EDM_STRING);
+    public static final EntityProperty<String> EP_USERPASS = new EntityPropertyMain<>(NAME_EP_USERPASS, EDM_STRING);
+    public static final EntityProperty<String> EP_ROLENAME = new EntityPropertyMain<>(NAME_EP_ROLENAME, EDM_STRING);
 
     public final NavigationPropertyEntitySet npUserRoles = new NavigationPropertyEntitySet(NAME_ROLES);
     public final NavigationPropertyEntitySet npUserUserprojectroles = new NavigationPropertyEntitySet(NAME_USERPROJECTROLES);
@@ -77,14 +78,19 @@ public class SensorThingsUserModel {
     public final EntityType etProject = new EntityType(NAME_PROJECT, NAME_PROJECTS);
     public final EntityType etUserProjectRole = new EntityType(NAME_USERPROJECTROLE, NAME_USERPROJECTROLES);
 
-    public final ModelRegistry mr;
+    public ModelRegistry mr;
 
-    public SensorThingsUserModel(SensorThingsSensingV11 modelSensing) {
-        this(modelSensing.getModelRegistry());
+    public SensorThingsUserModel() {
     }
 
-    public SensorThingsUserModel(ModelRegistry mrSensing) {
-        this.mr = mrSensing;
+    @Override
+    public final void init(ModelRegistry modelRegistry) {
+        if (this.mr != null) {
+            throw new IllegalArgumentException("Already initialised.");
+        }
+        this.mr = modelRegistry;
+        mr.addDataModel(this);
+
         mr.registerEntityType(etUser);
         mr.registerEntityType(etRole);
         mr.registerEntityType(etProject);
@@ -118,6 +124,11 @@ public class SensorThingsUserModel {
                 .registerProperty(npUserprojectroleProject);
 
         mr.getEntityTypeForName(NAME_THING).registerProperty(npThingProjects);
+    }
+
+    @Override
+    public boolean isInitialised() {
+        return mr != null;
     }
 
     public ModelRegistry getModelRegistry() {
