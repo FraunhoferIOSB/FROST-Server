@@ -66,6 +66,17 @@ public interface Subscription {
     public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields);
 
     /**
+     * Fetch expand relations
+     *
+     * @param persistenceManager The PersistenceManager to use for queries.
+     * @param newEntity The entity to expand.
+     * @return entity with expanded relations.
+     */
+    public default Entity fetchExpand(PersistenceManager persistenceManager, Entity newEntity) {
+        return newEntity;
+    }
+
+    /**
      * If the subscription is over a one-to-many relation, this has a value.
      *
      * @return The relation to the parent of the main entity type of this

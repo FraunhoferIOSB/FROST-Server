@@ -69,7 +69,8 @@ class SubscriptionManager {
         }
         for (Subscription subscription : complexSubscriptions.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
-                mqttManager.notifySubscription(subscription, entity);
+                Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
+                mqttManager.notifySubscription(subscription, newEntity);
             }
         }
     }
