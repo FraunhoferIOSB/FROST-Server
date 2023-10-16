@@ -112,7 +112,7 @@
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
         <version.jetty>10.0.16</version.jetty>
-        <version.jooq>3.18.6</version.jooq>
+        <version.jooq>3.18.7</version.jooq>
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.10.0</version.junit>
         <version.junit-platform-suite>1.10.0</version.junit-platform-suite>
