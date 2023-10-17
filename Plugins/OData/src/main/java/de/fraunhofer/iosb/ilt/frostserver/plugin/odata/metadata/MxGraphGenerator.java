@@ -32,6 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import net.time4j.Moment;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 public class MxGraphGenerator {
 
     private static final String STYLE_LIST = "swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#98D095;strokeColor=#82b366;swimlaneFillColor=#E3F7E2;";
-    private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;";
+    private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=visible;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;html=1;";
     private static final String STYLE_CONNECTOR = "endArrow=classic;startArrow=classic;html=1;rounded=0;";
     private static final String STYLE_LABEL = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=10;spacingLeft=1;spacing=3;spacingRight=2;";
 
@@ -85,9 +88,17 @@ public class MxGraphGenerator {
         root.addMxCell(cellOne);
 
         final Set<EntityType> entityTypes = model.getEntityTypes(isAdmin);
+        final Set<String> complexTypes = new TreeSet<>();
         maxWidth = (int) Math.round(Math.ceil(Math.sqrt(entityTypes.size())));
         for (EntityType et : entityTypes) {
-            addEntityType(et, cellOne, root);
+            addEntityType(et, cellOne, root, complexTypes);
+        }
+        final Map<String, PropertyType> propertyTypes = model.getPropertyTypes();
+        for (String name : complexTypes) {
+            PropertyType value = propertyTypes.get(name);
+            if (value instanceof TypeComplex tc) {
+                addComplexPropertyType(tc, cellOne, root);
+            }
         }
 
         MxGraphModel gm = new MxGraphModel()
@@ -106,7 +117,7 @@ public class MxGraphGenerator {
         xmlMapper.writeValue(writer, mxFile);
     }
 
-    private void addEntityType(EntityType et, MxCell cellOne, Root root) {
+    private void addEntityType(EntityType et, MxCell cellOne, Root root, Set<String> complexTypes) {
         etCount++;
         globalX++;
         if (globalX >= maxWidth) {
@@ -136,6 +147,9 @@ public class MxGraphGenerator {
         for (EntityPropertyMain ep : entityProperties) {
             addEntityProperty(listItemY, typeCell, ep, root);
             listItemY += BOX_HEIGHT_ITEM;
+            if (ep.getType() instanceof TypeComplex) {
+                complexTypes.add(ep.getType().getName());
+            }
         }
         for (NavigationProperty np : et.getNavigationEntities()) {
             addNavLink(np, et, typeCell, cellOne, root);
@@ -143,6 +157,56 @@ public class MxGraphGenerator {
         for (NavigationProperty np : et.getNavigationSets()) {
             addNavLink(np, et, typeCell, cellOne, root);
         }
+    }
+
+    private void addComplexPropertyType(TypeComplex tc, MxCell cellOne, Root root) {
+        etCount++;
+        globalX++;
+        if (globalX >= maxWidth) {
+            globalX = 0;
+            globalY += rowHeight + DISTANCE;
+            rowHeight = DISTANCE;
+        }
+        Map<String, PropertyType> properties = tc.getProperties();
+        int boxHeight = BOX_HEIGHT_BASE + properties.size() * BOX_HEIGHT_ITEM;
+        if (boxHeight > rowHeight) {
+            rowHeight = boxHeight;
+        }
+        MxGeometry cellGeom = new MxGeometry()
+                .setWidth(BOX_WIDTH)
+                .setHeight(boxHeight)
+                .setX(globalX * (BOX_WIDTH + DISTANCE))
+                .setY(globalY);
+        MxCell typeCell = new MxCell()
+                .setValue(tc.getName())
+                .setStyle(STYLE_LIST)
+                .setParent(cellOne.getId())
+                .setVertex(1)
+                .setMxGeometry(cellGeom);
+        root.addMxCell(typeCell);
+
+        int listItemY = BOX_HEIGHT_BASE;
+        for (Map.Entry<String, PropertyType> prop : properties.entrySet()) {
+            final String name = prop.getKey();
+            final PropertyType type = prop.getValue();
+            addPropertyType(listItemY, typeCell, name, type, tc.isRequired(name), root);
+            listItemY += BOX_HEIGHT_ITEM;
+        }
+    }
+
+    private void addPropertyType(int listItemY, MxCell typeCell, String name, PropertyType pt, boolean required, Root root) {
+        MxGeometry propGeom = new MxGeometry()
+                .setWidth(BOX_WIDTH)
+                .setHeight(BOX_HEIGHT_ITEM)
+                .setY(listItemY);
+        MxCell propCell = new MxCell()
+                .setParent(typeCell.getId())
+                .setValue(createText(name, pt.getName(), required))
+                .setStyle(STYLE_LIST_ITEM)
+                .setVertex(1)
+                .setConnectable(0)
+                .setMxGeometry(propGeom);
+        root.addMxCell(propCell);
     }
 
     private void addEntityProperty(int listItemY, MxCell typeCell, EntityPropertyMain ep, Root root) {
@@ -172,7 +236,18 @@ public class MxGraphGenerator {
                 }
             }
         }
-        return name + ": " + StringUtils.replace(ep.getType().getName(), "Edm.", "");
+        return createText(name, ep.getType().getName(), ep.isRequired());
+    }
+
+    private String createText(String name, String typeName, boolean required) {
+        StringBuilder result = new StringBuilder();
+        if (required) {
+            result.append("+ ");
+        } else {
+            result.append("&nbsp;&nbsp;&nbsp;");
+        }
+        result.append(name).append(": ").append(StringUtils.replace(typeName, "Edm.", ""));
+        return result.toString();
     }
 
     private void addNavLink(NavigationProperty np, EntityType et, MxCell typeCell, MxCell cellOne, Root root) {

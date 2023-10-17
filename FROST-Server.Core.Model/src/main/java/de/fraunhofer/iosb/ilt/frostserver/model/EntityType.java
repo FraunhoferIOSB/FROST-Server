@@ -95,7 +95,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     /**
      * The set of Entity properties.
      */
-    private final Set<EntityPropertyMain> entityProperties = new TreeSet<>();
+    private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
     /**
      * The set of Navigation properties.
      */
