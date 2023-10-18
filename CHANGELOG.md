@@ -3,6 +3,7 @@
 ## Development version 2.0.12
 
 **Internal changes & Bugfixes**
+* Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream
 
 
 ## Release version 2.0.11
