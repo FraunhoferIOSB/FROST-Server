@@ -116,7 +116,7 @@ Function | Description &amp; Example
 --- | --- 
 `substringof(s1, s2)` <br/> bool | Returns true if s1 is a substring of s2 <br/> `Things?$filter=substringof('room', name)` matches `livingroom` and `room S01`
 `endswith(s1, s2)` <br/> bool | Returns true if s1 ends with s2 <br/> `Things?$filter=endswith(name, 'room')` matches `livingroom` but not `room S01`
-`startswith(s1, s2)` <br/> bool | Returns true if s1 starts with s2 <br/> `Things?$filter=endswith(name, 'room')` matches `room S01` but not `livingroom`
+`startswith(s1, s2)` <br/> bool | Returns true if s1 starts with s2 <br/> `Things?$filter=startswith(name, 'room')` matches `room S01` but not `livingroom`
 `substring(s1, i1)` <br/> string | Returns the substring of s1, starting at position i1 <br/> `substring(description,1) eq 'ensor Things'`
 `substring(s1, i1, i2)` <br/> string | Returns the substring of s1, starting at position i1, with length i2 <br/> `substring(description,2,4) eq 'nsor'`
 `length(s1)` <br/> int | Returns the length of string s1 <br/> `length(description) eq 13`
