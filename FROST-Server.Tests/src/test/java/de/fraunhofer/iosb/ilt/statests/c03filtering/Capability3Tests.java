@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -39,15 +41,13 @@ import de.fraunhofer.iosb.ilt.statests.util.Query;
 import de.fraunhofer.iosb.ilt.statests.util.Request;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -67,12 +67,20 @@ public abstract class Capability3Tests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability3Tests.class);
 
-    private enum Order {
-        LT,
-        LE,
-        EQ,
-        GE,
-        GT;
+    private enum Compare {
+        LT("lt"),
+        LE("le"),
+        EQ("eq"),
+        GE("ge"),
+        GT("gt"),
+        NE("ne");
+
+        public final String urlOperator;
+
+        private Compare(String urlOperator) {
+            this.urlOperator = urlOperator;
+        }
+
     }
 
     private static Object thingId1, thingId2,
@@ -106,7 +114,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      *
-     * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
+     * @throws
+     * de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
      */
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
@@ -362,17 +371,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
             assertEquals(200, responseMap.code, message);
 
             String response = responseMap.response;
-            JSONArray array = new JSONObject(response).getJSONArray("value");
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
 
-            message = "The query order of execution is not correct. The expected count is 6. The service returned " + new JSONObject(response).getLong("@iot.count");
-            assertEquals(6, new JSONObject(response).getLong("@iot.count"), message);
+            message = "The query order of execution is not correct. The expected count is 6. The service returned " + Utils.MAPPER.readTree(response).get("@iot.count").asLong();
+            assertEquals(6, Utils.MAPPER.readTree(response).get("@iot.count").asLong(), message);
 
-            message = "The query asked for top 1. The service rerurned " + array.length() + " entities.";
-            assertEquals(1, array.length(), message);
+            message = "The query asked for top 1. The service rerurned " + array.size() + " entities.";
+            assertEquals(1, array.size(), message);
 
-            message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.getJSONObject(0).get("result").toString();
-            assertEquals("6", array.getJSONObject(0).get("result").toString(), message);
-        } catch (JSONException e) {
+            message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.get(0).get("result").toString();
+            assertEquals("6", array.get(0).get("result").toString(), message);
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -466,19 +475,19 @@ public abstract class Capability3Tests extends AbstractTestClass {
             assertEquals(200, responseMap.code, message);
 
             String response = responseMap.response;
-            JSONArray array = new JSONObject(response).getJSONArray("value");
-            int length = array.length();
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            int length = array.size();
 
             message = resultError + " Expected " + expectedCount + " Observations. got " + length + ".";
             assertEquals(expectedCount, length, message);
 
             for (int i = 0; i < length; i++) {
-                JSONObject obs = array.getJSONObject(i);
+                JsonNode obs = array.get(i);
                 String result = obs.get("result").toString();
                 String msg = resultError + " The expected Observation result is " + expectedResult + ", but the given result is " + result;
                 assertEquals(expectedResult, result, msg);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -495,11 +504,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
-            JSONArray array = new JSONObject(response).getJSONArray("value");
-            if (array.length() == 0) {
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            if (array.size() == 0) {
                 return;
             }
-            Object id = array.getJSONObject(0).get(ControlInformation.ID);
+            Object id = array.get(0).get(ControlInformation.ID);
 
             for (String relation : relations) {
                 if (!EntityType.isPlural(relation)) {
@@ -515,26 +524,26 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
-                        compareWithPrevious(i, array, property.name, Order.LE, message);
+                        compareWithPrevious(i, array, property.name, Compare.LE, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
-                        compareWithPrevious(i, array, property.name, Order.LE, message);
+                        compareWithPrevious(i, array, property.name, Compare.LE, message);
                     }
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
-                        compareWithPrevious(i, array, property.name, Order.GE, message);
+                        compareWithPrevious(i, array, property.name, Compare.GE, message);
                     }
                 }
 
@@ -555,11 +564,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         for (String orderProperty : orderbyPropeties) {
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -572,11 +581,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         for (String orderProperty : orderbyPropeties) {
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -589,11 +598,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
-                    array = new JSONObject(response).getJSONArray("value");
-                    for (int i = 1; i < array.length(); i++) {
+                    array = Utils.MAPPER.readTree(response).get("value");
+                    for (int i = 1; i < array.size(); i++) {
                         for (String orderProperty : orderbyPropeties) {
                             String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Order.GE, message);
+                            int compare = compareWithPrevious(i, array, orderProperty, Compare.GE, message);
                             if (compare != 0) {
                                 break;
                             }
@@ -601,7 +610,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -624,26 +633,26 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 String response = responseMap.response;
-                JSONArray array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                JsonNode array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
-                    compareWithPrevious(i, array, property.name, Order.LE, msg);
+                    compareWithPrevious(i, array, property.name, Compare.LE, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
-                array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
-                    compareWithPrevious(i, array, property.name, Order.LE, msg);
+                    compareWithPrevious(i, array, property.name, Compare.LE, msg);
                 }
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
-                array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
-                    compareWithPrevious(i, array, property.name, Order.GE, msg);
+                    compareWithPrevious(i, array, property.name, Compare.GE, msg);
                 }
             }
 
@@ -664,11 +673,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 String response = responseMap.response;
-                JSONArray array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                JsonNode array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     for (String orderProperty : orderbyPropeties) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                        int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
                         if (compare != 0) {
                             break;
                         }
@@ -681,11 +690,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
-                array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     for (String orderProperty : orderbyPropeties) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                        int compare = compareWithPrevious(i, array, orderProperty, Order.LE, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
                         if (compare != 0) {
                             break;
                         }
@@ -698,42 +707,42 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
-                array = new JSONObject(response).getJSONArray("value");
-                for (int i = 1; i < array.length(); i++) {
+                array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
                     for (String orderProperty : orderbyPropeties) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                        int compare = compareWithPrevious(i, array, orderProperty, Order.GE, message);
+                        int compare = compareWithPrevious(i, array, orderProperty, Compare.GE, message);
                         if (compare != 0) {
                             break;
                         }
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing " + entityType + ":\n" + e.getMessage());
         }
 
     }
 
-    private int compareWithPrevious(int idx, JSONArray array, String property, Order order, String message) throws JSONException {
-        JSONObject jObj1 = array.getJSONObject(idx - 1);
-        JSONObject jObj2 = array.getJSONObject(idx);
+    private int compareWithPrevious(int idx, JsonNode array, String property, Compare order, String message) throws IOException {
+        JsonNode jObj1 = array.get(idx - 1);
+        JsonNode jObj2 = array.get(idx);
         int result = compareObjects(property, jObj1, jObj2, order, message);
         return result;
     }
 
-    private int compareObjects(String property, JSONObject jObj1, JSONObject jObj2, Order order, String message) throws JSONException {
+    private int compareObjects(String property, JsonNode jObj1, JsonNode jObj2, Compare order, String message) throws IOException {
         int result;
         Object o1 = null;
         Object o2 = null;
         if (jObj1.has(property)) {
-            o1 = jObj1.get(property);
+            o1 = Utils.MAPPER.treeToValue(jObj1.get(property), Object.class);
         }
         if (jObj2.has(property)) {
-            o2 = jObj2.get(property);
+            o2 = Utils.MAPPER.treeToValue(jObj2.get(property), Object.class);
         }
-        if (o1 == null || o2 == null || o1 == JSONObject.NULL || o2 == JSONObject.NULL) {
+        if (o1 == null || o2 == null || o1 instanceof NullNode || o2 instanceof NullNode) {
             // One of the two does not have the property, or undefined?
             result = 0;
         } else {
@@ -835,7 +844,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             request.getQuery()
                     .setTop(12L)
                     .setSkip(1L);
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -886,7 +895,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     .addElement(new PathElement(relation));
             Query query = request.getQuery();
             query.setTop(3L);
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -910,7 +919,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addSelect(property.name);
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -920,7 +929,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
         request.addElement(new PathElement(entityType.plural));
         for (EntityType.EntityProperty property : properties) {
             request.getQuery().addSelect(property.name);
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -932,7 +941,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addSelect(relation);
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -953,7 +962,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 request.addElement(new PathElement(parentRelation));
 
                 request.getQuery().addSelect(property.name);
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
 
@@ -962,7 +971,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             request.addElement(new PathElement(parentRelation));
             for (EntityType.EntityProperty property : properties) {
                 request.getQuery().addSelect(property.name);
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
         }
@@ -980,7 +989,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
 
@@ -988,7 +997,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
         request.addElement(new PathElement(entityType.plural));
         for (String relation : relations) {
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
-            JSONObject response = request.executeGet();
+            JsonNode response = request.executeGet();
             EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
@@ -1011,7 +1020,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 request.addElement(entityPathElement);
                 request.addElement(parentRelationPathElement);
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
 
@@ -1020,7 +1029,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             request.addElement(parentRelationPathElement);
             for (String relation : relations) {
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
         }
@@ -1052,7 +1061,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                             .addElement(new PathElement(relation))
                             .addElement(new PathElement(secondLevelRelation));
                     request.getQuery().addExpand(expand);
-                    JSONObject response = request.executeGet();
+                    JsonNode response = request.executeGet();
                     request.reNest();
                     EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
                 }
@@ -1069,7 +1078,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                             .addElement(new PathElement(relation))
                             .addElement(new PathElement(secondLevelRelation));
                     request.getQuery().addExpand(expand);
-                    JSONObject response = request.executeGet();
+                    JsonNode response = request.executeGet();
                     EntityUtils.checkResponse(serverSettings.getExtensions(), response, request.clone().reNest(), ENTITYCOUNTS);
                 }
             }
@@ -1095,7 +1104,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         .addElement(new PathElement(relation))
                         .addElement(new PathElement(secondLevelRelation));
                 request.getQuery().addExpand(expand);
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 request.reNest();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
@@ -1111,7 +1120,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         .addElement(new PathElement(relation))
                         .addElement(new PathElement(secondLevelRelation));
                 request.getQuery().addExpand(expand);
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request.clone().reNest(), ENTITYCOUNTS);
             }
         }
@@ -1191,7 +1200,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 even = !even;
                 skip = 1 - skip;
 
-                JSONObject response = request.executeGet();
+                JsonNode response = request.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
 
                 request.getPath().clear();
@@ -1223,7 +1232,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 query3.setCount(even);
                 even = !even;
 
-                JSONObject response = request2.executeGet();
+                JsonNode response = request2.executeGet();
                 EntityUtils.checkResponse(serverSettings.getExtensions(), response, request2, ENTITYCOUNTS);
                 even = !even;
             }
@@ -1241,7 +1250,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
         request.getQuery()
                 .setCount(true)
                 .setTop(1l);
-        final JSONObject response = request.executeGet();
+        final JsonNode response = request.executeGet();
         String nextLink = EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
 
         Assertions.assertNotNull(nextLink, "NextLink should not have been null for " + entityType);
@@ -1305,35 +1314,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
             samplePropertyValues.add(propertyValue);
 
             propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20lt%20" + propertyValue);
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20le%20" + propertyValue);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
+            for (Compare operator : Compare.values()) {
+                String urlString = ServiceUrlHelper.buildURLString(
+                        serverSettings.getServiceUrl(version),
+                        entityType, null, null,
+                        "?$filter=" + property.name + "%20" + operator.urlOperator + "%20" + propertyValue);
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                String response = responseMap.response;
+                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, operator);
+            }
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20eq%20" + propertyValue);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20ne%20" + propertyValue);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20ge%20" + propertyValue);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20gt%20" + propertyValue);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
         }
     }
 
@@ -1349,23 +1340,18 @@ public abstract class Capability3Tests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
-        JSONArray array = null;
+        JsonNode array = null;
         try {
-            array = new JSONObject(response).getJSONArray("value");
-        } catch (JSONException e) {
+            array = Utils.MAPPER.readTree(response).get("value");
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
-        if (array.length() == 0) {
+        if (array.size() == 0) {
             return;
         }
-        Object id = null;
-        try {
-            id = array.getJSONObject(0).get(ControlInformation.ID);
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
+        Object id;
+        id = array.get(0).get(ControlInformation.ID);
 
         for (String relation : relations) {
             if (!EntityType.isPlural(relation)) {
@@ -1391,35 +1377,16 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 samplePropertyValues.add(propertyValue);
 
                 propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20lt%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20le%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
-
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20eq%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
-
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20ne%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
-
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20ge%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
-
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20gt%20" + propertyValue);
-                responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.response;
-                checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
+                for (Compare operator : Compare.values()) {
+                    urlString = ServiceUrlHelper.buildURLString(
+                            serverSettings.getServiceUrl(version),
+                            entityType, id, relationEntityType,
+                            "?$filter=" + property.name + "%20" + operator.urlOperator + "%20" + propertyValue);
+                    responseMap = HTTPMethods.doGet(urlString);
+                    response = responseMap.response;
+                    checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, operator);
+                }
             }
         }
     }
@@ -1432,22 +1399,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * @param values List of values for filtered properties
      * @param operator The operator of the filter
      */
-    private void checkPropertiesForFilter(String response, List<String> properties, List<Comparable> values, int operator) {
+    private void checkPropertiesForFilter(String response, List<String> properties, List<Comparable> values, Compare operator) {
         try {
-            JSONObject entities = new JSONObject(response);
-            JSONArray entityArray = entities.getJSONArray("value");
-            for (int i = 0; i < entityArray.length(); i++) {
-                JSONObject entity = entityArray.getJSONObject(i);
+            JsonNode entities = Utils.MAPPER.readTree(response);
+            JsonNode entityArray = entities.get("value");
+            for (JsonNode entity : entityArray) {
                 for (int j = 0; j < properties.size(); j++) {
-                    Object propertyValue = "";
-                    try {
-                        propertyValue = entity.get(properties.get(j));
-                    } catch (JSONException e) {
-                        fail("The entity does not have property " + properties.get(j));
-                    }
-                    if (propertyValue == null) {
+                    JsonNode propertyNode = entity.get(properties.get(j));
+                    if (propertyNode == null) {
                         fail("The entity has null value for property " + properties.get(j));
                     }
+                    Object propertyValue = Utils.MAPPER.treeToValue(propertyNode, Object.class);
                     Comparable value = values.get(j);
                     if (value instanceof String && ((String) value).charAt(0) == '\'') {
                         String sValue = (String) value;
@@ -1461,34 +1423,34 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
                     int result = value.compareTo(propertyValue);
                     switch (operator) {
-                        case -3:
+                        case NE:
                             String message = properties.get(j) + " should not be equal to " + value + ". But the property value is " + propertyValue;
                             assertNotEquals(0, result, message);
                             break;
-                        case -2:
+                        case LT:
                             message = properties.get(j) + " should be less than " + value + ". But the property value is " + propertyValue;
                             assertTrue(result > 0, message);
                             break;
-                        case -1:
+                        case LE:
                             message = properties.get(j) + " should be less than or equal to " + value + ". But the property value is " + propertyValue;
                             assertTrue(result >= 0, message);
                             break;
-                        case 0:
-                            message = properties.get(j) + " should be equal to than " + value + ". But the property value is " + propertyValue;
+                        case EQ:
+                            message = properties.get(j) + " should be equal to " + value + ". But the property value is " + propertyValue;
                             assertEquals(0, result, message);
                             break;
-                        case 1:
+                        case GE:
                             message = properties.get(j) + " should be greate than or equal to " + value + ". But the property value is " + propertyValue;
                             assertTrue(result <= 0, message);
                             break;
-                        case 2:
+                        case GT:
                             message = properties.get(j) + " should be greater than " + value + ". But the property value is " + propertyValue;
                             assertTrue(result < 0, message);
                             break;
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing " + properties + ":\n" + e.getMessage());
         }
@@ -1577,38 +1539,38 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.LOCATION, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
-            JSONArray array = new JSONObject(response).getJSONArray("value");
-            locationId1 = array.getJSONObject(0).get(ControlInformation.ID);
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            locationId1 = array.get(0).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
+            array = Utils.MAPPER.readTree(response).get("value");
             // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 1".equals(array.getJSONObject(0).get("name"))) {
-                datastreamId1 = array.getJSONObject(0).get(ControlInformation.ID);
-                datastreamId2 = array.getJSONObject(1).get(ControlInformation.ID);
+            if ("datastream 1".equals(array.get(0).get("name").asText())) {
+                datastreamId1 = array.get(0).get(ControlInformation.ID);
+                datastreamId2 = array.get(1).get(ControlInformation.ID);
             } else {
-                datastreamId1 = array.getJSONObject(1).get(ControlInformation.ID);
-                datastreamId2 = array.getJSONObject(0).get(ControlInformation.ID);
+                datastreamId1 = array.get(1).get(ControlInformation.ID);
+                datastreamId2 = array.get(0).get(ControlInformation.ID);
             }
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            sensorId1 = new JSONObject(response).get(ControlInformation.ID);
+            sensorId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            observedPropertyId1 = new JSONObject(response).get(ControlInformation.ID);
+            observedPropertyId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            sensorId2 = new JSONObject(response).get(ControlInformation.ID);
+            sensorId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            observedPropertyId2 = new JSONObject(response).get(ControlInformation.ID);
+            observedPropertyId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             //Second Thing
             urlParameters = "{\n"
@@ -1659,8 +1621,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     + "                \"symbol\": \"C\",\n"
                     + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
                     + "            },\n"
-                    + "            \"name\": \"datastream 2\",\n"
-                    + "            \"description\": \"datastream 2\",\n"
+                    + "            \"name\": \"datastream 4\",\n"
+                    + "            \"description\": \"datastream 4\",\n"
                     + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                     + "            \"ObservedProperty\": {\n"
                     + "                \"@iot.id\": " + quoteForJson(observedPropertyId2) + "\n"
@@ -1680,34 +1642,34 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
-            locationId2 = array.getJSONObject(0).get(ControlInformation.ID);
+            array = Utils.MAPPER.readTree(response).get("value");
+            locationId2 = array.get(0).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
+            array = Utils.MAPPER.readTree(response).get("value");
             // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 3".equals(array.getJSONObject(0).get("name"))) {
-                datastreamId3 = array.getJSONObject(0).get(ControlInformation.ID);
-                datastreamId4 = array.getJSONObject(1).get(ControlInformation.ID);
+            if ("datastream 3".equals(array.get(0).get("name").asText())) {
+                datastreamId3 = array.get(0).get(ControlInformation.ID);
+                datastreamId4 = array.get(1).get(ControlInformation.ID);
             } else {
-                datastreamId4 = array.getJSONObject(0).get(ControlInformation.ID);
-                datastreamId3 = array.getJSONObject(1).get(ControlInformation.ID);
+                datastreamId4 = array.get(0).get(ControlInformation.ID);
+                datastreamId3 = array.get(1).get(ControlInformation.ID);
             }
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            sensorId3 = new JSONObject(response).get(ControlInformation.ID);
+            sensorId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            observedPropertyId3 = new JSONObject(response).get(ControlInformation.ID);
+            observedPropertyId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            sensorId4 = new JSONObject(response).get(ControlInformation.ID);
+            sensorId4 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             //HistoricalLocations
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
@@ -1729,16 +1691,16 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
-            historicalLocationId1 = array.getJSONObject(0).get(ControlInformation.ID);
-            historicalLocationId2 = array.getJSONObject(1).get(ControlInformation.ID);
+            array = Utils.MAPPER.readTree(response).get("value");
+            historicalLocationId1 = array.get(0).get(ControlInformation.ID);
+            historicalLocationId2 = array.get(1).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
-            historicalLocationId3 = array.getJSONObject(0).get(ControlInformation.ID);
-            historicalLocationId4 = array.getJSONObject(1).get(ControlInformation.ID);
+            array = Utils.MAPPER.readTree(response).get("value");
+            historicalLocationId3 = array.get(0).get(ControlInformation.ID);
+            historicalLocationId4 = array.get(1).get(ControlInformation.ID);
 
             //Observations
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
@@ -1825,12 +1787,12 @@ public abstract class Capability3Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            featureOfInterestId1 = new JSONObject(response).get(ControlInformation.ID);
+            featureOfInterestId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            featureOfInterestId2 = new JSONObject(response).get(ControlInformation.ID);
+            featureOfInterestId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
             ENTITYCOUNTS.setGlobalCount(EntityType.DATASTREAM, 4);
             ENTITYCOUNTS.setGlobalCount(EntityType.FEATURE_OF_INTEREST, 2);
@@ -1869,7 +1831,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
             ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

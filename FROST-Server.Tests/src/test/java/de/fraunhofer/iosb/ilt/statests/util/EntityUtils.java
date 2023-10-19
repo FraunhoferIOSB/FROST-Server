@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.NotFoundException;
@@ -38,9 +39,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,65 +207,59 @@ public class EntityUtils {
      * @param entityCounts The object with the expected entity counts.
      * @return the nextLink, or null.
      */
-    public static String checkResponse(Set<Extension> extensions, JSONObject response, Request request, EntityCounts entityCounts) {
+    public static String checkResponse(Set<Extension> extensions, JsonNode response, Request request, EntityCounts entityCounts) {
         String nextLink = null;
-        try {
-            if (request.isCollection()) {
-                checkCollection(extensions, response.getJSONArray("value"), request, entityCounts);
+        if (request.isCollection()) {
+            checkCollection(extensions, response.get("value"), request, entityCounts);
 
-                // check count for request
-                Query expandQuery = request.getQuery();
-                Boolean count = expandQuery.getCount();
-                String countProperty = "@iot.count";
-                if (count != null) {
-                    if (count) {
-                        String message = "Response should have property " + countProperty + " for request: '" + request.toString() + "'";
-                        assertTrue(response.has(countProperty), message);
-                    } else {
-                        String message = "Response should not have property " + countProperty + " for request: '" + request.toString() + "'";
-                        assertFalse(response.has(countProperty), message);
-                    }
+            // check count for request
+            Query expandQuery = request.getQuery();
+            Boolean count = expandQuery.getCount();
+            String countProperty = "@iot.count";
+            if (count != null) {
+                if (count) {
+                    String message = "Response should have property " + countProperty + " for request: '" + request.toString() + "'";
+                    assertTrue(response.has(countProperty), message);
+                } else {
+                    String message = "Response should not have property " + countProperty + " for request: '" + request.toString() + "'";
+                    assertFalse(response.has(countProperty), message);
                 }
-
-                long expectedCount = findCountForRequest(request, entityCounts);
-                if (response.has(countProperty) && expectedCount != -1) {
-                    long foundCount = response.getLong(countProperty);
-                    String message = "Incorrect count for collection of " + request.getEntityType() + " for request: '" + request.toString() + "'";
-                    assertEquals(expectedCount, foundCount, message);
-                }
-                Long top = expandQuery.getTop();
-                String nextLinkProperty = "@iot.nextLink";
-                if (response.has(nextLinkProperty)) {
-                    nextLink = response.getString(nextLinkProperty);
-                }
-                if (top != null && expectedCount != -1) {
-                    int foundNumber = response.getJSONArray("value").length();
-                    long skip = expandQuery.getSkip() == null ? 0 : expandQuery.getSkip();
-
-                    long expectedNumber = Math.max(0, Math.min(expectedCount - skip, top));
-                    if (foundNumber != expectedNumber) {
-                        fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
-                    }
-
-                    if (foundNumber + skip < expectedCount) {
-                        // should have nextLink
-                        String message = "Entity should have " + nextLinkProperty + " for request: '" + request.toString() + "'";
-                        assertTrue(response.has(nextLinkProperty), message);
-                    } else {
-                        // should not have nextLink
-                        String message = "Entity should not have " + nextLinkProperty + " for request: '" + request.toString() + "'";
-                        assertFalse(response.has(nextLinkProperty), message);
-                    }
-
-                }
-
-            } else {
-                checkEntity(extensions, response, request, entityCounts);
             }
-        } catch (JSONException ex) {
-            String message = "Failure when checking response of query '" + request.getLastUrl() + "'";
-            LOGGER.error(message, ex);
-            fail(message);
+
+            long expectedCount = findCountForRequest(request, entityCounts);
+            if (response.has(countProperty) && expectedCount != -1) {
+                long foundCount = response.get(countProperty).asLong();
+                String message = "Incorrect count for collection of " + request.getEntityType() + " for request: '" + request.toString() + "'";
+                assertEquals(expectedCount, foundCount, message);
+            }
+            Long top = expandQuery.getTop();
+            String nextLinkProperty = "@iot.nextLink";
+            if (response.has(nextLinkProperty)) {
+                nextLink = response.get(nextLinkProperty).textValue();
+            }
+            if (top != null && expectedCount != -1) {
+                int foundNumber = response.get("value").size();
+                long skip = expandQuery.getSkip() == null ? 0 : expandQuery.getSkip();
+
+                long expectedNumber = Math.max(0, Math.min(expectedCount - skip, top));
+                if (foundNumber != expectedNumber) {
+                    fail("Requested " + top + " of " + expectedCount + ", expected " + expectedNumber + " with skip of " + skip + " but received " + foundNumber);
+                }
+
+                if (foundNumber + skip < expectedCount) {
+                    // should have nextLink
+                    String message = "Entity should have " + nextLinkProperty + " for request: '" + request.toString() + "'";
+                    assertTrue(response.has(nextLinkProperty), message);
+                } else {
+                    // should not have nextLink
+                    String message = "Entity should not have " + nextLinkProperty + " for request: '" + request.toString() + "'";
+                    assertFalse(response.has(nextLinkProperty), message);
+                }
+
+            }
+
+        } else {
+            checkEntity(extensions, response, request, entityCounts);
         }
         return nextLink;
     }
@@ -280,12 +272,11 @@ public class EntityUtils {
      * @param collection The collection of items to check.
      * @param expand The expand that led to the collection.
      * @param entityCounts The object with the expected entity counts.
-     * @throws JSONException if there is a problem with the json.
      */
-    public static void checkCollection(Set<Extension> extensions, JSONArray collection, Expand expand, EntityCounts entityCounts) throws JSONException {
+    public static void checkCollection(Set<Extension> extensions, JsonNode collection, Expand expand, EntityCounts entityCounts) {
         // Check entities
-        for (int i = 0; i < collection.length(); i++) {
-            checkEntity(extensions, collection.getJSONObject(i), expand, entityCounts);
+        for (int i = 0; i < collection.size(); i++) {
+            checkEntity(extensions, collection.get(i), expand, entityCounts);
         }
         // todo: check orderby
         // todo: check filter
@@ -298,9 +289,8 @@ public class EntityUtils {
      * @param entity The entity to check.
      * @param expand The expand that led to the entity.
      * @param entityCounts The object with the expected entity counts.
-     * @throws JSONException if there is a problem with the json.
      */
-    public static void checkEntity(Set<Extension> extensions, JSONObject entity, Expand expand, EntityCounts entityCounts) throws JSONException {
+    public static void checkEntity(Set<Extension> extensions, JsonNode entity, Expand expand, EntityCounts entityCounts) {
         EntityType entityType = expand.getEntityType();
         Query query = expand.getQuery();
 
@@ -341,7 +331,7 @@ public class EntityUtils {
         }
 
         // Entity id in case we need to check counts.
-        Object entityId = entity.opt("@iot.id");
+        Object entityId = entity.get("@iot.id");
 
         // Check expand
         List<String> relations = new ArrayList<>(entityType.getRelations(extensions));
@@ -354,9 +344,9 @@ public class EntityUtils {
 
             // Check the expanded items
             if (subExpand.isCollection()) {
-                checkCollection(extensions, entity.getJSONArray(propertyName), subExpand, entityCounts);
+                checkCollection(extensions, entity.get(propertyName), subExpand, entityCounts);
             } else {
-                checkEntity(extensions, entity.getJSONObject(propertyName), subExpand, entityCounts);
+                checkEntity(extensions, entity.get(propertyName), subExpand, entityCounts);
             }
             relations.remove(propertyName);
 
@@ -379,14 +369,14 @@ public class EntityUtils {
 
                 long expectedCount = entityCounts.getCount(entityType, entityId, EntityType.getForRelation(propertyName));
                 if (hasCountProperty && expectedCount != -1) {
-                    long foundCount = entity.getLong(countProperty);
+                    long foundCount = entity.get(countProperty).asLong();
                     String message = "Found incorrect count for " + countProperty;
                     assertEquals(expectedCount, foundCount, message);
                 }
 
                 Long top = expandQuery.getTop();
                 if (top != null && expectedCount != -1) {
-                    int foundNumber = entity.getJSONArray(propertyName).length();
+                    int foundNumber = entity.get(propertyName).size();
                     long skip = expandQuery.getSkip() == null ? 0 : expandQuery.getSkip();
 
                     long expectedNumber = Math.min(expectedCount - skip, top);

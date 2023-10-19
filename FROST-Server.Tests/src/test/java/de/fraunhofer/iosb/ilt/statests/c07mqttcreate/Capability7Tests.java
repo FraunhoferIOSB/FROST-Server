@@ -20,22 +20,20 @@ package de.fraunhofer.iosb.ilt.statests.c07mqttcreate;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
-import java.time.ZonedDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import net.time4j.range.MomentInterval;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -87,81 +85,71 @@ public abstract class Capability7Tests extends AbstractTestClass {
     void checkCreateObservationDirect() {
         LOGGER.info("  checkCreateObservationDirect");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
-        JSONObject createdObservation = getObservation();
+        JsonNode createdObservation = getObservation();
         mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
-        JSONObject latestObservation = entityHelper.getAnyEntity(
+        JsonNode latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
     void checkCreateObservationViaDatastream() {
         LOGGER.info("  checkCreateObservationViaDatastream");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
-        JSONObject createdObservation = getObservation();
+        JsonNode createdObservation = getObservation();
         Object datastreamId = -1;
-        try {
-            datastreamId = createdObservation.getJSONObject("Datastream").get(ControlInformation.ID);
-        } catch (JSONException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("Datastream of created observation does not contain @iot.id: " + ex.getMessage());
-        }
+        datastreamId = createdObservation.get("Datastream").get(ControlInformation.ID);
         mqttHelper.publish(mqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
 
-        JSONObject latestObservation = entityHelper.getAnyEntity(
+        JsonNode latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
     void checkCreateObservationViaFeatureOfInterest() {
         LOGGER.info("  checkCreateObservationViaFeatureOfInterest");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
-        JSONObject createdObservation = getObservation();
+        JsonNode createdObservation = getObservation();
         Object featureOfInterestId = -1;
-        try {
-            featureOfInterestId = createdObservation.getJSONObject("FeatureOfInterest").get(ControlInformation.ID);
-        } catch (JSONException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("created observation does not contain @iot.id: " + ex.getMessage());
-        }
+        featureOfInterestId = createdObservation.get("FeatureOfInterest").get(ControlInformation.ID);
         mqttHelper.publish(mqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
 
-        JSONObject latestObservation = entityHelper.getAnyEntity(
+        JsonNode latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
                 "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
-        assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
     void checkCreateObservationWithDeepInsert() {
         LOGGER.info("  checkCreateObservationWithDeepInsert");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
-        JSONObject createdObservation = getObservationWithDeepInsert();
+        JsonNode createdObservation = getObservationWithDeepInsert();
         mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
-        JSONObject latestObservation = entityHelper.getAnyEntity(
+        JsonNode latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
                 expandQueryFromJsonObject(createdObservation),
                 10);
-        assertTrue(jsonEquals(latestObservation, createdObservation));
+        assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
-    private String expandQueryFromJsonObject(JSONObject expectedResult) {
+    private String expandQueryFromJsonObject(JsonNode expectedResult) {
         return expandQueryFromJsonObject(expectedResult, "&");
     }
 
-    private String expandQueryFromJsonObject(JSONObject expectedResult, String seperator) {
+    private String expandQueryFromJsonObject(JsonNode expectedResult, String seperator) {
         String result = "";
         List<String> selects = new ArrayList<>();
         List<String> expands = new ArrayList<>();
-        Iterator iterator = expectedResult.keys();
+        Iterator iterator = expectedResult.fieldNames();
         while (iterator.hasNext()) {
             String key = iterator.next().toString();
             EntityType relationType = null;
@@ -172,12 +160,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
             }
             // check if navigationLink or simple property
             if (relationType != null) {
-                try {
-                    expands.add(key + "(" + expandQueryFromJsonObject(expectedResult.getJSONObject(key), ";") + ")");
-                } catch (JSONException ex) {
-                    LOGGER.error("Exception:", ex);
-                    fail("JSON element addressed by navigationLink is no valid JSON object: " + ex.getMessage());
-                }
+                expands.add(key + "(" + expandQueryFromJsonObject(expectedResult.get(key), ";") + ")");
             } else {
                 selects.add(key);
             }
@@ -194,92 +177,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         return result;
     }
 
-    private static boolean jsonEquals(JSONObject obj1, JSONObject obj2) {
-        if (obj1 == null) {
-            return obj2 == null;
-        }
-        if (obj1.equals(obj2)) {
-            return true;
-        }
-        if (obj1.getClass() != obj2.getClass()) {
-            return false;
-        }
-        if (obj1.length() != obj2.length()) {
-            return false;
-        }
-        Iterator iterator = obj1.keys();
-        while (iterator.hasNext()) {
-            String key = iterator.next().toString();
-            if (!obj2.has(key)) {
-                return false;
-            }
-            try {
-                Object val1 = obj1.get(key);
-                if (val1 instanceof JSONObject) {
-                    if (!jsonEquals((JSONObject) val1, (JSONObject) obj2.getJSONObject(key))) {
-                        return false;
-                    }
-                } else if (val1 instanceof JSONArray) {
-                    JSONArray arr1 = (JSONArray) val1;
-                    JSONArray arr2 = obj2.getJSONArray(key);
-                    if (!jsonEquals(arr1, arr2)) {
-                        return false;
-                    }
-                } // check here for properties ending on 'time"
-                else if (key.toLowerCase().endsWith("time")) {
-                    if (!checkTimeEquals(val1.toString(), obj2.get(key).toString())) {
-                        return false;
-                    }
-                } else if (!val1.equals(obj2.get(key))) {
-                    return false;
-                }
-            } catch (JSONException ex) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean jsonEquals(JSONArray arr1, JSONArray arr2) {
-        if (arr1.length() != arr2.length()) {
-            return false;
-        }
-        for (int i = 0; i < arr1.length(); i++) {
-            Object val1 = arr1.get(i);
-            if (val1 instanceof JSONObject) {
-                if (!jsonEquals((JSONObject) val1, arr2.getJSONObject(i))) {
-                    return false;
-                }
-            } else if (val1 instanceof JSONArray) {
-                if (!jsonEquals((JSONArray) val1, arr2.getJSONArray(i))) {
-                    return false;
-                }
-            } else if (!val1.equals(arr2.get(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean checkTimeEquals(String val1, String val2) {
-        try {
-            ZonedDateTime dateTime1 = ZonedDateTime.parse(val1);
-            ZonedDateTime dateTime2 = ZonedDateTime.parse(val2);
-            return dateTime1.isEqual(dateTime2);
-        } catch (Exception ex) {
-            // do nothing
-        }
-        try {
-            MomentInterval interval1 = MomentInterval.parseISO(val1);
-            MomentInterval interval2 = MomentInterval.parseISO(val2);
-            return interval1.equals(interval2);
-        } catch (Exception ex) {
-            fail("time properies could neither be parsed as time nor as interval");
-        }
-        return false;
-    }
-
-    private JSONObject getObservation() {
+    private JsonNode getObservation() {
         long value = new Random().nextLong();
         Object thingId = entityHelper.createThing();
         Object observedPropertyId = entityHelper.createObservedProperty();
@@ -287,7 +185,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         Object datastreamId = entityHelper.createDatastream(thingId, observedPropertyId, sensorId);
         Object featureOfInterestId = entityHelper.createFeatureOfInterest();
         try {
-            return new JSONObject("{\n"
+            return Utils.MAPPER.readTree("{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T02:40:00+02:00\",\n"
                     + "  \"validTime\": \"2016-01-01T01:01:01.000Z/2016-01-01T23:59:59.000Z\",\n"
                     + "  \"result\": " + value + ",\n"
@@ -295,17 +193,17 @@ public abstract class Capability7Tests extends AbstractTestClass {
                     + "  \"Datastream\":{\"@iot.id\": " + datastreamId + "},\n"
                     + "  \"FeatureOfInterest\": {\"@iot.id\": " + featureOfInterestId + "}  \n"
                     + "}");
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("error converting obsveration to JSON: " + ex.getMessage());
         }
         return null;
     }
 
-    private JSONObject getObservationWithDeepInsert() {
+    private JsonNode getObservationWithDeepInsert() {
         long value = new Random().nextLong();
         try {
-            return new JSONObject("{\n"
+            return Utils.MAPPER.readTree("{\n"
                     + "	\"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
                     + "	\"result\": " + value + ",\n"
                     + "	\"FeatureOfInterest\": {\n"
@@ -347,7 +245,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
                     + "	}\n"
                     + "}\n"
                     + "");
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("error converting obsveration to JSON: " + ex.getMessage());
         }

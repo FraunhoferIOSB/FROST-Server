@@ -21,18 +21,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,10 +120,10 @@ public class TestEntityCreator {
 
     private static int countEntitiesInResponse(String response) {
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray entities = jsonResponse.getJSONArray("value");
-            return entities.length();
-        } catch (JSONException e) {
+            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+            JsonNode entities = jsonResponse.get("value");
+            return entities.size();
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

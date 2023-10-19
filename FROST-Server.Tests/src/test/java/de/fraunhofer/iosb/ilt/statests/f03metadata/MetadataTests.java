@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
@@ -48,7 +48,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Point;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -227,15 +226,20 @@ public abstract class MetadataTests extends AbstractTestClass {
     private void testEntityMetadata(String metadata, boolean hasNavigationLink) {
         HttpResponse result = getEntity(metadata);
         assertEquals(200, result.code);
-        JSONObject thing = new JSONObject(result.response);
+        JsonNode thing = null;
+        try {
+            thing = Utils.MAPPER.readTree(result.response);
+        } catch (JsonProcessingException ex) {
+            Assertions.fail("Failed to parse " + metadata);
+        }
         assertEquals(
                 hasNavigationLink,
-                thing.getJSONObject("properties").has("parent.Thing@iot.navigationLink"),
+                thing.get("properties").has("parent.Thing@iot.navigationLink"),
                 metadata + " metadata navigationLink");
         if (hasNavigationLink) {
             assertEquals(
                     generateSelfLink(0),
-                    thing.getJSONObject("properties").get("parent.Thing@iot.navigationLink"),
+                    thing.get("properties").get("parent.Thing@iot.navigationLink").asText(),
                     metadata + " metadata navigationLink expected");
         }
     }
@@ -266,25 +270,32 @@ public abstract class MetadataTests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, queryString);
         HttpResponse result = HTTPMethods.doGet(urlString);
         assertEquals(200, result.code);
-        JSONObject response = new JSONObject(result.response);
+        JsonNode response = null;
+        try {
+            response = Utils.MAPPER.readTree(result.response);
+        } catch (JsonProcessingException ex) {
+            Assertions.fail("Failed to parse " + metadata);
+        }
         assertFalse(response.has("@iot.nextLink"), metadata + " metadata nextLink");
-        JSONObject thing = response.getJSONArray("value").getJSONObject(0);
+        JsonNode thing = response.get("value").get(0);
 
         assertEquals(hasSelfLink, thing.has("@iot.selfLink"), metadata + " metadata selfLink");
         if (hasSelfLink) {
-            assertEquals(generateSelfLink(1), thing.get("@iot.selfLink"), metadata + " metadata selfLink");
+            assertEquals(generateSelfLink(1), thing.get("@iot.selfLink").asText(), metadata + " metadata selfLink");
         }
-        JSONObject properties = thing.getJSONObject("properties");
+        JsonNode properties = thing.get("properties");
         assertEquals(hasNavigationLink,
                 properties.has("parent.Thing@iot.navigationLink"),
                 metadata + " metadata navigationLink");
         if (hasNavigationLink) {
             assertEquals(generateSelfLink(0),
-                    properties.get("parent.Thing@iot.navigationLink"),
+                    properties.get("parent.Thing@iot.navigationLink").asText(),
                     metadata + " metadata navigationLink");
         }
-        JSONObject parent = thing.getJSONObject("properties").getJSONObject("parent.Thing");
-        assertEquals(THINGS.get(0).getProperty(EP_NAME), parent.get("name"), "parent.Thing should have expanded");
+        JsonNode parent = thing.get("properties").get("parent.Thing");
+        final String expected = THINGS.get(0).getProperty(EP_NAME);
+        final String actual = parent.get("name").asText();
+        assertEquals(expected, actual, "parent.Thing should have expanded");
     }
 
     private String generateSelfLink(int thingIndex) {
@@ -366,7 +377,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = Utils.MAPPER.readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);

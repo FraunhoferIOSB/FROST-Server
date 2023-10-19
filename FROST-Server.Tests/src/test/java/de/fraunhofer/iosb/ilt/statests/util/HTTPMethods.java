@@ -357,15 +357,16 @@ public class HTTPMethods {
             countPatch++;
             uri = new URI(urlString);
 
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-            HttpPatch request = new HttpPatch(uri);
-            StringEntity params = new StringEntity(patchBody, ContentType.APPLICATION_JSON);
-            request.setEntity(params);
-            CloseableHttpResponse response = httpClient.execute(request);
-            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
-            result.setResponse(EntityUtils.toString(response.getEntity()));
-            response.close();
-            httpClient.close();
+            HttpResponse result;
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                HttpPatch request = new HttpPatch(uri);
+                StringEntity params = new StringEntity(patchBody, ContentType.APPLICATION_JSON);
+                request.setEntity(params);
+                try (CloseableHttpResponse response = httpClient.execute(request)) {
+                    result = new HttpResponse(response.getStatusLine().getStatusCode());
+                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                }
+            }
             return result;
         } catch (URISyntaxException | IOException e) {
             LOGGER.error("Exception: ", e);

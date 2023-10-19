@@ -21,20 +21,21 @@ import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,296 +98,234 @@ public class EntityHelper {
      * @param entityType The entity type from EntityType enum
      */
     public void deleteEntityType(EntityType entityType) {
-        JSONArray array = null;
+        JsonNode array = null;
         do {
             try {
                 String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
-                JSONObject result = new JSONObject(responseMap.response);
-                array = result.getJSONArray("value");
-                for (int i = 0; i < array.length(); i++) {
-                    Object id = array.getJSONObject(i).get(ControlInformation.ID);
+                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+                array = result.get("value");
+                for (int i = 0; i < array.size(); i++) {
+                    Object id = array.get(i).get(ControlInformation.ID);
                     deleteEntity(entityType, id);
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
-        } while (array.length() > 0);
+        } while (array.size() > 0);
     }
 
     public Object createDatastream(Object thingId, Object observedPropertyId, Object sensorId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                    + "  \"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(observedPropertyId) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(sensorId) + " }\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "  \"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(observedPropertyId) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(sensorId) + " }\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.DATASTREAM, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createDatastreamWithDeepInsert(Object thingId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                    + "   \"ObservedProperty\": {\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "   },\n"
-                    + "   \"Sensor\": {        \n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"http://schema.org/description\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "   },\n"
-                    + "      \"Observations\": [\n"
-                    + "        {\n"
-                    + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
-                    + "          \"result\": 10\n"
-                    + "        }\n"
-                    + "      ]"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("An Exception occurred during testing: " + ex);
-        }
-        return -1l;
+        String urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                + "   \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "   },\n"
+                + "   \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"http://schema.org/description\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "   },\n"
+                + "      \"Observations\": [\n"
+                + "        {\n"
+                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
+                + "          \"result\": 10\n"
+                + "        }\n"
+                + "      ]"
+                + "}";
+        JsonNode entity = postEntity(EntityType.DATASTREAM, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createFeatureOfInterest() {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"name\": \"A weather station.\",\n"
-                    + "  \"description\": \"A weather station.\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"feature\": {\n"
-                    + "    \"type\": \"Point\",\n"
-                    + "    \"coordinates\": [\n"
-                    + "      10,\n"
-                    + "      10\n"
-                    + "    ]\n"
-                    + "  }\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"name\": \"A weather station.\",\n"
+                + "  \"description\": \"A weather station.\",\n"
+                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"feature\": {\n"
+                + "    \"type\": \"Point\",\n"
+                + "    \"coordinates\": [\n"
+                + "      10,\n"
+                + "      10\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createHistoricalLocation(Object thingId, Object locationId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"Thing\":{\"@iot.id\": " + quoteForJson(thingId) + "},\n"
-                    + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(locationId) + "}]  \n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"Thing\":{\"@iot.id\": " + quoteForJson(thingId) + "},\n"
+                + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(locationId) + "}]  \n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createLocation(Object thingId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"name\": \"bow river\",\n"
-                    + "  \"description\": \"bow river\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"Things\":[{\"@iot.id\": " + quoteForJson(thingId) + "}],\n"
-                    + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.LOCATION, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"name\": \"bow river\",\n"
+                + "  \"description\": \"bow river\",\n"
+                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"Things\":[{\"@iot.id\": " + quoteForJson(thingId) + "}],\n"
+                + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.LOCATION, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createObservation(Object datastreamId, Object featureOfInterstId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
-                    + "  \"result\": 8,\n"
-                    + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(featureOfInterstId) + "}\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
+                + "  \"result\": 8,\n"
+                + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "},\n"
+                + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(featureOfInterstId) + "}\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createObservation(Object datastreamId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
-                    + "  \"result\": 8,\n"
-                    + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
+                + "  \"result\": 8,\n"
+                + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createObservationWithDeepInsert(Object datastreamId) {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                    + "  \"result\": 100,\n"
-                    + "  \"FeatureOfInterest\": {\n"
-                    + "  \t\"name\": \"A weather station.\",\n"
-                    + "  \t\"description\": \"A weather station.\",\n"
-                    + "  \t\"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "    \"feature\": {\n"
-                    + "      \"type\": \"Point\",\n"
-                    + "      \"coordinates\": [\n"
-                    + "        -114.05,\n"
-                    + "        51.05\n"
-                    + "      ]\n"
-                    + "    }\n"
-                    + "  },\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException ex) {
-            fail("An Exception occurred during testing: " + ex);
-        }
-        return -1l;
+        String urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"FeatureOfInterest\": {\n"
+                + "  \t\"name\": \"A weather station.\",\n"
+                + "  \t\"description\": \"A weather station.\",\n"
+                + "  \t\"encodingType\": \"application/vnd.geo+json\",\n"
+                + "    \"feature\": {\n"
+                + "      \"type\": \"Point\",\n"
+                + "      \"coordinates\": [\n"
+                + "        -114.05,\n"
+                + "        51.05\n"
+                + "      ]\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createObservedProperty() {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"name\": \"DewPoint Temperature\",\n"
-                    + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                    + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"name\": \"DewPoint Temperature\",\n"
+                + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
+                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createSensor() {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"name\": \"Fuguro Barometer\",\n"
-                    + "  \"description\": \"Fuguro Barometer\",\n"
-                    + "  \"encodingType\": \"http://schema.org/description\",\n"
-                    + "  \"metadata\": \"Barometer\"\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.SENSOR, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{\n"
+                + "  \"name\": \"Fuguro Barometer\",\n"
+                + "  \"description\": \"Fuguro Barometer\",\n"
+                + "  \"encodingType\": \"http://schema.org/description\",\n"
+                + "  \"metadata\": \"Barometer\"\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.SENSOR, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createThing() {
-        try {
-            String urlParameters = "{"
-                    + "\"name\":\"Test Thing\","
-                    + "\"description\":\"This is a Test Thing From TestNG\""
-                    + "}";
-            JSONObject entity = postEntity(EntityType.THING, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException e) {
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
-        return -1;
+        String urlParameters = "{"
+                + "\"name\":\"Test Thing\","
+                + "\"description\":\"This is a Test Thing From TestNG\""
+                + "}";
+        JsonNode entity = postEntity(EntityType.THING, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public Object createThingWithDeepInsert() {
-        try {
-            String urlParameters = "{\n"
-                    + "  \"name\": \"Office Building\",\n"
-                    + "  \"description\": \"Office Building\",\n"
-                    + "  \"properties\": {\n"
-                    + "    \"reference\": \"Third Floor\"\n"
-                    + "  },\n"
-                    + "  \"Locations\": [\n"
-                    + "    {\n"
-                    + "      \"name\": \"West Roof\",\n"
-                    + "      \"description\": \"West Roof\",\n"
-                    + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                    + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "    }\n"
-                    + "  ],\n"
-                    + "  \"Datastreams\": [\n"
-                    + "    {\n"
-                    + "      \"unitOfMeasurement\": {\n"
-                    + "        \"name\": \"Lumen\",\n"
-                    + "        \"symbol\": \"lm\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                    + "      },\n"
-                    + "      \"name\": \"Light exposure.\",\n"
-                    + "      \"description\": \"Light exposure.\",\n"
-                    + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "      \"ObservedProperty\": {\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      },\n"
-                    + "      \"Sensor\": {        \n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"http://schema.org/description\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "      }\n"
-                    + "    }\n"
-                    + "  ]\n"
-                    + "}";
-            JSONObject entity = postEntity(EntityType.THING, urlParameters);
-            return entity.get(ControlInformation.ID);
-        } catch (JSONException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("An Exception occurred during testing: " + ex.getMessage());
-        }
-        return -1l;
+        String urlParameters = "{\n"
+                + "  \"name\": \"Office Building\",\n"
+                + "  \"description\": \"Office Building\",\n"
+                + "  \"properties\": {\n"
+                + "    \"reference\": \"Third Floor\"\n"
+                + "  },\n"
+                + "  \"Locations\": [\n"
+                + "    {\n"
+                + "      \"name\": \"West Roof\",\n"
+                + "      \"description\": \"West Roof\",\n"
+                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
+                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
+                + "    }\n"
+                + "  ],\n"
+                + "  \"Datastreams\": [\n"
+                + "    {\n"
+                + "      \"unitOfMeasurement\": {\n"
+                + "        \"name\": \"Lumen\",\n"
+                + "        \"symbol\": \"lm\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
+                + "      },\n"
+                + "      \"name\": \"Light exposure.\",\n"
+                + "      \"description\": \"Light exposure.\",\n"
+                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "      \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "      },\n"
+                + "      \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"http://schema.org/description\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}";
+        JsonNode entity = postEntity(EntityType.THING, urlParameters);
+        return entity.get(ControlInformation.ID);
     }
 
     public void deleteEntity(EntityType entityType, Object id) {
@@ -428,25 +367,25 @@ public class EntityHelper {
         return result;
     }
 
-    public JSONObject getEntity(EntityType entityType, Object id) {
+    public JsonNode getEntity(EntityType entityType, Object id) {
         if (id == null) {
             return null;
         }
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).response);
-        } catch (JSONException e) {
+            return Utils.MAPPER.readTree(HTTPMethods.doGet(urlString).response);
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!: " + e.getMessage());
             return null;
         }
     }
 
-    public JSONObject getEntity(String relativeUrl) {
+    public JsonNode getEntity(String relativeUrl) {
         String urlString = concatOverlapping(rootUri, relativeUrl);
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).response);
-        } catch (JSONException e) {
+            return Utils.MAPPER.readTree(HTTPMethods.doGet(urlString).response);
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!: " + e.getMessage());
             return null;
@@ -467,7 +406,7 @@ public class EntityHelper {
      * @param retries The maximum number of retries.
      * @return The first entity found, or null after all retries.
      */
-    public JSONObject getAnyEntity(EntityType entityType, String queryOptions, int retries) {
+    public JsonNode getAnyEntity(EntityType entityType, String queryOptions, int retries) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null) + "?$top=1";
         if (queryOptions != null && !queryOptions.isEmpty()) {
             urlString += "&" + queryOptions;
@@ -476,9 +415,9 @@ public class EntityHelper {
             int retry = 0;
             while (retry < retries) {
                 String json = HTTPMethods.doGet(urlString).response;
-                JSONArray items = new JSONObject(json).getJSONArray("value");
+                JsonNode items = Utils.MAPPER.readTree(json).get("value");
                 if (!items.isEmpty()) {
-                    return items.getJSONObject(0);
+                    return items.get(0);
                 } else {
                     retry++;
                     LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, urlString);
@@ -487,7 +426,7 @@ public class EntityHelper {
             }
             LOGGER.error("Failed to read an entity from url after {} tries: {}", retries, urlString);
             return null;
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Failed while reading from url {}", urlString);
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!: " + e.getMessage());
@@ -522,20 +461,20 @@ public class EntityHelper {
         }
     }
 
-    public JSONObject patchEntity(EntityType entityType, Map<String, Object> changes, Object id) {
+    public JsonNode patchEntity(EntityType entityType, Map<String, Object> changes, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         HttpResponse responseMap = null;
         try {
-            responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
+            responseMap = HTTPMethods.doPatch(urlString, Utils.MAPPER.writeValueAsString(changes));
             int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             assertEquals(200, responseCode, message);
 
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Response: {}", responseMap);
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
@@ -543,63 +482,59 @@ public class EntityHelper {
         }
     }
 
-    public JSONObject putEntity(EntityType entityType, Map<String, Object> changes, Object id) {
+    public JsonNode putEntity(EntityType entityType, Map<String, Object> changes, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         try {
-            JSONObject entity = getEntity(entityType, id);
+            ObjectNode entity = (ObjectNode) getEntity(entityType, id);
             clearLinks(entity);
             for (Map.Entry<String, Object> entry : changes.entrySet()) {
-                entity.put(entry.getKey(), entry.getValue());
+                entity.putPOJO(entry.getKey(), entry.getValue());
             }
             HttpResponse responseMap = HTTPMethods.doPut(urlString, entity.toString());
             int responseCode = responseMap.code;
             String message = "Error during updating(PUT) of entity " + entityType.name() + ": " + responseMap.response;
             assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }
     }
 
-    public JSONObject updateEntitywithPATCH(EntityType entityType, Object id) {
+    public JsonNode updateEntitywithPATCH(EntityType entityType, Object id) {
         latestEntities.put(entityType, id);
         return patchEntity(entityType, getEntityChanges(entityType), id);
     }
 
-    public JSONObject updateEntitywithPUT(EntityType entityType, Object id) {
+    public JsonNode updateEntitywithPUT(EntityType entityType, Object id) {
         latestEntities.put(entityType, id);
         return putEntity(entityType, getEntityChanges(entityType), id);
     }
 
     private void clearLinks(Object obj) {
-        if (!(obj instanceof JSONObject)) {
+        if (!(obj instanceof ObjectNode)) {
             return;
         }
-        JSONObject entity = (JSONObject) obj;
-        Iterator iterator = entity.keys();
+        ObjectNode entity = (ObjectNode) obj;
+        Iterator iterator = entity.fieldNames();
         while (iterator.hasNext()) {
             String key = iterator.next().toString();
             if (key.contains("@")) {
                 iterator.remove();
                 //entity.remove(key);
             } else {
-                try {
-                    Object val = entity.get(key);
-                    if (val instanceof JSONObject) {
-                        clearLinks((JSONObject) val);
-                    } else if (val instanceof JSONArray) {
-                        JSONArray arr = (JSONArray) val;
-                        for (int i = 0; i < arr.length(); i++) {
-                            clearLinks(arr.get(i));
-                        }
+                Object val = entity.get(key);
+                if (val instanceof ObjectNode) {
+                    clearLinks(val);
+                } else if (val instanceof ArrayNode) {
+                    JsonNode arr = (ArrayNode) val;
+                    for (int i = 0; i < arr.size(); i++) {
+                        clearLinks(arr.get(i));
                     }
-                } catch (JSONException ex) {
-                    fail();
                 }
             }
         }
@@ -611,9 +546,9 @@ public class EntityHelper {
             changes.put("name", "Data coming from sensor on ISS.");
             changes.put("description", "Data coming from sensor on ISS.");
             changes.put("observationType", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation");
-            changes.put("unitOfMeasurement", new JSONObject("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
+            changes.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
             return changes;
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Generating Datastream changes failed: " + ex.getMessage());
         }
@@ -624,11 +559,11 @@ public class EntityHelper {
         try {
             Map<String, Object> changes = new HashMap<>();
             changes.put("encodingType", "SQUARE");
-            changes.put("feature", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
+            changes.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
             changes.put("name", "POIUYTREW");
             changes.put("description", "POIUYTREW");
             return changes;
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Generating FeatureOfInterest changes failed: " + ex.getMessage());
         }
@@ -647,9 +582,9 @@ public class EntityHelper {
             changes.put("encodingType", "UPDATED ENCODING");
             changes.put("name", "UPDATED NAME");
             changes.put("description", "UPDATED DESCRIPTION");
-            changes.put("location", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}"));
+            changes.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}"));
             return changes;
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Generating Location changes failed: " + ex.getMessage());
         }
@@ -663,10 +598,10 @@ public class EntityHelper {
             changes.put("phenomenonTime", "2015-08-01T00:40:00.000Z");
             changes.put("resultTime", "2015-12-12T12:12:12.000Z");
             changes.put("validTime", "2016-12-12T12:12:12+01:00/2016-12-12T23:59:59+01:00");
-            changes.put("parameters", new JSONObject("{\"param1\": \"some updated value1\", \"param2\": \"some updated value2\"}"));
+            changes.put("parameters", Utils.MAPPER.readTree("{\"param1\": \"some updated value1\", \"param2\": \"some updated value2\"}"));
 
             return changes;
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Generating Observation changes failed: " + ex.getMessage());
         }
@@ -707,7 +642,7 @@ public class EntityHelper {
         return changes;
     }
 
-    private JSONObject postEntity(EntityType entityType, String urlParameters) {
+    private JsonNode postEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
@@ -725,9 +660,9 @@ public class EntityHelper {
             message = "The POSTed entity is not created.";
             assertEquals(200, responseCode, message);
 
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
-        } catch (JSONException e) {
+        } catch (IOException e) {
             fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
         }

@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -320,7 +320,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
 
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(responseMap.response);
+            json = Utils.MAPPER.readTree(responseMap.response);
         } catch (IOException ex) {
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return null;

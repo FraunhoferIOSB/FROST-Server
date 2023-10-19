@@ -19,10 +19,13 @@ package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -37,7 +40,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -45,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author jab
  * @author scf
  */
-public class MqttListener implements Callable<JSONObject> {
+public class MqttListener implements Callable<JsonNode> {
 
     /**
      * The logger for this class.
@@ -56,7 +58,7 @@ public class MqttListener implements Callable<JSONObject> {
     private final String mqttServerUri;
 
     private MqttAsyncClient mqttClient;
-    private JSONObject result;
+    private JsonNode result;
 
     public MqttListener(String mqttServer, String topic) {
         this.mqttServerUri = mqttServer;
@@ -95,7 +97,11 @@ public class MqttListener implements Callable<JSONObject> {
                         @Override
                         public void messageArrived(String topic, MqttMessage mm) {
                             if (barrier.getCount() > 0) {
-                                result = new JSONObject(new String(mm.getPayload(), StandardCharsets.UTF_8));
+                                try {
+                                    result = Utils.MAPPER.readTree(new String(mm.getPayload(), StandardCharsets.UTF_8));
+                                } catch (JsonProcessingException ex) {
+                                    LOGGER.error("Failed to parse result", ex);
+                                }
                                 barrier.countDown();
                                 LOGGER.debug("Received on {}. To go: {}", topic, barrier.getCount());
                             } else {
@@ -146,7 +152,7 @@ public class MqttListener implements Callable<JSONObject> {
     }
 
     @Override
-    public JSONObject call() throws InterruptedException, MqttException {
+    public JsonNode call() throws InterruptedException, MqttException {
         try {
             barrier.await();
         } catch (InterruptedException ex) {

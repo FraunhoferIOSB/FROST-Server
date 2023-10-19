@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -32,14 +33,13 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -148,12 +148,12 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     private void readPropertyOfEntityWithEntityType(EntityType entityType) {
         try {
             String response = getEntities(entityType);
-            Object id = new JSONObject(response).getJSONArray("value").getJSONObject(0).get(ControlInformation.ID);
+            Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 checkGetPropertyOfEntity(entityType, id, property);
                 checkGetPropertyValueOfEntity(entityType, id, property);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception handling " + entityType, e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -178,17 +178,13 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
             String message = "Reading property \"" + property.name + "\" of the existing " + entityType.name() + " with id " + id + " failed.";
             assertEquals(200, responseCode, message);
             String response = responseMap.response;
-            JSONObject entity;
-            entity = new JSONObject(response);
-            try {
-                message = "Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.";
-                assertNotNull(entity.get(property.name), message);
-            } catch (JSONException e) {
-                fail("Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.");
-            }
+            JsonNode entity;
+            entity = Utils.MAPPER.readTree(response);
+            message = "Reading property \"" + property.name + "\" of \"" + entityType + "\" fails.";
+            assertNotNull(entity.get(property.name), message);
             message = "The response for getting property " + property.name + " of a " + entityType + " returns more properties!";
-            assertEquals(1, entity.length(), message);
-        } catch (JSONException e) {
+            assertEquals(1, entity.size(), message);
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -278,9 +274,9 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
             String response = responseMap.response;
             Object id;
             if (isPlural) {
-                id = new JSONObject(response).getJSONArray("value").getJSONObject(0).get(ControlInformation.ID);
+                id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
             } else {
-                id = new JSONObject(response).get(ControlInformation.ID);
+                id = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
             }
 
             //check $ref
@@ -307,7 +303,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 entityTypes.remove(entityTypes.size() - 1);
             }
             ids.remove(ids.size() - 1);
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Failed to parse response for " + urlString, e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -329,32 +325,24 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
             if (EntityType.isPlural(entityTypes.get(entityTypes.size() - 1))) {
                 String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
                 assertTrue(response.contains("value"), message);
-                JSONArray value = new JSONObject(response).getJSONArray("value");
+                JsonNode value = Utils.MAPPER.readTree(response).get("value");
                 int count = 0;
-                for (int i = 0; i < value.length() && count < 2; i++) {
+                for (int i = 0; i < value.size() && count < 2; i++) {
                     count++;
-                    JSONObject obj = value.getJSONObject(i);
-                    try {
-                        message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
-                        assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
-                    } catch (JSONException e) {
-                        fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
-                    }
+                    JsonNode obj = value.get(i);
+                    message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
+                    assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
                     message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
-                    assertEquals(1, obj.length(), message);
+                    assertEquals(1, obj.size(), message);
                 }
             } else {
-                JSONObject obj = new JSONObject(response);
-                try {
-                    String message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
-                    assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
-                } catch (JSONException e) {
-                    fail("The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString());
-                }
-                String message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
-                assertEquals(1, obj.length(), message);
+                JsonNode obj = Utils.MAPPER.readTree(response);
+                String message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
+                assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
+                message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
+                assertEquals(1, obj.size(), message);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -369,7 +357,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     private String readEntityWithEntityType(EntityType entityType) {
         try {
             String response = getEntities(entityType);
-            Object id = new JSONObject(response).getJSONArray("value").getJSONObject(0).get(ControlInformation.ID);
+            Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
             HttpResponse responseMap = getEntity(entityType, id, null);
             int responseCode = responseMap.code;
 
@@ -378,7 +366,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
 
             response = responseMap.response;
             return response;
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
@@ -407,8 +395,8 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
         LOGGER.info("  checkServiceRootUri");
         try {
             String response = getEntities(null);
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray entities = jsonResponse.getJSONArray("value");
+            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+            JsonNode entities = jsonResponse.get("value");
             Map<String, Boolean> addedLinks = new HashMap<>();
             addedLinks.put("Things", false);
             addedLinks.put("Locations", false);
@@ -426,13 +414,13 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 addedLinks.put("TaskingCapabilities", false);
                 addedLinks.put("Tasks", false);
             }
-            for (int i = 0; i < entities.length(); i++) {
-                JSONObject entity = entities.getJSONObject(i);
+            for (int i = 0; i < entities.size(); i++) {
+                JsonNode entity = entities.get(i);
                 if (!entity.has("name") || !entity.has("url")) {
                     fail("Service root URI component does not have proper JSON keys: name and value.");
                 }
-                String name = entity.getString("name");
-                String nameUrl = entity.getString("url");
+                String name = entity.get("name").textValue();
+                String nameUrl = entity.get("url").textValue();
                 addedLinks.put(name, true);
                 if ("MultiDatastreams".equals(name)) {
                     // TODO: MultiDatastreams are not in the entity list yet.
@@ -538,15 +526,15 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntitiesControlInformation(String response) {
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray entities = jsonResponse.getJSONArray("value");
+            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+            JsonNode entities = jsonResponse.get("value");
             int count = 0;
-            for (int i = 0; i < entities.length() && count < 2; i++) {
+            for (int i = 0; i < entities.size() && count < 2; i++) {
                 count++;
-                JSONObject entity = entities.getJSONObject(i);
+                JsonNode entity = entities.get(i);
                 checkEntityControlInformation(entity);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -560,20 +548,12 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntityControlInformation(Object response) {
         try {
-            JSONObject entity = new JSONObject(response.toString());
-            try {
-                String message = "The entity does not have mandatory control information : " + ControlInformation.ID;
-                assertNotNull(entity.get(ControlInformation.ID), message);
-            } catch (JSONException e) {
-                fail("The entity does not have mandatory control information : " + ControlInformation.ID);
-            }
-            try {
-                String message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
-                assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
-            } catch (JSONException e) {
-                fail("The entity does not have mandatory control information : " + ControlInformation.SELF_LINK);
-            }
-        } catch (JSONException e) {
+            JsonNode entity = Utils.MAPPER.readTree(response.toString());
+            String message = "The entity does not have mandatory control information : " + ControlInformation.ID;
+            assertNotNull(entity.get(ControlInformation.ID), message);
+            message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
+            assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -588,16 +568,16 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntitiesProperties(EntityType entityType, String response) {
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray entities = jsonResponse.getJSONArray("value");
+            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+            JsonNode entities = jsonResponse.get("value");
             int count = 0;
-            for (int i = 0; i < entities.length() && count < 2; i++) {
+            for (int i = 0; i < entities.size() && count < 2; i++) {
                 count++;
-                JSONObject entity = entities.getJSONObject(i);
+                JsonNode entity = entities.get(i);
                 checkEntityProperties(entityType, entity);
             }
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -613,20 +593,16 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntityProperties(EntityType entityType, Object response) {
         try {
-            JSONObject entity = new JSONObject(response.toString());
+            JsonNode entity = Utils.MAPPER.readTree(response.toString());
             for (EntityType.EntityProperty property : entityType.getProperties()) {
                 if (property.optional) {
                     continue;
                 }
-                try {
-                    String message = "Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".";
-                    assertNotNull(entity.get(property.name), message);
-                } catch (JSONException e) {
-                    fail("Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".");
-                }
+                String message = "Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".";
+                assertNotNull(entity.get(property.name), message);
             }
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -642,15 +618,15 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntitiesRelations(EntityType entityType, String response) {
         try {
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray entities = jsonResponse.getJSONArray("value");
+            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+            JsonNode entities = jsonResponse.get("value");
             int count = 0;
-            for (int i = 0; i < entities.length() && count < 2; i++) {
+            for (int i = 0; i < entities.size() && count < 2; i++) {
                 count++;
-                JSONObject entity = entities.getJSONObject(i);
+                JsonNode entity = entities.get(i);
                 checkEntityRelations(entityType, entity);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -666,16 +642,12 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
      */
     private void checkEntityRelations(EntityType entityType, Object response) {
         try {
-            JSONObject entity = new JSONObject(response.toString());
+            JsonNode entity = Utils.MAPPER.readTree(response.toString());
             for (String relation : entityType.getRelations(serverSettings.getExtensions())) {
-                try {
-                    String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
-                    assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
-                } catch (JSONException e) {
-                    fail("Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".");
-                }
+                String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
+                assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
             }
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

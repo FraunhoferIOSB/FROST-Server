@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.c02cud;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
@@ -36,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -91,7 +91,8 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      *
-     * @throws de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
+     * @throws
+     * de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
      */
     @AfterAll
     public static void deleteEverything() throws ServiceFailureException {
@@ -161,7 +162,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
         List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
+        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 1}")));
         sSrvc.patch(thingOnlyId, operations);
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
@@ -188,7 +189,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
         List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 2}")));
+        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 2}")));
         sSrvc.patch(thingOnlyId, operations);
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
@@ -218,7 +219,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         LOGGER.info("  jsonPatchDatastreamTest");
         Entity dsOnlyId = DATASTREAMS.get(0).withOnlyPk();
         List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));
+        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 1}")));
         sSrvc.patch(dsOnlyId, operations);
         Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 

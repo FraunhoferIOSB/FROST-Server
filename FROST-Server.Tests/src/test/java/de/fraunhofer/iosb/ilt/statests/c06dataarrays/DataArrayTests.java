@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
@@ -186,7 +185,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
 
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = Utils.MAPPER.readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
@@ -281,7 +280,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
 
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = Utils.MAPPER.readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
@@ -326,7 +325,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     private void validateGetDataArrayResponse(String response, String urlString, Set<String> requestedProperties) {
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = Utils.MAPPER.readTree(response);
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());

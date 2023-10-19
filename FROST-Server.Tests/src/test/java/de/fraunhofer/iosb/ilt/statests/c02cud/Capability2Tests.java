@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -36,17 +37,13 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.IdType;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -357,298 +354,278 @@ public abstract class Capability2Tests extends AbstractTestClass {
     @Test
     void test02CreateEntities() {
         LOGGER.info("  test02CreateEntities");
-        try {
+        {
+            /* Thing */
+            String urlParameters = "{"
+                    + "\"name\":\"Test Thing\","
+                    + "\"description\":\"This is a Test Thing From TestNG\""
+                    + "}";
+            JsonNode entity = postEntity(EntityType.THING, urlParameters);
+            Object thingId = entity.get(ControlInformation.ID);
+            THING_IDS.add(thingId);
+            ID_TYPES.put(EntityType.THING, IdType.findFor(thingId));
+        }
+        JsonNode locationEntity;
+        {
+            /* Location */
+            String urlParameters = "{\n"
+                    + "  \"name\": \"bow river\",\n"
+                    + "  \"description\": \"bow river\",\n"
+                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                    + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.LOCATION, urlParameters);
+            Object locationId = entity.get(ControlInformation.ID);
+            LOCATION_IDS.add(locationId);
+            ID_TYPES.put(EntityType.LOCATION, IdType.findFor(locationId));
+            locationEntity = entity;
+        }
+        {
+            /* Sensor */
+            String urlParameters = "{\n"
+                    + "  \"name\": \"Fuguro Barometer\",\n"
+                    + "  \"description\": \"Fuguro Barometer\",\n"
+                    + "  \"encodingType\": \"application/pdf\",\n"
+                    + "  \"metadata\": \"Barometer\"\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.SENSOR, urlParameters);
+            Object sensorId = entity.get(ControlInformation.ID);
+            SENSOR_IDS.add(sensorId);
+            ID_TYPES.put(EntityType.SENSOR, IdType.findFor(sensorId));
+        }
+        {
+            /* ObservedProperty */
+            String urlParameters = "{\n"
+                    + "  \"name\": \"DewPoint Temperature\",\n"
+                    + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
+                    + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
+            Object obsPropId = entity.get(ControlInformation.ID);
+            OBSPROP_IDS.add(obsPropId);
+            ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(obsPropId));
+        }
+        {
+            /* FeatureOfInterest */
+            String urlParameters = "{\n"
+                    + "  \"name\": \"A weather station.\",\n"
+                    + "  \"description\": \"A weather station.\",\n"
+                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                    + "  \"feature\": {\n"
+                    + "    \"type\": \"Point\",\n"
+                    + "    \"coordinates\": [\n"
+                    + "      10,\n"
+                    + "      10\n"
+                    + "    ]\n"
+                    + "  }\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
+            Object foiId = entity.get(ControlInformation.ID);
+            FOI_IDS.add(foiId);
+            ID_TYPES.put(EntityType.FEATURE_OF_INTEREST, IdType.findFor(foiId));
+        }
+        {
+            /* Datastream */
+            String urlParameters = "{\n"
+                    + "  \"unitOfMeasurement\": {\n"
+                    + "    \"name\": \"Celsius\",\n"
+                    + "    \"symbol\": \"degC\",\n"
+                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                    + "  },\n"
+                    + "  \"name\": \"test datastream.\",\n"
+                    + "  \"description\": \"test datastream.\",\n"
+                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.DATASTREAM, urlParameters);
+            Object datastreamId = entity.get(ControlInformation.ID);
+            DATASTREAM_IDS.add(datastreamId);
+            ID_TYPES.put(EntityType.DATASTREAM, IdType.findFor(datastreamId));
+        }
+        {
+            /* Observation */
+            String urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                    + "  \"result\": 8,\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "},\n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            Object obsId1 = entity.get(ControlInformation.ID);
+            OBSERVATION_IDS.add(obsId1);
+            ID_TYPES.put(EntityType.OBSERVATION, IdType.findFor(obsId1));
+        }
+        {
+            //POST Observation without FOI (Automatic creation of FOI)
+            //Add location to the Thing
+            String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(0)) + "}]}";
+            patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
+
+            urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
+                    + "  \"resultTime\": \"2015-03-01T01:00:00.000Z\",\n"
+                    + "  \"result\": 100,\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            checkForObservationResultTime(entity, "2015-03-01T01:00:00.000Z");
+            Object obsId2 = entity.get(ControlInformation.ID);
+            OBSERVATION_IDS.add(obsId2);
+            Object automatedFOIId = checkAutomaticInsertionOfFOI(obsId2, locationEntity, null);
+            FOI_IDS.add(automatedFOIId);
+        }
+        {
+            //POST another Observation to make sure it is linked to the previously created FOI
+            String urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-05-01T00:00:00.000Z\",\n"
+                    + "  \"result\": 105,\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            checkForObservationResultTime(entity, null);
+            Object obsId3 = entity.get(ControlInformation.ID);
+            OBSERVATION_IDS.add(obsId3);
+            checkAutomaticInsertionOfFOI(OBSERVATION_IDS.get(1), locationEntity, FOI_IDS.get(1));
+        }
+        JsonNode location2Entity;
+        {
+            // Move the Thing to a new location, create a new observation
+            // without FOI, check if a new FOI is created from this new location.
+            /* Second Location */
+            String urlParameters = "{\n"
+                    + "  \"name\": \"spear river\",\n"
+                    + "  \"description\": \"spear river\",\n"
+                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                    + "  \"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.LOCATION, urlParameters);
+            Object location2Id = entity.get(ControlInformation.ID);
+            LOCATION_IDS.add(location2Id);
+            location2Entity = entity;
+        }
+        {
+            //Add second location to the Thing
+            String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(1)) + "}]}";
+            patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
+        }
+        {
+            // Create a new Observation for Thing1 with no FoI.
+            String urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-03-01T01:00:00.000Z\",\n"
+                    + "  \"resultTime\": \"2015-03-01T02:00:00.000Z\",\n"
+                    + "  \"result\": 200,\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            Object obsId4 = entity.get(ControlInformation.ID);
+            OBSERVATION_IDS.add(obsId4);
+            Object automatedFOI2Id = checkAutomaticInsertionOfFOI(obsId4, location2Entity, null);
+            FOI_IDS.add(automatedFOI2Id);
+            String message = "A new FoI should have been created, since the Thing moved.";
+            assertNotEquals(automatedFOI2Id, FOI_IDS.get(1), message);
+        }
+        final Object thing2Id;
+        {
+            // Create a new Thing with the same Location, create a new
+            // observation without FOI, check if the same FOI is used.
+            /* Thing2 */
+            String urlParameters = "{"
+                    + "\"name\":\"Test Thing 2\","
+                    + "\"description\":\"This is a second Test Thing From TestNG\","
+                    + "\"Locations\":[{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.THING, urlParameters);
+            thing2Id = entity.get(ControlInformation.ID);
+            THING_IDS.add(thing2Id);
+        }
+        final Object datastream2Id;
+        {
+            /* Datastream2 */
+            String urlParameters = "{\n"
+                    + "  \"unitOfMeasurement\": {\n"
+                    + "    \"name\": \"Celsius\",\n"
+                    + "    \"symbol\": \"degC\",\n"
+                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                    + "  },\n"
+                    + "  \"name\": \"test datastream 2.\",\n"
+                    + "  \"description\": \"test datastream 2.\",\n"
+                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thing2Id) + " },\n"
+                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.DATASTREAM, urlParameters);
+            datastream2Id = entity.get(ControlInformation.ID);
+            DATASTREAM_IDS.add(datastream2Id);
+        }
+        {
+            /* Post new Observation without FoI */
+            String urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
+                    + "  \"resultTime\": \"2015-03-01T04:00:00.000Z\",\n"
+                    + "  \"result\": 300,\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastream2Id) + "}\n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            Object obsId5 = entity.get(ControlInformation.ID);
+            OBSERVATION_IDS.add(obsId5);
+            Object automatedFOI3Id = checkAutomaticInsertionOfFOI(obsId5, locationEntity, null);
+            String message = "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location.";
+            assertEquals(automatedFOI3Id, FOI_IDS.get(1), message);
+        }
+        {
+            /* HistoricalLocation */
+            String urlParameters = "{\n"
+                    + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
+                    + "  \"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "},\n"
+                    + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]  \n"
+                    + "}";
+            JsonNode entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
+            Object histLocId = entity.get(ControlInformation.ID);
+            HISTORICAL_LOCATION_IDS.add(histLocId);
+            ID_TYPES.put(EntityType.HISTORICAL_LOCATION, IdType.findFor(histLocId));
+        }
+        if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
             {
-                /* Thing */
+                /* Actuator */
                 String urlParameters = "{"
                         + "\"name\":\"Test Thing\","
-                        + "\"description\":\"This is a Test Thing From TestNG\""
+                        + "\"description\":\"This is a Test Thing From TestNG\","
+                        + "\"encodingType\":\"none\","
+                        + "\"metadata\":\"none\""
                         + "}";
-                JSONObject entity = postEntity(EntityType.THING, urlParameters);
-                Object thingId = entity.get(ControlInformation.ID);
-                THING_IDS.add(thingId);
-                ID_TYPES.put(EntityType.THING, IdType.findFor(thingId));
-            }
-
-            JSONObject locationEntity;
-            {
-                /* Location */
-                String urlParameters = "{\n"
-                        + "  \"name\": \"bow river\",\n"
-                        + "  \"description\": \"bow river\",\n"
-                        + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                        + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.LOCATION, urlParameters);
-                Object locationId = entity.get(ControlInformation.ID);
-                LOCATION_IDS.add(locationId);
-                ID_TYPES.put(EntityType.LOCATION, IdType.findFor(locationId));
-                locationEntity = entity;
-            }
-
-            {
-                /* Sensor */
-                String urlParameters = "{\n"
-                        + "  \"name\": \"Fuguro Barometer\",\n"
-                        + "  \"description\": \"Fuguro Barometer\",\n"
-                        + "  \"encodingType\": \"application/pdf\",\n"
-                        + "  \"metadata\": \"Barometer\"\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.SENSOR, urlParameters);
-                Object sensorId = entity.get(ControlInformation.ID);
-                SENSOR_IDS.add(sensorId);
-                ID_TYPES.put(EntityType.SENSOR, IdType.findFor(sensorId));
-            }
-
-            {
-                /* ObservedProperty */
-                String urlParameters = "{\n"
-                        + "  \"name\": \"DewPoint Temperature\",\n"
-                        + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                        + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
-                Object obsPropId = entity.get(ControlInformation.ID);
-                OBSPROP_IDS.add(obsPropId);
-                ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(obsPropId));
-            }
-
-            {
-                /* FeatureOfInterest */
-                String urlParameters = "{\n"
-                        + "  \"name\": \"A weather station.\",\n"
-                        + "  \"description\": \"A weather station.\",\n"
-                        + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                        + "  \"feature\": {\n"
-                        + "    \"type\": \"Point\",\n"
-                        + "    \"coordinates\": [\n"
-                        + "      10,\n"
-                        + "      10\n"
-                        + "    ]\n"
-                        + "  }\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
-                Object foiId = entity.get(ControlInformation.ID);
-                FOI_IDS.add(foiId);
-                ID_TYPES.put(EntityType.FEATURE_OF_INTEREST, IdType.findFor(foiId));
-            }
-
-            {
-                /* Datastream */
-                String urlParameters = "{\n"
-                        + "  \"unitOfMeasurement\": {\n"
-                        + "    \"name\": \"Celsius\",\n"
-                        + "    \"symbol\": \"degC\",\n"
-                        + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                        + "  },\n"
-                        + "  \"name\": \"test datastream.\",\n"
-                        + "  \"description\": \"test datastream.\",\n"
-                        + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                        + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
-                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
-                        + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
-                Object datastreamId = entity.get(ControlInformation.ID);
-                DATASTREAM_IDS.add(datastreamId);
-                ID_TYPES.put(EntityType.DATASTREAM, IdType.findFor(datastreamId));
+                JsonNode entity = postEntity(EntityType.ACTUATOR, urlParameters);
+                Object id = entity.get(ControlInformation.ID);
+                ACTUATOR_IDS.add(id);
+                ID_TYPES.put(EntityType.ACTUATOR, IdType.findFor(id));
             }
             {
-                /* Observation */
-                String urlParameters = "{\n"
-                        + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                        + "  \"result\": 8,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "},\n"
-                        + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-                Object obsId1 = entity.get(ControlInformation.ID);
-                OBSERVATION_IDS.add(obsId1);
-                ID_TYPES.put(EntityType.OBSERVATION, IdType.findFor(obsId1));
-            }
-
-            {
-                //POST Observation without FOI (Automatic creation of FOI)
-                //Add location to the Thing
-                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(0)) + "}]}";
-                patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
-
-                urlParameters = "{\n"
-                        + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
-                        + "  \"resultTime\": \"2015-03-01T01:00:00.000Z\",\n"
-                        + "  \"result\": 100,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-                checkForObservationResultTime(entity, "2015-03-01T01:00:00.000Z");
-                Object obsId2 = entity.get(ControlInformation.ID);
-                OBSERVATION_IDS.add(obsId2);
-                Object automatedFOIId = checkAutomaticInsertionOfFOI(obsId2, locationEntity, null);
-                FOI_IDS.add(automatedFOIId);
-            }
-
-            {
-                //POST another Observation to make sure it is linked to the previously created FOI
-                String urlParameters = "{\n"
-                        + "  \"phenomenonTime\": \"2015-05-01T00:00:00.000Z\",\n"
-                        + "  \"result\": 105,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-                checkForObservationResultTime(entity, null);
-                Object obsId3 = entity.get(ControlInformation.ID);
-                OBSERVATION_IDS.add(obsId3);
-                checkAutomaticInsertionOfFOI(OBSERVATION_IDS.get(1), locationEntity, FOI_IDS.get(1));
-            }
-
-            JSONObject location2Entity;
-            {
-                // Move the Thing to a new location, create a new observation
-                // without FOI, check if a new FOI is created from this new location.
-                /* Second Location */
-                String urlParameters = "{\n"
-                        + "  \"name\": \"spear river\",\n"
-                        + "  \"description\": \"spear river\",\n"
-                        + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                        + "  \"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.LOCATION, urlParameters);
-                Object location2Id = entity.get(ControlInformation.ID);
-                LOCATION_IDS.add(location2Id);
-                location2Entity = entity;
-            }
-
-            {
-                //Add second location to the Thing
-                String urlParameters = "{\"Locations\":[{\"@iot.id\":" + quoteForJson(LOCATION_IDS.get(1)) + "}]}";
-                patchEntity(EntityType.THING, urlParameters, THING_IDS.get(0));
-            }
-
-            {
-                // Create a new Observation for Thing1 with no FoI.
-                String urlParameters = "{\n"
-                        + "  \"phenomenonTime\": \"2015-03-01T01:00:00.000Z\",\n"
-                        + "  \"resultTime\": \"2015-03-01T02:00:00.000Z\",\n"
-                        + "  \"result\": 200,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "}\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-                Object obsId4 = entity.get(ControlInformation.ID);
-                OBSERVATION_IDS.add(obsId4);
-                Object automatedFOI2Id = checkAutomaticInsertionOfFOI(obsId4, location2Entity, null);
-                FOI_IDS.add(automatedFOI2Id);
-                String message = "A new FoI should have been created, since the Thing moved.";
-                assertNotEquals(automatedFOI2Id, FOI_IDS.get(1), message);
-            }
-
-            final Object thing2Id;
-            {
-                // Create a new Thing with the same Location, create a new
-                // observation without FOI, check if the same FOI is used.
-                /* Thing2 */
+                /* TaskingCapability */
                 String urlParameters = "{"
-                        + "\"name\":\"Test Thing 2\","
-                        + "\"description\":\"This is a second Test Thing From TestNG\","
-                        + "\"Locations\":[{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]"
+                        + "\"name\":\"Test Thing\","
+                        + "\"description\":\"This is a Test Thing From TestNG\","
+                        + "\"taskingParameters\":{},"
+                        + "\"Actuator\":{\"@iot.id\": " + quoteForJson(ACTUATOR_IDS.get(0)) + "},"
+                        + "\"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "}"
                         + "}";
-                JSONObject entity = postEntity(EntityType.THING, urlParameters);
-                thing2Id = entity.get(ControlInformation.ID);
-                THING_IDS.add(thing2Id);
+                JsonNode entity = postEntity(EntityType.TASKING_CAPABILITY, urlParameters);
+                Object id = entity.get(ControlInformation.ID);
+                TASKINGCAPABILITY_IDS.add(id);
+                ID_TYPES.put(EntityType.TASKING_CAPABILITY, IdType.findFor(id));
             }
-
-            final Object datastream2Id;
             {
-                /* Datastream2 */
-                String urlParameters = "{\n"
-                        + "  \"unitOfMeasurement\": {\n"
-                        + "    \"name\": \"Celsius\",\n"
-                        + "    \"symbol\": \"degC\",\n"
-                        + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                        + "  },\n"
-                        + "  \"name\": \"test datastream 2.\",\n"
-                        + "  \"description\": \"test datastream 2.\",\n"
-                        + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                        + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thing2Id) + " },\n"
-                        + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
-                        + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                /* Task */
+                String urlParameters = "{"
+                        + "\"taskingParameters\":{},"
+                        + "\"TaskingCapability\":{\"@iot.id\": " + quoteForJson(TASKINGCAPABILITY_IDS.get(0)) + "}"
                         + "}";
-                JSONObject entity = postEntity(EntityType.DATASTREAM, urlParameters);
-                datastream2Id = entity.get(ControlInformation.ID);
-                DATASTREAM_IDS.add(datastream2Id);
+                JsonNode entity = postEntity(EntityType.TASK, urlParameters);
+                Object id = entity.get(ControlInformation.ID);
+                TASK_IDS.add(id);
+                ID_TYPES.put(EntityType.TASK, IdType.findFor(id));
             }
-
-            {
-                /* Post new Observation without FoI */
-                String urlParameters = "{\n"
-                        + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
-                        + "  \"resultTime\": \"2015-03-01T04:00:00.000Z\",\n"
-                        + "  \"result\": 300,\n"
-                        + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastream2Id) + "}\n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
-                Object obsId5 = entity.get(ControlInformation.ID);
-                OBSERVATION_IDS.add(obsId5);
-                Object automatedFOI3Id = checkAutomaticInsertionOfFOI(obsId5, locationEntity, null);
-                String message = "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location.";
-                assertEquals(automatedFOI3Id, FOI_IDS.get(1), message);
-            }
-
-            {
-                /* HistoricalLocation */
-                String urlParameters = "{\n"
-                        + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
-                        + "  \"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "},\n"
-                        + "  \"Locations\": [{\"@iot.id\": " + quoteForJson(LOCATION_IDS.get(0)) + "}]  \n"
-                        + "}";
-                JSONObject entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
-                Object histLocId = entity.get(ControlInformation.ID);
-                HISTORICAL_LOCATION_IDS.add(histLocId);
-                ID_TYPES.put(EntityType.HISTORICAL_LOCATION, IdType.findFor(histLocId));
-            }
-
-            if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
-                {
-                    /* Actuator */
-                    String urlParameters = "{"
-                            + "\"name\":\"Test Thing\","
-                            + "\"description\":\"This is a Test Thing From TestNG\","
-                            + "\"encodingType\":\"none\","
-                            + "\"metadata\":\"none\""
-                            + "}";
-                    JSONObject entity = postEntity(EntityType.ACTUATOR, urlParameters);
-                    Object id = entity.get(ControlInformation.ID);
-                    ACTUATOR_IDS.add(id);
-                    ID_TYPES.put(EntityType.ACTUATOR, IdType.findFor(id));
-                }
-                {
-                    /* TaskingCapability */
-                    String urlParameters = "{"
-                            + "\"name\":\"Test Thing\","
-                            + "\"description\":\"This is a Test Thing From TestNG\","
-                            + "\"taskingParameters\":{},"
-                            + "\"Actuator\":{\"@iot.id\": " + quoteForJson(ACTUATOR_IDS.get(0)) + "},"
-                            + "\"Thing\":{\"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + "}"
-                            + "}";
-                    JSONObject entity = postEntity(EntityType.TASKING_CAPABILITY, urlParameters);
-                    Object id = entity.get(ControlInformation.ID);
-                    TASKINGCAPABILITY_IDS.add(id);
-                    ID_TYPES.put(EntityType.TASKING_CAPABILITY, IdType.findFor(id));
-                }
-                {
-                    /* Task */
-                    String urlParameters = "{"
-                            + "\"taskingParameters\":{},"
-                            + "\"TaskingCapability\":{\"@iot.id\": " + quoteForJson(TASKINGCAPABILITY_IDS.get(0)) + "}"
-                            + "}";
-                    JSONObject entity = postEntity(EntityType.TASK, urlParameters);
-                    Object id = entity.get(ControlInformation.ID);
-                    TASK_IDS.add(id);
-                    ID_TYPES.put(EntityType.TASK, IdType.findFor(id));
-                }
-            }
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -701,10 +678,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "    }\n"
                     + "  ]\n"
                     + "}";
-            JSONObject entity = postEntity(EntityType.THING, urlParameters);
+            JsonNode entity = postEntity(EntityType.THING, urlParameters);
             Object thingId = entity.get(ControlInformation.ID);
             //Check Datastream
-            JSONObject deepInsertedObj = new JSONObject("{\n"
+            JsonNode deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "      \"unitOfMeasurement\": {\n"
                     + "        \"name\": \"Lumen\",\n"
                     + "        \"symbol\": \"lm\",\n"
@@ -717,7 +694,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             Object datastreamId = checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
             DATASTREAM_IDS.add(datastreamId);
             //Check Location
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "      \"name\": \"West Roof\",\n"
                     + "      \"description\": \"West Roof\",\n"
                     + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
@@ -725,7 +702,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "    }\n");
             LOCATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
             //Check Sensor
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "        \"name\": \"Acme Fluxomatic 1000\",\n"
                     + "        \"description\": \"Acme Fluxomatic 1000\",\n"
                     + "        \"encodingType\": \"application/pdf\",\n"
@@ -733,7 +710,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "      }\n");
             SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
@@ -773,7 +750,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = postEntity(EntityType.DATASTREAM, urlParameters);
             datastreamId = entity.get(ControlInformation.ID);
             //Check Sensor
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "        \"name\": \"Acme Fluxomatic 1000\",\n"
                     + "        \"description\": \"Acme Fluxomatic 1000\",\n"
                     + "        \"encodingType\": \"application/pdf\",\n"
@@ -781,14 +758,14 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "      }\n");
             SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
                     + "      },\n");
             OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             //Check Observation
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
                     + "          \"result\": 10\n"
                     + "        }\n");
@@ -816,7 +793,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = postEntity(EntityType.OBSERVATION, urlParameters);
             Object obsId1 = entity.get(ControlInformation.ID);
             //Check FeaturOfInterest
-            deepInsertedObj = new JSONObject("{\n"
+            deepInsertedObj = Utils.MAPPER.readTree("{\n"
                     + "  \"name\": \"A weather station.\",\n"
                     + "  \"description\": \"A weather station.\",\n"
                     + "  \"encodingType\": \"application/vnd.geo+json\",\n"
@@ -831,7 +808,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
             OBSERVATION_IDS.add(obsId1);
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -844,94 +821,86 @@ public abstract class Capability2Tests extends AbstractTestClass {
     @Test
     void test04CreateInvalidEntities() {
         LOGGER.info("  test04CreateInvalidEntities");
-        try {
-            /* Datastream */
-            // Without Sensor
-            String urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "}\n"
-                    + "}";
-            postInvalidEntity(EntityType.DATASTREAM, urlParameters);
-            //Without ObservedProperty
-            urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
-                    + "}";
-            postInvalidEntity(EntityType.DATASTREAM, urlParameters);
-            //Without Things
-            urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
-                    + "}";
-            postInvalidEntity(EntityType.DATASTREAM, urlParameters);
-
-            /* Observation */
-            //Create Thing and Datastream
-            urlParameters = "{"
-                    + "\"name\":\"This is a Test Thing From TestNG\","
-                    + "\"description\":\"This is a Test Thing From TestNG\""
-                    + "}";
-            Object thingId = postEntity(EntityType.THING, urlParameters).get(ControlInformation.ID);
-            THING_IDS.add(thingId);
-            urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
-                    + "}";
-            Object datastreamId = postEntity(EntityType.DATASTREAM, urlParameters).get(ControlInformation.ID);
-            DATASTREAM_IDS.add(datastreamId);
-            //Without Datastream
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"result\": 8,\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
-                    + "}";
-            postInvalidEntity(EntityType.OBSERVATION, urlParameters);
-            //Without FOI and without Thing's Location
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
-                    + "  \"result\": 100,\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                    + "}";
-            postInvalidEntity(EntityType.OBSERVATION, urlParameters);
-
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-        }
-
+        /* Datastream */
+        // Without Sensor
+        String urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+        //Without ObservedProperty
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
+                + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+        //Without Things
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+        /* Observation */
+        //Create Thing and Datastream
+        urlParameters = "{"
+                + "\"name\":\"This is a Test Thing From TestNG\","
+                + "\"description\":\"This is a Test Thing From TestNG\""
+                + "}";
+        Object thingId = postEntity(EntityType.THING, urlParameters).get(ControlInformation.ID);
+        THING_IDS.add(thingId);
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
+                + "}";
+        Object datastreamId = postEntity(EntityType.DATASTREAM, urlParameters).get(ControlInformation.ID);
+        DATASTREAM_IDS.add(datastreamId);
+        //Without Datastream
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"result\": 8,\n"
+                + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
+        //Without FOI and without Thing's Location
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
     }
 
     /**
@@ -945,11 +914,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
         try {
             /* Thing */
             Object thingId = THING_IDS.get(0);
-            JSONObject entity = getEntity(EntityType.THING, thingId);
+            JsonNode entity = getEntity(EntityType.THING, thingId);
             String urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
             Map<String, Object> diffs = new HashMap<>();
             diffs.put("description", "This is a PATCHED Test Thing From TestNG");
-            JSONObject updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
+            JsonNode updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
             checkPatch(EntityType.THING, entity, updatedEntity, diffs);
 
             /* Location */
@@ -957,7 +926,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = getEntity(EntityType.LOCATION, locationId);
             urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
             diffs = new HashMap<>();
-            diffs.put("location", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}"));
+            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}"));
             updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
             checkPatch(EntityType.LOCATION, entity, updatedEntity, diffs);
 
@@ -993,7 +962,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = getEntity(EntityType.FEATURE_OF_INTEREST, foiId);
             urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
             diffs = new HashMap<>();
-            diffs.put("feature", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }"));
+            diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }"));
             updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
             checkPatch(EntityType.FEATURE_OF_INTEREST, entity, updatedEntity, diffs);
 
@@ -1013,7 +982,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "    \"definition\": \"http://qudt.org/vocab/unit#Entropy2\"\n"
                     + "  } }";
             diffs = new HashMap<>();
-            diffs.put("unitOfMeasurement", new JSONObject("{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}"));
+            diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}"));
             updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
             checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
 
@@ -1026,7 +995,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
             checkPatch(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1043,7 +1012,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
         try {
             /* Thing */
             Object thingId = THING_IDS.get(0);
-            JSONObject entity = getEntity(EntityType.THING, thingId);
+            JsonNode entity = getEntity(EntityType.THING, thingId);
             String urlParameters = "{"
                     + "\"name\":\"This is a Updated Test Thing From TestNG\","
                     + "\"description\":\"This is a Updated Test Thing From TestNG\""
@@ -1051,7 +1020,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             Map<String, Object> diffs = new HashMap<>();
             diffs.put("name", "This is a Updated Test Thing From TestNG");
             diffs.put("description", "This is a Updated Test Thing From TestNG");
-            JSONObject updatedEntity = updateEntity(EntityType.THING, urlParameters, thingId);
+            JsonNode updatedEntity = updateEntity(EntityType.THING, urlParameters, thingId);
             checkPut(EntityType.THING, entity, updatedEntity, diffs);
 
             /* Location */
@@ -1065,7 +1034,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             diffs = new HashMap<>();
             diffs.put("name", "UPDATED NAME");
             diffs.put("description", "UPDATED DESCRIPTION");
-            diffs.put("location", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}"));
+            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}"));
             updatedEntity = updateEntity(EntityType.LOCATION, urlParameters, locationId);
             checkPut(EntityType.LOCATION, entity, updatedEntity, diffs);
 
@@ -1119,7 +1088,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "\"name\":\"POIUYTREW\""
                     + "}";
             diffs = new HashMap<>();
-            diffs.put("feature", new JSONObject("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
+            diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
             diffs.put("name", "POIUYTREW");
             diffs.put("description", "POIUYTREW");
             updatedEntity = updateEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
@@ -1142,7 +1111,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             diffs.put("name", "Data coming from sensor on ISS.");
             diffs.put("description", "Data coming from sensor on ISS.");
             diffs.put("observationType", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation");
-            diffs.put("unitOfMeasurement", new JSONObject("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
+            diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
             updatedEntity = updateEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
             checkPut(EntityType.DATASTREAM, entity, updatedEntity, diffs);
 
@@ -1156,7 +1125,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             updatedEntity = updateEntity(EntityType.OBSERVATION, urlParameters, obsId1);
             checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1447,7 +1416,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param id The id of requested entity
      * @return The requested entity in the format of JSON Object.
      */
-    private JSONObject getEntity(EntityType entityType, Object id) {
+    private JsonNode getEntity(EntityType entityType, Object id) {
         if (id == null) {
             return null;
         }
@@ -1455,8 +1424,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
         HttpResponse response = null;
         try {
             response = HTTPMethods.doGet(urlString);
-            return new JSONObject(response.response);
-        } catch (JSONException e) {
+            return Utils.MAPPER.readTree(response.response);
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             LOGGER.error("Failed input: {}", response);
             fail("An Exception occurred during testing: " + e.getMessage());
@@ -1472,7 +1441,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param urlParameters POST body
      * @return The created entity in the form of JSON Object
      */
-    private JSONObject postEntity(EntityType entityType, String urlParameters) {
+    private JsonNode postEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         try {
             HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
@@ -1487,9 +1456,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
             message = "The POSTed entity is not created.";
             assertEquals(200, responseCode, message);
 
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1564,7 +1533,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param id The id of requested entity
      * @return The updated entity in the format of JSON Object
      */
-    private JSONObject updateEntity(EntityType entityType, String urlParameters, Object id) {
+    private JsonNode updateEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
@@ -1573,10 +1542,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
             assertEquals(200, responseCode, message);
 
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1592,7 +1561,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param id The id of requested entity
      * @return The patched entity in the format of JSON Object
      */
-    private JSONObject patchEntity(EntityType entityType, String urlParameters, Object id) {
+    private JsonNode patchEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
 
@@ -1601,10 +1570,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1639,27 +1608,22 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param diffs The properties that supposed to be updated based on the
      * request due to the specification
      */
-    private void checkPatch(EntityType entityType, JSONObject oldEntity, JSONObject newEntity, Map diffs) {
-        try {
-            for (EntityType.EntityProperty property : entityType.getProperties()) {
-                if (diffs.containsKey(property.name)) {
-                    final String diffValue = String.valueOf(diffs.get(property.name));
-                    final String newValue = String.valueOf(newEntity.get(property.name));
-                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Should have changed.";
-                    assertParameterEquals(property.name, diffValue, newValue, message);
-                } else if (newEntity.has(property.name) && oldEntity.has(property.name)) {
-                    final String oldValue = String.valueOf(oldEntity.get(property.name));
-                    final String newValue = String.valueOf(newEntity.get(property.name));
-                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Value " + oldValue + " should not have changed to " + newValue;
-                    assertParameterEquals(property.name, oldValue, newValue, message);
-                } else {
-                    String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
-                    assertEquals(oldEntity.has(property.name), newEntity.has(property.name), message);
-                }
+    private void checkPatch(EntityType entityType, JsonNode oldEntity, JsonNode newEntity, Map diffs) {
+        for (EntityType.EntityProperty property : entityType.getProperties()) {
+            if (diffs.containsKey(property.name)) {
+                final JsonNode diffValue = Utils.MAPPER.valueToTree(diffs.get(property.name));
+                final JsonNode newValue = newEntity.get(property.name);
+                final String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Should have changed.";
+                assertTrue(Utils.jsonEquals(diffValue, newValue, property.name), message);
+            } else if (newEntity.has(property.name) && oldEntity.has(property.name)) {
+                final JsonNode oldValue = oldEntity.get(property.name);
+                final JsonNode newValue = newEntity.get(property.name);
+                final String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ". Value " + oldValue + " should not have changed to " + newValue;
+                assertTrue(Utils.jsonEquals(oldValue, newValue, property.name), message);
+            } else {
+                String message = "PATCH was not applied correctly for " + entityType + "'s " + property.name + ".";
+                assertEquals(oldEntity.has(property.name), newEntity.has(property.name), message);
             }
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1672,37 +1636,23 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param diffs The properties that supposed to be updated based on the
      * request due to the specification
      */
-    private void checkPut(EntityType entityType, JSONObject oldEntity, JSONObject newEntity, Map diffs) {
-        try {
-            for (EntityType.EntityProperty property : entityType.getProperties()) {
-                if (diffs.containsKey(property.name)) {
-                    String message = "PUT was not applied correctly for " + entityType + ".";
-                    final String expected = diffs.get(property.name).toString();
-                    final String value = newEntity.get(property.name).toString();
-                    assertParameterEquals(property.name, expected, value, message);
+    private void checkPut(EntityType entityType, JsonNode oldEntity, JsonNode newEntity, Map diffs) {
+        for (EntityType.EntityProperty property : entityType.getProperties()) {
+            if (diffs.containsKey(property.name)) {
+                String message = "PUT was not applied correctly for " + entityType + ".";
+                final JsonNode diffValue = Utils.MAPPER.valueToTree(diffs.get(property.name));
+                final JsonNode newValue = newEntity.get(property.name);
+                assertTrue(Utils.jsonEquals(diffValue, newValue, property.name), message);
+            } else {
+                String message = "PUT was not applied correctly for " + entityType + ".";
+                if (oldEntity.has(property.name)) {
+                    final boolean jsonEquals = Utils.jsonEquals(oldEntity.get(property.name), newEntity.get(property.name));
+                    assertTrue(jsonEquals, message);
                 } else {
-                    String message = "PUT was not applied correctly for " + entityType + ".";
-                    if (oldEntity.has(property.name)) {
-                        assertTrue(equalsFixJson(oldEntity.get(property.name), newEntity.get(property.name)), message);
-                    } else {
-                        assertFalse(newEntity.has(property.name), message);
-                    }
+                    assertFalse(newEntity.has(property.name), message);
                 }
             }
-
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
         }
-    }
-
-    private boolean equalsFixJson(Object expected, Object given) {
-        if (expected instanceof JSONObject && given instanceof JSONObject) {
-            JSONObject jsonGiven = (JSONObject) given;
-            JSONObject jsonExpected = (JSONObject) expected;
-            return jsonGiven.toString().equals(jsonExpected.toString());
-        }
-        return expected.equals(given);
     }
 
     /**
@@ -1715,23 +1665,24 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param expectedFOIId The id of the FOI linked to the Observation
      * @return The id of FOI
      */
-    private Object checkAutomaticInsertionOfFOI(Object obsId, JSONObject locationObj, Object expectedFOIId) {
+    private Object checkAutomaticInsertionOfFOI(Object obsId, JsonNode locationObj, Object expectedFOIId) {
         String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + quoteForUrl(obsId) + ")/FeatureOfInterest";
         try {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
             String message = "ERROR: FeatureOfInterest was not automatically created.";
             assertEquals(200, responseCode, message);
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             Object id = result.get(ControlInformation.ID);
             if (expectedFOIId != null) {
                 message = "ERROR: the Observation should have linked to FeatureOfInterest with ID: " + expectedFOIId + ", but it is linked for FeatureOfInterest with Id: " + id + ".";
                 assertEquals(expectedFOIId, id, message);
             }
+
             message = "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.";
-            assertEquals(locationObj.getJSONObject("location").toString(), result.getJSONObject("feature").toString(), message);
+            assertEquals(locationObj.get("location"), result.get("feature"), message);
             return id;
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1747,7 +1698,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param relationObj The expected related entity object
      * @return The id of related object
      */
-    private Object checkRelatedEntity(Set<Extension> extensions, EntityType parentEntityType, Object parentId, EntityType relationEntityType, JSONObject relationObj) {
+    private Object checkRelatedEntity(Set<Extension> extensions, EntityType parentEntityType, Object parentId, EntityType relationEntityType, JsonNode relationObj) {
         boolean isCollection = true;
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), parentEntityType, parentId, relationEntityType, null);
         if (parentEntityType.getRelations(extensions).contains(relationEntityType.singular)) {
@@ -1760,20 +1711,14 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String message = "ERROR: Deep inserted " + relationEntityType + " was not created or linked to " + parentEntityType;
             assertEquals(200, responseCode, message);
 
-            JSONObject result = new JSONObject(responseMap.response);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             if (isCollection == true) {
-                result = result.getJSONArray("value").getJSONObject(0);
+                result = result.get("value").get(0);
             }
-            Iterator<String> iterator = relationObj.keys();
-            while (iterator.hasNext()) {
-                String key = iterator.next();
-                message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
-                final String expected = Objects.toString(relationObj.get(key));
-                final String value = Objects.toString(result.get(key));
-                assertParameterEquals(key, expected, value, message);
-            }
+            message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
+            assertTrue(Utils.jsonEquals(relationObj, result, true, null), message);
             return result.get(ControlInformation.ID);
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1801,18 +1746,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param observation The observation JSON object
      * @param resultTimeValue The expected value of resultTime
      */
-    private void checkForObservationResultTime(JSONObject observation, String resultTimeValue) {
-        try {
-            if (resultTimeValue == null) {
-                String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been null but it is now \"" + observation.get("resultTime").toString() + "\".";
-                assertEquals("null", observation.get("resultTime").toString(), message);
-            } else {
-                String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been \"" + resultTimeValue + "\" but it is now \"" + observation.get("resultTime").toString() + "\".";
-                assertEquals(ZonedDateTime.parse(resultTimeValue), ZonedDateTime.parse(observation.get("resultTime").toString()), message);
-            }
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
+    private void checkForObservationResultTime(JsonNode observation, String resultTimeValue) {
+        if (resultTimeValue == null) {
+            String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been null but it is now \"" + observation.get("resultTime").toString() + "\".";
+            assertEquals("null", observation.get("resultTime").toString(), message);
+        } else {
+            String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been \"" + resultTimeValue + "\" but it is now \"" + observation.get("resultTime").toString() + "\".";
+            assertEquals(ZonedDateTime.parse(resultTimeValue), ZonedDateTime.parse(observation.get("resultTime").textValue()), message);
         }
     }
 
@@ -1826,11 +1766,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
-                JSONObject result = new JSONObject(responseMap.response);
-                JSONArray array = result.getJSONArray("value");
+                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+                JsonNode array = result.get("value");
                 String message = entityType + " is found although it shouldn't.";
-                assertEquals(0, array.length(), message);
-            } catch (JSONException e) {
+                assertEquals(0, array.size(), message);
+            } catch (IOException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
@@ -1847,11 +1787,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
-                JSONObject result = new JSONObject(responseMap.response);
-                JSONArray array = result.getJSONArray("value");
+                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+                JsonNode array = result.get("value");
                 String message = entityType + " is created although it shouldn't.";
-                assertTrue(array.length() > 0, message);
-            } catch (JSONException e) {
+                assertTrue(array.size() > 0, message);
+            } catch (IOException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
@@ -1895,23 +1835,23 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * @param entityType The entity type from EntityType enum
      */
     private static void deleteEntityType(EntityType entityType) {
-        JSONArray array = null;
+        JsonNode array = null;
         do {
             try {
                 String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 int responseCode = responseMap.code;
-                JSONObject result = new JSONObject(responseMap.response);
-                array = result.getJSONArray("value");
-                for (int i = 0; i < array.length(); i++) {
-                    Object id = array.getJSONObject(i).get(ControlInformation.ID);
+                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+                array = result.get("value");
+                for (int i = 0; i < array.size(); i++) {
+                    Object id = array.get(i).get(ControlInformation.ID);
                     deleteEntity(entityType, id);
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
-        } while (array.length() > 0);
+        } while (array.size() > 0);
     }
 
     /**
@@ -1976,29 +1916,29 @@ public abstract class Capability2Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            JSONArray array = new JSONObject(response).getJSONArray("value");
-            LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
-            DATASTREAM_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
+            array = Utils.MAPPER.readTree(response).get("value");
+            DATASTREAM_IDS.add(array.get(0).get(ControlInformation.ID));
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            SENSOR_IDS.add(new JSONObject(response).get(ControlInformation.ID));
+            SENSOR_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            OBSPROP_IDS.add(new JSONObject(response).get(ControlInformation.ID));
+            OBSPROP_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            array = new JSONObject(response).getJSONArray("value");
-            HISTORICAL_LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
+            array = Utils.MAPPER.readTree(response).get("value");
+            HISTORICAL_LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
 
             //Observations
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
@@ -2015,9 +1955,9 @@ public abstract class Capability2Tests extends AbstractTestClass {
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
-            FOI_IDS.add(new JSONObject(response).get(ControlInformation.ID));
+            FOI_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }

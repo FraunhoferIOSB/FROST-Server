@@ -20,9 +20,9 @@ package de.fraunhofer.iosb.ilt.statests.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,17 +91,17 @@ public class Request extends Expand {
         return lastUrl;
     }
 
-    public JSONObject executeGet() {
+    public JsonNode executeGet() {
         String fetchUrl = buildUrl();
         HttpResponse responseMap = HTTPMethods.doGet(fetchUrl);
         if (responseMap.code != 200) {
             String message = "Error during request: " + fetchUrl;
             assertEquals(200, responseMap.code, message);
         }
-        JSONObject jsonResponse = null;
+        JsonNode jsonResponse = null;
         try {
-            jsonResponse = new JSONObject(responseMap.response);
-        } catch (JSONException ex) {
+            jsonResponse = Utils.MAPPER.readTree(responseMap.response);
+        } catch (IOException ex) {
             LOGGER.error("Failed to parse response for request: " + fetchUrl, ex);
             fail("Failed to parse response for request: " + fetchUrl);
         }

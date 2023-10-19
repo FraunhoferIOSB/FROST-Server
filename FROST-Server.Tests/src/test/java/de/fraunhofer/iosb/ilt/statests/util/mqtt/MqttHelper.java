@@ -27,6 +27,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityType.SENSOR;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.THING;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
@@ -46,7 +47,6 @@ import java.util.stream.Collectors;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +116,7 @@ public class MqttHelper {
 
     public <T> MqttBatchResult<T> executeRequests(Callable<T> action, String... topics) {
         MqttBatchResult<T> result = new MqttBatchResult<>(topics.length);
-        Map<String, Future<JSONObject>> tempResult = new HashMap<>(topics.length);
+        Map<String, Future<JsonNode>> tempResult = new HashMap<>(topics.length);
         ExecutorService executor = Executors.newFixedThreadPool(topics.length);
         try {
             for (String topic : topics) {
@@ -136,7 +136,7 @@ public class MqttHelper {
             if (!executor.awaitTermination(mqttTimeout, TimeUnit.MILLISECONDS)) {
                 executor.shutdownNow();
             }
-            for (Map.Entry<String, Future<JSONObject>> entry : tempResult.entrySet()) {
+            for (Map.Entry<String, Future<JsonNode>> entry : tempResult.entrySet()) {
                 result.addMessage(entry.getKey(), entry.getValue().get());
             }
         } catch (InterruptedException | ExecutionException ex) {

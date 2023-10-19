@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
@@ -44,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -536,25 +536,19 @@ public abstract class BatchTests extends AbstractTestClass {
 
     private String postBatch(String boundary, String body) {
         String urlString = serverSettings.getServiceUrl(version) + "/$batch";
-        try {
-            HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
-                    boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary);
-            assertEquals(200, httpResponse.code, "Batch response should be 200");
-            return httpResponse.response;
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
-        }
+        HttpResponse httpResponse = HTTPMethods.doPost(urlString, body,
+                boundary == null ? "application/json" : "multipart/mixed;boundary=" + boundary);
+        assertEquals(200, httpResponse.code, "Batch response should be 200");
+        return httpResponse.response;
     }
 
     private String getLastestEntityIdForPath(EntityType entityType) {
         EntityHelper entityHelper = new EntityHelper(version, serverSettings);
-        Object id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
-        if (id instanceof Number) {
-            return id.toString();
+        JsonNode id = entityHelper.getAnyEntity(entityType, "$orderBy=id%20desc", 1).get("@iot.id");
+        if (id.isNumber()) {
+            return Long.toString(id.asLong());
         } else {
-            return '\'' + id.toString() + '\'';
+            return '\'' + id.textValue() + '\'';
         }
 
     }

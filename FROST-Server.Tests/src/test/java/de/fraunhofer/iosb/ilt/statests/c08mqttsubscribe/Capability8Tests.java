@@ -30,6 +30,9 @@ import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
@@ -52,9 +55,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import net.time4j.range.MomentInterval;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -162,7 +162,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
     }
@@ -177,7 +177,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
     }
@@ -245,20 +245,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntitySet(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
-                MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                         getUpdatePutEntityAction(entityType),
                         relativeTopics.toArray(new String[relativeTopics.size()]));
                 result.getMessages().entrySet().stream().forEach((entry) -> {
-                    try {
-                        // coudl return multiple results so make sure we only get the latest
-                        Object lastestId = entityHelper.getLastestEntityId(entityType);
-                        String filter = "id%20eq%20" + Utils.quoteForUrl(lastestId);
-                        JSONObject expectedResult = entityHelper.getEntity(entry.getKey() + "?$filter=" + filter).getJSONArray("value").getJSONObject(0);
-                        assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
-                    } catch (JSONException ex) {
-                        LOGGER.error("Exception:", ex);
-                        fail("Could not get expected result for MQTT subscription from server: " + ex.getMessage());
-                    }
+                    // coudl return multiple results so make sure we only get the latest
+                    Object lastestId = entityHelper.getLastestEntityId(entityType);
+                    String filter = "id%20eq%20" + Utils.quoteForUrl(lastestId);
+                    JsonNode expectedResult = entityHelper.getEntity(entry.getKey() + "?$filter=" + filter).get("value").get(0);
+                    assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
                 });
             }
         });
@@ -285,15 +280,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
                     getDeepInsertEntityAction(entityType),
                     topics.toArray(new String[topics.size()]));
             IDS.put(entityType, result.getActionResult());
-            JSONObject entity = entityHelper.getEntity(deepInsertInfo.getEntityType(), result.getActionResult());
-            Optional<JSONObject> rootResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(deepInsertInfo.getEntityType()))).map(x -> x.getValue()).findFirst();
+            JsonNode entity = entityHelper.getEntity(deepInsertInfo.getEntityType(), result.getActionResult());
+            Optional<JsonNode> rootResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(deepInsertInfo.getEntityType()))).map(x -> x.getValue()).findFirst();
             if (!rootResult.isPresent()) {
                 fail("Deep insert MQTT result is missing root entity");
             }
             assertJsonEqualsWithLinkResolving(entity, rootResult.get(), mqttHelper.getTopic(deepInsertInfo.getEntityType()));
             deepInsertInfo.getSubEntityTypes().stream().forEach((subType) -> {
-                JSONObject subEntity = getSubEntityByRoot(deepInsertInfo.getEntityType(), result.getActionResult(), subType);
-                Optional<JSONObject> subResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(subType))).map(x -> x.getValue()).findFirst();
+                JsonNode subEntity = getSubEntityByRoot(deepInsertInfo.getEntityType(), result.getActionResult(), subType);
+                Optional<JsonNode> subResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(subType))).map(x -> x.getValue()).findFirst();
                 if (!subResult.isPresent()) {
                     fail("Deep insert MQTT result is missing entity " + subEntity.toString());
                 }
@@ -312,7 +307,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
@@ -327,7 +322,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
@@ -344,11 +339,11 @@ public abstract class Capability8Tests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntity(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
-                MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                         getUpdatePutEntityAction(entityType),
                         relativeTopics.toArray(new String[relativeTopics.size()]));
                 result.getMessages().entrySet().stream().forEach((entry) -> {
-                    JSONObject expectedResult = entityHelper.getEntity(entry.getKey());
+                    JsonNode expectedResult = entityHelper.getEntity(entry.getKey());
                     assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
                 });
             }
@@ -374,12 +369,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
                     continue;
                 }
                 propertyChange.put(property, change);
-                MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                         () -> {
                             return entityHelper.patchEntity(entityType, propertyChange, IDS.get(entityType));
                         },
                         mqttHelper.getTopic(entityType, IDS.get(entityType), property));
-                assertJsonEqualsWithLinkResolving(new JSONObject(propertyChange), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType), property));
+                assertJsonEqualsWithLinkResolving(
+                        Utils.MAPPER.valueToTree(propertyChange),
+                        result.getMessages().values().iterator().next(),
+                        mqttHelper.getTopic(entityType, IDS.get(entityType), property));
             }
         });
     }
@@ -403,12 +401,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
                     continue;
                 }
                 propertyChange.put(property, change);
-                MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                         () -> {
                             return entityHelper.putEntity(entityType, propertyChange, IDS.get(entityType));
                         },
                         mqttHelper.getTopic(entityType, IDS.get(entityType), property));
-                assertJsonEqualsWithLinkResolving(new JSONObject(propertyChange), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType), property));
+                assertJsonEqualsWithLinkResolving(
+                        Utils.MAPPER.valueToTree(propertyChange),
+                        result.getMessages().values().iterator().next(),
+                        mqttHelper.getTopic(entityType, IDS.get(entityType), property));
             }
         });
     }
@@ -419,7 +420,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
         deleteCreatedEntities();
         createEntities();
 
-        Callable<JSONObject> updateLocationOfThing;
+        Callable<JsonNode> updateLocationOfThing;
         try {
             // Create a second location
             final Object locId2 = getInsertEntityAction(LOCATION).call();
@@ -432,8 +433,8 @@ public abstract class Capability8Tests extends AbstractTestClass {
                         entityHelper.getThingChangesLocation(locId2),
                         IDS.get(THING));
             };
-            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(updateLocationOfThing, mqttHelper.getTopic(HISTORICAL_LOCATION));
-            JSONObject lastHistLoc = entityHelper.getAnyEntity(HISTORICAL_LOCATION, "$orderby=time%20desc", 10);
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(updateLocationOfThing, mqttHelper.getTopic(HISTORICAL_LOCATION));
+            JsonNode lastHistLoc = entityHelper.getAnyEntity(HISTORICAL_LOCATION, "$orderby=time%20desc", 10);
             assertJsonEqualsWithLinkResolving(lastHistLoc, result.getMessages().values().iterator().next(), mqttHelper.getTopic(HISTORICAL_LOCATION));
         } catch (Exception ex) {
             fail("Could not create second Location: " + ex.getMessage());
@@ -474,7 +475,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
         }
         MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), mqttHelper.getTopic(entityType, selectedProperties));
         IDS.put(entityType, result.getActionResult());
-        JSONObject entity = entityHelper.getEntity(entityType, result.getActionResult());
+        JsonNode entity = entityHelper.getEntity(entityType, result.getActionResult());
         filterEntity(entity, selectedProperties);
         assertJsonEqualsWithLinkResolving(entity, result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
     }
@@ -486,12 +487,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
         }
         Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
         prunePropertiesToChanges(selectedProperties, changes);
-        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+        MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                 () -> {
                     return entityHelper.putEntity(entityType, changes, IDS.get(entityType));
                 },
                 mqttHelper.getTopic(entityType, selectedProperties));
-        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
+        assertJsonEqualsWithLinkResolving(
+                Utils.MAPPER.valueToTree(changes),
+                result.getMessages().values().iterator().next(),
+                mqttHelper.getTopic(entityType, selectedProperties));
     }
 
     private void checkSubscribePatch(EntityType entityType, List<String> selectedProperties) {
@@ -501,16 +505,19 @@ public abstract class Capability8Tests extends AbstractTestClass {
         }
         Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
         prunePropertiesToChanges(selectedProperties, changes);
-        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+        MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
                 () -> {
                     return entityHelper.patchEntity(entityType, changes, IDS.get(entityType));
                 },
                 mqttHelper.getTopic(entityType, selectedProperties));
-        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
+        assertJsonEqualsWithLinkResolving(
+                Utils.MAPPER.valueToTree(changes),
+                result.getMessages().values().iterator().next(),
+                mqttHelper.getTopic(entityType, selectedProperties));
     }
 
-    private JSONObject filterEntity(JSONObject entity, List<String> selectedProperties) {
-        Iterator iterator = entity.keys();
+    private JsonNode filterEntity(JsonNode entity, List<String> selectedProperties) {
+        Iterator iterator = entity.fieldNames();
         while (iterator.hasNext()) {
             String key = iterator.next().toString();
             if (!selectedProperties.contains(key)) {
@@ -599,37 +606,31 @@ public abstract class Capability8Tests extends AbstractTestClass {
         return selectedProperties;
     }
 
-    private JSONObject getSubEntityByRoot(EntityType rootEntityType, Object rootId, EntityType subtEntityType) {
-        try {
-            String path = getPathToRelatedEntity(subtEntityType, rootEntityType);
-            path = "/" + subtEntityType.getRootEntitySet() + "?$count=true&$filter=" + path + "/id%20eq%20" + Utils.quoteForUrl(rootId);
-            JSONObject result = entityHelper.getEntity(path);
-            if (result.getInt("@iot.count") != 1) {
-                fail("Invalid result with size != 1");
-            }
-            JSONObject subEntity = result.getJSONArray("value").getJSONObject(0);
-            //helper.clearLinks(subEntity);
-            return subEntity;
-        } catch (JSONException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("Invalid JSON: " + ex.getMessage());
+    private JsonNode getSubEntityByRoot(EntityType rootEntityType, Object rootId, EntityType subtEntityType) {
+        String path = getPathToRelatedEntity(subtEntityType, rootEntityType);
+        path = "/" + subtEntityType.getRootEntitySet() + "?$count=true&$filter=" + path + "/id%20eq%20" + Utils.quoteForUrl(rootId);
+        JsonNode result = entityHelper.getEntity(path);
+        if (result.get("@iot.count").asInt() != 1) {
+            fail("Invalid result with size != 1");
         }
-        throw new IllegalStateException();
+        JsonNode subEntity = result.get("value").get(0);
+        //helper.clearLinks(subEntity);
+        return subEntity;
     }
 
-    private Callable<JSONObject> getUpdatePatchEntityAction(EntityType entityType) {
+    private Callable<JsonNode> getUpdatePatchEntityAction(EntityType entityType) {
         return () -> {
             return entityHelper.updateEntitywithPATCH(entityType, IDS.get(entityType));
         };
     }
 
-    private Callable<JSONObject> getUpdatePutEntityAction(EntityType entityType) {
+    private Callable<JsonNode> getUpdatePutEntityAction(EntityType entityType) {
         return () -> {
             return entityHelper.updateEntitywithPUT(entityType, IDS.get(entityType));
         };
     }
 
-    private static void assertJsonEqualsWithLinkResolving(JSONObject expected, JSONObject received, String topic) {
+    private static void assertJsonEqualsWithLinkResolving(JsonNode expected, JsonNode received, String topic) {
         String message = "";
         boolean equals = jsonEqualsWithLinkResolving(expected, received, topic);
         if (!equals) {
@@ -638,18 +639,28 @@ public abstract class Capability8Tests extends AbstractTestClass {
         assertTrue(equals, message);
     }
 
-    private static boolean jsonEqualsWithLinkResolving(JSONArray arr1, JSONArray arr2, String topic) {
-        if (arr1.length() != arr2.length()) {
+    private static boolean jsonEqualsWithLinkResolving(JsonNode node1, JsonNode node2, String topic) {
+        if (node1 instanceof ObjectNode obj1 && node2 instanceof ObjectNode obj2) {
+            return jsonEqualsWithLinkResolving(obj1, obj2, topic);
+        }
+        if (node1 instanceof ArrayNode arr1 && node2 instanceof ArrayNode arr2) {
+            return jsonEqualsWithLinkResolving(arr1, arr2, topic);
+        }
+        return false;
+    }
+
+    private static boolean jsonEqualsWithLinkResolving(ArrayNode arr1, ArrayNode arr2, String topic) {
+        if (arr1.size() != arr2.size()) {
             return false;
         }
-        for (int i = 0; i < arr1.length(); i++) {
+        for (int i = 0; i < arr1.size(); i++) {
             Object val1 = arr1.get(i);
-            if (val1 instanceof JSONObject) {
-                if (!jsonEqualsWithLinkResolving((JSONObject) val1, arr2.getJSONObject(i), topic)) {
+            if (val1 instanceof ObjectNode) {
+                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) arr2.get(i), topic)) {
                     return false;
                 }
-            } else if (val1 instanceof JSONArray) {
-                if (!jsonEqualsWithLinkResolving((JSONArray) val1, arr2.getJSONArray(i), topic)) {
+            } else if (val1 instanceof ArrayNode) {
+                if (!jsonEqualsWithLinkResolving((ArrayNode) val1, (ArrayNode) arr2.get(i), topic)) {
                     return false;
                 }
             } else if (!val1.equals(arr2.get(i))) {
@@ -659,7 +670,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
         return true;
     }
 
-    private static boolean jsonEqualsWithLinkResolving(JSONObject obj1, JSONObject obj2, String topic) {
+    private static boolean jsonEqualsWithLinkResolving(ObjectNode obj1, ObjectNode obj2, String topic) {
         if (obj1 == obj2) {
             return true;
         }
@@ -669,53 +680,49 @@ public abstract class Capability8Tests extends AbstractTestClass {
         if (obj1.getClass() != obj2.getClass()) {
             return false;
         }
-        if (obj1.length() != obj2.length()) {
+        if (obj1.size() != obj2.size()) {
             return false;
         }
-        Iterator iterator = obj1.keys();
+        Iterator<String> iterator = obj1.fieldNames();
         while (iterator.hasNext()) {
-            String key = iterator.next().toString();
+            String key = iterator.next();
             if (!obj2.has(key)) {
                 return false;
             }
-            try {
-                Object val1 = obj1.get(key);
-                if (val1 == null) {
-                    return obj2.get(key) == null;
-                } else if (val1 instanceof JSONObject) {
-                    if (!jsonEqualsWithLinkResolving((JSONObject) val1, (JSONObject) obj2.getJSONObject(key), topic)) {
-                        return false;
-                    }
-                } else if (val1 instanceof JSONArray) {
-                    JSONArray arr1 = (JSONArray) val1;
-                    JSONArray arr2 = obj2.getJSONArray(key);
-                    if (!jsonEqualsWithLinkResolving(arr1, arr2, topic)) {
-                        return false;
-                    }
-                } else if (key.toLowerCase().endsWith("time")) {
-                    if (!checkTimeEquals(val1.toString(), obj2.get(key).toString())) {
-                        return false;
-                    }
-                } else if (topic != null && !topic.isEmpty() && key.endsWith("@iot.navigationLink")) {
-                    String version = topic.substring(0, topic.indexOf("/"));
-
-                    String selfLink1 = obj1.getString("@iot.selfLink");
-                    URI baseUri1 = URI.create(selfLink1.substring(0, selfLink1.indexOf(version))).resolve(topic);
-                    String navLink1 = obj1.getString(key);
-                    String absoluteUri1 = baseUri1.resolve(navLink1).toString();
-
-                    String selfLink2 = obj2.getString("@iot.selfLink");
-                    URI baseUri2 = URI.create(selfLink2.substring(0, selfLink2.indexOf(version))).resolve(topic);
-                    String navLink2 = obj2.getString(key);
-                    String absoluteUri2 = baseUri2.resolve(navLink2).toString();
-                    if (!absoluteUri1.equals(absoluteUri2)) {
-                        return false;
-                    }
-
-                } else if (!val1.equals(obj2.get(key))) {
+            JsonNode val1 = obj1.get(key);
+            if (val1 == null) {
+                return obj2.get(key) == null;
+            } else if (val1 instanceof ObjectNode) {
+                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) obj2.get(key), topic)) {
                     return false;
                 }
-            } catch (JSONException ex) {
+            } else if (val1 instanceof ArrayNode) {
+                ArrayNode arr1 = (ArrayNode) val1;
+                ArrayNode arr2 = (ArrayNode) obj2.get(key);
+                if (!jsonEqualsWithLinkResolving(arr1, arr2, topic)) {
+                    return false;
+                }
+            } else if (key.toLowerCase().endsWith("time")) {
+                if (!checkTimeEquals(val1.textValue(), obj2.get(key).textValue())) {
+                    return false;
+                }
+            } else if (topic != null && !topic.isEmpty() && key.endsWith("@iot.navigationLink")) {
+                String version = topic.substring(0, topic.indexOf("/"));
+
+                String selfLink1 = obj1.get("@iot.selfLink").textValue();
+                URI baseUri1 = URI.create(selfLink1.substring(0, selfLink1.indexOf(version))).resolve(topic);
+                String navLink1 = obj1.get(key).textValue();
+                String absoluteUri1 = baseUri1.resolve(navLink1).toString();
+
+                String selfLink2 = obj2.get("@iot.selfLink").textValue();
+                URI baseUri2 = URI.create(selfLink2.substring(0, selfLink2.indexOf(version))).resolve(topic);
+                String navLink2 = obj2.get(key).textValue();
+                String absoluteUri2 = baseUri2.resolve(navLink2).toString();
+                if (!absoluteUri1.equals(absoluteUri2)) {
+                    return false;
+                }
+
+            } else if (!val1.equals(obj2.get(key))) {
                 return false;
             }
         }
@@ -723,6 +730,9 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     private static boolean checkTimeEquals(String val1, String val2) {
+        if (val1 == null) {
+            return val2 == null;
+        }
         if (val1.equals(val2)) {
             return true;
         }

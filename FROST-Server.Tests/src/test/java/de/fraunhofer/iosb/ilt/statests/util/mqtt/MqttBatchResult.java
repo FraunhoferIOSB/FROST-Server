@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
 
 /**
  *
@@ -30,7 +30,7 @@ import org.json.JSONObject;
 public class MqttBatchResult<T> {
 
     private T actionResult;
-    private Map<String, JSONObject> messages;
+    private Map<String, JsonNode> messages;
 
     public MqttBatchResult() {
         messages = new HashMap<>();
@@ -45,7 +45,7 @@ public class MqttBatchResult<T> {
         return this;
     }
 
-    public MqttBatchResult withMessages(Map<String, JSONObject> messages) {
+    public MqttBatchResult withMessages(Map<String, JsonNode> messages) {
         setMessages(messages);
         return this;
     }
@@ -54,7 +54,7 @@ public class MqttBatchResult<T> {
         return actionResult;
     }
 
-    public Map<String, JSONObject> getMessages() {
+    public Map<String, JsonNode> getMessages() {
         return messages;
     }
 
@@ -62,11 +62,11 @@ public class MqttBatchResult<T> {
         this.actionResult = actionResult;
     }
 
-    public void setMessages(Map<String, JSONObject> messages) {
+    public void setMessages(Map<String, JsonNode> messages) {
         this.messages = messages;
     }
 
-    public void addMessage(String topic, JSONObject message) {
+    public void addMessage(String topic, JsonNode message) {
         messages.put(topic, message);
     }
 

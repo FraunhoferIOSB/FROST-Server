@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  *
  * @author hylke
@@ -40,16 +42,23 @@ public enum IdType {
         if (id == null) {
             throw new IllegalArgumentException("null object can not be converted.");
         }
+        String stringValue = id.toString();
+        if (id instanceof JsonNode jn) {
+            if (jn.isNumber()) {
+                return LONG;
+            }
+            stringValue = jn.asText();
+        }
         if (id instanceof Number) {
             return LONG;
         }
         try {
-            java.util.UUID.fromString(id.toString());
+            java.util.UUID.fromString(stringValue);
             return UUID;
         } catch (IllegalArgumentException ex) {
             // Not a uuid
         }
-        if (id instanceof String) {
+        if (id instanceof String || id instanceof JsonNode jn && jn.isTextual()) {
             return STRING;
         }
         throw new IllegalArgumentException("Can not detect id type from " + id);

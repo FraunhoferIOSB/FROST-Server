@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PL
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
@@ -86,6 +87,7 @@ import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests10;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -106,9 +108,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -558,29 +557,29 @@ public class TestSuite {
             return;
         }
 
-        JSONObject jsonResponse;
-        JSONArray entities;
+        JsonNode jsonResponse;
+        JsonNode entities;
         try {
-            jsonResponse = new JSONObject(response.response);
-            entities = jsonResponse.getJSONArray("value");
-        } catch (JSONException e) {
+            jsonResponse = Utils.MAPPER.readTree(response.response);
+            entities = jsonResponse.get("value");
+        } catch (IOException | NullPointerException e) {
             LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
             fail("The service response for the root URI '" + rootUri + "' is not JSON.");
             return;
         }
         boolean hasActuation = false;
         boolean hasMultiDatastream = false;
-        for (int i = 0; i < entities.length(); i++) {
-            JSONObject entity;
+        for (int i = 0; i < entities.size(); i++) {
+            JsonNode entity;
             String name;
             try {
-                entity = entities.getJSONObject(i);
+                entity = entities.get(i);
                 if (!entity.has("name")) {
                     fail("The name component of Service root URI response is not available.");
                     return;
                 }
-                name = entity.getString("name");
-            } catch (JSONException e) {
+                name = entity.get("name").textValue();
+            } catch (NullPointerException e) {
                 LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
                 fail("The service response for the root URI '" + rootUri + "' is not JSON.");
                 return;
@@ -611,10 +610,10 @@ public class TestSuite {
             }
         }
         if (version == ServerVersion.v_1_1) {
-            JSONObject serverSettingsObject = jsonResponse.getJSONObject("serverSettings");
-            JSONArray conformanceArray = serverSettingsObject.getJSONArray("conformance");
-            for (Object reqItem : conformanceArray.toList()) {
-                Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.toString());
+            JsonNode serverSettingsObject = jsonResponse.get("serverSettings");
+            JsonNode conformanceArray = serverSettingsObject.get("conformance");
+            for (JsonNode reqItem : conformanceArray) {
+                Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.textValue());
                 if (allMatching.isEmpty()) {
                     LOGGER.info("Server implements unknown requirement: {}", reqItem);
                 }

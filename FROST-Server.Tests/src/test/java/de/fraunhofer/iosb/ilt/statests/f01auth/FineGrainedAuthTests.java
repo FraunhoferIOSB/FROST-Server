@@ -30,7 +30,6 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -65,7 +64,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.geojson.Point;
-import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -200,7 +198,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
             String batchPostData = IOUtils.resourceToString("finegrainedsecurity/dataBatchPost.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
             String response = postBatch(batchPostData);
-            BatchResponseJson result = new ObjectMapper().readValue(response, BatchResponseJson.class);
+            BatchResponseJson result = Utils.MAPPER.readValue(response, BatchResponseJson.class);
             for (BatchResponseJson.ResponsePart part : result.getResponses()) {
                 final String location = part.getLocation();
                 Object[] pk = pkFromSelfLink(location);
@@ -274,15 +272,9 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private String postBatch(String body) {
         String urlString = serverSettings.getServiceUrl(version) + "/$batch";
-        try {
-            HTTPMethods.HttpResponse httpResponse = HTTPMethods.doPost(serviceAdmin.getHttpClient(), urlString, body, "application/json");
-            assertEquals(200, httpResponse.code, "Batch response should be 200");
-            return httpResponse.response;
-        } catch (JSONException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
-        }
+        HTTPMethods.HttpResponse httpResponse = HTTPMethods.doPost(serviceAdmin.getHttpClient(), urlString, body, "application/json");
+        assertEquals(200, httpResponse.code, "Batch response should be 200");
+        return httpResponse.response;
     }
 
     @Test
