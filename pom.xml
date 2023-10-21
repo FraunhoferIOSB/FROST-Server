@@ -80,7 +80,7 @@
         <postgis.version>2021.1.0</postgis.version>
         <postgres.version>42.6.0</postgres.version>
         <slf4j-api.version>2.0.7</slf4j-api.version>
-        <testcontainers.version>1.18.3</testcontainers.version>
+        <testcontainers.version>1.19.1</testcontainers.version>
         <testcontainers-keycloak.version>2.6.0</testcontainers-keycloak.version>
         <time4j.version>5.9.3</time4j.version>
 
