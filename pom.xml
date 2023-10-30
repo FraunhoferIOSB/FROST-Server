@@ -98,7 +98,7 @@
         <version.commons-csv>1.10.0</version.commons-csv>
         <version.commons-io>2.14.0</version.commons-io>
         <version.commons-lang3>3.13.0</version.commons-lang3>
-        <version.commons-text>1.10.0</version.commons-text>
+        <version.commons-text>1.11.0</version.commons-text>
         <version.configurable>0.34</version.configurable>
         <version.congocc>2022-05-31</version.congocc>
         <version.dbcp2>2.10.0</version.dbcp2>
