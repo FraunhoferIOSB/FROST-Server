@@ -84,7 +84,7 @@ class MessageSerialisationTest {
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123));
+                .setProperty(pluginCoreModel.epLocation, TestHelper.jsonPoint(-117.123, 54.123));
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 

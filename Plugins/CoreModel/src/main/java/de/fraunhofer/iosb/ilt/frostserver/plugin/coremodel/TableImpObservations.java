@@ -438,7 +438,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
             JsonValue properties = getFieldOrNull(tuple, ql.colProperties);
             String encoding = getFieldOrNull(tuple, ql.colEncodingType);
             String locString = getFieldOrNull(tuple, ql.colLocation);
-            Object locObject = Utils.locationFromEncoding(encoding, locString);
+            Object locObject = Utils.jsonToTreeOrString(locString);
             foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                     .setProperty(pluginCoreModel.epName, name)
                     .setProperty(pluginCoreModel.epDescription, description)

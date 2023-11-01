@@ -103,11 +103,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
 
-        Entity location1 = sMdl.newLocation("Location 1.0, Address", "The address of Thing 1.", "text/plain", "");
+        Entity location1 = sMdl.newLocation("Location 1.0, Address", "The address of Thing 1.", "text/plain", "Street Lane 1, City of Townsville");
         thing.getProperty(sMdl.npThingLocations).add(location1);
         Entity location2 = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/geo+json", new Point(8, 51));
         thing.getProperty(sMdl.npThingLocations).add(location2);
-        Entity location3 = sMdl.newLocation("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "");
+        Entity location3 = sMdl.newLocation("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "Third rock from the Sun");
         thing.getProperty(sMdl.npThingLocations).add(location3);
 
         sSrvc.create(thing);

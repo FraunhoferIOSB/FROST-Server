@@ -94,15 +94,15 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
                                         DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
                             }
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(property, Utils.locationUnknownEncoding(locationString));
+                            entity.setProperty(property, Utils.jsonToTreeOrString(locationString));
                         },
                         (t, entity, insertFields) -> {
                             Object feature = entity.getProperty(property);
-                            EntityFactories.insertGeometryNoTransform(insertFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
+                            EntityFactories.insertGeometry(insertFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature, false);
                         },
                         (t, entity, updateFields, message) -> {
                             Object feature = entity.getProperty(property);
-                            EntityFactories.insertGeometryNoTransform(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
+                            EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature, false);
                             message.addField(property);
                         }),
                 sourcePfr);

@@ -21,8 +21,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.
 import static de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils.idFromObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -120,6 +120,7 @@ public class EntityFactories {
      *
      * @param pm the persistenceManager
      * @param e The Entity to check.
+     * @param updateMode The update mode to use.
      * @throws NoSuchEntityException If the entity has an id, but does not
      * exist.
      * @throws IncompleteEntityException If the entity has no id, but is not
@@ -216,7 +217,8 @@ public class EntityFactories {
     }
 
     /**
-     * Sets both the geometry and location in the clause.
+     * Sets both the geometry and location in the clause. The geometry will be
+     * flattened to 2D.
      *
      * @param clause The insert or update clause to add to.
      * @param locationPath The path to the location column.
@@ -224,51 +226,63 @@ public class EntityFactories {
      * @param encodingType The encoding type.
      * @param location The location.
      */
-    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, final Object location) {
-        if (encodingType == null && location instanceof GeoJsonObject) {
-            encodingType = GeoJsonDeserializier.APPLICATION_GEOJSON;
-        }
-        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-            insertGeometryKnownEncoding(location, clause, geomPath, locationPath);
+    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, Object location) {
+        if (location instanceof JsonNode jn) {
+            insertGeometry(clause, locationPath, geomPath, encodingType, jn, true);
         } else {
-            String json;
-            json = objectToJson(location);
-            clause.put(geomPath, NULL_FIELD);
-            if (locationPath != null) {
-                clause.put(locationPath, json);
-            }
+            throw new IllegalArgumentException("Unknown location object type");
         }
     }
 
-    public static void insertGeometryNoTransform(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, final Object location) {
-        if (encodingType == null && location instanceof GeoJsonObject) {
-            encodingType = GeoJsonDeserializier.APPLICATION_GEOJSON;
-        }
-        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-            insertGeometryKnownEncodingNoTransform(location, clause, geomPath, locationPath);
+    /**
+     * Sets both the geometry and location in the clause.
+     *
+     * @param clause The insert or update clause to add to.
+     * @param locationPath The path to the location column.
+     * @param geomPath The path to the geometry column.
+     * @param encodingType The encoding type.
+     * @param location The location.
+     * @param flatten If the GEOM column should be transformed and flattened.
+     */
+    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, Object location, boolean flatten) {
+        if (location instanceof JsonNode jn) {
+            insertGeometry(clause, locationPath, geomPath, encodingType, jn, flatten);
         } else {
-            String json;
-            json = objectToJson(location);
-            clause.put(geomPath, NULL_FIELD);
-            if (locationPath != null) {
-                clause.put(locationPath, json);
-            }
+            throw new IllegalArgumentException("Unknown location object type");
         }
     }
 
-    private static void insertGeometryKnownEncoding(final Object location, Map<Field, Object> clause, Field<? extends Object> geomPath, Field<String> locationPath) {
-        String locJson;
-        try {
-            locJson = new GeoJsonSerializer().serialize(location);
-        } catch (JsonProcessingException ex) {
-            LOGGER.error("Failed to store.", ex);
-            throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
+    /**
+     * Sets both the geometry and location in the clause.
+     *
+     * @param clause The insert or update clause to add to.
+     * @param locationPath The path to the location column.
+     * @param geomPath The path to the geometry column.
+     * @param encodingType The encoding type.
+     * @param location The location.
+     * @param flatten If the GEOM column should be transformed and flattened.
+     */
+    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, JsonNode location, boolean flatten) {
+        Object locationParsed = Utils.locationFromEncoding(encodingType, location);
+
+        if (locationParsed instanceof GeoJsonObject locationGeoJson) {
+            insertGeoJson(clause, geomPath, locationPath, location, locationGeoJson, flatten);
+            return;
         }
 
+        String json;
+        json = objectToJson(location);
+        clause.put(geomPath, NULL_FIELD);
+        if (locationPath != null) {
+            clause.put(locationPath, json);
+        }
+    }
+
+    private static void insertGeoJson(Map<Field, Object> clause, Field<? extends Object> geomPath, Field<String> locationPath, JsonNode locationSource, GeoJsonObject locationParsed, boolean flatten) {
         // Postgres does not support Feature.
-        Object geoLocation = location;
-        if (location instanceof Feature) {
-            geoLocation = ((Feature) location).getGeometry();
+        Object geoLocation = locationParsed;
+        if (locationParsed instanceof Feature feature) {
+            geoLocation = feature.getGeometry();
         }
         // Ensure the geoJson has a crs, otherwise Postgres complains.
         if (geoLocation instanceof GeoJsonObject) {
@@ -281,6 +295,7 @@ public class EntityFactories {
                 geoJsonObject.setCrs(crs);
             }
         }
+
         String geoJson;
         try {
             geoJson = new GeoJsonSerializer().serialize(geoLocation);
@@ -295,62 +310,17 @@ public class EntityFactories {
         } catch (JsonException ex) {
             throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
         }
-        final String template = "ST_Force2D(ST_Transform(ST_GeomFromGeoJSON({0}), 4326))";
+
+        final String template;
+        if (flatten) {
+            template = "ST_Force2D(ST_Transform(ST_GeomFromGeoJSON({0}), 4326))";
+        } else {
+            template = "ST_GeomFromGeoJSON({0})";
+        }
         clause.put(geomPath, DSL.field(template, Object.class, geoJson));
         if (locationPath != null) {
-            clause.put(locationPath, locJson);
+            clause.put(locationPath, objectToJson(locationSource));
         }
-    }
-
-    private static void insertGeometryKnownEncodingNoTransform(final Object location, Map<Field, Object> clause, Field<? extends Object> geomPath, Field<String> locationPath) {
-        String locJson;
-        try {
-            locJson = new GeoJsonSerializer().serialize(location);
-        } catch (JsonProcessingException ex) {
-            LOGGER.error("Failed to store.", ex);
-            throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
-        }
-
-        // Postgres does not support Feature.
-        Object geoLocation = location;
-        if (location instanceof Feature) {
-            geoLocation = ((Feature) location).getGeometry();
-        }
-        // Ensure the geoJson has a crs, otherwise Postgres complains.
-        if (geoLocation instanceof GeoJsonObject) {
-            GeoJsonObject geoJsonObject = (GeoJsonObject) geoLocation;
-            Crs crs = geoJsonObject.getCrs();
-            if (crs == null) {
-                crs = new Crs();
-                crs.setType(CrsType.name);
-                crs.getProperties().put("name", "EPSG:4326");
-                geoJsonObject.setCrs(crs);
-            }
-        }
-        String geoJson;
-        try {
-            geoJson = new GeoJsonSerializer().serialize(geoLocation);
-        } catch (JsonProcessingException ex) {
-            LOGGER.error("Failed to store.", ex);
-            throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
-        }
-
-        try {
-            // geojson.jackson allows invalid polygons, geolatte catches those.
-            Utils.getGeoJsonMapper().fromJson(geoJson, Geometry.class);
-        } catch (JsonException ex) {
-            throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
-        }
-        final String template = "ST_GeomFromGeoJSON({0})";
-        clause.put(geomPath, DSL.field(template, Object.class, geoJson));
-        if (locationPath != null) {
-            clause.put(locationPath, locJson);
-        }
-    }
-
-    public static Object reParseGeometry(String encodingType, Object object) {
-        String json = objectToJson(object);
-        return Utils.locationFromEncoding(encodingType, json);
     }
 
     public static String objectToJson(JsonValue jsonValue) {

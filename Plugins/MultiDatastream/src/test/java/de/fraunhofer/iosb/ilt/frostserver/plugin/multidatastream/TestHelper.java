@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 import static net.time4j.tz.ZonalOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -32,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,8 +59,18 @@ public class TestHelper {
         // Utility class, not to be instantiated.
     }
 
+    public static <T extends Number> JsonNode jsonPolygon(int dimensions, T... values) {
+        Polygon poly = getPolygon(dimensions, values);
+        return SimpleJsonMapper.getSimpleObjectMapper().valueToTree(poly);
+    }
+
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
         return new Polygon(getPointList(dimensions, values));
+    }
+
+    public static <T extends Number> JsonNode jsonPoint(T... values) {
+        Point point = getPoint(values);
+        return SimpleJsonMapper.getSimpleObjectMapper().valueToTree(point);
     }
 
     public static <T extends Number> Point getPoint(T... values) {

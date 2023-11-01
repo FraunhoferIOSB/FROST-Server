@@ -114,7 +114,6 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
         boolean failOnUnknown = ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        DelayedField delayedField = null;
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.FIELD_NAME) {
             String fieldName = parser.getCurrentName();
@@ -128,32 +127,20 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
                     parser.readValueAsTree();
                 }
             } else {
-                delayedField = deserializeProperty(parser, ctxt, result, propertyData, delayedField);
+                deserializeProperty(parser, ctxt, result, propertyData);
             }
             currentToken = parser.nextToken();
         }
 
-        if (delayedField != null) {
-            EntityPropertyMain entityPropertyMain = delayedField.entityPropertyMain;
-            Object encodingType = result.getProperty(ModelRegistry.EP_ENCODINGTYPE);
-            if (encodingType == null) {
-                entityPropertyMain.setOn(result, delayedField.tempValue);
-            } else {
-                CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
-                Object value = deserializer.deserialize(delayedField.tempValue);
-                entityPropertyMain.setOn(result, value);
-            }
-        }
         return result;
     }
 
-    private DelayedField deserializeProperty(JsonParser parser, DeserializationContext ctxt, Entity result, PropertyData propertyData, DelayedField delayedField) throws IOException {
+    private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Entity result, PropertyData propertyData) throws IOException {
         if (propertyData.property instanceof EntityPropertyMain) {
-            delayedField = deserializeEntityProperty(parser, ctxt, propertyData, result, delayedField);
+            deserializeEntityProperty(parser, propertyData, result);
         } else if (propertyData.property instanceof NavigationPropertyMain) {
             deserializeNavigationProperty(propertyData, result, parser, ctxt);
         }
-        return delayedField;
     }
 
     private void deserializeNavigationProperty(PropertyData propertyData, Entity result, JsonParser parser, DeserializationContext ctxt) throws IOException {
@@ -173,18 +160,12 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         }
     }
 
-    private DelayedField deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, PropertyData propertyData, Entity result, DelayedField delayedField) throws IOException {
+    private void deserializeEntityProperty(JsonParser parser, PropertyData propertyData, Entity result) throws IOException {
         parser.nextValue();
         EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
         if (propertyData.valueTypeRef == null) {
-            Object encodingType = ModelRegistry.EP_ENCODINGTYPE.getFrom(result);
-            if (encodingType == null) {
-                delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
-            } else {
-                CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
-                Object value = deserializer.deserialize(parser, ctxt);
-                entityPropertyMain.setOn(result, value);
-            }
+            TreeNode value = parser.readValueAsTree();
+            entityPropertyMain.setOn(result, value);
         } else if (propertyData.property == entityType.getPrimaryKey()) {
             Object value = parser.readValueAs(propertyData.valueTypeRef);
             entityPropertyMain.setOn(result, ParserUtils.idFromObject(value));
@@ -192,7 +173,6 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
             Object value = parser.readValueAs(propertyData.valueTypeRef);
             entityPropertyMain.setOn(result, value);
         }
-        return delayedField;
     }
 
     private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntitySet navPropertyMain, Entity result) throws IOException {
@@ -214,18 +194,6 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
             entitySet.add(setEntityDeser.deserialize(parser, ctxt));
             curToken = parser.nextToken();
         }
-    }
-
-    private static class DelayedField {
-
-        public final EntityPropertyMain entityPropertyMain;
-        public final TreeNode tempValue;
-
-        public DelayedField(EntityPropertyMain entityPropertyMain, TreeNode tempValue) {
-            this.entityPropertyMain = entityPropertyMain;
-            this.tempValue = tempValue;
-        }
-
     }
 
     private static class PropertyData {

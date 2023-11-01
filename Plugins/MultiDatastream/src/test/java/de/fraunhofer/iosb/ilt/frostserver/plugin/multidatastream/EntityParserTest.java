@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.TestHelp
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.node.TextNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -303,7 +304,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
-                        .setProperty(pluginCoreModel.epFeature, "tarmac"))
+                        .setProperty(pluginCoreModel.epFeature, new TextNode("tarmac")))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
@@ -649,7 +650,7 @@ class EntityParserTest {
                                 .setProperty(pluginCoreModel.epName, "my backyard")
                                 .setProperty(pluginCoreModel.epDescription, "my backyard")
                                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123)));
+                                .setProperty(pluginCoreModel.epLocation, TestHelper.jsonPoint(-117.123, 54.123)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 

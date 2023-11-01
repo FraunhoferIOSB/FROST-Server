@@ -22,6 +22,7 @@ import static net.time4j.TemporalType.INSTANT;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -118,30 +119,25 @@ public class Utils {
         return new TimeValue(intervalFromTimes(timeStart, timeEnd));
     }
 
-    public static Object locationFromEncoding(String encodingType, String locationString) {
-        if (locationString == null || locationString.isEmpty()) {
+    public static Object locationFromEncoding(String encodingType, JsonNode location) {
+        if (location == null || location.isEmpty()) {
             return null;
         }
         if (encodingType == null) {
-            return locationUnknownEncoding(locationString);
+            return locationUnknownEncoding(location);
         }
         if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
-                return new GeoJsonDeserializier().deserialize(locationString);
+                return new GeoJsonDeserializier().deserialize(location);
             } catch (IOException ex) {
                 LOGGER.error("Failed to deserialise geoJson.", ex);
             }
-            return locationString;
+            return location;
         }
-        try {
-            return jsonToObject(locationString, Object.class);
-        } catch (Exception ex) {
-            LOGGER.trace("Not a map.", ex);
-        }
-        return locationString;
+        return location;
     }
 
-    public static Object locationUnknownEncoding(String locationString) {
+    public static Object locationUnknownEncoding(JsonNode locationString) {
         if (locationString == null) {
             return null;
         }
@@ -151,12 +147,19 @@ public class Utils {
         } catch (IOException ex) {
             LOGGER.trace("Not geoJson.", ex);
         }
-        try {
-            return jsonToObject(locationString, Map.class);
-        } catch (Exception ex) {
-            LOGGER.trace("Not a map.", ex);
-        }
         return locationString;
+    }
+
+    public static JsonNode jsonToTreeOrString(String json) {
+        if (json == null) {
+            return null;
+        }
+
+        try {
+            return SimpleJsonMapper.getSimpleObjectMapper().readTree(json);
+        } catch (IOException ex) {
+            return new TextNode(json);
+        }
     }
 
     public static JsonNode jsonToTree(String json) {

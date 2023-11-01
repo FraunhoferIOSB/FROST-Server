@@ -167,7 +167,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colLocation);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(pluginCoreModel.epLocation, Utils.locationFromEncoding(encodingType, locationString));
+                            entity.setProperty(pluginCoreModel.epLocation, Utils.jsonToTreeOrString(locationString));
                         },
                         (table, entity, insertFields) -> {
                             Object feature = entity.getProperty(pluginCoreModel.epLocation);

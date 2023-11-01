@@ -94,7 +94,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                                         DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
                             }
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(property, Utils.locationUnknownEncoding(locationString));
+                            entity.setProperty(property, Utils.jsonToTreeOrString(locationString));
                         },
                         (t, entity, insertFields) -> {
                             Object feature = entity.getProperty(property);

@@ -141,7 +141,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(pluginCoreModel.epFeature, Utils.locationFromEncoding(encodingType, locationString));
+                            entity.setProperty(pluginCoreModel.epFeature, Utils.jsonToTreeOrString(locationString));
                         },
                         (table, entity, insertFields) -> {
                             Object feature = entity.getProperty(pluginCoreModel.epFeature);
