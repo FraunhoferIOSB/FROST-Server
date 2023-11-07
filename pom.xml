@@ -131,7 +131,7 @@
         <version.maven.plugin.gpg>3.1.0</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.11</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.3.0</version.maven.plugin.jar>
-        <version.maven.plugin.javadoc>3.6.0</version.maven.plugin.javadoc>
+        <version.maven.plugin.javadoc>3.6.2</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.6.13</version.maven.plugin.nexus-staging>
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.5.1</version.maven.plugin.shade>
