@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   web:
@@ -6,7 +6,7 @@ services:
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - http_cors_enable=true
-      - http_cors_allowed.origins=*
+      - http_cors_allowed_origins=*
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
@@ -19,7 +19,7 @@ services:
       - database
 
   database:
-    image: postgis/postgis:11-2.5-alpine
+    image: postgis/postgis:14-3.2-alpine
     environment:
       - POSTGRES_DB=sensorthings
       - POSTGRES_USER=sensorthings
