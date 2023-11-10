@@ -6,7 +6,8 @@
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
 
 **Internal changes & Bugfixes**
-* Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream
+* Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream.
+* Fixed ordering of object properties on JSONB columns.
 
 
 ## Release version 2.2.0

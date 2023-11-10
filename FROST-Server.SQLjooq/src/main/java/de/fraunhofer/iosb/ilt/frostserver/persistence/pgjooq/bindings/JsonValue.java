@@ -64,7 +64,7 @@ public class JsonValue {
     }
 
     public Map<String, Object> getMapValue() {
-        return getValue(Utils.TYPE_MAP_STRING_OBJECT);
+        return getValue(Utils.TYPE_SORTED_MAP_STRING_OBJECT);
     }
 
     public <T> T getValue(TypeReference<T> typeReference) {
