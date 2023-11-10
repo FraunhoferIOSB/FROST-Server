@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import net.time4j.Moment;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.jooq.Field;
@@ -64,6 +65,10 @@ public class Utils {
     };
 
     public static final TypeReference<Map<String, Object>> TYPE_MAP_STRING_OBJECT = new TypeReference<Map<String, Object>>() {
+        // Empty on purpose.
+    };
+
+    public static final TypeReference<TreeMap<String, Object>> TYPE_SORTED_MAP_STRING_OBJECT = new TypeReference<TreeMap<String, Object>>() {
         // Empty on purpose.
     };
 
