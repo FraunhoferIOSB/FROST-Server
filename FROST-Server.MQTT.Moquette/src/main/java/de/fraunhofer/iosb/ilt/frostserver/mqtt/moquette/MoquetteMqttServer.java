@@ -232,19 +232,22 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
         @Override
         public void onPublish(InterceptPublishMessage msg) {
-            if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
-                return;
+            try {
+                if (frostClientId.equals(msg.getClientID())) {
+                    return;
+                }
+                LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
+                String payload = msg.getPayload().toString(StringHelper.UTF8);
+                PrincipalExtended userPrincipal;
+                if (authWrapper == null) {
+                    userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
+                } else {
+                    userPrincipal = authWrapper.getUserPrincipal(msg.getClientID());
+                }
+                fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload, userPrincipal));
+            } finally {
+                super.onPublish(msg);
             }
-            LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
-            String payload = msg.getPayload().toString(StringHelper.UTF8);
-            PrincipalExtended userPrincipal;
-            if (authWrapper == null) {
-                userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
-            } else {
-                userPrincipal = authWrapper.getUserPrincipal(msg.getClientID());
-            }
-            fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload, userPrincipal));
-            super.onPublish(msg);
         }
 
         @Override
@@ -288,7 +291,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         @Override
         public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
             final String clientId = msg.getClientID();
-            if (clientId.equalsIgnoreCase(frostClientId)) {
+            if (frostClientId.equals(clientId)) {
                 return;
             }
             final String topicFilter = msg.getTopicFilter();
