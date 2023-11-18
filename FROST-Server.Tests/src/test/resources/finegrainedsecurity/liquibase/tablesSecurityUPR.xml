@@ -20,6 +20,38 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
+    <changeSet author="scf" id="2023-11-17-Table-Users" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USERS" />
+            </not>
+        </preConditions>
+        <createTable tableName="USERS">
+            <column name="USER_NAME" type="VARCHAR(36)">
+                <constraints primaryKey="true" primaryKeyName="USERS_PKEY"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2023-11-17-Table-user_roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USER_ROLES" />
+            </not>
+        </preConditions>
+        <createTable tableName="USER_ROLES">
+            <column name="USER_NAME" type="VARCHAR(36)" />
+            <column name="ROLE_NAME" type="VARCHAR(15)" />
+        </createTable>
+        <addPrimaryKey tableName="USER_ROLES" columnNames="USER_NAME,ROLE_NAME"/>
+        <addForeignKeyConstraint
+            constraintName="USER_ROLES_USERS_FKEY"
+            baseTableName="USER_ROLES" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
     <changeSet author="scf" id="2023-04-26-Table-Roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="HALT">
             <tableExists tableName="USER_ROLES" />
@@ -46,6 +78,34 @@
             onDelete="CASCADE" onUpdate="CASCADE" />
     </changeSet>
 
+    <changeSet author="scf" id="2023-04-26-Table-Roles-data" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <tableIsEmpty tableName="ROLES" />
+        </preConditions>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="read" />
+            <column name="DESCRIPTION" value="Read data" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="create" />
+            <column name="DESCRIPTION" value="Create (POST) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="update" />
+            <column name="DESCRIPTION" value="Update (PUT/PATCH) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="delete" />
+            <column name="DESCRIPTION" value="Delete Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="admin" />
+            <column name="DESCRIPTION" value="All actions" />
+        </insert>
+    </changeSet>
+
     <changeSet author="scf" id="2023-04-26-Table-Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -64,8 +124,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="THING_PROJECTS" />
@@ -77,8 +136,7 @@
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>
 
-        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID"
-            constraintName="PK_THING_PROJECTS" />
+        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID" constraintName="PK_THING_PROJECTS" />
 
         <addForeignKeyConstraint
             constraintName="FK_THING_PROJECTS_THING_ID"
@@ -96,8 +154,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="USER_PROJECT_ROLE" />

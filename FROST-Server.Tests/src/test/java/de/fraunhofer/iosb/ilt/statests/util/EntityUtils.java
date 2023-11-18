@@ -137,6 +137,10 @@ public class EntityUtils {
             deleteAll(service.dao(mr.getEntityTypeForName("Thing")));
         }
         for (de.fraunhofer.iosb.ilt.frostclient.model.EntityType et : mr.getEntityTypes()) {
+            if ("user".equalsIgnoreCase(et.entityName)) {
+                // Can't usually delete users.
+                continue;
+            }
             try {
                 deleteAll(service.dao(et));
             } catch (NotFoundException exc) {

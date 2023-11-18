@@ -17,13 +17,26 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
+import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +58,47 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     public static final String KEYCLOAK_FROST_CONFIG_SECRET = "5aa9087d-817f-47b6-92a1-2b5f7caac967";
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
+    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
+    private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
+    private static final List<Entity> USERS = new ArrayList<>();
+
+    private static String modelUrl(String name) {
+        return resourceUrl("finegrainedsecurity/model/", name);
+    }
+
+    private static String resourceUrl(String path, String name) {
+        try {
+            return IOUtils.resourceToURL(path + "/" + name, KeyCloakTests.class.getClassLoader()).getFile();
+        } catch (IOException ex) {
+            LOGGER.error("Failed", ex);
+            return "";
+        }
+    }
+
     static {
+        final String dbName = "keycloakauth";
+        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
+        SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
+        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
+
         SERVER_PROPERTIES.put("auth_provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
         SERVER_PROPERTIES.put("auth_keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
         SERVER_PROPERTIES.put("auth_keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
         SERVER_PROPERTIES.put("auth_allowAnonymousRead", "false");
+        SERVER_PROPERTIES.put("auth_registerUserLocally", "true");
+        SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
+        SERVER_PROPERTIES.put("plugins.modelLoader.enable", "true");
+        SERVER_PROPERTIES.put("plugins.modelLoader.modelPath", "");
+        SERVER_PROPERTIES.put("plugins.modelLoader.modelFiles", modelUrl("Role.json") + ", " + modelUrl("UserNoPass.json"));
+        SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "target/test-classes/finegrainedsecurity/liquibase");
+        SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
+        SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
+        SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
+        SERVER_PROPERTIES.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
+        SERVER_PROPERTIES.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
     }
 
     public KeyCloakTests(ServerVersion version) {
@@ -59,7 +108,29 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = mdlSensing;
         super.setUpVersion();
+        USERS.clear();
+        USERS.add(mdlUsers.newUser("c8e84639-9914-4b1e-b756-349afed255f6", null));
+        USERS.add(mdlUsers.newUser("1d6b3bb2-a869-4686-b781-c1ea481e6085", null));
+        USERS.add(mdlUsers.newUser("74fe01f1-2ecc-4696-87f0-340ee3fe1a86", null));
+    }
+
+    @Test
+    void test_100_ReadUser() {
+        LOGGER.info("  test_100_ReadUser");
+        testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
+        filterForException(serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
+    }
+
+    @Override
+    protected SensorThingsService createService() {
+        try {
+            return new SensorThingsService(baseService.getModelRegistry())
+                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
+        }
     }
 
     @Override

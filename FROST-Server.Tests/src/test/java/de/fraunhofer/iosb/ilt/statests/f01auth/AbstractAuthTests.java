@@ -67,10 +67,10 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
-    private static SensorThingsService serviceAdmin;
-    private static SensorThingsService serviceWrite;
-    private static SensorThingsService serviceRead;
-    private static SensorThingsService serviceAnon;
+    protected static SensorThingsService serviceAdmin;
+    protected static SensorThingsService serviceWrite;
+    protected static SensorThingsService serviceRead;
+    protected static SensorThingsService serviceAnon;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;

@@ -4,6 +4,7 @@
 
 **New Features**
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
+* Added option for KeycloakAuthProvider to locally register user.
 
 **Internal changes & Bugfixes**
 * Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream.
