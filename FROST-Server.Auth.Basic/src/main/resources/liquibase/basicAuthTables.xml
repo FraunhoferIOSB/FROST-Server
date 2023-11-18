@@ -34,6 +34,20 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="scf" id="20231117-users" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <!-- If there is a users table, but it has no password column. -->
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USERS" />
+            <not>
+                <columnExists tableName="USERS" columnName="USER_PASS" />
+            </not>
+        </preConditions>
+        <addColumn tableName="USERS">
+            <column name="USER_PASS" type="VARCHAR(255)" />
+        </addColumn>
+    </changeSet>
+
+
     <changeSet author="scf" id="20181121-user_roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>

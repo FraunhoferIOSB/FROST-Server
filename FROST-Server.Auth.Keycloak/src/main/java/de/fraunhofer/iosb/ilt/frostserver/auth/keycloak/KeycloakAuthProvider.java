@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
@@ -79,6 +80,15 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     @DefaultValueInt(10)
     public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
 
+    @DefaultValueBoolean(false)
+    public static final String TAG_REGISTER_USER_LOCALLY = "registerUserLocally";
+
+    @DefaultValue("USERS")
+    public static final String TAG_USER_TABLE = "userTable";
+
+    @DefaultValue("USER_NAME")
+    public static final String TAG_USERNAME_COLUMN = "usernameColumn";
+
     /**
      * The logger for this class.
      */
@@ -95,6 +105,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     private CoreSettings coreSettings;
     private String roleAdmin;
     private int maxClientsPerUser;
+    private boolean registerUserLocally;
+    private DatabaseHandler databaseHandler;
 
     private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
     private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
@@ -113,6 +125,11 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
         final Settings authSettings = coreSettings.getAuthSettings();
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
+        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
+        if (registerUserLocally) {
+            DatabaseHandler.init(coreSettings);
+            databaseHandler = DatabaseHandler.getInstance(coreSettings);
+        }
     }
 
     @Override
@@ -173,6 +190,9 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
                 client.setSubject(subject);
                 CLIENTMAP.put(clientId, client);
                 client.getSubject().getPrincipals().stream().forEach(t -> userData.roles.add(t.getName()));
+                if (registerUserLocally) {
+                    databaseHandler.enureUserInUsertable(userData.userName);
+                }
             }
             return login;
         } catch (LoginException ex) {

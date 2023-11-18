@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_REGISTER_USER_LOCALLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
@@ -43,7 +44,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.keycloak.adapters.AdapterDeploymentContext;
@@ -79,6 +79,8 @@ public class KeycloakFilter implements Filter {
     private Map<Role, String> roleMappings;
     private String roleAdmin;
     private boolean authenticateOnly;
+    private boolean registerUserLocally;
+    private DatabaseHandler databaseHandler;
 
     private AdapterDeploymentContext deploymentContext;
     private NodesRegistrationManagement nodesRegistrationManagement;
@@ -96,7 +98,11 @@ public class KeycloakFilter implements Filter {
         Settings authSettings = coreSettings.getAuthSettings();
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        authenticateOnly = "T".equals(authSettings.get(TAG_AUTHENTICATE_ONLY, "F"));
+        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
+        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
+        if (registerUserLocally) {
+            databaseHandler = DatabaseHandler.getInstance(coreSettings);
+        }
 
         final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         roleMappersByPath.put("/Data", method -> Role.ADMIN);
@@ -209,19 +215,21 @@ public class KeycloakFilter implements Filter {
                 LOGGER.debug("Request handled by authentication actions.");
                 return;
             } else {
+                final KeycloakAccount account = findKeycloakAccount(httpRequest);
+                final Principal principalBasic = account.getPrincipal();
+                final Set<String> roles = account.getRoles();
+                final String userName = principalBasic.getName();
+                final PrincipalExtended pe = new PrincipalExtended(userName, roles.contains(roleAdmin), roles);
+                if (registerUserLocally) {
+                    databaseHandler.enureUserInUsertable(userName);
+                }
                 if (authenticateOnly) {
-                    final KeycloakAccount account = findKeycloakAccount(httpRequest);
-                    final Principal principalBasic = account.getPrincipal();
-                    final Set<String> roles = account.getRoles();
-                    final PrincipalExtended pe = new PrincipalExtended(principalBasic.getName(), roles.contains(roleAdmin), roles);
                     chain.doFilter(new RequestWrapper(httpRequest, pe), response);
                     return;
                 }
-
-                HttpServletRequestWrapper wrapper = tokenStore.buildWrapper();
-                if (wrapper.isUserInRole(roleMappings.get(requiredRole))) {
+                if (roles.contains(roleMappings.get(requiredRole))) {
                     LOGGER.debug("User has correct role.");
-                    chain.doFilter(wrapper, response);
+                    chain.doFilter(new RequestWrapper(httpRequest, pe), response);
                     return;
                 }
             }
