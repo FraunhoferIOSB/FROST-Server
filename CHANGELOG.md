@@ -8,6 +8,7 @@
 **Internal changes & Bugfixes**
 * Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream.
 * Fixed ordering of object properties on JSONB columns.
+* Improved internal message bus when MQTT is not in use.
 
 
 ## Release version 2.2.0
