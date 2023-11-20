@@ -36,6 +36,7 @@
 * Fixed unknown version giving 200 instead of 404.
 * Fixed JSON-Patch that changed nothing giving an error back.
 * Fixed memory leak when creating Entities using MQTT.
+* Improved internal message bus when MQTT is not in use.
 
 
 ## Release version 2.1.0

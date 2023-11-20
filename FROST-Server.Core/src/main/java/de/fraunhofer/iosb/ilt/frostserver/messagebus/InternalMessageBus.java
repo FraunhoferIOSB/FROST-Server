@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -53,13 +55,15 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
     private BlockingQueue<EntityChangedMessage> entityChangedMessageQueue;
     private ExecutorService entityChangedExecutorService;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
+    private int poolSize;
+    private int queueSize;
 
     @Override
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        int poolSize = customSettings.getInt(TAG_WORKER_COUNT, defaultValueInt(TAG_WORKER_COUNT));
-        int queueSize = customSettings.getInt(TAG_QUEUE_SIZE, defaultValueInt(TAG_QUEUE_SIZE));
+        poolSize = customSettings.getInt(TAG_WORKER_COUNT, defaultValueInt(TAG_WORKER_COUNT));
+        queueSize = customSettings.getInt(TAG_QUEUE_SIZE, defaultValueInt(TAG_QUEUE_SIZE));
 
         entityChangedMessageQueue = new ArrayBlockingQueue<>(queueSize);
         entityChangedExecutorService = ProcessorHelper.createProcessors(
@@ -86,8 +90,13 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
 
     @Override
     public void sendMessage(EntityChangedMessage message) {
+        if (listeners.isEmpty()) {
+            // No listeners, no point in doing anything.
+            return;
+        }
         if (!entityChangedMessageQueue.offer(message)) {
-            LOGGER.error("Failed to add message to queue. Increase the queue size to allow a bigger buffer, or increase the worker pool size to empty the buffer quicker.");
+            LOGGER.error("Failed to add message to message bus. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                    PREFIX_BUS, TAG_QUEUE_SIZE, queueSize, PREFIX_BUS, TAG_WORKER_COUNT, poolSize);
         }
     }
 
