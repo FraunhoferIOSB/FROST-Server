@@ -10,6 +10,7 @@
 * Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream.
 * Fixed ordering of object properties on JSONB columns.
 * Improved internal message bus when MQTT is not in use.
+* Improved drawio diagram generation.
 
 
 ## Release version 2.2.0
