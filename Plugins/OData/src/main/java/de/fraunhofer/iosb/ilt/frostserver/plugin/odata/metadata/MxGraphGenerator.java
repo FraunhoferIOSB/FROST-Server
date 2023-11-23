@@ -36,9 +36,13 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,18 +56,18 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MxGraphGenerator {
 
-    private static final String STYLE_LIST = "swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#98D095;strokeColor=#82b366;swimlaneFillColor=#E3F7E2;";
-    private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=visible;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;html=1;";
+    private static final String STYLE_LIST = "swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=32;fontSize=16;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#98D095;strokeColor=#82b366;swimlaneFillColor=#E3F7E2;";
+    private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=visible;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;html=1;fontSize=14;";
     private static final String STYLE_CONNECTOR = "endArrow=classic;startArrow=classic;html=1;rounded=0;";
-    private static final String STYLE_LABEL = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=10;spacingLeft=1;spacing=3;spacingRight=2;";
+    private static final String STYLE_LABEL = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=12;spacingLeft=1;spacing=3;spacingRight=2;";
 
     private static final String AS_SOURCEPOINT = "sourcePoint";
     private static final String AS_TARGETPOINT = "targetPoint";
     private static final String AS_OFFSET = "offset";
     private static final String AS_GEOMETRY = "geometry";
-    private static final int BOX_WIDTH = 140;
-    private static final int BOX_HEIGHT_BASE = 30;
-    private static final int BOX_HEIGHT_ITEM = 16;
+    private static final int BOX_WIDTH = 160;
+    private static final int BOX_HEIGHT_BASE = 32;
+    private static final int BOX_HEIGHT_ITEM = 18;
     private static final int DISTANCE = 100;
 
     private final Map<EntityType, MxCell> typeCells = new HashMap<>();
@@ -136,6 +140,7 @@ public class MxGraphGenerator {
                 .setX(globalX * (BOX_WIDTH + DISTANCE))
                 .setY(globalY);
         MxCell typeCell = new MxCell()
+                .setId(genIdFor(et))
                 .setValue(et.entityName)
                 .setStyle(STYLE_LIST)
                 .setParent(cellOne.getId())
@@ -145,7 +150,7 @@ public class MxGraphGenerator {
         typeCells.put(et, typeCell);
         int listItemY = BOX_HEIGHT_BASE;
         for (EntityPropertyMain ep : entityProperties) {
-            addEntityProperty(listItemY, typeCell, ep, root);
+            addEntityProperty(listItemY, typeCell, et, ep, root);
             listItemY += BOX_HEIGHT_ITEM;
             if (ep.getType() instanceof TypeComplex) {
                 complexTypes.add(ep.getType().getName());
@@ -178,6 +183,7 @@ public class MxGraphGenerator {
                 .setX(globalX * (BOX_WIDTH + DISTANCE))
                 .setY(globalY);
         MxCell typeCell = new MxCell()
+                .setId(genIdFor(tc))
                 .setValue(tc.getName())
                 .setStyle(STYLE_LIST)
                 .setParent(cellOne.getId())
@@ -189,17 +195,18 @@ public class MxGraphGenerator {
         for (Map.Entry<String, PropertyType> prop : properties.entrySet()) {
             final String name = prop.getKey();
             final PropertyType type = prop.getValue();
-            addPropertyType(listItemY, typeCell, name, type, tc.isRequired(name), root);
+            addTypeProperty(listItemY, typeCell, tc, name, type, tc.isRequired(name), root);
             listItemY += BOX_HEIGHT_ITEM;
         }
     }
 
-    private void addPropertyType(int listItemY, MxCell typeCell, String name, PropertyType pt, boolean required, Root root) {
+    private void addTypeProperty(int listItemY, MxCell typeCell, TypeComplex tc, String name, PropertyType pt, boolean required, Root root) {
         MxGeometry propGeom = new MxGeometry()
                 .setWidth(BOX_WIDTH)
                 .setHeight(BOX_HEIGHT_ITEM)
                 .setY(listItemY);
         MxCell propCell = new MxCell()
+                .setId(genIdForTypeProperty(tc, name))
                 .setParent(typeCell.getId())
                 .setValue(createText(name, pt.getName(), required))
                 .setStyle(STYLE_LIST_ITEM)
@@ -209,12 +216,13 @@ public class MxGraphGenerator {
         root.addMxCell(propCell);
     }
 
-    private void addEntityProperty(int listItemY, MxCell typeCell, EntityPropertyMain ep, Root root) {
+    private void addEntityProperty(int listItemY, MxCell typeCell, EntityType et, EntityPropertyMain ep, Root root) {
         MxGeometry propGeom = new MxGeometry()
                 .setWidth(BOX_WIDTH)
                 .setHeight(BOX_HEIGHT_ITEM)
                 .setY(listItemY);
         MxCell propCell = new MxCell()
+                .setId(genIdFor(et, ep))
                 .setParent(typeCell.getId())
                 .setValue(createTextForEp(ep))
                 .setStyle(STYLE_LIST_ITEM)
@@ -277,6 +285,7 @@ public class MxGraphGenerator {
                         .setY(targetCell.getMxGeometry().getY())
                         .setAs(AS_TARGETPOINT));
         MxCell linkCell = new MxCell()
+                .setId(genIdFor(np))
                 .setStyle(STYLE_CONNECTOR)
                 .setParent(cellOne.getId())
                 .setSource(sourceCell.getId())
@@ -292,6 +301,7 @@ public class MxGraphGenerator {
 
     private MxCell createLabelCell(NavigationProperty np, MxCell linkCell, boolean target) {
         return new MxCell()
+                .setId(genIdForNpLabel(np))
                 .setValue(textForNp(np))
                 .setStyle(STYLE_LABEL)
                 .setParent(linkCell.getId())
@@ -321,6 +331,66 @@ public class MxGraphGenerator {
             }
         }
         return result.toString();
+    }
+
+    private static String genIdFor(EntityType et) {
+        String data = "ET-" + et.entityName;
+        return createHash(data);
+    }
+
+    private static String genIdFor(TypeComplex tc) {
+        String data = "TC-" + tc.getName();
+        return createHash(data);
+    }
+
+    private static String genIdFor(NavigationProperty np) {
+        String data = genNpString(np);
+        return createHash(data);
+    }
+
+    private static String genIdForNpLabel(NavigationProperty np) {
+        String data = genNpString(np) + ":" + np.getEntityType().entityName + ":" + np.getName();
+        return createHash(data);
+    }
+
+    private static String genNpString(NavigationProperty np) {
+        String etName1;
+        String etName2;
+        String npName1;
+        String npName2;
+        if (np.getEntityType().entityName.compareTo(np.getInverse().getEntityType().entityName) > 0) {
+            etName1 = np.getEntityType().entityName;
+            etName2 = np.getInverse().getEntityType().entityName;
+            npName1 = np.getName();
+            npName2 = np.getInverse().getName();
+        } else {
+            etName1 = np.getInverse().getEntityType().entityName;
+            etName2 = np.getEntityType().entityName;
+            npName1 = np.getInverse().getName();
+            npName2 = np.getName();
+        }
+        String data = "ET-" + etName1 + "-" + npName1 + "-" + npName2 + "-" + etName2;
+        return data;
+    }
+
+    private static String genIdFor(EntityType et, EntityPropertyMain ep) {
+        String data = "ET-" + et.entityName + "-EP-" + ep.getName();
+        return createHash(data);
+    }
+
+    private static String genIdForTypeProperty(TypeComplex tc, String name) {
+        String data = "TC-" + tc.getName() + "-P-" + name;
+        return createHash(data);
+    }
+
+    private static String createHash(String data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] byteHash = md.digest(data.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(byteHash);
+        } catch (NoSuchAlgorithmException ex) {
+            return UUID.randomUUID().toString();
+        }
     }
 
     @JsonRootName("mxfile")
@@ -642,7 +712,7 @@ public class MxGraphGenerator {
 
     private static class MxCell {
 
-        private String id = UUID.randomUUID().toString();
+        private String id;
         private String value;
         private String style;
         private String parent;
@@ -655,6 +725,9 @@ public class MxGraphGenerator {
 
         @JacksonXmlProperty(isAttribute = true)
         public String getId() {
+            if (id == null) {
+                id = UUID.randomUUID().toString();
+            }
             return id;
         }
 
@@ -756,12 +829,12 @@ public class MxGraphGenerator {
 
     private static class MxGeometry {
 
-        private final String as = AS_GEOMETRY;
         private Integer x;
         private Integer y;
         private Integer width;
         private Integer height;
         private Integer relative;
+        private final String as = AS_GEOMETRY;
 
         private final List<MxPoint> mxPoint = new ArrayList<>();
         private Array array;
