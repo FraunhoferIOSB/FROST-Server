@@ -91,7 +91,8 @@ create three default users:
 * **admin:**  
   password `admin`, has roles `read`, `create`, `update`, `delete` and `admin`
 
-You should change these default users!
+You should change these default users! The creation only happens at the moment you
+first try to authenticate, so do an authentication attempt to have tables created.
 
 The BasicAuthProvider has the following specific settings:
 
