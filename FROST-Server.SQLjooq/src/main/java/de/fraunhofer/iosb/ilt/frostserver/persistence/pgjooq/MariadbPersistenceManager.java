@@ -141,6 +141,8 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
     private DSLContext dslContext;
     private String schemaPriority;
 
+    private final Map<Name, Table<?>> tableCache = new HashMap<>();
+
     /**
      * Tracker for the amount of data fetched form the DB by this PM.
      */
@@ -708,6 +710,10 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
 
     @Override
     public Table<?> getDbTable(Name tableName) {
+        return tableCache.computeIfAbsent(tableName, (t) -> readDbTableFromDb(tableName));
+    }
+
+    public Table<?> readDbTableFromDb(Name tableName) {
         final Meta meta = dslContext.meta();
         final List<Table<?>> tables = meta.getTables(tableName);
         if (tables.isEmpty()) {
