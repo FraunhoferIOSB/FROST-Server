@@ -11,6 +11,7 @@
 * Fixed ordering of object properties on JSONB columns.
 * Improved internal message bus when MQTT is not in use.
 * Improved drawio diagram generation.
+* Improved loading speed of data model extensions.
 
 
 ## Release version 2.2.0
