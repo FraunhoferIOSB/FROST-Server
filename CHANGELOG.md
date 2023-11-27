@@ -4,9 +4,13 @@
 
 **New Features**
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
+* Added option for KeycloakAuthProvider to locally register user.
 
 **Internal changes & Bugfixes**
-* Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream
+* Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream.
+* Fixed ordering of object properties on JSONB columns.
+* Improved internal message bus when MQTT is not in use.
+* Improved loading speed of custom data models.
 
 
 ## Release version 2.2.0
@@ -36,7 +40,6 @@
 * Fixed unknown version giving 200 instead of 404.
 * Fixed JSON-Patch that changed nothing giving an error back.
 * Fixed memory leak when creating Entities using MQTT.
-* Improved internal message bus when MQTT is not in use.
 
 
 ## Release version 2.1.0
