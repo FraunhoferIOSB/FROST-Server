@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.2.1
+## Release version 2.2.1
 
 **New Features**
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
