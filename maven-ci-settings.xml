@@ -17,6 +17,10 @@
 			<username>${env.OWASP_OSS_INDEX_USERNAME}</username>
 			<password>${env.OWASP_OSS_INDEX_APIKEY}</password>
 		</server>
+		<server>
+			<id>NIST_NVD_API</id>
+			<password>${env.NIST_NVD_API_KEY}</password>
+		</server>
     </servers>
     <profiles>
         <profile>

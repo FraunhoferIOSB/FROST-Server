@@ -42,13 +42,11 @@ jobs:
       env:
         OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
         OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
+        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
       run: |
         mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
 
     - name: Build with Maven
-      env:
-        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
-        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
       run: |
         mvn -B install -Dmaven.javadoc.skip=true
 
