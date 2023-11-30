@@ -2,6 +2,10 @@
 
 ## Development version 2.3.0
 
+NOTE: The helm option `frost.http.ingress.rewriteTarget` had a typo in it
+and has been changed (was: `rewriteTraget`). If you use this HELM option,
+make sure to check and update your HELM settings.
+
 **New Features**
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
 * Added option for KeycloakAuthProvider to locally register user.
@@ -11,6 +15,7 @@
 * Fixed ordering of object properties on JSONB columns.
 * Improved internal message bus when MQTT is not in use.
 * Improved loading speed of custom data models.
+* Fixed a typo in the helm variable rewriteTarget.
 
 
 ## Release version 2.2.0
