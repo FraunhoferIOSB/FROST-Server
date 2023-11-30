@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: fraunhoferiosb/frost-server-http:2.0
+    image: fraunhoferiosb/frost-server-http:latest
     ports:
       - 8080:8080
     depends_on:
@@ -25,7 +25,7 @@ services:
       - persistence_autoUpdateDatabase=true
 
   mqtt:
-    image: fraunhoferiosb/frost-server-mqtt:2.0
+    image: fraunhoferiosb/frost-server-mqtt:latest
     ports:
       - 1883:1883
       - 9876:9876

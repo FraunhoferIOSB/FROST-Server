@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: fraunhoferiosb/frost-server:2.2
+    image: fraunhoferiosb/frost-server:latest
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - plugins_multiDatastream.enable=false
