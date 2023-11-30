@@ -119,7 +119,7 @@ frost:
     ingress:
       enabled: true
       rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
-      rewriteTraget: /FROST-Server/$1
+      rewriteTarget: /FROST-Server/$1
       path: /FROST-Server/(.*)
       annotations:
       tls:

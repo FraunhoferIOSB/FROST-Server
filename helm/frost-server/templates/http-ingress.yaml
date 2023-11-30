@@ -6,7 +6,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   annotations:
-    {{ .Values.frost.http.ingress.rewriteAnnotation}}: {{ .Values.frost.http.ingress.rewriteTraget}}
+    {{ .Values.frost.http.ingress.rewriteAnnotation}}: {{ .Values.frost.http.ingress.rewriteTarget}}
     {{- if .Values.frost.http.ingress.annotations }}
     {{- toYaml .Values.frost.http.ingress.annotations | nindent 4 }}
     {{ end }}
