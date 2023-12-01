@@ -6,8 +6,10 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - database
-      - mosquitto
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
@@ -30,8 +32,10 @@ services:
       - 1883:1883
       - 9876:9876
     depends_on:
-      - database
-      - mosquitto
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
@@ -61,6 +65,12 @@ services:
       - POSTGRES_PASSWORD=ChangeMe
     volumes:
       - postgis_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
     postgis_volume:
+

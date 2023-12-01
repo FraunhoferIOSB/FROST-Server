@@ -17,7 +17,8 @@ services:
       - 8080:8080
       - 1883:1883
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   database:
     image: postgis/postgis:14-3.2-alpine
@@ -27,6 +28,12 @@ services:
       - POSTGRES_PASSWORD=ChangeMe
     volumes:
       - postgis_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
     postgis_volume:
-    
+
