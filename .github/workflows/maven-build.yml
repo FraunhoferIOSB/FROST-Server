@@ -36,6 +36,28 @@ jobs:
         distribution: 'adopt'
         java-version: 17
 
+    - name: Restore CVD Database from Cache
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          ~/.m2/repository/org/owasp/dependency-check-data
+        key: ${{ runner.os }}-maven-owasp-cvedb
+
+    - name: Update CVD Database
+      env:
+        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
+        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
+        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
+      run: |
+        mvn -B -P owasp -DnvdApiDelay=6000 --settings maven-ci-settings.xml org.owasp:dependency-check-maven:update-only
+
+    - name: Save CVD Database to Cache
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ~/.m2/repository/org/owasp/dependency-check-data
+        key: ${{ runner.os }}-maven-owasp-cvedb
+
     - name: Check OWASP
       env:
         OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
