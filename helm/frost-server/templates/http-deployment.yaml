@@ -291,8 +291,13 @@ spec:
               value: ""
             - name: auth_db_driver
               value: "{{ .Values.frost.db.driver }}"
+            {{ if .Values.frost.db.enableIntegratedDb }}
             - name: auth_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            {{ else }}
+            - name: auth_db_url
+              value: "{{ .Values.frost.db.dbExternalConnectionString }}"
+            {{ end }}
             - name: auth_autoUpdateDatabase
               value: "{{tpl .Values.frost.auth.db.autoUpdate . }}"
             - name: auth_db_conn_max
