@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Added missing serializer for times to OData plugin.
+* Allow username to appear multiple times in fine-grained security where.
 
 
 ## Release version 2.2.1

@@ -31,7 +31,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SQL;
@@ -118,6 +120,8 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     @EditorBoolean.EdOptsBool()
     private boolean groupSetParameter;
 
+    private int paramCount = -1;
+
     @Override
     public Table wrap(StaMainTable table, JooqPersistenceManager pm) {
         final Principal principal = PrincipalExtended.getLocalPrincipal();
@@ -150,8 +154,18 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
             }
         }
         if (!StringHelper.isNullOrEmpty(where)) {
-            if (usernameParameter) {
-                SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where, principal.getName());
+            if (paramCount < 0) {
+                paramCount = StringUtils.countMatches(where, '?');
+            }
+            if (paramCount > 0) {
+                Object[] params = new Object[paramCount];
+                if (usernameParameter) {
+                    Arrays.fill(params, principal.getName());
+                } else if (groupSetParameter) {
+                    final String[] groups = ((PrincipalExtended) principal).getRoles().toArray(String[]::new);
+                    Arrays.fill(params, groups);
+                }
+                SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where, params);
                 return table.whereExists(finalExists).asTable("tOut");
             }
             SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where);
