@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityChangedMessageSer
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityPropertySerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityTypeSerialiser;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.MomentSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -38,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
+import net.time4j.Moment;
 
 /**
  * Enables serialization of entities as JSON.
@@ -91,6 +93,7 @@ public class JsonWriterOdata40 {
         module.addSerializer(Entity.class, entitySerializer);
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
         module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK));
+        module.addSerializer(Moment.class, new MomentSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
         module.addSerializer(TimeInstant.class, new TimeInstantSerializer());
         module.addSerializer(TimeInterval.class, new TimeIntervalSerializer());

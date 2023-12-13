@@ -3,6 +3,7 @@
 ## Development version 2.2.2
 
 **Internal changes & Bugfixes**
+* Added missing serializer for times to OData plugin.
 
 
 ## Release version 2.2.1
