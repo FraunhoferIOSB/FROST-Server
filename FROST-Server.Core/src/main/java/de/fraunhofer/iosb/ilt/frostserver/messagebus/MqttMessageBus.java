@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
-import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WAITING;
-import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WORKING;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
+import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.time.Instant;
@@ -367,55 +366,15 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     }
 
     private void checkWorkers() {
-        int recvWaiting = 0;
-        int recvWorking = 0;
-        int recvBroken = 0;
-        int sendWaiting = 0;
-        int sendWorking = 0;
-        int sendBroken = 0;
         Instant threshold = Instant.now().minus(2, ChronoUnit.SECONDS);
-        for (Processor<EntityChangedMessage> processor : recvProcessors) {
-            switch (processor.getStatus()) {
-                case WAITING:
-                    recvWaiting++;
-                    break;
-
-                case WORKING:
-                    if (!processor.isFine(threshold)) {
-                        recvBroken++;
-                    } else {
-                        recvWorking++;
-                    }
-                    break;
-
-                default:
-                    LOGGER.trace("Worker not started.");
-            }
-        }
-        for (Processor<EntityChangedMessage> processor : sendProcessors) {
-            switch (processor.getStatus()) {
-                case WAITING:
-                    sendWaiting++;
-                    break;
-
-                case WORKING:
-                    if (!processor.isFine(threshold)) {
-                        sendBroken++;
-                    } else {
-                        sendWorking++;
-                    }
-                    break;
-
-                default:
-                    LOGGER.trace("Worker not started.");
-            }
-        }
-        logStatus.setRecvWaiting(recvWaiting)
-                .setRecvWorking(recvWorking)
-                .setRecvBad(recvBroken)
-                .setSendWaiting(sendWaiting)
-                .setSendWorking(sendWorking)
-                .setSendBad(sendBroken);
+        ProcessorListStatus recvStatus = ProcessorHelper.checkStatus(recvProcessors, threshold);
+        ProcessorListStatus sendStatus = ProcessorHelper.checkStatus(sendProcessors, threshold);
+        logStatus.setRecvWaiting(recvStatus.countWaiting())
+                .setRecvWorking(recvStatus.countWorking())
+                .setRecvBad(recvStatus.countBroken())
+                .setSendWaiting(sendStatus.countWaiting())
+                .setSendWorking(sendStatus.countWorking())
+                .setSendBad(sendStatus.countBroken());
     }
 
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {

@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WAITING;
-import static de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor.Status.WORKING;
-
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -47,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
+import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -287,55 +285,16 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void checkWorkers() {
-        int cngWaiting = 0;
-        int cngWorking = 0;
-        int cngBroken = 0;
-        int crtWaiting = 0;
-        int crtWorking = 0;
-        int crtBroken = 0;
         Instant threshold = Instant.now().minus(2, ChronoUnit.SECONDS);
-        for (Processor<EntityChangedMessage> processor : entityChangedProcessors) {
-            switch (processor.getStatus()) {
-                case WAITING:
-                    cngWaiting++;
-                    break;
+        ProcessorListStatus cngStatus = ProcessorHelper.checkStatus(entityChangedProcessors, threshold);
+        ProcessorListStatus crtStatus = ProcessorHelper.checkStatus(entityCreateProcessors, threshold);
 
-                case WORKING:
-                    if (!processor.isFine(threshold)) {
-                        cngBroken++;
-                    } else {
-                        cngWorking++;
-                    }
-                    break;
-
-                default:
-                    LOGGER.trace("Worker not started.");
-            }
-        }
-        for (Processor<EntityCreateEvent> processor : entityCreateProcessors) {
-            switch (processor.getStatus()) {
-                case WAITING:
-                    crtWaiting++;
-                    break;
-
-                case WORKING:
-                    if (!processor.isFine(threshold)) {
-                        crtBroken++;
-                    } else {
-                        crtWorking++;
-                    }
-                    break;
-
-                default:
-                    LOGGER.trace("Worker not started.");
-            }
-        }
-        logStatus.setEntityChangedWaiting(cngWaiting)
-                .setEntityChangedWorking(cngWorking)
-                .setEntityChangedBad(cngBroken)
-                .setEntityCreateWaiting(crtWaiting)
-                .setEntityCreateWorking(crtWorking)
-                .setEntityCreateBad(crtBroken);
+        logStatus.setEntityChangedWaiting(cngStatus.countWaiting())
+                .setEntityChangedWorking(cngStatus.countWorking())
+                .setEntityChangedBad(cngStatus.countBroken())
+                .setEntityCreateWaiting(crtStatus.countWaiting())
+                .setEntityCreateWorking(crtStatus.countWorking())
+                .setEntityCreateBad(crtStatus.countBroken());
     }
 
     public static Version getVersionFromTopic(CoreSettings settings, String topic) throws UnknownVersionException {

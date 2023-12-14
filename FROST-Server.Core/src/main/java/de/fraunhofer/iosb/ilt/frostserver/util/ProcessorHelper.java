@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -81,20 +82,57 @@ public class ProcessorHelper {
         }
     }
 
+    public static <T> ProcessorListStatus checkStatus(List<Processor<T>> processorList, Instant threshold) {
+        int countWaiting = 0;
+        int countBroken = 0;
+        int countWorking = 0;
+        for (Iterator<Processor<T>> it = processorList.iterator(); it.hasNext();) {
+            Processor<T> processor = it.next();
+            switch (processor.getStatus()) {
+                case WAITING -> {
+                    countWaiting++;
+                }
+
+                case WORKING -> {
+                    if (!processor.isFine(threshold)) {
+                        countBroken++;
+                    } else {
+                        countWorking++;
+                    }
+                }
+
+                case STOPPED -> {
+                    it.remove();
+                }
+
+                default -> {
+                    LOGGER.trace("Worker not started.");
+                }
+            }
+        }
+        return new ProcessorListStatus(countWaiting, countWorking, countBroken);
+    }
+
+    public static record ProcessorListStatus(int countWaiting, int countWorking, int countBroken) {
+
+        // Empty by design.
+    }
+
     public static class Processor<T> implements Runnable {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
 
         public enum Status {
-            STOPPED,
+            CREATED,
             WAITING,
-            WORKING
+            WORKING,
+            STOPPED
         }
 
         private final BlockingQueue<T> queue;
         private final Consumer<T> consumer;
         private final String name;
-        private Status status = Status.STOPPED;
+        private Status status = Status.CREATED;
         private Instant workStarted;
 
         private Processor(BlockingQueue<T> queue, Consumer<T> consumer, String name) {
@@ -132,6 +170,7 @@ public class ProcessorHelper {
                     LOGGER.warn("Exception while executing {}", name, ex);
                 }
             }
+            status = Status.STOPPED;
             LOGGER.debug("exiting {}-Thread", name);
         }
 
