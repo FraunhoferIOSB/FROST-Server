@@ -63,7 +63,8 @@ class SubscriptionSetDirectParent {
         // for each subscription on EntityType check match
         for (Subscription subscription : subsForParent.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
-                mqttManager.notifySubscription(subscription, entity);
+                Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
+                mqttManager.notifySubscription(subscription, newEntity);
             }
         }
     }

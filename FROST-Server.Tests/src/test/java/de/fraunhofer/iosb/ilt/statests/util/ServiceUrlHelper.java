@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.util;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class ServiceUrlHelper {
             }
         }
 
-        if (property != null) {
+        if (!StringHelper.isNullOrEmpty(property)) {
             if (property.indexOf('?') >= 0) {
                 urlString += property;
             } else {

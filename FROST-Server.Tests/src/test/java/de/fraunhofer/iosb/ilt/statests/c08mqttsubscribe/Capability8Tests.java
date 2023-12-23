@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
@@ -41,6 +42,8 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttBatchResult;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.MqttTopicListener;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.UpdateAction;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
@@ -54,6 +57,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import net.time4j.range.MomentInterval;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -128,15 +132,17 @@ public abstract class Capability8Tests extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
-        ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+        for (var entityType : ENTITY_TYPES_FOR_CREATE) {
             LOGGER.debug("    {}", entityType);
-            MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), mqttHelper.getTopic(entityType));
-            IDS.put(entityType, result.getActionResult());
-            assertJsonEqualsWithLinkResolving(
-                    entityHelper.getEntity(entityType, result.getActionResult()),
-                    result.getMessages().values().iterator().next(),
-                    mqttHelper.getTopic(entityType));
-        });
+            final var updateAction = new UpdateAction<>(
+                    getInsertEntityAction(entityType),
+                    getTopicListeners(entityType));
+            final Object result = mqttHelper.executeRequests(updateAction);
+            IDS.put(entityType, result);
+            for (MqttTopicListener topic : updateAction.getTopics()) {
+                topic.assertCorrect(result);
+            }
+        }
 
         // Now check if an Observation insert creates a new FoI and posts it over MQTT.
         LOGGER.debug("    FoI creation");
@@ -145,11 +151,13 @@ public abstract class Capability8Tests extends AbstractTestClass {
         entityHelper.deleteEntityType(FEATURE_OF_INTEREST);
         IDS.remove(FEATURE_OF_INTEREST);
 
-        MqttBatchResult<Object> result = mqttHelper.executeRequests(
-                getInsertEntityAction(OBSERVATION),
-                mqttHelper.getTopic(OBSERVATION),
-                mqttHelper.getTopic(FEATURE_OF_INTEREST));
-        IDS.put(OBSERVATION, result.getActionResult());
+        var ua = new UpdateAction<>(
+                () -> entityHelper.createObservation(IDS.get(DATASTREAM)),
+                Arrays.asList(
+                        directTopicListener(OBSERVATION),
+                        directTopicListener(FEATURE_OF_INTEREST)));
+        Object result = mqttHelper.executeRequests(ua);
+        IDS.put(OBSERVATION, result);
     }
 
     @Test
@@ -162,8 +170,14 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType));
-            assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
+            var id = IDS.get(entityType);
+            var ua = new UpdateAction<>(
+                    getUpdatePatchEntityAction(entityType),
+                    getTopicListeners(entityType));
+            mqttHelper.executeRequests(ua);
+            for (MqttTopicListener topic : ua.getTopics()) {
+                topic.assertCorrect(id);
+            }
         });
     }
 
@@ -177,8 +191,14 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType));
-            assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
+            var id = IDS.get(entityType);
+            var ua = new UpdateAction<>(
+                    getUpdatePutEntityAction(entityType),
+                    getTopicListeners(entityType));
+            mqttHelper.executeRequests(ua);
+            for (MqttTopicListener topic : ua.getTopics()) {
+                topic.assertCorrect(id);
+            }
         });
     }
 
@@ -245,16 +265,14 @@ public abstract class Capability8Tests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntitySet(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
-                MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
-                        getUpdatePutEntityAction(entityType),
-                        relativeTopics.toArray(new String[relativeTopics.size()]));
-                result.getMessages().entrySet().stream().forEach((entry) -> {
-                    // coudl return multiple results so make sure we only get the latest
-                    Object lastestId = entityHelper.getLastestEntityId(entityType);
-                    String filter = "id%20eq%20" + Utils.quoteForUrl(lastestId);
-                    JsonNode expectedResult = entityHelper.getEntity(entry.getKey() + "?$filter=" + filter).get("value").get(0);
-                    assertJsonEqualsWithLinkResolving(expectedResult, entry.getValue(), entry.getKey());
-                });
+                Object id = IDS.get(entityType);
+                var ua = new UpdateAction<>(
+                        () -> entityHelper.updateEntitywithPUT(entityType, IDS.get(entityType)),
+                        directTopicListeners(entityType, relativeTopics));
+                mqttHelper.executeRequests(ua);
+                for (MqttTopicListener topic : ua.getTopics()) {
+                    topic.assertCorrect(id);
+                }
             }
         });
     }
@@ -278,7 +296,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
             MqttBatchResult<Object> result = mqttHelper.executeRequests(
                     getDeepInsertEntityAction(entityType),
-                    topics.toArray(new String[topics.size()]));
+                    topics.toArray(String[]::new));
             IDS.put(entityType, result.getActionResult());
             JsonNode entity = entityHelper.getEntity(deepInsertInfo.getEntityType(), result.getActionResult());
             Optional<JsonNode> rootResult = result.getMessages().entrySet().stream().filter(x -> x.getKey().equals(mqttHelper.getTopic(deepInsertInfo.getEntityType()))).map(x -> x.getValue()).findFirst();
@@ -307,8 +325,13 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
-            assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
+                    getUpdatePatchEntityAction(entityType),
+                    mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            assertJsonEqualsWithLinkResolving(
+                    result.getActionResult(),
+                    result.getMessages().values().iterator().next(),
+                    mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
 
@@ -322,8 +345,13 @@ public abstract class Capability8Tests extends AbstractTestClass {
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             LOGGER.info("    {}", entityType);
-            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
-            assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
+                    getUpdatePutEntityAction(entityType),
+                    mqttHelper.getTopic(entityType, IDS.get(entityType)));
+            assertJsonEqualsWithLinkResolving(
+                    result.getActionResult(),
+                    result.getMessages().values().iterator().next(),
+                    mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
     }
 
@@ -370,9 +398,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
                 }
                 propertyChange.put(property, change);
                 MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
-                        () -> {
-                            return entityHelper.patchEntity(entityType, propertyChange, IDS.get(entityType));
-                        },
+                        () -> entityHelper.patchEntity(entityType, propertyChange, IDS.get(entityType)),
                         mqttHelper.getTopic(entityType, IDS.get(entityType), property));
                 assertJsonEqualsWithLinkResolving(
                         Utils.MAPPER.valueToTree(propertyChange),
@@ -402,9 +428,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
                 }
                 propertyChange.put(property, change);
                 MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
-                        () -> {
-                            return entityHelper.putEntity(entityType, propertyChange, IDS.get(entityType));
-                        },
+                        () -> entityHelper.putEntity(entityType, propertyChange, IDS.get(entityType)),
                         mqttHelper.getTopic(entityType, IDS.get(entityType), property));
                 assertJsonEqualsWithLinkResolving(
                         Utils.MAPPER.valueToTree(propertyChange),
@@ -427,13 +451,13 @@ public abstract class Capability8Tests extends AbstractTestClass {
             // Give the server a second to send out the messages created by the setup.
             waitMillis(WAIT_AFTER_CLEANUP);
 
-            updateLocationOfThing = () -> {
-                return entityHelper.patchEntity(
-                        THING,
-                        entityHelper.getThingChangesLocation(locId2),
-                        IDS.get(THING));
-            };
-            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(updateLocationOfThing, mqttHelper.getTopic(HISTORICAL_LOCATION));
+            updateLocationOfThing = () -> entityHelper.patchEntity(
+                    THING,
+                    entityHelper.getThingChangesLocation(locId2),
+                    IDS.get(THING));
+            MqttBatchResult<JsonNode> result = mqttHelper.executeRequests(
+                    updateLocationOfThing,
+                    mqttHelper.getTopic(HISTORICAL_LOCATION));
             JsonNode lastHistLoc = entityHelper.getAnyEntity(HISTORICAL_LOCATION, "$orderby=time%20desc", 10);
             assertJsonEqualsWithLinkResolving(lastHistLoc, result.getMessages().values().iterator().next(), mqttHelper.getTopic(HISTORICAL_LOCATION));
         } catch (Exception ex) {
@@ -473,11 +497,15 @@ public abstract class Capability8Tests extends AbstractTestClass {
             // can't test with no selected properties.
             return;
         }
-        MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), mqttHelper.getTopic(entityType, selectedProperties));
-        IDS.put(entityType, result.getActionResult());
-        JsonNode entity = entityHelper.getEntity(entityType, result.getActionResult());
-        filterEntity(entity, selectedProperties);
-        assertJsonEqualsWithLinkResolving(entity, result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
+        String select = selectedProperties.stream().collect(Collectors.joining(","));
+        UpdateAction<Object, Object> ua = new UpdateAction<>(
+                getInsertEntityAction(entityType),
+                getTopicListeners(entityType, select));
+        Object id = mqttHelper.executeRequests(ua);
+        IDS.put(entityType, id);
+        for (MqttTopicListener topic : ua.getTopics()) {
+            topic.assertCorrect(id);
+        }
     }
 
     private void checkSubscribePut(EntityType entityType, List<String> selectedProperties) {
@@ -542,33 +570,96 @@ public abstract class Capability8Tests extends AbstractTestClass {
         return trigger;
     }
 
+    private List<MqttTopicListener<Object>> getTopicListeners(EntityType entityType) {
+        return getTopicListeners(entityType, null);
+    }
+
+    private List<MqttTopicListener<Object>> getTopicListeners(EntityType entityType, String select) {
+        switch (entityType) {
+            case DATASTREAM:
+                return Arrays.asList(
+                        directTopicListener(entityType, select, null),
+                        directTopicListener(entityType, select, "Thing,Sensor,ObservedProperty"));
+            case HISTORICAL_LOCATION:
+                return Arrays.asList(
+                        directTopicListener(entityType, select, null),
+                        directTopicListener(entityType, select, "Thing,Locations"));
+            case OBSERVATION:
+                return Arrays.asList(
+                        directTopicListener(entityType, select, null),
+                        directTopicListener(entityType, select, "Datastream,FeatureOfInterest"));
+            case THING:
+            case LOCATION:
+            case SENSOR:
+            case OBSERVED_PROPERTY:
+            case FEATURE_OF_INTEREST:
+                return Arrays.asList(
+                        directTopicListener(entityType, select, null));
+            default:
+                throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");
+        }
+    }
+
     private Callable<Object> getInsertEntityAction(EntityType entityType) {
-        Callable<Object> trigger = () -> {
-            switch (entityType) {
-                case THING:
-                    return entityHelper.createThing();
-                case DATASTREAM:
-                    return entityHelper.createDatastream(IDS.get(THING), IDS.get(OBSERVED_PROPERTY), IDS.get(SENSOR));
-                case FEATURE_OF_INTEREST:
-                    return entityHelper.createFeatureOfInterest();
-                case HISTORICAL_LOCATION:
-                    return entityHelper.createHistoricalLocation(IDS.get(THING), IDS.get(LOCATION));
-                case LOCATION:
-                    return entityHelper.createLocation(IDS.get(THING));
-                case OBSERVATION:
-                    if (IDS.get(FEATURE_OF_INTEREST) == null) {
-                        return entityHelper.createObservation(IDS.get(DATASTREAM));
-                    } else {
-                        return entityHelper.createObservation(IDS.get(DATASTREAM), IDS.get(FEATURE_OF_INTEREST));
-                    }
-                case OBSERVED_PROPERTY:
-                    return entityHelper.createObservedProperty();
-                case SENSOR:
-                    return entityHelper.createSensor();
-            }
-            throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");
-        };
-        return trigger;
+        switch (entityType) {
+            case THING:
+                return () -> entityHelper.createThing();
+            case DATASTREAM:
+                return () -> entityHelper.createDatastream(IDS.get(THING), IDS.get(OBSERVED_PROPERTY), IDS.get(SENSOR));
+            case FEATURE_OF_INTEREST:
+                return () -> entityHelper.createFeatureOfInterest();
+            case HISTORICAL_LOCATION:
+                return () -> entityHelper.createHistoricalLocation(IDS.get(THING), IDS.get(LOCATION));
+            case LOCATION:
+                return () -> entityHelper.createLocation(IDS.get(THING));
+            case OBSERVATION:
+                if (IDS.get(FEATURE_OF_INTEREST) == null) {
+                    return () -> entityHelper.createObservation(IDS.get(DATASTREAM));
+                } else {
+                    return () -> entityHelper.createObservation(IDS.get(DATASTREAM), IDS.get(FEATURE_OF_INTEREST));
+                }
+            case OBSERVED_PROPERTY:
+                return () -> entityHelper.createObservedProperty();
+            case SENSOR:
+                return () -> entityHelper.createSensor();
+        }
+        throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");
+    }
+
+    public static List<MqttTopicListener<Object>> directTopicListeners(EntityType entityType, List<String> topics) {
+        List<MqttTopicListener<Object>> result = new ArrayList<>();
+        for (String topic : topics) {
+            var ttl = new MqttHelper.MqttTopicListener((id, tl) -> {
+                assertJsonEqualsWithLinkResolving(
+                        entityHelper.getEntity(entityType, id),
+                        tl.getMessage(),
+                        tl.getTopic());
+            }).setTopic(topic);
+            result.add(ttl);
+        }
+        return result;
+    }
+
+    public static MqttTopicListener<Object> directTopicListener(EntityType entityType) {
+        return directTopicListener(entityType, null, null);
+    }
+
+    public static MqttTopicListener<Object> directTopicListener(EntityType entityType, String select, String expand) {
+        String topic = version.urlPart + "/" + entityType.plural;
+        char join = '?';
+        if (!StringHelper.isNullOrEmpty(select)) {
+            topic += join + "$select=" + select;
+            join = '&';
+        }
+        if (!StringHelper.isNullOrEmpty(expand)) {
+            topic += join + "$expand=" + expand;
+        }
+        return new MqttHelper.MqttTopicListener((id, tl) -> {
+            assertJsonEqualsWithLinkResolving(
+                    entityHelper.getEntity(entityType, id, select, expand),
+                    tl.getMessage(),
+                    tl.getTopic());
+        }).setTopic(topic);
     }
 
     private String getPathToRelatedEntity(EntityType sourceEntityType, EntityType destinationEntityType) {
@@ -619,15 +710,11 @@ public abstract class Capability8Tests extends AbstractTestClass {
     }
 
     private Callable<JsonNode> getUpdatePatchEntityAction(EntityType entityType) {
-        return () -> {
-            return entityHelper.updateEntitywithPATCH(entityType, IDS.get(entityType));
-        };
+        return () -> entityHelper.updateEntitywithPATCH(entityType, IDS.get(entityType));
     }
 
     private Callable<JsonNode> getUpdatePutEntityAction(EntityType entityType) {
-        return () -> {
-            return entityHelper.updateEntitywithPUT(entityType, IDS.get(entityType));
-        };
+        return () -> entityHelper.updateEntitywithPUT(entityType, IDS.get(entityType));
     }
 
     private static void assertJsonEqualsWithLinkResolving(JsonNode expected, JsonNode received, String topic) {
