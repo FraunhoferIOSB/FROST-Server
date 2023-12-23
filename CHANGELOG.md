@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Fixed #1754: resultTime/phenomenonTime mixup in MultiDatastream
+* Updated MQTT-Docker base image to eclipse-temurin:17-alpine
 
 
 ## Release version 2.0.11

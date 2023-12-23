@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:17-alpine
 
 EXPOSE 1883
 EXPOSE 9876
