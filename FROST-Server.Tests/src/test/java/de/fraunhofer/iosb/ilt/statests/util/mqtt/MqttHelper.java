@@ -114,6 +114,7 @@ public class MqttHelper {
         }
     }
 
+    @Deprecated
     public <T> MqttBatchResult<T> executeRequests(Callable<T> action, String... topics) {
         MqttBatchResult<T> result = new MqttBatchResult<>(topics.length);
         Map<String, Future<JsonNode>> tempResult = new HashMap<>(topics.length);
@@ -142,6 +143,110 @@ public class MqttHelper {
         } catch (InterruptedException | ExecutionException ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             fail("Topics: " + Arrays.toString(topics) + " Error subscribing to MQTT: " + ex.getMessage());
+        } finally {
+            executor.shutdownNow();
+        }
+        MqttManager.clearTestSubscriptionListeners();
+        return result;
+    }
+
+    public interface AssertCheckTopicResult<T> {
+
+        public void assertCorrect(T actionResult, MqttTopicListener tl);
+    }
+
+    public static class MqttTopicListener<T> {
+
+        private String topic;
+        private Future<JsonNode> futureMessage;
+        private JsonNode message;
+        private final AssertCheckTopicResult checker;
+
+        public MqttTopicListener(AssertCheckTopicResult checker) {
+            this.checker = checker;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public MqttTopicListener setTopic(String topic) {
+            this.topic = topic;
+            return this;
+        }
+
+        public Future<JsonNode> getFutureMessage() {
+            return futureMessage;
+        }
+
+        public MqttTopicListener setFutureMessage(Future<JsonNode> futureResult) {
+            this.futureMessage = futureResult;
+            return this;
+        }
+
+        public JsonNode getMessage() {
+            return message;
+        }
+
+        public MqttTopicListener setMessage(JsonNode result) {
+            this.message = result;
+            return this;
+        }
+
+        public void assertCorrect(T actionResult) {
+            checker.assertCorrect(actionResult, this);
+        }
+    }
+
+    public static class UpdateAction<T, U> {
+
+        private final Callable<T> action;
+        private final List<MqttTopicListener<U>> topics;
+
+        public UpdateAction(Callable<T> action, List<MqttTopicListener<U>> topics) {
+            this.action = action;
+            this.topics = topics;
+        }
+
+        public Callable<T> getAction() {
+            return action;
+        }
+
+        public List<MqttTopicListener<U>> getTopics() {
+            return topics;
+        }
+
+    }
+
+    public <T, U> T executeRequests(UpdateAction<T, U> ua) {
+        final Callable<T> action = ua.getAction();
+        final List<MqttTopicListener<U>> topics = ua.getTopics();
+        final ExecutorService executor = Executors.newFixedThreadPool(topics.size());
+        T result = null;
+        try {
+            for (MqttTopicListener tl : topics) {
+                MqttListener listener = new MqttListener(mqttServerUri, tl.getTopic());
+                listener.connect();
+                tl.setFutureMessage(executor.submit(listener));
+            }
+
+            try {
+                LOGGER.debug("  Calling action...");
+                result = action.call();
+            } catch (Exception ex) {
+                LOGGER.error("Exception on server {} :", mqttServerUri, ex);
+                fail("Topics: " + topics + " Error executing : " + ex.getMessage());
+            }
+            executor.shutdown();
+            if (!executor.awaitTermination(mqttTimeout, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
+            }
+            for (MqttTopicListener<U> tl : topics) {
+                tl.setMessage(tl.getFutureMessage().get());
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            LOGGER.error("Exception on server {} :", mqttServerUri, ex);
+            fail("Topics: " + topics + " Error subscribing to MQTT: " + ex.getMessage());
         } finally {
             executor.shutdownNow();
         }

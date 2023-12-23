@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -368,10 +369,23 @@ public class EntityHelper {
     }
 
     public JsonNode getEntity(EntityType entityType, Object id) {
+        return getEntity(entityType, id, null, null);
+    }
+
+    public JsonNode getEntity(EntityType entityType, Object id, String select, String expand) {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
+        String query = "";
+        char join = '?';
+        if (!StringHelper.isNullOrEmpty(expand)) {
+            query += "?$expand=" + expand;
+            join = '&';
+        }
+        if (!StringHelper.isNullOrEmpty(select)) {
+            query += join + "$select=" + select;
+        }
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, query);
         try {
             return Utils.MAPPER.readTree(HTTPMethods.doGet(urlString).response);
         } catch (IOException e) {
