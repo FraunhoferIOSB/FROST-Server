@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-alpine
+FROM eclipse-temurin:17-jdk
 
 EXPOSE 1883
 EXPOSE 9876
