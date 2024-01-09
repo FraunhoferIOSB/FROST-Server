@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import net.time4j.Moment;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -46,7 +47,7 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
      * @param utc Flag indicating that the original time given was in utc.
      */
     public StaDateTimeWrapper(final Moment ts, boolean utc) {
-        field = DSL.inline(ts);
+        field = DSL.inline(ts, MomentBinding.dataType());
         this.utc = utc;
     }
 
@@ -90,7 +91,7 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
             case "+":
             case "-":
                 String template = "(? " + op + " " + INTERVAL_PARAM + ")";
-                Field<Moment> expression = DSL.field(template, Moment.class, field, other.getDuration());
+                Field<Moment> expression = DSL.field(template, MomentBinding.dataType(), field, other.getDuration());
                 return new StaDateTimeWrapper(expression);
 
             default:

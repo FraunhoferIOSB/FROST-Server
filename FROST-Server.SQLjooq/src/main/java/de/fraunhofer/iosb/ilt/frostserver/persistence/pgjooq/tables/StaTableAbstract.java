@@ -500,7 +500,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     protected PropertyFields<T> propertyFieldForJsonField(final JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epCustomSelect) {
-        final Field deepField = jsonFactory.materialise().getJsonExpression();
+        final Field<Object> deepField = jsonFactory.materialise().getJsonExpression();
         PropertyFields<T> pfs = new PropertyFields<>(
                 epCustomSelect,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(

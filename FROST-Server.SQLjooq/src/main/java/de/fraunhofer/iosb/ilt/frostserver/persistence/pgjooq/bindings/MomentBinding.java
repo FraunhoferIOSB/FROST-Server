@@ -32,8 +32,10 @@ import org.jooq.BindingSQLContext;
 import org.jooq.BindingSetSQLOutputContext;
 import org.jooq.BindingSetStatementContext;
 import org.jooq.Converter;
+import org.jooq.DataType;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -41,7 +43,8 @@ import org.jooq.impl.DSL;
  */
 public class MomentBinding implements Binding<Timestamp, Moment> {
 
-    private static final Converter<Timestamp, Moment> INSTANCE = new Converter<Timestamp, Moment>() {
+    private static final MomentBinding INSTANCE = new MomentBinding();
+    private static final Converter<Timestamp, Moment> CONVERTER_INSTANCE = new Converter<Timestamp, Moment>() {
         @Override
         public Moment from(Timestamp databaseObject) {
             if (databaseObject == null) {
@@ -68,10 +71,19 @@ public class MomentBinding implements Binding<Timestamp, Moment> {
             return Moment.class;
         }
     };
+    private static final DataType<Moment> DATA_TYPE = SQLDataType.TIMESTAMP.asConvertedDataType(INSTANCE);
+
+    public static MomentBinding instance() {
+        return INSTANCE;
+    }
 
     @Override
     public Converter<Timestamp, Moment> converter() {
-        return INSTANCE;
+        return CONVERTER_INSTANCE;
+    }
+
+    public static DataType<Moment> dataType() {
+        return DATA_TYPE;
     }
 
     @Override
@@ -83,37 +95,31 @@ public class MomentBinding implements Binding<Timestamp, Moment> {
         }
     }
 
-    // Registering VARCHAR types for JDBC CallableStatement OUT parameters
     @Override
     public void register(BindingRegisterContext<Moment> ctx) throws SQLException {
         ctx.statement().registerOutParameter(ctx.index(), Types.TIMESTAMP_WITH_TIMEZONE);
     }
 
-    // Converting the JsonElement to a String value and setting that on a JDBC PreparedStatement
     @Override
     public void set(BindingSetStatementContext<Moment> ctx) throws SQLException {
         ctx.statement().setTimestamp(ctx.index(), ctx.convert(converter()).value());
     }
 
-    // Getting a String value from a JDBC ResultSet and converting that to a JsonElement
     @Override
     public void get(BindingGetResultSetContext<Moment> ctx) throws SQLException {
         ctx.convert(converter()).value(ctx.resultSet().getTimestamp(ctx.index()));
     }
 
-    // Getting a String value from a JDBC CallableStatement and converting that to a JsonElement
     @Override
     public void get(BindingGetStatementContext<Moment> ctx) throws SQLException {
         ctx.convert(converter()).value(ctx.statement().getTimestamp(ctx.index()));
     }
 
-    // Setting a value on a JDBC SQLOutput (useful for Oracle OBJECT types)
     @Override
     public void set(BindingSetSQLOutputContext<Moment> ctx) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    // Getting a value from a JDBC SQLInput (useful for Oracle OBJECT types)
     @Override
     public void get(BindingGetSQLInputContext<Moment> ctx) throws SQLException {
         throw new SQLFeatureNotSupportedException();

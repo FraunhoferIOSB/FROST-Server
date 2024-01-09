@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Map;
 import net.time4j.Moment;
@@ -58,8 +59,8 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
     }
 
     public StaTimeIntervalWrapper(Moment start, Moment end) {
-        this.start = DSL.inline(start);
-        this.end = DSL.inline(end);
+        this.start = DSL.inline(start, MomentBinding.dataType());
+        this.end = DSL.inline(end, MomentBinding.dataType());
     }
 
     public Field<Moment> getStart() {
@@ -104,8 +105,8 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
             case "-":
                 String template = "(? " + op + " " + INTERVAL_PARAM + ")";
                 return new StaTimeIntervalWrapper(
-                        DSL.field(template, Moment.class, start, other.getDuration()),
-                        DSL.field(template, Moment.class, end, other.getDuration()));
+                        DSL.field(template, MomentBinding.dataType(), start, other.getDuration()),
+                        DSL.field(template, MomentBinding.dataType(), end, other.getDuration()));
 
             default:
                 throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());

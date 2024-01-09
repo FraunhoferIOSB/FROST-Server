@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
@@ -31,8 +30,10 @@ import org.jooq.BindingSQLContext;
 import org.jooq.BindingSetSQLOutputContext;
 import org.jooq.BindingSetStatementContext;
 import org.jooq.Converter;
+import org.jooq.DataType;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -40,15 +41,12 @@ import org.jooq.impl.DSL;
  */
 public class JsonBinding implements Binding<Object, JsonValue> {
 
+    private static final JsonBinding INSTANCE = new JsonBinding();
     private static final Converter<Object, JsonValue> CONVERTER_INSTANCE = new Converter<Object, JsonValue>() {
         @Override
         public JsonValue from(Object databaseObject) {
             if (databaseObject == null) {
                 return new JsonValue((String) null);
-            }
-            if (databaseObject instanceof byte[]) {
-                String jsonString = new String((byte[]) databaseObject, StringHelper.UTF8);
-                return new JsonValue(jsonString);
             }
             return new JsonValue(databaseObject.toString());
         }
@@ -68,14 +66,23 @@ public class JsonBinding implements Binding<Object, JsonValue> {
             return JsonValue.class;
         }
     };
+    private static final DataType<JsonValue> DATA_TYPE = SQLDataType.CLOB.asConvertedDataType(INSTANCE);
 
     public static Converter<Object, JsonValue> getConverterInstance() {
         return CONVERTER_INSTANCE;
     }
 
+    public static JsonBinding instance() {
+        return INSTANCE;
+    }
+
     @Override
     public Converter<Object, JsonValue> converter() {
         return CONVERTER_INSTANCE;
+    }
+
+    public static DataType<JsonValue> dataType() {
+        return DATA_TYPE;
     }
 
     @Override
@@ -104,12 +111,12 @@ public class JsonBinding implements Binding<Object, JsonValue> {
 
     @Override
     public void get(BindingGetResultSetContext<JsonValue> ctx) throws SQLException {
-        ctx.convert(converter()).value(ctx.resultSet().getBytes(ctx.index()));
+        ctx.convert(converter()).value(ctx.resultSet().getString(ctx.index()));
     }
 
     @Override
     public void get(BindingGetStatementContext<JsonValue> ctx) throws SQLException {
-        ctx.convert(converter()).value(ctx.statement().getBytes(ctx.index()));
+        ctx.convert(converter()).value(ctx.statement().getString(ctx.index()));
     }
 
     @Override

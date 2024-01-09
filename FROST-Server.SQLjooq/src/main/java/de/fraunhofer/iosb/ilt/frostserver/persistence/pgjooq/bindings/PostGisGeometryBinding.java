@@ -30,6 +30,8 @@ import org.jooq.BindingSQLContext;
 import org.jooq.BindingSetSQLOutputContext;
 import org.jooq.BindingSetStatementContext;
 import org.jooq.Converter;
+import org.jooq.DataType;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -37,6 +39,7 @@ import org.jooq.Converter;
  */
 public class PostGisGeometryBinding implements Binding<Object, Geometry> {
 
+    private static final PostGisGeometryBinding INSTANCE = new PostGisGeometryBinding();
     private static final Converter<Object, Geometry> CONVERTER_INSTANCE = new Converter<Object, Geometry>() {
         @Override
         public Geometry from(Object databaseObject) {
@@ -59,10 +62,19 @@ public class PostGisGeometryBinding implements Binding<Object, Geometry> {
             return Geometry.class;
         }
     };
+    private static final DataType<Geometry> DATA_TYPE = SQLDataType.VARBINARY.asConvertedDataType(INSTANCE);
+
+    public static PostGisGeometryBinding instance() {
+        return INSTANCE;
+    }
 
     @Override
     public Converter<Object, Geometry> converter() {
         return CONVERTER_INSTANCE;
+    }
+
+    public static DataType<Geometry> dataType() {
+        return DATA_TYPE;
     }
 
     @Override
