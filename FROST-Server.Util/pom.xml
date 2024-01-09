@@ -88,7 +88,7 @@
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/pathParser.ccc</argument>
                                 <argument>-d</argument>
-                                <argument>../../../target/generated-sources/congocc/</argument>
+                                <argument>${project.build.directory}/generated-sources/congocc/</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -107,7 +107,7 @@
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/queryParser.ccc</argument>
                                 <argument>-d</argument>
-                                <argument>../../../target/generated-sources/congocc/</argument>
+                                <argument>${project.build.directory}/generated-sources/congocc/</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -126,7 +126,7 @@
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/wktParser.ccc</argument>
                                 <argument>-d</argument>
-                                <argument>../../../target/generated-sources/congocc/</argument>
+                                <argument>${project.build.directory}/generated-sources/congocc/</argument>
                             </arguments>
                         </configuration>
                     </execution>
