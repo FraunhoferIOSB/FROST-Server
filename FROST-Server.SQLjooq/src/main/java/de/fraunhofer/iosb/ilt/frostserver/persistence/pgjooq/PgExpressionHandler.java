@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.ArrayConstandFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
@@ -407,7 +408,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(LineStringConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
     @Override
@@ -418,13 +419,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
     private static Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
