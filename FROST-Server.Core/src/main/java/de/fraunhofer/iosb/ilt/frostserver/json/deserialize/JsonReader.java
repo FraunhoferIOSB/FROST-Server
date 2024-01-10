@@ -70,6 +70,20 @@ public class JsonReader {
      * @return The cached or created object mapper.
      */
     private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
+        ObjectMapper mapper;
+        if (isAdmin) {
+            mapper = mappersAdmin.get(modelRegistry);
+        } else {
+            mapper = mappers.get(modelRegistry);
+        }
+        if (mapper == null) {
+            // computeIfAbsent is not thread-safe, and we don't want this method to be synchronised.
+            mapper = initObjectMapper(modelRegistry, isAdmin);
+        }
+        return mapper;
+    }
+
+    private static synchronized ObjectMapper initObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
         if (isAdmin) {
             return mappersAdmin.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, isAdmin));
         } else {
@@ -84,9 +98,7 @@ public class JsonReader {
      * mapper for.
      * @return The created object mapper.
      */
-    private static ObjectMapper createObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
-        // ToDo: Allow extensions to add deserializers
-
+    private static synchronized ObjectMapper createObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.getInstance().registerDeserializer(encodingType, geoJsonDeserializier);
