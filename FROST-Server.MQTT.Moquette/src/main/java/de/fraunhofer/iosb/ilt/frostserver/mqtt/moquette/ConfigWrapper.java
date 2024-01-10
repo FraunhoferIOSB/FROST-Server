@@ -36,27 +36,27 @@ public class ConfigWrapper extends IConfig {
 
     @Override
     public void setProperty(String name, String value) {
-        wrappedSettings.set(name, value);
+        wrappedSettings.set(name.replace('_', '.'), value);
     }
 
     @Override
     public String getProperty(String name) {
-        return wrappedSettings.get(name, (String) null);
+        return wrappedSettings.get(name.replace('_', '.'), (String) null);
     }
 
     @Override
     public String getProperty(String name, String defaultValue) {
-        return wrappedSettings.get(name, defaultValue);
+        return wrappedSettings.get(name.replace('_', '.'), defaultValue);
     }
 
     @Override
     public int intProp(String propertyName, int defaultValue) {
-        return wrappedSettings.getInt(propertyName, defaultValue);
+        return wrappedSettings.getInt(propertyName.replace('_', '.'), defaultValue);
     }
 
     @Override
     public boolean boolProp(String propertyName, boolean defaultValue) {
-        return wrappedSettings.getBoolean(propertyName, defaultValue);
+        return wrappedSettings.getBoolean(propertyName.replace('_', '.'), defaultValue);
     }
 
     @Override

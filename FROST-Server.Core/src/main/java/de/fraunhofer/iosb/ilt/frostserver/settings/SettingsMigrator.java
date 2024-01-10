@@ -39,6 +39,7 @@ public class SettingsMigrator {
 
     private final Map<String, Map<String, ReplaceList>> valueChanges = new HashMap<>();
     private final Map<String, String> keyChanges = new HashMap<>();
+    private final Map<String, ValueChecker> valueCheckers = new HashMap<>();
 
     private Map<String, ReplaceList> getReplaceValue(String key) {
         return valueChanges.computeIfAbsent(key, t -> new TreeMap<>());
@@ -77,6 +78,18 @@ public class SettingsMigrator {
         for (Map.Entry<String, Map<String, ReplaceList>> change : valueChanges.entrySet()) {
             migrateOldSettings(properties, change.getKey(), change.getValue());
         }
+        for (Map.Entry<String, ValueChecker> checkEntry : valueCheckers.entrySet()) {
+            String key = checkEntry.getKey();
+            ValueChecker checker = checkEntry.getValue();
+            String valueOld = properties.getProperty(key);
+            if (valueOld != null) {
+                String valueNew = checker.getNewValue(valueOld);
+                if (!valueOld.equals(valueNew)) {
+                    LOGGER.warn("Converting setting with key: {} from old value: {} to new value: {}", key, valueOld, valueNew);
+                    properties.setProperty(key, valueNew);
+                }
+            }
+        }
     }
 
     private void migrateOldSettings(Properties properties, String key, Map<String, ReplaceList> replaces) {
@@ -98,7 +111,7 @@ public class SettingsMigrator {
     }
 
     private void migrateOldSettings(Properties properties, String oldKey, String newKey) {
-        Object oldValue = properties.get(oldKey);
+        String oldValue = properties.getProperty(oldKey);
         if (oldValue != null) {
             LOGGER.warn("Converting setting with old key: {} to new key: {} with value: {}", oldKey, newKey, oldValue);
             properties.remove(oldKey);
@@ -135,4 +148,8 @@ public class SettingsMigrator {
 
     }
 
+    private static interface ValueChecker {
+
+        public String getNewValue(String oldValue);
+    }
 }
