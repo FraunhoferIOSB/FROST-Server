@@ -178,6 +178,7 @@ public class CachedSettings extends Settings {
         }
         int value = super.getInt(name, defaultValue);
         valuesInt.put(name, value);
+        valuesString.put(name, Integer.toString(value));
         return value;
     }
 

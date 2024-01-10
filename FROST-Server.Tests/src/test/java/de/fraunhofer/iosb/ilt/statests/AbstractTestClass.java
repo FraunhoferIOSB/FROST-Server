@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_FILTER_DELETE_ENABLE;
 
@@ -72,6 +73,7 @@ public abstract class AbstractTestClass {
         defaultProperties.put(PREFIX_PLUGINS + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
         defaultProperties.put(PREFIX_PLUGINS + MdsModelSettings.TAG_ENABLE_MDS_MODEL, "true");
         defaultProperties.put(TAG_FILTER_DELETE_ENABLE, "true");
+        defaultProperties.put(PREFIX_MQTT + "session.timeout.seconds", "100");
     }
 
     public AbstractTestClass(ServerVersion serverVersion) {

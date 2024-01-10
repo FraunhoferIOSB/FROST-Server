@@ -15,7 +15,7 @@
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
-        <moquette.version>0.15.2</moquette.version>
+        <moquette.version>0.17</moquette.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
@@ -32,7 +32,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.fraunhofer.iosb.io.moquette</groupId>
+            <groupId>io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
             <version>${moquette.version}</version>
             <exclusions>

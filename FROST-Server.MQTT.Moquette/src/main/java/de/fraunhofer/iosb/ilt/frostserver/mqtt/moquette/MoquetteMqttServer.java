@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.interception.AbstractInterceptHandler;
@@ -48,6 +47,7 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,32 +176,36 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         IConfig config = new ConfigWrapper(customSettings);
 
         // Ensure the immediate_flush property has a default of true.
-        customSettings.getBoolean(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, true);
-        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
-        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
-        config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
+        config.intProp(IConfig.BUFFER_FLUSH_MS_PROPERTY_NAME, 0);
+        config.setProperty(IConfig.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
+        config.setProperty(IConfig.HOST_PROPERTY_NAME, mqttSettings.getHost());
+        config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
         String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
         if (VALUE_STORE_TYPE_H2.equalsIgnoreCase(persistentStoreType)) {
-            String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME).toString();
-            String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
-            config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
+            String tempPath = Paths.get(settings.getTempPath()).toString();
+            String persistentStore = customSettings.get(IConfig.DATA_PATH_PROPERTY_NAME, tempPath);
+            config.setProperty(IConfig.DATA_PATH_PROPERTY_NAME, persistentStore);
         }
-        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, customSettings.get(TAG_WEBSOCKET_PORT, getClass()));
+        config.setProperty(IConfig.WEB_SOCKET_PORT_PROPERTY_NAME, customSettings.get(TAG_WEBSOCKET_PORT, getClass()));
 
         String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, getClass());
         if (!keystorePath.isEmpty()) {
             LOGGER.info("Configuring keystore for ssl");
-            config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
-            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass(), false));
-            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass(), false));
-            config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
-            config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
+            config.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, keystorePath);
+            config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass(), false));
+            config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass(), false));
+            config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
+            config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }
 
         authWrapper = createAuthWrapper();
 
-        mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
+        try {
+            mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to start MQTT Broker!", ex);
+        }
     }
 
     private AuthWrapper createAuthWrapper() {
@@ -304,6 +308,11 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         @Override
         public String getID() {
             return frostClientId;
+        }
+
+        @Override
+        public void onSessionLoopError(Throwable thrwbl) {
+            LOGGER.error("MQTT Session Loop caused an exception!", thrwbl);
         }
     }
 

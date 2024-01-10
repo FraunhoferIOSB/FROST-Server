@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,14 @@ public class SettingsMigrator {
         keyChanges.put("enableActuation", "plugins.actuation.enable");
         keyChanges.put("enableMultiDatastream", "plugins.multiDatastream.enable");
         keyChanges.put("persistence.alwaysOrderbyId", "alwaysOrderbyId");
+        keyChanges.put("mqtt.session.timeout.seconds", "mqtt.persistent.client.expiration");
+        valueCheckers.put("mqtt.persistent.client.expiration", oldValue -> {
+            final int lastIdx = oldValue.length() - 1;
+            if (StringUtils.indexOfAny(oldValue, 's', 'm', 'h', 'd', 'w', 'M', 'y') < lastIdx) {
+                return oldValue + 's';
+            }
+            return oldValue;
+        });
     }
 
     public void migrateOldSettings(Properties properties) {
