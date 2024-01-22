@@ -22,7 +22,7 @@ jobs:
         fetch-depth: 0
 
     - name: Cache maven repository
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.m2/repository
@@ -37,7 +37,7 @@ jobs:
         java-version: 17
 
     - name: Restore CVD Database from Cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data
@@ -52,7 +52,7 @@ jobs:
         mvn -B -P owasp -DnvdApiDelay=6000 --settings maven-ci-settings.xml org.owasp:dependency-check-maven:update-only
 
     - name: Save CVD Database to Cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data

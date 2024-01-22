@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Cache maven repository
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-dpl-${{ hashFiles('**/pom.xml') }}
