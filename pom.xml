@@ -112,11 +112,11 @@
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
         <version.jetty>10.0.19</version.jetty>
-        <version.jooq>3.19.1</version.jooq>
+        <version.jooq>3.19.3</version.jooq>
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.10.1</version.junit>
         <version.junit-platform-suite>1.10.1</version.junit-platform-suite>
-        <version.keycloak>23.0.3</version.keycloak>
+        <version.keycloak>23.0.4</version.keycloak>
         <version.liquibase>4.25.1</version.liquibase>
         <version.logback>1.4.14</version.logback>
 
@@ -124,7 +124,7 @@
         <version.maven.plugin.build-helper>3.5.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.12.1</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.6.1</version.maven.plugin.dependency>
-        <version.maven.plugin.dependency-check>9.0.7</version.maven.plugin.dependency-check>
+        <version.maven.plugin.dependency-check>9.0.9</version.maven.plugin.dependency-check>
         <version.maven.plugin.download>1.8.0</version.maven.plugin.download>
         <version.maven.plugin.exec>3.1.1</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>7.0.0</version.maven.plugin.git-commit-id>
@@ -136,16 +136,16 @@
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.5.1</version.maven.plugin.shade>
         <version.maven.plugin.source>3.3.0</version.maven.plugin.source>
-        <version.maven.plugin.spotless>2.41.1</version.maven.plugin.spotless>
-        <version.maven.plugin.surefire>3.2.3</version.maven.plugin.surefire>
+        <version.maven.plugin.spotless>2.42.0</version.maven.plugin.spotless>
+        <version.maven.plugin.surefire>3.2.5</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
-        <version.openjfx>21.0.1</version.openjfx>
+        <version.openjfx>21.0.2</version.openjfx>
         <version.org.json>20231013</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.7.1</version.postgres>
-        <version.slf4j-api>2.0.9</version.slf4j-api>
+        <version.slf4j-api>2.0.11</version.slf4j-api>
         <version.testcontainers>1.19.3</version.testcontainers>
         <version.testcontainers-keycloak>3.2.0</version.testcontainers-keycloak>
         <version.time4j>5.9.3</version.time4j>
