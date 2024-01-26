@@ -76,9 +76,10 @@ public class CheckNavLinkQuery implements ValidationCheck {
         if (parsedQuery == null) {
             init(contextEntity, pm);
         }
+        final PrincipalExtended localPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
             context.setEntity(contextEntity);
-            context.setUser(PrincipalExtended.getLocalPrincipal());
+            context.setUser(localPrincipal);
             if (targetNp instanceof NavigationPropertyMain.NavigationPropertyEntity targetNpEntity) {
                 final Entity targetEntity = contextEntity.getProperty(targetNpEntity);
                 if (targetEntity == null) {
@@ -86,7 +87,12 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     return isEmptyAllowed();
                 }
                 final Id targetId = targetEntity.getId();
+
+                // Run the actual query as admin, but with the user in the context.
+                PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
                 final Entity result = pm.get(targetType, targetId, parsedQuery);
+                PrincipalExtended.setLocalPrincipal(localPrincipal);
+
                 final boolean valid = result != null;
                 LOGGER.debug("  Check on {}.{}({}): {}", entityType, targetNp, targetId, valid);
                 return valid;
@@ -102,7 +108,11 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     if (targetId == null) {
                         // Entity does not exist yet. Will be checked wen it is created.
                     } else {
+                        // Run the actual query as admin, but with the user in the context.
+                        PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
                         Entity result = pm.get(targetType, targetId, parsedQuery);
+                        PrincipalExtended.setLocalPrincipal(localPrincipal);
+
                         if (result == null) {
                             LOGGER.debug("  Check on {}.{}({}): false", entityType, targetNp, targetId);
                             return false;
@@ -113,6 +123,8 @@ public class CheckNavLinkQuery implements ValidationCheck {
                 return true;
             }
         } finally {
+            // Ensure the user is re-set, in case of an exception.
+            PrincipalExtended.setLocalPrincipal(localPrincipal);
             context.clear();
         }
         return false;

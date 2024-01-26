@@ -103,8 +103,8 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
         if (parsedQuery == null) {
             init(pm);
         }
+        final PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
-            final PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
             context.setUser(userPrincipal);
             // Run the Query as Admin user.
             PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
@@ -115,6 +115,8 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
             LOGGER.debug("  Check on {}: {}", entityType, valid);
             return valid;
         } finally {
+            // Ensure the user is re-set, in case of an exception.
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
             context.clear();
         }
     }
