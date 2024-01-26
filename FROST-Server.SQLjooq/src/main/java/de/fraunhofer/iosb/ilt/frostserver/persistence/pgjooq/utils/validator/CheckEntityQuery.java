@@ -59,14 +59,22 @@ public class CheckEntityQuery implements ValidationCheck {
         if (parsedQuery == null) {
             init(contextEntity, pm);
         }
+        final PrincipalExtended localPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
             context.setEntity(contextEntity);
-            context.setUser(PrincipalExtended.getLocalPrincipal());
+            context.setUser(localPrincipal);
+
+            // Run the actual query as admin, but with the user in the context.
+            PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
             final Entity result = pm.get(entityType, contextEntity.getId(), parsedQuery);
+            PrincipalExtended.setLocalPrincipal(localPrincipal);
+
             final boolean valid = result != null;
             LOGGER.debug("  Check on {}: {}", entityType, valid);
             return valid;
         } finally {
+            // Ensure the user is re-set, in case of an exception.
+            PrincipalExtended.setLocalPrincipal(localPrincipal);
             context.clear();
         }
     }

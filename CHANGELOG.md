@@ -6,6 +6,9 @@
 * Added missing serializer for times to OData plugin.
 * Allow username to appear multiple times in fine-grained security where.
 * HELM: Use external db for basic-auth if specified.
+* HELM: corrected typo: rewriteTarget <- rewriteTraget.
+* Fixed ConcurrentModificationException in initialisation of deserialiser.
+* Fixed security queries running as normal user, resulting in too narrow access.
 
 
 ## Release version 2.2.1
