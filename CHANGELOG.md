@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.2.2
+## Release version 2.2.2
 
 **Internal changes & Bugfixes**
 * Added missing serializer for times to OData plugin.
@@ -9,6 +9,8 @@
 * HELM: corrected typo: rewriteTarget <- rewriteTraget.
 * Fixed ConcurrentModificationException in initialisation of deserialiser.
 * Fixed security queries running as normal user, resulting in too narrow access.
+* Fixed _. translation issue when loading settings for MQTT.
+* Fixed warnings due to JOOQ issue #15286
 
 
 ## Release version 2.2.1
