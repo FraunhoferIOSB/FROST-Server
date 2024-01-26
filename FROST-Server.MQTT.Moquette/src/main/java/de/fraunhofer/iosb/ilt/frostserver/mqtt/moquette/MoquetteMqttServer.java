@@ -177,6 +177,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
         // Ensure the immediate_flush property has a default of true.
         config.intProp(IConfig.BUFFER_FLUSH_MS_PROPERTY_NAME, 0);
+        config.boolProp(IConfig.ENABLE_TELEMETRY_NAME, false);
         config.setProperty(IConfig.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(IConfig.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
