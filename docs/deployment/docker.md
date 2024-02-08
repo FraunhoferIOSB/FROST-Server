@@ -28,8 +28,10 @@ If you have docker and docker-compose
 
     ```curl -X POST -H "Content-Type: application/json" -d @demoEntities.json http://localhost:8080/FROST-Server/v1.1/Things```
 
-5. Browse to http://localhost:8080/FROST-Server/v1.0
-6. Enjoy!
+5. Browse to http://localhost:8080/FROST/DatabaseStatus
+6. Click the upgrade button
+7. Browse to http://localhost:8080/FROST-Server/v1.0
+8. Enjoy!
 
 
 ## Details
