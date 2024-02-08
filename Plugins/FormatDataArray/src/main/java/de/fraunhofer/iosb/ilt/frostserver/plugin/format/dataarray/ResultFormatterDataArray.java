@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -82,18 +81,13 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     @Override
     public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
-        try {
-            if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                EntitySet entitySet = (EntitySet) result;
-                if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
-                    return new FormatWriterGeneric(formatDataArray(path, query, entitySet));
-                }
+        if (EntitySet.class.isAssignableFrom(result.getClass())) {
+            EntitySet entitySet = (EntitySet) result;
+            if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
+                return target -> JsonWriter.writeObject(target, getDataArray(path, query, entitySet));
             }
-            throw new IllegalArgumentException(OBSERVATIONS_ONLY);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to format response.", ex);
         }
-        return null;
+        throw new IllegalArgumentException(OBSERVATIONS_ONLY);
     }
 
     @Override
@@ -191,7 +185,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
+    private DataArrayResult getDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(pluginCoreModel, true);
@@ -218,7 +212,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         result.setCount(entitySet.getCount());
         result.setNextLink(entitySet.getNextLink());
 
-        return JsonWriter.writeObject(result);
+        return result;
     }
 
 }

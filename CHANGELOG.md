@@ -18,6 +18,7 @@ make sure to check and update your HELM settings.
 * Improved loading speed of custom data models.
 * Fixed a typo in the helm variable rewriteTarget.
 * Fixed security queries running as normal user, resulting in too narrow access.
+* Improved the memory efficiency of the DataArray resultFormat.
 
 
 ## Release version 2.2.0
