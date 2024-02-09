@@ -35,8 +35,8 @@ public class PolygonConstant extends GeoJsonConstant<Polygon> {
 
     public static PolygonConstant parse(String value) {
         GeoJsonObject result = WktParser.parseWkt(value);
-        if (result instanceof Polygon) {
-            return new PolygonConstant((Polygon) result, value);
+        if (result instanceof Polygon polygon) {
+            return new PolygonConstant(polygon, value);
         }
         throw new IllegalArgumentException("Can not parse Polygon from: " + StringHelper.cleanForLogging(value));
     }

@@ -65,7 +65,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
-            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, nameSpace, et, np));
+            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, nameSpace, np));
         }
         for (Annotation an : et.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));

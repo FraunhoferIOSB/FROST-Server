@@ -42,7 +42,7 @@ public class HttpContent extends Request implements MultipartContent {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpContent.class);
-    private static final String COMMAND_REGEX = "^(GET|PATCH|POST|PUT|DELETE) ([^ ]+)( HTTP/[0-9]\\.[0-9])?";
+    private static final String COMMAND_REGEX = "^(GET|PATCH|POST|PUT|DELETE) ([^ ]+)( HTTP/\\d\\.\\d)?";
     private static final Pattern COMMAND_PATTERN = Pattern.compile(COMMAND_REGEX);
 
     /**

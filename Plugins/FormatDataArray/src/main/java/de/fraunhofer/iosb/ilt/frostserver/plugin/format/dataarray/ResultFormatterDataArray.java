@@ -33,7 +33,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,7 +69,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
-            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
+            if (lastElement instanceof PathElementEntitySet pees && pees.getEntityType() == pluginCoreModel.etObservation) {
                 query.getSelect().add(pluginCoreModel.npDatastreamObservation);
                 if (npMultiDatastream != null) {
                     query.getSelect().add(npMultiDatastream);
@@ -185,7 +184,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
     }
 
-    private DataArrayResult getDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
+    private DataArrayResult getDataArray(ResourcePath path, Query query, EntitySet entitySet) {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(pluginCoreModel, true);

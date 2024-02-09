@@ -170,12 +170,10 @@ public class ResourcePath {
     }
 
     public EntityType getMainElementType() {
-        if (mainElement instanceof PathElementEntity) {
-            PathElementEntity entityPathElement = (PathElementEntity) mainElement;
+        if (mainElement instanceof PathElementEntity entityPathElement) {
             return entityPathElement.getEntityType();
         }
-        if (mainElement instanceof PathElementEntitySet) {
-            PathElementEntitySet entitySetPathElement = (PathElementEntitySet) mainElement;
+        if (mainElement instanceof PathElementEntitySet entitySetPathElement) {
             return entitySetPathElement.getEntityType();
         }
         return null;
@@ -253,8 +251,7 @@ public class ResourcePath {
         if (isMain && pe instanceof PathElementEntity || pe instanceof PathElementEntitySet) {
             setMainElement(pe);
         }
-        if (isIdentifier && pe instanceof PathElementEntity) {
-            PathElementEntity epe = (PathElementEntity) pe;
+        if (isIdentifier && pe instanceof PathElementEntity epe) {
             setIdentifiedElement(epe);
         }
         this.entityProperty = (pe instanceof PathElementProperty);
@@ -263,9 +260,9 @@ public class ResourcePath {
 
     public ResourcePath compress() {
         for (int i = pathElements.size() - 1; i > 0; i--) {
-            if (pathElements.get(i) instanceof PathElementEntity
+            final PathElement current = pathElements.get(i);
+            if (current instanceof PathElementEntity epe
                     && pathElements.get(i - 1) instanceof PathElementEntitySet) {
-                PathElementEntity epe = (PathElementEntity) pathElements.get(i);
                 if (epe.getId() != null) {
                     // crop path
                     pathElements.subList(0, i - 1).clear();
@@ -332,8 +329,7 @@ public class ResourcePath {
         StringBuilder sb = new StringBuilder(serviceRootUrl)
                 .append('/').append(version.urlPart);
         for (PathElement rpe : pathElements) {
-            if (rpe instanceof PathElementEntity && ((PathElementEntity) rpe).getId() != null) {
-                PathElementEntity epe = (PathElementEntity) rpe;
+            if (rpe instanceof PathElementEntity epe && epe.getId() != null) {
                 sb.append("(").append(epe.getId().getUrl()).append(")");
             } else if (rpe instanceof PathElementArrayIndex) {
                 sb.append(rpe.toString());

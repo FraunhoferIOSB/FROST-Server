@@ -65,7 +65,7 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
     /**
      * The column <code>public.ACTUATORS.EP_PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.ACTUATORS.EP_ID</code>.

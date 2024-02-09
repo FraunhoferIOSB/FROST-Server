@@ -105,7 +105,7 @@ public abstract class AbstractSubscription implements Subscription {
         PathElement nextPathElement = startIdx < size ? path.get(startIdx + 1) : null;
         for (int i = startIdx; i >= 0; i--) {
             PathElement element = path.get(i);
-            if (element instanceof PathElementEntitySet pees) {
+            if (element instanceof PathElementEntitySet) {
                 NavigationPropertyMain navPropInverse = null;
                 if (nextPathElement instanceof PathElementEntityType peet) {
                     final NavigationPropertyMain navProp = peet.getNavigationProperty();

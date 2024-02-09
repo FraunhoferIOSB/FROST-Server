@@ -248,8 +248,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * @return The target list, or a new list if target was null.
      */
     public PropertyFields<T> getSelectFieldsForProperty(Property property) {
-        if (property instanceof EntityPropertyCustomSelect) {
-            final EntityPropertyCustomSelect epCustomSelect = (EntityPropertyCustomSelect) property;
+        if (property instanceof EntityPropertyCustomSelect epCustomSelect) {
             return table.handleEntityPropertyCustomSelect(epCustomSelect);
         } else {
             return epMapSelect.get(property);
@@ -302,10 +301,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory) {
-        if (property instanceof NavigationPropertyEntity) {
-            addEntry((NavigationPropertyEntity) property, factory);
-        } else if (property instanceof NavigationPropertyEntitySet) {
-            addEntry((NavigationPropertyEntitySet) property, factory);
+        if (property instanceof NavigationPropertyEntity navigationPropertyEntity) {
+            addEntry(navigationPropertyEntity, factory);
+        } else if (property instanceof NavigationPropertyEntitySet navigationPropertyEntitySet) {
+            addEntry(navigationPropertyEntitySet, factory);
         } else {
             throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
         }

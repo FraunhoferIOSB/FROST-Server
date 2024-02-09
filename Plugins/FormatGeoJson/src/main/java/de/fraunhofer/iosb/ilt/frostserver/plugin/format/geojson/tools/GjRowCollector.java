@@ -41,7 +41,7 @@ public class GjRowCollector {
 
     private static class FeatureList extends ArrayList<GeoJsonObject> {
         // Nothing to override.
-    };
+    }
 
     private final Map<String, Object> collection = new LinkedHashMap<>();
     private final FeatureList features = new FeatureList();
@@ -97,21 +97,20 @@ public class GjRowCollector {
         if (value == null) {
             return;
         }
-        if (value instanceof Feature) {
-            Feature featureValue = (Feature) value;
+        if (value instanceof Feature featureValue) {
             feature.setGeometry(featureValue.getGeometry());
             feature.getProperties().putAll(featureValue.getProperties());
             return;
         }
-        if (value instanceof TimeValue) {
-            if (!((TimeValue) value).isEmpty()) {
+        if (value instanceof TimeValue timeValue) {
+            if (!timeValue.isEmpty()) {
                 feature.setProperty(headerName, value);
             }
             return;
         }
-        if (value instanceof GeoJsonObject) {
+        if (value instanceof GeoJsonObject geoJsonObject) {
             if (feature.getGeometry() == null) {
-                feature.setGeometry((GeoJsonObject) value);
+                feature.setGeometry(geoJsonObject);
             }
             return;
         }
@@ -119,8 +118,8 @@ public class GjRowCollector {
             flattenMap((Map<String, Object>) value, headerName);
             return;
         }
-        if (value instanceof List) {
-            flattenList((List<Object>) value, headerName);
+        if (value instanceof List list) {
+            flattenList(list, headerName);
             return;
         }
         if (value instanceof Entity) {

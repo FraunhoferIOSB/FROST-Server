@@ -50,7 +50,7 @@ public class FieldMapperTimeInstant extends FieldMapperAbstractEp {
     public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable, new MomentBinding());
+        fieldIdx = getOrRegisterField(field, dbTable, staTable, MomentBinding.instance());
     }
 
     @Override

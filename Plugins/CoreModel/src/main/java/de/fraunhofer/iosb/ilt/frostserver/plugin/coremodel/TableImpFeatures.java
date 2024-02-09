@@ -79,7 +79,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     /**
      * The column <code>public.FEATURES.GEOM</code>.
      */
-    public final TableField<Record, Geometry> colGeom = createField(DSL.name(NAME_COL_GEOM), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colGeom = createField(DSL.name(NAME_COL_GEOM), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", PostGisGeometryBinding.instance());
 
     /**
      * The column <code>public.FEATURES.NAME</code>.
@@ -89,7 +89,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     /**
      * The column <code>public.FEATURES.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.FEATURES.ID</code>.

@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -72,7 +73,7 @@ public class DatabaseHandler {
     }
 
     private static synchronized DatabaseHandler createInstance(CoreSettings coreSettings) {
-        return INSTANCES.computeIfAbsent(coreSettings, (s) -> {
+        return INSTANCES.computeIfAbsent(coreSettings, s -> {
             LOGGER.info("Initialising DatabaseHandler.");
             return new DatabaseHandler(coreSettings);
         });
@@ -125,8 +126,8 @@ public class DatabaseHandler {
                     .fetch();
             roles.getValues(TableUsersRoles.USER_ROLES.roleName)
                     .stream()
-                    .filter((t) -> t != null)
-                    .forEach(t -> userData.roles.add(t));
+                    .filter(Objects::nonNull)
+                    .forEach(userData.roles::add);
             return !roles.isEmpty();
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user credentials.", exc);

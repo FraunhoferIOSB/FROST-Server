@@ -69,13 +69,13 @@ public class DataArrayValue {
         this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         if (datastream != null) {
-            datastream.setSelfLink(UrlHelper.generateSelfLink(query, path, datastream));
+            datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
         } else {
             if (npMultiDatastream == null) {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
             multiDatastream = observation.getProperty(npMultiDatastream);
-            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(query, path, multiDatastream));
+            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
         }
     }
 

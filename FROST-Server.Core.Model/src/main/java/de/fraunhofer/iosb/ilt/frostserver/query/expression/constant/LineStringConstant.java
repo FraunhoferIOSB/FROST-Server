@@ -35,8 +35,8 @@ public class LineStringConstant extends GeoJsonConstant<LineString> {
 
     public static LineStringConstant parse(String value) {
         GeoJsonObject result = WktParser.parseWkt(value);
-        if (result instanceof LineString) {
-            return new LineStringConstant((LineString) result, value);
+        if (result instanceof LineString lineString) {
+            return new LineStringConstant(lineString, value);
         }
         throw new IllegalArgumentException("Can not parse LineString from: " + StringHelper.cleanForLogging(value));
     }

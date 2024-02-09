@@ -36,6 +36,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
 /**
+ * JOOQ Binding for JsonValue.
  *
  * @author scf
  */
@@ -76,13 +77,17 @@ public class JsonBinding implements Binding<Object, JsonValue> {
         return INSTANCE;
     }
 
+    public static DataType<JsonValue> dataType() {
+        return DATA_TYPE;
+    }
+
+    private JsonBinding() {
+        // use instance()
+    }
+
     @Override
     public Converter<Object, JsonValue> converter() {
         return CONVERTER_INSTANCE;
-    }
-
-    public static DataType<JsonValue> dataType() {
-        return DATA_TYPE;
     }
 
     @Override

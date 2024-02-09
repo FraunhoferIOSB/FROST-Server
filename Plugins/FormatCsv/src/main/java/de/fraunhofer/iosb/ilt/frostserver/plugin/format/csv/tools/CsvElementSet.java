@@ -78,10 +78,10 @@ public class CsvElementSet {
             if (property == ModelRegistry.EP_SELFLINK) {
                 continue;
             }
-            if (property instanceof EntityPropertyMain) {
-                initFrom((EntityPropertyMain) property);
-            } else if (property instanceof EntityPropertyCustomSelect) {
-                initFrom((EntityPropertyCustomSelect) property);
+            if (property instanceof EntityPropertyMain epm) {
+                initFrom(epm);
+            } else if (property instanceof EntityPropertyCustomSelect epcs) {
+                initFrom(epcs);
             }
         }
     }
@@ -89,7 +89,7 @@ public class CsvElementSet {
     public void initFrom(EntityPropertyMain property) {
         PropertyType type = property.getType();
         CsvEntityEntry element;
-        if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+        if (type instanceof TypeComplex tc && !tc.isOpenType()) {
             element = new CsvComplexProperty(namePrefix, property);
         } else {
             element = new CsvEntityProperty(namePrefix + property.getName(), property);
@@ -119,10 +119,10 @@ public class CsvElementSet {
     }
 
     public void writeData(CsvRowCollector collector, Object obj) throws IOException {
-        if (obj instanceof Entity) {
-            writeData(collector, (Entity) obj);
-        } else if (obj instanceof EntitySet) {
-            writeData(collector, (EntitySet) obj);
+        if (obj instanceof Entity entity) {
+            writeData(collector, entity);
+        } else if (obj instanceof EntitySet entitySet) {
+            writeData(collector, entitySet);
         }
     }
 
@@ -159,11 +159,10 @@ public class CsvElementSet {
         public Entity fetch(Entity source) {
             try {
                 Object result = property.getFrom(source);
-                if (result instanceof Entity) {
-                    return (Entity) result;
+                if (result instanceof Entity entity) {
+                    return entity;
                 }
-                if (result instanceof EntitySet) {
-                    EntitySet entitySet = (EntitySet) result;
+                if (result instanceof EntitySet entitySet) {
                     return entitySet.isEmpty() ? null : entitySet.iterator().next();
                 }
             } catch (IllegalArgumentException ex) {

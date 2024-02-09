@@ -74,8 +74,8 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<p><a href='.'>Back...</a></p>");
 
             try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
-                if (pm instanceof LiquibaseUser) {
-                    checkForUpgrades(out, (LiquibaseUser) pm);
+                if (pm instanceof LiquibaseUser liquibaseUser) {
+                    checkForUpgrades(out, liquibaseUser);
                 }
                 for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
                     checkForUpgrades(out, user);
@@ -119,8 +119,8 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
             try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
-                if (pm instanceof LiquibaseUser) {
-                    processUpgrade(out, (LiquibaseUser) pm);
+                if (pm instanceof LiquibaseUser liquibaseUser) {
+                    processUpgrade(out, liquibaseUser);
                 }
                 for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
                     processUpgrade(out, user);

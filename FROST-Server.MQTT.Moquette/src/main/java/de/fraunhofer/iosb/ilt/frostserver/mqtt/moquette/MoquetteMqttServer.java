@@ -249,7 +249,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 } else {
                     userPrincipal = authWrapper.getUserPrincipal(msg.getClientID());
                 }
-                fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload, userPrincipal));
+                fireEntityCreate(new EntityCreateEvent(msg.getTopicName(), payload, userPrincipal));
             } finally {
                 super.onPublish(msg);
             }

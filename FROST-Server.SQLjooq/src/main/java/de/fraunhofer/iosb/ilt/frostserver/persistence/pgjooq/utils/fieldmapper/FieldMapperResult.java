@@ -89,7 +89,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         fieldTypeIdx = getOrRegisterField(fieldType, dbTable, staTable);
         fieldStringIdx = getOrRegisterField(fieldString, dbTable, staTable);
         fieldNumberIdx = getOrRegisterField(fieldNumber, dbTable, staTable);
-        fieldJsonIdx = getOrRegisterField(fieldJson, dbTable, staTable, new JsonBinding());
+        fieldJsonIdx = getOrRegisterField(fieldJson, dbTable, staTable, JsonBinding.instance());
         fieldBooleanIdx = getOrRegisterField(fieldBoolean, dbTable, staTable);
     }
 
@@ -124,10 +124,10 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
             T table, Map<Field, Object> output,
             int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
         Object result = entity.getProperty(property);
-        if (result instanceof Number) {
+        if (result instanceof Number number) {
             output.put(table.field(idxReTy), ResultType.NUMBER.sqlValue());
             output.put(table.field(idxReSt), result.toString());
-            output.put(table.field(idxReNu), ((Number) result).doubleValue());
+            output.put(table.field(idxReNu), number.doubleValue());
             output.put(table.field(idxReBo), null);
             output.put(table.field(idxReJs), null);
         } else if (result instanceof Boolean) {

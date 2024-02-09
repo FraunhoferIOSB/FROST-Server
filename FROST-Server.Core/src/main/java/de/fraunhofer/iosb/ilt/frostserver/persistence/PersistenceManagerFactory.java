@@ -90,8 +90,8 @@ public class PersistenceManagerFactory {
     public void maybeUpdateDatabase() {
         if (maybeUpdateDatabase) {
             PersistenceManager pm = create();
-            if (pm instanceof LiquibaseUser) {
-                LiquibaseUtils.maybeUpdateDatabase(LOGGER, (LiquibaseUser) pm);
+            if (pm instanceof LiquibaseUser liquibaseUser) {
+                LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser);
             }
             final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
             if (liquibaseUsers.isEmpty()) {

@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +155,7 @@ public abstract class Function implements Expression {
                 parameters
                         .stream()
                         .map(Expression::compress)
-                        .collect(Collectors.toList()));
+                        .toList());
     }
 
     @Override

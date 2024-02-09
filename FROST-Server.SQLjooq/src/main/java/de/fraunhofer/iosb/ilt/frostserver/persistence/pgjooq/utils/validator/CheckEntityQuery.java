@@ -49,7 +49,6 @@ public class CheckEntityQuery implements ValidationCheck {
     @EditorString.EdOptsString
     private String query;
 
-    private ResourcePath path;
     private EntityType entityType;
     private DynamicContext context;
     private Query parsedQuery;
@@ -83,7 +82,7 @@ public class CheckEntityQuery implements ValidationCheck {
         entityType = contextEntity.getEntityType();
         final CoreSettings coreSettings = pm.getCoreSettings();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + entityType.plural)
+        final ResourcePath path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, '/' + entityType.plural)
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)

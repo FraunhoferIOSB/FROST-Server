@@ -409,27 +409,26 @@ public class OpenApiGenerator {
                 }
                 schema.addProperty(propertyName, propSchema);
             } else {
-                if (property instanceof NavigationProperty) {
-                    NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (navigationProperty.isEntitySet()) {
+                if (property instanceof NavigationProperty np) {
+                    if (np.isEntitySet()) {
                         OASchema propSchema = new OASchema(OASchema.Type.ARRAY, null);
-                        propSchema.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getEntityType().entityName));
+                        propSchema.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + np.getEntityType().entityName));
                         schema.addProperty(propertyName, propSchema);
 
                         OASchema count = new OASchema("#/components/schemas/count");
-                        schema.addProperty(navigationProperty.getEntityType().plural + version.countName, count);
+                        schema.addProperty(np.getEntityType().plural + version.countName, count);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getEntityType().plural + version.navLinkName, navLink);
+                        schema.addProperty(np.getEntityType().plural + version.navLinkName, navLink);
 
                         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
-                        schema.addProperty(navigationProperty.getEntityType().plural + version.nextLinkName, nextLink);
+                        schema.addProperty(np.getEntityType().plural + version.nextLinkName, nextLink);
                     } else {
-                        OASchema propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getEntityType().entityName);
+                        OASchema propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + np.getEntityType().entityName);
                         schema.addProperty(propertyName, propSchema);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getEntityType().entityName + version.navLinkName, navLink);
+                        schema.addProperty(np.getEntityType().entityName + version.navLinkName, navLink);
                     }
                 }
             }

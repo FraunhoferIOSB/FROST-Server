@@ -44,7 +44,7 @@ public class Finishes extends Function {
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
-        return new BooleanConstant(p1.getValue().equals(p2.getValue().getEnd()));
+        return new BooleanConstant(p1.getValue().toMoment().equals(p2.getValue().getEnd().getTemporal()));
     }
 
     @Override

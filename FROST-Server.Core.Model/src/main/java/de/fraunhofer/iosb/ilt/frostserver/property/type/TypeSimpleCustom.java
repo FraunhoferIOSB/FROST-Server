@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINSTANT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -32,8 +36,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeSimpleCustom extends TypeSimple {
 
-    public static final String STA_GEOJSON_NAME = "GeoJson";
-    public static final TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom(STA_GEOJSON_NAME, "A GeoJSON Object", TypeSimplePrimitive.EDM_GEOMETRY, null);
+    public static final String STA_GEOJSON_NAME = "Geometry";
+    public static final String STA_TM_INSTANT_NAME = "TM_Instant";
+    public static final TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom(STA_GEOJSON_NAME, "A GeoJSON Object", EDM_GEOMETRY, null);
+    public static final TypeSimpleCustom STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET, TYPE_REFERENCE_TIMEINSTANT);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimpleCustom.class.getName());
     private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();

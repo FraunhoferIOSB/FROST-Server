@@ -39,14 +39,14 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
     public static GeoJsonConstant<? extends GeoJsonObject> fromString(String value) {
 
         GeoJsonObject geoJsonObject = WktParser.parseWkt(value);
-        if (geoJsonObject instanceof Point) {
-            return new PointConstant((Point) geoJsonObject, value);
+        if (geoJsonObject instanceof Point point) {
+            return new PointConstant(point, value);
         }
-        if (geoJsonObject instanceof LineString) {
-            return new LineStringConstant((LineString) geoJsonObject, value);
+        if (geoJsonObject instanceof LineString lineString) {
+            return new LineStringConstant(lineString, value);
         }
-        if (geoJsonObject instanceof Polygon) {
-            return new PolygonConstant((Polygon) geoJsonObject, value);
+        if (geoJsonObject instanceof Polygon polygon) {
+            return new PolygonConstant(polygon, value);
         }
         throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }

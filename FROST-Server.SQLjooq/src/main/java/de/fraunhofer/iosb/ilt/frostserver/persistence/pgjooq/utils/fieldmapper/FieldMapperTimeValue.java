@@ -58,8 +58,8 @@ public class FieldMapperTimeValue extends FieldMapperAbstractEp {
         // find the actual field
         final Name tableName = staTable.getQualifiedName();
         final Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable, new MomentBinding());
-        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable, new MomentBinding());
+        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable, MomentBinding.instance());
+        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable, MomentBinding.instance());
     }
 
     @Override

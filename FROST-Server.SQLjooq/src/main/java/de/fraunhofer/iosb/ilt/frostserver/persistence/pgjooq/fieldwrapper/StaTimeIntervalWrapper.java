@@ -134,14 +134,14 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public FieldWrapper simpleOp(String op, FieldWrapper other) {
-        if (other instanceof StaDurationWrapper) {
-            return specificOp(op, (StaDurationWrapper) other);
+        if (other instanceof StaDurationWrapper staDurationWrapper) {
+            return specificOp(op, staDurationWrapper);
         }
-        if (other instanceof StaDateTimeWrapper) {
-            return specificOp(op, (StaDateTimeWrapper) other);
+        if (other instanceof StaDateTimeWrapper staDateTimeWrapper) {
+            return specificOp(op, staDateTimeWrapper);
         }
-        if (other instanceof StaTimeIntervalWrapper) {
-            return specificOp(op, (StaTimeIntervalWrapper) other);
+        if (other instanceof StaTimeIntervalWrapper staTimeIntervalWrapper) {
+            return specificOp(op, staTimeIntervalWrapper);
         }
         throw new UnsupportedOperationException("Can not add, sub, mul or div with Duration and " + other.getClass().getName());
     }
@@ -247,13 +247,13 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public FieldWrapper simpleOpBool(String op, FieldWrapper other) {
-        if (other instanceof StaDateTimeWrapper) {
+        if (other instanceof StaDateTimeWrapper staDateTimeWrapper) {
             return new SimpleFieldWrapper(
-                    specificOpBool(op, (StaDateTimeWrapper) other));
+                    specificOpBool(op, staDateTimeWrapper));
         }
-        if (other instanceof StaTimeIntervalWrapper) {
+        if (other instanceof StaTimeIntervalWrapper staTimeIntervalWrapper) {
             return new SimpleFieldWrapper(
-                    specificOpBool(op, (StaTimeIntervalWrapper) other));
+                    specificOpBool(op, staTimeIntervalWrapper));
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
     }

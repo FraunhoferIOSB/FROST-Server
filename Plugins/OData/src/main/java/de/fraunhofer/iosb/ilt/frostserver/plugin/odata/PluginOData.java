@@ -154,20 +154,25 @@ public class PluginOData implements PluginService, ConfigDefaults {
         switch (method) {
             case DELETE:
                 return RequestTypeUtils.DELETE;
+
             case GET:
                 if (path.isEmpty() || "/".equals(path)) {
                     return RequestTypeUtils.GET_CAPABILITIES;
                 }
                 return RequestTypeUtils.READ;
+
             case PATCH:
                 if (!StringHelper.isNullOrEmpty(contentType) && contentType.startsWith(CONTENT_TYPE_APPLICATION_JSONPATCH)) {
                     return RequestTypeUtils.UPDATE_CHANGESET;
                 }
                 return RequestTypeUtils.UPDATE_CHANGES;
+
             case POST:
                 return RequestTypeUtils.CREATE;
+
             case PUT:
                 return RequestTypeUtils.UPDATE_ALL;
+
             default:
                 return null;
         }

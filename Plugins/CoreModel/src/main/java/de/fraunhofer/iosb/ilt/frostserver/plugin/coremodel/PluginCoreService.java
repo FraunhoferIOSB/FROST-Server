@@ -106,20 +106,25 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
         switch (method) {
             case DELETE:
                 return RequestTypeUtils.DELETE;
+
             case GET:
                 if (path.isEmpty() || "/".equals(path)) {
                     return RequestTypeUtils.GET_CAPABILITIES;
                 }
                 return RequestTypeUtils.READ;
+
             case PATCH:
                 if (!StringHelper.isNullOrEmpty(contentType) && contentType.startsWith(CONTENT_TYPE_APPLICATION_JSONPATCH)) {
                     return RequestTypeUtils.UPDATE_CHANGESET;
                 }
                 return RequestTypeUtils.UPDATE_CHANGES;
+
             case POST:
                 return RequestTypeUtils.CREATE;
+
             case PUT:
                 return RequestTypeUtils.UPDATE_ALL;
+
             default:
                 return null;
         }
@@ -133,11 +138,11 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
                 request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
-                break;
+                return mainService.execute(request, response);
+
             default:
-                // Nothing to do.
+                return mainService.execute(request, response);
         }
-        return mainService.execute(request, response);
     }
 
 }

@@ -101,7 +101,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         Set<NavigationPropertyMain> navigationProps;
         List<Expand> expand;
         Query query = entity.getQuery();
-        Metadata metadata = Metadata.DEFAULT;
+        Metadata metadata;
         if (query == null) {
             LOGGER.error("Received entity without Query: {}", entity);
             throw new IllegalArgumentException("Entity without query.");
@@ -180,13 +180,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
-        final boolean admin = entity.getQuery().getPrincipal().isAdmin();
+        final boolean adminUser = entity.getQuery().getPrincipal().isAdmin();
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
-            if (!np.isAdminOnly() || admin) {
-                if (np instanceof NavigationPropertyMain) {
-                    writeExpand(exp, entity, (NavigationPropertyMain) np, gen);
-                }
+            if ((adminUser || !np.isAdminOnly()) && np instanceof NavigationPropertyMain npm) {
+                writeExpand(exp, entity, npm, gen);
             }
         }
     }

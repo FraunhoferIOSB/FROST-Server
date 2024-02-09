@@ -172,8 +172,7 @@ public class PluginManager implements ConfigDefaults {
                 LOGGER.info("Loading {}", className);
                 Class<?> clazz = Class.forName(className.trim());
                 Object newInstance = clazz.getDeclaredConstructor().newInstance();
-                if (newInstance instanceof Plugin) {
-                    Plugin plugin = (Plugin) newInstance;
+                if (newInstance instanceof Plugin plugin) {
                     plugin.init(settings);
                 }
             } catch (NoClassDefFoundError | ClassNotFoundException ex) {

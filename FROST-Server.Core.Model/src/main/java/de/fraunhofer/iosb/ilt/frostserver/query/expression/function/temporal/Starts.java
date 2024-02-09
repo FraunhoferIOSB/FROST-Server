@@ -44,7 +44,7 @@ public class Starts extends Function {
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
-        return new BooleanConstant(p1.getValue().equals(p2.getValue().getStart()));
+        return new BooleanConstant(p1.getValue().toMoment().equals(p2.getValue().getStart().getTemporal()));
     }
 
     @Override

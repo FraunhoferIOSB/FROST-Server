@@ -36,13 +36,18 @@ import org.slf4j.LoggerFactory;
 public abstract class Request implements Content {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Request.class);
-    private static final String VERSION_REGEX = "/v[0-9]\\.[0-9](/|$)";
+    private static final String VERSION_REGEX = "/v\\d\\.\\d(/|$)";
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
+    private static final String SLASH = "/";
+
     protected String logIndent = "";
     protected HttpMethod method;
     protected String version;
     protected String path;
-    /** Batch request user. */
+
+    /**
+     * Batch request user.
+     */
     protected Principal userPrincipal;
 
     protected final Map<String, String> headersOuter = new HashMap<>();
@@ -192,16 +197,16 @@ public abstract class Request implements Content {
         if (versionMatcher.find()) {
             int versionStart = versionMatcher.start() + 1;
             int versionEnd = versionMatcher.end();
-            if ("/".equals(versionMatcher.group(1))) {
+            if (SLASH.equals(versionMatcher.group(1))) {
                 version = fullUrl.substring(versionStart, versionEnd - 1);
                 path = fullUrl.substring(versionEnd - 1);
             } else {
                 version = fullUrl.substring(versionStart, versionEnd);
-                path = "/";
+                path = SLASH;
             }
         } else {
             version = batchVersion.urlPart;
-            path = "/" + fullUrl;
+            path = SLASH + fullUrl;
         }
     }
 

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -50,11 +49,6 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     private final NavigationPropertyMain navProp;
 
     /**
-     * The target entity type of the relation.
-     */
-    private final EntityType targetType;
-
-    /**
      * The name of the relation. For official relations, this is the (singular)
      * entity type name.
      */
@@ -82,17 +76,16 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     private final boolean distinctRequired;
 
     public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
-        this(navProp, source, target, navProp.getEntityType(), navProp.isEntitySet());
+        this(navProp, source, target, navProp.isEntitySet());
     }
 
-    public RelationOneToMany(NavigationPropertyMain navProp, S source, T target, EntityType targetType, boolean distinctRequired) {
+    public RelationOneToMany(NavigationPropertyMain navProp, S source, T target, boolean distinctRequired) {
         if (source == null) {
             // Source is only used for finding the generics...
             LOGGER.error("NULL source");
         }
         this.navProp = navProp;
         this.target = target;
-        this.targetType = targetType;
         this.name = navProp.getName();
         this.distinctRequired = distinctRequired;
     }

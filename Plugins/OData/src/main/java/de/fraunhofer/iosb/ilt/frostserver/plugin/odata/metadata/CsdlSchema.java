@@ -56,14 +56,11 @@ public class CsdlSchema {
         for (Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {
             String name = entry.getKey();
             PropertyType value = entry.getValue();
-            if (value instanceof TypeComplex) {
-                TypeComplex tc = (TypeComplex) value;
+            if (value instanceof TypeComplex tc) {
                 schemaItems.put(name, new CsdlItemComplexType().generateFrom(doc, nameSpace, tc));
-            } else if (value instanceof TypeSimpleCustom) {
-                TypeSimpleCustom tc = (TypeSimpleCustom) value;
+            } else if (value instanceof TypeSimpleCustom tc) {
                 schemaItems.put(name, new CsdlItemTypeDefinition().generateFrom(tc));
-            } else if (value instanceof TypeEnumeration) {
-                TypeEnumeration te = (TypeEnumeration) value;
+            } else if (value instanceof TypeEnumeration te) {
                 schemaItems.put(name, new CsdlItemEnumType().generateFrom(te));
             } else {
                 LOGGER.debug("Unknown PropertyType {}", value);

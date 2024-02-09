@@ -285,8 +285,7 @@ public class EntityFactories {
             geoLocation = feature.getGeometry();
         }
         // Ensure the geoJson has a crs, otherwise Postgres complains.
-        if (geoLocation instanceof GeoJsonObject) {
-            GeoJsonObject geoJsonObject = (GeoJsonObject) geoLocation;
+        if (geoLocation instanceof GeoJsonObject geoJsonObject) {
             Crs crs = geoJsonObject.getCrs();
             if (crs == null) {
                 crs = new Crs();

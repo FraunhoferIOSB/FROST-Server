@@ -95,22 +95,22 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_START</code>.
      */
-    public final TableField<Record, Moment> colResultTimeStart = createField(DSL.name(NAME_COL_RESULTTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colResultTimeStart = createField(DSL.name(NAME_COL_RESULTTIMESTART), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_END</code>.
      */
-    public final TableField<Record, Moment> colResultTimeEnd = createField(DSL.name(NAME_COL_RESULTTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colResultTimeEnd = createField(DSL.name(NAME_COL_RESULTTIMEEND), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_NAME</code>.
@@ -135,7 +135,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name(NAME_COL_OBSERVEDAREA), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name(NAME_COL_OBSERVEDAREA), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", PostGisGeometryBinding.instance());
 
     /**
      * A helper field for getting the observedArea
@@ -145,7 +145,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name(NAME_COL_PROPERTIES), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.DATASTREAMS.ID</code>.

@@ -114,10 +114,10 @@ public class EntityChangedMessage {
     }
 
     public EntityChangedMessage addField(Property field) {
-        if (field instanceof EntityPropertyMain) {
-            addEpField((EntityPropertyMain) field);
-        } else if (field instanceof NavigationPropertyMain) {
-            addNpField((NavigationPropertyMain) field);
+        if (field instanceof EntityPropertyMain entityPropertyMain) {
+            addEpField(entityPropertyMain);
+        } else if (field instanceof NavigationPropertyMain navigationPropertyMain) {
+            addNpField(navigationPropertyMain);
         } else {
             throw new IllegalArgumentException("Field is not an entity or navigation property: " + field);
         }

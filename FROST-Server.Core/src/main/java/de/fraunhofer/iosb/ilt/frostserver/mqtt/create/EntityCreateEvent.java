@@ -18,24 +18,22 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.create;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.util.EventObject;
 
 /**
  *
  * @author jab
  */
-public class EntityCreateEvent extends EventObject {
+public class EntityCreateEvent {
 
     private final String topic;
     private final String payload;
-    private final PrincipalExtended principal;
+    private final transient PrincipalExtended principal;
 
-    public EntityCreateEvent(Object source, String topic, String payload) {
-        this(source, topic, payload, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    public EntityCreateEvent(String topic, String payload) {
+        this(topic, payload, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
-    public EntityCreateEvent(Object source, String topic, String payload, PrincipalExtended principal) {
-        super(source);
+    public EntityCreateEvent(String topic, String payload, PrincipalExtended principal) {
         this.topic = topic;
         this.payload = payload;
         this.principal = principal;

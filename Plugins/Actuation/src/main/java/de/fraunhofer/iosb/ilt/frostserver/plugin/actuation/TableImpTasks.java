@@ -47,12 +47,12 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
     /**
      * The column <code>public.TASKS.CREATION_TIME</code>.
      */
-    public final TableField<Record, Moment> colCreationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colCreationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.EP_PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.TASKS.EP_ID</code>.

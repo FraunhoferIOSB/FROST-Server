@@ -126,6 +126,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -135,6 +137,7 @@ public class ExpressionParser extends Visitor {
 
     private static final String GEOGRAPHY_REGEX = "^geography'([^']+)'$";
     private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionParser.class.getName());
 
     public enum Operator {
         // Logical
@@ -469,6 +472,9 @@ public class ExpressionParser extends Visitor {
     }
 
     public void visit(T_NULL node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         NullConstant value = new NullConstant();
         addToCurrentExpression(value);
     }

@@ -177,8 +177,8 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
                 .where(sourceLinkFieldAcc.getField(linkTable).eq(sourceId))
                 .execute();
         LOGGER.debug("Removed {} relations from {}", count, linkTable.getName());
-        for (Entity target : targets) {
-            link(pm, sourceId, target.getId().getValue());
+        for (Entity targetEntity : targets) {
+            link(pm, sourceId, targetEntity.getId().getValue());
         }
 
     }

@@ -65,6 +65,8 @@ public class MxGraphGenerator {
     private static final String AS_TARGETPOINT = "targetPoint";
     private static final String AS_OFFSET = "offset";
     private static final String AS_GEOMETRY = "geometry";
+    private static final String AS_POINTS = "points";
+
     private static final int BOX_WIDTH = 160;
     private static final int BOX_HEIGHT_BASE = 32;
     private static final int BOX_HEIGHT_ITEM = 18;
@@ -369,8 +371,7 @@ public class MxGraphGenerator {
             npName1 = np.getInverse().getName();
             npName2 = np.getName();
         }
-        String data = "ET-" + etName1 + "-" + npName1 + "-" + npName2 + "-" + etName2;
-        return data;
+        return "ET-" + etName1 + "-" + npName1 + "-" + npName2 + "-" + etName2;
     }
 
     private static String genIdFor(EntityType et, EntityPropertyMain ep) {
@@ -834,7 +835,7 @@ public class MxGraphGenerator {
         private Integer width;
         private Integer height;
         private Integer relative;
-        private final String as = AS_GEOMETRY;
+        private String as = AS_GEOMETRY;
 
         private final List<MxPoint> mxPoint = new ArrayList<>();
         private Array array;
@@ -842,6 +843,10 @@ public class MxGraphGenerator {
         @JacksonXmlProperty(isAttribute = true)
         public String getAs() {
             return as;
+        }
+
+        public void setAs(String as) {
+            this.as = as;
         }
 
         @JacksonXmlProperty(isAttribute = true)
@@ -922,7 +927,7 @@ public class MxGraphGenerator {
 
         private Integer x;
         private Integer y;
-        private String as = "sourcePoint";
+        private String as = AS_SOURCEPOINT;
 
         @JacksonXmlProperty(isAttribute = true)
         public Integer getX() {
@@ -957,12 +962,16 @@ public class MxGraphGenerator {
 
     private static class Array {
 
-        private final String as = "points";
+        private String as = AS_POINTS;
         private final List<MxPoint> mxPoint = new ArrayList<>();
 
         @JacksonXmlProperty(isAttribute = true)
         public String getAs() {
             return as;
+        }
+
+        public void setAs(String as) {
+            this.as = as;
         }
 
         public List<MxPoint> getMxPoint() {

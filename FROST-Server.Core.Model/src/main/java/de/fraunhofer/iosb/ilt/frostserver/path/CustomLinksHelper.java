@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -53,7 +52,7 @@ public class CustomLinksHelper {
                 modelRegistry.getEntityTypes()
                         .stream()
                         .map(type -> type.entityName)
-                        .collect(Collectors.toList()),
+                        .toList(),
                 '|');
         entityLinkNamePattern = Pattern.compile("([a-zA-Z0-9._-]+)\\.(" + entityTypeRegex + ")@iot\\.id");
     }
@@ -111,7 +110,7 @@ public class CustomLinksHelper {
                     EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
                 }
             }
         }

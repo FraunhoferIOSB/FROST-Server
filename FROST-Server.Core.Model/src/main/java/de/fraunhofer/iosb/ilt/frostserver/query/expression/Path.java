@@ -76,13 +76,13 @@ public class Path implements Variable {
             throw new IllegalArgumentException("Unknown Property: " + topName);
         }
         elements.add(property);
-        if (property instanceof NavigationPropertyMain) {
-            localType = ((NavigationPropertyMain) property).getEntityType();
+        if (property instanceof NavigationPropertyMain npm) {
+            localType = npm.getEntityType();
         }
         for (String rawElement : rawElements.getSubPath()) {
             property = helper.parseProperty(localType, rawElement, property);
-            if (property instanceof NavigationProperty) {
-                localType = ((NavigationProperty) property).getEntityType();
+            if (property instanceof NavigationProperty navigationProperty) {
+                localType = navigationProperty.getEntityType();
             }
             if (property == null) {
                 throw new IllegalArgumentException("Unknown Property: " + rawElement);

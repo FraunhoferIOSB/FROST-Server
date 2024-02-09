@@ -106,8 +106,7 @@ public class BatchProcessor<C extends Content> {
 
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
-            if (createdObject instanceof Entity) {
-                Entity entity = (Entity) createdObject;
+            if (createdObject instanceof Entity entity) {
                 httpRequest.setContentIdValue(entity.getId());
             }
         }
@@ -152,8 +151,7 @@ public class BatchProcessor<C extends Content> {
         for (Part part : parts) {
             LOGGER.debug("SubPart: {}", part);
             Content content = part.getContent();
-            if (content instanceof Request) {
-                Request request = (Request) content;
+            if (content instanceof Request request) {
                 request.updateUsingContentIds(contentIds);
                 request.setUserPrincipal(changeset.getUserPrincipal());
                 Request httpResponse = processHttpRequest(service, request, true);
@@ -192,8 +190,7 @@ public class BatchProcessor<C extends Content> {
                 Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");
                 newPart.setContent(changesetResponse);
                 batchResponse.addPart(newPart);
-            } else if (content instanceof Request) {
-                Request request = (Request) content;
+            } else if (content instanceof Request request) {
                 request.setUserPrincipal(batchRequest.getUserPrincipal());
                 Request httpResponse = processHttpRequest(service, request, false);
                 Part newPart = batchFactory.createPart(batchVersion, service.getSettings(), false, "");

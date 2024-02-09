@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
+    private static final String IS_NOT_EQUAL = ") is not equal to size of multiObservationDataTypes (";
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginmultidatastream/tables.xml";
     private static final String MULTI_DATASTREAM = "MultiDatastream";
     private static final String MULTI_DATASTREAMS = "MultiDatastreams";
@@ -170,11 +171,11 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     EntitySet observedProperties = entity.getProperty(npObservedPropertiesMDs);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + (unitOfMeasurements == null ? "null" : unitOfMeasurements.size()) + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + (unitOfMeasurements == null ? "null" : unitOfMeasurements.size()) + IS_NOT_EQUAL + multiObservationDataTypes.size() + ").");
                     }
                     if (observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
                         final int opSize = observedProperties == null ? 0 : observedProperties.size();
-                        throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + IS_NOT_EQUAL + multiObservationDataTypes.size() + ").");
                     }
                     String observationType = entity.getProperty(pluginCoreModel.epObservationType);
                     if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
@@ -184,10 +185,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .addUpdateValidator("MD-Properties", entity -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
-                    if (unitOfMeasurements != null && multiObservationDataTypes != null) {
-                        if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                            throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-                        }
+                    if (unitOfMeasurements != null && multiObservationDataTypes != null && unitOfMeasurements.size() != multiObservationDataTypes.size()) {
+                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + IS_NOT_EQUAL + multiObservationDataTypes.size() + ").");
                     }
                     String observationType = entity.getProperty(pluginCoreModel.epObservationType);
                     if (observationType != null && !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
@@ -248,8 +247,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager ppm) {
                 return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
             }
             return "Unknown persistence manager class";
@@ -259,8 +257,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager ppm) {
                 return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
             }
             out.append("Unknown persistence manager class");

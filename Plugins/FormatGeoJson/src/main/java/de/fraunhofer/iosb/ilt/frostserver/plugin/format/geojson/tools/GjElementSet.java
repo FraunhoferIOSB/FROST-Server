@@ -108,10 +108,10 @@ public class GjElementSet {
                         property));
             } else if (property == ModelRegistry.EP_SELFLINK) {
                 elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.getName()));
-            } else if (property instanceof EntityPropertyMain) {
-                initFrom((EntityPropertyMain) property);
-            } else if (property instanceof EntityPropertyCustomSelect) {
-                elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
+            } else if (property instanceof EntityPropertyMain epm) {
+                initFrom(epm);
+            } else if (property instanceof EntityPropertyCustomSelect epcs) {
+                elements.add(new GjEntityProperty(epcs.getName(), property));
             }
         }
     }
@@ -122,7 +122,7 @@ public class GjElementSet {
             elements.add(new GjEntityProperty(property.getName(), property));
         } else if (type == TypeComplex.STA_TIMEINTERVAL) {
             elements.add(new GjEntityProperty(property.getName(), property));
-        } else if (type instanceof TypeComplex && !((TypeComplex) type).isOpenType()) {
+        } else if (type instanceof TypeComplex tc && !tc.isOpenType()) {
             elements.add(new GjComplexProperty(property.getName(), property));
         } else {
             elements.add(new GjEntityProperty(property.getName(), property));
@@ -140,10 +140,10 @@ public class GjElementSet {
     }
 
     public void writeData(GjRowCollector collector, Object obj, String namePrefix) {
-        if (obj instanceof Entity) {
-            writeData(collector, (Entity) obj, namePrefix + name);
-        } else if (obj instanceof EntitySet) {
-            writeData(collector, (EntitySet) obj, namePrefix + name);
+        if (obj instanceof Entity entity) {
+            writeData(collector, entity, namePrefix + name);
+        } else if (obj instanceof EntitySet entitySet) {
+            writeData(collector, entitySet, namePrefix + name);
         }
     }
 

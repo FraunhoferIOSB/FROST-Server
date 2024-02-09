@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jab
  */
-class PathParserTestUuidId {
+class PathParserUuidIdTest {
 
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;

@@ -41,11 +41,11 @@ import org.slf4j.LoggerFactory;
  */
 public class MixedContent extends Batch<MultipartContent> implements MultipartContent {
 
-    public static final String BOUNDARY_REGEX = "boundary=[\"]?([A-Za-z0-9'()+_,-./:=?]+)[\"]?";
+    public static final String BOUNDARY_REGEX = "boundary=\"?([A-Za-z0-9'()+_,-./:=?]+)\"?";
     public static final Pattern BOUNDARY_PATTERN = Pattern.compile(BOUNDARY_REGEX);
-    public static final String HEADER_REGEX = "^([-A-Za-z]+):([^;]+)(;[ ]*)?";
+    public static final String HEADER_REGEX = "^([-A-Za-z]+):([^;]+)(; *)?";
     public static final Pattern HEADER_PATTERN = Pattern.compile(HEADER_REGEX);
-    public static final String SUB_HEADER_REGEX = "([-A-Za-z]+)=([^;]+)(;[ ]*)?";
+    public static final String SUB_HEADER_REGEX = "([-A-Za-z]+)=([^;]+)(; *)?";
     public static final Pattern SUB_HEADER_PATTERN = Pattern.compile(SUB_HEADER_REGEX);
     private static final char[] BOUNDARY_CHARS = "-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 

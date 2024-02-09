@@ -75,16 +75,15 @@ public class CsdlAnnotation {
     }
 
     public void writeXml(Writer writer) throws IOException {
-        if (value instanceof Boolean) {
-            boolean boolValue = (Boolean) value;
+        if (value instanceof Boolean boolValue) {
             if (boolValue) {
                 writer.write("<Annotation Term=\"" + getQualifiedName() + "\" />");
             }
             return;
         }
         writer.write("<Annotation Term=\"" + getQualifiedName() + "\"");
-        if (value instanceof String) {
-            writer.write(" String=\"" + StringEscapeUtils.escapeXml11((String) value) + "\" />");
+        if (value instanceof String string) {
+            writer.write(" String=\"" + StringEscapeUtils.escapeXml11(string) + "\" />");
             return;
         }
         LOGGER.error("Unknown annotation value type: {}", value.getClass().getName());

@@ -125,15 +125,21 @@ public class QueryParser extends Visitor {
         currentOption = lastOption;
     }
 
-    void visit(T_O_COUNT node) {
+    public void visit(T_O_COUNT node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<T_BOOL> values = currentOption.childrenOfType(T_BOOL.class);
         if (values.isEmpty()) {
             return;
         }
-        currentQuery.setCount(Boolean.valueOf(values.get(0).getImage()));
+        currentQuery.setCount(Boolean.parseBoolean(values.get(0).getImage()));
     }
 
-    void visit(T_O_SKIP node) {
+    public void visit(T_O_SKIP node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
         if (values.isEmpty()) {
             return;
@@ -141,7 +147,10 @@ public class QueryParser extends Visitor {
         currentQuery.setSkip(Integer.parseInt(values.get(0).getImage()));
     }
 
-    void visit(T_O_TOP node) {
+    public void visit(T_O_TOP node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
         if (values.isEmpty()) {
             return;
@@ -150,7 +159,10 @@ public class QueryParser extends Visitor {
         currentQuery.setTop(Integer.parseInt(image));
     }
 
-    void visit(T_O_FORMAT node) {
+    public void visit(T_O_FORMAT node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<T_CHARSEQ_FORMAT> values = currentOption.childrenOfType(T_CHARSEQ_FORMAT.class);
         if (values.isEmpty()) {
             return;
@@ -158,7 +170,10 @@ public class QueryParser extends Visitor {
         currentQuery.setFormat(values.get(0).getImage());
     }
 
-    void visit(T_O_METADATA node) {
+    public void visit(T_O_METADATA node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<T_CHARSEQ_METADATA> values = currentOption.childrenOfType(T_CHARSEQ_METADATA.class);
         if (values.isEmpty()) {
             return;
@@ -166,7 +181,10 @@ public class QueryParser extends Visitor {
         currentQuery.setMetadata(Metadata.lookup(values.get(0).getImage()));
     }
 
-    void visit(T_O_SELECT node) {
+    public void visit(T_O_SELECT node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         if (currentOption.getChild(1) instanceof T_DISTINCT) {
             currentQuery.setSelectDistinct(true);
         }
@@ -180,7 +198,7 @@ public class QueryParser extends Visitor {
         }
     }
 
-    PropertyPlaceholder handle(P_PlainPath pp) {
+    public PropertyPlaceholder handle(P_PlainPath pp) {
         List<Token> children = pp.childrenOfType(Token.class);
         PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).getImage());
         for (int i = 1; i < children.size(); i++) {
@@ -198,7 +216,10 @@ public class QueryParser extends Visitor {
         return property;
     }
 
-    void visit(T_O_ORDERBY node) {
+    public void visit(T_O_ORDERBY node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<P_OrderBy> values = currentOption.childrenOfType(P_OrderBy.class);
         if (values.isEmpty()) {
             return;
@@ -208,7 +229,7 @@ public class QueryParser extends Visitor {
         }
     }
 
-    void handle(P_OrderBy node) {
+    public void handle(P_OrderBy node) {
         var dir = OrderBy.OrderType.ASCENDING;
         if (node.getChildCount() == 2 && node.getChild(1) instanceof T_O_DESC) {
             dir = OrderBy.OrderType.DESCENDING;
@@ -217,15 +238,24 @@ public class QueryParser extends Visitor {
         currentQuery.addOrderBy(new OrderBy(expression, dir));
     }
 
-    void visit(T_O_FILTER node) {
+    public void visit(T_O_FILTER node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         currentQuery.setFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
     }
 
-    void visit(T_O_SKIPFILTER node) {
+    public void visit(T_O_SKIPFILTER node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         currentQuery.setSkipFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
     }
 
-    void visit(T_O_EXPAND node) {
+    public void visit(T_O_EXPAND node) {
+        if (node == null) {
+            LOGGER.warn("Visit called without parameter.");
+        }
         List<P_ExpandItem> values = currentOption.childrenOfType(P_ExpandItem.class);
         if (values.isEmpty()) {
             return;
@@ -235,7 +265,7 @@ public class QueryParser extends Visitor {
         }
     }
 
-    void handle(P_ExpandItem expandItem) {
+    public void handle(P_ExpandItem expandItem) {
         Expand expand = new Expand(modelRegistry);
         List<P_PlainPath> paths = expandItem.childrenOfType(P_PlainPath.class);
         if (paths.isEmpty()) {
@@ -285,7 +315,7 @@ public class QueryParser extends Visitor {
     }
 
     public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
+        return parseQuery(query, encoding, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
     }
 
     public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user, DynamicContext context) {

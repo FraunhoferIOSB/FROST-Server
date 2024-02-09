@@ -95,17 +95,17 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colPhenomenonTimeStart = createField(DSL.name(NAME_COL_PHENOMENONTIMESTART), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colPhenomenonTimeEnd = createField(DSL.name(NAME_COL_PHENOMENONTIMEEND), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TIME</code>.
      */
-    public final TableField<Record, Moment> colResultTime = createField(DSL.name(NAME_COL_RESULTTIME), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colResultTime = createField(DSL.name(NAME_COL_RESULTTIME), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_NUMBER</code>.
@@ -120,21 +120,21 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * The column <code>public.OBSERVATIONS.RESULT_QUALITY</code>.
      */
-    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name(NAME_COL_RESULTQUALITY), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name(NAME_COL_RESULTQUALITY), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
-    public final TableField<Record, Moment> colValidTimeStart = createField(DSL.name(NAME_COL_VALIDTIMESTART), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colValidTimeStart = createField(DSL.name(NAME_COL_VALIDTIMESTART), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_END</code>.
      */
-    public final TableField<Record, Moment> colValidTimeEnd = createField(DSL.name(NAME_COL_VALIDTIMEEND), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> colValidTimeEnd = createField(DSL.name(NAME_COL_VALIDTIMEEND), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.
      */
-    public final TableField<Record, JsonValue> colParameters = createField(DSL.name(NAME_COL_PARAMETERS), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colParameters = createField(DSL.name(NAME_COL_PARAMETERS), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TYPE</code>.
@@ -144,7 +144,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * The column <code>public.OBSERVATIONS.RESULT_JSON</code>.
      */
-    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name(NAME_COL_RESULTJSON), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name(NAME_COL_RESULTJSON), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_BOOLEAN</code>.
      */
@@ -310,10 +310,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
     public void handleResult(TableImpObservations table, Entity entity, Map<Field, Object> output) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
-        if (result instanceof Number) {
+        if (result instanceof Number number) {
             output.put(table.colResultType, ResultType.NUMBER.sqlValue());
             output.put(table.colResultString, result.toString());
-            output.put(table.colResultNumber, ((Number) result).doubleValue());
+            output.put(table.colResultNumber, number.doubleValue());
             output.put(table.colResultBoolean, null);
             output.put(table.colResultJson, null);
         } else if (result instanceof Boolean) {

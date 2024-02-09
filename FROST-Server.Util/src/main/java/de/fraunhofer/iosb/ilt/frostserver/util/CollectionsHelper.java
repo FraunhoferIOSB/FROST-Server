@@ -52,8 +52,8 @@ public class CollectionsHelper {
             return;
         }
         Object subEntry = map.computeIfAbsent(key, t -> new HashMap<>());
-        if (subEntry instanceof Map) {
-            setOn((Map) subEntry, path, idx + 1, value);
+        if (subEntry instanceof Map subMap) {
+            setOn(subMap, path, idx + 1, value);
             return;
         }
         if (subEntry instanceof List) {
@@ -77,11 +77,11 @@ public class CollectionsHelper {
         int last = path.size();
         for (int idx = 0; idx < last; idx++) {
             String key = path.get(idx);
-            if (currentEntry instanceof Map) {
-                currentEntry = ((Map) currentEntry).get(key);
-            } else if (currentEntry instanceof List) {
+            if (currentEntry instanceof Map map) {
+                currentEntry = map.get(key);
+            } else if (currentEntry instanceof List list) {
                 try {
-                    currentEntry = ((List) currentEntry).get(Integer.parseInt(key));
+                    currentEntry = list.get(Integer.parseInt(key));
                 } catch (NumberFormatException | IndexOutOfBoundsException ex) {
                     LOGGER.warn("Failed to get {} from {}.", key, currentEntry, ex);
                     return null;

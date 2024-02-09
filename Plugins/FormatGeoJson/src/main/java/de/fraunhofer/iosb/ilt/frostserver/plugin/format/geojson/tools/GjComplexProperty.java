@@ -48,13 +48,11 @@ public class GjComplexProperty implements GjEntityEntry {
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
         Object value = source.getProperty(property);
-        if (value instanceof ComplexValue) {
-            ComplexValue complexValue = (ComplexValue) value;
+        if (value instanceof ComplexValue complexValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
                 collector.collectEntry(namePrefix + entry.getKey(), complexValue.get(entry.getValue()));
             }
-        } else if (value instanceof Map) {
-            Map mapValue = (Map) value;
+        } else if (value instanceof Map mapValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
                 collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()));
             }

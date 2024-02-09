@@ -363,10 +363,9 @@ public class Query {
             }
         } else {
             for (Property s : select) {
-                if (s instanceof EntityPropertyMain) {
-                    selectedEntityPropMain.add((EntityPropertyMain) s);
-                } else if (s instanceof EntityPropertyCustomSelect) {
-                    EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
+                if (s instanceof EntityPropertyMain epm) {
+                    selectedEntityPropMain.add(epm);
+                } else if (s instanceof EntityPropertyCustomSelect epcs) {
                     selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
                 } else if (s instanceof NavigationPropertyMain np) {
                     if (!np.isAdminOnly() || principal.isAdmin()) {

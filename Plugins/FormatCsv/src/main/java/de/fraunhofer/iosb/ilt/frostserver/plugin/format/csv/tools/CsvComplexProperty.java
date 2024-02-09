@@ -54,13 +54,11 @@ public class CsvComplexProperty implements CsvEntityEntry {
     @Override
     public void writeData(CsvRowCollector collector, Entity source) {
         Object value = source.getProperty(property);
-        if (value instanceof ComplexValue) {
-            ComplexValue complexValue = (ComplexValue) value;
+        if (value instanceof ComplexValue complexValue) {
             for (Map.Entry<Integer, String> entry : subProperties.entrySet()) {
                 collector.collectEntry(entry.getKey(), complexValue.get(entry.getValue()));
             }
-        } else if (value instanceof Map) {
-            Map mapValue = (Map) value;
+        } else if (value instanceof Map mapValue) {
             for (Map.Entry<Integer, String> entry : subProperties.entrySet()) {
                 collector.collectEntry(entry.getKey(), mapValue.get(entry.getValue()));
             }

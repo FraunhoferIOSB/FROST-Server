@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +49,11 @@ public class ResultFormatterDefault implements ResultFormatter {
     @Override
     public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         try {
-            if (Entity.class.isAssignableFrom(result.getClass())) {
-                final Entity entity = (Entity) result;
+            if (result instanceof Entity entity) {
                 LOGGER.trace("Formatting as Entity.");
                 return target -> JsonWriter.writeEntity(target, entity);
             }
-            if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                EntitySet entitySet = (EntitySet) result;
+            if (result instanceof EntitySet entitySet) {
                 LOGGER.trace("Formatting as EntitySet.");
                 return target -> JsonWriter.writeEntityCollection(target, entitySet, query);
             }
@@ -64,10 +63,10 @@ public class ResultFormatterDefault implements ResultFormatter {
                 LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = JsonWriter.writeObject(result);
-                } else if (result instanceof Id) {
-                    entityJsonString = ((Id) result).getValue().toString();
+                } else if (result instanceof Id id) {
+                    entityJsonString = id.getValue().toString();
                 } else {
-                    entityJsonString = result.toString();
+                    entityJsonString = Objects.toString(result);
                 }
             } else {
                 LOGGER.trace("Formatting as Object.");

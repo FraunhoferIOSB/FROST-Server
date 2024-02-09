@@ -68,13 +68,17 @@ public class PostGisGeometryBinding implements Binding<Object, Geometry> {
         return INSTANCE;
     }
 
+    public static DataType<Geometry> dataType() {
+        return DATA_TYPE;
+    }
+
+    private PostGisGeometryBinding() {
+        // Use instance()
+    }
+
     @Override
     public Converter<Object, Geometry> converter() {
         return CONVERTER_INSTANCE;
-    }
-
-    public static DataType<Geometry> dataType() {
-        return DATA_TYPE;
     }
 
     @Override

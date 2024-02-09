@@ -179,8 +179,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             return sqlWhere.and(filterField.getCondition());
 
         }
-        if (filterField instanceof FieldListWrapper) {
-            FieldListWrapper listExpression = (FieldListWrapper) filterField;
+        if (filterField instanceof FieldListWrapper listExpression) {
             for (Field expression : listExpression.getExpressions().values()) {
                 if (Boolean.class.isAssignableFrom(expression.getType())) {
                     Field<Boolean> predicate = expression;
@@ -194,24 +193,21 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     public void addOrderbyToQuery(OrderBy orderBy, Utils.SortSelectFields orderFields) {
         FieldWrapper resultExpression = orderBy.getExpression().accept(this);
-        if (resultExpression instanceof StaTimeIntervalWrapper) {
-            StaTimeIntervalWrapper timeInterval = (StaTimeIntervalWrapper) resultExpression;
+        if (resultExpression instanceof StaTimeIntervalWrapper timeInterval) {
             addToQuery(orderBy, timeInterval.getStart(), orderFields);
             addToQuery(orderBy, timeInterval.getEnd(), orderFields);
             return;
         }
-        if (resultExpression instanceof StaDurationWrapper) {
-            StaDurationWrapper duration = (StaDurationWrapper) resultExpression;
+        if (resultExpression instanceof StaDurationWrapper duration) {
             addToQuery(orderBy, duration.getDuration(), orderFields);
             return;
         }
-        if (resultExpression instanceof StaDateTimeWrapper) {
-            StaDateTimeWrapper dateTime = (StaDateTimeWrapper) resultExpression;
+        if (resultExpression instanceof StaDateTimeWrapper dateTime) {
             addToQuery(orderBy, dateTime.getDateTime(), orderFields);
             return;
         }
-        if (resultExpression instanceof FieldListWrapper) {
-            for (Field sqlExpression : ((FieldListWrapper) resultExpression).getExpressionsForOrder().values()) {
+        if (resultExpression instanceof FieldListWrapper fieldListWrapper) {
+            for (Field sqlExpression : fieldListWrapper.getExpressionsForOrder().values()) {
                 addToQuery(orderBy, sqlExpression, orderFields);
             }
             return;
@@ -237,18 +233,17 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             } else if (element instanceof EntityPropertyCustomLink) {
                 handleCustomProperty(state, path);
 
-            } else if (element instanceof EntityPropertyMain) {
-                handleEntityProperty(state, path, (EntityPropertyMain) element);
+            } else if (element instanceof EntityPropertyMain entityPropertyMain) {
+                handleEntityProperty(state, path, entityPropertyMain);
 
-            } else if (element instanceof NavigationPropertyMain) {
-                handleNavigationProperty(state, path, (NavigationPropertyMain) element);
+            } else if (element instanceof NavigationPropertyMain navigationPropertyMain) {
+                handleNavigationProperty(state, path, navigationPropertyMain);
             }
         }
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("Path does not end in an EntityProperty: " + path);
         }
-        if (state.finalExpression instanceof Field) {
-            Field field = (Field) state.finalExpression;
+        if (state.finalExpression instanceof Field field) {
             if (Moment.class.isAssignableFrom(field.getType())) {
                 Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
                 state.finalExpression = new StaDateTimeWrapper(dateTimePath);
@@ -263,8 +258,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
         // generate finalExpression::jsonb#>>'{x,y,z}'
         JsonFieldWrapper jsonFactory;
-        if (state.finalExpression instanceof JsonFieldWrapper) {
-            jsonFactory = (JsonFieldWrapper) state.finalExpression;
+        if (state.finalExpression instanceof JsonFieldWrapper jsonFieldWrapper) {
+            jsonFactory = jsonFieldWrapper;
         } else {
             jsonFactory = new JsonFieldWrapper(state.finalExpression);
         }
@@ -458,8 +453,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.before(p2);
         }
         throw new IllegalArgumentException("Before can only be used on times, not on " + p1.getClass().getName());
@@ -470,8 +464,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.after(p2);
         }
         throw new IllegalArgumentException("After can only be used on times, not on " + p1.getClass().getName());
@@ -482,8 +475,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.meets(p2);
         }
         throw new IllegalArgumentException("Meets can only be used on times, not on " + p1.getClass().getName());
@@ -494,8 +486,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p2 instanceof StaTimeIntervalWrapper) {
-            StaTimeIntervalWrapper ti2 = (StaTimeIntervalWrapper) p2;
+        if (p2 instanceof StaTimeIntervalWrapper ti2) {
             return ti2.contains(p1);
         }
         throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
@@ -506,8 +497,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.overlaps(p2);
         }
         throw new IllegalArgumentException("Overlaps can only be used on times, not on " + p1.getClass().getName());
@@ -518,8 +508,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.starts(p2);
         }
         throw new IllegalArgumentException("Starts can only be used on times, not on " + p1.getClass().getName());
@@ -530,8 +519,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper timeExpression) {
             return timeExpression.finishes(p2);
         }
         throw new IllegalArgumentException("Finishes can only be used on times, not on " + p1.getClass().getName());
@@ -542,12 +530,10 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.add(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.add(p1);
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -560,8 +546,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.div(p2);
         }
         if (p2 instanceof TimeFieldWrapper) {
@@ -593,12 +578,10 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.mul(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.mul(p1);
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -611,8 +594,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.sub(p2);
         }
         if (p2 instanceof TimeFieldWrapper) {
@@ -634,20 +616,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p2 instanceof NullWrapper) {
             return new SimpleFieldWrapper(p1.getDefaultField().isNull());
         }
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.eq(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.eq(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.eq(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.eq(p1);
         }
 
@@ -660,20 +638,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.goe(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.loe(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.goe(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.loe(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -685,20 +659,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.gt(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.lt(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.gt(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.lt(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -710,20 +680,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.loe(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.goe(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.loe(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.goe(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -735,20 +701,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.lt(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.gt(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.lt(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.gt(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -766,20 +728,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p2 instanceof NullWrapper) {
             return new SimpleFieldWrapper(p1.getDefaultField().isNotNull());
         }
-        if (p1 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
+        if (p1 instanceof TimeFieldWrapper ti1) {
             return ti1.neq(p2);
         }
-        if (p2 instanceof TimeFieldWrapper) {
-            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
+        if (p2 instanceof TimeFieldWrapper ti2) {
             return ti2.neq(p1);
         }
-        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper l1) {
             return l1.ne(p2);
         }
-        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
-            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper l2) {
             return l2.ne(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -806,8 +764,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Date node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
         }
         Field<java.sql.Date> fieldAsDate = input.getFieldAsType(java.sql.Date.class, true);
@@ -821,8 +778,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Day node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
         }
         throw new IllegalArgumentException("Day can only be used on times, not on " + input.getClass().getName());
@@ -832,8 +788,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(FractionalSeconds node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.field("(date_part('SECONDS', TIMESTAMPTZ ?) - floor(date_part('SECONDS', TIMESTAMPTZ ?)))", Double.class, timeExpression.getDateTime(), timeExpression.getDateTime()));
         }
         throw new IllegalArgumentException("FractionalSeconds can only be used on times, not on " + input.getClass().getName());
@@ -843,8 +798,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Hour node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
         }
         throw new IllegalArgumentException("Hour can only be used on times, not on " + input.getClass().getName());
@@ -864,8 +818,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Minute node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
         }
         throw new IllegalArgumentException("Minute can only be used on times, not on " + input.getClass().getName());
@@ -875,8 +828,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Month node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
         }
         throw new IllegalArgumentException("Month can only be used on times, not on " + input.getClass().getName());
@@ -891,8 +843,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Second node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
         }
         throw new IllegalArgumentException("Second can only be used on times, not on " + input.getClass().getName());
@@ -902,8 +853,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Time node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
         }
         throw new IllegalArgumentException("Time can only be used on times, not on " + input.getClass().getName());
@@ -913,8 +863,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(TotalOffsetMinutes node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
         }
         throw new IllegalArgumentException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
@@ -924,8 +873,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Year node) {
         Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeFieldWrapper) {
-            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
+        if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
         }
         throw new IllegalArgumentException("Year can only be used on times, not on " + input.getClass().getName());

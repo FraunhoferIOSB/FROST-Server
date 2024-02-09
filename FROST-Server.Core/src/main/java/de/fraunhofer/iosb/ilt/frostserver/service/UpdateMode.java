@@ -35,12 +35,6 @@ public class UpdateMode {
     public static final UpdateMode UPDATE_STA_11 = UPDATE_ODATA_40;
 
     /**
-     * Should Updates only add nested entities to related sets, or can they also
-     * remove relations.
-     */
-    public final boolean linkExisting = true;
-
-    /**
      * Can an update create new related entities and link them.
      */
     public final boolean createAndLinkNew;

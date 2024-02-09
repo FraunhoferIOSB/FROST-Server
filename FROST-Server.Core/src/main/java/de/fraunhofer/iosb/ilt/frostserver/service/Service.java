@@ -514,7 +514,7 @@ public class Service implements AutoCloseable {
             response.setResult(entity);
             response.setCode(201);
             if (query.getMetadata() != Metadata.OFF) {
-                String url = UrlHelper.generateSelfLink(null, path, entity);
+                String url = UrlHelper.generateSelfLink(path, entity);
                 response.addHeader(Constants.HEADER_LOCATION, url);
             }
             return formatResponse(response, formatter, query, path, entity);

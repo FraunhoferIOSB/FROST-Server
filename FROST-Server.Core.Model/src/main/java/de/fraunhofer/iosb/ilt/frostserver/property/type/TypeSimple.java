@@ -34,8 +34,8 @@ public abstract class TypeSimple extends PropertyType {
 
     protected TypeSimple(String name, String description, TypeReference typeReference, Parser parser) {
         super(name, description, typeReference);
-        if (this instanceof TypeSimplePrimitive) {
-            this.underlyingType = (TypeSimplePrimitive) this;
+        if (this instanceof TypeSimplePrimitive typeSimplePrimitive) {
+            this.underlyingType = typeSimplePrimitive;
         } else {
             throw new IllegalArgumentException("This constuctor can only be used by subclass TypeSimplePrimitive or TypeSimpleSet");
         }

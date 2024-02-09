@@ -201,7 +201,7 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Object id) {
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -213,7 +213,7 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, EntityType entityType, Id id) {
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Id id) {
         return new StringBuilder(serviceRootUrl)
                 .append('/')
                 .append(version.urlPart)
@@ -225,26 +225,27 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(Query query, String serviceRootUrl, Version version, Entity entity) {
-        return generateSelfLink(query, serviceRootUrl, version, entity.getEntityType(), entity.getId());
+    public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
+        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getId());
     }
 
-    public static String generateSelfLink(Query query, ResourcePath path, Entity entity) {
-        return generateSelfLink(query, path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
+    public static String generateSelfLink(ResourcePath path, Entity entity) {
+        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
     }
 
     /**
-     * Generate a navigation link for the given entity, using the given path and parent entities.
+     * Generate a navigation link for the given entity, using the given path and
+     * parent entities.
      *
-     * @param query The query used.
-     * @param path The path for the current page that relative links are relative to.
+     * @param path The path for the current page that relative links are
+     * relative to.
      * @param parent The parent of the entity to generate a navlink for.
      * @param entity The entity to generate a navlink for.
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(Query query, ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(query, path, parent) + "/" + entity.getEntityType().entityName;
+    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
+        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);
@@ -253,17 +254,18 @@ public class UrlHelper {
     }
 
     /**
-     * Generate a navigation link for the given EntitySet, using the given path and parent entities.
+     * Generate a navigation link for the given EntitySet, using the given path
+     * and parent entities.
      *
-     * @param query The query used.
-     * @param path The path for the current page that relative links are relative to.
+     * @param path The path for the current page that relative links are
+     * relative to.
      * @param parent The parent of the entity to generate a navlink for.
      * @param es The EntitySet to generate a navlink for.
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link or null depending on query responseMetadata.
      */
-    public static String generateNavLink(Query query, ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
-        String result = generateSelfLink(query, path, parent) + "/" + es.getEntityType().plural;
+    public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
+        String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);

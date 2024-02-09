@@ -26,8 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Helper class for creating MqttServers.
  *
- * @author jab
+ * @author scf
  */
 public class MqttServerFactory {
 
@@ -40,17 +41,8 @@ public class MqttServerFactory {
         RENAME.put("de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer", "de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer");
     }
 
-    private static MqttServerFactory instance;
-
-    public static MqttServerFactory getInstance() {
-        if (instance == null) {
-            instance = new MqttServerFactory();
-        }
-        return instance;
-    }
-
     private MqttServerFactory() {
-
+        // Private only.
     }
 
     /**
@@ -61,7 +53,7 @@ public class MqttServerFactory {
      * server.
      * @return An initialised MQTT server, or null if none is configured.
      */
-    public MqttServer get(CoreSettings settings) {
+    public static MqttServer get(CoreSettings settings) {
         MqttServer mqttServer = get(settings.getMqttSettings());
         if (mqttServer != null) {
             mqttServer.init(settings);
@@ -77,7 +69,7 @@ public class MqttServerFactory {
      * MQTT server.
      * @return An MQTT server instance, or null if none is configured.
      */
-    public MqttServer get(MqttSettings mqttSettings) {
+    public static MqttServer get(MqttSettings mqttSettings) {
         if (mqttSettings == null || !mqttSettings.isEnableMqtt()) {
             return null;
         }

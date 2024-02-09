@@ -44,7 +44,8 @@ public class Meets extends Function {
     }
 
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
-        boolean value = p1.getValue().equals(p2.getValue().getStart()) || p1.getValue().equals(p2.getValue().getEnd());
+        boolean value = p1.getValue().toMoment().equals(p2.getValue().getStart().getTemporal())
+                || p1.getValue().toMoment().equals(p2.getValue().getEnd().getTemporal());
         return new BooleanConstant(value);
     }
 

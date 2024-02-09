@@ -252,6 +252,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             try {
                 tempclient.close(true);
             } catch (MqttException | RuntimeException ex1) {
+                // nothing further to do.
             }
         }
     }

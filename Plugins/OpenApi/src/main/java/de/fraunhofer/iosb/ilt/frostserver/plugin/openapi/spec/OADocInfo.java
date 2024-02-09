@@ -25,37 +25,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author scf
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public final class OADocInfo {
-
-    private final String title;
-    private final String version;
-    private final String description;
-
-    public OADocInfo(String title, String version, String description) {
-        this.title = title;
-        this.version = version;
-        this.description = description;
-    }
-
-    /**
-     * @return the title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
+public final record OADocInfo(String title, String version, String description) {
 
 }

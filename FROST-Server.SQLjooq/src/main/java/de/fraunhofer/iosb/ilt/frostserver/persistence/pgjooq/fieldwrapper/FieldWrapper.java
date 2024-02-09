@@ -55,11 +55,10 @@ public interface FieldWrapper {
     public Field getDefaultField();
 
     public static Field fieldFromObject(Object in) {
-        if (in instanceof Field) {
-            return (Field) in;
+        if (in instanceof Field field) {
+            return field;
         }
-        if (in instanceof FieldWrapper) {
-            FieldWrapper fieldWrapper = (FieldWrapper) in;
+        if (in instanceof FieldWrapper fieldWrapper) {
             return fieldWrapper.getDefaultField();
         }
         throw new IllegalArgumentException("Object is not a Field or FieldWrapper: " + in.getClass());

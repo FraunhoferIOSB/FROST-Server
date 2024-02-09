@@ -86,7 +86,6 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTableAbstract.class.getName());
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
-    private static final String UNKNOWN_UPDATE_LINK_EXISTING_FALSE = "Unknown update mode, don't know how to handle linkExisting=false";
 
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
@@ -257,6 +256,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         // Second create/validate single-entity navigation links.
         // this must happen first so the second step can use these in validation
+        // TODO: add Priority number, handle priorities < 0 here
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
@@ -299,6 +299,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         entity.setId(ParserUtils.idFromObject(entityId));
 
         // Seventh, deal with set-navigation links.
+        // TODO: add Priority number, handle priorities >= 0 here
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
             if (entity.isSetProperty(np)) {
                 LOGGER.debug("  Linking {}", np);
@@ -329,11 +330,6 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         if (relation == null) {
             LOGGER.error("Unknown relation: {}", navProp.getName());
             throw new IllegalStateException("Unknown relation: " + navProp.getName());
-        }
-        // Sanity check.
-        if (!updateMode.linkExisting) {
-            LOGGER.error(UNKNOWN_UPDATE_LINK_EXISTING_FALSE);
-            throw new IllegalStateException(UNKNOWN_UPDATE_LINK_EXISTING_FALSE);
         }
         if (updateMode.deepUpdate) {
             EntityFactories ef = pm.getEntityFactories();

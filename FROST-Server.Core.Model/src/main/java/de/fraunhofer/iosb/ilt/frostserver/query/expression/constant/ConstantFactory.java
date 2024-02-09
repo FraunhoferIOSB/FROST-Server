@@ -37,29 +37,32 @@ public class ConstantFactory {
     }
 
     public static Constant of(Object object) {
+        if (object == null) {
+            return null;
+        }
         if (object instanceof BigDecimal) {
             return new StringConstant(Objects.toString(object));
         }
-        if (object instanceof Boolean) {
-            return new BooleanConstant((Boolean) object);
+        if (object instanceof Boolean aBoolean) {
+            return new BooleanConstant(aBoolean);
         }
-        if (object instanceof Double) {
-            return new DoubleConstant((Double) object);
+        if (object instanceof Double aDouble) {
+            return new DoubleConstant(aDouble);
         }
-        if (object instanceof Id) {
-            return new IdConstant((Id) object);
+        if (object instanceof Id id) {
+            return new IdConstant(id);
         }
-        if (object instanceof Integer) {
-            return new IntegerConstant((Integer) object);
+        if (object instanceof Integer integer) {
+            return new IntegerConstant(integer);
         }
-        if (object instanceof Long) {
-            return new IntegerConstant((Long) object);
+        if (object instanceof Long aLong) {
+            return new IntegerConstant(aLong);
         }
         if (object instanceof String) {
             return new StringConstant(Objects.toString(object));
         }
-        if (object instanceof TimeObject) {
-            return new TimeObjectConstant((TimeObject) object);
+        if (object instanceof TimeObject timeObject) {
+            return new TimeObjectConstant(timeObject);
         }
         LOGGER.warn("Can not make constant of {}", object.getClass());
         return null;

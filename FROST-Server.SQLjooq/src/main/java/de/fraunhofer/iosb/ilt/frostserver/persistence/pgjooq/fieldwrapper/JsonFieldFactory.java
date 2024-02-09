@@ -257,8 +257,10 @@ public class JsonFieldFactory {
             switch (other) {
                 case NUMBER:
                     return DSL.field("jsonb_typeof(?)", jsonExpression).eq("number");
+
                 case BOOLEAN:
                     return DSL.field("jsonb_typeof(?)", jsonExpression).eq("boolean");
+
                 default:
                     return null;
             }

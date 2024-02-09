@@ -69,7 +69,7 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
         entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
         final CoreSettings coreSettings = pm.getCoreSettings();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + entityType.plural)
+        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, '/' + entityType.plural)
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)

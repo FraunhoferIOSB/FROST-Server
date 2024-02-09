@@ -74,8 +74,8 @@ public class ArrayValueHandlers {
                 "resultQuality",
                 (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResultQuality, value));
         handlers.put("parameters", (Object value, Entity target) -> {
-            if (value instanceof Map) {
-                target.setProperty(pluginCoreModel.epParameters, (Map) value);
+            if (value instanceof Map map) {
+                target.setProperty(pluginCoreModel.epParameters, map);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");

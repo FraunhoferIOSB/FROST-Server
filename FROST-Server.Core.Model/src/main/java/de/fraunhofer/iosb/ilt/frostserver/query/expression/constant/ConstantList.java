@@ -39,7 +39,7 @@ public class ConstantList<T> extends Constant<List<Constant<T>>> {
     }
 
     public List<Object> getValueList() {
-        return getValue().stream().map((c) -> (Object) c.value).toList();
+        return getValue().stream().map(c -> (Object) c.value).toList();
     }
 
     @Override

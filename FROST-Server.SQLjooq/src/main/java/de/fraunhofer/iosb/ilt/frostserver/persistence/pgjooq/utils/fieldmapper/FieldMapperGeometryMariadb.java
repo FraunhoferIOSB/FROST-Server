@@ -61,7 +61,7 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
     public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         final Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, new PostGisGeometryBinding());
+        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, PostGisGeometryBinding.instance());
         if (!StringHelper.isNullOrEmpty(fieldSource)) {
             fieldSourceIdx = getOrRegisterField(fieldSource, dbTable, staTable);
         }

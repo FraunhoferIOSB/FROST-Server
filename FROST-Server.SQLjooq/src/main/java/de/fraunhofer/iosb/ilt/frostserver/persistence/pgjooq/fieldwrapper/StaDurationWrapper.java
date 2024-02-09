@@ -147,8 +147,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
 
     private FieldWrapper specificOp(String op, Field<Number> other) {
         switch (op) {
-            case "*":
-            case "/":
+            case "*", "/":
                 String template = "(" + INTERVAL_PARAM + " " + op + " (?))";
                 Field<String> expression = DSL.field(template, String.class, this.duration, other);
                 return new StaDurationWrapper(expression);
@@ -160,17 +159,17 @@ public class StaDurationWrapper implements TimeFieldWrapper {
 
     @Override
     public FieldWrapper simpleOp(String op, FieldWrapper other) {
-        if (other instanceof StaDurationWrapper) {
-            return specificOp(op, (StaDurationWrapper) other);
+        if (other instanceof StaDurationWrapper staDurationWrapper) {
+            return specificOp(op, staDurationWrapper);
         }
-        if (other instanceof StaTimeIntervalWrapper) {
-            return specificOp(op, (StaTimeIntervalWrapper) other);
+        if (other instanceof StaTimeIntervalWrapper staTimeIntervalWrapper) {
+            return specificOp(op, staTimeIntervalWrapper);
         }
-        if (other instanceof StaDateTimeWrapper) {
-            return specificOp(op, (StaDateTimeWrapper) other);
+        if (other instanceof StaDateTimeWrapper staDateTimeWrapper) {
+            return specificOp(op, staDateTimeWrapper);
         }
-        if (other instanceof FieldListWrapper) {
-            Field<Number> nrOther = ((FieldListWrapper) other).getFieldAsType(Number.class, true);
+        if (other instanceof FieldListWrapper fieldListWrapper) {
+            Field<Number> nrOther = fieldListWrapper.getFieldAsType(Number.class, true);
             return specificOp(op, nrOther);
         }
         Field otherField = other.getFieldAsType(Number.class, true);
@@ -183,8 +182,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
 
     @Override
     public FieldWrapper simpleOpBool(String op, FieldWrapper other) {
-        if (other instanceof StaDurationWrapper) {
-            StaDurationWrapper cd = (StaDurationWrapper) other;
+        if (other instanceof StaDurationWrapper cd) {
             String template = "(" + INTERVAL_PARAM + " " + op + " " + INTERVAL_PARAM + ")";
             return new SimpleFieldWrapper(
                     DSL.condition(template, this.duration, cd.duration));

@@ -36,10 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ValidatorCUD implements HookValidator {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidatorCUD.class);
+    private static final String OPERATION_NOT_ALLOWED = "Operation not allowed.";
 
     @ConfigurableField(editor = EditorSubclass.class,
             label = "Early Insert Check", description = "The check to validate if the user can insert. Runs before required relations are validated.")
@@ -71,10 +69,8 @@ public class ValidatorCUD implements HookValidator {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
                 }
-                if (phase == HookPreInsert.Phase.PRE_RELATIONS) {
-                    if (!checkInsertPreRel.check(pm, entity)) {
-                        throwUnautorizedOrForbidden("Operation not allowed.");
-                    }
+                if (phase == HookPreInsert.Phase.PRE_RELATIONS && !checkInsertPreRel.check(pm, entity)) {
+                    throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
                 return true;
             });
@@ -85,10 +81,8 @@ public class ValidatorCUD implements HookValidator {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
                 }
-                if (phase == HookPreInsert.Phase.POST_RELATIONS) {
-                    if (!checkInsert.check(pm, entity)) {
-                        throwUnautorizedOrForbidden("Operation not allowed.");
-                    }
+                if (phase == HookPreInsert.Phase.POST_RELATIONS && !checkInsert.check(pm, entity)) {
+                    throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
                 return true;
             });
@@ -100,7 +94,7 @@ public class ValidatorCUD implements HookValidator {
                     return;
                 }
                 if (!checkUpdate.check(pm, entity)) {
-                    throwUnautorizedOrForbidden("Operation not allowed.");
+                    throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
             });
         }
@@ -112,7 +106,7 @@ public class ValidatorCUD implements HookValidator {
                 }
                 final Entity entity = pm.get(entityType, id);
                 if (!checkDelete.check(pm, entity)) {
-                    throwUnautorizedOrForbidden("Operation not allowed.");
+                    throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
             });
         }
@@ -156,9 +150,9 @@ public class ValidatorCUD implements HookValidator {
 
     private void throwUnautorizedOrForbidden(String cause) {
         if (PrincipalExtended.ANONYMOUS_PRINCIPAL.equals(PrincipalExtended.getLocalPrincipal())) {
-            throw new UnauthorizedException("Operation not allowed.");
+            throw new UnauthorizedException(cause);
         } else {
-            throw new ForbiddenException("Operation not allowed.");
+            throw new ForbiddenException(cause);
         }
     }
 }

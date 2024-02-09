@@ -38,6 +38,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
 /**
+ * JOOQ binding for net.time4j.Moment.
  *
  * @author hylke
  */
@@ -77,13 +78,17 @@ public class MomentBinding implements Binding<Timestamp, Moment> {
         return INSTANCE;
     }
 
+    public static DataType<Moment> dataType() {
+        return DATA_TYPE;
+    }
+
+    private MomentBinding() {
+        // Use instance()
+    }
+
     @Override
     public Converter<Timestamp, Moment> converter() {
         return CONVERTER_INSTANCE;
-    }
-
-    public static DataType<Moment> dataType() {
-        return DATA_TYPE;
     }
 
     @Override

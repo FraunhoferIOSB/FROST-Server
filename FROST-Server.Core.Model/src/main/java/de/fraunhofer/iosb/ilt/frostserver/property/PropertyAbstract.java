@@ -37,7 +37,7 @@ public abstract class PropertyAbstract<P> implements Property<P> {
      */
     protected boolean readOnly;
 
-    public PropertyAbstract(String name, PropertyType type, boolean required, boolean nullable, boolean readOnly) {
+    protected PropertyAbstract(String name, PropertyType type, boolean required, boolean nullable, boolean readOnly) {
         if (type == null) {
             throw new IllegalArgumentException("Type must not be null");
         }

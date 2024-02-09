@@ -36,8 +36,8 @@ public class TypeComplex extends PropertyType {
 
     public static final String STA_MAP_NAME = "Object";
     public static final String STA_OBJECT_NAME = "ANY";
-    public static final String STA_TIMEINTERVAL_NAME = "TimeInterval";
-    public static final String STA_TIMEVALUE_NAME = "TimeValue";
+    public static final String STA_TIMEINTERVAL_NAME = "TM_Period";
+    public static final String STA_TIMEVALUE_NAME = "TM_Object";
     public static final String KEY_INTERVAL_START = "start";
     public static final String KEY_INTERVAL_END = "end";
 

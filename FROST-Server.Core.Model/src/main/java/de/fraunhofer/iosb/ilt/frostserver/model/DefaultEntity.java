@@ -78,7 +78,7 @@ public class DefaultEntity implements Entity {
     @Override
     public String getSelfLink() {
         if (selfLink == null && query != null) {
-            selfLink = UrlHelper.generateSelfLink(query, query.getPath(), this);
+            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
         }
         return selfLink;
     }
@@ -115,11 +115,9 @@ public class DefaultEntity implements Entity {
     public <P> P getProperty(Property<P> property) {
         if (property == ModelRegistry.EP_SELFLINK) {
             return (P) getSelfLink();
-        } else if (property instanceof EntityPropertyMain) {
-            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
+        } else if (property instanceof EntityPropertyMain entityPropertyMain) {
             return (P) entityProperties.get(entityPropertyMain);
-        } else if (property instanceof NavigationPropertyMain) {
-            NavigationPropertyMain navigationPropertyMain = (NavigationPropertyMain) property;
+        } else if (property instanceof NavigationPropertyMain navigationPropertyMain) {
             return (P) navProperties.get(navigationPropertyMain);
         }
         return property.getFrom(this);
@@ -129,14 +127,14 @@ public class DefaultEntity implements Entity {
     public Object getProperty(Path path) {
         Object result = this;
         for (Property element : path.getElements()) {
-            if (result instanceof Entity) {
-                result = element.getFrom((Entity) result);
+            if (result instanceof Entity entity) {
+                result = element.getFrom(entity);
             } else if (result instanceof Map) {
                 result = ((Map<String, Object>) result).get(element.getName());
-            } else if (result instanceof List) {
+            } else if (result instanceof List list) {
                 try {
                     int idx = Integer.parseInt(element.getName());
-                    result = ((List) result).get(idx);
+                    result = list.get(idx);
                 } catch (NumberFormatException exc) {
                     // it was not an index...
                     return null;
@@ -152,11 +150,11 @@ public class DefaultEntity implements Entity {
     public <P> DefaultEntity setProperty(Property<P> property, P value) {
         if (property == ModelRegistry.EP_SELFLINK) {
             setSelfLink(String.valueOf(value));
-        } else if (property instanceof EntityPropertyMain) {
-            entityProperties.put((EntityPropertyMain) property, value);
+        } else if (property instanceof EntityPropertyMain entityPropertyMain) {
+            entityProperties.put(entityPropertyMain, value);
             setProperties.add(property);
-        } else if (property instanceof NavigationPropertyMain) {
-            navProperties.put((NavigationPropertyMain) property, value);
+        } else if (property instanceof NavigationPropertyMain navigationPropertyMain) {
+            navProperties.put(navigationPropertyMain, value);
             if (value == null) {
                 setProperties.remove(property);
             } else {
@@ -168,11 +166,9 @@ public class DefaultEntity implements Entity {
 
     @Override
     public DefaultEntity unsetProperty(Property property) {
-        if (property instanceof EntityPropertyMain) {
-            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) property;
+        if (property instanceof EntityPropertyMain entityPropertyMain) {
             entityProperties.remove(entityPropertyMain);
-        } else if (property instanceof NavigationPropertyMain) {
-            NavigationPropertyMain navigationPropertyMain = (NavigationPropertyMain) property;
+        } else if (property instanceof NavigationPropertyMain navigationPropertyMain) {
             navProperties.remove(navigationPropertyMain);
         }
         setProperties.remove(property);

@@ -62,7 +62,7 @@ public class ModelRegistry {
     /**
      * All entity types.
      */
-    private final Set<EntityType> entityTypes = new TreeSet<>();
+    private final Set<EntityType> entityTypesAll = new TreeSet<>();
 
     /**
      * All entity types accessible to non-admin users.
@@ -101,7 +101,7 @@ public class ModelRegistry {
         }
         entityTypesByName.put(type.entityName, type);
         entityTypesByName.put(type.plural, type);
-        entityTypes.add(type);
+        entityTypesAll.add(type);
         if (!type.isAdminOnly()) {
             entityTypesNonAdmin.add(type);
         }
@@ -145,7 +145,7 @@ public class ModelRegistry {
 
     public final Set<EntityType> getEntityTypes(boolean isAdmin) {
         if (isAdmin) {
-            return entityTypes;
+            return entityTypesAll;
         }
         return entityTypesNonAdmin;
     }
@@ -184,8 +184,8 @@ public class ModelRegistry {
     }
 
     public synchronized void initFinalise() {
-        LOGGER.info("Finalising {} EntityTypes.", entityTypes.size());
-        for (EntityType type : entityTypes) {
+        LOGGER.info("Finalising {} EntityTypes.", entityTypesAll.size());
+        for (EntityType type : entityTypesAll) {
             type.init();
         }
     }

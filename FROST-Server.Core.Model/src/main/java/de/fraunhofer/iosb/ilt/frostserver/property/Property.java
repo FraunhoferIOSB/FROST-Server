@@ -111,7 +111,7 @@ public interface Property<P> extends Comparable<Property<?>> {
      */
     public static final Comparator<Property> COMPARATOR = Comparator
             .comparingInt((Property p) -> p.getPriority())
-            .thenComparing((Property p) -> p.getName());
+            .thenComparing(Property::getName);
 
     @Override
     public default int compareTo(Property o) {

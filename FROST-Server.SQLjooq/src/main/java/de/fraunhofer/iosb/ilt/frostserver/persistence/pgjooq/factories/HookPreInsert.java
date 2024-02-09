@@ -35,7 +35,7 @@ public interface HookPreInsert {
     /**
      * The fase the pre-insert hook is running in.
      */
-    public static enum Phase {
+    public enum Phase {
         /**
          * Phase before relations are loaded and maybe created.
          */

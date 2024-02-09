@@ -143,7 +143,7 @@ public class ServiceDataArray {
                 if (query.getMetadata() == Metadata.OFF) {
                     selfLinks.add("");
                 } else {
-                    String selfLink = UrlHelper.generateSelfLink(null, serviceRootUrl, version, observation);
+                    String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, version, observation);
                     selfLinks.add(selfLink);
                 }
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {

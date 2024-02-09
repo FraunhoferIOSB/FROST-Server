@@ -59,7 +59,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<Record, Moment> time = createField(DSL.name(NAME_COL_TIME), SQLDataType.TIMESTAMP, this, "", new MomentBinding());
+    public final TableField<Record, Moment> time = createField(DSL.name(NAME_COL_TIME), SQLDataType.TIMESTAMP, this, "", MomentBinding.instance());
 
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.

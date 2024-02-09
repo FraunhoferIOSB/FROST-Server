@@ -39,19 +39,19 @@ public class CheckNavLinkEmpty implements ValidationCheck {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinkEmpty.class);
 
-    public static enum EmptyState {
+    public enum EmptyState {
         MUST_BE_EMPTY("Must be Empty"),
         MUST_BE_FILLED("Must be Filled (non Empty)");
 
-        public final String name;
+        public final String label;
 
-        private EmptyState(String name) {
-            this.name = name;
+        private EmptyState(String label) {
+            this.label = label;
         }
 
         @Override
         public String toString() {
-            return name;
+            return label;
         }
 
     }

@@ -71,24 +71,23 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         propertySet = entityType.getPropertySet();
 
         for (Property property : propertySet) {
-            if (property instanceof EntityPropertyMain) {
+            if (property instanceof EntityPropertyMain<?> epm) {
                 final PropertyData propertyData = new PropertyData(
                         property,
                         property.getType().getTypeReference(),
                         false,
                         null);
-                for (String alias : ((EntityPropertyMain<?>) property).getAliases()) {
+                for (String alias : epm.getAliases()) {
                     propertyByName.put(alias, propertyData);
                 }
-            } else if (property instanceof NavigationPropertyMain) {
-                NavigationPropertyMain np = (NavigationPropertyMain) property;
+            } else if (property instanceof NavigationPropertyMain npm) {
                 propertyByName.put(
                         property.getJsonName(),
                         new PropertyData(
                                 property,
                                 null,
-                                np.isEntitySet(),
-                                np.getEntityType()));
+                                npm.isEntitySet(),
+                                npm.getEntityType()));
             }
         }
     }

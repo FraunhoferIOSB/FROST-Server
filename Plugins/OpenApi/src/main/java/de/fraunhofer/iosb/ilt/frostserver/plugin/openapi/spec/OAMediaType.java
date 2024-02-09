@@ -25,19 +25,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author scf
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public final class OAMediaType {
-
-    private final OASchema schema;
-
-    public OAMediaType(OASchema schema) {
-        this.schema = schema;
-    }
-
-    /**
-     * @return the schema
-     */
-    public OASchema getSchema() {
-        return schema;
-    }
+public record OAMediaType(OASchema schema) {
 
 }

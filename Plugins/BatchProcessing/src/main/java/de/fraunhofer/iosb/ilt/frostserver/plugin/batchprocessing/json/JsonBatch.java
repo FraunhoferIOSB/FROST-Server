@@ -47,6 +47,14 @@ import org.slf4j.LoggerFactory;
  */
 public class JsonBatch extends Batch<Content> {
 
+    private static final String FIELD_NAME_BODY = "body";
+    private static final String FIELD_NAME_HEADERS = "headers";
+    private static final String FIELD_NAME_ID = "id";
+    private static final String FIELD_NAME_METHOD = "method";
+    private static final String FIELD_NAME_REQUESTS = "requests";
+    private static final String FIELD_NAME_RESPONSES = "responses";
+    private static final String FIELD_NAME_URL = "url";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonBatch.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -59,7 +67,7 @@ public class JsonBatch extends Batch<Content> {
     public boolean parse(ServiceRequest serviceRequest) {
         try {
             JsonNode rootNode = OBJECT_MAPPER.readTree(serviceRequest.getContentString());
-            JsonNode reqNode = rootNode.path("requests");
+            JsonNode reqNode = rootNode.path(FIELD_NAME_REQUESTS);
             Iterator<JsonNode> requests = reqNode.elements();
 
             Map<String, Batch<Content>> atomicityGroupToBatch = new HashMap<>();
@@ -76,21 +84,21 @@ public class JsonBatch extends Batch<Content> {
                 }
                 JsonRequest request = new JsonRequest(this.batchVersion);
                 reqPart.setContent(request);
-                for (String property : Arrays.asList("id", "method", "url")) {
+                for (String property : Arrays.asList(FIELD_NAME_ID, FIELD_NAME_METHOD, FIELD_NAME_URL)) {
                     if (StringHelper.isNullOrEmpty(property)) {
                         parseFailed = true;
                         errors.add("All requests must have a valid " + property);
                     }
                 }
                 if (!parseFailed) {
-                    request.setContentId(req.get("id").textValue());
-                    request.setMethod(HttpMethod.fromString(req.get("method").textValue()));
-                    request.parseUrl(req.get("url").textValue());
-                    if (req.has("body")) {
-                        request.addData(OBJECT_MAPPER.writeValueAsString(req.get("body")));
+                    request.setContentId(req.get(FIELD_NAME_ID).textValue());
+                    request.setMethod(HttpMethod.fromString(req.get(FIELD_NAME_METHOD).textValue()));
+                    request.parseUrl(req.get(FIELD_NAME_URL).textValue());
+                    if (req.has(FIELD_NAME_BODY)) {
+                        request.addData(OBJECT_MAPPER.writeValueAsString(req.get(FIELD_NAME_BODY)));
                     }
-                    if (req.has("headers") && req.get("headers").isObject()) {
-                        JsonNode headers = req.get("headers");
+                    if (req.has(FIELD_NAME_HEADERS) && req.get(FIELD_NAME_HEADERS).isObject()) {
+                        JsonNode headers = req.get(FIELD_NAME_HEADERS);
                         Map<String, String> innerHeaders = request.getInnerHeaders();
                         Iterator<Map.Entry<String, JsonNode>> fields = headers.fields();
                         while (fields.hasNext()) {
@@ -129,7 +137,7 @@ public class JsonBatch extends Batch<Content> {
         ObjectNode rootNode = OBJECT_MAPPER.createObjectNode();
         ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         responses.forEach(s -> arrayNode.addRawValue(new RawValue(s)));
-        rootNode.set("responses", arrayNode);
+        rootNode.set(FIELD_NAME_RESPONSES, arrayNode);
         try {
             return OBJECT_MAPPER.writeValueAsString(rootNode);
         } catch (IOException ex) {
@@ -140,8 +148,8 @@ public class JsonBatch extends Batch<Content> {
     private void addResponses(List<String> responses, Batch<Content> batch) {
         for (Part<Content> part : batch.getParts()) {
             Content partContent = part.getContent();
-            if (partContent instanceof Batch) {
-                addResponses(responses, (Batch) partContent);
+            if (partContent instanceof Batch batchPart) {
+                addResponses(responses, batchPart);
             } else {
                 responses.add(partContent.getContent(false));
             }

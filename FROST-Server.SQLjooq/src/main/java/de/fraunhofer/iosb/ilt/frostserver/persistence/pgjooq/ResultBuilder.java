@@ -174,10 +174,9 @@ public class ResultBuilder implements ResourcePathVisitor {
         NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
         Object o = entity.getProperty(firstNp);
-        if (o instanceof NavigableElement) {
-            existing = (NavigableElement) o;
-        } else if (firstNp instanceof NavigationPropertyCustom) {
-            NavigationPropertyCustom firstNpCust = (NavigationPropertyCustom) firstNp;
+        if (o instanceof NavigableElement navigableElement) {
+            existing = navigableElement;
+        } else if (firstNp instanceof NavigationPropertyCustom firstNpCust) {
             Object id = firstNpCust.getTargetIdFrom(entity);
             if (id == null) {
                 return;
@@ -192,10 +191,10 @@ public class ResultBuilder implements ResourcePathVisitor {
         Query subQuery = expand.getSubQuery();
         if (existing == null || existing.isEmpty()) {
             createExpandedElement(entity, firstNp, subQuery);
-        } else if (existing instanceof EntitySet) {
-            expandEntitySet((EntitySet) existing, subQuery);
-        } else if (existing instanceof Entity) {
-            expandEntity((Entity) existing, subQuery);
+        } else if (existing instanceof EntitySet subEntitySet) {
+            expandEntitySet(subEntitySet, subQuery);
+        } else if (existing instanceof Entity subEntity) {
+            expandEntity(subEntity, subQuery);
         }
     }
 
@@ -398,11 +397,10 @@ public class ResultBuilder implements ResourcePathVisitor {
     public void visit(PathElementCustomProperty element) {
         element.getParent().visit(this);
         String name = element.getName();
-        if (resultObject instanceof Map) {
-            Map map = (Map) resultObject;
+        if (resultObject instanceof Map map) {
             Object inner = map.get(entityName);
-            if (inner instanceof Map) {
-                map = (Map) inner;
+            if (inner instanceof Map innerMap) {
+                map = innerMap;
                 if (map.containsKey(name)) {
                     Object propertyValue = map.get(name);
                     Map<String, Object> entityMap = new HashMap<>();
@@ -422,15 +420,14 @@ public class ResultBuilder implements ResourcePathVisitor {
     public void visit(PathElementArrayIndex element) {
         element.getParent().visit(this);
         int index = element.getIndex();
-        if (resultObject instanceof Map) {
-            Map map = (Map) resultObject;
+        if (resultObject instanceof Map map) {
             Object inner = map.get(entityName);
             Object propertyValue = null;
-            if (inner instanceof ArrayNode && ((ArrayNode) inner).size() > index) {
-                propertyValue = ((ArrayNode) inner).get(index);
+            if (inner instanceof ArrayNode innerArray && innerArray.size() > index) {
+                propertyValue = innerArray.get(index);
             }
-            if (inner instanceof List && ((List) inner).size() > index) {
-                propertyValue = ((List) inner).get(index);
+            if (inner instanceof List innerList && innerList.size() > index) {
+                propertyValue = innerList.get(index);
             }
             if (propertyValue != null) {
                 Map<String, Object> entityMap = new HashMap<>();

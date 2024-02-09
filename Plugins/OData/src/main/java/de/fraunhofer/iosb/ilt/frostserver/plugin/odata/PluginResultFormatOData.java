@@ -102,7 +102,10 @@ public class PluginResultFormatOData implements PluginResultFormat {
             query.setFormat(FORMAT_NAME_ODATA_JSON);
             if (formatSplit.length > 1) {
                 String[] paramSplit = StringUtils.split(formatSplit[1], '=');
-                if (paramSplit != null && paramSplit.length == 2 && FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0]) || FORMAT_PARAM_METADATA40.equalsIgnoreCase(paramSplit[0])) {
+                if (paramSplit == null) {
+                    return;
+                }
+                if (paramSplit.length == 2 && (FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0]) || FORMAT_PARAM_METADATA40.equalsIgnoreCase(paramSplit[0]))) {
                     query.setMetadata(Metadata.lookup(paramSplit[1], Metadata.DEFAULT));
                 }
             }
@@ -147,8 +150,8 @@ public class PluginResultFormatOData implements PluginResultFormat {
                     LOGGER.trace("Formatting as $Value.");
                     if (result instanceof Map || result instanceof GeoJsonObject) {
                         entityJsonString = JsonWriterOdata401.writeObject(result);
-                    } else if (result instanceof Id) {
-                        entityJsonString = ((Id) result).getValue().toString();
+                    } else if (result instanceof Id id) {
+                        entityJsonString = id.getValue().toString();
                     } else {
                         entityJsonString = result.toString();
                     }

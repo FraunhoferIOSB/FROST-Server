@@ -61,7 +61,7 @@ public class FieldMapperJson extends FieldMapperAbstractEp {
     public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable, new JsonBinding());
+        fieldIdx = getOrRegisterField(field, dbTable, staTable, JsonBinding.instance());
     }
 
     @Override

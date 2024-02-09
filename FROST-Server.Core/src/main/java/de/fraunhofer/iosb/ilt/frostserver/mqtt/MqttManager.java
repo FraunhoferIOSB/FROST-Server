@@ -74,7 +74,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     /**
      * Listeners for integration-test use only. Not thread safe.
      */
-    private static List<SubscriptionListener> TEST_LISTENERS;
+    private static List<SubscriptionListener> testListeners;
 
     private final Map<EntityType, SubscriptionManager> subscriptions = new HashMap<>();
     private final CoreSettings settings;
@@ -135,7 +135,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     "Mqtt-EntityCreateProcessor",
                     entityCreateProcessors);
             // start MQTT server
-            server = MqttServerFactory.getInstance().get(settings);
+            server = MqttServerFactory.get(settings);
             server.addSubscriptionListener(this);
             server.addEntityCreateListener(this);
             server.start();
@@ -376,10 +376,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private static void fireTestSubscriptionAdded(SubscriptionEvent s) {
-        if (TEST_LISTENERS == null) {
+        if (testListeners == null) {
             return;
         }
-        for (SubscriptionListener l : TEST_LISTENERS) {
+        for (SubscriptionListener l : testListeners) {
             l.onSubscribe(s);
         }
 
@@ -391,10 +391,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
      * @param l the listener to add.
      */
     public static void addTestSubscriptionListener(SubscriptionListener l) {
-        if (TEST_LISTENERS == null) {
-            TEST_LISTENERS = new ArrayList<>();
+        if (testListeners == null) {
+            testListeners = new ArrayList<>();
         }
-        TEST_LISTENERS.add(l);
+        testListeners.add(l);
     }
 
     /**
@@ -403,17 +403,17 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
      * @param l the listener to remove.
      */
     public static void removeTestSubscriptionListener(SubscriptionListener l) {
-        if (TEST_LISTENERS == null) {
+        if (testListeners == null) {
             return;
         }
-        TEST_LISTENERS.remove(l);
+        testListeners.remove(l);
     }
 
     /**
      * For test use only.
      */
     public static void clearTestSubscriptionListeners() {
-        TEST_LISTENERS = null;
+        testListeners = null;
     }
 
 }

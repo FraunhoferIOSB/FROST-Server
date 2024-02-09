@@ -35,7 +35,7 @@ public class PrincipalExtended implements Principal {
     public static final String ROLE_CREATE = "create";
     public static final String ROLE_READ = "read";
     public static final PrincipalExtended ANONYMOUS_PRINCIPAL = new PrincipalExtended(USER_NAME_ANONYMOUS, false, Collections.emptySet());
-    public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended("admin", true, Collections.emptySet());
+    public static final PrincipalExtended INTERNAL_ADMIN_PRINCIPAL = new PrincipalExtended(ROLE_ADMIN, true, Collections.emptySet());
 
     private static final ThreadLocal<PrincipalExtended> LOCAL_PRINCIPAL = ThreadLocal.withInitial(() -> ANONYMOUS_PRINCIPAL);
 

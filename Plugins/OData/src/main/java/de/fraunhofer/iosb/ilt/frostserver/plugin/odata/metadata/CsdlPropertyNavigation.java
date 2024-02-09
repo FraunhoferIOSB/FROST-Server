@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -56,7 +55,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyNavigation generateFrom(CsdlDocument doc, String nameSpace, EntityType et, NavigationPropertyMain<?> np) {
+    public CsdlPropertyNavigation generateFrom(CsdlDocument doc, String nameSpace, NavigationPropertyMain<?> np) {
         type = nameSpace + "." + np.getType().getName();
         final NavigationPropertyMain inverse = np.getInverse();
         if (inverse != null) {

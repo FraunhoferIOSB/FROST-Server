@@ -62,7 +62,7 @@ public class DatabaseHandler {
     }
 
     private static synchronized DatabaseHandler createInstance(CoreSettings coreSettings) {
-        return INSTANCES.computeIfAbsent(coreSettings, (s) -> {
+        return INSTANCES.computeIfAbsent(coreSettings, s -> {
             LOGGER.info("Initialising DatabaseHandler.");
             return new DatabaseHandler(coreSettings);
         });

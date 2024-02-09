@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * A function that returns a property from the entity in the DynamicContext.
@@ -39,9 +40,7 @@ public class ContextEntityProperty extends Function {
     }
 
     public String getValue() {
-        Expression p0 = getParameters().get(0);
-        // return getContext().getEntity().getProperty();
-        return null;
+        throw new NotImplementedException("ContextEntityProperty is work in progress.");
     }
 
     @Override

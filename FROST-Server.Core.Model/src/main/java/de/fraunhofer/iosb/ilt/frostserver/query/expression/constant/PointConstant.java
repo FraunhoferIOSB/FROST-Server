@@ -35,8 +35,8 @@ public class PointConstant extends GeoJsonConstant<Point> {
 
     public static PointConstant parse(String value) {
         GeoJsonObject result = WktParser.parseWkt(value);
-        if (result instanceof Point) {
-            return new PointConstant((Point) result, value);
+        if (result instanceof Point point) {
+            return new PointConstant(point, value);
         }
         throw new IllegalArgumentException("Can not parse Point from: " + StringHelper.cleanForLogging(value));
     }

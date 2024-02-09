@@ -185,7 +185,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityType etSensor = new EntityType(NAME_NP_SENSOR, NAME_NP_SENSORS);
     public final EntityType etObservedProperty = new EntityType(NAME_NP_OBSERVEDPROPERTY, NAME_NP_OBSERVEDPROPERTIES);
     public final EntityType etObservation = new EntityType(NAME_NP_OBSERVATION, NAME_NP_OBSERVATIONS)
-            .addCreateValidator("CM-ObsPhenTime", (entity) -> {
+            .addCreateValidator("CM-ObsPhenTime", entity -> {
                 if (entity.getProperty(epPhenomenonTime) == null) {
                     entity.setProperty(epPhenomenonTime, new TimeValue(TimeInstant.now()));
                 }
@@ -349,8 +349,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(npHistoricalLocationsThing)
                 .registerProperty(npDatastreamsThing);
 
-        if (pm instanceof JooqPersistenceManager) {
-            JooqPersistenceManager ppm = (JooqPersistenceManager) pm;
+        if (pm instanceof JooqPersistenceManager ppm) {
             TableCollection tableCollection = ppm.getTableCollection();
             final DataType dataTypeDstr = ppm.getDataTypeFor(modelSettings.idTypeDatastream);
             final DataType dataTypeFeat = ppm.getDataTypeFor(modelSettings.idTypeFeature);
@@ -394,8 +393,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     @Override
     public String checkForUpgrades() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager jpm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager jpm) {
                 return jpm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(jpm, null));
             }
             return "Unknown persistence manager class";
@@ -405,8 +403,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
-            if (pm instanceof JooqPersistenceManager) {
-                JooqPersistenceManager jpm = (JooqPersistenceManager) pm;
+            if (pm instanceof JooqPersistenceManager jpm) {
                 return jpm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(jpm, null), out);
             }
             out.append("Unknown persistence manager class");

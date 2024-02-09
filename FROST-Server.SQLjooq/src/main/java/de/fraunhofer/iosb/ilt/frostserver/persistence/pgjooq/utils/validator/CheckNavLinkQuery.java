@@ -64,7 +64,6 @@ public class CheckNavLinkQuery implements ValidationCheck {
     @EditorBoolean.EdOptsBool(dflt = true)
     private boolean emptyAllowed;
 
-    private ResourcePath path;
     private EntityType entityType;
     private EntityType targetType;
     private NavigationPropertyMain targetNp;
@@ -137,7 +136,8 @@ public class CheckNavLinkQuery implements ValidationCheck {
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
             final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-            path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, "/" + targetType.plural).addPathElement(new PathElementEntitySet(targetType));
+            final ResourcePath path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, '/' + targetType.plural)
+                    .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
             parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                     .validate(targetType);

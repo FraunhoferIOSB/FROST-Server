@@ -334,20 +334,6 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     /**
-     * Find a navigation property that points from this type to the given target
-     * type.
-     *
-     * @param to The entity type to find a link to.
-     * @return A navigation property linking the two types.
-     * @deprecated there may be more than one navigation property linking the
-     * two types. This mathod can only return one at random.
-     */
-    @Deprecated(forRemoval = true)
-    public NavigationPropertyMain getNavigationProperty(EntityType to) {
-        return navigationPropertiesByTarget.get(to);
-    }
-
-    /**
      * Run Create-validators on the entity. This checks if all required
      * properties are non-null on the given Entity. This may change the entity
      * to remove computed or read-only values.

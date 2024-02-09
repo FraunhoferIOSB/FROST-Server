@@ -20,6 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_SCHEMA_PRIORITY;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -63,7 +66,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -110,8 +112,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     public static final String DATETIME_MAX_INSTANT = "9999-12-30T23:59:59.999Z";
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
-    // TODO: Change back to -4000 when it is fixed.
-    public static final String DATETIME_MIN_INSTANT = "0001-01-02T00:00:00.000Z";
+    // Changed back to -4000 after it was fixed.
+    public static final String DATETIME_MIN_INSTANT = "-4000-01-02T00:00:00.000Z";
     public static final Moment DATETIME_MAX = parseMoment(DATETIME_MAX_INSTANT);
     public static final Moment DATETIME_MIN = parseMoment(DATETIME_MIN_INSTANT);
 
@@ -306,14 +308,12 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
-        if (path.isEntityProperty() && entity instanceof Map) {
-            Map<String, Object> map = (Map) entity;
+        if (path.isEntityProperty() && entity instanceof Map map) {
             if (map.get(entityCreator.getEntityName()) == null) {
                 return null;
             }
         }
-        if (path.isValue() && entity instanceof Map) {
-            Map<String, Object> map = (Map) entity;
+        if (path.isValue() && entity instanceof Map map) {
             entity = map.get(entityCreator.getEntityName());
         }
 
@@ -662,8 +662,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     private void maybeRegisterField(PropertyPersistenceMapper handler, StaMainTable typeStaTable) {
-        if (handler instanceof FieldMapper) {
-            ((FieldMapper) handler).registerField(this, typeStaTable);
+        if (handler instanceof FieldMapper fieldMapper) {
+            fieldMapper.registerField(this, typeStaTable);
         }
     }
 
@@ -693,8 +693,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     private void maybeRegisterMapping(PropertyPersistenceMapper handler, StaMainTable orCreateTable) {
-        if (handler instanceof FieldMapper) {
-            ((FieldMapper) handler).registerMapping(this, orCreateTable);
+        if (handler instanceof FieldMapper fieldMapper) {
+            fieldMapper.registerMapping(this, orCreateTable);
         }
     }
 
@@ -705,7 +705,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     @Override
     public Table<?> getDbTable(Name tableName) {
-        return tableCache.computeIfAbsent(tableName, (t) -> readDbTableFromDb(tableName));
+        return tableCache.computeIfAbsent(tableName, t -> readDbTableFromDb(tableName));
     }
 
     public Table<?> readDbTableFromDb(Name tableName) {
@@ -756,8 +756,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             tableCollection.registerTable(newTable);
             table = newTable;
         }
-        if (table instanceof StaLinkTableDynamic) {
-            return (StaLinkTableDynamic) table;
+        if (table instanceof StaLinkTableDynamic staLinkTableDynamic) {
+            return staLinkTableDynamic;
         }
         throw new IllegalStateException("Table " + tableName + " already exists, yet is not of type StaLinkTableDynamic but " + table.getClass().getName());
     }
@@ -766,14 +766,17 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     public DataType<?> getDataTypeFor(String type) {
         switch (type.toUpperCase()) {
             case "EDM.INT64":
-            case Constants.VALUE_ID_TYPE_LONG:
+            case VALUE_ID_TYPE_LONG:
                 return SQLDataType.BIGINT;
+
             case "EDM.STRING":
-            case Constants.VALUE_ID_TYPE_STRING:
+            case VALUE_ID_TYPE_STRING:
                 return SQLDataType.VARCHAR;
+
             case "EDM.GUID":
-            case Constants.VALUE_ID_TYPE_UUID:
+            case VALUE_ID_TYPE_UUID:
                 return SQLDataType.UUID;
+
             default:
                 throw new IllegalArgumentException("Unknown data type: " + type);
         }

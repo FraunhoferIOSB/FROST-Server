@@ -58,7 +58,10 @@ public class GitVersionInfo {
      */
     public static void logGitInfo() {
         init();
-        LOGGER.info("{} Version: {}", PACKAGE_NAME, gitData.get(PATH_GIT_COMMIT_ID_DESCRIBE));
+        if (LOGGER.isInfoEnabled()) {
+            final String version = gitData.get(PATH_GIT_COMMIT_ID_DESCRIBE);
+            LOGGER.info("{} Version: {}", PACKAGE_NAME, version);
+        }
     }
 
     public static String getGitDescription() {
