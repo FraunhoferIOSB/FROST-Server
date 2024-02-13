@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -65,7 +64,7 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(Query query, ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
+    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
         this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         if (datastream != null) {

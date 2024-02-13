@@ -22,29 +22,21 @@ import java.util.Map;
 
 /**
  *
- * @author jab
+ * @author scf
  */
 public class CustomDeserializationManager {
 
-    private static CustomDeserializationManager instance;
-    private final Map<String, CustomDeserializer> customDeserializers;
+    private static final Map<String, CustomDeserializer> customDeserializers = new HashMap<>();
 
     private CustomDeserializationManager() {
-        customDeserializers = new HashMap<>();
+        // Not for instantiation.
     }
 
-    public static CustomDeserializationManager getInstance() {
-        if (instance == null) {
-            instance = new CustomDeserializationManager();
-        }
-        return instance;
-    }
-
-    public void registerDeserializer(String encodingType, CustomDeserializer deserializer) {
+    public static void registerDeserializer(String encodingType, CustomDeserializer deserializer) {
         customDeserializers.put(encodingType, deserializer);
     }
 
-    public CustomDeserializer getDeserializer(String encodingType) {
+    public static CustomDeserializer getDeserializer(String encodingType) {
         CustomDeserializer result = null;
         if (customDeserializers.containsKey(encodingType)) {
             result = customDeserializers.get(encodingType);

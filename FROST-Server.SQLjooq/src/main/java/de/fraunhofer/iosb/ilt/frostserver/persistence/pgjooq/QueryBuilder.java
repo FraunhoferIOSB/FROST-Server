@@ -518,11 +518,12 @@ public class QueryBuilder implements ResourcePathVisitor {
      * @return A new table ref with the target entity type table joined.
      */
     public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
-        StaMainTable<?> target = tableCollection.getTablesByType().get(epcl.getTargetEntityType());
-        StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
-        Field<?> targetField = targetAliased.getId();
+        final EntityType targetEntityType = epcl.getEntityType();
+        final StaMainTable<?> target = tableCollection.getTablesByType().get(targetEntityType);
+        final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
+        final Field<?> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
-        TableRef newRef = new TableRef(epcl.getEntityType(), targetAliased);
+        TableRef newRef = new TableRef(targetEntityType, targetAliased);
         sourceRef.addJoin(epcl, newRef);
         return newRef;
     }

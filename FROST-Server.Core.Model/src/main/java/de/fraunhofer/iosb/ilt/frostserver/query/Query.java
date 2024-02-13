@@ -56,6 +56,8 @@ import java.util.Set;
  */
 public class Query {
 
+    private static final String ERROR_ADD_PLACEHOLDER_OR_PROPERTY = "Either add PropertyPlaceholder or Property instances, not both.";
+
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
 
     private final QueryDefaults settings;
@@ -270,7 +272,7 @@ public class Query {
 
     public Query addSelect(PropertyPlaceholder property) {
         if (!select.isEmpty()) {
-            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+            throw new IllegalStateException(ERROR_ADD_PLACEHOLDER_OR_PROPERTY);
         }
         rawSelect.add(property);
         return this;
@@ -367,10 +369,8 @@ public class Query {
                     selectedEntityPropMain.add(epm);
                 } else if (s instanceof EntityPropertyCustomSelect epcs) {
                     selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
-                } else if (s instanceof NavigationPropertyMain np) {
-                    if (!np.isAdminOnly() || principal.isAdmin()) {
-                        selectNavProp.add(np);
-                    }
+                } else if (s instanceof NavigationPropertyMain np && (!np.isAdminOnly() || principal.isAdmin())) {
+                    selectNavProp.add(np);
                 }
             }
         }

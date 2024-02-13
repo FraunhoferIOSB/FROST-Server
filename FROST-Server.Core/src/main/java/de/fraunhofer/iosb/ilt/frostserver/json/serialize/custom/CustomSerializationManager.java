@@ -22,29 +22,21 @@ import java.util.Map;
 
 /**
  *
- * @author jab
+ * @author scf
  */
 public class CustomSerializationManager {
 
-    private static CustomSerializationManager instance;
-    private final Map<String, CustomSerializer> customSerializers;
+    private static final Map<String, CustomSerializer> customSerializers = new HashMap<>();
 
     private CustomSerializationManager() {
-        customSerializers = new HashMap<>();
+        // Not for instantiation.
     }
 
-    public static CustomSerializationManager getInstance() {
-        if (instance == null) {
-            instance = new CustomSerializationManager();
-        }
-        return instance;
-    }
-
-    public void registerSerializer(String encodingType, CustomSerializer serializer) {
+    public static void registerSerializer(String encodingType, CustomSerializer serializer) {
         customSerializers.computeIfAbsent(encodingType, t -> serializer);
     }
 
-    public CustomSerializer getSerializer(String encodingType) {
+    public static CustomSerializer getSerializer(String encodingType) {
         CustomSerializer result = customSerializers.get(encodingType);
         if (result == null) {
             result = new DefaultSerializer();

@@ -37,10 +37,6 @@ public class EntityPropertyCustomLink extends PropertyAbstract<Entity> implement
         this.targetEntityType = targetEntityType;
     }
 
-    public EntityType getTargetEntityType() {
-        return targetEntityType;
-    }
-
     @Override
     public Entity getFrom(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);

@@ -243,11 +243,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("Path does not end in an EntityProperty: " + path);
         }
-        if (state.finalExpression instanceof Field field) {
-            if (Moment.class.isAssignableFrom(field.getType())) {
-                Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
-                state.finalExpression = new StaDateTimeWrapper(dateTimePath);
-            }
+        if (state.finalExpression instanceof Field field && Moment.class.isAssignableFrom(field.getType())) {
+            Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
+            state.finalExpression = new StaDateTimeWrapper(dateTimePath);
         }
         return state.finalExpression;
     }

@@ -48,6 +48,8 @@ import java.util.Set;
  */
 public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
+    private static final String BUT_FOUND = " but found: ";
+
     private static final Map<ModelRegistry, Map<EntityType, CustomEntityDeserializer>> instancePerModelAndType = new HashMap<>();
 
     public static CustomEntityDeserializer getInstance(final ModelRegistry modelRegistry, final EntityType entityType) {
@@ -150,7 +152,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
             final EntityType targetEntityType = navPropertyMain.getEntityType();
             JsonToken nextToken = parser.nextToken();
             if (nextToken != JsonToken.START_OBJECT) {
-                final String message = "Expected start of object for: " + propertyData.property.getName() + " on " + entityType.entityName + " but found: " + nextToken;
+                final String message = "Expected start of object for: " + propertyData.property.getName() + " on " + entityType.entityName + BUT_FOUND + nextToken;
                 throw MismatchedInputException.from(parser, DefaultEntity.class, message);
             }
             Object value = getInstance(modelRegistry, targetEntityType)
@@ -181,12 +183,12 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         result.setProperty(navPropertyMain, entitySet);
         JsonToken curToken = parser.nextToken();
         if (curToken != JsonToken.START_ARRAY) {
-            final String message = "Expected start of array for: " + navPropertyMain.getName() + " on " + entityType.entityName + " but found: " + curToken;
+            final String message = "Expected start of array for: " + navPropertyMain.getName() + " on " + entityType.entityName + BUT_FOUND + curToken;
             throw MismatchedInputException.from(parser, DefaultEntity.class, message);
         }
         curToken = parser.nextToken();
         if (curToken != JsonToken.START_OBJECT && curToken != JsonToken.END_ARRAY) {
-            final String message = "Expected object in array for: " + navPropertyMain.getName() + " on " + entityType.entityName + " but found: " + curToken;
+            final String message = "Expected object in array for: " + navPropertyMain.getName() + " on " + entityType.entityName + BUT_FOUND + curToken;
             throw MismatchedInputException.from(parser, DefaultEntity.class, message);
         }
         while (curToken != null && curToken != JsonToken.END_ARRAY) {

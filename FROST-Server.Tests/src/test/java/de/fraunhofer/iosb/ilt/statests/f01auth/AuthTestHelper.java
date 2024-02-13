@@ -32,12 +32,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,14 +73,12 @@ public class AuthTestHelper {
     public void getDatabaseStatus(SensorThingsService service, String url, int... expectedResponse) throws IOException {
         HttpGet getUpdateDb = new HttpGet(url);
         CloseableHttpResponse response = service.execute(getUpdateDb);
-        int code = response.getStatusLine().getStatusCode();
-        for (int expected : expectedResponse) {
-            if (expected == code) {
-                return;
-            }
+        Integer code = response.getStatusLine().getStatusCode();
+        final boolean found = ArrayUtils.contains(expectedResponse, code);
+        if (!found) {
+            LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
         }
-        LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
-        fail("Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
+        Assertions.assertTrue(found, "Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
     }
 
     public void createForOk(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected) {

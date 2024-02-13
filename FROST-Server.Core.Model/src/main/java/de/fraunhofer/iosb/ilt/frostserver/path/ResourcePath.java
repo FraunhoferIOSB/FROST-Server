@@ -262,14 +262,13 @@ public class ResourcePath {
         for (int i = pathElements.size() - 1; i > 0; i--) {
             final PathElement current = pathElements.get(i);
             if (current instanceof PathElementEntity epe
-                    && pathElements.get(i - 1) instanceof PathElementEntitySet) {
-                if (epe.getId() != null) {
-                    // crop path
-                    pathElements.subList(0, i - 1).clear();
-                    setIdentifiedElement(epe);
-                    pathElements.get(0).setParent(null);
-                    return this;
-                }
+                    && pathElements.get(i - 1) instanceof PathElementEntitySet
+                    && epe.getId() != null) {
+                // crop path
+                pathElements.subList(0, i - 1).clear();
+                setIdentifiedElement(epe);
+                pathElements.get(0).setParent(null);
+                return this;
             }
         }
         return this;

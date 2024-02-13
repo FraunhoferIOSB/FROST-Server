@@ -312,13 +312,13 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         }
         Object entity = entityCreator.getEntity();
 
-        if (path.isEntityProperty() && entity instanceof Map map) {
-            if (map.get(entityCreator.getEntityName()) == null) {
+        if (entity instanceof Map map) {
+            if (path.isEntityProperty() && map.get(entityCreator.getEntityName()) == null) {
                 return null;
             }
-        }
-        if (path.isValue() && entity instanceof Map map) {
-            entity = map.get(entityCreator.getEntityName());
+            if (path.isValue()) {
+                entity = map.get(entityCreator.getEntityName());
+            }
         }
 
         return entity;

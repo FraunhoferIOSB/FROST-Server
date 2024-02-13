@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -164,7 +162,6 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 true,
                 new ConverterRecordDeflt<>(
                         (TableImpLocations table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colLocation);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
                             entity.setProperty(pluginCoreModel.epLocation, Utils.jsonToTreeOrString(locationString));

@@ -71,9 +71,8 @@ import org.slf4j.LoggerFactory;
 
 public class QueryParser extends Visitor {
 
-    /**
-     * The logger for this class.
-     */
+    private static final String VISIT_CALLED_WITHOUT_PARAMETER = "Visit called without parameter.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
 
     private final QueryDefaults queryDefaults;
@@ -127,7 +126,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_COUNT node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<T_BOOL> values = currentOption.childrenOfType(T_BOOL.class);
         if (values.isEmpty()) {
@@ -138,7 +137,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_SKIP node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
         if (values.isEmpty()) {
@@ -149,7 +148,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_TOP node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<T_LONG> values = currentOption.childrenOfType(T_LONG.class);
         if (values.isEmpty()) {
@@ -161,7 +160,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_FORMAT node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<T_CHARSEQ_FORMAT> values = currentOption.childrenOfType(T_CHARSEQ_FORMAT.class);
         if (values.isEmpty()) {
@@ -172,7 +171,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_METADATA node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<T_CHARSEQ_METADATA> values = currentOption.childrenOfType(T_CHARSEQ_METADATA.class);
         if (values.isEmpty()) {
@@ -183,7 +182,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_SELECT node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         if (currentOption.getChild(1) instanceof T_DISTINCT) {
             currentQuery.setSelectDistinct(true);
@@ -218,7 +217,7 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_ORDERBY node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<P_OrderBy> values = currentOption.childrenOfType(P_OrderBy.class);
         if (values.isEmpty()) {
@@ -240,21 +239,21 @@ public class QueryParser extends Visitor {
 
     public void visit(T_O_FILTER node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         currentQuery.setFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
     }
 
     public void visit(T_O_SKIPFILTER node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         currentQuery.setSkipFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
     }
 
     public void visit(T_O_EXPAND node) {
         if (node == null) {
-            LOGGER.warn("Visit called without parameter.");
+            LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
         List<P_ExpandItem> values = currentOption.childrenOfType(P_ExpandItem.class);
         if (values.isEmpty()) {

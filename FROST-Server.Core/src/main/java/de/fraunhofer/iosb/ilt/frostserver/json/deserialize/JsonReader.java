@@ -101,7 +101,7 @@ public class JsonReader {
     private static synchronized ObjectMapper createObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
-            CustomDeserializationManager.getInstance().registerDeserializer(encodingType, geoJsonDeserializier);
+            CustomDeserializationManager.registerDeserializer(encodingType, geoJsonDeserializier);
         }
         ObjectMapper mapper = new ObjectMapper()
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
