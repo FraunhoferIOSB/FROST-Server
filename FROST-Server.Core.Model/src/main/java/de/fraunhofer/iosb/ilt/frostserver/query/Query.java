@@ -280,7 +280,7 @@ public class Query {
 
     public Query addSelect(Collection<PropertyPlaceholder> properties) {
         if (!select.isEmpty()) {
-            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+            throw new IllegalStateException(ERROR_ADD_PLACEHOLDER_OR_PROPERTY);
         }
         rawSelect.addAll(properties);
         return this;
@@ -288,7 +288,7 @@ public class Query {
 
     public Query addSelect(Property property) {
         if (!rawSelect.isEmpty()) {
-            throw new IllegalStateException("Either add PropertyPlaceholder or Property instances, not both.");
+            throw new IllegalStateException(ERROR_ADD_PLACEHOLDER_OR_PROPERTY);
         }
         select.add(property);
         return this;

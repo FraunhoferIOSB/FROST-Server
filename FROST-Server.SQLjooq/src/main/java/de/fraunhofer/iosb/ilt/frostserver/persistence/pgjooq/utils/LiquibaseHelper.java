@@ -81,33 +81,37 @@ public class LiquibaseHelper {
         final String searchPath = Objects.toString(params.get("searchPath"), null);
         try (SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(searchPath)) {
             resourceAccessor.addResourceAccessor(new ClassLoaderResourceAccessor());
-            try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
-                }
-                final List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
-                int toRunCount = 0;
-                for (ChangeSetStatus status : changeSetStatuses) {
-                    if (status.getWillRun()) {
-                        toRunCount++;
-                        String[] actions = StringUtils.stripAll(StringUtils.split(status.getDescription(), ';'));
-                        out.append(status.getChangeSet().getId()).append('\n');
-                        for (String action : actions) {
-                            out.append('\t').append(action).append('\n');
-                        }
-                        out.append('\n');
-                    }
-                }
-                if (toRunCount == 0) {
-                    out.append("Up to date, no changes to apply.");
-                }
-            } catch (LiquibaseException ex) {
-                outputError(ex, out, "Failed to upgrade database");
-            } catch (Exception ex) {
-                LOGGER.warn("Exception happened when closing liquibase.", ex);
-            }
+            runLiquibaseCheck(liquibaseChangelogFilename, resourceAccessor, database, params, out);
         } catch (Exception ex) {
             LOGGER.warn("Failed to close SearchPathResourceAccessor.", ex);
+        }
+    }
+
+    private static void runLiquibaseCheck(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, StringWriter out) {
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
+            final List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
+            int toRunCount = 0;
+            for (ChangeSetStatus status : changeSetStatuses) {
+                if (status.getWillRun()) {
+                    toRunCount++;
+                    String[] actions = StringUtils.stripAll(StringUtils.split(status.getDescription(), ';'));
+                    out.append(status.getChangeSet().getId()).append('\n');
+                    for (String action : actions) {
+                        out.append('\t').append(action).append('\n');
+                    }
+                    out.append('\n');
+                }
+            }
+            if (toRunCount == 0) {
+                out.append("Up to date, no changes to apply.");
+            }
+        } catch (LiquibaseException ex) {
+            outputError(ex, out, "Failed to upgrade database");
+        } catch (Exception ex) {
+            LOGGER.warn("Exception happened when closing liquibase.", ex);
         }
     }
 
@@ -116,20 +120,24 @@ public class LiquibaseHelper {
         final String liquibaseSearchPath = Objects.toString(params.get("searchPath"), null);
         try (SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(liquibaseSearchPath)) {
             resourceAccessor.addResourceAccessor(new ClassLoaderResourceAccessor());
-            try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
-                }
-                liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
-                out.append("Update Completed.");
-            } catch (LiquibaseException ex) {
-                outputError(ex, out, "Failed to upgrade database");
-                throw new UpgradeFailedException(ex);
-            } catch (Exception ex) {
-                LOGGER.warn("Exception happened when closing liquibase.", ex);
-            }
+            runLiquibaseUpdate(liquibaseChangelogFilename, resourceAccessor, database, params, out);
         } catch (Exception ex) {
             LOGGER.warn("Failed to close SearchPathResourceAccessor.", ex);
+        }
+    }
+
+    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
+            liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
+            out.append("Update Completed.");
+        } catch (LiquibaseException ex) {
+            outputError(ex, out, "Failed to upgrade database");
+            throw new UpgradeFailedException(ex);
+        } catch (Exception ex) {
+            LOGGER.warn("Exception happened when closing liquibase.", ex);
         }
     }
 
