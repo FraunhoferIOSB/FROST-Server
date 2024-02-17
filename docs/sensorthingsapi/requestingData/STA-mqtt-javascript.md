@@ -15,7 +15,7 @@ In the following, we use [Eclipse Paho](https://www.eclipse.org/paho/files/jsdoc
 Steps:
 1. Require Paho from your trusted cdn, such as:
 
-   ```<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>```
+   ```<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js" type="text/javascript"></script>```
 
 2. In your JS, create a new Paho Client (find the blue print for the instanciation of a Paho Client [here](https://github.com/eclipse/paho.mqtt.javascript "The github repository for Paho")) and give it appropriate callback handlers
 
@@ -27,7 +27,7 @@ Steps:
             clientId: "ClientId"    //Should be unique for every of your client connections.
     }
 
-    client = new Paho.MQTT.Client(pahoConfig.hostname, Number(pahoConfig.port), pahoConfig.clientId);
+    client = new Paho.Client(pahoConfig.hostname, Number(pahoConfig.port), pahoConfig.clientId);
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
 
@@ -38,7 +38,7 @@ Steps:
     function onConnect() {
     // Once a connection has been made, make a subscription and send a message.
     console.log("Connected with Server");
-    client.subscribe("v1.0/Observations");
+    client.subscribe("v1.1/Observations");
     }
 
     function onConnectionLost(responseObject) {
@@ -56,7 +56,7 @@ Steps:
 3. Do something with your received message
    ```javascript
     function handleMessage(message) {
-	    if (message != null || message != undefined) {
+	    if (message != null && message != undefined) {
 	           console.log(message)
 	    }
     }
