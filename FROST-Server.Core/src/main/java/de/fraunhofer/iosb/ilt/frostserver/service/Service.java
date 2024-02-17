@@ -489,7 +489,7 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        JsonReader jsonReader = new JsonReader(modelRegistry, request.getUserPrincipal());
+        JsonReader jsonReader = request.getJsonReader();
         Entity entity;
         try {
             entity = jsonReader.parseEntity(type, request.getContentReader());
@@ -567,7 +567,7 @@ public class Service implements AutoCloseable {
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            JsonReader entityParser = new JsonReader(modelRegistry, request.getUserPrincipal());
+            JsonReader entityParser = request.getJsonReader();
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.getEntityType().validateUpdate(entity);
@@ -686,7 +686,7 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
 
-            JsonReader entityParser = new JsonReader(modelRegistry, request.getUserPrincipal());
+            JsonReader entityParser = request.getJsonReader();
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             entity.validateUpdate();
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);

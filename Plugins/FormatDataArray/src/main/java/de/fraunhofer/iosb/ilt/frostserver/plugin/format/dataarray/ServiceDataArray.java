@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -88,7 +88,7 @@ public class ServiceDataArray {
         final PersistenceManager pm = service.getPm();
         try {
             Query query = QueryParser.parseQuery(request.getUrlQuery(), settings, null, request.getUserPrincipal());
-            JsonReader entityParser = new JsonReader(settings.getModelRegistry(), request.getUserPrincipal());
+            JsonReaderDefault entityParser = new JsonReaderDefault(settings.getModelRegistry(), request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {

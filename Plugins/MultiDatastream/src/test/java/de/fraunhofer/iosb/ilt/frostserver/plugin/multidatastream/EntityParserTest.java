@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.node.TextNode;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -57,7 +57,7 @@ class EntityParserTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
-    private static JsonReader entityParser;
+    private static JsonReaderDefault entityParser;
     private static EntityType etMultiDatastream;
     private static EntityPropertyMain epMultiObservationDataTypes;
     private static EntityPropertyMain epUnitOfMeasurements;
@@ -82,7 +82,7 @@ class EntityParserTest {
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
             coreSettings.getPluginManager().initPlugins(null);
-            entityParser = new JsonReader(modelRegistry);
+            entityParser = new JsonReaderDefault(modelRegistry);
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
             epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
             epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");

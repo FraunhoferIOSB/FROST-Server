@@ -31,6 +31,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETUR
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
@@ -187,6 +188,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             isOdata401 = true;
             response.addHeader("OData-Version", "4.01");
         }
+        request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(settings).generateMetaData(request, response);

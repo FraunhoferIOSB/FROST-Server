@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -53,6 +55,7 @@ public class ServiceRequest {
     private PrincipalExtended userPrincipal;
     private CoreSettings coreSettings;
     private UpdateMode updateMode;
+    private JsonReader jsonReader;
 
     protected ServiceRequest() {
         // empty by design.
@@ -206,6 +209,18 @@ public class ServiceRequest {
             this.urlPath = url;
             this.urlQuery = null;
         }
+    }
+
+    public JsonReader getJsonReader() {
+        if (jsonReader == null) {
+            jsonReader = new JsonReaderDefault(coreSettings.getModelRegistry(), userPrincipal);
+        }
+        return jsonReader;
+    }
+
+    public ServiceRequest setJsonReader(JsonReader jsonReader) {
+        this.jsonReader = jsonReader;
+        return this;
     }
 
     public PrincipalExtended getUserPrincipal() {

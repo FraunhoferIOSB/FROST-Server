@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.node.TextNode;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -57,7 +57,7 @@ class EntityParserTest {
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
-    private static JsonReader entityParser;
+    private static JsonReaderDefault entityParser;
 
     @BeforeAll
     public static void beforeClass() {
@@ -68,7 +68,7 @@ class EntityParserTest {
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
-        entityParser = new JsonReader(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry);
     }
 
     @Test
@@ -1009,7 +1009,7 @@ class EntityParserTest {
             PluginCoreModel pluginCoreModelString = new PluginCoreModel();
             pluginCoreModelString.init(coreSettingsString);
             coreSettingsString.getPluginManager().initPlugins(null);
-            JsonReader entityParserString = new JsonReader(modelRegistryString);
+            JsonReaderDefault entityParserString = new JsonReaderDefault(modelRegistryString);
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
             Entity expectedResult = new DefaultEntity(pluginCoreModelString.etThing)

@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -71,11 +71,11 @@ class EntityParserStringIdTest {
         }
     }
 
-    private JsonReader entityParser;
+    private JsonReaderDefault entityParser;
 
     @BeforeEach
     public void setUp() {
-        entityParser = new JsonReader(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry);
     }
 
     @Test

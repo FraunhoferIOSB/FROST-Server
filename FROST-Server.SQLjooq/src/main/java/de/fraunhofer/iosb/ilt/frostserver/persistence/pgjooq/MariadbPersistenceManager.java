@@ -27,7 +27,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_UU
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -370,7 +370,7 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         Entity newEntity;
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(modelRegistry, PrincipalExtended.getLocalPrincipal());
+            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, PrincipalExtended.getLocalPrincipal());
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);

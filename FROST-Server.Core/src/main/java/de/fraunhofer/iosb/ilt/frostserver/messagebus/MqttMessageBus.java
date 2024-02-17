@@ -21,7 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BU
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -121,7 +121,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private boolean listening = false;
 
     private ObjectMapper formatter;
-    private JsonReader parser;
+    private JsonReaderDefault parser;
 
     @Override
     public void init(CoreSettings settings) {
@@ -156,7 +156,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         formatter = JsonWriter.getObjectMapper();
         final ModelRegistry modelRegistry = settings.getModelRegistry();
-        parser = new JsonReader(modelRegistry, true);
+        parser = new JsonReaderDefault(modelRegistry, true);
 
         long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
         if (queueLoggingInterval > 0) {

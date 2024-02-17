@@ -75,6 +75,10 @@ public class TimeInstant implements TimeObject {
         }
     }
 
+    public static TimeInstant create(Moment time) {
+        return new TimeInstant(time);
+    }
+
     public Moment getDateTime() {
         return dateTime;
     }

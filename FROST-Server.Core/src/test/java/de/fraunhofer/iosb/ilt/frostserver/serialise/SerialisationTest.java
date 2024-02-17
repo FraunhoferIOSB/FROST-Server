@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -83,7 +83,7 @@ class SerialisationTest {
         expResult.setHours(0);
         expResult.setMinutes(0);
         expResult.setSeconds(0);
-        Date result = new JsonReader(modelRegistry).parseObject(Date.class, input);
+        Date result = new JsonReaderDefault(modelRegistry).parseObject(Date.class, input);
         result.setHours(0);
         result.setMinutes(0);
         result.setSeconds(0);

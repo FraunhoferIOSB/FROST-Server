@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -44,7 +44,7 @@ class MessageSerialisationTest {
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
-    private static JsonReader entityParser;
+    private static JsonReaderDefault entityParser;
 
     @BeforeAll
     public static void beforeClass() {
@@ -55,7 +55,7 @@ class MessageSerialisationTest {
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
-        entityParser = new JsonReader(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry);
     }
 
     @Test
