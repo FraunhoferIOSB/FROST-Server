@@ -60,7 +60,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private final String countField;
     private final String navLinkField;
     private final String nextLinkField;
-    private final boolean serialiseAllNulls;
+    private final boolean odata;
     private final Map<EntityPropertyMain, SimplePropertySerializer> propertySerializers = new HashMap<>();
     private final Map<PropertyType, SimplePropertySerializer> propertyTypeSerializers = new HashMap<>();
 
@@ -68,11 +68,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         this(false, AT_IOT_COUNT, AT_IOT_NAVIGATION_LINK, AT_IOT_NEXT_LINK, AT_IOT_SELF_LINK);
     }
 
-    public EntitySerializer(boolean nulls, String countField, String navLinkField, String nextLinkField, String selfLinkField) {
+    public EntitySerializer(boolean odata, String countField, String navLinkField, String nextLinkField, String selfLinkField) {
         this.countField = countField;
         this.navLinkField = navLinkField;
         this.nextLinkField = nextLinkField;
-        this.serialiseAllNulls = nulls;
+        this.odata = odata;
         propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, entity, gen) -> {
             if (entity.getQuery().getMetadata() == Metadata.FULL) {
                 final String value = entity.getSelfLink();
@@ -152,11 +152,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             return;
         }
         final Object value = entity.getProperty(ep);
-        if (serialiseAllNulls || value != null || ep.serialiseNull) {
+        if (value != null || ep.serialiseNull) {
             final String name = ep.getName();
             Collection<String> aliases = ep.getAliases();
             if (aliases.size() > 1) {
-                if (serialiseAllNulls) {
+                if (odata) {
                     // OData: find the first alias that does not start with an @
                     for (String alias : aliases) {
                         if (!alias.startsWith("@")) {
@@ -196,11 +196,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             writeEntitySet(np, entitySet, gen, exp.getSubQuery());
         } else {
             Entity expandedEntity = (Entity) entityOrSet;
-            if (expandedEntity == null) {
-                if (serialiseAllNulls) {
-                    gen.writeNullField(np.getJsonName());
-                }
-            } else {
+            if (expandedEntity != null) {
                 if (expandedEntity.getQuery() == null && exp != null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }
