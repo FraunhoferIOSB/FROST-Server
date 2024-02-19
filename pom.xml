@@ -111,21 +111,21 @@
         <version.javaee-web-api>8.0.1</version.javaee-web-api>
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
-        <version.jetty>10.0.19</version.jetty>
+        <version.jetty>10.0.20</version.jetty>
         <version.jooq>3.19.3</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.10.1</version.junit>
-        <version.junit-platform-suite>1.10.1</version.junit-platform-suite>
-        <version.keycloak>23.0.4</version.keycloak>
-        <version.liquibase>4.25.1</version.liquibase>
-        <version.logback>1.4.14</version.logback>
+        <version.junit>5.10.2</version.junit>
+        <version.junit-platform-suite>1.10.2</version.junit-platform-suite>
+        <version.keycloak>23.0.6</version.keycloak>
+        <version.liquibase>4.26.0</version.liquibase>
+        <version.logback>1.5.0</version.logback>
 
         <version.maven.plugin.assembly>3.6.0</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.5.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.12.1</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.6.1</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>9.0.9</version.maven.plugin.dependency-check>
-        <version.maven.plugin.download>1.8.0</version.maven.plugin.download>
+        <version.maven.plugin.download>1.8.1</version.maven.plugin.download>
         <version.maven.plugin.exec>3.1.1</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>7.0.0</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.1.0</version.maven.plugin.gpg>
@@ -136,7 +136,7 @@
         <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.5.1</version.maven.plugin.shade>
         <version.maven.plugin.source>3.3.0</version.maven.plugin.source>
-        <version.maven.plugin.spotless>2.42.0</version.maven.plugin.spotless>
+        <version.maven.plugin.spotless>2.43.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.2.5</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
@@ -145,10 +145,10 @@
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.7.1</version.postgres>
-        <version.slf4j-api>2.0.11</version.slf4j-api>
-        <version.testcontainers>1.19.3</version.testcontainers>
+        <version.slf4j-api>2.0.12</version.slf4j-api>
+        <version.testcontainers>1.19.5</version.testcontainers>
         <version.testcontainers-keycloak>3.2.0</version.testcontainers-keycloak>
-        <version.time4j>5.9.3</version.time4j>
+        <version.time4j>5.9.4</version.time4j>
     </properties>
 
     <dependencyManagement>
