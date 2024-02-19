@@ -45,11 +45,11 @@ updates:
           - "*"
     ignore:
       - dependency-name: "org.jooq:jooq"
-        versions: ["[3.16,3.17)"]
+        versions: ["[3.17,)"]
       - dependency-name: "org.liquibase:liquibase-core"
-        versions: ["[4.12,4.13)"]
+        versions: ["[4.13,)"]
       - dependency-name: "org.openjfx:*"
-        versions: ["[19.0,20.0)"]
+        versions: ["[20.0,)"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
