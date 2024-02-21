@@ -90,6 +90,13 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     protected SensorThingsService createService() {
+        if (!sSrvc.isEndpointSet()) {
+            try {
+                sSrvc.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+            } catch (MalformedURLException ex) {
+                throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
+            }
+        }
         try {
             return new SensorThingsService(sSrvc.getModelRegistry())
                     .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
