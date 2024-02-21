@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.E
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_THING;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_THINGS;
 
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
@@ -84,7 +85,7 @@ public class SensorThingsUserModel implements DataModel {
     }
 
     @Override
-    public final void init(ModelRegistry modelRegistry) {
+    public final void init(SensorThingsService service, ModelRegistry modelRegistry) {
         if (this.mr != null) {
             throw new IllegalArgumentException("Already initialised.");
         }
