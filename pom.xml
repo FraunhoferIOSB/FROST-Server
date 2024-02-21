@@ -144,7 +144,7 @@
         <version.org.json>20231013</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
-        <version.postgres>42.7.1</version.postgres>
+        <version.postgres>42.7.2</version.postgres>
         <version.slf4j-api>2.0.11</version.slf4j-api>
         <version.testcontainers>1.19.3</version.testcontainers>
         <version.testcontainers-keycloak>3.2.0</version.testcontainers-keycloak>
