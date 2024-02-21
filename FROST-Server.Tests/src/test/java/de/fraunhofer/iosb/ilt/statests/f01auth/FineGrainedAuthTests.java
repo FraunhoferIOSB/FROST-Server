@@ -35,10 +35,10 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -264,6 +264,13 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     private SensorThingsService createService() {
+        if (!baseService.isEndpointSet()) {
+            try {
+                baseService.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+            } catch (MalformedURLException ex) {
+                throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
+            }
+        }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
                     .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
