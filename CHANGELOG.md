@@ -1,8 +1,9 @@
 # Changelog
 
-## Development version 2.2.3
+## Release version 2.2.3
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 
 
 ## Release version 2.2.2
