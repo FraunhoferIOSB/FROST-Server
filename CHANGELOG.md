@@ -3,6 +3,7 @@
 ## Development version 2.0.13
 
 **Internal changes & Bugfixes**
+* Updated dependency versions.
 
 
 ## Release version 2.0.12
