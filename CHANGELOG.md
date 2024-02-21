@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.0.13
+## Release version 2.0.13
 
 **Internal changes & Bugfixes**
 * Updated dependency versions.
