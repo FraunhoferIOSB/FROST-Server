@@ -40,10 +40,14 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PUT;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_PASSWORD_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_USERNAME_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
@@ -86,6 +90,8 @@ public class BasicAuthFilter implements Filter {
 
     private boolean allowAnonymous;
     private boolean authenticateOnly;
+    private int maxPassLength = MAX_PASSWORD_LENGTH;
+    private int maxNameLength = MAX_USERNAME_LENGTH;
     private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
     private DatabaseHandler databaseHandler;
@@ -121,6 +127,9 @@ public class BasicAuthFilter implements Filter {
         String realmName = authSettings.get(TAG_AUTH_REALM_NAME, BasicAuthProvider.class);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 
+        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, BasicAuthProvider.class);
+        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, BasicAuthProvider.class);
+
         final AuthChecker allAllowed = (userData, response) -> true;
         methodCheckers.put(HttpMethod.OPTIONS, allAllowed);
         methodCheckers.put(HttpMethod.HEAD, allAllowed);
@@ -152,7 +161,7 @@ public class BasicAuthFilter implements Filter {
         }
 
         String[] split = userPassDecoded.split(":", 2);
-        final UserData userData = new UserData(split[0], split[1]);
+        final UserData userData = new UserData(split[0], maxNameLength, split[1], maxPassLength);
         if (databaseHandler.isValidUser(userData)) {
             return userData;
         } else {

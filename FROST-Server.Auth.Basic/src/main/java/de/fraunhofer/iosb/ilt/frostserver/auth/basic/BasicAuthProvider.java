@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -53,6 +55,12 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueInt(10)
     public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
 
+    @DefaultValueInt(MAX_PASSWORD_LENGTH)
+    public static final String TAG_MAX_PASSWORD_LENGTH = "maxPasswordLength";
+
+    @DefaultValueInt(MAX_USERNAME_LENGTH)
+    public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 
@@ -70,6 +78,8 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     private CoreSettings coreSettings;
     private String roleAdmin;
     private int maxClientsPerUser;
+    private int maxPassLength = MAX_PASSWORD_LENGTH;
+    private int maxNameLength = MAX_USERNAME_LENGTH;
 
     private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
     private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
@@ -81,6 +91,8 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         final Settings authSettings = coreSettings.getAuthSettings();
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
+        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
+        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
     }
 
     @Override
@@ -90,7 +102,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @Override
     public boolean isValidUser(String clientId, String userName, String password) {
-        final UserData userData = new UserData(userName, password);
+        final UserData userData = new UserData(userName, maxNameLength, password, maxPassLength);
         final boolean validUser = DatabaseHandler.getInstance(coreSettings)
                 .isValidUser(userData);
         if (!validUser) {

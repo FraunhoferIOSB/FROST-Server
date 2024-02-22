@@ -19,17 +19,51 @@ package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A wrapper for userName, userPass and userRoles.
  */
 public class UserData {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserData.class);
+    public static final int MAX_PASSWORD_LENGTH = 128;
+    public static final int MAX_USERNAME_LENGTH = 128;
+
     public final String userName;
     public final String userPass;
     public final Set<String> roles = new LinkedHashSet<>();
 
+    /**
+     * Create a new UserData with the standard maximum username and password
+     * lengths.
+     *
+     * @param userName the user name to use.
+     * @param userPass the password to use.
+     */
     public UserData(String userName, String userPass) {
+        this(userName, MAX_USERNAME_LENGTH, userPass, MAX_PASSWORD_LENGTH);
+    }
+
+    /**
+     * Create a new UserData with the given maximum username and password
+     * lengths.
+     *
+     * @param userName the user name to use.
+     * @param maxNameLength the maximum length of the username to check for.
+     * @param userPass the password to use.
+     * @param maxPassLength the maximum length of the password to check for.
+     */
+    public UserData(String userName, int maxNameLength, String userPass, int maxPassLength) {
+        if (userName != null && userName.length() > maxNameLength) {
+            LOGGER.error("Password too long, aborting.");
+            throw new IllegalArgumentException("Password too long.");
+        }
+        if (userPass != null && userPass.length() > maxPassLength) {
+            LOGGER.error("Password too long, aborting.");
+            throw new IllegalArgumentException("Password too long.");
+        }
         this.userName = userName;
         this.userPass = userPass;
     }

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -89,6 +91,12 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     @DefaultValue("USER_NAME")
     public static final String TAG_USERNAME_COLUMN = "usernameColumn";
 
+    @DefaultValueInt(MAX_PASSWORD_LENGTH)
+    public static final String TAG_MAX_PASSWORD_LENGTH = "maxPasswordLength";
+
+    @DefaultValueInt(MAX_USERNAME_LENGTH)
+    public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
+
     /**
      * The logger for this class.
      */
@@ -107,6 +115,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     private int maxClientsPerUser;
     private boolean registerUserLocally;
     private DatabaseHandler databaseHandler;
+    private int maxPassLength = MAX_PASSWORD_LENGTH;
+    private int maxNameLength = MAX_USERNAME_LENGTH;
 
     private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
     private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
@@ -125,6 +135,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
         final Settings authSettings = coreSettings.getAuthSettings();
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
+        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
+        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
         if (registerUserLocally) {
             DatabaseHandler.init(coreSettings);
@@ -148,7 +160,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
             loginModule = new DirectAccessGrantsLoginModuleFrost(coreSettings);
         }
 
-        final UserData userData = new UserData(username, password);
+        final UserData userData = new UserData(username, maxNameLength, password, maxPassLength);
 
         clientMapCleanup();
         final boolean validUser = checkLogin(loginModule, userData, clientId);
