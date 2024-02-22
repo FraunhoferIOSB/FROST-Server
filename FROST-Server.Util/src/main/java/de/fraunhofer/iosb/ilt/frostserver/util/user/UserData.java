@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,32 @@ public class UserData {
 
     public boolean isEmpty() {
         return userName == null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final UserData other = (UserData) obj;
+        if (!Objects.equals(this.userName, other.userName)) {
+            return false;
+        }
+        return Objects.equals(this.userPass, other.userPass);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + Objects.hashCode(this.userName);
+        hash = 71 * hash + Objects.hashCode(this.userPass);
+        return hash;
     }
 
 }

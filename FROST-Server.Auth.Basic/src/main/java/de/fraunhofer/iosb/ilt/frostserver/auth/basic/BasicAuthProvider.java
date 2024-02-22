@@ -61,6 +61,9 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueInt(MAX_USERNAME_LENGTH)
     public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
 
+    @DefaultValueInt(60_000)
+    public static final String TAG_USER_CACHE_LIFE_MS = "userCacheLifeMs";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 

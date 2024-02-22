@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_PLAIN_TEXT_PASSWORD;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_USER_CACHE_LIFE_MS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -66,6 +68,8 @@ public class DatabaseHandler {
     private final String connectionUrl;
     private boolean maybeUpdateDatabase;
 
+    private PassiveExpiringMap<UserData, UserData> cache;
+
     public static void init(CoreSettings coreSettings) {
         if (INSTANCES.get(coreSettings) == null) {
             createInstance(coreSettings);
@@ -93,6 +97,11 @@ public class DatabaseHandler {
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEXT_PASSWORD, BasicAuthProvider.class);
         connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        int userCacheLifeMs = authSettings.getInt(TAG_USER_CACHE_LIFE_MS, BasicAuthProvider.class);
+        if (userCacheLifeMs > 0) {
+            LOGGER.info("Enabling user cache.");
+            cache = new PassiveExpiringMap<>(userCacheLifeMs);
+        }
     }
 
     public boolean isPlainTextPassword() {
@@ -113,6 +122,11 @@ public class DatabaseHandler {
      * @return true if the user is value
      */
     public boolean isValidUser(UserData userData) {
+        final UserData cachedData = getFromCache(userData);
+        if (cachedData != null) {
+            userData.roles.addAll(cachedData.roles);
+            return true;
+        }
         maybeUpdateDatabase();
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
@@ -128,10 +142,36 @@ public class DatabaseHandler {
                     .stream()
                     .filter(Objects::nonNull)
                     .forEach(userData.roles::add);
-            return !roles.isEmpty();
+            boolean valid = !roles.isEmpty();
+            if (valid) {
+                addToCache(userData);
+            }
+            return valid;
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user credentials.", exc);
             return false;
+        }
+    }
+
+    public UserData getFromCache(UserData userData) {
+        if (cache == null) {
+            return null;
+        }
+        try {
+            return cache.get(userData);
+        } catch (RuntimeException ex) {
+            LOGGER.debug("Failed to check cache.", ex);
+            return null;
+        }
+    }
+
+    public void addToCache(UserData userData) {
+        if (cache != null) {
+            try {
+                cache.put(userData, userData);
+            } catch (RuntimeException exc) {
+                LOGGER.debug("Failed to fill cache.", exc);
+            }
         }
     }
 

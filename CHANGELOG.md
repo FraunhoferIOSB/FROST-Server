@@ -20,6 +20,7 @@ make sure to check and update your HELM settings.
 * Fixed security queries running as normal user, resulting in too narrow access.
 * Improved the memory efficiency of the DataArray resultFormat.
 * Added checks for maximum username and password lengths.
+* Added cache to basic authentication module to avoid calling crypt for users that are previously authenticated.
 
 
 ## Release version 2.2.0
