@@ -34,6 +34,13 @@ jobs:
         tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
         chmod +x /tmp/helm
 
+    - name: Lint Helm Chart
+      id: kube-lint-scan
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: ./helm/frost-server
+        config: ./helm/.kube-linter/config.yaml
+    
     - name: Build and upload Helm
       env:
         HELM_SSH_KEY: ${{ secrets.HELM_SSH_KEY }}

@@ -30,6 +30,13 @@ jobs:
         wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
         tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
         chmod +x /tmp/helm
+    
+    - name: Lint Helm Chart
+      id: kube-lint-scan
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: ./helm/frost-server
+        config: ./helm/.kube-linter/config.yaml
 
     - name: Build Helm
       run: |

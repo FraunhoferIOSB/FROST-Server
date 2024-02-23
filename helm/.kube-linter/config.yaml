@@ -1,0 +1,6 @@
+checks:
+  addAllBuiltIn: true
+  exclude:
+   - "required-annotation-email"
+   - "required-label-owner"
+   - "default-service-account"
