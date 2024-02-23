@@ -9,7 +9,8 @@ make sure to check and update your HELM settings.
 **New Features**
 * Added support for headers in JSON-Batch requets, enabling JSON-Patch requests in JSON-Batch requests.
 * Added option for KeycloakAuthProvider to locally register user.
-* Implemented expand option for MQTT Topics: `v1.1/Observations?$select=id&$expand=Datastream($expand=Thing)`
+* Implemented expand option for MQTT Topics: `v1.1/Observations?$select=id&$expand=Datastream($expand=Thing)`.
+* Fixed ordering of object properties on JSONB columns (Aplhabetic instead of by key-length).
 * Changed the default orderby for Observations to `phenomenonTime, id`.
 
 **Internal changes & Bugfixes**
