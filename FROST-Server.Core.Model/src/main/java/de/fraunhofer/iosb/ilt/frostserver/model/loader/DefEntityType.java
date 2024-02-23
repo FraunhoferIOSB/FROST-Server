@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -76,6 +80,15 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
             label = "Table", description = "The 'table' that data for this EntityType is stored in. What this exactly means depends on the PersistenceManager.")
     @EditorString.EdOptsString()
     private String table;
+
+    /**
+     * The properties to order entities of this type by.
+     */
+    @ConfigurableField(editor = EditorList.class,
+            label = "OrderBy", description = "The default way to order this entity type.")
+    @EditorList.EdOptsList(editor = EditorString.class)
+    @EditorString.EdOptsString()
+    private List<String> orderByDflt;
 
     /**
      * The EntityProperties of the EntityType.
@@ -161,6 +174,12 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         for (DefNavigationProperty defNp : navigationProperties) {
             defNp.setSourceEntityType(entityType);
             defNp.registerProperties(modelRegistry);
+        }
+        if (!StringHelper.isNullOrEmpty(orderByDflt)) {
+            for (String ob : orderByDflt) {
+                Property property = entityType.getProperty(ob);
+                entityType.addOrderByDefault(new OrderBy(new Path(property)));
+            }
         }
     }
 

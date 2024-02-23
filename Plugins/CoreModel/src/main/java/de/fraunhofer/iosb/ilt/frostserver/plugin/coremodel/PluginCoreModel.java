@@ -39,6 +39,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -324,7 +326,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(epValidTime)
                 .registerProperty(epParameters)
                 .registerProperty(npDatastreamObservation)
-                .registerProperty(npFeatureOfInterestObservation);
+                .registerProperty(npFeatureOfInterestObservation)
+                .addOrderByDefault(new OrderBy(new Path(epPhenomenonTime)));
         etObservedProperty
                 .registerProperty(epIdObsProp)
                 .registerProperty(epName)

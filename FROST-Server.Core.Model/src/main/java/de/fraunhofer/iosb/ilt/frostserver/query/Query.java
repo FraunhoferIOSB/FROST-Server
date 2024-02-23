@@ -33,7 +33,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
@@ -190,7 +189,9 @@ public class Query {
             }
         }
         if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
-            orderBy.add(new OrderBy(new Path(primaryKey), OrderBy.OrderType.ASCENDING));
+            for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
+                orderBy.add(dfltOrder);
+            }
             pkOrder = true;
         }
         return this;

@@ -34,10 +34,11 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -108,10 +109,6 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * The set of Navigation properties pointing to entity sets.
      */
     private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new TreeSet<>();
-    /**
-     * The map of NavigationProperties by their target EntityTypes.
-     */
-    private final Map<EntityType, NavigationPropertyMain> navigationPropertiesByTarget = new HashMap<>();
 
     private final Map<String, EntityValidator> validatorsCreateEntity = new LinkedHashMap<>();
     private final Map<String, EntityValidator> validatorsUpdateEntity = new LinkedHashMap<>();
@@ -120,6 +117,11 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * The (OData)annotations for this Entity Type.
      */
     private final List<Annotation> annotations = new ArrayList<>();
+
+    /**
+     * The list of oderby's to use by default.
+     */
+    private final List<OrderBy> orderbyDefaults = new ArrayList<>();
 
     /**
      * The ModelRegistry this EntityType is registered on.
@@ -191,8 +193,18 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
                 } else {
                     navigationEntities.add(np);
                 }
-                navigationPropertiesByTarget.put(np.getEntityType(), np);
             }
+        }
+        // Make sure we have a default orderby and that it contains the primary key last.
+        boolean pkOrder = false;
+        final String pkName = primaryKey.getName();
+        for (OrderBy order : orderbyDefaults) {
+            if (pkName.equals(order.getExpression().toUrl())) {
+                pkOrder = true;
+            }
+        }
+        if (!pkOrder) {
+            orderbyDefaults.add(new OrderBy(new Path(primaryKey), OrderBy.OrderType.ASCENDING));
         }
     }
 
@@ -524,4 +536,17 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         throw new IllegalArgumentException("Can not use " + ((rawId == null) ? "null" : rawId.getClass().getName()) + " (" + input + ") as an Id");
     }
 
+    public List<OrderBy> getOrderbyDefaults() {
+        return orderbyDefaults;
+    }
+
+    public EntityType addOrderByDefault(OrderBy order) {
+        orderbyDefaults.add(order);
+        return this;
+    }
+
+    public EntityType clearOrderByDefaults() {
+        orderbyDefaults.clear();
+        return this;
+    }
 }

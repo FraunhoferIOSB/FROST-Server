@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.format.FormatStyle;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
@@ -83,6 +84,10 @@ public class StringHelper {
 
     public static boolean isNullOrEmpty(String string) {
         return string == null || string.isEmpty();
+    }
+
+    public static boolean isNullOrEmpty(Collection collection) {
+        return collection == null || collection.isEmpty();
     }
 
     /**

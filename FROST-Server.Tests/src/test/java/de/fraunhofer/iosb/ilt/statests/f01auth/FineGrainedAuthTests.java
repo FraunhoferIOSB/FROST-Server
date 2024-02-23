@@ -241,7 +241,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 }
             }
 
-            OBSERVATIONS.addAll(serviceAdmin.query(mdlSensing.etObservation).top(100).list().toList());
+            OBSERVATIONS.addAll(serviceAdmin.query(mdlSensing.etObservation).top(100).orderBy("id").list().toList());
         } catch (IOException ex) {
             LOGGER.error("Failed to read resource", ex);
         }
