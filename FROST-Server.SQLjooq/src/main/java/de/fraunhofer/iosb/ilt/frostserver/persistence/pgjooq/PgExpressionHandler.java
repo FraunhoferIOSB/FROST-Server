@@ -295,7 +295,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
                 .getPropertyFieldRegistry()
                 .getAllFieldsForProperty(element, new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
-            state.finalExpression = WrapperHelper.wrapField(pathExpressions.values().iterator().next());
+            final Field field = pathExpressions.values().stream().iterator().next();
+            Field optimisedField = state.pathTableRef.getJoinEqual(field);
+            state.finalExpression = WrapperHelper.wrapField(optimisedField);
         } else {
             state.finalExpression = getSubExpression(state, pathExpressions);
         }

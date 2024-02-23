@@ -28,6 +28,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +111,11 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);
         }
-        return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased);
+        // When a query filters or orders on the target field, it should instead do so on the source field
+        Map<Field, Field> joinEquals = new HashMap<>();
+        joinEquals.put(targetField, sourceField);
+        return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased)
+                .setJoinEquals(joinEquals);
     }
 
     @Override

@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import java.util.HashMap;
 import java.util.Map;
+import org.jooq.Field;
 
 /**
  * A class that keeps track of the latest table that was joined.
@@ -31,6 +32,7 @@ public class TableRef {
     private final EntityType type;
     private final StaMainTable<?> table;
     private final Map<NavigationProperty, TableRef> joins = new HashMap<>();
+    private Map<Field, Field> joinEquals;
 
     public TableRef(EntityType type, StaMainTable<?> table) {
         this.type = type;
@@ -64,4 +66,21 @@ public class TableRef {
     public TableRef createJoin(String name, QueryState<?> queryState) {
         return table.createJoin(name, queryState, this);
     }
+
+    public TableRef setJoinEquals(Map<Field, Field> joinEquals) {
+        this.joinEquals = joinEquals;
+        return this;
+    }
+
+    public Field getJoinEqual(Field requested) {
+        if (joinEquals == null) {
+            return requested;
+        }
+        Field found = joinEquals.get(requested);
+        if (found == null) {
+            return requested;
+        }
+        return found;
+    }
+
 }

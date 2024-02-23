@@ -21,6 +21,7 @@ make sure to check and update your HELM settings.
 * Improved the memory efficiency of the DataArray resultFormat.
 * Added checks for maximum username and password lengths.
 * Added cache to basic authentication module to avoid calling crypt for users that are previously authenticated.
+* Improved generated queries when filtering or ordering on ID over one-to-many relations.
 
 
 ## Release version 2.2.0
