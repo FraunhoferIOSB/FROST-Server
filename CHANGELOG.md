@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.3.0
+## Release version 2.3.0
 
 NOTE: The helm option `frost.http.ingress.rewriteTarget` had a typo in it
 and has been changed (was: `rewriteTraget`). If you use this HELM option,
