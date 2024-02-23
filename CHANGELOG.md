@@ -1,5 +1,10 @@
 # Changelog
 
+## Development version 2.3.1
+
+**Internal changes & Bugfixes**
+
+
 ## Release version 2.3.0
 
 NOTE: The helm option `frost.http.ingress.rewriteTarget` had a typo in it
