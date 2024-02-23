@@ -5,6 +5,7 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Improved generated queries when fetching entities over a one-to-many relation.
 
 
 ## Release version 2.3.0

@@ -474,8 +474,10 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
 
         if (targetId != null) {
-            Object id = targetId.asBasicPersistenceType();
-            queryState.setSqlWhere(queryState.getSqlWhere().and(result.getTable().getId().eq(id)));
+            final Object id = targetId.asBasicPersistenceType();
+            final Field lastId = result.getTable().getId();
+            final Field optimisedLastId = result.getJoinEqual(lastId);
+            queryState.setSqlWhere(queryState.getSqlWhere().and(optimisedLastId.eq(id)));
         }
 
         if (mainTable == null) {
