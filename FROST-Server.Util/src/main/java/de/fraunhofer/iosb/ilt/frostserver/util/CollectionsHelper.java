@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,10 @@ public class CollectionsHelper {
         return getFrom((Object) map, path);
     }
 
+    public static Object getFrom(final ComplexValue cv, final List<String> path) {
+        return getFrom((Object) cv, path);
+    }
+
     private static Object getFrom(final Object mapOrList, final List<String> path) {
         Object currentEntry = mapOrList;
         int last = path.size();
@@ -79,6 +84,8 @@ public class CollectionsHelper {
             String key = path.get(idx);
             if (currentEntry instanceof Map map) {
                 currentEntry = map.get(key);
+            } else if (currentEntry instanceof ComplexValue cv) {
+                currentEntry = cv.get(key);
             } else if (currentEntry instanceof List list) {
                 try {
                     currentEntry = list.get(Integer.parseInt(key));

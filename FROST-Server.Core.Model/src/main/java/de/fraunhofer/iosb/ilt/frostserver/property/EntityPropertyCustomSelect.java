@@ -78,8 +78,11 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
             entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);
         }
         Object baseProperty = entity.getProperty(entityProperty);
-        if (baseProperty instanceof Map) {
-            return CollectionsHelper.getFrom((Map<String, Object>) baseProperty, subPath);
+        if (baseProperty instanceof Map map) {
+            return CollectionsHelper.getFrom(map, subPath);
+        }
+        if (baseProperty instanceof ComplexValue cv) {
+            return CollectionsHelper.getFrom(cv, subPath);
         }
         return null;
     }
