@@ -284,7 +284,7 @@ P_LogicalAnd :
     P_NegationExpression (<T_QO_AND> P_NegationExpression )*
 ;
 P_NegationExpression :
-    (<T_QO_NOT>)? (P_BoolFunction | P_ComparativeExpression)
+    (<T_QO_NOT>)? (SCAN P_BoolFunction | SCAN P_ComparativeExpression)
 ;
 
 P_BoolFunction :

@@ -340,7 +340,7 @@ public class ExpressionParser extends Visitor {
         Expression previousExpression = currentExpression;
         final int childCount = node.getChildCount();
 
-        String operator = node.getFirstToken().getImage();
+        String operator = node.getFirstChild().getImage();
         Function function = getFunction(operator);
         currentExpression = function;
         for (int i = 1; i < childCount; i += 2) {

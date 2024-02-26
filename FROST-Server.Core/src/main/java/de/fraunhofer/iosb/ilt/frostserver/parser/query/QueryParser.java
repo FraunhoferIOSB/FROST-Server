@@ -62,8 +62,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.slf4j.Logger;
@@ -322,9 +320,7 @@ public class QueryParser extends Visitor {
             return new Query(modelRegistry, queryDefaults, path, user);
         }
         LOGGER.debug("Parsing: {}", query);
-
-        InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        QParser t = new QParser(is);
+        QParser t = new QParser(query);
         try {
             Start start = t.Start();
             QueryParser v = new QueryParser(queryDefaults, modelRegistry, path, user, context);

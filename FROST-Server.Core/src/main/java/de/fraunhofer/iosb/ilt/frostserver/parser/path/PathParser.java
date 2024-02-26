@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.UTF8;
-
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -48,9 +46,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_REF;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_STR_LIT;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_VALUE;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -259,7 +254,7 @@ public class PathParser extends Visitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+        return parsePath(modelRegistry, serviceRootUrl, version, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
     /**
@@ -273,21 +268,6 @@ public class PathParser extends Visitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, PrincipalExtended user) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, user);
-    }
-
-    /**
-     * Parse the given path.
-     *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @param encoding The character encoding to use when parsing.
-     * @param user The principal of the user.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, Charset encoding, PrincipalExtended user) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setVersion(version);
@@ -297,8 +277,7 @@ public class PathParser extends Visitor {
         }
         resourcePath.setPath(path);
         LOGGER.debug("Parsing: {}", path);
-        InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        PParser parser = new PParser(is);
+        PParser parser = new PParser(path);
         try {
             parser.Start();
             PathParser pp = new PathParser(modelRegistry, resourcePath, user.isAdmin());

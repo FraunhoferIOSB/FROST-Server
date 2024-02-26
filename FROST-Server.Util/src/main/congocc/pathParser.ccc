@@ -25,7 +25,7 @@ BASE_NAME=P;
 
 SKIP : " " | "\t" | "\n" | "\r" ;
 
-<DEFAULT> TOKEN: {
+<DEFAULT> TOKEN:
   <T_PATH_SEPARATOR: "/" >
 | <T_VALUE:  "/$value" >
 | <T_REF:    "/$ref" >

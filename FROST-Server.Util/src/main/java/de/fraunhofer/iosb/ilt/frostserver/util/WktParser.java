@@ -30,9 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktLineString;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktMultiPoint;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPoint;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPolygon;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.GeoJsonObject;
@@ -77,8 +74,7 @@ public class WktParser extends Visitor {
     public static GeoJsonObject parseWkt(String wkt) {
         try {
             LOGGER.debug("Parsing: {}", wkt);
-            InputStream is = new ByteArrayInputStream(wkt.getBytes(StandardCharsets.UTF_8));
-            WParser parser = new WParser(is);
+            WParser parser = new WParser(wkt);
             Start start = parser.Start();
             return new WktParser().visit(start);
         } catch (ParseException ex) {

@@ -172,12 +172,21 @@ class QueryParserTest {
 
     @Test
     void testFilterLinked() {
-        String query = "$filter=House/id eq 1";
+        String query = "$filter=id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(new Equal(
+                new Path(testModel.ET_HOUSE.getPrimaryKey()),
+                new IntegerConstant(1)));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+
+        query = "$filter=House/id eq 1";
+        expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
                 new Path(testModel.NP_ROOM_HOUSE, testModel.ET_HOUSE.getPrimaryKey()),
                 new IntegerConstant(1)));
-        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
 

@@ -53,7 +53,7 @@
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
                 <configuration>
-                    <url>https://github.com/hylkevds/CongoCC-Versions/releases/download/v${version.congocc}/javacc-full-${version.congocc}.jar</url>
+                    <url>https://repo1.maven.org/maven2/org/congocc/org.congocc.parser.generator/${version.congocc}/org.congocc.parser.generator-${version.congocc}.jar</url>
                     <unpack>false</unpack>
                     <outputDirectory>${project.build.directory}/scripts</outputDirectory>
                     <sha512>${congocc.sha512}</sha512>
@@ -84,7 +84,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
+                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/pathParser.ccc</argument>
                                 <argument>-d</argument>
@@ -103,7 +103,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
+                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/queryParser.ccc</argument>
                                 <argument>-d</argument>
@@ -122,7 +122,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/javacc-full-${version.congocc}.jar</argument>
+                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/wktParser.ccc</argument>
                                 <argument>-d</argument>
