@@ -197,13 +197,13 @@ public class QueryParser extends Visitor {
 
     public PropertyPlaceholder handle(P_PlainPath pp) {
         List<Token> children = pp.childrenOfType(Token.class);
-        PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).getImage());
+        PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).toString());
         for (int i = 1; i < children.size(); i++) {
             final Token child = children.get(i);
             if (child instanceof T_PATH_SEPARATOR) {
                 continue;
             }
-            final String img = child.getImage();
+            final String img = child.toString();
             if (child instanceof T_ARRAYINDEX) {
                 property.addToSubPath(img.substring(1, img.length() - 1));
             } else {

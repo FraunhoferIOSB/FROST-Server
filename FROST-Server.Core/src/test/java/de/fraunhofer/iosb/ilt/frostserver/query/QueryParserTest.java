@@ -54,6 +54,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.L
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Round;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
@@ -894,6 +895,23 @@ class QueryParserTest {
                         new LessEqual(
                                 new Path(testModel.NP_ROOM_HOUSE,
                                         testModel.NP_HOUSE_ROOMS,
+                                        testModel.EP_TIME),
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAny() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z)";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Any(
+                        new Path(testModel.NP_HOUSE_ROOMS),
+                        "r",
+                        new LessEqual(
+                                new Path(
                                         testModel.EP_TIME),
                                 new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);

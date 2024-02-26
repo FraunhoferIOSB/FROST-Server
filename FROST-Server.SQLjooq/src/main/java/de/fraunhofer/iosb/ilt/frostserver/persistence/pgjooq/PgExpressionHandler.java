@@ -87,6 +87,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
@@ -356,6 +357,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         result[0] = p1.getDefaultField();
         result[1] = p2.getDefaultField();
         return result;
+    }
+
+    @Override
+    public FieldWrapper visit(Any node) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

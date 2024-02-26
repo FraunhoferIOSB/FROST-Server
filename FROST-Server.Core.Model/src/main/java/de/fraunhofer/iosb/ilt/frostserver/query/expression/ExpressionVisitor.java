@@ -59,6 +59,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
@@ -102,6 +103,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Sta
 public interface ExpressionVisitor<O extends Object> {
 
     public O visit(Path node);
+
+    public O visit(Any node);
 
     public O visit(BooleanConstant node);
 
