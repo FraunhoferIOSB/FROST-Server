@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 
@@ -36,7 +36,15 @@ public interface Expression {
 
     public <O> O accept(ExpressionVisitor<O> visitor);
 
-    public void validate(ParserHelper helper, EntityType type);
+    /**
+     * Validate the raw elements in this Expression against the given context
+     * and EntityType, turning it into a usable Expression.
+     *
+     * @param context The parser context.
+     * @param type The starting point of this Path, or null to validate against
+     * the service Root.
+     */
+    public void validate(ParserContext context, EntityType type);
 
     /**
      * get the filter as it is expected to appear in a URL.

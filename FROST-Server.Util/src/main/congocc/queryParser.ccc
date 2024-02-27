@@ -269,12 +269,13 @@ P_PlainPaths #void :
 ;
 
 P_PlainPath #P_PlainPath : LS_PLAIN_PATH :
-  <T_CHARSEQ> ( <T_ARRAYINDEX> )* ( 
-    <T_PATH_SEPARATOR> ( 
-        P_Any 
-      | (<T_CHARSEQ> (<T_ARRAYINDEX>)* (<T_PATH_SEPARATOR> <T_CHARSEQ> (<T_ARRAYINDEX>)* )*)
-    ) 
-  )?
+    <T_CHARSEQ> ( <T_ARRAYINDEX> )* 
+    ( SCAN 2 <T_PATH_SEPARATOR> <T_CHARSEQ>  (<T_ARRAYINDEX>)* )*
+    ( <T_PATH_SEPARATOR> P_Any )?
+;
+
+P_PathParts #void:
+    ( <T_PATH_SEPARATOR> <T_CHARSEQ> (<T_ARRAYINDEX>)* )*
 ;
 
 P_Any #P_Any : LS_PLAIN_PATH :

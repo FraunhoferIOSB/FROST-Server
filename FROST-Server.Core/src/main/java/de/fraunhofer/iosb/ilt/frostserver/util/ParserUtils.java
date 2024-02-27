@@ -44,7 +44,7 @@ public class ParserUtils {
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
         ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), serviceRootUrl, version, pathString);
-        return QueryParser.parseQuery(queryString, settings, path).validate(path.getMainElementType());
+        return QueryParser.parseQuery(queryString, settings, path).validate(null, path.getMainElementType());
     }
 
     public static Id idFromObject(Object input) {

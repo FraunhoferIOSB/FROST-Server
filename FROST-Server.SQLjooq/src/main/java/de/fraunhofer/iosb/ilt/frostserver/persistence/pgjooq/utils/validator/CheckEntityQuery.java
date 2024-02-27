@@ -86,7 +86,7 @@ public class CheckEntityQuery implements ValidationCheck {
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                .validate(entityType);
+                .validate(null, entityType);
         LOGGER.info("Initialised check on {}", entityType);
     }
 

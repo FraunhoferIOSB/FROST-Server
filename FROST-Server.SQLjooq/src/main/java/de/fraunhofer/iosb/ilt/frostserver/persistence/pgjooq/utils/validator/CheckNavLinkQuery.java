@@ -140,7 +140,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
             parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                    .validate(targetType);
+                    .validate(null, targetType);
             LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
         } catch (RuntimeException ex) {
             LOGGER.error("Failed to initialise check.", ex);

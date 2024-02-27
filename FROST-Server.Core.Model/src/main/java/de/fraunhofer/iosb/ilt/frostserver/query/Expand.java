@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
@@ -100,7 +101,7 @@ public class Expand {
     public Query getSubQuery() {
         if (subQuery == null) {
             final Query newSubQuery = new Query(parentQuery)
-                    .validate(validatedPath.getEntityType());
+                    .validate(null, validatedPath.getEntityType());
             setSubQuery(newSubQuery);
         }
         return subQuery;
@@ -120,7 +121,7 @@ public class Expand {
         this.parentQuery = parentQuery;
     }
 
-    public void validate(ResourcePath path) {
+    public void validate(ParserContext context, ResourcePath path) {
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {
             throw new IllegalArgumentException("No expand allowed on property paths.");
@@ -129,10 +130,10 @@ public class Expand {
         if (entityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
-        validate(entityType);
+        validate(context, entityType);
     }
 
-    protected void validate(EntityType entityType) {
+    protected void validate(ParserContext context, EntityType entityType) {
         if (validatedPath == null) {
             final String firstRawPath = rawPath.get(0);
             final Property property = entityType.getProperty(firstRawPath);
@@ -169,7 +170,7 @@ public class Expand {
             if (!subQuery.hasMetadata()) {
                 subQuery.setMetadata(parentQuery.getMetadata());
             }
-            subQuery.validate(validatedPath.getEntityType());
+            subQuery.validate(context, validatedPath.getEntityType());
         }
     }
 

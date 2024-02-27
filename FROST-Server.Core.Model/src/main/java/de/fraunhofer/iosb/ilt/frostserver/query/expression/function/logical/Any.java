@@ -17,12 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import java.util.Objects;
 
 /**
  * Any is not really a Function.
@@ -57,6 +63,20 @@ public class Any extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public void validate(ParserContext parentContext, EntityType type) {
+        ParserContext context = new ParserContext(parentContext);
+        collection.validate(context, type);
+        Property lastElement = collection.lastElement();
+        if (lastElement instanceof NavigationPropertyEntitySet npes) {
+            EntityType anyType = npes.getEntityType();
+            context.registerVariable(lambdaName, new PropertyReference<>(lambdaName, npes));
+            super.validate(context, anyType);
+        } else {
+            throw new IllegalArgumentException("Any can only be used on an EntitySet, " + lastElement + " is not an EntitySet.");
+        }
+    }
+
     public void setCollection(Path collection) {
         this.collection = collection;
     }
@@ -88,6 +108,35 @@ public class Any extends Function {
     @Override
     public String toString() {
         return toUrl();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Any other = (Any) obj;
+        if (!Objects.equals(this.lambdaName, other.lambdaName)) {
+            return false;
+        }
+        if (!Objects.equals(this.collection, other.collection)) {
+            return false;
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 23 * hash + Objects.hashCode(this.collection);
+        hash = 23 * hash + Objects.hashCode(this.lambdaName);
+        return 23 * hash + super.hashCode();
     }
 
 }

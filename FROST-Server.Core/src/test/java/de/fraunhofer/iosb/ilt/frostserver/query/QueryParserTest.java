@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
@@ -903,7 +904,7 @@ class QueryParserTest {
     }
 
     @Test
-    void testFilterAny() {
+    void testFilterAny1() {
         String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z)";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
@@ -912,11 +913,78 @@ class QueryParserTest {
                         "r",
                         new LessEqual(
                                 new Path(
+                                        new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
                                         testModel.EP_TIME),
                                 new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
-        result.validate(testModel.ET_ROOM);
+        result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAny2() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z) and Rooms/any(r : r/time ge 2010-07-01T00:00:00Z)";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new And(
+                        new Any(
+                                new Path(testModel.NP_HOUSE_ROOMS),
+                                "r",
+                                new LessEqual(
+                                        new Path(
+                                                new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))),
+                        new Any(
+                                new Path(testModel.NP_HOUSE_ROOMS),
+                                "r",
+                                new GreaterEqual(
+                                        new Path(
+                                                new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAnyNested() {
+        String query = "$filter=Rooms/any(r1 : r1/time le 2010-07-01T00:00:00Z and r1/House/Rooms/any(r2 : r2/time ge 2010-07-01T00:00:00Z))";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Any(
+                        new Path(testModel.NP_HOUSE_ROOMS),
+                        "r1",
+                        new And(
+                                new LessEqual(
+                                        new Path(
+                                                new PropertyReference("r1", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))),
+                                new Any(
+                                        new Path(
+                                                new PropertyReference("r1", testModel.NP_HOUSE_ROOMS),
+                                                testModel.NP_ROOM_HOUSE,
+                                                testModel.NP_HOUSE_ROOMS),
+                                        "r2",
+                                        new GreaterEqual(
+                                                new Path(
+                                                        new PropertyReference("r2", testModel.NP_HOUSE_ROOMS),
+                                                        testModel.EP_TIME),
+                                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAnyDupicateName() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z and r/House/Rooms/any(r : r/time ge 2010-07-01T00:00:00Z))";
+        assertThrows(IllegalArgumentException.class, () -> {
+            QueryParser.parseQuery(query, coreSettings, path)
+                    .validate(testModel.ET_HOUSE);
+        });
     }
 
     // TODO add tests for all functions

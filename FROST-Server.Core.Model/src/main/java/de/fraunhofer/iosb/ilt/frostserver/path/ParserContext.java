@@ -24,23 +24,57 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * The context for validating an expression tree.
  *
- * @author jab
  * @author scf
  */
-public class ParserHelper {
+public class ParserContext {
 
-    private final CustomLinksHelper customLinksHelper;
+    private final ParserContext parentContext;
+    private final ModelRegistry modelRegistry;
+    private final Map<String, PropertyReference> lambdaVariables = new HashMap<>();
 
-    public ParserHelper(ModelRegistry modelRegistry) {
-        this.customLinksHelper = new CustomLinksHelper(modelRegistry, false, 0);
+    public ParserContext(ModelRegistry modelRegistry) {
+        this.parentContext = null;
+        this.modelRegistry = modelRegistry;
+    }
+
+    public ParserContext(ParserContext parentContext) {
+        this.parentContext = parentContext;
+        this.modelRegistry = parentContext.getModelRegistry();
+    }
+
+    public void registerVariable(String name, PropertyReference type) {
+        if (getVariable(name) != null) {
+            throw new IllegalArgumentException("Variable name '" + name + "' used multiple times.");
+        }
+        lambdaVariables.put(name, type);
+    }
+
+    public PropertyReference getVariable(String name) {
+        var variable = lambdaVariables.get(name);
+        if (variable == null && parentContext != null) {
+            return parentContext.getVariable(name);
+        }
+        return variable;
+    }
+
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
     }
 
     public Property parseProperty(EntityType type, String propertyName, Property previous) {
         String decodedName = StringHelper.urlDecode(propertyName);
+        var variable = getVariable(decodedName);
+        if (variable != null) {
+            return variable;
+        }
         if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
@@ -56,7 +90,7 @@ public class ParserHelper {
     }
 
     private Property parseCustomProperty(String decodedName) {
-        EntityType typeForCustomLink = customLinksHelper.getTypeForCustomLinkName(decodedName);
+        EntityType typeForCustomLink = modelRegistry.getCustomLinksHelper().getTypeForCustomLinkName(decodedName);
         if (typeForCustomLink == null) {
             return new EntityPropertyCustom(decodedName);
         } else {
