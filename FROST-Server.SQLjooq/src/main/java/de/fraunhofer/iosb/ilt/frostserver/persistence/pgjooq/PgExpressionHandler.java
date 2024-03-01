@@ -442,7 +442,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             if (!p1.isCondition()) {
                 throw new IllegalArgumentException("Any() requires a condition, got " + p1);
             }
-            Condition exists = DSL.exists(DSL.selectOne().from(existsQueryState.getMainTable()).where(existsQueryState.getSqlWhere().and(p1.getCondition())));
+            Condition exists = DSL.exists(DSL.selectOne().from(existsQueryState.getSqlFrom()).where(existsQueryState.getSqlWhere().and(p1.getCondition())));
             return new SimpleFieldWrapper(exists);
         } finally {
             // Set the query state back to what it was.

@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.E
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propertiesBuilder;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
@@ -111,12 +112,12 @@ public abstract class FilterTests extends AbstractTestClass {
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 2", "The second thing.")
-                .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("field", 2).build());
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build());
         sSrvc.create(thing);
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 3", "The third thing.")
-                .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("field", 3).build());
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build());
         sSrvc.create(thing);
         THINGS.add(thing);
 
@@ -125,26 +126,30 @@ public abstract class FilterTests extends AbstractTestClass {
         THINGS.add(thing);
 
         // Locations 0
-        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1).build())
+                .addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 1
-        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1.1).build())
+                .addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 2
-        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/vnd.geo+json", new Point(8, 53));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(1));
+        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/vnd.geo+json", new Point(8, 53))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build())
+                .addNavigationEntity(sMdl.npLocationThings, THINGS.get(1));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
         // Locations 3
-        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/vnd.geo+json", new Point(8, 54));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(2));
+        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/vnd.geo+json", new Point(8, 54))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build())
+                .addNavigationEntity(sMdl.npLocationThings, THINGS.get(2));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
@@ -154,8 +159,9 @@ public abstract class FilterTests extends AbstractTestClass {
                         new LngLatAlt(8, 53),
                         new LngLatAlt(7, 52),
                         new LngLatAlt(7, 53),
-                        new LngLatAlt(8, 53)));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(3));
+                        new LngLatAlt(8, 53)))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 4).build())
+                .addNavigationEntity(sMdl.npLocationThings, THINGS.get(3));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
@@ -163,7 +169,8 @@ public abstract class FilterTests extends AbstractTestClass {
         location = sMdl.newLocation("Location 5", "A line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
-                        new LngLatAlt(5, 53)));
+                        new LngLatAlt(5, 53)))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 5).build());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
@@ -171,7 +178,8 @@ public abstract class FilterTests extends AbstractTestClass {
         location = sMdl.newLocation("Location 6", "A longer line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
-                        new LngLatAlt(6, 53)));
+                        new LngLatAlt(6, 53)))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 6).build());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
@@ -179,14 +187,15 @@ public abstract class FilterTests extends AbstractTestClass {
         location = sMdl.newLocation("Location 7", "The longest line.", "application/vnd.geo+json",
                 new LineString(
                         new LngLatAlt(4, 52),
-                        new LngLatAlt(8, 52)));
+                        new LngLatAlt(8, 52)))
+                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 7).build());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
         createSensor("Sensor 0", "The sensor with idx 0.", "text", "Some metadata.");
-        createSensor("Sensor 1", "The sensor with idx 0.", "text", "Some metadata.");
-        createSensor("Sensor 2", "The sensor with idx 0.", "text", "Some metadata.");
-        createSensor("Sensor 3", "The sensor with idx 0.", "text", "Some metadata.");
+        createSensor("Sensor 1", "The sensor with idx 1.", "text", "Some metadata.");
+        createSensor("Sensor 2", "The sensor with idx 2.", "text", "Some metadata.");
+        createSensor("Sensor 3", "The sensor with idx 3.", "text", "Some metadata.");
 
         createObservedProperty("ObservedProperty 0", "http://ucom.org/temperature", "ObservedProperty with index 0.");
         createObservedProperty("ObservedProperty 1", "http://ucom.org/humidity", "ObservedProperty with index 1.");
@@ -201,6 +210,7 @@ public abstract class FilterTests extends AbstractTestClass {
         createDatastream("Datastream 3", "Datastream 1 of thing 1, sensor 0.", "someType", uomTemp, THINGS.get(1), SENSORS.get(0), O_PROPS.get(0));
         createDatastream("Datastream 4", "Datastream 2 of thing 1, sensor 1.", "someType", uomTemp, THINGS.get(1), SENSORS.get(1), O_PROPS.get(1));
         createDatastream("Datastream 5", "Datastream 3 of thing 1, sensor 3.", "someType", uomTemp, THINGS.get(1), SENSORS.get(3), O_PROPS.get(3));
+        createDatastream("Datastream 6", "Datastream 1 of thing 2, sensor 3.", "someType", uomTemp, THINGS.get(2), SENSORS.get(1), O_PROPS.get(0));
 
         ZonedDateTime startTime = ZonedDateTime.parse("2016-01-01T01:00:00.000Z");
         TimeInterval startInterval = TimeInterval.create(Instant.parse("2016-01-01T01:00:00.000Z"), Instant.parse("2016-01-01T02:00:00.000Z"));
@@ -293,6 +303,7 @@ public abstract class FilterTests extends AbstractTestClass {
         Dao doa = sSrvc.dao(sMdl.etThing);
         testFilterResults(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
         testFilterResults(doa, "startswith(HistoricalLocations/Locations/name, 'Location 1')", getFromList(THINGS, 0));
+        testFilterResults(doa, "HistoricalLocations/Locations/properties/field eq properties/field", getFromList(THINGS, 1, 2));
     }
 
     /**
@@ -320,7 +331,7 @@ public abstract class FilterTests extends AbstractTestClass {
         Dao doa = sSrvc.dao(sMdl.etThing);
 
         testFilterResults(doa, "properties/field eq null", getFromList(THINGS, 0, 3));
-        testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 2, 3));
+        testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 3));
     }
 
     /**
@@ -334,7 +345,7 @@ public abstract class FilterTests extends AbstractTestClass {
         Dao doa = sSrvc.dao(sMdl.etThing);
 
         testFilterResults(doa, "properties/field ne null", getFromList(THINGS, 1, 2));
-        testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1));
+        testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1, 2));
     }
 
     /**
@@ -381,6 +392,23 @@ public abstract class FilterTests extends AbstractTestClass {
         LOGGER.info("  testNumericResultQualityValue");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, "resultQuality eq 2", getFromList(OBSERVATIONS, 2));
+    }
+
+    /**
+     * Test indirect/deep filter, across entity relations.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testAnyFilter() throws ServiceFailureException {
+        LOGGER.info("  testAnyFilter");
+        Dao doa = sSrvc.dao(sMdl.etThing);
+        testFilterResults(doa, "Locations/any(l:l/name eq 'Location 2')", getFromList(THINGS, 1));
+        testFilterResults(doa, "HistoricalLocations/any(hl : hl/Locations/any(l : startswith(l/name, 'Location 1')))", getFromList(THINGS, 0));
+        testFilterResults(doa, "HistoricalLocations/any(hl : hl/Locations/any(l : l/properties/field eq properties/field))", getFromList(THINGS, 1, 2));
+        testFilterResults(doa, "Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 0') and Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 1')", getFromList(THINGS, 0, 1));
+        testFilterResults(doa, "Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 3') and Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 1')", getFromList(THINGS, 1));
+        testFilterResults(doa, "Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 0' and d/Sensor/name eq 'Sensor 1')", getFromList(THINGS, 2));
     }
 
 }
