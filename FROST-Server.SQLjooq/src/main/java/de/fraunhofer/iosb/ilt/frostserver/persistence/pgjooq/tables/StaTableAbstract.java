@@ -224,6 +224,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
+    public <U extends StaMainTable<U>> void createSemiJoin(String name, U targetTable, QueryState queryState) {
+        findRelation(name).semiJoinTo(getThis(), targetTable, queryState);
+    }
+
+    @Override
     public PropertyFieldRegistry<T> getPropertyFieldRegistry() {
         if (pfReg == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());

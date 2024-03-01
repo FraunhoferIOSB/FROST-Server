@@ -77,6 +77,10 @@ public class Any extends Function {
         }
     }
 
+    public String getLambdaName() {
+        return lambdaName;
+    }
+
     public void setCollection(Path collection) {
         this.collection = collection;
     }

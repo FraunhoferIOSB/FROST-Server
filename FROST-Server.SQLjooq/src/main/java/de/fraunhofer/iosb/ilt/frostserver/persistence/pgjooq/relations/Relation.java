@@ -54,6 +54,15 @@ public interface Relation<S extends StaMainTable<S>> {
     public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef);
 
     /**
+     * Create a semi-join, useful for sub-queries that link to the main query.
+     *
+     * @param joinSource The source (subquery) table.
+     * @param joinTarget The target (outer) query table.
+     * @param queryState The query state to register the join on.
+     */
+    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState);
+
+    /**
      * Create a link between the given source and target. This is not
      * necessarily supported for all implementations, in all directions. For
      * some types of relations this means creating new entries in a link table,

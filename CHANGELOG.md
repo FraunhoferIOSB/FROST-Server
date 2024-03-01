@@ -3,6 +3,7 @@
 ## Development version 2.4.0
 
 **New Features**
+* Implemented OData any() filters.
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.

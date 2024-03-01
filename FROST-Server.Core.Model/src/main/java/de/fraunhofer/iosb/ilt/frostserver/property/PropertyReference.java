@@ -111,4 +111,9 @@ public class PropertyReference<P> implements Property<P> {
         return Objects.equals(this.referencedProperty, other.referencedProperty);
     }
 
+    @Override
+    public String toString() {
+        return getName() + "->" + referencedProperty;
+    }
+
 }

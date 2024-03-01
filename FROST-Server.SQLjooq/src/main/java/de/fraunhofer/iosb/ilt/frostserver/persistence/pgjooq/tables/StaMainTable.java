@@ -89,6 +89,8 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public TableRef createJoin(String name, QueryState<?> queryState, TableRef sourceRef);
 
+    public <U extends StaMainTable<U>> void createSemiJoin(String name, U targetTable, QueryState queryState);
+
     public PropertyFieldRegistry<T> getPropertyFieldRegistry();
 
     public PropertyFieldRegistry.PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);

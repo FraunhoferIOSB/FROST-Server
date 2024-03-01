@@ -171,6 +171,20 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
+    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState) {
+        if (joinTarget.getEntityType() != target.getEntityType()) {
+            throw new IllegalArgumentException("SemiJoin target entity type incorrect. Expected " + target.getEntityType() + ", got " + joinTarget.getEntityType());
+        }
+        L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
+        Field<Object> sourceField = sourceFieldAcc.getField(joinSource);
+        Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetField = targetFieldAcc.getField((T) joinTarget);
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
+        queryState.setSqlWhere(queryState.getSqlWhere().and(targetField.eq(targetLinkField)));
+    }
+
+    @Override
     public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
         final Object sourceId = source.getId().getValue();
         int count = pm.getDslContext().deleteFrom(linkTable)

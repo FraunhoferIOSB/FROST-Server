@@ -119,6 +119,13 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
+    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState) {
+        Field sourceField = sourceFieldAccessor.getField(joinSource);
+        Field targetField = targetFieldAccessor.getField((T) joinTarget);
+        queryState.setSqlWhere(queryState.getSqlWhere().and(targetField.eq(sourceField)));
+    }
+
+    @Override
     public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
         throw new UnsupportedOperationException("Not supported yet.");
     }

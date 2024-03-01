@@ -43,6 +43,8 @@ import org.jooq.impl.DSL;
  */
 public class QueryState<T extends StaMainTable<T>> {
 
+    public static final String ALIAS_ROOT = "_ROOT";
+
     private final JooqPersistenceManager persistenceManager;
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
@@ -78,7 +80,7 @@ public class QueryState<T extends StaMainTable<T>> {
         mainTable = table;
         sqlMainIdField = table.getId();
         tableRef = new TableRef(table);
-        staAlias = "";
+        staAlias = ALIAS_ROOT;
     }
 
     public JooqPersistenceManager getPersistenceManager() {
@@ -99,6 +101,16 @@ public class QueryState<T extends StaMainTable<T>> {
 
     public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder) {
         return new EntitySetJooqCurser(mainTable.getEntityType(), tuples, this, resultBuilder);
+    }
+
+    public QueryState findStateForAlias(String alias) {
+        if (staAlias.equalsIgnoreCase(alias)) {
+            return this;
+        }
+        if (parent == null) {
+            return this;
+        }
+        return parent.findStateForAlias(alias);
     }
 
     public String getNextAlias() {

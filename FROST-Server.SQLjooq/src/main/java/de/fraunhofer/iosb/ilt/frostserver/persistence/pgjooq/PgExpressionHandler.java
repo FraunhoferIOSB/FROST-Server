@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState.ALIAS_ROOT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -45,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
@@ -227,9 +229,27 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(Path path) {
         PathState state = new PathState();
-        state.pathTableRef = queryState.getTableRef();
         state.elements = path.getElements();
-        for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
+        var storedQueryState = queryState;
+        try {
+            Property firstElement = state.elements.get(0);
+            int startIdx = 0;
+            if (firstElement instanceof PropertyReference pr) {
+                startIdx = 1;
+                queryState = queryState.findStateForAlias(pr.getName());
+            } else {
+                queryState = queryState.findStateForAlias(ALIAS_ROOT);
+            }
+            state.pathTableRef = queryState.getTableRef();
+            walkPath(state, startIdx, path);
+        } finally {
+            queryState = storedQueryState;
+        }
+        return state.finalExpression;
+    }
+
+    private void walkPath(PathState state, int startIdx, Path path) throws IllegalArgumentException {
+        for (state.curIndex = startIdx; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             Property element = state.elements.get(state.curIndex);
             if (element instanceof EntityPropertyCustom) {
                 handleCustomProperty(state, path);
@@ -251,7 +271,6 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
             state.finalExpression = new StaDateTimeWrapper(dateTimePath);
         }
-        return state.finalExpression;
     }
 
     private void handleCustomProperty(PathState state, Path path) {
@@ -407,7 +426,83 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Any node) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final TableCollection tc = queryBuilder.getTableCollection();
+        final QueryState<?> parentQueryState = queryState;
+
+        QueryState existsQueryState = walkAnyPath(parentQueryState, node, tc);
+        if (existsQueryState == null) {
+            throw new IllegalStateException("Failed to parse any().");
+        }
+
+        // Set our subQuery state to be the active one.
+        queryState = existsQueryState;
+        try {
+            List<Expression> params = node.getParameters();
+            FieldWrapper p1 = params.get(0).accept(this);
+            if (!p1.isCondition()) {
+                throw new IllegalArgumentException("Any() requires a condition, got " + p1);
+            }
+            Condition exists = DSL.exists(DSL.selectOne().from(existsQueryState.getMainTable()).where(existsQueryState.getSqlWhere().and(p1.getCondition())));
+            return new SimpleFieldWrapper(exists);
+        } finally {
+            // Set the query state back to what it was.
+            queryState = parentQueryState;
+        }
+    }
+
+    private QueryState walkAnyPath(final QueryState<?> parentQueryState, Any node, final TableCollection tc) throws IllegalArgumentException {
+        final StaMainTable parentMainTable = parentQueryState.getMainTable();
+        final EntityType parentEntityType = parentMainTable.getEntityType();
+        final Path path = node.getCollection();
+        final List<Property> elements = path.getElements();
+        QueryState existsQueryState = null;
+        TableRef lastJoin = null;
+        Property firstElement = elements.get(0);
+        int startIdx = 0;
+        if (firstElement instanceof PropertyReference) {
+            startIdx = 1;
+        }
+        for (int idx = elements.size() - 1; idx >= startIdx; idx--) {
+            Property element = elements.get(idx);
+            if ((lastJoin == null)) {
+                if (element instanceof NavigationPropertyEntitySet npes) {
+                    // Last entry in the path: the target collection.
+                    EntityType finalType = npes.getEntityType();
+                    final StaMainTable<?> tableForType = tc.getTableForType(finalType).asSecure(parentQueryState.getNextAlias(), parentQueryState.getPersistenceManager());
+                    existsQueryState = new QueryState(tableForType, parentQueryState, node.getLambdaName());
+                    lastJoin = existsQueryState.getTableRef();
+                } else {
+                    throw new IllegalArgumentException("Path before any() MUST end in an EntitySet. Found: " + element);
+                }
+            }
+            if (element instanceof NavigationPropertyMain npm) {
+                var inverse = npm.getInverse();
+                if (idx == startIdx) {
+                    // First entry in the path: Link to the main table!
+                    if (inverse.getEntityType() != parentEntityType) {
+                        throw new IllegalArgumentException("path of any() did not track back to main entity type. Expected " + parentEntityType + " got " + inverse.getEntityType());
+                    }
+                    lastJoin.createSemiJoin(inverse.getName(), parentMainTable, existsQueryState);
+
+                } else {
+                    TableRef existingJoin = lastJoin.getJoin(inverse);
+                    if (existingJoin != null) {
+                        lastJoin = existingJoin;
+                    }
+                    lastJoin = lastJoin.createJoin(inverse.getName(), existsQueryState);
+                }
+
+            } else if (element instanceof EntityPropertyCustomLink) {
+                throw new IllegalArgumentException("Path before any() should not contain Custom Links. Found: " + element);
+            } else if (element instanceof EntityPropertyCustom) {
+                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
+            } else if (element instanceof EntityPropertyMain) {
+                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
+            } else {
+                throw new IllegalArgumentException("Path before any() contains unknown element. Found: " + element);
+            }
+        }
+        return existsQueryState;
     }
 
     @Override

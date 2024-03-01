@@ -67,6 +67,10 @@ public class TableRef {
         return table.createJoin(name, queryState, this);
     }
 
+    public void createSemiJoin(String name, StaMainTable joinTarget, QueryState<?> queryState) {
+        table.createSemiJoin(name, joinTarget, queryState);
+    }
+
     public TableRef setJoinEquals(Map<Field, Field> joinEquals) {
         this.joinEquals = joinEquals;
         return this;
