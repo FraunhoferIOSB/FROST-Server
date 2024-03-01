@@ -43,6 +43,14 @@ public interface Relation<S extends StaMainTable<S>> {
      */
     public String getName();
 
+    /**
+     * Create a table join across this relation.
+     *
+     * @param source The (aliased) source table to join on.
+     * @param queryState The query state to register the join on.
+     * @param sourceRef The table tree to add the join to.
+     * @return A new table tree leaf-entry.
+     */
     public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef);
 
     /**

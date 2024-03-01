@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -41,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -90,13 +88,11 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private final JooqPersistenceManager pm;
     private final CoreSettings coreSettings;
-    private final PersistenceSettings settings;
     private final TableCollection tableCollection;
     private Query staQuery;
 
     private Set<Property> selectedProperties;
     private TableRef lastPath;
-    private TableRef mainTable;
     private NavigationPropertyMain lastNavProp;
 
     private boolean forPath = false;
@@ -114,8 +110,11 @@ public class QueryBuilder implements ResourcePathVisitor {
     public QueryBuilder(JooqPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
         this.pm = pm;
         this.coreSettings = coreSettings;
-        this.settings = coreSettings.getPersistenceSettings();
         this.tableCollection = tableCollection;
+    }
+
+    public JooqPersistenceManager getPersistenceManager() {
+        return pm;
     }
 
     public QueryState<?> getQueryState() {
@@ -345,7 +344,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
             // Joins created when generating the path should not be merged with
             // joins generated for the filter or orderby.
-            mainTable.clearJoins();
+            queryState.getTableRef().clearJoins();
 
             parseFilter(staQuery);
             parseOrder(staQuery);
@@ -395,7 +394,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private void parseOrder(Query query) {
         if (query != null) {
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -407,7 +406,7 @@ public class QueryBuilder implements ResourcePathVisitor {
             queryState.setFilter(true);
             final Expression filter = query.getFilter();
             final Expression skipFilter = query.getSkipFilter();
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
             if (filter != null) {
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
@@ -451,7 +450,7 @@ public class QueryBuilder implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
+    private TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
         if (last != null) {
             TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
@@ -464,7 +463,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         if (last == null) {
             StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX, pm);
             queryState = new QueryState(pm, tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
-            result = new TableRef(entityType, tableForType);
+            result = queryState.getTableRef();
         } else {
             if (entityType.equals(last.getType()) && lastNavProp == null) {
                 result = last;
@@ -480,54 +479,8 @@ public class QueryBuilder implements ResourcePathVisitor {
             queryState.setSqlWhere(queryState.getSqlWhere().and(optimisedLastId.eq(id)));
         }
 
-        if (mainTable == null) {
-            mainTable = result;
-        }
         lastNavProp = pe.getNavigationProperty();
         return result;
-    }
-
-    /**
-     * Queries the given entity type, as relation to the given table reference
-     * and returns a new table reference. Effectively, this generates a join.
-     *
-     * @param np The NavigationProperty to query
-     * @param last The table the requested entity is related to.
-     * @return The table reference of the requested entity.
-     */
-    public TableRef queryEntityType(NavigationProperty np, TableRef last) {
-        if (mainTable == null) {
-            throw new IllegalStateException("mainTable should not be null");
-        }
-        if (last == null) {
-            throw new IllegalStateException("last result should not be null");
-        }
-
-        TableRef existingJoin = last.getJoin(np);
-        if (existingJoin != null) {
-            return existingJoin;
-        }
-
-        return last.createJoin(np.getName(), queryState);
-    }
-
-    /**
-     * Directly query an entity type. Used for custom linking.
-     *
-     * @param epcl the custom link.
-     * @param sourceRef The source table ref.
-     * @param sourceIdField The source ID field.
-     * @return A new table ref with the target entity type table joined.
-     */
-    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
-        final EntityType targetEntityType = epcl.getEntityType();
-        final StaMainTable<?> target = tableCollection.getTablesByType().get(targetEntityType);
-        final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
-        final Field<?> targetField = targetAliased.getId();
-        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
-        TableRef newRef = new TableRef(targetEntityType, targetAliased);
-        sourceRef.addJoin(epcl, newRef);
-        return newRef;
     }
 
     public TableCollection getTableCollection() {
@@ -535,7 +488,10 @@ public class QueryBuilder implements ResourcePathVisitor {
     }
 
     public static TableRef createJoinedRef(TableRef base, NavigationProperty np, StaMainTable<?> table) {
-        TableRef newRef = new TableRef(np.getEntityType(), table);
+        if (np.getEntityType() != table.getEntityType()) {
+            throw new IllegalArgumentException("NavProp does not point to given table: " + np.getEntityType() + " != " + table.getEntityType());
+        }
+        TableRef newRef = new TableRef(table);
         if (base != null) {
             base.addJoin(np, newRef);
         }

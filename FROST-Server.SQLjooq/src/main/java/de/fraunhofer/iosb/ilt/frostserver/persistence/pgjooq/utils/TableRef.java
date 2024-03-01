@@ -34,8 +34,8 @@ public class TableRef {
     private final Map<NavigationProperty, TableRef> joins = new HashMap<>();
     private Map<Field, Field> joinEquals;
 
-    public TableRef(EntityType type, StaMainTable<?> table) {
-        this.type = type;
+    public TableRef(StaMainTable<?> table) {
+        this.type = table.getEntityType();
         this.table = table;
     }
 

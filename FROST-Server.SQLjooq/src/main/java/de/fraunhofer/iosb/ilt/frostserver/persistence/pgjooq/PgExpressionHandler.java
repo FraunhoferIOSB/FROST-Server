@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.ArrayConstandFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
@@ -32,12 +33,17 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDur
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.WrapperHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -158,16 +164,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
 
     private final QueryBuilder queryBuilder;
-    /**
-     * The table reference for the main table of the request.
-     */
-    private final TableRef tableRef;
+    private QueryState queryState;
 
     private int maxCustomLinkDepth = -1;
 
-    public PgExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder, TableRef tableRef) {
+    public PgExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
-        this.tableRef = tableRef;
+        this.queryState = queryBuilder.getQueryState();
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             maxCustomLinkDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
@@ -224,7 +227,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(Path path) {
         PathState state = new PathState();
-        state.pathTableRef = tableRef;
+        state.pathTableRef = queryState.getTableRef();
         state.elements = path.getElements();
         for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             Property element = state.elements.get(state.curIndex);
@@ -284,7 +287,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private void handleCustomLink(final EntityPropertyCustomLink epcl, JsonFieldWrapper jsonFactory, String name, PathState state) {
         JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).materialise();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
-        state.pathTableRef = queryBuilder.queryEntityType(epcl, state.pathTableRef, sourceIdField);
+        state.pathTableRef = queryEntityType(epcl, state.pathTableRef, sourceIdField);
         state.finalExpression = null;
     }
 
@@ -308,7 +311,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        state.pathTableRef = queryBuilder.queryEntityType(np, state.pathTableRef);
+        state.pathTableRef = queryEntityType(np, state.pathTableRef);
     }
 
     private FieldWrapper getSubExpression(PathState state, Map<String, Field> pathExpressions) {
@@ -329,6 +332,49 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             return new StaTimeIntervalWrapper(pathExpressions);
         }
         return new FieldListWrapper(pathExpressions);
+    }
+
+    /**
+     * Queries the given entity type, as relation to the given table reference
+     * and returns a new table reference. Effectively, this generates a join.
+     *
+     * @param np The NavigationProperty to query
+     * @param last The table the requested entity is related to.
+     * @return The table reference of the requested entity.
+     */
+    public TableRef queryEntityType(NavigationProperty np, TableRef last) {
+        if (queryState == null) {
+            throw new IllegalStateException("QueryState should not be null");
+        }
+        if (last == null) {
+            throw new IllegalStateException("last result should not be null");
+        }
+
+        TableRef existingJoin = last.getJoin(np);
+        if (existingJoin != null) {
+            return existingJoin;
+        }
+
+        return last.createJoin(np.getName(), queryState);
+    }
+
+    /**
+     * Directly query an entity type. Used for custom linking.
+     *
+     * @param epcl the custom link.
+     * @param sourceRef The source table ref.
+     * @param sourceIdField The source ID field.
+     * @return A new table ref with the target entity type table joined.
+     */
+    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
+        final EntityType targetEntityType = epcl.getEntityType();
+        final StaMainTable<?> target = queryBuilder.getTableCollection().getTablesByType().get(targetEntityType);
+        final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), queryBuilder.getPersistenceManager());
+        final Field<?> targetField = targetAliased.getId();
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
+        TableRef newRef = new TableRef(targetAliased);
+        sourceRef.addJoin(epcl, newRef);
+        return newRef;
     }
 
     public Field[] findPair(FieldWrapper p1, FieldWrapper p2) {

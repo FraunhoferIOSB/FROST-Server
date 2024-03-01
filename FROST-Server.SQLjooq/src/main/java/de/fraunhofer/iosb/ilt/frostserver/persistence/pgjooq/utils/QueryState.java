@@ -57,6 +57,19 @@ public class QueryState<T extends StaMainTable<T>> {
     private boolean isFilter = false;
 
     private int aliasNr = 0;
+    private QueryState parent;
+    private String staAlias;
+
+    /**
+     * The table reference for the main table of the request.
+     */
+    private final TableRef tableRef;
+
+    public QueryState(T table, QueryState parent, String staAlias) {
+        this(parent.getPersistenceManager(), table, null);
+        this.parent = parent;
+        this.staAlias = staAlias;
+    }
 
     public QueryState(JooqPersistenceManager pm, T table, Set<PropertyFields<T>> sqlSelectFields) {
         this.persistenceManager = pm;
@@ -64,6 +77,8 @@ public class QueryState<T extends StaMainTable<T>> {
         sqlFrom = table;
         mainTable = table;
         sqlMainIdField = table.getId();
+        tableRef = new TableRef(table);
+        staAlias = "";
     }
 
     public JooqPersistenceManager getPersistenceManager() {
@@ -72,6 +87,10 @@ public class QueryState<T extends StaMainTable<T>> {
 
     public T getMainTable() {
         return mainTable;
+    }
+
+    public TableRef getTableRef() {
+        return tableRef;
     }
 
     public Entity entityFromQuery(Record tuple, DataSize dataSize) {
@@ -83,7 +102,10 @@ public class QueryState<T extends StaMainTable<T>> {
     }
 
     public String getNextAlias() {
-        return ALIAS_PREFIX + (++aliasNr);
+        if (parent == null) {
+            return ALIAS_PREFIX + (++aliasNr);
+        }
+        return parent.getNextAlias();
     }
 
     public boolean isSqlSortFieldsSet() {
