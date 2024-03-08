@@ -8,6 +8,7 @@
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.
 * Fixed deep select for complex properties in GeoJSON and CSV output.
+* Fixed automatic generation of Features when Feature and Location use different idTypes.
 
 
 ## Release version 2.3.0

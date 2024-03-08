@@ -108,7 +108,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<Record, ?> colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), getIdType(), this);
+    public final TableField<Record, ?> colGenFoiId;
 
     private final transient PluginCoreModel pluginCoreModel;
 
@@ -117,10 +117,13 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
      *
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
+     * @param idTypeFeature The (SQL)DataType of the FEATURE_ID column used in
+     * the database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpLocations(DataType<?> idType, PluginCoreModel pluginCoreModel) {
+    public TableImpLocations(DataType<?> idType, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
+        colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), idTypeFeature);
         this.pluginCoreModel = pluginCoreModel;
     }
 
@@ -130,6 +133,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
 
     private TableImpLocations(Name alias, TableImpLocations aliased, Table updatedSql, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased, updatedSql);
+        colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), aliased.colGenFoiId.getDataType());
         this.pluginCoreModel = pluginCoreModel;
     }
 

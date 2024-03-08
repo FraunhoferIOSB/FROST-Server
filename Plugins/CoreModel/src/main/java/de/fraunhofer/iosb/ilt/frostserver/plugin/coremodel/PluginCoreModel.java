@@ -365,7 +365,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             tableCollection.registerTable(etDatastream, new TableImpDatastreams(dataTypeDstr, dataTypeObPr, dataTypeSnsr, dataTypeThng, this));
             tableCollection.registerTable(etFeatureOfInterest, new TableImpFeatures(dataTypeFeat, this));
             tableCollection.registerTable(etHistoricalLocation, new TableImpHistLocations(dataTypeHist, dataTypeThng, this));
-            tableCollection.registerTable(etLocation, new TableImpLocations(dataTypeLctn, this));
+            tableCollection.registerTable(etLocation, new TableImpLocations(dataTypeLctn, dataTypeFeat, this));
             tableCollection.registerTable(new TableImpLocationsHistLocations(dataTypeLctn, dataTypeHist));
             tableCollection.registerTable(etObservation, new TableImpObservations(dataTypeObsr, dataTypeDstr, dataTypeFeat, this));
             tableCollection.registerTable(etObservedProperty, new TableImpObsProperties(dataTypeObPr, this));
