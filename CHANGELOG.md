@@ -4,6 +4,7 @@
 
 **New Features**
 * Implemented OData any() filters.
+* Added options for adding extra meta data to the landing page using the modelLoader plugin.
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.

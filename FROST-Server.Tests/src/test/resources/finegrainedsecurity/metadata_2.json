@@ -1,0 +1,5 @@
+{
+    "conformance": ["testModel2"],
+    "testModel": {"value":6},
+    "testModel2": {"value":6}
+}
