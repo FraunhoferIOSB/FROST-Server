@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -59,6 +59,24 @@ class EntityCompleteTest {
     }
 
     @Test
+    void testPkSingleValueAllSet() {
+        PkValue pk = new PkValue(1);
+        assertFalse(pk.isFullySet(), "Pk should not be fully set yet!");
+        pk.set(0, 1L);
+        assertTrue(pk.isFullySet(), "Pk should be fully set yet!");
+    }
+
+    @Test
+    void testPkMultiValueAllSet() {
+        PkValue pk = new PkValue(2);
+        assertFalse(pk.isFullySet(), "Pk should not be fully set yet!");
+        pk.set(0, 1L);
+        assertFalse(pk.isFullySet(), "Pk should not be fully set yet!");
+        pk.set(1, 1L);
+        assertTrue(pk.isFullySet(), "Pk should be fully set yet!");
+    }
+
+    @Test
     void testEntityComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(testModel.ET_ROOM);
         Entity entity = new DefaultEntity(testModel.ET_ROOM);
@@ -67,16 +85,16 @@ class EntityCompleteTest {
         entity.setProperty(testModel.EP_NAME, "name");
         assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(testModel.NP_HOUSE_ROOM, new DefaultEntity(testModel.ET_HOUSE).setId(new IdLong(2)));
+        entity.setProperty(testModel.NP_HOUSE_ROOM, new DefaultEntity(testModel.ET_HOUSE).setPrimaryKeyValues(PkValue.of(2L)));
         assertTrue(isEntityComplete(entity, containingSet), "Entity not complete: " + entity);
 
         entity = new DefaultEntity(testModel.ET_ROOM);
         entity.setProperty(testModel.EP_NAME, "Name");
         containingSet = new PathElementEntitySet(testModel.ET_ROOM);
         assertFalse(isEntityComplete(entity, containingSet));
-        containingSet = new PathElementEntitySet(testModel.NP_BATHROOMS_HOUSE, new PathElementEntity(testModel.ET_ROOM, null).setId(new IdLong(1)));
+        containingSet = new PathElementEntitySet(testModel.NP_BATHROOMS_HOUSE, new PathElementEntity(testModel.ET_ROOM, null).setPkValues(PkValue.of(1L)));
         assertFalse(isEntityComplete(entity, containingSet));
-        containingSet = new PathElementEntitySet(testModel.NP_ROOMS_HOUSE, new PathElementEntity(testModel.ET_HOUSE, null).setId(new IdLong(1)));
+        containingSet = new PathElementEntitySet(testModel.NP_ROOMS_HOUSE, new PathElementEntity(testModel.ET_HOUSE, null).setPkValues(PkValue.of(1L)));
         assertTrue(isEntityComplete(entity, containingSet));
 
     }

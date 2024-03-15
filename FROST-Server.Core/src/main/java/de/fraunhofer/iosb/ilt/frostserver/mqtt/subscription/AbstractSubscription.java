@@ -22,12 +22,14 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANO
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -64,7 +66,7 @@ public abstract class AbstractSubscription implements Subscription {
      * If the subscription is over a one-to-many relation, this has a value.
      */
     private NavigationPropertyMain parentRelation;
-    private Id parentId;
+    private PkValue parentId;
 
     protected ResourcePath path;
     protected CoreSettings settings;
@@ -122,7 +124,7 @@ public abstract class AbstractSubscription implements Subscription {
                     navProp = peet.getNavigationProperty().getInverse();
                 }
 
-                final Id id = epe.getId();
+                final PkValue id = epe.getPkValues();
                 if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
                     createMatcher(navProp, id);
                     assert (i <= 1);
@@ -142,11 +144,11 @@ public abstract class AbstractSubscription implements Subscription {
         }
     }
 
-    private void createMatcher(final NavigationPropertyMain navProp, Id id) {
+    private void createMatcher(final NavigationPropertyMain navProp, PkValue pkValue) {
         // We have a collectionSubscription of type one-to-many.
         // Create a (cheap) matcher instead of an (expensive) Expression
         parentRelation = navProp;
-        parentId = id;
+        parentId = pkValue;
 
         matcher = (Entity t) -> {
             Entity parent = (Entity) t.getProperty(navProp);
@@ -154,13 +156,14 @@ public abstract class AbstractSubscription implements Subscription {
                 // can be for Observation->Datastream when Observation is MultiDatastream.
                 return false;
             }
-            return id.equals(parent.getId());
+            return pkValue.equals(parent.getPrimaryKeyValues());
         };
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
-        properties.add(entityType.getPrimaryKey());
-        String epeId = epe.getId().getUrl();
+        final PrimaryKey primaryKey = entityType.getPrimaryKey();
+        properties.addAll(primaryKey.getKeyProperties());
+        String epeId = UrlHelper.quoteForUrl(primaryKey, epe.getPkValues());
         if (epeId.startsWith("'")) {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
         } else {
@@ -191,7 +194,7 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     @Override
-    public Id getParentId() {
+    public PkValue getParentId() {
         return parentId;
     }
 

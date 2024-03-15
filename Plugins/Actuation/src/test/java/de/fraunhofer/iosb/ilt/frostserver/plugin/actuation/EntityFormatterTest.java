@@ -23,11 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -37,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -94,7 +94,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, new QueryDefaults(true, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -124,7 +124,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, new QueryDefaults(false, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -145,7 +145,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -179,7 +179,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, queryDefaults, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -200,7 +200,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -209,7 +209,7 @@ class EntityFormatterTest {
                         .build())
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
-                        new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
+                        new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(2L)));
         assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -260,12 +260,12 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setQuery(query.getExpand().get(0).getSubQuery())
-                                .setId(new IdLong(1))
+                                .setPrimaryKeyValues(PkValue.of(1L))
                                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                                 .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()

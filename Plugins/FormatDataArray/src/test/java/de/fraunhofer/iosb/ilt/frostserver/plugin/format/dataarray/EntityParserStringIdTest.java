@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
@@ -88,7 +88,7 @@ class EntityParserStringIdTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("A"));
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of("A"));
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.newItemList()
@@ -100,7 +100,7 @@ class EntityParserStringIdTest {
                 .addItemToTail(30)
                 .addItemToTail("B");
 
-        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("B"));
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of("B"));
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.newItemList()
@@ -112,7 +112,7 @@ class EntityParserStringIdTest {
                 .addItemToTail(60)
                 .addItemToTail("D");
 
-        Entity mds1 = new DefaultEntity(etMultiDatastream).setId(new IdString("A"));
+        Entity mds1 = new DefaultEntity(etMultiDatastream).setPrimaryKeyValues(PkValue.of("A"));
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.newItemList()

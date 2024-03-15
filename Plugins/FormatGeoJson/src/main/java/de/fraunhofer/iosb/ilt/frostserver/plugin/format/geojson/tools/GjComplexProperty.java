@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,7 +39,7 @@ public class GjComplexProperty implements GjEntityEntry {
         this.name = name;
         this.property = property;
         final TypeComplex type = (TypeComplex) property.getType();
-        for (Map.Entry<String, PropertyType> subProperty : type.getProperties().entrySet()) {
+        for (Map.Entry<String, Property> subProperty : type.getPropertiesByName().entrySet()) {
             String subName = subProperty.getKey();
             subProperties.put(name + "/" + subName, subName);
         }
@@ -50,7 +50,7 @@ public class GjComplexProperty implements GjEntityEntry {
         Object value = source.getProperty(property);
         if (value instanceof ComplexValue complexValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(namePrefix + entry.getKey(), complexValue.get(entry.getValue()));
+                collector.collectEntry(namePrefix + entry.getKey(), complexValue.getProperty(entry.getValue()));
             }
         } else if (value instanceof Map mapValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {

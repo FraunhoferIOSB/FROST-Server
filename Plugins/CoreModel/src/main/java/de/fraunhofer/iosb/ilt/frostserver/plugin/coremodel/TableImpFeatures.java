@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -36,8 +36,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Arrays;
+import java.util.List;
 import org.geolatte.geom.Geometry;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -158,7 +161,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
-    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
@@ -166,7 +169,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
         pm.getDslContext()
                 .update(tLoc)
                 .setNull(tLoc.getGenFoiId())
-                .where(((TableField) tLoc.getGenFoiId()).eq(entityId.getValue()))
+                .where(((TableField) tLoc.getGenFoiId()).eq(entityId.get(0)))
                 .execute();
     }
 
@@ -176,6 +179,10 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

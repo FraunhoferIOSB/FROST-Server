@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,9 @@ public class ConstantFactory {
         if (object == null) {
             return null;
         }
+        if (object instanceof Constant c) {
+            return c;
+        }
         if (object instanceof BigDecimal) {
             return new StringConstant(Objects.toString(object));
         }
@@ -49,17 +52,17 @@ public class ConstantFactory {
         if (object instanceof Double aDouble) {
             return new DoubleConstant(aDouble);
         }
-        if (object instanceof Id id) {
-            return new IdConstant(id);
-        }
         if (object instanceof Integer integer) {
             return new IntegerConstant(integer);
         }
         if (object instanceof Long aLong) {
             return new IntegerConstant(aLong);
         }
-        if (object instanceof String) {
-            return new StringConstant(Objects.toString(object));
+        if (object instanceof String string) {
+            return new StringConstant(string);
+        }
+        if (object instanceof UUID uuid) {
+            return new StringConstant(uuid.toString());
         }
         if (object instanceof TimeObject timeObject) {
             return new TimeObjectConstant(timeObject);

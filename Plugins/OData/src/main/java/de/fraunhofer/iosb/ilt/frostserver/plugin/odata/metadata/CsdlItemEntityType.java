@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -48,12 +49,14 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
     public CsdlItemEntityType generateFrom(CsdlDocument doc, Version version, String nameSpace, EntityType et) {
-        String keyName = et.getPrimaryKey().getName();
-        if ("@iot.id".equals(keyName)) {
-            keyName = "id";
+        final PrimaryKey primaryKey = et.getPrimaryKey();
+        for (var property : primaryKey.getKeyProperties()) {
+            String keyName = property.getName();
+            if ("@iot.id".equals(keyName)) {
+                keyName = "id";
+            }
+            key.add(keyName);
         }
-        key.add(keyName);
-
         for (EntityPropertyMain ep : et.getEntityProperties()) {
             if (ep == ModelRegistry.EP_SELFLINK) {
                 continue;

@@ -24,11 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
@@ -39,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -92,7 +92,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, new QueryDefaults(true, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -121,7 +121,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, new QueryDefaults(false, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -142,7 +142,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -175,7 +175,7 @@ class EntityFormatterTest {
         Query query = new Query(modelRegistry, queryDefaults, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -196,7 +196,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -205,7 +205,7 @@ class EntityFormatterTest {
                         .build())
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
-                        new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(2)));
+                        new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(2L)));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
@@ -255,12 +255,12 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setQuery(query.getExpand().get(0).getSubQuery())
-                                .setId(new IdLong(1))
+                                .setPrimaryKeyValues(PkValue.of(1L))
                                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                                 .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
@@ -305,13 +305,13 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setQuery(query.getExpand().get(0).getSubQuery())
-                                .setId(new IdLong(123)))
+                                .setPrimaryKeyValues(PkValue.of(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -334,12 +334,12 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setQuery(query.getExpand().get(0).getSubQuery())
-                                .setId(new IdLong(123)))
+                                .setPrimaryKeyValues(PkValue.of(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
@@ -362,13 +362,13 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setQuery(query.getExpand().get(0).getSubQuery())
-                                .setId(new IdLong(123)))
+                                .setPrimaryKeyValues(PkValue.of(123)))
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
@@ -391,7 +391,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.npLocationsThing, new EntitySetImpl(pluginCoreModel.etLocation))
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
@@ -418,7 +418,7 @@ class EntityFormatterTest {
                     .validate();
             DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
                     .setQuery(query)
-                    .setId(new IdLong(1))
+                    .setPrimaryKeyValues(PkValue.of(1L))
                     .setProperty(pluginCoreModel.npThingsLocation, new EntitySetImpl(pluginCoreModel.etThing))
                     .setProperty(pluginCoreModel.npHistoricalLocationsLocation, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
@@ -437,7 +437,7 @@ class EntityFormatterTest {
                     .validate();
             DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
                     .setQuery(query)
-                    .setId(new IdLong(1))
+                    .setPrimaryKeyValues(PkValue.of(1L))
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
             compareJson(expResult, JsonWriter.writeEntity(entity));
         }
@@ -468,7 +468,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         compareJson(expResult, JsonWriter.writeEntity(entity));
@@ -488,8 +488,8 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThingHistLoc, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npThingHistLoc, new DefaultEntity(pluginCoreModel.etThing, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, ZonalOffset.ofHours(BEHIND_UTC, 7)));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
@@ -520,10 +520,10 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
@@ -562,10 +562,10 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, PkValue.of(1)))
                 .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement())
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
@@ -606,10 +606,10 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.getEpUnitOfMeasurement(), new UnitOfMeasurement()
@@ -639,7 +639,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "TMP36 - Analog Temperature sensor")
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
@@ -662,7 +662,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "TMP36 - Analog Temperature sensor")
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
@@ -685,7 +685,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epDescription, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
                 .setProperty(pluginCoreModel.epName, "DewPoint Temperature")
                 .setProperty(pluginCoreModel.epDefinition, "http://dbpedia.org/page/Dew_point");
@@ -708,10 +708,10 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
-                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
         compareJson(expResult, JsonWriter.writeEntity(entity));
@@ -733,9 +733,9 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
@@ -759,9 +759,9 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
-                .setId(new IdLong(1))
-                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
-                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setPrimaryKeyValues(PkValue.of(1L))
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59)))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");
@@ -783,7 +783,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
@@ -816,7 +816,7 @@ class EntityFormatterTest {
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setQuery(query)
-                .setId(new IdLong(1))
+                .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")

@@ -26,18 +26,19 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.node.TextNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -93,9 +94,18 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(pluginCoreModel.etObservedProperty.getPrimaryKey(), new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(pluginCoreModel.etSensor.getPrimaryKey(), new IdLong(Long.MAX_VALUE)));
+                .setProperty(
+                        pluginCoreModel.npThingDatasteam,
+                        new DefaultEntity(pluginCoreModel.etThing)
+                                .setPrimaryKeyValues(PkValue.of(5394817L)))
+                .setProperty(
+                        pluginCoreModel.npObservedPropertyDatastream,
+                        new DefaultEntity(pluginCoreModel.etObservedProperty)
+                                .setPrimaryKeyValues(PkValue.of(5394816L)))
+                .setProperty(
+                        pluginCoreModel.npSensorDatastream,
+                        new DefaultEntity(pluginCoreModel.etSensor)
+                                .setPrimaryKeyValues(PkValue.of(Long.MAX_VALUE)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
@@ -176,9 +186,18 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
-                .setProperty(pluginCoreModel.npThingDatasteam, new DefaultEntity(pluginCoreModel.etThing).setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(5394817)))
-                .setProperty(pluginCoreModel.npObservedPropertyDatastream, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(pluginCoreModel.etObservedProperty.getPrimaryKey(), new IdLong(5394816)))
-                .setProperty(pluginCoreModel.npSensorDatastream, new DefaultEntity(pluginCoreModel.etSensor).setProperty(pluginCoreModel.etSensor.getPrimaryKey(), new IdLong(5394815)))
+                .setProperty(
+                        pluginCoreModel.npThingDatasteam,
+                        new DefaultEntity(pluginCoreModel.etThing)
+                                .setPrimaryKeyValues(PkValue.of(5394817L)))
+                .setProperty(
+                        pluginCoreModel.npObservedPropertyDatastream,
+                        new DefaultEntity(pluginCoreModel.etObservedProperty)
+                                .setPrimaryKeyValues(PkValue.of(5394816L)))
+                .setProperty(
+                        pluginCoreModel.npSensorDatastream,
+                        new DefaultEntity(pluginCoreModel.etSensor)
+                                .setPrimaryKeyValues(PkValue.of(5394815L)))
                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
         final Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
         assertEquals(expectedResult, result);
@@ -353,7 +372,8 @@ class EntityParserTest {
                 + "    },"
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
-        Entity thing = new DefaultEntity(pluginCoreModel.etThing).setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(100));
+        Entity thing = new DefaultEntity(pluginCoreModel.etThing)
+                .setPrimaryKeyValues(PkValue.of(100L));
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(thing);
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etLocation)
@@ -418,7 +438,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                        .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -446,7 +466,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
                 .setProperty(pluginCoreModel.epResult, 38)
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                        .setProperty(pluginCoreModel.etFeatureOfInterest.getPrimaryKey(), new IdLong(14269)));
+                        .setPrimaryKeyValues(PkValue.of(14269L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -475,7 +495,7 @@ class EntityParserTest {
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
                         .setProperty(pluginCoreModel.epFeature, new TextNode("tarmac")))
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream)
-                        .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(14314)));
+                        .setPrimaryKeyValues(PkValue.of(14314L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
@@ -529,7 +549,7 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsObsProp,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                                .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
 
@@ -590,7 +610,7 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                                .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
@@ -611,11 +631,11 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)))
+                                .setPrimaryKeyValues(PkValue.of(100L)))
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(101)));
+                                .setPrimaryKeyValues(PkValue.of(101L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
 
@@ -807,7 +827,7 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npLocationsThing,
                         new DefaultEntity(pluginCoreModel.etLocation)
-                                .setProperty(pluginCoreModel.etLocation.getPrimaryKey(), new IdLong(100)));
+                                .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -836,7 +856,7 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.etDatastream.getPrimaryKey(), new IdLong(100)));
+                                .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -987,17 +1007,19 @@ class EntityParserTest {
 
     @Test
     void readEntityLongId() throws IOException {
+        final PrimaryKey thingPrimaryKey = pluginCoreModel.etThing.getPrimaryKey();
+        final EntityPropertyMain thingIdProperty = thingPrimaryKey.getKeyProperties().get(0);
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing).setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(id));
+            Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing).setProperty(thingIdProperty, id);
             assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
         }
         {
             long id = Long.MIN_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
             Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
-                    .setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdLong(id));
+                    .setProperty(thingIdProperty, id);
             assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
         }
         {
@@ -1013,7 +1035,7 @@ class EntityParserTest {
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
             Entity expectedResult = new DefaultEntity(pluginCoreModelString.etThing)
-                    .setProperty(pluginCoreModel.etThing.getPrimaryKey(), new IdString(id));
+                    .setProperty(thingIdProperty, id);
             assertEquals(expectedResult, entityParserString.parseEntity(pluginCoreModelString.etThing, json));
         }
     }

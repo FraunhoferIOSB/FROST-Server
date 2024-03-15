@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.security.Principal;
@@ -62,7 +64,8 @@ public abstract class Request implements Content {
 
     protected final boolean requireContentId;
     protected String contentId;
-    protected Id contentIdValue;
+    protected PkValue contentIdValue;
+    protected EntityType entityType;
     protected final StringBuilder data = new StringBuilder();
     protected final Version batchVersion;
 
@@ -136,12 +139,20 @@ public abstract class Request implements Content {
         this.contentId = contentId;
     }
 
-    public Id getContentIdValue() {
+    public PkValue getContentIdValue() {
         return contentIdValue;
     }
 
-    public void setContentIdValue(Id contentIdValue) {
+    public void setContentIdValue(PkValue contentIdValue) {
         this.contentIdValue = contentIdValue;
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
 
     /**
@@ -178,10 +189,10 @@ public abstract class Request implements Content {
 
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value.getUrl());
+            path = path.replace(pair.key, pair.keyToUrl());
             int keyIndex = 0;
             String quotedKey = '"' + pair.key + '"';
-            String value = pair.value.getJson();
+            String value = UrlHelper.quoteForJson(pair.value.get(0));
             while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
                 data.replace(keyIndex, keyIndex + quotedKey.length(), value);
                 keyIndex += value.length();

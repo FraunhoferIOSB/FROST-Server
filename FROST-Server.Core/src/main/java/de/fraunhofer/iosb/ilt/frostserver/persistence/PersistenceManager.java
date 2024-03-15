@@ -21,7 +21,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -55,7 +55,14 @@ public interface PersistenceManager extends AutoCloseable {
      */
     public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
-    public Entity get(EntityType entityType, Id id);
+    /**
+     * Get the Entity of the given EntityType with the given Primary Key.
+     *
+     * @param entityType The EntityType to fetch.
+     * @param pkValue The primary key of the Entity to fetch.
+     * @return An entity with the given type and given primary key, or null.
+     */
+    public Entity get(EntityType entityType, PkValue pkValue);
 
     public Object get(ResourcePath path, Query query);
 
