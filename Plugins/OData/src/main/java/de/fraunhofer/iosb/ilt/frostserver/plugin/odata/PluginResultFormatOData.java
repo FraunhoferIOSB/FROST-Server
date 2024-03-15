@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterEmpty;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
@@ -150,8 +149,6 @@ public class PluginResultFormatOData implements PluginResultFormat {
                     LOGGER.trace("Formatting as $Value.");
                     if (result instanceof Map || result instanceof GeoJsonObject) {
                         entityJsonString = JsonWriterOdata401.writeObject(result);
-                    } else if (result instanceof Id id) {
-                        entityJsonString = id.getValue().toString();
                     } else {
                         entityJsonString = result.toString();
                     }

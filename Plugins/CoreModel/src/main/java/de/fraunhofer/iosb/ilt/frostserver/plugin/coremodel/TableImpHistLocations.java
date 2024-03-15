@@ -33,10 +33,13 @@ import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import net.time4j.Moment;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -127,7 +130,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         super.insertIntoDatabase(pm, histLoc, updateMode);
         EntityFactories entityFactories = pm.getEntityFactories();
         Entity thing = histLoc.getProperty(pluginCoreModel.npThingHistLoc);
-        Object thingId = thing.getId().getValue();
+        Object thingId = thing.getPrimaryKeyValues().get(0);
         DSLContext dslContext = pm.getDslContext();
         TableImpHistLocations thl = getTables().getTableForClass(TableImpHistLocations.class);
 
@@ -156,10 +159,10 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
 
             // Link new locations to Thing.
             for (Entity l : histLoc.getProperty(pluginCoreModel.npLocationsHistLoc)) {
-                if (l.getId() == null || !entityFactories.entityExists(pm, l, true)) {
+                if (!l.getPrimaryKeyValues().isFullySet() || !entityFactories.entityExists(pm, l, true)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
-                Object locationId = l.getId().getValue();
+                Object locationId = l.getPrimaryKeyValues().get(0);
 
                 dslContext.insertInto(qtl)
                         .set(((TableField) qtl.getThingId()), thingId)
@@ -178,6 +181,10 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

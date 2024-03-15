@@ -21,8 +21,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
@@ -107,7 +108,8 @@ public class BatchProcessor<C extends Content> {
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity entity) {
-                httpRequest.setContentIdValue(entity.getId());
+                httpRequest.setContentIdValue(entity.getPrimaryKeyValues());
+                httpRequest.setEntityType(entity.getEntityType());
             }
         }
         Request httpResponse = batchFactory.createRequest(serviceRequest.getVersion(), inChangeSet);
@@ -164,10 +166,11 @@ public class BatchProcessor<C extends Content> {
                     response.addPart(newPart);
                 }
 
-                String contentId = request.getContentId();
-                Id contentIdValue = request.getContentIdValue();
-                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null) {
-                    contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
+                final String contentId = request.getContentId();
+                final PkValue contentIdValue = request.getContentIdValue();
+                final EntityType entityType = request.getEntityType();
+                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null && entityType != null) {
+                    contentIds.add(new ContentIdPair("$" + contentId, contentIdValue, entityType));
                 }
             } else {
                 LOGGER.warn("Only http requests allowed in changset. Found type: {}", content.getClass().getName());

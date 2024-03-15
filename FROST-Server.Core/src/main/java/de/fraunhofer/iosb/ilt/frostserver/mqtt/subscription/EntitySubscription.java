@@ -21,7 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORM
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -57,8 +57,8 @@ public class EntitySubscription extends AbstractSubscription {
         entityType = ((PathElementEntity) path.getLastElement()).getEntityType();
         final int size = path.size();
         if (size == 2 && path.get(0) instanceof PathElementEntitySet) {
-            Id id = ((PathElementEntity) path.getLastElement()).getId();
-            matcher = x -> x.getProperty(entityType.getPrimaryKey()).equals(id);
+            PkValue id = ((PathElementEntity) path.getLastElement()).getPkValues();
+            matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
         generateFilter(1);
     }

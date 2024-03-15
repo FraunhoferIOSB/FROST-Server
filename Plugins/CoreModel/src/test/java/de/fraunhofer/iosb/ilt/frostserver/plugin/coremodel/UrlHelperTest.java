@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -27,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -250,12 +250,12 @@ class UrlHelperTest {
         Query queryBase = null;
         Query queryExpected = null;
         try {
-            queryBase = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+            queryBase = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse base url: " + baseUrl, e);
         }
         try {
-            queryExpected = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+            queryExpected = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
         }
@@ -266,7 +266,7 @@ class UrlHelperTest {
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
         Query next = null;
         try {
-            next = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+            next = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed for base url {}", baseUrl);
             LOGGER.error("Expected nextLink   {}", expectedNextUrl);

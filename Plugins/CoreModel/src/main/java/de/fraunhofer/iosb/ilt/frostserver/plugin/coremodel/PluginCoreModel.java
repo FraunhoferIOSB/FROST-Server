@@ -133,8 +133,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET, false, false);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, true, false);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, true, false);
@@ -249,12 +249,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
-                .addProperty("name", EDM_STRING, false)
-                .addProperty("symbol", EDM_STRING, false)
-                .addProperty(NAME_DEFINITION, EDM_STRING, false);
+        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false, UnitOfMeasurement::new, TYPE_REFERENCE_UOM)
+                .registerProperty(UnitOfMeasurement.EP_NAME)
+                .registerProperty(UnitOfMeasurement.EP_DEFINITION)
+                .registerProperty(UnitOfMeasurement.EP_SYMBOL);
         mr.registerPropertyType(eptUom)
-                .registerPropertyType(TypeSimpleCustom.STA_GEOJSON)
+                .registerPropertyType(TypeSimpleCustom.STA_LOCATION)
                 .registerPropertyType(TypeComplex.STA_OBJECT)
                 .registerPropertyType(TypeComplex.STA_MAP)
                 .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)

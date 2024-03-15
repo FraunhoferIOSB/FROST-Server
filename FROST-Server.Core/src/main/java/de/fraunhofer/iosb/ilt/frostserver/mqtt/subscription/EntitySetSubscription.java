@@ -69,7 +69,7 @@ public class EntitySetSubscription extends AbstractSubscription {
                 List<Expand> expandList = queryCopy.getExpand();
                 expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
                         .setExpand(expandList)
-                        .addSelect(entityType.getPrimaryKey());
+                        .addSelect(entityType.getPrimaryKey().getKeyProperties());
             }
         }
 

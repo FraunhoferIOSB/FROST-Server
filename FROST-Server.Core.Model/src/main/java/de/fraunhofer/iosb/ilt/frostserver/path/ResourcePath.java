@@ -263,7 +263,7 @@ public class ResourcePath {
             final PathElement current = pathElements.get(i);
             if (current instanceof PathElementEntity epe
                     && pathElements.get(i - 1) instanceof PathElementEntitySet
-                    && epe.getId() != null) {
+                    && epe.primaryKeyFullySet()) {
                 // crop path
                 pathElements.subList(0, i - 1).clear();
                 setIdentifiedElement(epe);
@@ -328,8 +328,8 @@ public class ResourcePath {
         StringBuilder sb = new StringBuilder(serviceRootUrl)
                 .append('/').append(version.urlPart);
         for (PathElement rpe : pathElements) {
-            if (rpe instanceof PathElementEntity epe && epe.getId() != null) {
-                sb.append("(").append(epe.getId().getUrl()).append(")");
+            if (rpe instanceof PathElementEntity epe && epe.primaryKeyFullySet()) {
+                sb.append("(").append(UrlHelper.quoteForUrl(epe.getEntityType().getPrimaryKey(), epe.getPkValues())).append(")");
             } else if (rpe instanceof PathElementArrayIndex) {
                 sb.append(rpe.toString());
             } else {

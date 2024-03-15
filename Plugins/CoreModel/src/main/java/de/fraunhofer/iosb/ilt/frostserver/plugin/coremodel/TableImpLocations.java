@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -37,14 +37,16 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Arrays;
+import java.util.List;
 import net.time4j.Moment;
 import org.geolatte.geom.Geometry;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -193,7 +195,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
         EntityType linkedEntityType = linkedSet.getEntityType();
         ModelRegistry modelRegistry = getModelRegistry();
         if (linkedEntityType.equals(pluginCoreModel.etThing)) {
-            Object locationId = location.getId().getValue();
+            Object locationId = location.getPrimaryKeyValues().get(0);
             DSLContext dslContext = pm.getDslContext();
             EntityFactories entityFactories = pm.getEntityFactories();
             final TableCollection tables = getTables();
@@ -208,7 +210,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                     throw new NoSuchEntityException("Thing not found.");
                 }
 
-                Object thingId = t.getId().getValue();
+                Object thingId = t.getPrimaryKeyValues().get(0);
 
                 // Unlink old Locations from Thing.
                 long delCount = dslContext.delete(ttl)
@@ -241,7 +243,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, ParserUtils.idFromObject(histLocationId));
+                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, PkValue.of(histLocationId));
                 newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
@@ -254,7 +256,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
-    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
         final TableCollection tables = getTables();
         // Also delete all historicalLocations that no longer reference any location
@@ -278,6 +280,10 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

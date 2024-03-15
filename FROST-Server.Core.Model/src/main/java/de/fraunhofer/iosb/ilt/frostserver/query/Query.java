@@ -21,7 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -188,14 +188,18 @@ public class Query {
         if (skipFilter != null) {
             skipFilter.validate(context, entityType);
         }
-        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
-        final String pkName = primaryKey.getName();
-        for (OrderBy order : orderBy) {
-            order.getExpression().validate(context, entityType);
-            if (pkName.equals(order.getExpression().toUrl())) {
-                pkOrder = true;
+        PrimaryKey primaryKey = entityType.getPrimaryKey();
+        int pkCount = 0;
+        for (var keyProp : primaryKey.getKeyProperties()) {
+            final String pkName = keyProp.getName();
+            for (OrderBy order : orderBy) {
+                order.getExpression().validate(context, entityType);
+                if (pkName.equals(order.getExpression().toUrl())) {
+                    pkCount++;
+                }
             }
         }
+        pkOrder = pkCount >= primaryKey.getKeyProperties().size();
         if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
                 orderBy.add(dfltOrder);
@@ -305,6 +309,11 @@ public class Query {
 
     public Query addSelect(Property... properties) {
         select.addAll(Arrays.asList(properties));
+        return this;
+    }
+
+    public Query addSelect(List<EntityPropertyMain> properties) {
+        select.addAll(properties);
         return this;
     }
 

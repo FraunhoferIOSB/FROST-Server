@@ -49,6 +49,8 @@ public class Constants {
     public static final String VALUE_RETURN_REPRESENTATION = "representation";
     public static final String VALUE_RETURN_MINIMAL = "minimal";
 
+    public static final String NOT_IMPLEMENTED_MULTI_VALUE_PK = "Multi-valued primary keys are not implemented yet.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
 
     private Constants() {

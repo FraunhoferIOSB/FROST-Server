@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import static de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils.idFromObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
@@ -42,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
@@ -51,6 +51,7 @@ import org.geojson.GeoJsonObject;
 import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.geom.Geometry;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -96,21 +97,31 @@ public class EntityFactories {
         return tableCollection;
     }
 
-    public static Entity entityFromId(EntityType entityType, Record tuple, Field<?> path) {
-        return entityFromId(entityType, getFieldOrNull(tuple, path));
+    public static Entity entityFromId(EntityType entityType, Record tuple, List<Field> path) {
+        int pkSize = entityType.getPrimaryKey().size();
+        PkValue pk = new PkValue(pkSize);
+        for (int idx = 0; idx < pkSize; idx++) {
+            pk.set(idx, getFieldOrNull(tuple, path.get(idx)));
+        }
+        return entityFromId(entityType, pk);
     }
 
-    public static Entity entityFromId(EntityType entityType, Object id) {
-        if (id == null) {
+    public static Entity entityFromId(EntityType entityType, PkValue idValues) {
+        if (idValues == null) {
             return null;
         }
-        return new DefaultEntity(entityType, idFromObject(id));
+        return new DefaultEntity(entityType, idValues);
     }
 
-    public void insertUserDefinedId(JooqPersistenceManager pm, Map<Field, Object> clause, Field<?> idField, Entity entity) throws IncompleteEntityException {
+    public void insertUserDefinedId(JooqPersistenceManager pm, Map<Field, Object> clause, List<Field> idFields, Entity entity) throws IncompleteEntityException {
         if (pm.useClientSuppliedId(entity)) {
             pm.modifyClientSuppliedId(entity);
-            clause.put(idField, entity.getId().getValue());
+            PkValue pkValues = entity.getPrimaryKeyValues();
+            for (int i = 0; i < idFields.size(); i++) {
+                Field idField = idFields.get(i);
+                Object idValue = pkValues.get(i);
+                clause.put(idField, idValue);
+            }
         }
     }
 
@@ -131,7 +142,7 @@ public class EntityFactories {
             throw new NoSuchEntityException("No entity!");
         }
 
-        if (e.getId() == null) {
+        if (!e.primaryKeyFullySet()) {
             e.validateCreate();
             // no id but complete -> create
             pm.insert(e, updateMode);
@@ -147,40 +158,45 @@ public class EntityFactories {
             e.validateCreate();
         } catch (IncompleteEntityException exc) {
             // not complete and link entity does not exist
-            throw new NoSuchEntityException("No such entity '" + e.getEntityType() + "' with id " + e.getId().getValue());
+            throw new NoSuchEntityException("No such entity '" + e.getEntityType() + "' with id " + e.getPrimaryKeyValues());
         }
 
         // complete with id -> create
         pm.insert(e, updateMode);
     }
 
-    public boolean entityExists(JooqPersistenceManager pm, EntityType type, Id entityId, boolean admin) {
-        Object id = entityId.getValue();
+    public boolean entityExists(JooqPersistenceManager pm, EntityType type, PkValue entityId, boolean admin) {
         StaMainTable<?> table = tableCollection.getTableForType(type);
         if (!admin) {
             table = table.asSecure("t", pm);
         }
 
-        DSLContext dslContext = pm.getDslContext();
+        List<Field> pkFields = table.getPkFields();
+        Condition where = pkFields.get(0).eq(entityId.get(0));
+        final int size = entityId.size();
+        for (int i = 1; i < size; i++) {
+            where = where.and(pkFields.get(i).eq(entityId.get(i)));
+        }
 
+        DSLContext dslContext = pm.getDslContext();
         Integer count = dslContext.selectCount()
                 .from(table)
-                .where(table.getId().equal(id))
+                .where(where)
                 .fetchOne()
                 .component1();
 
         if (count > 1) {
-            LOGGER.error("More than one instance of {} with id {}.", type, id);
+            LOGGER.error("More than one instance of {} with id {}.", type, entityId);
         }
         return count > 0;
 
     }
 
     public boolean entityExists(JooqPersistenceManager pm, Entity e, boolean admin) {
-        if (e == null || e.getId() == null) {
+        if (e == null || !e.primaryKeyFullySet()) {
             return false;
         }
-        return entityExists(pm, e.getEntityType(), e.getId(), admin);
+        return entityExists(pm, e.getEntityType(), e.getPrimaryKeyValues(), admin);
     }
 
     public static void insertTimeValue(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeValue time) {

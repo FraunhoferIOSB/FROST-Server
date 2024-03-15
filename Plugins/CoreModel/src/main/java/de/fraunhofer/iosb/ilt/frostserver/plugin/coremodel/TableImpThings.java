@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -32,15 +33,16 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.time4j.Moment;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -142,7 +144,8 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
         EntityType linkedEntityType = linkedSet.getEntityType();
         if (linkedEntityType.equals(pluginCoreModel.etLocation)) {
             final TableCollection tables = getTables();
-            Object thingId = thing.getId().getValue();
+            // We know a Thing has a single-valued PK.
+            Object thingId = thing.getPrimaryKeyValues().get(0);
             DSLContext dslContext = pm.getDslContext();
             EntityFactories entityFactories = pm.getEntityFactories();
             TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
@@ -160,7 +163,8 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
                 } else if (!entityFactories.entityExists(pm, l, admin)) {
                     throw new NoSuchEntityException("Linked Location with no id.");
                 }
-                Object lId = l.getId().getValue();
+                PkValue lPk = l.getPrimaryKeyValues();
+                Object lId = lPk.get(0);
 
                 dslContext.insertInto(ttl)
                         .set((TableField) ttl.getThingId(), thingId)
@@ -192,7 +196,7 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
                 }
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, ParserUtils.idFromObject(histLocationId));
+                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, PkValue.of(histLocationId));
                 newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
@@ -210,6 +214,10 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

@@ -19,7 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
@@ -172,21 +173,21 @@ public class HttpContent extends Request implements MultipartContent {
     }
 
     @Override
-    public Id getContentIdValue() {
+    public PkValue getContentIdValue() {
         return contentIdValue;
     }
 
     @Override
-    public void setContentIdValue(Id contentIdValue) {
+    public void setContentIdValue(PkValue contentIdValue) {
         this.contentIdValue = contentIdValue;
     }
 
     @Override
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value.getUrl());
+            path = path.replace(pair.key, pair.getKey());
             final String quotedKey = '"' + pair.key + '"';
-            final String valueJson = pair.value.getJson();
+            final String valueJson = UrlHelper.quoteForJson(pair.value.get(0));
             int keyIndex = 0;
             while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
                 data.replace(keyIndex, keyIndex + quotedKey.length(), valueJson);

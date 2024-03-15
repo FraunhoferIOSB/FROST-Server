@@ -30,7 +30,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Arrays;
+import java.util.List;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -161,6 +164,10 @@ public class TableImpTaskingCapabilities extends StaTableAbstract<TableImpTaskin
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

@@ -225,7 +225,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         if (pm instanceof JooqPersistenceManager ppm) {
             final TableCollection tableCollection = ppm.getTableCollection();
             final DataType dataTypeMds = ppm.getDataTypeFor(modelSettings.idTypeMultiDatastream);
-            final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getId().getDataType();
+            final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getPkFields().get(0).getDataType();
             tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(dataTypeMds, this, pluginCoreModel));
             tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties(dataTypeMds, dataTypeObsProp));
         }

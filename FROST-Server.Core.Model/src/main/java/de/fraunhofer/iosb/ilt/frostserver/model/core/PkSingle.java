@@ -15,29 +15,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
+package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-/**
- *
- * @author jab
- */
-public class IdConstant extends Constant<Id> {
+public class PkSingle implements PrimaryKey {
 
-    public IdConstant(Id value) {
-        super(value);
+    private final List<EntityPropertyMain> keyProperties;
+
+    public PkSingle(EntityPropertyMain keyProperty) {
+        this.keyProperties = Collections.unmodifiableList(Arrays.asList(keyProperty));
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        throw new UnsupportedOperationException("Not supported for this type.");
+    public int size() {
+        return keyProperties.size();
     }
 
     @Override
-    public String toUrl() {
-        return value.getUrl();
+    public List<EntityPropertyMain> getKeyProperties() {
+        return keyProperties;
+    }
+
+    @Override
+    public EntityPropertyMain getKeyProperty(int idx) {
+        return keyProperties.get(idx);
     }
 
 }

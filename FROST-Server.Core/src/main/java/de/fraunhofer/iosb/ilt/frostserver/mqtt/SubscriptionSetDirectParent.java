@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -41,7 +41,7 @@ class SubscriptionSetDirectParent {
 
     private final MqttManager mqttManager;
     private final NavigationPropertyMain relationToParent;
-    private final Map<Id, SubscriptionSet> subscriptions = new ConcurrentHashMap<>();
+    private final Map<PkValue, SubscriptionSet> subscriptions = new ConcurrentHashMap<>();
     private final AtomicInteger topicCount;
 
     public SubscriptionSetDirectParent(MqttManager mqttManager, NavigationPropertyMain relationToParent, AtomicInteger topicCount) {
@@ -55,8 +55,8 @@ class SubscriptionSetDirectParent {
         if (parent == null) {
             return;
         }
-        Id parentId = parent.getId();
-        SubscriptionSet subsForParent = subscriptions.get(parentId);
+        PkValue pkValue = parent.getPrimaryKeyValues();
+        SubscriptionSet subsForParent = subscriptions.get(pkValue);
         if (subsForParent == null) {
             return;
         }
@@ -72,12 +72,12 @@ class SubscriptionSetDirectParent {
     public boolean addSubscription(Subscription subscription) {
         synchronized (this) {
             NavigationPropertyMain parentRelation = subscription.getParentRelation();
-            Id parentId = subscription.getParentId();
-            if (parentRelation == null || parentId == null) {
-                LOGGER.error("Parent Relation or ParentId is null! {} / {}", parentRelation, parentId);
+            PkValue parentPk = subscription.getParentId();
+            if (parentRelation == null || parentPk == null) {
+                LOGGER.error("Parent Relation or ParentId is null! {} / {}", parentRelation, parentPk);
                 return false;
             }
-            SubscriptionSet subsForParent = subscriptions.computeIfAbsent(parentId, t -> new SubscriptionSet(topicCount));
+            SubscriptionSet subsForParent = subscriptions.computeIfAbsent(parentPk, t -> new SubscriptionSet(topicCount));
             subsForParent.addSubscription(subscription);
             return true;
         }
@@ -86,12 +86,12 @@ class SubscriptionSetDirectParent {
     public void removeSubscription(Subscription subscription) {
         synchronized (this) {
             NavigationPropertyMain parentRelation = subscription.getParentRelation();
-            Id parentId = subscription.getParentId();
-            if (parentRelation == null || parentId == null) {
-                LOGGER.error("Parent Relation or ParentId is null! {} / {}", parentRelation, parentId);
+            PkValue parentPk = subscription.getParentId();
+            if (parentRelation == null || parentPk == null) {
+                LOGGER.error("Parent Relation or ParentId is null! {} / {}", parentRelation, parentPk);
                 return;
             }
-            SubscriptionSet subsForParent = subscriptions.get(parentId);
+            SubscriptionSet subsForParent = subscriptions.get(parentPk);
             if (subsForParent == null) {
                 return;
             }

@@ -20,7 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -58,20 +59,61 @@ public class DefaultEntity implements Entity {
         this.entityType = entityType;
     }
 
-    public DefaultEntity(EntityType entityType, Id id) {
+    public DefaultEntity(EntityType entityType, PkValue pkValue) {
         this.entityType = entityType;
-        setId(id);
+        setPrimaryKeyValues(pkValue);
+    }
+
+    /**
+     * Get the primary key definition of the (EntityType of the) Entity. This is
+     * a shorthand for getEntityType().getPrimaryKey();
+     *
+     * @return The primary key definition of the Entity.
+     */
+    @Override
+    public final PrimaryKey getPrimaryKey() {
+        return entityType.getPrimaryKey();
+    }
+
+    /**
+     * Key the values of the primary key fields for this Entity.
+     *
+     * @return the primary key values.
+     */
+    @Override
+    public final PkValue getPrimaryKeyValues() {
+        List<EntityPropertyMain> keyProperties = entityType.getPrimaryKey().getKeyProperties();
+        PkValue pkValue = new PkValue(keyProperties.size());
+        int idx = 0;
+        for (EntityPropertyMain keyProperty : keyProperties) {
+            pkValue.set(idx, getProperty(keyProperty));
+            idx++;
+        }
+        return pkValue;
     }
 
     @Override
-    public final Id getId() {
-        return getProperty(entityType.getPrimaryKey());
+    public boolean primaryKeyFullySet() {
+        List<EntityPropertyMain> keyProperties = entityType.getPrimaryKey().getKeyProperties();
+        for (EntityPropertyMain keyProperty : keyProperties) {
+            Object value = getProperty(keyProperty);
+            if (value == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
-    public final DefaultEntity setId(Id id) {
-        entityProperties.put(entityType.getPrimaryKey(), id);
-        setProperties.add(entityType.getPrimaryKey());
+    public final DefaultEntity setPrimaryKeyValues(PkValue values) {
+        int idx = 0;
+        for (EntityPropertyMain keyProperty : entityType.getPrimaryKey().getKeyProperties()) {
+            if (idx >= values.size()) {
+                throw new IllegalArgumentException("No value given for keyProperty " + idx);
+            }
+            setProperty(keyProperty, values.get(idx));
+            idx++;
+        }
         return this;
     }
 

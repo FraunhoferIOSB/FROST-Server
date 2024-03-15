@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -46,11 +46,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import net.time4j.Moment;
 import org.jooq.DSLContext;
@@ -259,7 +260,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
             if (f == null) {
                 final Entity ds = entity.getProperty(pluginCoreModel.npDatastreamObservation);
                 if (ds != null) {
-                    f = generateFeatureOfInterest(pm, ds.getId());
+                    f = generateFeatureOfInterest(pm, ds.getPrimaryKeyValues().get(0));
                     if (f == null) {
                         throw new IncompleteEntityException("No FeatureOfInterest provided, and none can be generated.");
                     }
@@ -276,6 +277,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }
@@ -377,8 +382,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         }
     }
 
-    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
-        final Object dsId = datastreamId.getValue();
+    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, Object dsId) throws NoSuchEntityException, IncompleteEntityException {
         final DSLContext dslContext = pm.getDslContext();
         TableCollection tableCollection = getTables();
         TableImpLocations ql = tableCollection.getTableForClass(TableImpLocations.class);
@@ -422,7 +426,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         // Or locationId will have a value if a supported encoding type was found.
         Entity foi;
         if (genFoiId != null) {
-            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, ParserUtils.idFromObject(genFoiId));
+            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(genFoiId));
         } else if (locationId != null) {
             SelectConditionStep<Record3<Object, String, String>> query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties)
                     .from(ql)
@@ -453,9 +457,9 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
             // Switch back to normal user
             PrincipalExtended.setLocalPrincipal(userPrincipal);
 
-            Object foiId = foi.getId().getValue();
+            Object foiId = foi.getPrimaryKeyValues().get(0);
             dslContext.update(ql)
-                    .set(((TableField) ql.getGenFoiId()), foi.getId().getValue())
+                    .set(((TableField) ql.getGenFoiId()), foiId)
                     .where(((TableField) ql.getId()).eq(locationId))
                     .execute();
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);

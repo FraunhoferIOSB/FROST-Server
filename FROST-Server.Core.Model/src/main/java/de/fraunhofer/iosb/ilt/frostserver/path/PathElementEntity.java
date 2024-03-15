@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import java.util.Objects;
 
@@ -31,7 +31,7 @@ public class PathElementEntity implements PathElementEntityType {
     private final NavigationPropertyEntity np;
     private final EntityType entityType;
     private PathElement parent;
-    private Id id;
+    private PkValue pkValue;
 
     public PathElementEntity(NavigationPropertyEntity np, PathElement parent) {
         this.np = np;
@@ -45,15 +45,38 @@ public class PathElementEntity implements PathElementEntityType {
         this.parent = parent;
     }
 
-    public PathElementEntity(Id id, EntityType entityType, PathElement parent) {
+    public PathElementEntity(PkValue pk, EntityType entityType, PathElement parent) {
         this.np = null;
         this.entityType = entityType;
         this.parent = parent;
-        this.id = id;
+        this.pkValue = pk;
     }
 
-    public Id getId() {
-        return id;
+    public PkValue getPkValues() {
+        return pkValue;
+    }
+
+    public PathElementEntity setPkValues(PkValue pkValue) {
+        this.pkValue = pkValue;
+        return this;
+    }
+
+    @Deprecated
+    public PathElementEntity setPkValues(Object... pkValues) {
+        this.pkValue = new PkValue(pkValues);
+        return this;
+    }
+
+    public boolean primaryKeyFullySet() {
+        if (pkValue == null) {
+            return false;
+        }
+        for (var value : pkValue) {
+            if (value == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -82,11 +105,6 @@ public class PathElementEntity implements PathElementEntityType {
         return parent;
     }
 
-    public PathElementEntity setId(Id id) {
-        this.id = id;
-        return this;
-    }
-
     @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
@@ -104,7 +122,7 @@ public class PathElementEntity implements PathElementEntityType {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, entityType, np, parent);
+        return Objects.hash(pkValue, entityType, np, parent);
     }
 
     @Override
@@ -116,7 +134,7 @@ public class PathElementEntity implements PathElementEntityType {
             return false;
         }
         final PathElementEntity other = (PathElementEntity) obj;
-        return Objects.equals(this.id, other.id)
+        return Objects.equals(this.pkValue, other.pkValue)
                 && this.np == other.np
                 && this.entityType == other.entityType
                 && Objects.equals(this.parent, other.parent);

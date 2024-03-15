@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
@@ -36,5 +36,5 @@ public interface HookPreDelete {
      * @throws NoSuchEntityException if something is wrong. This will cancel the
      * action.
      */
-    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException;
+    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 }

@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -30,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +93,9 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         this.target = target;
         this.name = navProp.getName();
         this.distinctRequired = distinctRequired;
+        if (source.getPkFields().size() != 1 || target.getPkFields().size() != 1) {
+            throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+        }
     }
 
     public RelationOneToMany<S, T> setSourceFieldAccessor(FieldAccessor<S> sourceFieldAccessor) {
@@ -137,7 +143,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         }
         EntityFactories entityFactories = pm.getEntityFactories();
         if (entityFactories.entityExists(pm, target, true)) {
-            link(pm, source.getId().getValue(), target.getId().getValue());
+            link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
         } else {
             throw new NoSuchEntityException("Linked Entity with no id.");
         }
@@ -158,7 +164,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         }
         int count = pm.getDslContext().update(target)
                 .set(targetFieldAccessor.getField(target), sourceId)
-                .where(target.getId().eq(targetId))
+                .where(target.getPkFields().get(0).eq(targetId))
                 .execute();
         if (count != 1) {
             LOGGER.error("Executing query did not result in an update!");

@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
@@ -142,7 +142,7 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epDescription, "My description");
         propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
         propertyValues.put(pluginCoreModel.epFeature, new Point(8, 42));
-        propertyValues.put(pluginCoreModel.etObservation.getPrimaryKey(), new IdLong(1));
+        propertyValues.put(pluginCoreModel.etObservation.getPrimaryKey().getKeyProperty(0), 1L);
         propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
         propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
         propertyValues.put(pluginCoreModel.epName, "myName");
@@ -165,57 +165,57 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.getEpUnitOfMeasurement(), unit1);
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
-        int nextId = 100;
-        final DefaultEntity datastream1 = new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++));
+        long nextId = 100;
+        final DefaultEntity datastream1 = new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npDatastreamObservation, datastream1);
-        final DefaultEntity foi1 = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++));
+        final DefaultEntity foi1 = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npFeatureOfInterestObservation, foi1);
-        final DefaultEntity histLoc1 = new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++));
+        final DefaultEntity histLoc1 = new DefaultEntity(pluginCoreModel.etHistoricalLocation, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npHistoricalLocationsLocation, histLoc1);
         propertyValues.put(pluginCoreModel.npHistoricalLocationsThing, histLoc1);
-        final DefaultEntity location1 = new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++));
+        final DefaultEntity location1 = new DefaultEntity(pluginCoreModel.etLocation, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npLocationsHistLoc, location1);
         propertyValues.put(pluginCoreModel.npLocationsThing, location1);
-        final DefaultEntity observation1 = new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++));
+        final DefaultEntity observation1 = new DefaultEntity(pluginCoreModel.etObservation, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npObservationsDatastream, observation1);
         propertyValues.put(pluginCoreModel.npObservationsFeature, observation1);
-        final DefaultEntity obsProp1 = new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++));
+        final DefaultEntity obsProp1 = new DefaultEntity(pluginCoreModel.etObservedProperty, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npObservedPropertyDatastream, obsProp1);
-        final DefaultEntity sensor1 = new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++));
+        final DefaultEntity sensor1 = new DefaultEntity(pluginCoreModel.etSensor, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npSensorDatastream, sensor1);
-        final DefaultEntity thing1 = new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++));
+        final DefaultEntity thing1 = new DefaultEntity(pluginCoreModel.etThing, PkValue.of(nextId++));
         propertyValues.put(pluginCoreModel.npThingDatasteam, thing1);
         propertyValues.put(pluginCoreModel.npThingHistLoc, thing1);
         propertyValues.put(pluginCoreModel.npThingsLocation, thing1);
 
         EntitySetImpl datastreams = new EntitySetImpl(pluginCoreModel.etDatastream);
-        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
-        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
+        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(nextId++)));
+        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npDatastreamsObsProp, datastreams);
         propertyValues.put(pluginCoreModel.npDatastreamsSensor, datastreams);
         propertyValues.put(pluginCoreModel.npDatastreamsThing, datastreams);
 
         EntitySetImpl histLocations = new EntitySetImpl(pluginCoreModel.etHistoricalLocation);
-        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
-        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
+        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, PkValue.of(nextId++)));
+        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npHistoricalLocationsLocation, histLocations);
         propertyValues.put(pluginCoreModel.npHistoricalLocationsThing, histLocations);
 
         EntitySetImpl locations = new EntitySetImpl(pluginCoreModel.etLocation);
-        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
-        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
+        locations.add(new DefaultEntity(pluginCoreModel.etLocation, PkValue.of(nextId++)));
+        locations.add(new DefaultEntity(pluginCoreModel.etLocation, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npLocationsHistLoc, locations);
         propertyValues.put(pluginCoreModel.npLocationsThing, locations);
 
         EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.etObservation);
-        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
-        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
+        observations.add(new DefaultEntity(pluginCoreModel.etObservation, PkValue.of(nextId++)));
+        observations.add(new DefaultEntity(pluginCoreModel.etObservation, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npObservationsDatastream, observations);
         propertyValues.put(pluginCoreModel.npObservationsFeature, observations);
 
         EntitySetImpl things = new EntitySetImpl(pluginCoreModel.etThing);
-        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
-        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
+        things.add(new DefaultEntity(pluginCoreModel.etThing, PkValue.of(nextId++)));
+        things.add(new DefaultEntity(pluginCoreModel.etThing, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npThingsLocation, things);
 
         for (EntityType entityType : modelRegistry.getEntityTypes()) {

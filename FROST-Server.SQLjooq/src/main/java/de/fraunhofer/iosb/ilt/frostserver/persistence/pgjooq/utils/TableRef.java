@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.jooq.Field;
 
@@ -74,6 +75,12 @@ public class TableRef {
     public TableRef setJoinEquals(Map<Field, Field> joinEquals) {
         this.joinEquals = joinEquals;
         return this;
+    }
+
+    public void getJoinEqual(List<Field> requested) {
+        for (int i = 0; i < requested.size(); i++) {
+            requested.set(i, getJoinEqual(requested.get(i)));
+        }
     }
 
     public Field getJoinEqual(Field requested) {

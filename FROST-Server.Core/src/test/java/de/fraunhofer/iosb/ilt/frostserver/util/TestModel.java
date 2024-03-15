@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -79,19 +80,19 @@ public class TestModel implements PluginService {
                 .registerProperty(NP_ROOM_HOUSE);
     }
 
-    public Entity createHouse(int id, String name, double value) {
-        return new DefaultEntity(ET_HOUSE, new IdLong(id))
+    public Entity createHouse(long id, String name, double value) {
+        return new DefaultEntity(ET_HOUSE, PkValue.of(id))
                 .setProperty(EP_NAME, name)
                 .setProperty(EP_VALUE, value);
     }
 
-    public Entity createRoom(int id, String name, double value) {
-        return new DefaultEntity(ET_HOUSE, new IdLong(id))
+    public Entity createRoom(long id, String name, double value) {
+        return new DefaultEntity(ET_HOUSE, PkValue.of(id))
                 .setProperty(EP_NAME, name)
                 .setProperty(EP_VALUE, value);
     }
 
-    public Entity createRoom(int id, String name, double value, TimeValue time) {
+    public Entity createRoom(long id, String name, double value, TimeValue time) {
         return createRoom(id, name, value)
                 .setProperty(EP_TIME, time);
     }
@@ -103,8 +104,8 @@ public class TestModel implements PluginService {
         propertyValues.put(ET_HOUSE, propertyValuesHouse);
         propertyValues.put(ET_ROOM, propertyValuesRoom);
 
-        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey(), new IdLong(1));
-        propertyValuesRoom.put(ET_ROOM.getPrimaryKey(), new IdLong(1));
+        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesRoom.put(ET_ROOM.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
         propertyValuesHouse.put(EP_NAME, "myName");
         propertyValuesRoom.put(EP_NAME, "myName");
         propertyValuesHouse.put(EP_VALUE, 6);
@@ -119,17 +120,17 @@ public class TestModel implements PluginService {
         propertyValuesHouse.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
         propertyValuesRoom.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
 
-        int nextId = 100;
-        propertyValuesRoom.put(NP_ROOM_HOUSE, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        long nextId = 100;
+        propertyValuesRoom.put(NP_ROOM_HOUSE, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
 
         EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
-        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
-        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
+        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
+        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
         propertyValuesHouse.put(NP_HOUSE_ROOMS, rooms);
 
         EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
-        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
-        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
+        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
         propertyValuesRoom.put(NP_HOUSE_ROOMS, houses);
         return propertyValues;
     }

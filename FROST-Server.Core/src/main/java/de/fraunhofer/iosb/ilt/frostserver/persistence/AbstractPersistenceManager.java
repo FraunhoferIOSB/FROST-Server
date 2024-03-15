@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -54,7 +54,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         return changedEntities;
     }
 
-    private Entity fetchEntity(EntityType entityType, Id id) {
+    private Entity fetchEntity(EntityType entityType, PkValue id) {
         return get(entityType, id);
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         if (result) {
             Entity newEntity = fetchEntity(
                     entity.getEntityType(),
-                    entity.getId());
+                    entity.getPrimaryKeyValues());
             newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
             changedEntities.add(
                     new EntityChangedMessage()
@@ -113,7 +113,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
             final EntityType entityType = entity.getEntityType();
-            Entity newEntity = fetchEntity(entityType, entity.getId());
+            Entity newEntity = fetchEntity(entityType, entity.getPrimaryKeyValues());
             newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
             result.setEntity(newEntity);
             changedEntities.add(result);
@@ -149,7 +149,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
             Entity entity = result.getEntity();
             final EntityType entityType = entity.getEntityType();
-            Entity newEntity = fetchEntity(entityType, entity.getId());
+            Entity newEntity = fetchEntity(entityType, entity.getPrimaryKeyValues());
             newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
             result.setEntity(newEntity);
 

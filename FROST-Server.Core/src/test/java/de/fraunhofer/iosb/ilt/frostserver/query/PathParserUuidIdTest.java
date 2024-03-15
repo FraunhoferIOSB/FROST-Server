@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdUuid;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -106,7 +106,7 @@ class PathParserUuidIdTest {
 
     @Test
     void testIdentifiers() {
-        testHouse(new IdUuid(UUID.randomUUID()));
+        testHouse(new PkValue(new Object[]{UUID.randomUUID()}));
     }
 
     @Test
@@ -120,7 +120,7 @@ class PathParserUuidIdTest {
                 ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
                 PathElementEntitySet espe = new PathElementEntitySet(entityType);
                 expResult.addPathElement(espe, false, false);
-                PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), entityType, espe);
+                PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), entityType, espe);
                 expResult.addPathElement(epe, true, true);
 
                 if (property instanceof EntityPropertyMain) {
@@ -149,7 +149,7 @@ class PathParserUuidIdTest {
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+        PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
         expResult.addPathElement(epe, true, true);
         PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
@@ -166,7 +166,7 @@ class PathParserUuidIdTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -180,7 +180,7 @@ class PathParserUuidIdTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -194,7 +194,7 @@ class PathParserUuidIdTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -210,7 +210,7 @@ class PathParserUuidIdTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -228,7 +228,7 @@ class PathParserUuidIdTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdUuid("123e4567-e89b-12d3-a456-426614174000"), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -272,8 +272,9 @@ class PathParserUuidIdTest {
         });
     }
 
-    private void testHouse(Id id) {
-        String path = "/Houses(" + id.getUrl() + ")";
+    private void testHouse(PkValue id) {
+        PrimaryKey primaryKey = testModel.ET_HOUSE.getPrimaryKey();
+        String path = "/Houses(" + id.getUrl(primaryKey) + ")";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);

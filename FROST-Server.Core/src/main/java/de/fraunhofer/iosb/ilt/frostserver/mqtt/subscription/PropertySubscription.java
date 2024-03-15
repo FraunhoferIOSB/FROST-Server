@@ -21,7 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANO
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -57,8 +57,8 @@ public class PropertySubscription extends AbstractSubscription {
         entityType = ((PathElementEntity) path.get(size - 2)).getEntityType();
         property = ((PathElementProperty) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
-            Id id = path.getIdentifiedElement().getId();
-            matcher = x -> x.getProperty(entityType.getPrimaryKey()).equals(id);
+            PkValue id = path.getIdentifiedElement().getPkValues();
+            matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
         query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.addSelect(property);

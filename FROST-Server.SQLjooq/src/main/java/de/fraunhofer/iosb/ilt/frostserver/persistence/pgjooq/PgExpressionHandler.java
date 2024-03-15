@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState.ALIAS_ROOT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
@@ -142,6 +143,7 @@ import net.time4j.PlainDate;
 import net.time4j.PlainTime;
 import net.time4j.ZonalDateTime;
 import net.time4j.range.MomentInterval;
+import org.apache.commons.lang3.NotImplementedException;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
@@ -389,8 +391,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         final EntityType targetEntityType = epcl.getEntityType();
         final StaMainTable<?> target = queryBuilder.getTableCollection().getTablesByType().get(targetEntityType);
         final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), queryBuilder.getPersistenceManager());
-        final Field<?> targetField = targetAliased.getId();
-        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
+        final List<Field> targetField = targetAliased.getPkFields();
+        if (targetField.size() > 1) {
+            throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+        }
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.get(0).eq(sourceIdField)));
         TableRef newRef = new TableRef(targetAliased);
         sourceRef.addJoin(epcl, newRef);
         return newRef;
