@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
@@ -174,7 +175,7 @@ public class MxGraphGenerator {
             globalY += rowHeight + DISTANCE;
             rowHeight = DISTANCE;
         }
-        Map<String, PropertyType> properties = tc.getProperties();
+        Map<String, Property> properties = tc.getPropertiesByName();
         int boxHeight = BOX_HEIGHT_BASE + properties.size() * BOX_HEIGHT_ITEM;
         if (boxHeight > rowHeight) {
             rowHeight = boxHeight;
@@ -194,10 +195,10 @@ public class MxGraphGenerator {
         root.addMxCell(typeCell);
 
         int listItemY = BOX_HEIGHT_BASE;
-        for (Map.Entry<String, PropertyType> prop : properties.entrySet()) {
-            final String name = prop.getKey();
-            final PropertyType type = prop.getValue();
-            addTypeProperty(listItemY, typeCell, tc, name, type, tc.isRequired(name), root);
+        for (Map.Entry<String, Property> entry : properties.entrySet()) {
+            final String name = entry.getKey();
+            final Property prop = entry.getValue();
+            addTypeProperty(listItemY, typeCell, tc, name, prop.getType(), !prop.isNullable(), root);
             listItemY += BOX_HEIGHT_ITEM;
         }
     }
