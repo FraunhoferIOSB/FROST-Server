@@ -28,8 +28,11 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_U
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -55,12 +58,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.geojson.Point;
@@ -93,6 +99,10 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         return resourceUrl("finegrainedsecurity/model/", name);
     }
 
+    private static String metaUrl(String name) {
+        return resourceUrl("finegrainedsecurity/", name);
+    }
+
     private static String resourceUrl(String path, String name) {
         try {
             return IOUtils.resourceToURL(path + "/" + name, FineGrainedAuthTests.class.getClassLoader()).getFile();
@@ -123,6 +133,9 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
         SERVER_PROPERTIES.put("plugins.modelLoader.securityPath", "");
         SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secUsers.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
+        SERVER_PROPERTIES.put("plugins.modelLoader.metadataData", "{\"conformance\": [\"testModel\"],\"testModel\": 4}");
+        SERVER_PROPERTIES.put("plugins.modelLoader.metadataPath", "");
+        SERVER_PROPERTIES.put("plugins.modelLoader.metadataFiles", metaUrl("metadata_1.json") + ", " + metaUrl("metadata_2.json"));
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
         SERVER_PROPERTIES.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
@@ -619,6 +632,35 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         deleteForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
+    }
+
+    @Test
+    void test_11_TestLandingPage() {
+        LOGGER.info("  test_11_TestLandingPage");
+        try {
+            JsonNode data = getRootUrl();
+            JsonNode settings = data.get("serverSettings");
+            JsonNode conformance = settings.get("conformance");
+            Set<String> confItems = new HashSet<>();
+            for (var item : conformance) {
+                confItems.add(item.textValue());
+            }
+            assertTrue(confItems.contains("testModel"), "Conformance should contain 'testModel'");
+            assertTrue(confItems.contains("testModel1"), "Conformance should contain 'testModel1'");
+            assertTrue(confItems.contains("testModel2"), "Conformance should contain 'testModel2'");
+            assertEquals(4, settings.findPath("testModel").intValue());
+            assertEquals(5, settings.findPath("testModel1").intValue());
+            assertEquals(6, settings.findPath("testModel2").findPath("value").intValue());
+        } catch (NullPointerException | ParseException | IOException ex) {
+            fail("Unexpected exception during test.", ex);
+        }
+    }
+
+    private JsonNode getRootUrl() throws JsonProcessingException, ParseException, IOException {
+        String urlString = serverSettings.getServiceUrl(version);
+        HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin.getHttpClient(), urlString);
+        assertEquals(200, responseMap.code, () -> "Error fetching root URI: " + urlString);
+        return Utils.MAPPER.readTree(responseMap.response);
     }
 
     private void fetchForCode(String user, SensorThingsService service, URL link, int... codesWant) throws URISyntaxException {

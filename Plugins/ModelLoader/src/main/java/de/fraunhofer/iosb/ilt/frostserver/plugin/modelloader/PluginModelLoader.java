@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader;
 
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.PLUGIN_NAME;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
@@ -47,6 +49,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,12 +75,19 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private List<DefModel> modelDefinitions = new ArrayList<>();
     private Map<String, DefEntityProperty> primaryKeys;
 
-    private String liquibasePath;
     private String modelPath;
-    private String securityPath;
-    private final List<String> conformance = new ArrayList<>();
+
+    private String liquibasePath;
     private final List<String> liquibaseFiles = new ArrayList<>();
+
+    private String securityPath;
     private final List<String> securityFiles = new ArrayList<>();
+
+    private String metadataPath;
+    private String metadataStringData;
+    private final List<String> metadataFiles = new ArrayList<>();
+    private Map<String, Object> metadataExtra;
+    private final List<String> conformance = new ArrayList<>();
 
     public PluginModelLoader() {
         LOGGER.info("Creating new ModelLoader Plugin.");
@@ -92,9 +102,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             idTypeDefault = pluginSettings.get(CoreModelSettings.TAG_ID_TYPE_DEFAULT, CoreModelSettings.class).toUpperCase();
             settings.getPluginManager().registerPlugin(this);
 
+            liquibasePath = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_PATH, ModelLoaderSettings.class);
             String liquibaseString = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_FILES, ModelLoaderSettings.class);
             liquibaseFiles.addAll(Arrays.asList(StringUtils.split(liquibaseString.trim(), ", ")));
-            liquibasePath = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_PATH, ModelLoaderSettings.class);
 
             modelPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
             String modelFilesString = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_FILES, ModelLoaderSettings.class);
@@ -112,6 +122,11 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
             String securityFilesString = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_FILES, ModelLoaderSettings.class);
             securityFiles.addAll(Arrays.asList(StringUtils.split(securityFilesString.trim(), ", ")));
+
+            metadataStringData = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_DATA, ModelLoaderSettings.class);
+            metadataPath = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_PATH, ModelLoaderSettings.class);
+            String metadataFilesString = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_FILES, ModelLoaderSettings.class);
+            metadataFiles.addAll(Arrays.asList(StringUtils.split(metadataFilesString.trim(), ", ")));
         }
     }
 
@@ -196,8 +211,78 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             // Nothing to add to.
             return;
         }
+        if (metadataExtra == null) {
+            metadataExtra = loadExtraMetadata();
+        }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
         extensionList.addAll(conformance);
+        mergeJson(serverSettings, metadataExtra);
+    }
+
+    private Map<String, Object> loadExtraMetadata() {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final Map<String, Object> extraMetadata = new LinkedHashMap<>();
+
+        // local copy for thread safety
+        final String localMetadataStringData = metadataStringData;
+        if (!StringHelper.isNullOrEmpty(localMetadataStringData)) {
+            try {
+                mergeJson(extraMetadata, objectMapper.readValue(localMetadataStringData, TYPE_REFERENCE_MAP));
+            } catch (JsonProcessingException ex) {
+                LOGGER.error("Failed to parse extra metadata.", ex);
+            }
+            // Free global String data.
+            metadataStringData = null;
+        }
+        for (String fileName : metadataFiles) {
+            mergeJson(extraMetadata, loadExtraMetadataFile(fileName));
+        }
+        return extraMetadata;
+    }
+
+    private void mergeJson(Map<String, Object> target, Map<String, Object> toMerge) {
+        if (toMerge == null) {
+            return;
+        }
+        for (var entry : toMerge.entrySet()) {
+            String name = entry.getKey();
+            Object valueToMerge = entry.getValue();
+            Object valueTarget = target.get(name);
+            if (valueTarget == null) {
+                target.put(name, valueToMerge);
+            } else if (valueTarget instanceof Map toMap && valueToMerge instanceof Map mergeMap) {
+                mergeJson(toMap, mergeMap);
+            } else if (valueTarget instanceof List toList && valueToMerge instanceof List mergeList) {
+                toList.addAll(mergeList);
+            } else if (valueTarget instanceof Set toSet && valueToMerge instanceof List mergeList) {
+                toSet.addAll(mergeList);
+            } else {
+                LOGGER.warn("Keeping value for {}, target already contains a value: {}; Ignoring {}", name, valueTarget, valueToMerge);
+            }
+        }
+    }
+
+    private Map<String, Object> loadExtraMetadataFile(String fileName) {
+        final Path fullPath = Path.of(metadataPath, fileName);
+        LOGGER.info("Loading extra landing page meta data from {}", fullPath.toAbsolutePath());
+        String data;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (fullPath.toFile().exists()) {
+                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+                return objectMapper.readValue(data, TYPE_REFERENCE_MAP);
+            } else {
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                if (stream == null) {
+                    LOGGER.info("  Not found: {}", fullPath);
+                } else {
+                    return objectMapper.readValue(stream, TYPE_REFERENCE_MAP);
+                }
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load extra metadata", ex);
+        }
+        return Collections.emptyMap();
     }
 
     @Override

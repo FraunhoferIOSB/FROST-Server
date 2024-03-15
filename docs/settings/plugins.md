@@ -119,6 +119,12 @@ Therefore, we strongly recommend you contact us for support if your use case req
   The file path where security definition files are located. This path is prepended to each entry in **plugins.modelLoader.securityFiles**.
 * **plugins.modelLoader.securityFiles:** Since 2.2.0  
   A comma-separated list of security files to load. Each entry is prefixed with **plugins.modelLoader.securityPath**.
+* **plugins.modelLoader.metadataData:** Since 2.3.2  
+  A json-string containing extra data to add to the serverSettings object on the landing page. The added data is merged into the existing data.
+* **plugins.modelLoader.metadataPath:** Since 2.3.2  
+  The file path where extra metadata files are located. This path is prepended to each entry in **plugins.modelLoader.metadataFiles**.
+* **plugins.modelLoader.metadataFiles:** Since 2.3.2  
+  A comma-separated list of meta data files to load. Each entry is prefixed with **plugins.modelLoader.metadataPath**. Each file is loaded and its JSON-content is merged into the serverSettings object on the ROOT-URL.
 
 
 ## Response Format Plugins

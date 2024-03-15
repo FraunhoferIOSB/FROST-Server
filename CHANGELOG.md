@@ -3,6 +3,7 @@
 ## Development version 2.3.2
 
 **Internal changes & Bugfixes**
+* Added options for adding extra meta data to the landing page using the modelLoader plugin.
 
 
 ## Release version 2.3.1

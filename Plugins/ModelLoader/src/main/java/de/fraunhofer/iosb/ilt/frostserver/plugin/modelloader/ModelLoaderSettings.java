@@ -46,6 +46,12 @@ public final class ModelLoaderSettings implements ConfigDefaults {
     public static final String TAG_SECURITY_PATH = PLUGIN_NAME + ".securityPath";
     @DefaultValue("")
     public static final String TAG_SECURITY_FILES = PLUGIN_NAME + ".securityFiles";
+    @DefaultValue("")
+    public static final String TAG_METADATA_DATA = PLUGIN_NAME + ".metadataData";
+    @DefaultValue("")
+    public static final String TAG_METADATA_PATH = PLUGIN_NAME + ".metadataPath";
+    @DefaultValue("")
+    public static final String TAG_METADATA_FILES = PLUGIN_NAME + ".metadataFiles";
 
     public final String idTypeDefault;
 

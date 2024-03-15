@@ -31,6 +31,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import org.apache.http.Consts;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -108,24 +109,39 @@ public class HTTPMethods {
      * be empty.
      */
     public static HttpResponse doGet(String urlString) {
-        HttpResponse result = null;
-        LOGGER.debug("Getting: {}", urlString);
-        countGet++;
-
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(urlString);
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                result = new HttpResponse(response.getStatusLine().getStatusCode());
-                if (result.code == 200) {
-                    result.setResponse(EntityUtils.toString(response.getEntity()));
-                } else {
-                    result.setResponse("");
-                }
-            }
+            return doGet(httpClient, urlString);
         } catch (IOException e) {
             LOGGER.error("Exception: ", e);
         }
-        return result;
+        return null;
+    }
+
+    /**
+     * Send HTTP GET request to the urlString, using the given HttpClient and
+     * return response code and response body
+     *
+     * @param httpClient the HttpClient to use.
+     * @param urlString The URL that the GET request should be sent to
+     * @return response-code and response(response body) of the HTTP GET in the
+     * MAP format. If the response is not 200, the response(response body) will
+     * be empty.
+     * @throws ParseException
+     * @throws IOException
+     */
+    public static HttpResponse doGet(final CloseableHttpClient httpClient, String urlString) throws ParseException, IOException {
+        LOGGER.debug("Getting: {}", urlString);
+        countGet++;
+        HttpGet request = new HttpGet(urlString);
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
+            if (result.code == 200) {
+                result.setResponse(EntityUtils.toString(response.getEntity()));
+            } else {
+                result.setResponse("");
+            }
+            return result;
+        }
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
