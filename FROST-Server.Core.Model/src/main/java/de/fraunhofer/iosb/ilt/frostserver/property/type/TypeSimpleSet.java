@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 
 /**
  *
@@ -28,12 +29,12 @@ public class TypeSimpleSet extends PropertyType {
     private final PropertyType containtedType;
 
     public TypeSimpleSet(TypeSimple containedType, TypeReference typeReference) {
-        super(containedType.getName(), "Collection of " + containedType.getName(), typeReference);
+        super(containedType.getName(), "Collection of " + containedType.getName(), ParserUtils.getDefaultDeserializer(typeReference));
         this.containtedType = containedType;
     }
 
     public TypeSimpleSet(TypeComplex containedType, TypeReference typeReference) {
-        super(containedType.getName(), "Collection of " + containedType.getName(), typeReference);
+        super(containedType.getName(), "Collection of " + containedType.getName(), ParserUtils.getDefaultDeserializer(typeReference));
         this.containtedType = containedType;
     }
 

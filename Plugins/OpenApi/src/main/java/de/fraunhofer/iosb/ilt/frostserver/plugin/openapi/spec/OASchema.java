@@ -206,10 +206,10 @@ public final class OASchema {
     }
 
     private void addSubtypeComplex(Version version, TypeComplex typeComplex) {
-        for (var subPropEntry : typeComplex.getProperties().entrySet()) {
+        for (var subPropEntry : typeComplex.getPropertiesByName().entrySet()) {
             var subPropName = subPropEntry.getKey();
-            var subPropType = subPropEntry.getValue();
-            addProperty(subPropName, new OASchema(version, subPropType));
+            var subProp = subPropEntry.getValue();
+            addProperty(subPropName, new OASchema(version, subProp.getType()));
         }
     }
 
