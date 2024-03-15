@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -43,14 +43,14 @@ public class TimeValueSerializer extends JsonSerializer<TimeValue> {
         } else {
             gen.writeStartObject();
             if (value.isInstant()) {
-                gen.writeObjectField(KEY_INTERVAL_START, value.asISO8601());
+                gen.writeObjectField(NAME_INTERVAL_START, value.asISO8601());
             } else {
                 final MomentInterval interval = value.getInterval().getInterval();
                 final Moment start = interval.getStartAsMoment();
                 final Moment end = interval.getEndAsMoment();
-                gen.writeObjectField(KEY_INTERVAL_START, StringHelper.FORMAT_MOMENT.print(start));
+                gen.writeObjectField(NAME_INTERVAL_START, StringHelper.FORMAT_MOMENT.print(start));
                 if (!start.equals(end)) {
-                    gen.writeObjectField(KEY_INTERVAL_END, StringHelper.FORMAT_MOMENT.print(end));
+                    gen.writeObjectField(NAME_INTERVAL_END, StringHelper.FORMAT_MOMENT.print(end));
                 }
             }
             gen.writeEndObject();

@@ -17,11 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINSTANT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -38,8 +37,9 @@ public class TypeSimpleCustom extends TypeSimple {
 
     public static final String STA_GEOJSON_NAME = "Geometry";
     public static final String STA_TM_INSTANT_NAME = "TM_Instant";
-    public static final TypeSimpleCustom STA_GEOJSON = new TypeSimpleCustom(STA_GEOJSON_NAME, "A GeoJSON Object", EDM_GEOMETRY, null);
-    public static final TypeSimpleCustom STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET, TYPE_REFERENCE_TIMEINSTANT);
+    public static final PropertyType STA_LOCATION = new TypeSimpleCustom(STA_GEOJSON_NAME, "A Free Location object", EDM_GEOMETRY)
+            .setDeserializer(ParserUtils.getLocationDeserializer());
+    public static final PropertyType STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimpleCustom.class.getName());
     private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();
@@ -69,11 +69,7 @@ public class TypeSimpleCustom extends TypeSimple {
     }
 
     public TypeSimpleCustom(String name, String description, TypeSimplePrimitive underlyingType) {
-        super(name, description, underlyingType, underlyingType.getTypeReference());
-    }
-
-    public TypeSimpleCustom(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference) {
-        super(name, description, underlyingType, typeReference);
+        super(name, description, underlyingType);
     }
 
 }

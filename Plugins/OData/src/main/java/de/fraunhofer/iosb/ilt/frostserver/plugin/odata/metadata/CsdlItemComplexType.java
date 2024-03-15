@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
 import java.io.Writer;
@@ -48,11 +48,11 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     public CsdlItemComplexType generateFrom(CsdlDocument doc, String nameSpace, TypeComplex tc) {
         description = tc.getDescription();
         openType = tc.isOpenType();
-        for (Entry<String, PropertyType> entry : tc.getProperties().entrySet()) {
+        for (Entry<String, Property> entry : tc.getPropertiesByName().entrySet()) {
             final String name = entry.getKey();
-            final PropertyType type = entry.getValue();
-            final boolean nullable = !tc.isRequired(name);
-            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, type, nullable));
+            final Property prop = entry.getValue();
+            final boolean nullable = prop.isNullable();
+            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, prop.getType(), nullable));
         }
         return this;
     }

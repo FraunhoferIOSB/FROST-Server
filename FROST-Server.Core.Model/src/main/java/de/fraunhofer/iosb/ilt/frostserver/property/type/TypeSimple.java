@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 
 /**
  *
@@ -32,8 +34,12 @@ public abstract class TypeSimple extends PropertyType {
         this(name, description, typeReference, null);
     }
 
-    protected TypeSimple(String name, String description, TypeReference typeReference, Parser parser) {
-        super(name, description, typeReference);
+    protected TypeSimple(String name, String description, TypeReference tr, Parser parser) {
+        this(name, description, ParserUtils.getDefaultDeserializer(tr), parser);
+    }
+
+    protected TypeSimple(String name, String description, JsonDeserializer deserializer, Parser parser) {
+        super(name, description, deserializer, ParserUtils.getDefaultSerializer());
         if (this instanceof TypeSimplePrimitive typeSimplePrimitive) {
             this.underlyingType = typeSimplePrimitive;
         } else {
@@ -42,18 +48,24 @@ public abstract class TypeSimple extends PropertyType {
         this.parser = parser;
     }
 
-    protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference) {
-        this(name, description, underlyingType, typeReference, null);
+    protected TypeSimple(String name, String description, TypeSimplePrimitive ut) {
+        super(name, description, ut.getDeserializer(), ut.getSerializer());
+        this.underlyingType = ut;
+        this.parser = ut.getParser();
     }
 
-    protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference typeReference, Parser parser) {
-        super(name, description, typeReference);
+    protected TypeSimple(String name, String description, TypeSimplePrimitive underlyingType, TypeReference tr, Parser parser) {
+        super(name, description, ParserUtils.getDefaultDeserializer(tr), ParserUtils.getDefaultSerializer());
         this.underlyingType = underlyingType;
         this.parser = parser;
     }
 
     public TypeSimplePrimitive getUnderlyingType() {
         return underlyingType;
+    }
+
+    protected Parser getParser() {
+        return parser;
     }
 
     @Override

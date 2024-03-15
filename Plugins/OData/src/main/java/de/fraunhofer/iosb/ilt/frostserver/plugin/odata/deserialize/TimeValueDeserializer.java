@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -52,11 +52,11 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         while (currentToken == JsonToken.FIELD_NAME) {
             String fieldName = parser.getCurrentName();
             switch (fieldName) {
-                case KEY_INTERVAL_START:
+                case NAME_INTERVAL_START:
                     start = TimeValueDeserializer.parseTime(parser);
                     break;
 
-                case KEY_INTERVAL_END:
+                case NAME_INTERVAL_END:
                     end = TimeValueDeserializer.parseTime(parser);
                     break;
 

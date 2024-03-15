@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.lang.reflect.Field;
@@ -146,6 +147,10 @@ public class TypeSimplePrimitive extends TypeSimple {
 
     private TypeSimplePrimitive(String name, String description, TypeReference typeReference, Parser parser) {
         super(name, description, typeReference, parser);
+    }
+
+    private TypeSimplePrimitive(String name, String description, JsonDeserializer deserializer, Parser parser) {
+        super(name, description, deserializer, parser);
     }
 
 }

@@ -17,9 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
