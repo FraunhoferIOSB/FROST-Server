@@ -164,8 +164,8 @@ public class DataArrayValue {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
             Entity mds = observation.getProperty(npMultiDatastream);
-            return "mds-" + mds.getId().getValue().toString();
+            return "mds-" + mds.getPrimaryKeyValues().get(0).toString();
         }
-        return "ds-" + ds.getId().getValue().toString();
+        return "ds-" + ds.getPrimaryKeyValues().get(0).toString();
     }
 }

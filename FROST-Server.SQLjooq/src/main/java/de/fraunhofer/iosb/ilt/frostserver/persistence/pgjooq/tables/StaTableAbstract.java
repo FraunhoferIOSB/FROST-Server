@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -46,14 +46,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -65,6 +63,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.jooq.Binding;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
@@ -130,7 +129,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public final int registerField(Name name, DataType type, Binding binding) {
+    public int registerField(Name name, DataType type, Binding binding) {
         customFields.add(new CustomField(name, type, binding));
         TableField newField = createField(name, type, "", binding);
         return fieldsRow().indexOf(newField);
@@ -279,13 +278,13 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         // Fourth, deal with the ID, user-defined or not
-        entityFactories.insertUserDefinedId(pm, insertFields, this.getId(), entity);
+        entityFactories.insertUserDefinedId(pm, insertFields, this.getPkFields(), entity);
 
         // Fifth, deal with the other properties
-        Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
-        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
+        final Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
+        final List<EntityPropertyMain> primaryKeyProperties = entityType.getPrimaryKey().getKeyProperties();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(primaryKey)) {
+            if (primaryKeyProperties.contains(ep)) {
                 // EP_ID has already been dealt with above.
                 continue;
             }
@@ -296,12 +295,12 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         // Sixth, do the actual insert.
         DSLContext dslContext = pm.getDslContext();
-        Object entityId = dslContext.insertInto(thisTable)
+        Object[] entityPkValues = dslContext.insertInto(thisTable)
                 .set(insertFields)
-                .returningResult(thisTable.getId())
-                .fetchOne(0);
-        LOGGER.debug("Inserted {} with id = {}.", entityType, entityId);
-        entity.setId(ParserUtils.idFromObject(entityId));
+                .returningResult(thisTable.getPkFields())
+                .fetchOneArray();
+        LOGGER.debug("Inserted {} with id = {}.", entityType, entityPkValues);
+        entity.setPrimaryKeyValues(new PkValue(entityPkValues));
 
         // Seventh, deal with set-navigation links.
         // TODO: add Priority number, handle priorities >= 0 here
@@ -341,7 +340,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
             for (Entity child : linkedSet) {
                 if (ef.entityExists(pm, child, admin)) {
-                    final PathElementEntity childPe = new PathElementEntity(child.getId(), child.getEntityType(), null);
+                    final PathElementEntity childPe = new PathElementEntity(child.getPrimaryKeyValues(), child.getEntityType(), null);
                     pm.update(childPe, child, updateMode);
                 }
             }
@@ -367,12 +366,12 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
-        EntityFactories entityFactories = pm.getEntityFactories();
-        EntityType entityType = entity.getEntityType();
-        Map<Field, Object> updateFields = new HashMap<>();
-        EntityChangedMessage message = new EntityChangedMessage();
+        final EntityFactories entityFactories = pm.getEntityFactories();
+        final EntityType entityType = entity.getEntityType();
+        final Map<Field, Object> updateFields = new HashMap<>();
+        final EntityChangedMessage message = new EntityChangedMessage();
 
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : hooksPreUpdate) {
             hookWrapper.getObject().updateInDatabase(pm, entity, entityId);
@@ -389,10 +388,10 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
-        Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
-        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
+        final Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
+        final List<EntityPropertyMain> primaryKeyProperties = entityType.getPrimaryKey().getKeyProperties();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(primaryKey)) {
+            if (primaryKeyProperties.contains(ep)) {
                 // EP_ID can not be changed.
                 continue;
             }
@@ -401,12 +400,19 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
+        final List<Field> pkFields = getPkFields();
+        Condition where = pkFields.get(0).eq(entityId.get(0));
+        final int size = entityId.size();
+        for (int i = 1; i < size; i++) {
+            where = where.and(pkFields.get(i).eq(entityId.get(i)));
+        }
+
         DSLContext dslContext = pm.getDslContext();
         long count = 0;
         if (!updateFields.isEmpty()) {
             count = dslContext.update(thisTable)
                     .set(updateFields)
-                    .where(thisTable.getId().equal(entityId.getValue()))
+                    .where(where)
                     .execute();
         }
         if (count > 1) {
@@ -423,15 +429,22 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException {
+    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException {
         for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
             hookWrapper.getObject().delete(pm, entityId);
+        }
+
+        final List<Field> pkFields = getPkFields();
+        Condition where = pkFields.get(0).eq(entityId.get(0));
+        final int size = entityId.size();
+        for (int i = 1; i < size; i++) {
+            where = where.and(pkFields.get(i).eq(entityId.get(i)));
         }
 
         final T thisTable = getThis();
         long count = pm.getDslContext()
                 .delete(thisTable)
-                .where(thisTable.getId().eq(entityId.getValue()))
+                .where(where)
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Entity of type " + getEntityType() + " with id " + entityId + " not found.");
@@ -508,7 +521,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                         (tbl, tuple, entity, dataSize) -> {
                             final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
                             dataSize.increase(jsonValue.getStringLength());
-                            Object value = jsonValue.getValue(Utils.TYPE_OBJECT);
+                            Object value = jsonValue.getValue();
                             epCustomSelect.setOn(entity, value);
                         }, null, null));
         pfs.addField("1", t -> deepField);

@@ -197,7 +197,7 @@ public class EntityChangedMessage {
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
                     Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()), INTERNAL_ADMIN_PRINCIPAL)
-                            .addSelect(np.getEntityType().getPrimaryKey())
+                            .addSelect(np.getEntityType().getPrimaryKey().getKeyProperties())
                             .setMetadata(Metadata.INTERNAL_COMPARE);
                     query.addExpand(new Expand(t.getModelRegistry(), np).setSubQuery(subQuery));
                 }

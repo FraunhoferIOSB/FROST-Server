@@ -21,7 +21,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
@@ -65,7 +65,7 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     void generateLiquibaseVariables(Map<String, Object> target, String entity, String type);
 
-    Entity get(EntityType entityType, Id id, Query query);
+    Entity get(EntityType entityType, PkValue id, Query query);
 
     ConnectionUtils.ConnectionWrapper getConnectionProvider();
 

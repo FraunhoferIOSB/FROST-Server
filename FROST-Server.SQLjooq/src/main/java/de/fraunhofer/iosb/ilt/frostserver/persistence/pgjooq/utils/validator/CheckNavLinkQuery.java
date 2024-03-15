@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -85,7 +85,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     LOGGER.debug("  Check on {}.{} (empty): {}", entityType, targetNp, isEmptyAllowed());
                     return isEmptyAllowed();
                 }
-                final Id targetId = targetEntity.getId();
+                final PkValue targetId = targetEntity.getPrimaryKeyValues();
 
                 // Run the actual query as admin, but with the user in the context.
                 PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
@@ -103,10 +103,10 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     return isEmptyAllowed();
                 }
                 for (Entity te : targetEntities) {
-                    final Id targetId = te.getId();
-                    if (targetId == null) {
+                    if (!te.primaryKeyFullySet()) {
                         // Entity does not exist yet. Will be checked wen it is created.
                     } else {
+                        final PkValue targetId = te.getPrimaryKeyValues();
                         // Run the actual query as admin, but with the user in the context.
                         PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
                         Entity result = pm.get(targetType, targetId, parsedQuery);

@@ -17,34 +17,34 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import java.util.List;
 
 /**
  *
- * @author jab
+ * @author hylke
  */
-public interface Id {
-
-    @JsonValue
-    public Object getValue();
+public interface PrimaryKey {
 
     /**
-     * Get the value as it should be formatted in a url.
+     * Get the size of the key, which is the number of properties in the key.
      *
-     * @return the value as it should be formatted in a url.
+     * @return the size of the key.
      */
-    public String getUrl();
+    public int size();
 
     /**
-     * Get the value as it appears in JSON, as an element. This is used to
-     * directly search and replace in a json string.
+     * Get the list of properties composing the primary key.
      *
-     * @return the value as JSON element.
+     * @return the list of properties composing the primary key.
      */
-    public String getJson();
+    public List<EntityPropertyMain> getKeyProperties();
 
-    public String getBasicPersistenceType();
-
-    public Object asBasicPersistenceType();
-
+    /**
+     * Get the key property with the given index.
+     *
+     * @param idx The index of the property, must be less than size().
+     * @return The requested key property.
+     */
+    public EntityPropertyMain getKeyProperty(int idx);
 }

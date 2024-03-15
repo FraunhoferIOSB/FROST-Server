@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -85,10 +85,11 @@ public interface Subscription {
     public NavigationPropertyMain getParentRelation();
 
     /**
-     * If the subscription depends on a parent with a fixed Id, this returns the
-     * Id that the parent must have for the subscription to be matched.
+     * If the subscription depends on a parent with a fixed Primary Key, this
+     * returns the Primary Key that the parent must have for the subscription to
+     * be matched.
      *
-     * @return The Id of the determining parent.
+     * @return The Primary Key of the determining parent.
      */
-    public Id getParentId();
+    public PkValue getParentId();
 }

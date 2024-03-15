@@ -194,7 +194,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             final DataType dataTypeActr = ppm.getDataTypeFor(modelSettings.idTypeActuator);
             final DataType dataTypeTask = ppm.getDataTypeFor(modelSettings.idTypeTask);
             final DataType dataTypeTCap = ppm.getDataTypeFor(modelSettings.idTypeTaskingCap);
-            final DataType dataTypeThng = tableCollection.getTableForType(pluginCoreModel.etThing).getId().getDataType();
+            final DataType dataTypeThng = tableCollection.getTableForType(pluginCoreModel.etThing).getPkFields().get(0).getDataType();
             tableCollection.registerTable(etActuator, new TableImpActuators(dataTypeActr, this, pluginCoreModel));
             tableCollection.registerTable(etTask, new TableImpTasks(dataTypeTask, dataTypeTCap, this, pluginCoreModel));
             tableCollection.registerTable(etTaskingCapability, new TableImpTaskingCapabilities(dataTypeTCap, dataTypeActr, dataTypeThng, this, pluginCoreModel));

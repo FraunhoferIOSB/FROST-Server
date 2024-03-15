@@ -65,7 +65,7 @@ public class CheckEntityQuery implements ValidationCheck {
 
             // Run the actual query as admin, but with the user in the context.
             PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
-            final Entity result = pm.get(entityType, contextEntity.getId(), parsedQuery);
+            final Entity result = pm.get(entityType, contextEntity.getPrimaryKeyValues(), parsedQuery);
             PrincipalExtended.setLocalPrincipal(localPrincipal);
 
             final boolean valid = result != null;

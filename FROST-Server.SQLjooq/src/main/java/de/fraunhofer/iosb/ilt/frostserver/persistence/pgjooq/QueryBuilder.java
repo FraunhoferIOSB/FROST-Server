@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -41,10 +41,12 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.RegExUtils;
 import org.jooq.AggregateFunction;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
 import org.jooq.DeleteConditionStep;
@@ -99,7 +101,7 @@ public class QueryBuilder implements ResourcePathVisitor {
     private ResourcePath requestedPath;
     private boolean forTypeAndId = false;
     private EntityType requestedEntityType;
-    private Id requestedId;
+    private PkValue requestedId;
 
     private boolean forUpdate = false;
     private boolean single = false;
@@ -131,13 +133,13 @@ public class QueryBuilder implements ResourcePathVisitor {
         } else if (queryState.isDistinctRequired()) {
             if (queryState.isSqlSortFieldsSet()) {
                 if (staQuery == null || !staQuery.isPkOrder()) {
-                    queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                    queryState.getSqlSortFields().addAll(queryState.getSqlMainIdFields());
                 }
                 selectStep = dslContext.select(queryState.getSqlSelectFields())
                         .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
             } else {
                 selectStep = dslContext.select(queryState.getSqlSelectFields())
-                        .distinctOn(queryState.getSqlMainIdField());
+                        .distinctOn(queryState.getSqlMainIdFields());
             }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
@@ -185,9 +187,15 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             count = DSL.countDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            count = DSL.countDistinct(queryState.getSqlMainIdField());
+            final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+            count = DSL.countDistinct(sqlMainIdFields.toArray(Field[]::new));
         } else {
-            count = DSL.count(queryState.getSqlMainIdField());
+            final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+            if (sqlMainIdFields.size() > 1) {
+                count = DSL.count();
+            } else {
+                count = DSL.count(sqlMainIdFields.get(0));
+            }
         }
         SelectConditionStep<Record1<Integer>> query = dslContext.select(count)
                 .from(queryState.getSqlFrom())
@@ -208,9 +216,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             subSelect = DSL.selectDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            subSelect = DSL.selectDistinct(queryState.getSqlMainIdField());
+            subSelect = DSL.selectDistinct(queryState.getSqlMainIdFields());
         } else {
-            subSelect = DSL.select(queryState.getSqlMainIdField());
+            subSelect = DSL.select(queryState.getSqlMainIdFields());
         }
         var selectFromWhere = subSelect.from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere())
@@ -258,9 +266,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             select = dslContext.selectDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            select = dslContext.selectDistinct(queryState.getSqlMainIdField());
+            select = dslContext.selectDistinct(queryState.getSqlMainIdFields());
         } else {
-            select = dslContext.select(queryState.getSqlMainIdField());
+            select = dslContext.select(queryState.getSqlMainIdFields());
         }
         String selectQuery = select
                 .from(queryState.getSqlFrom())
@@ -284,22 +292,22 @@ public class QueryBuilder implements ResourcePathVisitor {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().entityName, new IllegalArgumentException("Unknown type for delete"));
         }
 
-        SelectConditionStep idSelect = DSL.select(queryState.getSqlMainIdField())
+        final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+        SelectConditionStep idSelect = DSL.select(sqlMainIdFields)
                 .from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere());
 
         DeleteConditionStep<? extends Record> delete = dslContext
                 .deleteFrom(table)
                 .where(
-                        table.getId().in(idSelect));
-
+                        DSL.row(table.getPkFields()).in(idSelect));
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, delete.getSQL(ParamType.INDEXED));
         }
         return delete;
     }
 
-    public QueryBuilder forTypeAndId(EntityType entityType, Id id) {
+    public QueryBuilder forTypeAndId(EntityType entityType, PkValue id) {
         if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
@@ -371,18 +379,18 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
         for (Property property : query.getSelect()) {
             if (property instanceof NavigationPropertyMain) {
-                selectedProperties.add(requestedEntityType.getPrimaryKey());
+                selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             }
             selectedProperties.add(property);
         }
         if (query.isPkOrder() && !query.isSelectDistinct() && !selectedProperties.isEmpty()) {
             // We're ordering by PK, make sure we select it too, so we can build better nextLinks
-            selectedProperties.add(requestedEntityType.getPrimaryKey());
+            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
         }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(requestedEntityType.getPrimaryKey());
+            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -418,7 +426,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        lastPath = queryEntityType(element, element.getId(), lastPath);
+        lastPath = queryEntityType(element, element.getPkValues(), lastPath);
     }
 
     @Override
@@ -450,7 +458,7 @@ public class QueryBuilder implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    private TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
+    private TableRef queryEntityType(PathElementEntityType pe, PkValue targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
         if (last != null) {
             TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
@@ -473,10 +481,13 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
 
         if (targetId != null) {
-            final Object id = targetId.asBasicPersistenceType();
-            final Field lastId = result.getTable().getId();
-            final Field optimisedLastId = result.getJoinEqual(lastId);
-            queryState.setSqlWhere(queryState.getSqlWhere().and(optimisedLastId.eq(id)));
+            final List<Field> lastId = result.getTable().getPkFields();
+            result.getJoinEqual(lastId);
+            Condition where = lastId.get(0).eq(targetId.get(0));
+            for (int idx = 1; idx < lastId.size(); idx++) {
+                where = where.and(lastId.get(idx).eq(targetId.get(idx)));
+            }
+            queryState.setSqlWhere(queryState.getSqlWhere().and(where));
         }
 
         lastNavProp = pe.getNavigationProperty();

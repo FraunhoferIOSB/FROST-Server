@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class MessageSerialisationTest {
     void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
-                .setId(new IdLong(123456))
+                .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
@@ -80,7 +80,7 @@ class MessageSerialisationTest {
     void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etLocation)
-                .setId(new IdLong(123456))
+                .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
@@ -100,7 +100,7 @@ class MessageSerialisationTest {
     void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
-                .setId(new IdLong(123456))
+                .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
@@ -121,12 +121,12 @@ class MessageSerialisationTest {
     void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation)
-                .setId(new IdLong(123456))
+                .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epResult, 12345)
                 .setProperty(pluginCoreModel.epParameters, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
                         .build())
-                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(12)));
+                .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(12L)));
         entity.setProperty(pluginCoreModel.epResultTime, null);
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);

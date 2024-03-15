@@ -160,7 +160,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public List<Object> fromObservation(Entity o) {
             List<Object> value = new ArrayList<>();
             if (id) {
-                value.add(o.getId().getValue());
+                value.add(o.getPrimaryKeyValues().get(0));
             }
             if (phenomenonTime) {
                 value.add(o.getProperty(pluginCoreModel.epPhenomenonTime));

@@ -234,6 +234,12 @@ public class Utils {
             sqlSortSelectFields.add(field);
         }
 
+        public void addAll(List<Field> fields) {
+            for (var field : fields) {
+                add(field, OrderBy.OrderType.ASCENDING);
+            }
+        }
+
         public List<OrderField> getSqlSortFields() {
             return sqlSortFields;
         }

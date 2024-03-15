@@ -18,12 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkSingle;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
@@ -37,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.time4j.Moment;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -351,9 +353,11 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntryId(ExpressionFactory<T> factory) {
-        final ConverterId<T> converterId = new ConverterId<>(factory, true);
-        addEntry(table.getEntityType().getPrimaryKey(), factory, converterId);
-        addEntry(ModelRegistry.EP_SELFLINK, factory, converterId);
+        final EntityPropertyMain keyProperty = table.getEntityType().getPrimaryKey().getKeyProperty(0);
+        final ConverterSimple<T> converterId = new ConverterSimple<>(keyProperty, factory, true, false);
+        addEntry(keyProperty, factory, converterId);
+        final ConverterSimple<T> converterSelfLink = new ConverterSimple<>(keyProperty, factory, false, false);
+        addEntry(ModelRegistry.EP_SELFLINK, factory, converterSelfLink);
     }
 
     public void addEntryMap(EntityProperty<Map<String, Object>> property, ExpressionFactory<T> factory) {
@@ -446,10 +450,18 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
         private final Property property;
         private final ExpressionFactory<T> factory;
+        private final boolean canCreate;
+        private final boolean canUpdate;
 
         public ConverterSimple(Property property, ExpressionFactory<T> factory) {
+            this(property, factory, true, true);
+        }
+
+        public ConverterSimple(Property property, ExpressionFactory<T> factory, boolean canCreate, boolean canUpdate) {
             this.property = property;
             this.factory = factory;
+            this.canCreate = canCreate;
+            this.canUpdate = canUpdate;
         }
 
         @Override
@@ -459,13 +471,17 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
-            insertFields.put(factory.get(table), entity.getProperty(property));
+            if (canCreate) {
+                insertFields.put(factory.get(table), entity.getProperty(property));
+            }
         }
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
-            updateFields.put(factory.get(table), entity.getProperty(property));
-            message.addField(property);
+            if (canUpdate) {
+                updateFields.put(factory.get(table), entity.getProperty(property));
+                message.addField(property);
+            }
         }
     }
 
@@ -669,49 +685,17 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
     }
 
-    public static class ConverterId<T> implements ConverterRecord<T> {
-
-        private final ExpressionFactory<T> factory;
-        private final boolean canEdit;
-
-        public ConverterId(ExpressionFactory<T> factory, boolean canEdit) {
-            this.factory = factory;
-            this.canEdit = canEdit;
-        }
-
-        @Override
-        public void convert(T table, Record input, Entity entity, DataSize dataSize) {
-            final Object rawId = getFieldOrNull(input, factory.get(table));
-            Id id = ParserUtils.idFromObject(rawId);
-            entity.setProperty(entity.getEntityType().getPrimaryKey(), id);
-        }
-
-        @Override
-        public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
-            if (!canEdit) {
-                return;
-            }
-            Id id = entity.getProperty(entity.getEntityType().getPrimaryKey());
-            if (id == null) {
-                return;
-            }
-            insertFields.put(factory.get(table), id.getValue());
-        }
-
-        @Override
-        public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
-            // ID is never updated.
-        }
-    }
-
     public static class ConverterEntity<T> implements ConverterRecord<T> {
 
-        private final NavigationPropertyMain<Entity> property;
+        private final NavigationPropertyEntity property;
         private final ExpressionFactory<T> factory;
 
-        public ConverterEntity(NavigationPropertyMain<Entity> property, ExpressionFactory<T> factory) {
+        public ConverterEntity(NavigationPropertyEntity property, ExpressionFactory<T> factory) {
             this.property = property;
             this.factory = factory;
+            if (!(property.getEntityType().getPrimaryKey() instanceof PkSingle)) {
+                throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+            }
         }
 
         @Override
@@ -720,20 +704,20 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             if (rawId == null) {
                 return;
             }
-            DefaultEntity childEntity = new DefaultEntity(property.getEntityType(), ParserUtils.idFromObject(rawId));
+            DefaultEntity childEntity = new DefaultEntity(property.getEntityType(), PkValue.of(rawId));
             entity.setProperty(property, childEntity);
         }
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> insertFields) {
             Entity child = entity.getProperty(property);
-            insertFields.put(factory.get(table), child.getId().getValue());
+            insertFields.put(factory.get(table), child.getPrimaryKeyValues().get(0));
         }
 
         @Override
         public void convert(T table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             Entity child = entity.getProperty(property);
-            updateFields.put(factory.get(table), child.getId().getValue());
+            updateFields.put(factory.get(table), child.getPrimaryKeyValues().get(0));
             message.addField(property);
         }
     }

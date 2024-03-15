@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -49,7 +50,7 @@ public class QueryState<T extends StaMainTable<T>> {
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
-    private final Field<?> sqlMainIdField;
+    private final List<Field> sqlMainPkFields;
     private Table sqlFrom;
     private Condition sqlWhere = DSL.noCondition();
     private Condition sqlSkipWhere;
@@ -78,7 +79,7 @@ public class QueryState<T extends StaMainTable<T>> {
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         mainTable = table;
-        sqlMainIdField = table.getId();
+        sqlMainPkFields = table.getPkFields();
         tableRef = new TableRef(table);
         staAlias = ALIAS_ROOT;
     }
@@ -164,8 +165,8 @@ public class QueryState<T extends StaMainTable<T>> {
     /**
      * @return the sqlMainIdField
      */
-    public Field<?> getSqlMainIdField() {
-        return sqlMainIdField;
+    public List<Field> getSqlMainIdFields() {
+        return sqlMainPkFields;
     }
 
     /**
