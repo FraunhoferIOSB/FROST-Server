@@ -40,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,9 +97,9 @@ public abstract class AbstractSubscription implements Subscription {
         return true;
     }
 
-    protected void generateFilter(int pathElementOffset) {
+    protected void generateFilter(int pathElementOffset, Expression extraFilter) {
         final List<Property> properties = new ArrayList<>();
-        boolean direct = true;
+        boolean direct = extraFilter == null;
         final int size = path.size();
         final int startIdx = size - 1 - pathElementOffset;
         if (startIdx < 0) {
@@ -134,7 +135,7 @@ public abstract class AbstractSubscription implements Subscription {
                 properties.add(navProp);
 
                 if (id != null) {
-                    createMatchExpression(properties, epe);
+                    createMatchExpression(properties, epe, extraFilter);
                     // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
                     assert (i <= 1);
                     return;
@@ -160,7 +161,7 @@ public abstract class AbstractSubscription implements Subscription {
         };
     }
 
-    private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
+    private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {
         final PrimaryKey primaryKey = entityType.getPrimaryKey();
         properties.addAll(primaryKey.getKeyProperties());
         String epeId = UrlHelper.quoteForUrl(primaryKey, epe.getPkValues());
@@ -168,6 +169,9 @@ public abstract class AbstractSubscription implements Subscription {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
+        }
+        if (extraFilter != null) {
+            matchExpression = new And(matchExpression, extraFilter);
         }
         query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.setFilter(matchExpression);

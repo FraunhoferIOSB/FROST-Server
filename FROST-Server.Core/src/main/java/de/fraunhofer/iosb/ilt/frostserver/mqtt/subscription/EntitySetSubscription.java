@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -57,23 +58,30 @@ public class EntitySetSubscription extends AbstractSubscription {
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
         query = parseQuery(queryString);
-        if (query != null && (query.getCount().isPresent()
-                || query.getFilter() != null
-                || !query.getOrderBy().isEmpty()
-                || query.getSkip().isPresent()
-                || query.getTop().isPresent())) {
-            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select and $expand is allowed in query options.");
-        } else if (query != null && !query.getExpand().isEmpty()) {
-            Query queryCopy = parseQuery(queryString);
-            if (queryCopy != null) {
-                List<Expand> expandList = queryCopy.getExpand();
-                expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
-                        .setExpand(expandList)
-                        .addSelect(entityType.getPrimaryKey().getKeyProperties());
+        Expression filter = null;
+        if (query != null) {
+            if (query.getCount().isPresent()
+                    || query.getFilter() != null
+                    || !query.getOrderBy().isEmpty()
+                    || query.getSkip().isPresent()
+                    || query.getTop().isPresent()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select and $expand is allowed in query options.");
+            }
+            if (query.getFilter() != null && !settings.getMqttSettings().isAllowMqttFilter()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $filter is not allowed in query options.");
+            }
+            filter = query.getFilter();
+            if (!query.getExpand().isEmpty()) {
+                Query queryCopy = parseQuery(queryString);
+                if (queryCopy != null) {
+                    List<Expand> expandList = queryCopy.getExpand();
+                    expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
+                            .setExpand(expandList)
+                            .addSelect(entityType.getPrimaryKey().getKeyProperties());
+                }
             }
         }
-
-        generateFilter(1);
+        generateFilter(1, filter);
     }
 
     private Query parseQuery(String topic) {

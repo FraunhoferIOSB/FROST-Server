@@ -60,7 +60,7 @@ public class EntitySubscription extends AbstractSubscription {
             PkValue id = ((PathElementEntity) path.getLastElement()).getPkValues();
             matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
-        generateFilter(1);
+        generateFilter(1, null);
     }
 
     @Override
