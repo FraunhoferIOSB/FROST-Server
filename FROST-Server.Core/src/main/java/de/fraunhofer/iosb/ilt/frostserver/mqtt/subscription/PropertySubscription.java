@@ -62,7 +62,7 @@ public class PropertySubscription extends AbstractSubscription {
         }
         query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.addSelect(property);
-        generateFilter(2);
+        generateFilter(2, null);
     }
 
     @Override
