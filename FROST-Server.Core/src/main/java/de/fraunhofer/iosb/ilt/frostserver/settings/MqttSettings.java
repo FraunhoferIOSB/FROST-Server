@@ -66,6 +66,8 @@ public class MqttSettings implements ConfigDefaults {
     public static final String TAG_CREATE_THREAD_POOL_SIZE = "CreateThreadPoolSize";
     @DefaultValue("")
     public static final String TAG_EXPOSED_MQTT_ENDPOINTS = "exposedEndpoints";
+    @DefaultValueBoolean(false)
+    public static final String TAG_MQTT_ALLOW_FILTER = "allowFilter";
 
     /**
      * Constraints
@@ -140,6 +142,12 @@ public class MqttSettings implements ConfigDefaults {
      * Number of threads used to process EntityCreateEvents.
      */
     private int createThreadPoolSize;
+
+    /**
+     * Flag indicating if $filter is allowed on MQTT topics or not.
+     */
+    private boolean allowMqttFilter;
+
     /**
      * Extension point for implementation specific settings.
      */
@@ -158,6 +166,7 @@ public class MqttSettings implements ConfigDefaults {
         mqttServerImplementationClass = customSettings.get(TAG_IMPLEMENTATION_CLASS, getClass());
         enableMqtt = customSettings.getBoolean(TAG_ENABLED, getClass());
         port = customSettings.getInt(TAG_PORT, getClass());
+        allowMqttFilter = customSettings.getBoolean(TAG_MQTT_ALLOW_FILTER, getClass());
         setHost(customSettings.get(TAG_HOST, getClass()));
         setInternalHost(customSettings.get(TAG_HOST_INTERNAL, getClass()));
         setSubscribeMessageQueueSize(customSettings.getInt(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, getClass()));
@@ -340,6 +349,10 @@ public class MqttSettings implements ConfigDefaults {
             throw new IllegalArgumentException(TAG_CREATE_THREAD_POOL_SIZE + MUST_BE_POSITIVE);
         }
         this.createThreadPoolSize = createThreadPoolSize;
+    }
+
+    public boolean isAllowMqttFilter() {
+        return allowMqttFilter;
     }
 
 }

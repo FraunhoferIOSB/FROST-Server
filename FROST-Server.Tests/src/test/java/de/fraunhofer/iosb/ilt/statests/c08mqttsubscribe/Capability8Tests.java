@@ -544,17 +544,6 @@ public abstract class Capability8Tests extends AbstractTestClass {
                 mqttHelper.getTopic(entityType, selectedProperties));
     }
 
-    private JsonNode filterEntity(JsonNode entity, List<String> selectedProperties) {
-        Iterator iterator = entity.fieldNames();
-        while (iterator.hasNext()) {
-            String key = iterator.next().toString();
-            if (!selectedProperties.contains(key)) {
-                iterator.remove();
-            }
-        }
-        return entity;
-    }
-
     private Callable<Object> getDeepInsertEntityAction(EntityType entityType) {
         Callable<Object> trigger = () -> {
             switch (entityType) {
