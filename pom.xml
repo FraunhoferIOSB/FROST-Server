@@ -116,19 +116,19 @@
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.10.2</version.junit>
         <version.junit-platform-suite>1.10.2</version.junit-platform-suite>
-        <version.keycloak>24.0.1</version.keycloak>
+        <version.keycloak>24.0.2</version.keycloak>
         <version.liquibase>4.26.0</version.liquibase>
         <version.logback>1.5.3</version.logback>
 
-        <version.maven.plugin.assembly>3.7.0</version.maven.plugin.assembly>
+        <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.5.0</version.maven.plugin.build-helper>
-        <version.maven.plugin.compiler>3.12.1</version.maven.plugin.compiler>
+        <version.maven.plugin.compiler>3.13.0</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.6.1</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>9.0.10</version.maven.plugin.dependency-check>
         <version.maven.plugin.download>1.8.1</version.maven.plugin.download>
         <version.maven.plugin.exec>3.2.0</version.maven.plugin.exec>
-        <version.maven.plugin.git-commit-id>8.0.1</version.maven.plugin.git-commit-id>
-        <version.maven.plugin.gpg>3.2.0</version.maven.plugin.gpg>
+        <version.maven.plugin.git-commit-id>8.0.2</version.maven.plugin.git-commit-id>
+        <version.maven.plugin.gpg>3.2.1</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.11</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.3.0</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.6.3</version.maven.plugin.javadoc>
@@ -140,7 +140,7 @@
         <version.maven.plugin.surefire>3.2.5</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
-        <version.openjfx>21.0.2</version.openjfx>
+        <version.openjfx>22</version.openjfx>
         <version.org.json>20231013</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
