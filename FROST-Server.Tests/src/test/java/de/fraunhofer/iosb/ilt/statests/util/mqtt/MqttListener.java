@@ -49,21 +49,28 @@ import org.slf4j.LoggerFactory;
  */
 public class MqttListener implements Callable<JsonNode> {
 
-    /**
-     * The logger for this class.
-     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MqttListener.class);
+
     private final CountDownLatch barrier;
     private final String topic;
     private final String mqttServerUri;
 
     private MqttAsyncClient mqttClient;
     private JsonNode result;
+    private ReceivedListener listener;
 
     public MqttListener(String mqttServer, String topic) {
+        this(mqttServer, topic, 1);
+    }
+
+    public MqttListener(String mqttServer, String topic, int expectedMessages) {
         this.mqttServerUri = mqttServer;
         this.topic = topic;
-        barrier = new CountDownLatch(1);
+        barrier = new CountDownLatch(expectedMessages);
+    }
+
+    public void setListener(ReceivedListener listener) {
+        this.listener = listener;
     }
 
     public void connect() {
@@ -98,7 +105,11 @@ public class MqttListener implements Callable<JsonNode> {
                         public void messageArrived(String topic, MqttMessage mm) {
                             if (barrier.getCount() > 0) {
                                 try {
-                                    result = Utils.MAPPER.readTree(new String(mm.getPayload(), StandardCharsets.UTF_8));
+                                    final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
+                                    result = Utils.MAPPER.readTree(payload);
+                                    if (listener != null) {
+                                        listener.received(payload);
+                                    }
                                 } catch (JsonProcessingException ex) {
                                     LOGGER.error("Failed to parse result", ex);
                                 }
@@ -141,7 +152,7 @@ public class MqttListener implements Callable<JsonNode> {
                 }
             });
             try {
-                connectBarrier.await(ServerSettings.MQTT_TIMEOUT, TimeUnit.MILLISECONDS);
+                connectBarrier.await(ServerSettings.MQTT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOGGER.error("Exception:", ex);
             }
@@ -207,4 +218,10 @@ public class MqttListener implements Callable<JsonNode> {
         }
         return result;
     }
+
+    public interface ReceivedListener {
+
+        public void received(String result);
+    }
+
 }

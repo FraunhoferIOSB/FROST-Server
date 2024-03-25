@@ -101,7 +101,7 @@ public abstract class Capability8Tests extends AbstractTestClass {
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         entityHelper = new EntityHelper(version, serverSettings);
-        mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOut());
+        mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
     }
 
     @Override
