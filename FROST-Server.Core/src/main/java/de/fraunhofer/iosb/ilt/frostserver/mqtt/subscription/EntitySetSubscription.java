@@ -61,14 +61,13 @@ public class EntitySetSubscription extends AbstractSubscription {
         Expression filter = null;
         if (query != null) {
             if (query.getCount().isPresent()
-                    || query.getFilter() != null
                     || !query.getOrderBy().isEmpty()
                     || query.getSkip().isPresent()
                     || query.getTop().isPresent()) {
-                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select and $expand is allowed in query options.");
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $count, $skip, $top and $orderby are not allowed in query options.");
             }
             if (query.getFilter() != null && !settings.getMqttSettings().isAllowMqttFilter()) {
-                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $filter is not allowed in query options.");
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $filter is not allowed in query options.");
             }
             filter = query.getFilter();
             if (!query.getExpand().isEmpty()) {

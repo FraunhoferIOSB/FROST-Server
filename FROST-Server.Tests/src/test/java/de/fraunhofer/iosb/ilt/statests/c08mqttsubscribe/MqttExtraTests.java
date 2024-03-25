@@ -29,16 +29,23 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttAction;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +66,7 @@ public abstract class MqttExtraTests extends AbstractTestClass {
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
 
     private static EntityHelper entityHelper;
-    private static MqttHelper mqttHelper;
+    private static MqttHelper2 mqttHelper;
 
     public MqttExtraTests(ServerVersion serverVersion) {
         super(serverVersion);
@@ -69,7 +76,7 @@ public abstract class MqttExtraTests extends AbstractTestClass {
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         entityHelper = new EntityHelper(version, serverSettings);
-        mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOut());
+        mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         createEntities();
     }
 
@@ -195,4 +202,53 @@ public abstract class MqttExtraTests extends AbstractTestClass {
         createDatastream(sSrvc, "Datastream 6", "Datastream 1 of thing 2, sensor 3.", "someType", uomTemp, THINGS.get(2), SENSORS.get(1), O_PROPS.get(0), DATASTREAMS);
     }
 
+    @Test
+    void test01SubscribeObservationBase() {
+        LOGGER.info("  test01SubscribeObservationBase");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(0), 0, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture.complete(obs);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/Observations")
+                .addExpected(obsFuture)
+                .createReceivedListener(sMdl.etObservation);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription);
+        mqttHelper.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test01SubscribeObservationResultFilter() {
+        LOGGER.info("  test01SubscribeObservationResultFilter");
+        final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
+        final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
+        final CompletableFuture<Entity> obsFuture3 = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs1 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(0), 10, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture1.complete(obs1);
+            Entity obs2 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(0), 5, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture2.complete(obs2);
+            Entity obs3 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(0), 0, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture3.complete(obs3);
+            return null;
+        };
+        final TestSubscription testSubscription1 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=result gt 4")
+                .addExpected(obsFuture1)
+                .addExpected(obsFuture2)
+                .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription2 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=result gt 5")
+                .addExpected(obsFuture1)
+                .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=result ge 5")
+                .addExpected(obsFuture1)
+                .addExpected(obsFuture2)
+                .createReceivedListener(sMdl.etObservation);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription1)
+                .add(testSubscription2)
+                .add(testSubscription3);
+        mqttHelper.executeRequest(mqttAction);
+    }
 }

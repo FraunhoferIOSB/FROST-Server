@@ -588,4 +588,12 @@ public class EntityUtils {
         return obs;
     }
 
+    public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, List<Entity> registry) throws ServiceFailureException {
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream);
+        srvc.create(obs);
+        registry.add(obs);
+        return obs;
+    }
+
 }
