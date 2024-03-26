@@ -103,6 +103,7 @@ public abstract class AbstractSubscription implements Subscription {
         final int size = path.size();
         final int startIdx = size - 1 - pathElementOffset;
         if (startIdx < 0) {
+            createMatchExpression(extraFilter);
             return;
         }
         PathElement nextPathElement = startIdx < size ? path.get(startIdx + 1) : null;
@@ -159,6 +160,15 @@ public abstract class AbstractSubscription implements Subscription {
             }
             return pkValue.equals(parent.getPrimaryKeyValues());
         };
+    }
+
+    private void createMatchExpression(Expression extraFilter) {
+        if (extraFilter == null) {
+            return;
+        }
+        matchExpression = extraFilter;
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
+        query.setFilter(extraFilter);
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {

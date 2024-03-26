@@ -220,8 +220,8 @@ public abstract class MqttExtraTests extends AbstractTestClass {
     }
 
     @Test
-    void test01SubscribeObservationResultFilter() {
-        LOGGER.info("  test01SubscribeObservationResultFilter");
+    void test02SubscribeObservationResultFilter() {
+        LOGGER.info("  test02SubscribeObservationResultFilter");
         final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture3 = new CompletableFuture<>();
@@ -244,6 +244,37 @@ public abstract class MqttExtraTests extends AbstractTestClass {
         final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=result ge 5")
                 .addExpected(obsFuture1)
                 .addExpected(obsFuture2)
+                .createReceivedListener(sMdl.etObservation);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription1)
+                .add(testSubscription2)
+                .add(testSubscription3);
+        mqttHelper.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test03SubscribeObservationFoIFilter() {
+        LOGGER.info("  test03SubscribeObservationFoIFilter");
+        final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
+        final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
+        final CompletableFuture<Entity> obsFuture3 = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs1 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(0), 1, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture1.complete(obs1);
+            Entity obs2 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(3), 2, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture2.complete(obs2);
+            Entity obs3 = EntityUtils.createObservation(sSrvc, DATASTREAMS.get(6), 3, ZonedDateTime.parse("2016-01-01T01:00:00.000Z"), OBSERVATIONS);
+            obsFuture3.complete(obs3);
+            return null;
+        };
+        final TestSubscription testSubscription1 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=startswith(FeatureOfInterest/name,'Location 1')")
+                .addExpected(obsFuture1)
+                .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription2 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=startswith(FeatureOfInterest/name,'Location 2')")
+                .addExpected(obsFuture2)
+                .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$filter=startswith(FeatureOfInterest/name,'Location 3')")
+                .addExpected(obsFuture3)
                 .createReceivedListener(sMdl.etObservation);
         MqttAction mqttAction = new MqttAction(insertAction)
                 .add(testSubscription1)
