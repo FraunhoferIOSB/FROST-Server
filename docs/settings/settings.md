@@ -117,7 +117,7 @@ These are settings for the MQTT package.
 * **mqtt.SubscribeThreadPoolSize:**  
   Number of threads use to dispatch MQTT notifications.
 * **mqtt.CreateMessageQueueSize:**  
-  Queue size for create observation requests via MQTT .
+  Queue size for create observation requests via MQTT.
 * **mqtt.CreateThreadPoolSize:**  
   Number of threads use to dispatch observation creation requests.
 * **mqtt.WebsocketPort:**  
@@ -149,6 +149,8 @@ These are settings for the MQTT package.
 * **mqtt.exposedEndpoints:**  
   A comma separated list of MQTT endpoints to list on the index page.
   when not present, FROST will try to generate this list itself.
+* **mqtt.allowFilter:** Since 2.3.2  
+  When true, MQTT topics may contain `$filter` query parameters. Default: false
 
 
 ## Persistence Settings
