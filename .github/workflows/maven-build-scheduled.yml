@@ -46,6 +46,7 @@ jobs:
         key: ${{ runner.os }}-maven-owasp-cvedb
 
     - name: Update CVD Database
+      continue-on-error: true
       env:
         OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
         OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
@@ -66,7 +67,7 @@ jobs:
         OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
         NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
       run: |
-        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
+        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp -DautoUpdate=false --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
 
     - name: Build with Maven
       run: |
