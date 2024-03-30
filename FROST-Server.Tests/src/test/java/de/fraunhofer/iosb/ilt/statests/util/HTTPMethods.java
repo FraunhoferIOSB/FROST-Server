@@ -34,6 +34,7 @@ import org.apache.http.Consts;
 import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -196,7 +197,7 @@ public class HTTPMethods {
             LOGGER.debug("Posting: {}", urlString);
             countPost++;
             //Create connection
-            URL url = new URL(urlString);
+            URL url = new URI(urlString).toURL();
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
             int postDataLength = postData.length;
             connection = (HttpURLConnection) url.openConnection();
@@ -292,32 +293,27 @@ public class HTTPMethods {
      * be empty.
      */
     public static HttpResponse doPut(String urlString, String putBody) {
-        HttpURLConnection connection = null;
-        try {
-            LOGGER.debug("Putting: {}", urlString);
-            countPut++;
-            //Create connection
+        LOGGER.debug("Putting: {}", urlString);
+        countPut++;
+        HttpResponse result;
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             URI uri = new URI(urlString);
-
-            CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPut request = new HttpPut(uri);
             StringEntity params = new StringEntity(putBody, ContentType.APPLICATION_JSON);
             request.setEntity(params);
-            CloseableHttpResponse response = httpClient.execute(request);
-            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
-            result.setResponse(EntityUtils.toString(response.getEntity()));
-            response.close();
-            httpClient.close();
-            return result;
-
-        } catch (Exception e) {
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                result = new HttpResponse(response.getStatusLine().getStatusCode());
+                if (response.getEntity() == null) {
+                    result.setResponse("");
+                } else {
+                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                }
+            }
+        } catch (IOException | URISyntaxException | RuntimeException e) {
             LOGGER.error("Exception: ", e);
             return null;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
+        return result;
     }
 
     /**
@@ -329,31 +325,23 @@ public class HTTPMethods {
      * HTTP requests return.
      */
     public static HttpResponse doDelete(String urlString) {
-        HttpURLConnection connection = null;
-        try {
-            LOGGER.debug("Deleting: {}", urlString);
-            countDelete++;
-            //Create connection
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestProperty(
-                    "Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestMethod("DELETE");
-            connection.connect();
-
-            HttpResponse result = new HttpResponse(connection.getResponseCode());
-            result.setResponse("");
-
-            return result;
-        } catch (Exception e) {
+        HttpResponse result;
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            URI uri = new URI(urlString);
+            HttpDelete request = new HttpDelete(uri);
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                result = new HttpResponse(response.getStatusLine().getStatusCode());
+                if (response.getEntity() == null) {
+                    result.setResponse("");
+                } else {
+                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                }
+            }
+        } catch (IOException | URISyntaxException | RuntimeException e) {
             LOGGER.error("Exception: ", e);
             return null;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
+        return result;
     }
 
     /**
@@ -380,7 +368,11 @@ public class HTTPMethods {
                 request.setEntity(params);
                 try (CloseableHttpResponse response = httpClient.execute(request)) {
                     result = new HttpResponse(response.getStatusLine().getStatusCode());
-                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                    if (response.getEntity() == null) {
+                        result.setResponse("");
+                    } else {
+                        result.setResponse(EntityUtils.toString(response.getEntity()));
+                    }
                 }
             }
             return result;
@@ -412,7 +404,11 @@ public class HTTPMethods {
             request.setEntity(params);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
-                result.setResponse(EntityUtils.toString(response.getEntity()));
+                if (response.getEntity() == null) {
+                    result.setResponse("");
+                } else {
+                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                }
                 return result;
             }
         } catch (URISyntaxException | IOException e) {

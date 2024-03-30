@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.time.ZonedDateTime;
 
 /**

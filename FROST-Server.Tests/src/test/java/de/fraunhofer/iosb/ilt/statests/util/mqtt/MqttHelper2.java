@@ -17,14 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener.ReceivedListener;
 import java.io.IOException;
+import java.net.URI;
+import java.text.ParseException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import net.time4j.range.MomentInterval;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,11 +109,142 @@ public class MqttHelper2 {
         }
         MqttManager.clearTestSubscriptionListeners();
         for (TestSubscription tl : ma.topics) {
-            Assertions.assertTrue(tl.checkAllReceived(mqttTimeoutMs), "failure checking received entities.");
-            Assertions.assertTrue(tl.allReceived(), () -> "Did not receive " + tl.getExpectedCount() + " messages on " + tl.getTopic());
-            Assertions.assertFalse(tl.hasErrors(), () -> "Errors encountered on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
+            Assertions.assertTrue(
+                    tl.checkAllReceived(mqttTimeoutMs),
+                    () -> "failure checking received entities on " + tl.getTopic());
+            Assertions.assertTrue(
+                    tl.allReceived(),
+                    () -> "Did not receive " + tl.getExpectedCount() + " messages on " + tl.getTopic());
+            Assertions.assertFalse(
+                    tl.hasErrors(),
+                    () -> "Errors encountered on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
         }
 
+    }
+
+    private static void assertJsonEqualsWithLinkResolving(JsonNode expected, JsonNode received, String topic) {
+        String message = "";
+        boolean equals = jsonEqualsWithLinkResolving(expected, received, topic);
+        if (!equals) {
+            message = "Expected " + expected.toString() + " got " + received.toString() + " for topic " + topic;
+        }
+        assertTrue(equals, message);
+    }
+
+    private static boolean jsonEqualsWithLinkResolving(JsonNode node1, JsonNode node2, String topic) {
+        if (node1 instanceof ObjectNode obj1 && node2 instanceof ObjectNode obj2) {
+            return jsonEqualsWithLinkResolving(obj1, obj2, topic);
+        }
+        if (node1 instanceof ArrayNode arr1 && node2 instanceof ArrayNode arr2) {
+            return jsonEqualsWithLinkResolving(arr1, arr2, topic);
+        }
+        return false;
+    }
+
+    private static boolean jsonEqualsWithLinkResolving(ArrayNode arr1, ArrayNode arr2, String topic) {
+        if (arr1.size() != arr2.size()) {
+            return false;
+        }
+        for (int i = 0; i < arr1.size(); i++) {
+            Object val1 = arr1.get(i);
+            if (val1 instanceof ObjectNode) {
+                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) arr2.get(i), topic)) {
+                    return false;
+                }
+            } else if (val1 instanceof ArrayNode) {
+                if (!jsonEqualsWithLinkResolving((ArrayNode) val1, (ArrayNode) arr2.get(i), topic)) {
+                    return false;
+                }
+            } else if (!val1.equals(arr2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean jsonEqualsWithLinkResolving(ObjectNode obj1, ObjectNode obj2, String topic) {
+        if (obj1 == obj2) {
+            return true;
+        }
+        if (obj1 == null) {
+            return false;
+        }
+        if (obj1.getClass() != obj2.getClass()) {
+            return false;
+        }
+        if (obj1.size() != obj2.size()) {
+            return false;
+        }
+        Iterator<String> iterator = obj1.fieldNames();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            if (!obj2.has(key)) {
+                return false;
+            }
+            JsonNode val1 = obj1.get(key);
+            if (val1 == null) {
+                return obj2.get(key) == null;
+            } else if (val1 instanceof ObjectNode) {
+                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) obj2.get(key), topic)) {
+                    return false;
+                }
+            } else if (val1 instanceof ArrayNode) {
+                ArrayNode arr1 = (ArrayNode) val1;
+                ArrayNode arr2 = (ArrayNode) obj2.get(key);
+                if (!jsonEqualsWithLinkResolving(arr1, arr2, topic)) {
+                    return false;
+                }
+            } else if (key.toLowerCase().endsWith("time")) {
+                if (!checkTimeEquals(val1.textValue(), obj2.get(key).textValue())) {
+                    return false;
+                }
+            } else if (topic != null && !topic.isEmpty() && key.endsWith("@iot.navigationLink")) {
+                String version = topic.substring(0, topic.indexOf("/"));
+
+                String selfLink1 = obj1.get("@iot.selfLink").textValue();
+                URI baseUri1 = URI.create(selfLink1.substring(0, selfLink1.indexOf(version))).resolve(topic);
+                String navLink1 = obj1.get(key).textValue();
+                String absoluteUri1 = baseUri1.resolve(navLink1).toString();
+
+                String selfLink2 = obj2.get("@iot.selfLink").textValue();
+                URI baseUri2 = URI.create(selfLink2.substring(0, selfLink2.indexOf(version))).resolve(topic);
+                String navLink2 = obj2.get(key).textValue();
+                String absoluteUri2 = baseUri2.resolve(navLink2).toString();
+                if (!absoluteUri1.equals(absoluteUri2)) {
+                    return false;
+                }
+
+            } else if (!val1.equals(obj2.get(key))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkTimeEquals(String val1, String val2) {
+        if (val1 == null) {
+            return val2 == null;
+        }
+        if (val1.equals(val2)) {
+            return true;
+        }
+
+        try {
+            ZonedDateTime dateTime1 = ZonedDateTime.parse(val1);
+            ZonedDateTime dateTime2 = ZonedDateTime.parse(val2);
+            return dateTime1.isEqual(dateTime2);
+        } catch (Exception ex) {
+            // do nothing
+        }
+        try {
+            MomentInterval interval1 = MomentInterval.parseISO(val1);
+            MomentInterval interval2 = MomentInterval.parseISO(val2);
+            return interval1.equals(interval2);
+        } catch (RuntimeException | ParseException ex) {
+            fail("time properies could neither be parsed as time nor as interval");
+        }
+
+        return false;
     }
 
     /**
@@ -118,7 +258,7 @@ public class MqttHelper2 {
         /**
          * The topic for the subscription.
          */
-        private final String topic;
+        private String topic;
 
         /**
          * These are the entities that we expect to receive. When creating the
@@ -126,10 +266,34 @@ public class MqttHelper2 {
          * properties are server generated.
          */
         private final List<Future<Entity>> expectedEntities = new ArrayList<>();
+
+        /**
+         * These are JSON objects that we expect to receive.
+         */
+        private final List<Future<JsonNode>> expectedJson = new ArrayList<>();
+
+        /**
+         * Flag indicating this Subscription expects an Entity for each received
+         * message.
+         */
+        private boolean expectsEntities;
+
+        /**
+         * Flag indicating this Subscription expects JSON for each received
+         * message.
+         */
+        private boolean expectsJson;
+
+        private final List<Entity> receivedEntities = new ArrayList<>();
+        private final List<JsonNode> receivedJson = new ArrayList<>();
+
         private final List<String> errors = new ArrayList<>();
-        private final List<Entity> received = new ArrayList<>();
 
         private ReceivedListener mqttReceivedListener;
+
+        public TestSubscription(MqttHelper2 mqttHelper) {
+            this(mqttHelper, null);
+        }
 
         public TestSubscription(MqttHelper2 mqttHelper, String topic) {
             this.mqttHelper = mqttHelper;
@@ -140,8 +304,28 @@ public class MqttHelper2 {
             return topic;
         }
 
-        public TestSubscription addExpected(Future<Entity> expected) {
+        public TestSubscription setTopic(String topic) {
+            this.topic = topic;
+            return this;
+        }
+
+        public boolean isEntitiesExpected() {
+            return expectsEntities;
+        }
+
+        public TestSubscription addExpectedEntity(Future<Entity> expected) {
             expectedEntities.add(expected);
+            expectsEntities = true;
+            return this;
+        }
+
+        public boolean isJsonExpected() {
+            return expectsJson;
+        }
+
+        public TestSubscription addExpectedJson(Future<JsonNode> expected) {
+            expectedJson.add(expected);
+            expectsJson = true;
             return this;
         }
 
@@ -149,8 +333,12 @@ public class MqttHelper2 {
             return expectedEntities;
         }
 
+        public List<Future<JsonNode>> getExpectedJson() {
+            return expectedJson;
+        }
+
         public int getExpectedCount() {
-            return expectedEntities.size();
+            return expectedEntities.size() + expectedJson.size();
         }
 
         public TestSubscription setMqttReceivedListener(ReceivedListener mqttReceivedListener) {
@@ -158,12 +346,25 @@ public class MqttHelper2 {
             return this;
         }
 
-        public TestSubscription received(Entity receivedEntity) {
-            LOGGER.debug("    Logging received Entity {}", receivedEntity);
-            synchronized (received) {
-                received.add(receivedEntity);
+        public TestSubscription received(JsonNode json) {
+            if (expectsJson) {
+                LOGGER.debug("    Logging received JSON {}", json);
+                synchronized (receivedJson) {
+                    receivedJson.add(json);
+                }
+                LOGGER.debug("    Done Logging received JSON {}", json);
             }
-            LOGGER.debug("    Done Logging received Entity {}", receivedEntity);
+            return this;
+        }
+
+        public TestSubscription received(Entity receivedEntity) {
+            if (expectsEntities) {
+                LOGGER.debug("    Logging received Entity {}", receivedEntity);
+                synchronized (receivedEntities) {
+                    receivedEntities.add(receivedEntity);
+                }
+                LOGGER.debug("    Done Logging received Entity {}", receivedEntity);
+            }
             return this;
         }
 
@@ -177,15 +378,27 @@ public class MqttHelper2 {
          */
         public boolean checkAllReceived(long timeoutMs) {
             LOGGER.debug("    Checking all received.");
-            while (!received.isEmpty()) {
+            while (!receivedEntities.isEmpty()) {
                 Entity receivedEntity;
-                synchronized (received) {
-                    receivedEntity = received.remove(0);
+                synchronized (receivedEntities) {
+                    receivedEntity = receivedEntities.remove(0);
                     LOGGER.debug("    Checking received entity {}.", receivedEntity);
                 }
                 boolean result = checkReceived(receivedEntity, timeoutMs);
                 if (!result) {
                     LOGGER.debug("    Check failed on entity {}.", receivedEntity);
+                    return false;
+                }
+            }
+            while (!receivedJson.isEmpty()) {
+                JsonNode jsonNode;
+                synchronized (receivedJson) {
+                    jsonNode = receivedJson.remove(0);
+                    LOGGER.debug("    Checking received JSON {}.", jsonNode);
+                }
+                boolean result = checkReceived(jsonNode, timeoutMs);
+                if (!result) {
+                    LOGGER.debug("    Check failed on JOSN {}.", jsonNode);
                     return false;
                 }
             }
@@ -220,7 +433,39 @@ public class MqttHelper2 {
                     return false;
                 }
             }
-            LOGGER.debug("    Received entity {} matches nothing", receivedEntity);
+            errors.add("    Received entity " + receivedEntity + " matches nothing");
+            return false;
+        }
+
+        /**
+         * Compare the given JsonNode against all the expected JsonNodes until a
+         * match is found. The matching expected JsonNode is removed from the
+         * list. This call may block until all expected Futures are available.
+         *
+         * @param received the received JsonNode.
+         * @param timeoutMs the maximum number of milliseconds to wait.
+         * @return true this.
+         */
+        public boolean checkReceived(JsonNode received, long timeoutMs) {
+            LOGGER.debug("    Received JSON {}", received);
+            Iterator<Future<JsonNode>> it = expectedJson.iterator();
+            while (it.hasNext()) {
+                Future<JsonNode> entityFuture = it.next();
+                try {
+                    LOGGER.debug("    Getting expected for JSON {}", received);
+                    JsonNode expected = entityFuture.get(timeoutMs, TimeUnit.MILLISECONDS);
+                    LOGGER.debug("    Comparing received JSON {} against expected {}", received, expected);
+                    if (jsonEqualsWithLinkResolving(expected, received, topic)) {
+                        it.remove();
+                        LOGGER.debug("    Received JSON {} matches expected {}", received, expected);
+                        return true;
+                    }
+                } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+                    LOGGER.warn("Exeption waiting for future.", ex);
+                    return false;
+                }
+            }
+            LOGGER.debug("    Received JSON {} matches nothing", received);
             return false;
         }
 
@@ -244,8 +489,14 @@ public class MqttHelper2 {
         public TestSubscription createReceivedListener(EntityType et) {
             final ReceivedListener listener = (result) -> {
                 try {
-                    Entity entity = mqttHelper.getService().getJsonReader().parseEntity(et, result);
-                    received(entity);
+                    if (expectsEntities) {
+                        Entity entity = mqttHelper.getService().getJsonReader().parseEntity(et, result);
+                        received(entity);
+                    }
+                    if (expectsJson) {
+                        JsonNode tree = Utils.MAPPER.readTree(result);
+                        received(tree);
+                    }
                 } catch (IOException ex) {
                     addError("Failed to parse " + et + " from " + result);
                 }

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.statests.util;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.List;
 
 /**

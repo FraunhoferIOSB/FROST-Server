@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
-import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
-import de.fraunhofer.iosb.ilt.statests.util.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.ArrayList;
 import java.util.List;
 

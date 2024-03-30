@@ -17,21 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.DATASTREAM;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.FEATURE_OF_INTEREST;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.HISTORICAL_LOCATION;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.LOCATION;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.OBSERVATION;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.OBSERVED_PROPERTY;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.SENSOR;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityType.THING;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.DATASTREAM;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.FEATURE_OF_INTEREST;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.HISTORICAL_LOCATION;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.LOCATION;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.OBSERVATION;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.OBSERVED_PROPERTY;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.SENSOR;
+import static de.fraunhofer.iosb.ilt.statests.util.model.EntityType.THING;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,7 +61,7 @@ public class MqttHelper {
      * time to process it.
      */
     public static final int WAIT_AFTER_INSERT = 100;
-    public static final int WAIT_AFTER_CLEANUP = 500;
+    public static final int WAIT_AFTER_CLEANUP = 1;
     public static final int QOS = 2;
     public static final String CLIENT_ID = "STA-test_suite";
     private final String mqttServerUri;

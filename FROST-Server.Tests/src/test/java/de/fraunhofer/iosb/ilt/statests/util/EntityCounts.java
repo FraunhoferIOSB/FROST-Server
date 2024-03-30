@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
