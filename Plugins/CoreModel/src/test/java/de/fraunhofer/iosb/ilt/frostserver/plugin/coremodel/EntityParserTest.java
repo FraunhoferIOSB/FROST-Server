@@ -177,7 +177,7 @@ class EntityParserTest {
                 + "	\"Sensor\": {\"@iot.id\": 5394815},\n"
                 + "	\"observedArea\": {\n"
                 + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
+                + "		\"coordinates\": [[[100.0, 0.0],[101.0, 0.0],[101.0, 1.0],[100.0, 1.0],[100.0, 0.0]]]\n"
                 + "	}\n"
                 + "}";
         final Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
@@ -198,7 +198,7 @@ class EntityParserTest {
                         pluginCoreModel.npSensorDatastream,
                         new DefaultEntity(pluginCoreModel.etSensor)
                                 .setPrimaryKeyValues(PkValue.of(5394815L)))
-                .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
+                .setProperty(pluginCoreModel.epObservedArea, TestHelper.jsonPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
         final Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
         assertEquals(expectedResult, result);
     }

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -88,22 +89,25 @@ public class TypeSimplePrimitive extends TypeSimple {
     public static final TypeSimplePrimitive EDM_STREAM = new TypeSimplePrimitive(EDM_STREAM_NAME, "Binary data stream", TypeReferencesHelper.TYPE_REFERENCE_STRING);
     public static final TypeSimplePrimitive EDM_STRING = new TypeSimplePrimitive(EDM_STRING_NAME, "Sequence of characters", TypeReferencesHelper.TYPE_REFERENCE_STRING, SimpleParserUtils.PARSER_STRING);
     public static final TypeSimplePrimitive EDM_TIMEOFDAY = new TypeSimplePrimitive(EDM_TIMEOFDAY_NAME, "Clock time 00:00-23:59:59.999999999999", TypeReferencesHelper.TYPE_REFERENCE_DATE);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHY = new TypeSimplePrimitive(EDM_GEOGRAPHY_NAME, "Abstract base type for all Geography types", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYPOINT = new TypeSimplePrimitive(EDM_GEOGRAPHYPOINT_NAME, "A point in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYLINESTRING = new TypeSimplePrimitive(EDM_GEOGRAPHYLINESTRING_NAME, "Line string in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYPOLYGON = new TypeSimplePrimitive(EDM_GEOGRAPHYPOLYGON_NAME, "Polygon in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTIPOINT = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTIPOINT_NAME, "Collection of points in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTILINESTRING = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTILINESTRING_NAME, "Collection of line strings in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTIPOLYGON = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTIPOLYGON_NAME, "Collection of polygons in a round-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOGRAPHYCOLLECTION = new TypeSimplePrimitive(EDM_GEOGRAPHYCOLLECTION_NAME, "Collection of arbitrary Geography values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRY = new TypeSimplePrimitive(EDM_GEOMETRY_NAME, "Abstract base type for all Geometry types", TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYPOINT = new TypeSimplePrimitive(EDM_GEOMETRYPOINT_NAME, "Point in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYLINESTRING = new TypeSimplePrimitive(EDM_GEOMETRYLINESTRING_NAME, "Line string in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYPOLYGON = new TypeSimplePrimitive(EDM_GEOMETRYPOLYGON_NAME, "Polygon in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOINT = new TypeSimplePrimitive(EDM_GEOMETRYMULTIPOINT_NAME, "Collection of points in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYMULTILINESTRING = new TypeSimplePrimitive(EDM_GEOMETRYMULTILINESTRING_NAME, "Collection of line strings in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOLYGON = new TypeSimplePrimitive(EDM_GEOMETRYMULTIPOLYGON_NAME, "Collection of polygons in a flat-earth coordinate system", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeSimplePrimitive EDM_GEOMETRYCOLLECTION = new TypeSimplePrimitive(EDM_GEOMETRYCOLLECTION_NAME, "Collection of arbitrary Geometry values", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
+
+    public static final TypeSimplePrimitive EDM_GEOGRAPHY = new TypeSimplePrimitive(EDM_GEOGRAPHY_NAME, "Abstract base type for all Geography types", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYPOINT = new TypeSimplePrimitive(EDM_GEOGRAPHYPOINT_NAME, "A point in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYLINESTRING = new TypeSimplePrimitive(EDM_GEOGRAPHYLINESTRING_NAME, "Line string in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYPOLYGON = new TypeSimplePrimitive(EDM_GEOGRAPHYPOLYGON_NAME, "Polygon in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTIPOINT = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTIPOINT_NAME, "Collection of points in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTILINESTRING = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTILINESTRING_NAME, "Collection of line strings in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYMULTIPOLYGON = new TypeSimplePrimitive(EDM_GEOGRAPHYMULTIPOLYGON_NAME, "Collection of polygons in a round-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOGRAPHYCOLLECTION = new TypeSimplePrimitive(EDM_GEOGRAPHYCOLLECTION_NAME, "Collection of arbitrary Geography values", ParserUtils.getLocationDeserializer(), null);
+
+    public static final TypeSimplePrimitive EDM_GEOMETRY = new TypeSimplePrimitive(EDM_GEOMETRY_NAME, "Abstract base type for all Geometry types", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYPOINT = new TypeSimplePrimitive(EDM_GEOMETRYPOINT_NAME, "Point in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYLINESTRING = new TypeSimplePrimitive(EDM_GEOMETRYLINESTRING_NAME, "Line string in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYPOLYGON = new TypeSimplePrimitive(EDM_GEOMETRYPOLYGON_NAME, "Polygon in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOINT = new TypeSimplePrimitive(EDM_GEOMETRYMULTIPOINT_NAME, "Collection of points in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYMULTILINESTRING = new TypeSimplePrimitive(EDM_GEOMETRYMULTILINESTRING_NAME, "Collection of line strings in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYMULTIPOLYGON = new TypeSimplePrimitive(EDM_GEOMETRYMULTIPOLYGON_NAME, "Collection of polygons in a flat-earth coordinate system", ParserUtils.getLocationDeserializer(), null);
+    public static final TypeSimplePrimitive EDM_GEOMETRYCOLLECTION = new TypeSimplePrimitive(EDM_GEOMETRYCOLLECTION_NAME, "Collection of arbitrary Geometry values", ParserUtils.getLocationDeserializer(), null);
+
     public static final TypeSimplePrimitive EDM_UNTYPED = new TypeSimplePrimitive(EDM_UNTYPED_NAME, "Can be any valid JSON.", TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
 
     public static final TypeSimplePrimitive STA_ID_LONG = EDM_INT64;

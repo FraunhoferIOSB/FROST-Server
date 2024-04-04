@@ -74,11 +74,8 @@ public class ParserUtils {
     }
 
     /**
-     * // final ObjectMapper simpleObjectMapper =
-     * SimpleJsonMapper.getSimpleObjectMapper(); // try { // return
-     * simpleObjectMapper.treeToValue(valueTree, GeoJsonObject.class); // }
-     * catch (JsonProcessingException ex) { // // Not GeoJSON // } // return
-     * simpleObjectMapper.treeToValue(valueTree, String.class);
+     * @param type the type of the complex type.
+     * @return The deserialiser.
      */
     public static JsonDeserializer<ComplexValue> getComplexTypeDeserializer(TypeComplex type) {
         return new ComplexTypeDeserializer(type);
