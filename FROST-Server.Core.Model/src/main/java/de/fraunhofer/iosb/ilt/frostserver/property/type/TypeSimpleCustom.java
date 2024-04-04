@@ -37,6 +37,7 @@ public class TypeSimpleCustom extends TypeSimple {
 
     public static final String STA_GEOJSON_NAME = "Geometry";
     public static final String STA_TM_INSTANT_NAME = "TM_Instant";
+    public static final String STA_TM_INSTANT_ALIAS = "TimeInstant";
     public static final PropertyType STA_LOCATION = new TypeSimpleCustom(STA_GEOJSON_NAME, "A Free Location object", EDM_GEOMETRY)
             .setDeserializer(ParserUtils.getLocationDeserializer());
     public static final PropertyType STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET);
@@ -62,6 +63,7 @@ public class TypeSimpleCustom extends TypeSimple {
                 // It's not a TypeSimplePrimitive
             }
         }
+        TYPES.put(STA_TM_INSTANT_ALIAS, TYPES.get(STA_TM_INSTANT_NAME));
     }
 
     public static TypeSimpleCustom getType(String name) {
