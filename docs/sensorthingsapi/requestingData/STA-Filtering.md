@@ -200,11 +200,8 @@ Clients can use `any()` to search in related entity sets and `in` to search in p
 
 | Function | Description &amp; Example |
 | --- | --- |
-| `in` <br/> bool | Returns true if the item on the left is in the array on the right.<br/>
-`properties/countryCode in ('IT','NL')`<br/>
-`'myTag' in properties/tags` |
-| `relatedSet/any(x: <predicate>)` | Returns true if any of the Entities in the set match the predicate.<br>
-`Datastreams/any(d: d/ObservedProperty/name eq 'NO2')`|
+| `in` <br/> bool | Returns true if the item on the left is in the array on the right. <br/> `properties/countryCode in ('IT','NL')` <br/> `'myTag' in properties/tags` |
+| `relatedSet/any(x: <predicate>)` | Returns true if any of the Entities in the set match the predicate. <br/> `Datastreams/any(d: d/ObservedProperty/name eq 'NO2')`|
 
 
 Give me all Things that have both Datastreams that measure NO2 and Datastreams that measure O3:
