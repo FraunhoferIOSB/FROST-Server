@@ -62,6 +62,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -180,6 +181,10 @@ public class EntityHelper2 {
         return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues(), np, select, expand, orderby);
     }
 
+    public JsonNode getEntity(EntityType entityType) {
+        return getEntity(entityType, null, null, null, null, null);
+    }
+
     public JsonNode getEntity(EntityType entityType, Object[] pk) {
         return getEntity(entityType, pk, null, null, null, null);
     }
@@ -198,10 +203,41 @@ public class EntityHelper2 {
         return result;
     }
 
+    public String createUrl(EntityType target) {
+        return sSrvc.getVersion().getUrlPart()
+                + '/' + target.getContainerName();
+    }
+
+    public String createUrl(EntityType target, Object id, String subPath) {
+        return sSrvc.getVersion().getUrlPart()
+                + '/' + target.getContainerName()
+                + '(' + Utils.quoteForUrl(id) + ')'
+                + subPath;
+    }
+
     public String createUrl(Entity target) {
         return sSrvc.getVersion().getUrlPart()
                 + '/' + target.getEntityType().getContainerName()
                 + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues()[0]) + ')';
+    }
+
+    public JsonNode getEntityWithRetry(EntityType entityType, String expand, int retries) {
+        int retry = 0;
+        while (retry < retries) {
+            JsonNode entity = getEntity(entityType, expand);
+            if (entity != null) {
+                return entity;
+            }
+            retry++;
+            LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, entityType);
+            MqttHelper2.waitMillis(MqttHelper2.WAIT_AFTER_INSERT);
+        }
+        LOGGER.error("Failed to read an entity from url after {} tries: {}", retries, entityType);
+        return null;
+    }
+
+    public JsonNode getEntity(EntityType entityType, String expand) {
+        return getEntity(entityType, null, null, null, expand, null);
     }
 
     public JsonNode getEntity(EntityType entityType, Object[] pk, NavigationProperty np, List<String> select, String expand, String orderby) {
@@ -211,7 +247,11 @@ public class EntityHelper2 {
         String query = "";
         char join = '?';
         if (!StringHelper.isNullOrEmpty(expand)) {
-            query += "?$expand=" + expand;
+            if (expand.startsWith("$")) {
+                query += '?' + expand;
+            } else {
+                query += "?$expand=" + expand;
+            }
             join = '&';
         }
         if (!StringHelper.isNullOrEmpty(select)) {
@@ -222,7 +262,7 @@ public class EntityHelper2 {
             query += join + "$orderby=" + orderby;
         }
         String urlString = sSrvc.getEndpoint().toString()
-                + '/' + entityType.mainContainer;
+                + entityType.mainContainer;
         if (pk != null) {
             urlString += '(' + Utils.quoteForUrl(pk[0]) + ')';
         }
@@ -232,10 +272,12 @@ public class EntityHelper2 {
         urlString += query;
         try {
             final JsonNode tree = Utils.MAPPER.readTree(HTTPMethods.doGet(urlString).response);
-            if (tree.has("value")) {
+            JsonNode value = tree.get("value");
+            if (value == null) {
+                return tree;
+            } else {
                 return tree.get("value").get(0);
             }
-            return tree;
         } catch (IOException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!: " + e.getMessage());

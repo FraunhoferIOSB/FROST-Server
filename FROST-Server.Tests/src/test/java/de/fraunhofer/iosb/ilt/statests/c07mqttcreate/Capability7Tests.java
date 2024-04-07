@@ -21,13 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,14 +38,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author jab
- */
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability7Tests extends AbstractTestClass {
 
     /**
@@ -50,8 +52,8 @@ public abstract class Capability7Tests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Tests.class);
 
-    private static MqttHelper mqttHelper;
-    private static EntityHelper entityHelper;
+    private static MqttHelper2 mqttHelper;
+    private static EntityHelper2 entityHelper;
 
     public Capability7Tests(ServerVersion version) {
         super(version);
@@ -62,80 +64,80 @@ public abstract class Capability7Tests extends AbstractTestClass {
         LOGGER.info("Setting up for version {}.", version.urlPart);
 
         long mqttTimeout = serverSettings.getMqttTimeOutMs();
-        entityHelper = new EntityHelper(version, serverSettings);
-        mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), mqttTimeout);
+        entityHelper = new EntityHelper2(sSrvc);
+        mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), mqttTimeout);
     }
 
     @Override
-    protected void tearDownVersion() {
-        entityHelper.deleteEverything();
+    protected void tearDownVersion() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
         entityHelper = null;
         mqttHelper = null;
     }
 
     @AfterAll
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        entityHelper.deleteEverything();
+        EntityUtils.deleteAll(service);
         entityHelper = null;
         mqttHelper = null;
     }
 
     @Test
-    void checkCreateObservationDirect() {
+    void check01_CreateObservationDirect() throws ServiceFailureException {
         LOGGER.info("  checkCreateObservationDirect");
-        entityHelper.deleteEntityType(EntityType.OBSERVATION);
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         JsonNode createdObservation = getObservation();
-        mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
+        mqttHelper.publish(entityHelper.createUrl(sMdl.etObservation), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getAnyEntity(
-                EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+                sMdl.etObservation,
+                "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
         assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
-    void checkCreateObservationViaDatastream() {
+    void check02_CreateObservationViaDatastream() throws ServiceFailureException {
         LOGGER.info("  checkCreateObservationViaDatastream");
-        entityHelper.deleteEntityType(EntityType.OBSERVATION);
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         JsonNode createdObservation = getObservation();
-        Object datastreamId = -1;
+        Object datastreamId;
         datastreamId = createdObservation.get("Datastream").get(ControlInformation.ID);
-        mqttHelper.publish(mqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
+        mqttHelper.publish(entityHelper.createUrl(sMdl.etDatastream, datastreamId, "/Observations"), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getAnyEntity(
-                EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+                sMdl.etObservation,
+                "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
         assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
-    void checkCreateObservationViaFeatureOfInterest() {
+    void check03_CreateObservationViaFeatureOfInterest() throws ServiceFailureException {
         LOGGER.info("  checkCreateObservationViaFeatureOfInterest");
-        entityHelper.deleteEntityType(EntityType.OBSERVATION);
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         JsonNode createdObservation = getObservation();
         Object featureOfInterestId = -1;
         featureOfInterestId = createdObservation.get("FeatureOfInterest").get(ControlInformation.ID);
-        mqttHelper.publish(mqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
+        mqttHelper.publish(entityHelper.createUrl(sMdl.etFeatureOfInterest, featureOfInterestId, "/Observations"), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getAnyEntity(
-                EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+                sMdl.etObservation,
+                "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
         assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
     }
 
     @Test
-    void checkCreateObservationWithDeepInsert() {
+    void check04_CreateObservationWithDeepInsert() throws ServiceFailureException {
         LOGGER.info("  checkCreateObservationWithDeepInsert");
-        entityHelper.deleteEntityType(EntityType.OBSERVATION);
+        EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         JsonNode createdObservation = getObservationWithDeepInsert();
-        mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
+        mqttHelper.publish(entityHelper.createUrl(sMdl.etObservation), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getAnyEntity(
-                EntityType.OBSERVATION,
+        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+                sMdl.etObservation,
                 expandQueryFromJsonObject(createdObservation),
                 10);
         assertTrue(Utils.jsonEquals(latestObservation, createdObservation));
@@ -177,21 +179,21 @@ public abstract class Capability7Tests extends AbstractTestClass {
         return result;
     }
 
-    private JsonNode getObservation() {
+    private JsonNode getObservation() throws ServiceFailureException {
         long value = new Random().nextLong();
-        Object thingId = entityHelper.createThing();
-        Object observedPropertyId = entityHelper.createObservedProperty();
-        Object sensorId = entityHelper.createSensor();
-        Object datastreamId = entityHelper.createDatastream(thingId, observedPropertyId, sensorId);
-        Object featureOfInterestId = entityHelper.createFeatureOfInterest();
+        Entity thing = entityHelper.createThing();
+        Entity observedProperty = entityHelper.createObservedProperty();
+        Entity sensor = entityHelper.createSensor();
+        Entity datastream = entityHelper.createDatastream(thing, observedProperty, sensor);
+        Entity featureOfInterest = entityHelper.createFeatureOfInterest();
         try {
             return Utils.MAPPER.readTree("{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T02:40:00+02:00\",\n"
                     + "  \"validTime\": \"2016-01-01T01:01:01.000Z/2016-01-01T23:59:59.000Z\",\n"
                     + "  \"result\": " + value + ",\n"
                     + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + datastreamId + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + featureOfInterestId + "}  \n"
+                    + "  \"Datastream\":{\"@iot.id\": " + Utils.quoteForJson(datastream.getPrimaryKeyValues()[0]) + "},\n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + Utils.quoteForJson(featureOfInterest.getPrimaryKeyValues()[0]) + "}  \n"
                     + "}");
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);

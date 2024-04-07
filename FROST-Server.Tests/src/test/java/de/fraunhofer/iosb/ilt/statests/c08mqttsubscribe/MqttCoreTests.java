@@ -25,8 +25,8 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.N
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_OBSERVEDPROPERTY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_SENSOR;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_THING;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_CLEANUP;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_CLEANUP;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.waitMillis;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;

@@ -44,6 +44,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import net.time4j.range.MomentInterval;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +55,11 @@ import org.slf4j.LoggerFactory;
  * A helper for using MQTT in tests.
  */
 public class MqttHelper2 {
+
+    public static final int WAIT_AFTER_INSERT = 100;
+    public static final int WAIT_AFTER_CLEANUP = 1;
+    public static final int QOS = 2;
+    public static final String CLIENT_ID = "STA-test_suite";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttHelper2.class);
 
@@ -79,6 +87,32 @@ public class MqttHelper2 {
 
     public SensorThingsService getService() {
         return sSrvc;
+    }
+
+    public void publish(String topic, String message) {
+        publish(topic, message, QOS, false);
+    }
+
+    public void publish(String topic, String message, int qos, boolean retained) {
+        MqttClient client = null;
+        try {
+            client = new MqttClient(mqttServerUri, CLIENT_ID);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setCleanSession(true);
+            client.connect(connOpts);
+            client.publish(topic, message.getBytes(), qos, retained);
+        } catch (MqttException ex) {
+            LOGGER.error("Exception on server {} :", mqttServerUri, ex);
+            fail("error publishing message on MQTT: " + ex.getMessage());
+        } finally {
+            if (client != null) {
+                try {
+                    client.disconnect();
+                    client.close();
+                } catch (MqttException ex) {
+                }
+            }
+        }
     }
 
     public void executeRequest(MqttAction ma) {

@@ -76,7 +76,7 @@ public class MqttListener implements Callable<JsonNode> {
     public void connect() {
         try {
             final CountDownLatch connectBarrier = new CountDownLatch(2);
-            mqttClient = new MqttAsyncClient(mqttServerUri, MqttHelper.CLIENT_ID + "-" + topic + "-" + UUID.randomUUID(), new MemoryPersistence());
+            mqttClient = new MqttAsyncClient(mqttServerUri, MqttHelper2.CLIENT_ID + "-" + topic + "-" + UUID.randomUUID(), new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
             MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
@@ -126,7 +126,7 @@ public class MqttListener implements Callable<JsonNode> {
                         }
                     });
                     try {
-                        mqttClient.subscribe(topic, MqttHelper.QOS, null, new IMqttActionListener() {
+                        mqttClient.subscribe(topic, MqttHelper2.QOS, null, new IMqttActionListener() {
                             @Override
                             public void onSuccess(IMqttToken imt) {
                                 LOGGER.debug("Subscribed to {}", topic);
