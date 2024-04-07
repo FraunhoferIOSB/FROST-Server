@@ -31,8 +31,8 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSetting
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -98,7 +98,7 @@ public abstract class AbstractTestClass {
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
-                    service = new StaService(new URL(serverSettings.getServiceUrl(version)));
+                    service = new StaService(new URI(serverSettings.getServiceUrl(version)).toURL());
                     sSrvc = service.service;
                     sMdl = service.modelSensing;
                     mMdl = service.modelMultiDatastream;

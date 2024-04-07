@@ -30,7 +30,8 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -127,15 +128,15 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     protected SensorThingsService createService() {
         if (!baseService.isEndpointSet()) {
             try {
-                baseService.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
-            } catch (MalformedURLException ex) {
+                baseService.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+            } catch (MalformedURLException | URISyntaxException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
-        } catch (MalformedURLException ex) {
+                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+        } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
     }
