@@ -13,11 +13,6 @@
             <password>${env.SONATYPE_PASSWORD}</password>
         </server>
 		<server>
-			<id>OWASP_OSS_INDEX</id>
-			<username>${env.OWASP_OSS_INDEX_USERNAME}</username>
-			<password>${env.OWASP_OSS_INDEX_APIKEY}</password>
-		</server>
-		<server>
 			<id>NIST_NVD_API</id>
 			<password>${env.NIST_NVD_API_KEY}</password>
 		</server>
