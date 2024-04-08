@@ -321,7 +321,7 @@ public class MqttCoreTests extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                var finalNp = path.getLast();
+                var finalNp = path.get(path.size() - 1);
                 String topic = eh2.createUrl(eh2.getCache(finalNp.getEntityType(), 0));
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
                     NavigationProperty nextNp = path.get(idx);
@@ -557,7 +557,7 @@ public class MqttCoreTests extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                var finalNp = path.getLast();
+                var finalNp = path.get(path.size() - 1);
                 String topic = eh2.createUrl(eh2.getCache(finalNp.getEntityType(), 0));
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
                     NavigationProperty nextNp = path.get(idx);
