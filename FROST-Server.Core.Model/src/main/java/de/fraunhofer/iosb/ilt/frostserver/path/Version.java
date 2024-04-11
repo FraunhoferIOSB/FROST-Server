@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * The versions that FROST supports.
+ * The versions that FROST supports. Plugins can add more.
  *
  * @author scf
  */

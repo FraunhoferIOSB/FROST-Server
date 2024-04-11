@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SE
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
@@ -55,6 +56,11 @@ public class ModelRegistry {
     public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, true, false);
 
     /**
+     * The model version this registry holds.
+     */
+    private final Version version;
+
+    /**
      * All entity types, by their entityName (both singular and plural).
      */
     private final Map<String, EntityType> entityTypesByName = new TreeMap<>();
@@ -80,6 +86,19 @@ public class ModelRegistry {
      * Entities need queries, even when sent through messages.
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
+
+    public ModelRegistry(Version version) {
+        this.version = version;
+    }
+
+    /**
+     * Get the version of the model this registry holds.
+     *
+     * @return the version of the model this registry holds.
+     */
+    public Version getVersion() {
+        return version;
+    }
 
     /**
      * Register a new entity type. Registering the same type twice is a no-op,

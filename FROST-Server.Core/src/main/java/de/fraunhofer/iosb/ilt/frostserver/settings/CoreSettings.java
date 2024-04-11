@@ -41,7 +41,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -211,11 +213,11 @@ public class CoreSettings implements ConfigDefaults {
      */
     private final Set<LiquibaseUser> liquibaseUsers = new LinkedHashSet<>();
 
-    private final ModelRegistry modelRegistry = new ModelRegistry();
+    private final Map<Version, ModelRegistry> modelRegistry = new HashMap<>();
 
     private MessageBus messageBus;
 
-    private CustomLinksHelper customLinksHelper;
+    private Map<Version, CustomLinksHelper> customLinksHelper = new HashMap<>();
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -321,12 +323,13 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     /**
-     * Get the registry of entity types currently enabled.
+     * Get the model registry for the given model version.
      *
-     * @return the registry of entity types currently enabled.
+     * @param version The model version to get the modelRegistry for.
+     * @return the model registry.
      */
-    public ModelRegistry getModelRegistry() {
-        return modelRegistry;
+    public ModelRegistry getModelRegistry(Version version) {
+        return modelRegistry.computeIfAbsent(version, ModelRegistry::new);
     }
 
     public static CoreSettings load(String file) {
@@ -462,14 +465,13 @@ public class CoreSettings implements ConfigDefaults {
         this.messageBus = messageBus;
     }
 
-    public CustomLinksHelper getCustomLinksHelper() {
-        if (customLinksHelper == null) {
+    public CustomLinksHelper getCustomLinksHelper(Version version) {
+        return customLinksHelper.computeIfAbsent(version, v -> {
             final Settings experimentalSettings = getExtensionSettings();
             boolean customLinksEnabled = experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
             int customLinksRecurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            customLinksHelper = new CustomLinksHelper(modelRegistry, customLinksEnabled, customLinksRecurseDepth);
-        }
-        return customLinksHelper;
+            return new CustomLinksHelper(getModelRegistry(version), customLinksEnabled, customLinksRecurseDepth);
+        });
     }
 
 }

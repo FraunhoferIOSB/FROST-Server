@@ -189,17 +189,18 @@ public class EntityChangedMessage {
 
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
+                final ModelRegistry mr = t.getModelRegistry();
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
-                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName), INTERNAL_ADMIN_PRINCIPAL)
+                Query query = new Query(mr, queryDefaults, new ResourcePath("", mr.getVersion(), "/" + entityType.entityName), INTERNAL_ADMIN_PRINCIPAL)
                         .setMetadata(Metadata.INTERNAL_COMPARE);
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                     query.addSelect(ep);
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                    Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()), INTERNAL_ADMIN_PRINCIPAL)
+                    Query subQuery = new Query(mr, queryDefaults, new ResourcePath("", mr.getVersion(), "/" + np.getName()), INTERNAL_ADMIN_PRINCIPAL)
                             .addSelect(np.getEntityType().getPrimaryKey().getKeyProperties())
                             .setMetadata(Metadata.INTERNAL_COMPARE);
-                    query.addExpand(new Expand(t.getModelRegistry(), np).setSubQuery(subQuery));
+                    query.addExpand(new Expand(mr, np).setSubQuery(subQuery));
                 }
                 return query;
             });
