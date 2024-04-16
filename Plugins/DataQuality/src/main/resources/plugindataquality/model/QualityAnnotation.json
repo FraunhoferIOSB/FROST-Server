@@ -1,0 +1,169 @@
+{
+    "conformance": ["https://github.com/opengeospatial/sensorthings/issues/174"],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "QualityAnnotation",
+            "plural": "QualityAnnotations",
+            "adminOnly": false,
+            "table": "QUALITY_ANNOTATION",
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "properties",
+                    "type": "Object",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "PROPERTIES",
+                            "isMap": true
+                        }
+                    ]
+                },
+                {
+                    "name": "result",
+                    "type": "Edm.Untyped",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperResult",
+                            "fieldType": "RESULT_TYPE",
+                            "fieldString": "RESULT_STRING",
+                            "fieldNumber": "RESULT_NUMBER",
+                            "fieldJson": "RESULT_JSON",
+                            "fieldBoolean": "RESULT_BOOLEAN"
+                        }
+                    ]
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "QualityMeasure",
+                    "entitySet": false,
+                    "entityType": "QualityMeasure",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "MEASURE_ID",
+                            "otherTable": "QUALITY_MEASURE",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "QualityScheme",
+                    "entitySet": false,
+                    "entityType": "QualityScheme",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "SCHEME_ID",
+                            "otherTable": "QUALITY_SCHEME",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "QualitySetup",
+                    "entitySet": false,
+                    "entityType": "QualitySetup",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "SETUP_ID",
+                            "otherTable": "QUALITY_SETUP",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "Observations",
+                    "entitySet": true,
+                    "entityType": "Observation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "ID",
+                            "linkTable": "QUALITY_ANNOTATION_OBSERVATION",
+                            "linkOurField": "ANNOTATION_ID",
+                            "linkOtherField": "OBSERVATION_ID",
+                            "otherTable": "OBSERVATIONS",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sensors",
+                    "entitySet": true,
+                    "entityType": "Sensor",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "ID",
+                            "linkTable": "QUALITY_ANNOTATION_SENSOR",
+                            "linkOurField": "ANNOTATION_ID",
+                            "linkOtherField": "SENSOR_ID",
+                            "otherTable": "SENSORS",
+                            "otherField": "ID"
+                        }
+                    ]
+                }
+            ]        }
+    ]
+}

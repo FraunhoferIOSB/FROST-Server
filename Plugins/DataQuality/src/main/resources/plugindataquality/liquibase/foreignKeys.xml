@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2021-01-01-multiDatastreams-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_QUALITY_ANNOTATION_SCHEME_ID" foreignKeyTableName="QUALITY_ANNOTATION" />
+            </not>
+        </preConditions>
+
+        <!-- table QUALITY_ANNOTATION -->
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_SCHEME_ID"
+            baseTableName="QUALITY_ANNOTATION" baseColumnNames="SCHEME_ID"
+            referencedTableName="QUALITY_SCHEME" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_SETUP_ID"
+            baseTableName="QUALITY_ANNOTATION" baseColumnNames="SETUP_ID"
+            referencedTableName="QUALITY_SETUP" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_MEASURE_ID"
+            baseTableName="QUALITY_ANNOTATION" baseColumnNames="MEASURE_ID"
+            referencedTableName="QUALITY_MEASURE" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <!-- table QUALITY_ANNOTATION_HIST -->
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_HIST_ANNOTATION_ID"
+            baseTableName="QUALITY_ANNOTATION_HIST" baseColumnNames="ANNOTATION_ID"
+            referencedTableName="QUALITY_ANNOTATION" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_HIST_OBSERVATION_ID"
+            baseTableName="QUALITY_ANNOTATION_HIST" baseColumnNames="OBSERVATION_ID"
+            referencedTableName="OBSERVATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_HIST_SENSOR_ID"
+            baseTableName="QUALITY_ANNOTATION_HIST" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <!-- table QUALITY_SETUP_MEASURE -->
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_SETUP_MEASURE_SETUP_ID"
+            baseTableName="QUALITY_SETUP_MEASURE" baseColumnNames="SETUP_ID"
+            referencedTableName="QUALITY_SETUP" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_SETUP_MEASURE_MEASURE_ID"
+            baseTableName="QUALITY_SETUP_MEASURE" baseColumnNames="MEASURE_ID"
+            referencedTableName="QUALITY_MEASURE" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <!-- table QUALITY_ANNOTATION_SENSOR -->
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_SENSOR_ANNOTATION_ID"
+            baseTableName="QUALITY_ANNOTATION_SENSOR" baseColumnNames="ANNOTATION_ID"
+            referencedTableName="QUALITY_ANNOTATION" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_SENSOR_SENSOR_ID"
+            baseTableName="QUALITY_ANNOTATION_SENSOR" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <!-- table QUALITY_ANNOTATION_OBSERVATION -->
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_OBSERVATION_ANNOTATION_ID"
+            baseTableName="QUALITY_ANNOTATION_OBSERVATION" baseColumnNames="ANNOTATION_ID"
+            referencedTableName="QUALITY_ANNOTATION" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="FK_QUALITY_ANNOTATION_OBSERVATION_OBSERVATION_ID"
+            baseTableName="QUALITY_ANNOTATION_OBSERVATION" baseColumnNames="OBSERVATION_ID"
+            referencedTableName="OBSERVATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

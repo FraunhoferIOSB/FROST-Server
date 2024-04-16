@@ -15,6 +15,7 @@
         <module>Actuation</module>
         <module>BatchProcessing</module>
         <module>CoreModel</module>
+        <module>DataQuality</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>

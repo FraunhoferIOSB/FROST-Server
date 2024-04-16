@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2024-04-01-QualityAnnotation-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-QualityAnnotation" value="LONG" />
+            <not>
+                <tableExists tableName="QUALITY_ANNOTATION" />
+            </not>
+        </preConditions>
+        <createTable tableName="QUALITY_ANNOTATION">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="QUALITY_ANNOTATION_PKEY" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-04-01-QualityAnnotation-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-QualityAnnotation" value="STRING" />
+                <changeLogPropertyDefined property="id-QualityAnnotation" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="QUALITY_ANNOTATION" />
+            </not>
+        </preConditions>
+        <createTable tableName="QUALITY_ANNOTATION">
+            <column name="ID" type="${idType-QualityAnnotation}" defaultValueComputed="${defaultValueComputed-QualityAnnotation}">
+                <constraints primaryKey="true" primaryKeyName="QUALITY_ANNOTATION_PKEY"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-04-01-QualityAnnotation-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="NAME" tableName="QUALITY_ANNOTATION" />
+            </not>
+        </preConditions>
+        <addColumn tableName="QUALITY_ANNOTATION">
+            <column name="SCHEME_ID" type="${idType-QualityScheme}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SETUP_ID" type="${idType-QualitySetup}"/>
+            <column name="MEASURE_ID" type="${idType-QualityMeasure}"/>
+            <column name="RESULT_TYPE" type="TINYINT"/>
+            <column name="RESULT_NUMBER" type="FLOAT8"/>
+            <column name="RESULT_BOOLEAN" type="BOOLEAN"/>
+            <column name="RESULT_JSON" type="JSONB"/>
+            <column name="RESULT_STRING" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

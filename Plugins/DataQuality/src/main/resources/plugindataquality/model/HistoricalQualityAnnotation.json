@@ -1,0 +1,106 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "HistoricalQualityAnnotation",
+            "plural": "HistoricalQualityAnnotations",
+            "adminOnly": false,
+            "table": "QUALITY_ANNOTATION_HIST",
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "time",
+                    "type": "Edm.DateTimeOffset",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+                            "field": "TIME"
+                        }
+                    ]
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "Observation",
+                    "entitySet": false,
+                    "entityType": "Observation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "HistoricalQualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "OBSERVATION_ID",
+                            "otherTable": "OBSERVATIONS",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "QualityAnnotation",
+                    "entitySet": false,
+                    "entityType": "QualityAnnotation",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "HistoricalQualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "ANNOTATION_ID",
+                            "otherTable": "QUALITY_ANNOTATION",
+                            "otherField": "ID"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sensor",
+                    "entitySet": false,
+                    "entityType": "Sensor",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "HistoricalQualityAnnotations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "SENSOR_ID",
+                            "otherTable": "SENSORS",
+                            "otherField": "ID"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

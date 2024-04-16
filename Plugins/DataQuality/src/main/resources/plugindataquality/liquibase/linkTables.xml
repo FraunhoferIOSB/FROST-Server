@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2024-04-01-Quality_Setup_Measure" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="QUALITY_SETUP_MEASURE" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="QUALITY_SETUP_MEASURE">
+            <column name="SETUP_ID" type="${idType-QualitySetup}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MEASURE_ID" type="${idType-QualityMeasure}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="SETUP_ID, MEASURE_ID" constraintName="QUALITY_SETUP_MEASURE_PKEY" tableName="QUALITY_SETUP_MEASURE"/>
+
+        <createIndex tableName="QUALITY_SETUP_MEASURE" indexName="QSM_SETUP_ID">
+            <column name="SETUP_ID" />
+        </createIndex>
+        <createIndex tableName="QUALITY_SETUP_MEASURE" indexName="QSM_MEASURE_ID">
+            <column name="MEASURE_ID" />
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet author="scf" id="2024-04-01-Quality_Annotation_Sensor" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="QUALITY_ANNOTATION_SENSOR" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="QUALITY_ANNOTATION_SENSOR">
+            <column name="ANNOTATION_ID" type="${idType-QualityAnnotation}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SENSOR_ID" type="${idType-Sensor}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="ANNOTATION_ID, SENSOR_ID" constraintName="QUALITY_ANNOTATION_SENSOR_PKEY" tableName="QUALITY_ANNOTATION_SENSOR"/>
+
+        <createIndex tableName="QUALITY_ANNOTATION_SENSOR" indexName="QAS_ANNOTATION_ID">
+            <column name="ANNOTATION_ID" />
+        </createIndex>
+        <createIndex tableName="QUALITY_ANNOTATION_SENSOR" indexName="QAS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet author="scf" id="2024-04-01-Quality_Annotation_Observation" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="QUALITY_ANNOTATION_OBSERVATION" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="QUALITY_ANNOTATION_OBSERVATION">
+            <column name="ANNOTATION_ID" type="${idType-QualityAnnotation}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBSERVATION_ID" type="${idType-Observation}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="ANNOTATION_ID, OBSERVATION_ID" constraintName="QUALITY_ANNOTATION_OBSERVATION_PKEY" tableName="QUALITY_ANNOTATION_OBSERVATION"/>
+
+        <createIndex tableName="QUALITY_ANNOTATION_OBSERVATION" indexName="QAO_ANNOTATION_ID">
+            <column name="ANNOTATION_ID" />
+        </createIndex>
+        <createIndex tableName="QUALITY_ANNOTATION_OBSERVATION" indexName="QAO_OBSERVATION_ID">
+            <column name="OBSERVATION_ID" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
