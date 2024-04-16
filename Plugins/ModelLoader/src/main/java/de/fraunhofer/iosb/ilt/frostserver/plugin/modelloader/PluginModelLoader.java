@@ -73,9 +73,10 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private boolean fullyInitialised;
     private String idTypeDefault;
     private List<DefModel> modelDefinitions = new ArrayList<>();
-    private Map<String, DefEntityProperty> primaryKeys;
+    private final Map<String, DefEntityProperty> primaryKeys = new HashMap<>();
 
     private String modelPath;
+    private final List<String> modelFiles = new ArrayList<>();
 
     private String liquibasePath;
     private final List<String> liquibaseFiles = new ArrayList<>();
@@ -108,15 +109,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
             modelPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
             String modelFilesString = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_FILES, ModelLoaderSettings.class);
-            String[] modelFiles = StringUtils.split(modelFilesString.trim(), ", ");
-
-            primaryKeys = new HashMap<>();
-            for (String fileName : modelFiles) {
-                loadModelFile(fileName);
-            }
-            for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
-                String typeName = entry.getKey();
-                primaryKeys.get(typeName).setType(getTypeFor(settings, typeName));
+            for (var modelFile : StringUtils.split(modelFilesString.trim(), ", ")) {
+                addModelFileWithPath(modelFile);
             }
 
             securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
@@ -130,13 +124,40 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         }
     }
 
-    private void loadModelFile(String fileName) {
+    private void loadModelFiles() {
+        for (String fileName : modelFiles) {
+            loadModelFile(fileName);
+        }
+        for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
+            String typeName = entry.getKey();
+            primaryKeys.get(typeName).setType(getTypeFor(settings, typeName));
+        }
+    }
+
+    private void addModelFileWithPath(String fileName) {
         final Path fullPath;
         if (StringHelper.isNullOrEmpty(modelPath)) {
             fullPath = Path.of(fileName);
         } else {
             fullPath = Path.of(modelPath, fileName);
         }
+        modelFiles.add(fullPath.toString());
+    }
+
+    public void addModelFile(String filename) {
+        modelFiles.add(filename);
+    }
+
+    public void addSecurityFile(String filename) {
+        securityFiles.add(filename);
+    }
+
+    public void addLiquibaseFile(String filename) {
+        liquibaseFiles.add(filename);
+    }
+
+    public void loadModelFile(String fullPathString) {
+        Path fullPath = Path.of(fullPathString);
         LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
         String data;
         try {
@@ -297,6 +318,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public void registerEntityTypes() {
+        loadModelFiles();
+
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (DefModel modelDefinition : modelDefinitions) {
             modelDefinition.registerEntityTypes(modelRegistry);
