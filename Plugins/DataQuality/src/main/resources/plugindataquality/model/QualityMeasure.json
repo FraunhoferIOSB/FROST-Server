@@ -22,16 +22,6 @@
                     ]
                 },
                 {
-                    "name": "description",
-                    "type": "Edm.String",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "DESCRIPTION"
-                        }
-                    ]
-                },
-                {
                     "name": "name",
                     "type": "Edm.String",
                     "handlers": [
@@ -42,8 +32,22 @@
                     ]
                 },
                 {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "required": false,
+                    "nullable": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "DESCRIPTION"
+                        }
+                    ]
+                },
+                {
                     "name": "properties",
                     "type": "Object",
+                    "required": false,
+                    "nullable": true,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
