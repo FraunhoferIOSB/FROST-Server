@@ -93,7 +93,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     private boolean nullable;
 
     /**
-     * Flag indicating this property must always be serialised, even if it is null.
+     * Flag indicating this property must always be serialised, even if it is
+     * null.
      */
     @ConfigurableField(editor = EditorBoolean.class, optional = true,
             label = "Serialise NULL", description = "Flag indicating this property must always be serialised, even if it is null.")
@@ -101,7 +102,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     private boolean serialiseNull;
 
     /**
-     * Flag indicating this property is a complex property with sub-properties that can be queried.
+     * Flag indicating this property is a complex property with sub-properties
+     * that can be queried.
      */
     @ConfigurableField(editor = EditorBoolean.class, optional = true,
             label = "HasCustomProps", description = "Flag indicating this property is a complex property with sub-properties that can be queried.")
@@ -146,7 +148,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             PropertyType propType = modelRegistry.getPropertyType(type);
-            entityProperty = new EntityPropertyMain<>(name, propType, required, nullable, hasCustomProperties, serialiseNull)
+            entityProperty = new EntityPropertyMain<>(name, propType, required, isNullable(), hasCustomProperties, serialiseNull)
                     .setAliases(aliases.toArray(String[]::new))
                     .addAnnotations(annotations);
         }
@@ -295,7 +297,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * Flag indicating this property must always be serialised, even if it is null.
+     * Flag indicating this property must always be serialised, even if it is
+     * null.
      *
      * @return the serialiseNull
      */
@@ -304,7 +307,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * Flag indicating this property must always be serialised, even if it is null.
+     * Flag indicating this property must always be serialised, even if it is
+     * null.
      *
      * @param serialiseNull the serialiseNull to set
      * @return this.
@@ -315,7 +319,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * Flag indicating this property is a complex property with sub-properties that can be queried.
+     * Flag indicating this property is a complex property with sub-properties
+     * that can be queried.
      *
      * @return the hasCustomProperties
      */
@@ -324,7 +329,8 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     }
 
     /**
-     * Flag indicating this property is a complex property with sub-properties that can be queried.
+     * Flag indicating this property is a complex property with sub-properties
+     * that can be queried.
      *
      * @param hasCustomProperties the hasCustomProperties to set
      * @return this.
@@ -355,6 +361,24 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public DefEntityProperty addAnnotations(List<Annotation> annotationsToAdd) {
         annotations.addAll(annotationsToAdd);
         return this;
+    }
+
+    /**
+     * Flag indicating the property may be set to null.
+     *
+     * @return the nullable
+     */
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    /**
+     * Flag indicating the property may be set to null.
+     *
+     * @param nullable the nullable to set
+     */
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 
 }
