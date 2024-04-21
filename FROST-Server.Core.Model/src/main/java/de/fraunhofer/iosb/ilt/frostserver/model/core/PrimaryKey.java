@@ -47,4 +47,12 @@ public interface PrimaryKey {
      * @return The requested key property.
      */
     public EntityPropertyMain getKeyProperty(int idx);
+
+    /**
+     * Parse the primary key value from the given string.
+     *
+     * @param pk the key-string to parse.
+     * @return the value parsed from the string.
+     */
+    public PkValue parsePrimaryKey(String pk);
 }

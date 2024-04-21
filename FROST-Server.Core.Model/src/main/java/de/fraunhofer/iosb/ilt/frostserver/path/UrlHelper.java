@@ -19,7 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkSingle;
@@ -237,6 +239,20 @@ public class UrlHelper {
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
         return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getPrimaryKeyValues());
+    }
+
+    public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) {
+        int idxType = selfLink.lastIndexOf('/');
+        String lastPart = idxType >= 0 ? selfLink.substring(idxType) : selfLink;
+        int idxPk = lastPart.indexOf('(');
+        if (idxPk < 0) {
+            throw new IllegalArgumentException("SelfLink must contain a primary key in brackets.");
+        }
+        String entityTypeName = lastPart.substring(0, idxPk);
+        String pk = lastPart.substring(idxPk, lastPart.length() - 1);
+        EntityType entityType = mr.getEntityTypeForName(entityTypeName, isAdmin);
+        PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
+        return new DefaultEntity(entityType, pkValue);
     }
 
     /**
