@@ -32,7 +32,7 @@ public class PkSingle implements PrimaryKey {
 
     @Override
     public int size() {
-        return keyProperties.size();
+        return 1;
     }
 
     @Override
@@ -43,6 +43,12 @@ public class PkSingle implements PrimaryKey {
     @Override
     public EntityPropertyMain getKeyProperty(int idx) {
         return keyProperties.get(idx);
+    }
+
+    @Override
+    public PkValue parsePrimaryKey(String pk) {
+        Object value = keyProperties.get(0).getType().parseFromUrl(pk);
+        return PkValue.of(value);
     }
 
 }

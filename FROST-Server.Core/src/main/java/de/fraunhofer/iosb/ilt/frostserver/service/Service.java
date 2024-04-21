@@ -430,10 +430,31 @@ public class Service implements AutoCloseable {
         if (urlPath == null || urlPath.equals("/")) {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
+        ResourcePath path;
+        try {
+            path = PathParser.parsePath(
+                    modelRegistry,
+                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getVersion(),
+                    urlPath,
+                    request.getUserPrincipal());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
+        }
 
         PersistenceManager pm = getPm();
         try {
-            return handlePost(pm, urlPath, response, request);
+            if (!pm.validatePath(path)) {
+                maybeCommitAndClose();
+                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+            }
+            if (path.isRef()) {
+                return handlePostRef(pm, path, request, response);
+            } else if (path.getMainElement() instanceof PathElementEntitySet) {
+                return handlePostCollection(pm, path, request, response);
+            } else {
+                return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+            }
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
             return errorResponse(response, 401, e.getMessage());
@@ -453,23 +474,12 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePost(PersistenceManager pm, String urlPath, ServiceResponse response, ServiceRequest request) throws IOException {
-        ResourcePath path;
-        final Version version = request.getVersion();
-        try {
-            path = PathParser.parsePath(
-                    modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(),
-                    version,
-                    urlPath,
-                    request.getUserPrincipal());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
-        }
-        if (!(path.getMainElement() instanceof PathElementEntitySet)) {
-            return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
-        }
+    private ServiceResponse handlePostRef(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) throws IOException {
+        
+        return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+    }
 
+    private ServiceResponse handlePostCollection(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) throws IOException {
         Query query;
         ResultFormatter formatter;
         try {
@@ -477,14 +487,9 @@ public class Service implements AutoCloseable {
                     .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
-            formatter = findFormatter(query, request, version);
+            formatter = findFormatter(query, request);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
             return errorResponse(response, 400, ex.getMessage());
-        }
-
-        if (!pm.validatePath(path)) {
-            maybeCommitAndClose();
-            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
         }
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
@@ -524,13 +529,13 @@ public class Service implements AutoCloseable {
         }
     }
 
-    public ResultFormatter findFormatter(Query query, ServiceRequest request, Version version) throws IncorrectRequestException {
+    public ResultFormatter findFormatter(Query query, ServiceRequest request) throws IncorrectRequestException {
         ResultFormatter formatter;
         String format = query.getFormat();
         if (format == null) {
             format = request.getParameter(REQUEST_PARAM_FORMAT);
         }
-        formatter = settings.getFormatter(version, format);
+        formatter = settings.getFormatter(request.getVersion(), format);
         return formatter;
     }
 
