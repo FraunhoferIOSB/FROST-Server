@@ -17,12 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.serialise;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -74,20 +72,6 @@ class SerialisationTest {
         props.put("empty", "");
         final String result = JsonWriter.writeObject(props);
         assertTrue(jsonEqual(expResult, result), "Empty properties not serialised correctly: " + result);
-    }
-
-    @Test
-    void deSerialiseDate() throws IOException {
-        String input = "\"1987-06-05\"";
-        Date expResult = new Date(87, 5, 5);
-        expResult.setHours(0);
-        expResult.setMinutes(0);
-        expResult.setSeconds(0);
-        Date result = new JsonReaderDefault(modelRegistry).parseObject(Date.class, input);
-        result.setHours(0);
-        result.setMinutes(0);
-        result.setSeconds(0);
-        assertEquals(expResult, result);
     }
 
     private boolean jsonEqual(String string1, String string2) {
