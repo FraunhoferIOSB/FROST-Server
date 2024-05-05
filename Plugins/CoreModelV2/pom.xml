@@ -6,11 +6,11 @@
         <artifactId>FROST-Server.Plugins</artifactId>
         <version>2.4.0-SNAPSHOT</version>
     </parent>
-    <artifactId>FROST-Server.Plugin.CoreModel</artifactId>
+    <artifactId>FROST-Server.Plugin.CoreModelV2</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Plugin.CoreModel</name>
-    <description>The plugin that supplies the core SensorThings API version 1.1 data model.</description>
+    <name>FROST-Server.Plugin.CoreModelV2</name>
+    <description>The SensorThings API Version 2.0 Core Data Model.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
@@ -31,18 +31,13 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.SQLjooq</artifactId>
+            <artifactId>FROST-Server.Plugin.ModelLoader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Util</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
