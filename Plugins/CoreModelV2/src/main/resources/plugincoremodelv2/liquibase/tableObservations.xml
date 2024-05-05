@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2024-05-05-observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-Observation" value="LONG" />
+            <not>
+                <tableExists tableName="observations" />
+            </not>
+        </preConditions>
+        <createTable tableName="observations">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_observations" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-Observation" value="STRING" />
+                <changeLogPropertyDefined property="id-Observation" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="observations" />
+            </not>
+        </preConditions>
+        <createTable tableName="observations">
+            <column name="id" type="${idType-Observation}" defaultValueComputed="${defaultValueComputed-Observation}">
+                <constraints primaryKey="true" primaryKeyName="pk_observations"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="datastream_id" tableName="observations" />
+            </not>
+        </preConditions>
+        <addColumn tableName="observations">
+            <column name="datastream_id" type="${idType-Datastream}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feature_id" type="${idType-Feature}">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phenomenon_time_start" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="phenomenon_time_end" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="valid_time_start" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="valid_time_end" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="result_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="result_type" type="TINYINT"/>
+            <column name="result_number" type="FLOAT8"/>
+            <column name="result_boolean" type="BOOLEAN"/>
+            <column name="result_json" type="JSONB"/>
+            <column name="result_string" type="TEXT"/>
+            <column name="properties" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-observations-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="observations" indexName="observations_datastream_id" />
+            </not>
+        </preConditions>
+
+        <createIndex tableName="observations" indexName="observations_datastream_id">
+            <column name="datastream_id" />
+        </createIndex>
+
+        <createIndex tableName="observations" indexName="observations_feature_id">
+            <column name="feature_id" />
+        </createIndex>
+
+        <createIndex tableName="observations" indexName="obs-ds_id-id">
+            <column name="datastream_id" />
+            <column name="id" />
+        </createIndex>
+
+        <createIndex tableName="observations" indexName="obs-ds_id-pht_se">
+            <column name="datastream_id" />
+            <column name="phenomenon_time_start" />
+            <column name="phenomenon_time_end" />
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>
