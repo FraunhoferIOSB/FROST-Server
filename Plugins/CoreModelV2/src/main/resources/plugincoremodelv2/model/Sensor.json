@@ -1,0 +1,90 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "Sensor",
+            "plural": "Sensors",
+            "adminOnly": false,
+            "table": "sensors",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "name",
+                    "type": "Edm.String",
+                    "required": true,
+                    "nullable": false,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "name"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "description"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "encodingType",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "encoding_type"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "metadata",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "metadata"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "properties",
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "properties",
+                            "isMap": true
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [],
+            "annotations": []
+        }
+    ]
+}

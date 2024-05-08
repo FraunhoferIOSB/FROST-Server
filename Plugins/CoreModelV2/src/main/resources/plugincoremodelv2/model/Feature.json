@@ -1,0 +1,119 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "Feature",
+            "plural": "Features",
+            "adminOnly": false,
+            "table": "features",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "name",
+                    "type": "Edm.String",
+                    "required": true,
+                    "nullable": false,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "name"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "description"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "encodingType",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "encoding_type"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "feature",
+                    "type": "Geometry",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
+                            "fieldSource": "feature",
+                            "fieldGeom": "geom"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "properties",
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "properties",
+                            "isMap": true
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "FeatureTypes",
+                    "entitySet": true,
+                    "entityType": "FeatureType",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "Features",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "features_feature_types",
+                            "linkOurField": "feature_id",
+                            "linkOtherField": "feature_type_id",
+                            "otherTable": "feature_types",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "annotations": []
+        }
+    ]
+}

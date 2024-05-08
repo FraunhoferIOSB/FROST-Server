@@ -42,7 +42,7 @@ public class PluginCoreModelV2 implements Plugin, ConfigDefaults {
     private boolean enabled;
 
     public PluginCoreModelV2() {
-        LOGGER.info("Creating new DataQuality Plugin.");
+        LOGGER.info("Creating new CoreModelV2 Plugin.");
     }
 
     @Override
@@ -58,6 +58,15 @@ public class PluginCoreModelV2 implements Plugin, ConfigDefaults {
                 throw new IllegalArgumentException(INIT_FAILED);
             }
             pml.addLiquibaseFile("plugincoremodelv2/liquibase/tables.xml");
+            pml.addModelFile("plugincoremodelv2/model/Datastream.json");
+            pml.addModelFile("plugincoremodelv2/model/Feature.json");
+            pml.addModelFile("plugincoremodelv2/model/FeatureType.json");
+            pml.addModelFile("plugincoremodelv2/model/HistoricalLocation.json");
+            pml.addModelFile("plugincoremodelv2/model/Location.json");
+            pml.addModelFile("plugincoremodelv2/model/Observation.json");
+            pml.addModelFile("plugincoremodelv2/model/ObservedProperty.json");
+            pml.addModelFile("plugincoremodelv2/model/Sensor.json");
+            pml.addModelFile("plugincoremodelv2/model/Thing.json");
         }
     }
 

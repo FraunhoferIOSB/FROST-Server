@@ -1,0 +1,109 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "Thing",
+            "plural": "Things",
+            "adminOnly": false,
+            "table": "things",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "name",
+                    "type": "Edm.String",
+                    "required": true,
+                    "nullable": false,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "name"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "description"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "properties",
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "properties",
+                            "isMap": true
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "Locations",
+                    "entitySet": true,
+                    "entityType": "Location",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "Things",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "things_locations",
+                            "linkOurField": "thing_id",
+                            "linkOtherField": "location_id",
+                            "otherTable": "locations",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "hooks": [
+                {
+                    "hook": {
+                        "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.HookPrePostInsertUpdateThing",
+                        "ttlName": "things_locations",
+                        "ttlThingIdName": "thing_id",
+                        "ttlLocationIdName": "location_id",
+                        "tlhlName": "locations_hist_locations",
+                        "tlhlHistLocationIdName": "hist_location_id",
+                        "thlTimeName": "time"
+                    }
+                }
+            ],
+            "annotations": []
+        }
+    ]
+}
