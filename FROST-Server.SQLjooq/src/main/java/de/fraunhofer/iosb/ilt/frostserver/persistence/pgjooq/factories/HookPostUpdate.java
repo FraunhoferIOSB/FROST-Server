@@ -25,12 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
- * A hook that can be registered on a table and will get executed before an
- * update happens.
+ * A hook that can be registered on a table and will get executed after an
+ * update has happened.
  *
  * @author hylke
  */
-public interface HookPreUpdate extends JooqPmHook {
+public interface HookPostUpdate extends JooqPmHook {
 
-    public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    public void postUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 }

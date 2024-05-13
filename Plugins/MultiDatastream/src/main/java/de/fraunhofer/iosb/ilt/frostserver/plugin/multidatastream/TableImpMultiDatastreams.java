@@ -326,7 +326,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                     return true;
                 });
         obsPropsTable.registerHookPreUpdate(-1,
-                (pm, entity, entityId) -> {
+                (pm, entity, entityId, updateMode) -> {
                     EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
                     if (mds != null && !mds.isEmpty()) {
                         throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
@@ -385,7 +385,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             return true;
         });
         // On update, make sure we still have either a DS or MDS, but not both.
-        observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {
+        observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId, updateMode) -> {
             Entity oldObservation = pm.get(pluginCoreModel.etObservation, entityId);
             boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
             boolean newHasMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);

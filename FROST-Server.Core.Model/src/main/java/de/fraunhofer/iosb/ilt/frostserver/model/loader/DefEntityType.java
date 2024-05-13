@@ -112,10 +112,19 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      * Validators that are used to validate entities of this type.
      */
     @ConfigurableField(editor = EditorList.class, optional = true,
-            label = "NavProps")
+            label = "Validators", description = "Entity Validators")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
     @EditorSubclass.EdOptsSubclass(iface = DefValidator.class, merge = true, nameField = "@class", shortenClassNames = true)
     private List<DefValidator> validators = new ArrayList<>();
+
+    /**
+     * Hooks that are used to validate entities of this type.
+     */
+    @ConfigurableField(editor = EditorList.class, optional = true,
+            label = "PM Hooks", description = "Persistence Manager Hooks")
+    @EditorList.EdOptsList(editor = EditorClass.class)
+    @EditorClass.EdOptsClass(clazz = DefPmHook.class)
+    private List<DefPmHook> hooks = new ArrayList<>();
 
     /**
      * The (OData)annotations for this Element.
@@ -163,6 +172,10 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         }
 
         return entityType;
+    }
+
+    public List<DefPmHook> getHooks() {
+        return hooks;
     }
 
     public void linkProperties(ModelRegistry modelRegistry) {

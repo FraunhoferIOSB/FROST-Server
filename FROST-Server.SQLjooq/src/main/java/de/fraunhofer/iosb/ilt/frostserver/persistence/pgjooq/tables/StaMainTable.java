@@ -24,6 +24,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
@@ -120,6 +123,16 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public void registerHookPreInsert(double priority, HookPreInsert hook);
 
     /**
+     * Add a hook that runs post-insert.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPostInsert(double priority, HookPostInsert hook);
+
+    /**
      * Add a hook that runs pre-update.
      *
      * @param priority The priority. Lower priority hooks run first. This is a
@@ -130,6 +143,16 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public void registerHookPreUpdate(double priority, HookPreUpdate hook);
 
     /**
+     * Add a hook that runs post-update.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPostUpdate(double priority, HookPostUpdate hook);
+
+    /**
      * Add a hook that runs pre-delete.
      *
      * @param priority The priority. Lower priority hooks run first. This is a
@@ -138,6 +161,16 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * @param hook The hook
      */
     public void registerHookPreDelete(double priority, HookPreDelete hook);
+
+    /**
+     * Add a hook that runs post-delete.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPostDelete(double priority, HookPostDelete hook);
 
     public default Condition joinSelf(StaMainTable t2) {
         return joinSelf(this, t2);

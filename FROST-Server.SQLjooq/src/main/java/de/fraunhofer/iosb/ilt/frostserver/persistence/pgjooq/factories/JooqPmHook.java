@@ -17,20 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 
 /**
- * A hook that can be registered on a table and will get executed before an
- * update happens.
- *
- * @author hylke
+ * Interface for JooqPersistenceManager compatible Hooks.
  */
-public interface HookPreUpdate extends JooqPmHook {
+public interface JooqPmHook extends PmHook {
 
-    public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 }

@@ -34,6 +34,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
@@ -100,8 +103,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     private SecurityTableWrapper securityWrapper;
 
     private final transient SortedSet<SortingWrapper<Double, HookPreInsert>> hooksPreInsert;
+    private final transient SortedSet<SortingWrapper<Double, HookPostInsert>> hooksPostInsert;
     private final transient SortedSet<SortingWrapper<Double, HookPreUpdate>> hooksPreUpdate;
+    private final transient SortedSet<SortingWrapper<Double, HookPostUpdate>> hooksPostUpdate;
     private final transient SortedSet<SortingWrapper<Double, HookPreDelete>> hooksPreDelete;
+    private final transient SortedSet<SortingWrapper<Double, HookPostDelete>> hooksPostDelete;
 
     protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliasedBase, Table updatedSql) {
         super(alias, null, updatedSql);
@@ -110,16 +116,22 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             pfReg = new PropertyFieldRegistry<>(getThis());
             relations = new HashMap<>();
             hooksPreInsert = new TreeSet<>();
+            hooksPostInsert = new TreeSet<>();
             hooksPreUpdate = new TreeSet<>();
+            hooksPostUpdate = new TreeSet<>();
             hooksPreDelete = new TreeSet<>();
+            hooksPostDelete = new TreeSet<>();
             customFields = new ArrayList<>();
         } else {
             init(aliasedBase.getModelRegistry(), aliasedBase.getTables());
             pfReg = new PropertyFieldRegistry<>(getThis(), aliasedBase.getPropertyFieldRegistry());
             relations = aliasedBase.relations;
             hooksPreInsert = aliasedBase.hooksPreInsert;
+            hooksPostInsert = aliasedBase.hooksPostInsert;
             hooksPreUpdate = aliasedBase.hooksPreUpdate;
+            hooksPostUpdate = aliasedBase.hooksPostUpdate;
             hooksPreDelete = aliasedBase.hooksPreDelete;
+            hooksPostDelete = aliasedBase.hooksPostDelete;
             customFields = aliasedBase.customFields;
         }
     }
@@ -165,30 +177,29 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         hooksPreInsert.add(new SortingWrapper<>(priority, hook));
     }
 
-    /**
-     * Add a hook that runs pre-update.
-     *
-     * @param priority The priority. Lower priority hooks run first. This is a
-     * double to make sure it is always possible to squeeze in between two other
-     * hooks.
-     * @param hook The hook
-     */
+    @Override
+    public void registerHookPostInsert(double priority, HookPostInsert hook) {
+        hooksPostInsert.add(new SortingWrapper<>(priority, hook));
+    }
+
     @Override
     public void registerHookPreUpdate(double priority, HookPreUpdate hook) {
         hooksPreUpdate.add(new SortingWrapper<>(priority, hook));
     }
 
-    /**
-     * Add a hook that runs pre-delete.
-     *
-     * @param priority The priority. Lower priority hooks run first. This is a
-     * double to make sure it is always possible to squeeze in between two other
-     * hooks.
-     * @param hook The hook
-     */
+    @Override
+    public void registerHookPostUpdate(double priority, HookPostUpdate hook) {
+        hooksPostUpdate.add(new SortingWrapper<>(priority, hook));
+    }
+
     @Override
     public void registerHookPreDelete(double priority, HookPreDelete hook) {
         hooksPreDelete.add(new SortingWrapper<>(priority, hook));
+    }
+
+    @Override
+    public void registerHookPostDelete(double priority, HookPostDelete hook) {
+        hooksPostDelete.add(new SortingWrapper<>(priority, hook));
     }
 
     @Override
@@ -253,7 +264,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         // First, run the pre-insert hooks in the PRE_RELATION fase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().insertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
+            if (!hookWrapper.getObject().preInsertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
                 return false;
             }
         }
@@ -272,7 +283,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         // Third, run the pre-insert hooks in POST_RELATION fase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().insertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
+            if (!hookWrapper.getObject().preInsertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
                 return false;
             }
         }
@@ -308,6 +319,13 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             if (entity.isSetProperty(np)) {
                 LOGGER.debug("  Linking {}", np);
                 updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
+            }
+        }
+
+        // Finally, run the post-insert hooks in POST_INSERT fase.
+        for (SortingWrapper<Double, HookPostInsert> hookWrapper : hooksPostInsert) {
+            if (!hookWrapper.getObject().postInsertIntoDatabase(pm, entity, insertFields)) {
+                return false;
             }
         }
 
@@ -360,6 +378,10 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             relation.link(pm, entity, linkedSet, navProp);
         } else {
             for (Entity child : linkedSet) {
+                EntityFactories ef = pm.getEntityFactories();
+                if (!ef.entityExists(pm, child, false)) {
+                    throw new NoSuchEntityException("Can not link " + child.getEntityType() + " with no id.");
+                }
                 relation.link(pm, entity, child, navProp);
             }
         }
@@ -374,7 +396,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         final EntityChangedMessage message = new EntityChangedMessage();
 
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : hooksPreUpdate) {
-            hookWrapper.getObject().updateInDatabase(pm, entity, entityId);
+            hookWrapper.getObject().preUpdateInDatabase(pm, entity, entityId, updateMode);
         }
 
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
@@ -425,13 +447,18 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
             }
         }
+
+        for (SortingWrapper<Double, HookPostUpdate> hookWrapper : hooksPostUpdate) {
+            hookWrapper.getObject().postUpdateInDatabase(pm, entity, entityId, updateMode);
+        }
+
         return message;
     }
 
     @Override
     public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException {
         for (SortingWrapper<Double, HookPreDelete> hookWrapper : hooksPreDelete) {
-            hookWrapper.getObject().delete(pm, entityId);
+            hookWrapper.getObject().preDelete(pm, entityId);
         }
 
         final List<Field> pkFields = getPkFields();
@@ -448,6 +475,10 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Entity of type " + getEntityType() + " with id " + entityId + " not found.");
+        } else {
+            for (SortingWrapper<Double, HookPostDelete> hookWrapper : hooksPostDelete) {
+                hookWrapper.getObject().postDelete(pm, entityId);
+            }
         }
         LOGGER.debug("Deleted {} Entities of type {}", count, getEntityType());
     }

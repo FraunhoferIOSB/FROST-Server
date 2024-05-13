@@ -17,20 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
- * A hook that can be registered on a table and will get executed before an
- * update happens.
+ * A hook that can be registered on a table and will get executed after a
+ * postDelete has happened.
  *
  * @author hylke
  */
-public interface HookPreUpdate extends JooqPmHook {
+public interface HookPostDelete extends JooqPmHook {
 
-    public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    /**
+     *
+     * @param pm The PersistenceManager for database access.
+     * @param entityId The entity ID that is going to be deleted.
+     * @throws NoSuchEntityException if something is wrong. This will cancel the
+     * action.
+     */
+    public void postDelete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 }

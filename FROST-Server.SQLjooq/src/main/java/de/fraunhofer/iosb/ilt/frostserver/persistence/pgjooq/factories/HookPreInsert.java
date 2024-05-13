@@ -30,7 +30,7 @@ import org.jooq.Field;
  *
  * @author hylke
  */
-public interface HookPreInsert {
+public interface HookPreInsert extends JooqPmHook {
 
     /**
      * The fase the pre-insert hook is running in.
@@ -44,7 +44,11 @@ public interface HookPreInsert {
          * Phase after relations are loaded / created but before the entity
          * itself is created.
          */
-        POST_RELATIONS
+        POST_RELATIONS,
+        /**
+         * Phase after the insert has been done.
+         */
+        POST_INSERT
     }
 
     /**
@@ -58,6 +62,6 @@ public interface HookPreInsert {
      * @throws NoSuchEntityException If a related entity does not exist.
      * @throws IncompleteEntityException If the entity is not complete.
      */
-    public boolean insertIntoDatabase(Phase fase, JooqPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean preInsertIntoDatabase(Phase fase, JooqPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
 
 }

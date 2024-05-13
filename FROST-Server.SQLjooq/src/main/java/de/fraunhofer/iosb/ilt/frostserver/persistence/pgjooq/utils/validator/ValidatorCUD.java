@@ -89,7 +89,7 @@ public class ValidatorCUD implements HookValidator {
         }
         if (getCheckUpdate() != null) {
             LOGGER.info("    - update: {}", getCheckUpdate());
-            mainTable.registerHookPreUpdate(-10, (pm, entity, id) -> {
+            mainTable.registerHookPreUpdate(-10, (pm, entity, id, updateMode) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return;
                 }

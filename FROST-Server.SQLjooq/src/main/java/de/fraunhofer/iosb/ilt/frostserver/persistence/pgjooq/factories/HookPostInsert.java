@@ -18,19 +18,30 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.util.Map;
+import org.jooq.Field;
 
 /**
  * A hook that can be registered on a table and will get executed before an
- * update happens.
+ * insert happens.
  *
  * @author hylke
  */
-public interface HookPreUpdate extends JooqPmHook {
+public interface HookPostInsert extends JooqPmHook {
 
-    public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    /**
+     *
+     * @param pm The Persistence Manager to use for database queries.
+     * @param entity The entity that is being inserted.
+     * @param insertFields The fields being inserted.
+     * @return true if the insert can continue, false if the insert should be
+     * skipped without error.
+     * @throws NoSuchEntityException If a related entity does not exist.
+     * @throws IncompleteEntityException If the entity is not complete.
+     */
+    public boolean postInsertIntoDatabase(JooqPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException;
+
 }

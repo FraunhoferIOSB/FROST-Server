@@ -22,12 +22,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
- * A hook that can be registered on a table and will get executed after a delete
- * has happened.
+ * A hook that can be registered on a table and will get executed before a
+ * preDelete has happened.
  *
  * @author hylke
  */
-public interface HookPreDelete {
+public interface HookPreDelete extends JooqPmHook {
 
     /**
      *
@@ -36,5 +36,5 @@ public interface HookPreDelete {
      * @throws NoSuchEntityException if something is wrong. This will cancel the
      * action.
      */
-    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
+    public void preDelete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 }
