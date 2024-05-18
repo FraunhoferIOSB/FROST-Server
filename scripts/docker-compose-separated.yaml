@@ -1,4 +1,3 @@
-
 services:
   web:
     image: fraunhoferiosb/frost-server-http:latest
