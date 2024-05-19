@@ -304,6 +304,22 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return null;
     }
 
+    public NavigationPropertyEntity getNavigationPropertyEntity(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyEntity npe) {
+            return npe;
+        }
+        return null;
+    }
+
+    public NavigationPropertyEntitySet getNavigationPropertyEntitySet(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyEntitySet npes) {
+            return npes;
+        }
+        return null;
+    }
+
     /**
      * The Set of PROPERTIES that Entities of this type have.
      *
