@@ -23,12 +23,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import net.time4j.Moment;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +76,17 @@ class SerialisationTest {
         props.put("empty", "");
         final String result = JsonWriter.writeObject(props);
         assertTrue(jsonEqual(expResult, result), "Empty properties not serialised correctly: " + result);
+    }
+
+    @Test
+    void parseDateTimeOffset() {
+        TimeInstant expected = TimeInstant.create(Moment.from(Instant.ofEpochSecond(1_700_000_000)));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T22:13:20Z"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T22:13:20+00:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T23:13:20+01:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-15T00:13:20+02:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T21:13:20-01"));
+        // Not supported at the moment: Assertions.assertEquals(expected, TimeInstant.parse("20231114T221320+00:00"));
     }
 
     private boolean jsonEqual(String string1, String string2) {
