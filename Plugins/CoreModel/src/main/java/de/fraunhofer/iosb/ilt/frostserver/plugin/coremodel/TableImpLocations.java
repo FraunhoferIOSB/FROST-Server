@@ -17,12 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -36,15 +33,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
 import java.util.List;
-import net.time4j.Moment;
 import org.geolatte.geom.Geometry;
-import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -54,8 +46,6 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
 
@@ -69,7 +59,6 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     public static final String NAME_COL_NAME = "NAME";
     public static final String NAME_COL_PROPERTIES = "PROPERTIES";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpLocations.class.getName());
     private static final long serialVersionUID = -806078255;
 
     /**
@@ -188,89 +177,12 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId);
         pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId);
-    }
-
-    @Override
-    protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
-        EntityType linkedEntityType = linkedSet.getEntityType();
-        ModelRegistry modelRegistry = getModelRegistry();
-        if (linkedEntityType.equals(pluginCoreModel.etThing)) {
-            Object locationId = location.getPrimaryKeyValues().get(0);
-            DSLContext dslContext = pm.getDslContext();
-            EntityFactories entityFactories = pm.getEntityFactories();
-            final TableCollection tables = getTables();
-            TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
-
-            // Maybe Create new Things and link them to this Location.
-            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
-            for (Entity t : linkedSet) {
-                if (updateMode.createAndLinkNew) {
-                    entityFactories.entityExistsOrCreate(pm, t, updateMode);
-                } else if (!entityFactories.entityExists(pm, t, admin)) {
-                    throw new NoSuchEntityException("Thing not found.");
-                }
-
-                Object thingId = t.getPrimaryKeyValues().get(0);
-
-                // Unlink old Locations from Thing.
-                long delCount = dslContext.delete(ttl)
-                        .where(((TableField) ttl.getThingId()).eq(thingId))
-                        .execute();
-                LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, delCount, thingId);
-
-                // Link new Location to thing.
-                dslContext.insertInto(ttl)
-                        .set((TableField) ttl.getThingId(), thingId)
-                        .set(ttl.getLocationId(), locationId)
-                        .execute();
-                LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
-
-                // Create HistoricalLocation for Thing
-                TableImpHistLocations qhl = tables.getTableForClass(TableImpHistLocations.class);
-                Object histLocationId = dslContext.insertInto(qhl)
-                        .set((TableField) qhl.getThingId(), thingId)
-                        .set(qhl.time, Moment.nowInSystemTime())
-                        .returningResult(qhl.getId())
-                        .fetchOne(0);
-                LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
-
-                // Link Location to HistoricalLocation.
-                TableImpLocationsHistLocations qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
-                dslContext.insertInto(qlhl)
-                        .set((TableField) qlhl.getHistLocationId(), histLocationId)
-                        .set(qlhl.getLocationId(), locationId)
-                        .execute();
-                LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
-
-                // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, PkValue.of(histLocationId));
-                newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
-                pm.getEntityChangedMessages().add(
-                        new EntityChangedMessage()
-                                .setEventType(EntityChangedMessage.Type.CREATE)
-                                .setEntity(newHl));
-            }
-            return;
-        }
-        super.updateNavigationPropertySet(location, linkedSet, pm, updateMode);
-    }
-
-    @Override
-    public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException {
-        super.delete(pm, entityId);
-        final TableCollection tables = getTables();
-        // Also delete all historicalLocations that no longer reference any location
-        TableImpHistLocations thl = tables.getTableForClass(TableImpHistLocations.class);
-        TableImpLocationsHistLocations tlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
-        int count = pm.getDslContext()
-                .delete(thl)
-                .where(((TableField) thl.getId()).in(
-                        DSL.select(thl.getId())
-                                .from(thl)
-                                .leftJoin(tlhl).on(((TableField) thl.getId()).eq(tlhl.getHistLocationId()))
-                                .where(tlhl.getLocationId().isNull())))
-                .execute();
-        LOGGER.debug("Deleted {} HistoricalLocations", count);
+        registerHookPostDelete(0, new HookPostDeleteLocation());
+        HookPrePostInsertUpdateLocation hook = new HookPrePostInsertUpdateLocation();
+        registerHookPreInsert(0, hook);
+        registerHookPostInsert(0, hook);
+        registerHookPreUpdate(0, hook);
+        registerHookPostUpdate(0, hook);
 
     }
 

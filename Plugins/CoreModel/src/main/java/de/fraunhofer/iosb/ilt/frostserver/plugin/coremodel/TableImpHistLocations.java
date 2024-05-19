@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -29,15 +27,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import net.time4j.Moment;
-import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -46,8 +39,6 @@ import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocations> {
 
@@ -56,7 +47,6 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     public static final String NAME_COL_THINGID = "THING_ID";
     public static final String NAME_COL_TIME = "TIME";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpHistLocations.class.getName());
     private static final long serialVersionUID = -1457801967;
 
     /**
@@ -123,56 +113,7 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
                 new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time));
         pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId);
         pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
-    }
-
-    @Override
-    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity histLoc, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
-        super.insertIntoDatabase(pm, histLoc, updateMode);
-        EntityFactories entityFactories = pm.getEntityFactories();
-        Entity thing = histLoc.getProperty(pluginCoreModel.npThingHistLoc);
-        Object thingId = thing.getPrimaryKeyValues().get(0);
-        DSLContext dslContext = pm.getDslContext();
-        TableImpHistLocations thl = getTables().getTableForClass(TableImpHistLocations.class);
-
-        final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.epTime);
-        Moment newTime = hlTime.getDateTime();
-        // https://github.com/opengeospatial/sensorthings/issues/30
-        // Check the time of the latest HistoricalLocation of our thing.
-        // If this time is earlier than our time, set the Locations of our Thing to our Locations.
-        Record lastHistLocation = dslContext.select(Collections.emptyList())
-                .from(thl)
-                .where(
-                        ((TableField) thl.getThingId()).eq(thingId)
-                                .and(thl.time.gt(newTime)))
-                .orderBy(thl.time.desc())
-                .limit(1)
-                .fetchOne();
-        if (lastHistLocation == null) {
-            // We are the newest.
-            // Unlink old Locations from Thing.
-            TableImpThingsLocations qtl = getTables().getTableForClass(TableImpThingsLocations.class);
-            long count = dslContext
-                    .delete(qtl)
-                    .where(((TableField) qtl.getThingId()).eq(thingId))
-                    .execute();
-            LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
-
-            // Link new locations to Thing.
-            for (Entity l : histLoc.getProperty(pluginCoreModel.npLocationsHistLoc)) {
-                if (!l.getPrimaryKeyValues().isFullySet() || !entityFactories.entityExists(pm, l, true)) {
-                    throw new NoSuchEntityException("Location with no id.");
-                }
-                Object locationId = l.getPrimaryKeyValues().get(0);
-
-                dslContext.insertInto(qtl)
-                        .set(((TableField) qtl.getThingId()), thingId)
-                        .set((qtl.getLocationId()), locationId)
-                        .execute();
-                LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
-            }
-        }
-
-        return true;
+        registerHookPostInsert(0, new HookPostInsertHistLoc());
     }
 
     @Override

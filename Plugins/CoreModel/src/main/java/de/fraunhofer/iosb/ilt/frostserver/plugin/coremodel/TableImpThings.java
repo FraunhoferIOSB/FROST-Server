@@ -17,12 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -32,15 +28,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.time4j.Moment;
-import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -136,76 +126,11 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
         pfReg.addEntry(pluginCoreModel.npDatastreamsThing, TableImpThings::getId);
         pfReg.addEntry(pluginCoreModel.npHistoricalLocationsThing, TableImpThings::getId);
         pfReg.addEntry(pluginCoreModel.npLocationsThing, TableImpThings::getId);
-    }
-
-    @Override
-    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        EntityType linkedEntityType = linkedSet.getEntityType();
-        if (linkedEntityType.equals(pluginCoreModel.etLocation)) {
-            final TableCollection tables = getTables();
-            // We know a Thing has a single-valued PK.
-            Object thingId = thing.getPrimaryKeyValues().get(0);
-            DSLContext dslContext = pm.getDslContext();
-            EntityFactories entityFactories = pm.getEntityFactories();
-            TableImpThingsLocations ttl = tables.getTableForClass(TableImpThingsLocations.class);
-
-            // Unlink old Locations from Thing.
-            long count = dslContext.delete(ttl).where(((TableField) ttl.getThingId()).eq(thingId)).execute();
-            LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
-
-            // Maybe Create new Locations and link them to this Thing.
-            List<Object> locationIds = new ArrayList<>();
-            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
-            for (Entity l : linkedSet) {
-                if (updateMode.createAndLinkNew) {
-                    entityFactories.entityExistsOrCreate(pm, l, updateMode);
-                } else if (!entityFactories.entityExists(pm, l, admin)) {
-                    throw new NoSuchEntityException("Linked Location with no id.");
-                }
-                PkValue lPk = l.getPrimaryKeyValues();
-                Object lId = lPk.get(0);
-
-                dslContext.insertInto(ttl)
-                        .set((TableField) ttl.getThingId(), thingId)
-                        .set(ttl.getLocationId(), lId)
-                        .execute();
-                LOGGER.debug(EntityFactories.LINKED_L_TO_T, lId, thingId);
-                locationIds.add(lId);
-            }
-
-            // Now link the new locations also to a historicalLocation.
-            if (!locationIds.isEmpty()) {
-                // Insert a new HL into the DB
-                TableImpHistLocations qhl = tables.getTableForClass(TableImpHistLocations.class);
-                Object histLocationId = dslContext.insertInto(qhl)
-                        .set((TableField) qhl.getThingId(), thingId)
-                        .set(qhl.time, Moment.nowInSystemTime())
-                        .returningResult(qhl.getId())
-                        .fetchOne(0);
-                LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
-
-                // Link the locations to the new HL
-                TableImpLocationsHistLocations qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
-                for (Object locId : locationIds) {
-                    dslContext.insertInto(qlhl)
-                            .set(((TableField) qlhl.getHistLocationId()), histLocationId)
-                            .set((qlhl.getLocationId()), locId)
-                            .execute();
-                    LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locId, histLocationId);
-                }
-
-                // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, PkValue.of(histLocationId));
-                newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
-                pm.getEntityChangedMessages().add(
-                        new EntityChangedMessage()
-                                .setEventType(EntityChangedMessage.Type.CREATE)
-                                .setEntity(newHl));
-            }
-            return;
-        }
-        super.updateNavigationPropertySet(thing, linkedSet, pm, updateMode);
+        HookPrePostInsertUpdateThing hook = new HookPrePostInsertUpdateThing();
+        registerHookPreInsert(0, hook);
+        registerHookPostInsert(0, hook);
+        registerHookPreUpdate(0, hook);
+        registerHookPostUpdate(0, hook);
     }
 
     @Override
