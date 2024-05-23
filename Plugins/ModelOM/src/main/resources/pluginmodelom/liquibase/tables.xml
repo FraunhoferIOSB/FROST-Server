@@ -1,0 +1,201 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Table for Deployment -->
+    <changeSet author="IOSB" id="2024-05-05_Deployment-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-Deployment" value="LONG" />
+        </preConditions>
+        <createTable tableName="deployments">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_deployments" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="IOSB" id="2024-05-05_Deployment-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-Deployment" value="STRING" />
+                <changeLogPropertyDefined property="id-Deployment" value="UUID" />
+            </or>
+        </preConditions>
+        <createTable tableName="deployments">
+            <column name="id" type="${idType-Deployment}" defaultValueComputed="${defaultValueComputed-Deployment}">
+                <constraints primaryKey="true" primaryKeyName="pk_deployments" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="IOSB" id="2024-05-05_Deployment-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addColumn tableName="deployments">
+            <column name="sensor_id" type="${idType-Sensor}" />
+            <column name="thing_id" type="${idType-Thing}" />
+            <column name="name" type="TEXT" />
+            <column name="description" type="TEXT" />
+            <column name="properties" type="JSONB" />
+            <column name="reason" type="TEXT" />
+            <column name="encoding_type" type="TEXT"/>
+            <column name="position" type="TEXT"/>
+            <column name="geom" type="geometry(Geometry,4326)"/>
+            <column name="time_start" type="TIMESTAMP WITH TIME ZONE" />
+            <column name="time_end" type="TIMESTAMP WITH TIME ZONE" />
+        </addColumn>
+        <createIndex tableName="deployments" indexName="deployments_sensor_id">
+            <column name="sensor_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_deployments_sensor_id"
+            baseTableName="deployments" baseColumnNames="sensor_id"
+            referencedTableName="sensors" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+        <createIndex tableName="deployments" indexName="deployments_thing_id">
+            <column name="thing_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_deployments_thing_id"
+            baseTableName="deployments" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+    </changeSet>
+
+
+    <!-- Table for ObservingProcedure -->
+    <changeSet author="IOSB" id="2024-05-05_ObservingProcedure-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-ObservingProcedure" value="LONG" />
+        </preConditions>
+        <createTable tableName="observing_procedures">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_observing_procedures" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="IOSB" id="2024-05-05_ObservingProcedure-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-ObservingProcedure" value="STRING" />
+                <changeLogPropertyDefined property="id-ObservingProcedure" value="UUID" />
+            </or>
+        </preConditions>
+        <createTable tableName="observing_procedures">
+            <column name="id" type="${idType-ObservingProcedure}" defaultValueComputed="${defaultValueComputed-ObservingProcedure}">
+                <constraints primaryKey="true" primaryKeyName="pk_observing_procedures" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="IOSB" id="2024-05-05_ObservingProcedure-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addColumn tableName="observing_procedures">
+            <column name="name" type="TEXT" />
+            <column name="description" type="TEXT" />
+            <column name="definition" type="TEXT" />
+            <column name="properties" type="JSONB" />
+        </addColumn>
+        <addColumn tableName="datastreams">
+            <column name="observing_procedure_id" type="${idType-ObservingProcedure}" />
+        </addColumn>
+
+        <createIndex tableName="datastreams" indexName="datastreams_observing_procedure_id">
+            <column name="observing_procedure_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_datastreams_observing_procedure_id"
+            baseTableName="datastreams" baseColumnNames="observing_procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+    </changeSet>
+
+    <!-- LinkTable ObservingProcedure - Sensor -->
+    <changeSet author="IOSB" id="2024-05-05_ObservingProcedure-Sensor" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createTable tableName="sensor_observing_procedure">
+            <column name="sensor_id" type="${idType-Sensor}">
+                <constraints nullable="false" />
+            </column>
+            <column name="procedure_id" type="${idType-ObservingProcedure}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="sensor_id, procedure_id" constraintName="pk_sensor_observing_procedure" tableName="sensor_observing_procedure" />
+
+        <createIndex tableName="sensor_observing_procedure" indexName="sensor_observing_procedure_sensor_id">
+            <column name="sensor_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_sensor_observing_procedure_sensor_id"
+            baseTableName="sensor_observing_procedure" baseColumnNames="sensor_id"
+            referencedTableName="sensors" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+
+        <createIndex tableName="sensor_observing_procedure" indexName="sensor_observing_procedure_procedure_id">
+            <column name="procedure_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_sensor_observing_procedure_procedure_id"
+            baseTableName="sensor_observing_procedure" baseColumnNames="procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+    </changeSet>
+
+
+    <!-- LinkTable ObservingProcedure - ObservedProperty -->
+    <changeSet author="IOSB" id="2024-05-05_ObservingProcedure-ObservedProperty" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createTable tableName="observed_property_observing_procedure">
+            <column name="observed_property_id" type="${idType-ObservedProperty}">
+                <constraints nullable="false" />
+            </column>
+            <column name="procedure_id" type="${idType-ObservingProcedure}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="observed_property_id, procedure_id" constraintName="pk_observed_property_observing_procedure" tableName="observed_property_observing_procedure" />
+
+        <createIndex tableName="observed_property_observing_procedure" indexName="observed_property_observing_procedure_observed_property_id">
+            <column name="observed_property_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_observed_property_observing_procedure_observed_property_id"
+            baseTableName="observed_property_observing_procedure" baseColumnNames="observed_property_id"
+            referencedTableName="observed_properties" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+
+        <createIndex tableName="observed_property_observing_procedure" indexName="observed_property_observing_procedure_procedure_id">
+            <column name="procedure_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_observed_property_observing_procedure_procedure_id"
+            baseTableName="observed_property_observing_procedure" baseColumnNames="procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+    </changeSet>
+
+
+
+    <!-- LinkTable Deployment - Datastream -->
+    <changeSet author="IOSB" id="2024-05-05_Deployment-Datastream" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createTable tableName="deployment_datastream">
+            <column name="datastream_id" type="${idType-Datastream}">
+                <constraints nullable="false" />
+            </column>
+            <column name="deployment_id" type="${idType-Deployment}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="deployment_id, datastream_id" constraintName="pk_deployment_datastream" tableName="deployment_datastream" />
+
+        <createIndex tableName="deployment_datastream" indexName="deployment_datastream_deployment_id">
+            <column name="deployment_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_deployment_datastream_deployment_id"
+            baseTableName="deployment_datastream" baseColumnNames="deployment_id"
+            referencedTableName="observed_properties" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+
+        <createIndex tableName="deployment_datastream" indexName="deployment_datastream_procedure_id">
+            <column name="procedure_id" />
+        </createIndex>
+        <addForeignKeyConstraint constraintName="fk_deployment_datastream_datastream_id"
+            baseTableName="deployment_datastream" baseColumnNames="datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" validate="true" />
+    </changeSet>
+
+
+</databaseChangeLog>

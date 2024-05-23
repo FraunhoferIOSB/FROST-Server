@@ -20,6 +20,7 @@
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>
         <module>ModelLoader</module>
+        <module>ModelOM</module>
         <module>MultiDatastream</module>
         <module>OData</module>
         <module>OpenApi</module>
