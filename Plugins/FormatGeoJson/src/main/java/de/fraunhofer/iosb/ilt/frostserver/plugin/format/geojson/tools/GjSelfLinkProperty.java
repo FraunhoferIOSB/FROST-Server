@@ -42,7 +42,7 @@ public class GjSelfLinkProperty implements GjEntityEntry {
 
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
-        collector.collectEntry(namePrefix + name, UrlHelper.generateSelfLink(serviceRootUrl, version, source));
+        collector.collectEntry(namePrefix + name, UrlHelper.generateSelfLink(serviceRootUrl, version, source), null);
     }
 
 }

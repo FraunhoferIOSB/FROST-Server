@@ -17,15 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import com.fasterxml.jackson.core.TreeNode;
 import java.io.IOException;
 import org.geojson.GeoJsonObject;
 import org.geojson.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class GeoHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeoHelper.class.getName());
 
     private GeoHelper() {
         // Not for instantiation.
@@ -43,5 +48,14 @@ public class GeoHelper {
 
     public static GeoJsonObject parseGeoJson(String geoJsonString) throws IOException {
         return SimpleJsonMapper.getSimpleObjectMapper().readValue(geoJsonString, GeoJsonObject.class);
+    }
+
+    public static GeoJsonObject parseGeoJson(TreeNode tn) {
+        try {
+            return SimpleJsonMapper.getSimpleObjectMapper().treeToValue(tn, GeoJsonObject.class);
+        } catch (IOException ex) {
+            LOGGER.debug("Failed to convert to GeoJson: ", tn);
+        }
+        return null;
     }
 }

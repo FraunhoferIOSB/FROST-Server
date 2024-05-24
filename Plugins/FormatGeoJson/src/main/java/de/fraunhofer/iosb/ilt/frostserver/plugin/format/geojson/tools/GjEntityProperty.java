@@ -43,7 +43,7 @@ public class GjEntityProperty implements GjEntityEntry {
 
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
-        collector.collectEntry(namePrefix + name, property.getFrom(source));
+        collector.collectEntry(namePrefix + name, property.getFrom(source), property.getType());
     }
 
 }

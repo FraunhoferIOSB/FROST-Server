@@ -49,7 +49,7 @@ public class GjEntityId implements GjEntityEntry {
         if (topLevel) {
             collector.collectId(property.getFrom(source));
         }
-        collector.collectEntry(namePrefix + name, property.getFrom(source));
+        collector.collectEntry(namePrefix + name, property.getFrom(source), property.getType());
     }
 
 }

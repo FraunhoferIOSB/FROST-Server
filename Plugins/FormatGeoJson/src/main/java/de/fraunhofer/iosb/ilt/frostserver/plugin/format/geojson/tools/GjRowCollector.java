@@ -17,9 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import com.fasterxml.jackson.core.TreeNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimple;
+import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -92,8 +96,9 @@ public class GjRowCollector {
      *
      * @param headerName The name of the element.
      * @param value The value of the element for the current row.
+     * @param type The type of the property.
      */
-    public void collectEntry(String headerName, Object value) {
+    public void collectEntry(String headerName, Object value, PropertyType type) {
         if (value == null) {
             return;
         }
@@ -108,9 +113,15 @@ public class GjRowCollector {
             }
             return;
         }
-        if (value instanceof GeoJsonObject geoJsonObject) {
-            if (feature.getGeometry() == null) {
-                feature.setGeometry(geoJsonObject);
+        boolean isGeom = false;
+        if (type instanceof TypeSimple ts) {
+            if (ts.getUnderlyingType().getName().startsWith("Edm.Geo")) {
+                isGeom = true;
+            }
+        }
+        if (isGeom) {
+            if (feature.getGeometry() == null && value instanceof TreeNode tn) {
+                feature.setGeometry(GeoHelper.parseGeoJson(tn));
             }
             return;
         }
@@ -134,7 +145,7 @@ public class GjRowCollector {
             String key = entry.getKey();
             String header = headerName + "/" + key;
             Object value = entry.getValue();
-            collectEntry(header, value);
+            collectEntry(header, value, null);
         }
     }
 
@@ -142,7 +153,7 @@ public class GjRowCollector {
         int idx = 0;
         for (Object item : list) {
             String header = headerName + "/" + idx;
-            collectEntry(header, item);
+            collectEntry(header, item, null);
             idx++;
         }
     }
