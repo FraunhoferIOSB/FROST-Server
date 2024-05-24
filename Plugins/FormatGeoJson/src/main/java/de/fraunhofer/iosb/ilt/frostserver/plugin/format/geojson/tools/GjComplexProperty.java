@@ -50,14 +50,14 @@ public class GjComplexProperty implements GjEntityEntry {
         Object value = source.getProperty(property);
         if (value instanceof ComplexValue complexValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(namePrefix + entry.getKey(), complexValue.get(entry.getValue()));
+                collector.collectEntry(namePrefix + entry.getKey(), complexValue.get(entry.getValue()), null);
             }
         } else if (value instanceof Map mapValue) {
             for (Map.Entry<String, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()));
+                collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()), null);
             }
         } else {
-            collector.collectEntry(namePrefix + name, property.getFrom(source));
+            collector.collectEntry(namePrefix + name, property.getFrom(source), null);
         }
     }
 
