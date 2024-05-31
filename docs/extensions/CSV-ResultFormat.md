@@ -12,13 +12,13 @@ Since many users still like to work with data in spreadsheet applications, the a
 
 [https://github.com/INSIDE-information-systems/SensorThingsAPI/issues/3](https://github.com/INSIDE-information-systems/SensorThingsAPI/issues/3)
 
-The CSV result format can be requested by setting the request parameter `ResultFormat=CSV`.
+The CSV result format can be requested by setting the request parameter `$resultFormat=CSV`.
 The resulting CSV document must conform to the [RFC 4180](https://tools.ietf.org/html/rfc4180) specification.
 
 
 ## Single Table
 
-For single-table queries, `ResultFormat=CSV` is mostly self-explanatory. 
+For single-table queries, `$resultFormat=CSV` is mostly self-explanatory. 
 The header line contains the direct field names, with each further line having the data of one entity.
 Navigation links are omitted.
 

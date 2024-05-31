@@ -13,6 +13,7 @@
 * Fixed automatic generation of Features when Feature and Location use different idTypes.
 * Fixed GeoJSON output not containing geometries.
 * Fixed $select not properly working on unitOfMeasurement sub-properties.
+* Fixed #1934, incorrect URL parameter in docs.
 
 
 ## Release version 2.3.0
