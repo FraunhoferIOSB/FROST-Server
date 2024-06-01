@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -409,6 +410,13 @@ public class ResultBuilder implements ResourcePathVisitor {
                     resultObject = entityMap;
                     return;
                 }
+            } else if (inner instanceof ComplexValue cv) {
+                Object propertyValue = cv.get(name);
+                Map<String, Object> entityMap = new HashMap<>();
+                entityName = name;
+                entityMap.put(entityName, propertyValue);
+                resultObject = entityMap;
+                return;
             }
         }
 

@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -516,6 +517,34 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etObservation), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
+    @Test
+    void test21SelectUnit() {
+        LOGGER.info("  test21SelectUnit");
+        String urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")/unitOfMeasurement/symbol";
+        JsonNode json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "symbol", DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getSymbol(), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")/unitOfMeasurement/name";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "name", DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getName(), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")/unitOfMeasurement/definition";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "definition", DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getDefinition(), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")?$select=unitOfMeasurement/symbol";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, Arrays.asList("unitOfMeasurement", "symbol"), DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getSymbol(), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")?$select=unitOfMeasurement/name";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, Arrays.asList("unitOfMeasurement", "name"), DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getName(), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Datastreams(" + formatKeyValuesForUrl(DATASTREAMS.get(0)) + ")?$select=unitOfMeasurement/definition";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, Arrays.asList("unitOfMeasurement", "definition"), DATASTREAMS.get(0).getProperty(EP_UNITOFMEASUREMENT).getDefinition(), urlString);
+    }
+
     private JsonNode getJsonObjectForResponse(String urlString) {
         // Ensure [ and ] are urlEncoded.
         urlString = urlString.replaceAll(Pattern.quote("["), "%5B").replaceAll(Pattern.quote("]"), "%5D");
@@ -534,6 +563,21 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
             fail("Server did not return a JSON object for request: " + urlString);
         }
         return json;
+    }
+
+    private void testResponseProperty(JsonNode response, List<String> propertyNames, String expectedValue, String urlForError) {
+        JsonNode container = response;
+        final int size = propertyNames.size();
+        for (int idx = 0; idx < size - 1; idx++) {
+            String propertyName = propertyNames.get(idx);
+            JsonNode value = container.get(propertyName);
+            if (value == null || !value.isContainerNode()) {
+                fail("field '" + propertyName + "' is not a container node for request: " + urlForError);
+                return;
+            }
+            container = value;
+        }
+        testResponseProperty(container, propertyNames.get(size - 1), expectedValue, urlForError);
     }
 
     private void testResponseProperty(JsonNode response, String propertyName, String expectedValue, String urlForError) {

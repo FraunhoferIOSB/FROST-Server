@@ -5,6 +5,7 @@
 **Internal changes & Bugfixes**
 * Added options for adding extra meta data to the landing page using the modelLoader plugin.
 * Fixed GeoJSON output not containing geometries.
+* Fixed $select not properly working on unitOfMeasurement sub-properties.
 
 
 ## Release version 2.3.1
