@@ -12,6 +12,7 @@
 * Fixed deep select for complex properties in GeoJSON and CSV output.
 * Fixed automatic generation of Features when Feature and Location use different idTypes.
 * Fixed GeoJSON output not containing geometries.
+* Fixed $select not properly working on unitOfMeasurement sub-properties.
 
 
 ## Release version 2.3.0

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -409,6 +410,13 @@ public class ResultBuilder implements ResourcePathVisitor {
                     resultObject = entityMap;
                     return;
                 }
+            } else if (inner instanceof ComplexValue cv) {
+                Object propertyValue = cv.getProperty(name);
+                Map<String, Object> entityMap = new HashMap<>();
+                entityName = name;
+                entityMap.put(entityName, propertyValue);
+                resultObject = entityMap;
+                return;
             }
         }
 

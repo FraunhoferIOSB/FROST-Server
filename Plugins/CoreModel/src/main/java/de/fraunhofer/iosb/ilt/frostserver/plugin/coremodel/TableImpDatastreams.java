@@ -369,7 +369,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                                     uom.setSymbol(value);
                                 }
                                 case "definition" -> {
-                                    uom.setSymbol(value);
+                                    uom.setDefinition(value);
                                 }
                                 default -> {
                                     // Do nothing.
