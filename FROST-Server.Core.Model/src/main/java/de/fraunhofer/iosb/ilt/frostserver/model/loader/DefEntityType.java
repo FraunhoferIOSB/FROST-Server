@@ -178,6 +178,10 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         return hooks;
     }
 
+    public void setHooks(List<DefPmHook> hooks) {
+        this.hooks = hooks;
+    }
+
     public void linkProperties(ModelRegistry modelRegistry) {
         LOGGER.debug("  {} ({})", name, plural);
         for (DefEntityProperty defEp : entityProperties) {
@@ -381,6 +385,14 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      */
     public void setAdminOnly(boolean adminOnly) {
         this.adminOnly = adminOnly;
+    }
+
+    public List<String> getOrderByDflt() {
+        return orderByDflt;
+    }
+
+    public void setOrderByDflt(List<String> orderByDflt) {
+        this.orderByDflt = orderByDflt;
     }
 
 }

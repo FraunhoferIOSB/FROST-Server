@@ -17,9 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * Interface for PersistenceManager-specific hooks.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface PmHook {
 
 }
