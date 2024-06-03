@@ -67,6 +67,16 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Plugin.ModelOM</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Plugin.ModelSampling</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
             <version>${project.version}</version>
         </dependency>

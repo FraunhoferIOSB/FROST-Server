@@ -1,0 +1,224 @@
+{
+  "conformance": [
+    "http://www.opengis.net/spec/iot_sensing/2.0/req/sensing-extension-sampling/datamodel"
+  ],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Sampling",
+      "plural": "Samplings",
+      "adminOnly": false,
+      "table": "samplings",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "aliases": [
+            "@iot.id"
+          ],
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "name",
+          "type": "Edm.String",
+          "required": true,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "name"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "encodingType",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "encoding_type"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "location",
+          "type": "Edm.Geometry",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
+              "fieldSource": "location",
+              "fieldGeom": "geom"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "properties",
+          "type": "Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+              "field": "properties",
+              "isMap": true
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "time",
+          "type": "TM_Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
+              "fieldStart": "sampling_time_start",
+              "fieldEnd": "sampling_time_end"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "SampledFeature",
+          "entitySet": false,
+          "entityType": "Feature",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Samplings",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "sampled_feature_id",
+              "otherTable": "features",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Sampler",
+          "entitySet": false,
+          "entityType": "Sampler",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Samplings",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "sampler_id",
+              "otherTable": "samplers",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "SamplingProcedure",
+          "entitySet": false,
+          "entityType": "SamplingProcedure",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Samplings",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "procedure_id",
+              "otherTable": "sampling_procedures",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Thing",
+          "entitySet": false,
+          "entityType": "Thing",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Samplings",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "thing_id",
+              "otherTable": "things",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Samples",
+          "entitySet": true,
+          "entityType": "Feature",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Creator",
+            "entitySet": false,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "id",
+              "otherTable": "features",
+              "otherField": "creator_sampling_id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

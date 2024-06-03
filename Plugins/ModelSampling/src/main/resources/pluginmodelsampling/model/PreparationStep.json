@@ -1,0 +1,137 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "PreparationStep",
+      "plural": "PreparationSteps",
+      "adminOnly": false,
+      "table": "preparation_steps",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "aliases": [
+            "@iot.id"
+          ],
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "name",
+          "type": "Edm.String",
+          "required": true,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "name"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "link",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "link"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "properties",
+          "type": "Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+              "field": "properties",
+              "isMap": true
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "time",
+          "type": "Edm.DateTimeOffset",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+              "field": "time"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "PreparedSample",
+          "entitySet": false,
+          "entityType": "Feature",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "PreparationSteps",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "feature_id",
+              "otherTable": "features",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "PreparationProcedure",
+          "entitySet": false,
+          "entityType": "PreparationProcedure",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "PreparationSteps",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "preparation_procedure_id",
+              "otherTable": "preparation_procedures",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}
