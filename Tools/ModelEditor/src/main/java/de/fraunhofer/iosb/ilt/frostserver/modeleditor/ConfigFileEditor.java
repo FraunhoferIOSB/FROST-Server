@@ -26,13 +26,9 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,43 +41,46 @@ public class ConfigFileEditor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFileEditor.class.getName());
 
-    private final ScrollPane paneConfig;
-    private final Label labelFile;
-
     private final EditorNull editorNull = new EditorNull();
     private ConfigEditor<?> configEditorModel;
     private final FileChooser fileChooser = new FileChooser();
     private final Class<?> editorClass;
+    private File currentFile;
 
-    public ConfigFileEditor(Class<?> editorClass, ScrollPane paneConfig, Label labelFile) {
-        this.paneConfig = paneConfig;
-        this.labelFile = labelFile;
+    public ConfigFileEditor(Class<?> editorClass) {
         this.editorClass = editorClass;
     }
 
+    public File getCurrentFile() {
+        return currentFile;
+    }
+
     public void setCurrentFile(File file) {
-        File currentFile = file;
+        currentFile = file;
         if (currentFile != null) {
-            labelFile.setText(currentFile.getAbsolutePath());
             fileChooser.setInitialDirectory(currentFile.getParentFile());
             fileChooser.setInitialFileName(currentFile.getName());
         }
     }
 
-    public void loadFromFile(String title) {
+    public void loadFromFileWithChooser(String title, Window window) {
         fileChooser.setTitle(title);
-        File file = fileChooser.showOpenDialog(paneConfig.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(window);
         loadFromFile(file);
     }
 
     public void loadFromFile(File file) {
-        if (file == null) {
+        setCurrentFile(file);
+        loadFromCurrentFile();
+    }
+
+    public void loadFromCurrentFile() {
+        if (currentFile == null) {
             return;
         }
         try {
-            String config = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+            String config = FileUtils.readFileToString(currentFile, StandardCharsets.UTF_8);
             loadJson(config);
-            setCurrentFile(file);
         } catch (IOException ex) {
             LOGGER.error("Failed to read file", ex);
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -100,24 +99,34 @@ public class ConfigFileEditor {
                 .buildEditorFromClass(editorClass, null, null)
                 .orElse(editorNull);
         configEditorModel.setConfig(json);
-        replaceEditor();
     }
 
-    public void saveModel(String title) {
+    public void saveModelWithChooser(String title, Window window) {
         JsonElement json = configEditorModel.getConfig();
-        saveToFile(json, title);
+        saveToFileWithChooser(json, title, window);
     }
 
-    public void saveToFile(JsonElement json, String title) {
+    public void saveToFileWithChooser(JsonElement json, String title, Window window) {
         String config = new GsonBuilder().setPrettyPrinting().create().toJson(json);
         fileChooser.setTitle(title);
-        File file = fileChooser.showSaveDialog(paneConfig.getScene().getWindow());
+        File file = fileChooser.showSaveDialog(window);
         if (file == null) {
             return;
         }
         setCurrentFile(file);
+        saveToCurrentFile(config);
+    }
+
+    public String saveToCurrentFile() {
+        JsonElement json = configEditorModel.getConfig();
+        String config = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+        saveToCurrentFile(config);
+        return config;
+    }
+
+    private void saveToCurrentFile(String config) {
         try {
-            FileUtils.writeStringToFile(file, config, StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(currentFile, config, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             LOGGER.error("Failed to write file.", ex);
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -127,31 +136,13 @@ public class ConfigFileEditor {
         }
     }
 
-    public void replaceEditor() {
-        paneConfig.setContent(configEditorModel.getGuiFactoryFx().getNode());
+    public ConfigEditor<?> getConfigEditor() {
+        return configEditorModel;
     }
 
     public void initialize() {
         configEditorModel = ConfigEditors
                 .buildEditorFromClass(editorClass, null, null)
                 .orElse(editorNull);
-        paneConfig.setOnDragOver(event -> {
-            if (event.getGestureSource() != paneConfig && event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY);
-            }
-            event.consume();
-        });
-        paneConfig.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasFiles()) {
-                List<File> files = db.getFiles();
-                loadFromFile(files.get(0));
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-        });
-        replaceEditor();
     }
 }

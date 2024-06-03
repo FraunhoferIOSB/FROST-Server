@@ -15,22 +15,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.model.loader;
+package de.fraunhofer.iosb.ilt.frostserver.modelextractor;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+public class ForeignKeyData {
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface PropertyPersistenceMapper {
+    final String myTableName;
+    final String otherTableName;
+    FieldData fieldMine;
+    FieldData fieldTheirs;
 
-    @JsonIgnore
-    public default void setParent(DefNavigationProperty parent) {
-        // Default does nothing.
+    public ForeignKeyData(String myTableName, String otherTableName) {
+        this.myTableName = myTableName;
+        this.otherTableName = otherTableName;
     }
 
-    @JsonIgnore
-    public default void setParent(DefEntityProperty parent) {
-        // Default does nothing.
+    public ForeignKeyData setFieldMine(FieldData fieldMine) {
+        this.fieldMine = fieldMine;
+        return this;
+    }
+
+    public ForeignKeyData setFieldTheirs(FieldData fieldTheirs) {
+        this.fieldTheirs = fieldTheirs;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return myTableName + "." + fieldMine.name + " -> " + otherTableName + "." + fieldTheirs.name + "";
     }
 
 }

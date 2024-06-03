@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -272,6 +273,17 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
     public FieldMapperResult setFieldBoolean(String fieldBoolean) {
         this.fieldBoolean = fieldBoolean;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        Map<String, String> value = new HashMap<>();
+        value.put(fieldType, "TINYINT");
+        value.put(fieldBoolean, "BOOLEAN");
+        value.put(fieldJson, "JSONB");
+        value.put(fieldNumber, "FLOAT8");
+        value.put(fieldString, "TEXT");
+        return value;
     }
 
 }

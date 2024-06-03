@@ -24,6 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Table;
 
@@ -73,6 +75,13 @@ public class FieldMapperBigDecimal extends FieldMapperAbstractEp {
     public FieldMapperBigDecimal setField(String field) {
         this.field = field;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        Map<String, String> value = new HashMap<>();
+        value.put(field, "DOUBLE");
+        return value;
     }
 
 }

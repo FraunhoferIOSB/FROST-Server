@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import java.util.Collections;
+import java.util.Map;
 import org.jooq.Record;
 
 /**
@@ -86,6 +88,11 @@ public class FieldMapperStatic implements FieldMapper {
     public FieldMapperStatic setValue(Object value) {
         this.value = value;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        return Collections.emptyMap();
     }
 
 }

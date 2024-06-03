@@ -28,6 +28,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import java.util.Collections;
+import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -345,6 +347,11 @@ public class FieldMapperManyToManyOrdered extends FieldMapperAbstractNp {
     public FieldMapperManyToManyOrdered setDistinctInverse(boolean distinctInverse) {
         this.distinctInverse = distinctInverse;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        return Collections.emptyMap();
     }
 
 }

@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -93,4 +95,12 @@ public class FieldMapperId extends FieldMapperAbstractEp {
         this.field = field;
         return this;
     }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        Map<String, String> value = new HashMap<>();
+        value.put(field, "ID");
+        return value;
+    }
+
 }

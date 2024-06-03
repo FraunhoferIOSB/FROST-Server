@@ -20,10 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 
-/**
- *
- * @author hylke
- */
 public abstract class FieldMapperAbstractEp extends FieldMapperAbstract {
 
     @JsonIgnore

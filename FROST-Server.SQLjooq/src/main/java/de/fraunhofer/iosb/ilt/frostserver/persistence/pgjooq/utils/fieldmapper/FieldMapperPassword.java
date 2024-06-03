@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterPassword;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Table;
 
@@ -79,6 +81,13 @@ public class FieldMapperPassword extends FieldMapperAbstractEp {
     public FieldMapperPassword setField(String field) {
         this.field = field;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        Map<String, String> value = new HashMap<>();
+        value.put(field, "VARCHAR(255)");
+        return value;
     }
 
 }

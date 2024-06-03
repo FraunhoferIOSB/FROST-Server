@@ -2,7 +2,9 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -17,13 +19,16 @@
          <tabs>
             <Tab text="Entity Model">
                <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                  <BorderPane fx:id="bpEntityModel" prefHeight="200.0" prefWidth="200.0">
                      <top>
                         <GridPane BorderPane.alignment="CENTER">
                           <columnConstraints>
                             <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                               <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
                             <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                           </columnConstraints>
                           <rowConstraints>
@@ -33,7 +38,8 @@
                            <children>
                               <Label fx:id="labelFile" text="No File Opened" GridPane.hgrow="ALWAYS" />
                               <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#actionLoad" text="Load" GridPane.columnIndex="2" GridPane.hgrow="NEVER" />
-                              <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#actionSave" text="Save" GridPane.columnIndex="3" GridPane.hgrow="NEVER" />
+                              <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#actionSave" text="Save" GridPane.columnIndex="4" GridPane.hgrow="NEVER" />
+                              <Button fx:id="buttonSaveAll" mnemonicParsing="false" onAction="#actionSaveAll" text="Save All" GridPane.columnIndex="5" />
                            </children>
                         </GridPane>
                      </top>
@@ -50,14 +56,19 @@
                         </GridPane>
                      </bottom>
                      <center>
-                        <ScrollPane fx:id="paneConfig" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                        <SplitPane dividerPositions="0.2" BorderPane.alignment="CENTER">
+                           <items>
+                              <ListView fx:id="listViewEntityTypes" prefHeight="200.0" prefWidth="200.0" />
+                              <ScrollPane fx:id="paneConfig" prefHeight="200.0" prefWidth="200.0" />
+                           </items>
+                        </SplitPane>
                      </center>
                   </BorderPane>
                </content>
             </Tab>
             <Tab text="Security Definition">
               <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                  <BorderPane fx:id="bpSecurityModel" prefHeight="200.0" prefWidth="200.0">
                      <top>
                         <GridPane BorderPane.alignment="CENTER">
                            <columnConstraints>

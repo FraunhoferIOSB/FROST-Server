@@ -10,6 +10,5 @@
 
     <root level="${FROST_LL}">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
     </root>
 </configuration>
