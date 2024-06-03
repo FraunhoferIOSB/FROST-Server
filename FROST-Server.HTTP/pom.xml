@@ -121,7 +121,7 @@
                                 <artifactItem>
                                     <groupId>org.mariadb.jdbc</groupId>
                                     <artifactId>mariadb-java-client</artifactId>
-                                    <version>3.1.2</version>
+                                    <version>3.4.0</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
