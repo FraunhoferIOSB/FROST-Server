@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditor;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
-import de.fraunhofer.iosb.ilt.frostserver.modeleditor.LiquibaseTemplates.ChangelogBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.modeleditor.LiquibaseTemplates.ChangeLogBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import java.io.File;
 import java.io.IOException;
@@ -111,7 +111,7 @@ public class FXMLController implements Initializable {
                 LOGGER.error("Failed to instantiate.", ex);
             }
         }
-        List<ChangelogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models);
+        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models);
         File liquibasePath = new File(currentPath, "liquibase");
         if (!liquibaseChangeLogs.isEmpty()) {
             liquibasePath.mkdirs();
