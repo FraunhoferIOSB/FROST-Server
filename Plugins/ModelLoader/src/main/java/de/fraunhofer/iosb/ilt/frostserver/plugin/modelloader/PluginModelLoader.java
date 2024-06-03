@@ -126,6 +126,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     private void loadModelFiles() {
         for (String fileName : modelFiles) {
+            LOGGER.info("Loading Model file: {}", fileName);
             loadModelFile(fileName);
         }
         for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
@@ -363,6 +364,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public String checkForUpgrades() {
+        if (!isFullyInitialised()) {
+            return "ModelLoader not fully initialised yet.";
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 StringBuilder result = new StringBuilder();
@@ -380,6 +384,10 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        if (!isFullyInitialised()) {
+            out.append("ModelLoader not fully initialised yet.");
+            return false;
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 for (String file : liquibaseFiles) {
