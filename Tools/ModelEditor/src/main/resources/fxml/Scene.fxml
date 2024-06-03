@@ -56,7 +56,7 @@
                         </GridPane>
                      </bottom>
                      <center>
-                        <SplitPane dividerPositions="0.2" BorderPane.alignment="CENTER">
+                        <SplitPane fx:id="splitPaneModel" dividerPositions="0.2" BorderPane.alignment="CENTER">
                            <items>
                               <ListView fx:id="listViewEntityTypes" prefHeight="200.0" prefWidth="200.0" />
                               <ScrollPane fx:id="paneConfig" prefHeight="200.0" prefWidth="200.0" />

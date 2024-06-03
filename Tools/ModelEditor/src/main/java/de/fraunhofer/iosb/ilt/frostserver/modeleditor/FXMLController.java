@@ -40,6 +40,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -54,6 +55,8 @@ public class FXMLController implements Initializable {
 
     @FXML
     private AnchorPane paneRoot;
+    @FXML
+    private SplitPane splitPaneModel;
     @FXML
     private ScrollPane paneConfig;
     @FXML
@@ -109,13 +112,17 @@ public class FXMLController implements Initializable {
             }
         }
         List<ChangelogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models);
+        File liquibasePath = new File(currentPath, "liquibase");
+        if (!liquibaseChangeLogs.isEmpty()) {
+            liquibasePath.mkdirs();
+        }
         for (var cl : liquibaseChangeLogs) {
             String data = cl.build();
             String fileName = cl.getFileName();
             if (!fileName.endsWith(".xml")) {
                 fileName += ".xml";
             }
-            File targetFile = new File(currentPath, fileName);
+            File targetFile = new File(liquibasePath, fileName);
             try {
                 FileUtils.writeStringToFile(targetFile, data, StandardCharsets.UTF_8);
             } catch (IOException ex) {
@@ -212,6 +219,7 @@ public class FXMLController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        SplitPane.setResizableWithParent(listViewEntityTypes, Boolean.FALSE);
         cfeSecurity = new ConfigFileEditor(SecurityModel.class);
         cfeSecurity.initialize();
         entityTypeList = FXCollections.observableArrayList();
