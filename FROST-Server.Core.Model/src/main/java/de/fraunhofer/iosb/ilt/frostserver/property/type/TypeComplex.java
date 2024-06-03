@@ -55,6 +55,7 @@ public class TypeComplex extends PropertyType {
     public static final String STA_TIMEINTERVAL_ALIAS = "TimeInterval";
     public static final String STA_TIMEVALUE_NAME = "TM_Object";
     public static final String STA_TIMEVALUE_ALIAS = "TimeValue";
+    public static final String STA_TIMEVALUE_ALIAS2 = "TimeObject";
     public static final String NAME_INTERVAL_START = "start";
     public static final String NAME_INTERVAL_END = "end";
 
@@ -99,6 +100,7 @@ public class TypeComplex extends PropertyType {
         }
         TYPES.put(STA_TIMEINTERVAL_ALIAS, TYPES.get(STA_TIMEINTERVAL_NAME));
         TYPES.put(STA_TIMEVALUE_ALIAS, TYPES.get(STA_TIMEVALUE_NAME));
+        TYPES.put(STA_TIMEVALUE_ALIAS2, TYPES.get(STA_TIMEVALUE_NAME));
 
     }
 
