@@ -39,6 +39,12 @@
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE" />
         <addForeignKeyConstraint
+            constraintName="fk_datastreams_feature_id"
+            baseTableName="datastreams" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
             constraintName="fk_hist_locations_thing_id"
             baseTableName="hist_locations" baseColumnNames="thing_id"
             referencedTableName="things" referencedColumnNames="id"

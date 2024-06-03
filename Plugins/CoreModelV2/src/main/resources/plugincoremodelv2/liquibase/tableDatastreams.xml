@@ -64,7 +64,7 @@
             <column name="thing_id" type="${idType-Thing}">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_foi_id" type="${idType-Feature}" />
+            <column name="feature_id" type="${idType-Feature}" />
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
             <column name="properties" type="JSONB"/>
@@ -88,6 +88,9 @@
         </createIndex>
         <createIndex tableName="datastreams" indexName="datastreams_thing_id">
             <column name="thing_id" />
+        </createIndex>
+        <createIndex tableName="datastreams" indexName="datastreams_feature_id">
+            <column name="feature_id" />
         </createIndex>
     </changeSet>
 
