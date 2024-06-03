@@ -170,11 +170,9 @@ public class PluginManager implements ConfigDefaults {
         for (String className : split) {
             try {
                 LOGGER.info("Loading {}", className);
-                Class<?> clazz = Class.forName(className.trim());
-                Object newInstance = clazz.getDeclaredConstructor().newInstance();
-                if (newInstance instanceof Plugin plugin) {
-                    plugin.init(settings);
-                }
+                Class<? extends Plugin> clazz = getClass().getClassLoader().loadClass(className.trim()).asSubclass(Plugin.class);
+                Plugin plugin = clazz.getDeclaredConstructor().newInstance();
+                plugin.init(settings);
             } catch (NoClassDefFoundError | ClassNotFoundException ex) {
                 LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
