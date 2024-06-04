@@ -584,7 +584,7 @@ public class LiquibaseTemplates {
             """;
 
     public static final String BLOCK_CHANGLOG = """
-            <?xml version="1.0" encoding="UTF-8"?>
+            <?xml version="1.1" encoding="UTF-8"?>
             <databaseChangeLog
                 xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -710,7 +710,7 @@ public class LiquibaseTemplates {
             """;
 
     public static final String BLOCK_MAIN_FILE = """
-            <?xml version="1.0" encoding="UTF-8"?>
+            <?xml version="1.1" encoding="UTF-8"?>
             <databaseChangeLog
                 xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
