@@ -59,7 +59,11 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader";
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations";
 
     /**
      * The plugins provided with FROST by default. When editing these, also
