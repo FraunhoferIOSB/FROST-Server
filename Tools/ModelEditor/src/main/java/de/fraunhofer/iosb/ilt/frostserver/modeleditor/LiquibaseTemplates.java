@@ -77,9 +77,11 @@ public class LiquibaseTemplates {
     private static final String S_NAME_TABLE_NAME_OTHER = "§{" + VAR_NAME_TABLE_NAME_OTHER + '}';
     private static final String S_NAME_TESTCOLUMN_NAME = "§{" + VAR_NAME_TESTCOLUMN_NAME + '}';
 
-    public static List<ChangeLogBuilder> CreateChangeLogsFor(List<DefModel> models) {
+    public static List<ChangeLogBuilder> CreateChangeLogsFor(List<DefModel> models, String date) {
         List<ChangeLogBuilder> clBuilders = new ArrayList<>();
-        String date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now());
+        if (StringHelper.isNullOrEmpty(date)) {
+            date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now());
+        }
         TableChangelogBuilder clForeignKeys = TableChangelogBuilder.start(date)
                 .setFileName("foreignKeys.xml");
         MainChangeLogBuilder clMain = MainChangeLogBuilder.start();

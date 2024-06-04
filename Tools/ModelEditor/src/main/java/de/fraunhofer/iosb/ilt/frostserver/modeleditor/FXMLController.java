@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -41,6 +43,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -69,6 +72,12 @@ public class FXMLController implements Initializable {
     private Button buttonSave;
     @FXML
     private Button buttonSaveAll;
+    @FXML
+    private Button buttonClose;
+    @FXML
+    private TextField textFieldDate;
+    @FXML
+    private TextField textFieldLiquibasePath;
     @FXML
     private Label labelFile;
     @FXML
@@ -111,8 +120,8 @@ public class FXMLController implements Initializable {
                 LOGGER.error("Failed to instantiate.", ex);
             }
         }
-        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models);
-        File liquibasePath = new File(currentPath, "liquibase");
+        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models, textFieldDate.getText());
+        File liquibasePath = new File(currentPath, textFieldLiquibasePath.getText());
         if (!liquibaseChangeLogs.isEmpty()) {
             liquibasePath.mkdirs();
         }
@@ -130,6 +139,14 @@ public class FXMLController implements Initializable {
             }
         }
 
+    }
+
+    @FXML
+    private void actionClose(ActionEvent event) {
+        FileData fd = listViewEntityTypes.getSelectionModel().getSelectedItem();
+        if (fd != null) {
+            listViewEntityTypes.getItems().remove(fd);
+        }
     }
 
     private Window getWindow() {
@@ -227,6 +244,8 @@ public class FXMLController implements Initializable {
         listViewEntityTypes.getSelectionModel().selectedItemProperty().addListener((ov, oldItem, newItem) -> showModel(newItem));
         makeDropTarget(bpEntityModel, this::loadFromFile);
         makeDropTarget(bpSecurityModel, this::loadSecFromFile);
+        textFieldDate.setText(DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now()));
+        textFieldLiquibasePath.setText("../liquibase");
     }
 
     public static void makeDropTarget(Node node, FileAction action) {

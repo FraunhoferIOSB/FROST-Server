@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -7,10 +8,12 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <AnchorPane id="AnchorPane" fx:id="paneRoot" prefHeight="541.0" prefWidth="545.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.fraunhofer.iosb.ilt.frostserver.modeleditor.FXMLController">
@@ -26,20 +29,42 @@
                             <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                               <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
                             <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label fx:id="labelFile" text="No File Opened" GridPane.hgrow="ALWAYS" />
-                              <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#actionLoad" text="Load" GridPane.columnIndex="2" GridPane.hgrow="NEVER" />
-                              <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#actionSave" text="Save" GridPane.columnIndex="4" GridPane.hgrow="NEVER" />
-                              <Button fx:id="buttonSaveAll" mnemonicParsing="false" onAction="#actionSaveAll" text="Save All" GridPane.columnIndex="5" />
+                              <Label fx:id="labelFile" text="No File Opened" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS">
+                                 <GridPane.margin>
+                                    <Insets left="5.0" />
+                                 </GridPane.margin></Label>
+                              <HBox alignment="TOP_RIGHT" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
+                                 <children>
+                                    <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#actionLoad" text="Load">
+                                       <HBox.margin>
+                                          <Insets right="5.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#actionSave" text="Save" />
+                                    <Button fx:id="buttonSaveAll" mnemonicParsing="false" onAction="#actionSaveAll" text="Save All" />
+                                 </children>
+                                 <GridPane.margin>
+                                    <Insets right="5.0" />
+                                 </GridPane.margin>
+                              </HBox>
+                              <Button fx:id="buttonClose" mnemonicParsing="false" onAction="#actionClose" text="Close" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="5.0" />
+                                 </GridPane.margin></Button>
+                              <TextField fx:id="textFieldDate" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                              <TextField fx:id="textFieldLiquibasePath" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets right="5.0" />
+                                 </GridPane.margin>
+                              </TextField>
                            </children>
                         </GridPane>
                      </top>
