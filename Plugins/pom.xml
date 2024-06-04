@@ -21,6 +21,7 @@
         <module>FormatGeoJson</module>
         <module>ModelLoader</module>
         <module>ModelOM</module>
+        <module>ModelRelations</module>
         <module>ModelSampling</module>
         <module>MultiDatastream</module>
         <module>OData</module>
