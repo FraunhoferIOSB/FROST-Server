@@ -166,10 +166,14 @@ public class ModelRegistry {
         }
         type = TypeSimpleCustom.getType(name);
         if (type != null) {
+            // This provided custom type was not registered yet, do it now.
+            registerPropertyType(type);
             return type;
         }
         type = TypeComplex.getType(name);
         if (type != null) {
+            // This provided custom type was not registered yet, do it now.
+            registerPropertyType(type);
             return type;
         }
         throw new IllegalArgumentException("unknown property type: " + name);
