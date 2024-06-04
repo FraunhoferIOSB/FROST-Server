@@ -1,0 +1,151 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-fk_deployments_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_deployments_sensor_id" foreignKeyTableName="deployments" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_deployments_sensor_id"
+            baseTableName="deployments" baseColumnNames="sensor_id"
+            referencedTableName="sensors" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_deployments_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_deployments_thing_id" foreignKeyTableName="deployments" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_deployments_thing_id"
+            baseTableName="deployments" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_deployment_datastream_deployment_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_deployment_datastream_deployment_id" foreignKeyTableName="deployment_datastream" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_deployment_datastream_deployment_id"
+            baseTableName="deployment_datastream" baseColumnNames="deployment_id"
+            referencedTableName="deployments" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_deployment_datastream_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_deployment_datastream_datastream_id" foreignKeyTableName="deployment_datastream" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_deployment_datastream_datastream_id"
+            baseTableName="deployment_datastream" baseColumnNames="datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_sensor_observing_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_sensor_observing_procedure_procedure_id" foreignKeyTableName="sensor_observing_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_sensor_observing_procedure_procedure_id"
+            baseTableName="sensor_observing_procedure" baseColumnNames="procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_sensor_observing_procedure_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_sensor_observing_procedure_sensor_id" foreignKeyTableName="sensor_observing_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_sensor_observing_procedure_sensor_id"
+            baseTableName="sensor_observing_procedure" baseColumnNames="sensor_id"
+            referencedTableName="sensors" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_observed_property_observing_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_observed_property_observing_procedure_procedure_id" foreignKeyTableName="observed_property_observing_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_observed_property_observing_procedure_procedure_id"
+            baseTableName="observed_property_observing_procedure" baseColumnNames="procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_observed_property_observing_procedure_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_observed_property_observing_procedure_observed_property_id" foreignKeyTableName="observed_property_observing_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_observed_property_observing_procedure_observed_property_id"
+            baseTableName="observed_property_observing_procedure" baseColumnNames="observed_property_id"
+            referencedTableName="observed_properties" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_datastreams_observing_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observing_procedure_id" foreignKeyTableName="datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_observing_procedure_id"
+            baseTableName="datastreams" baseColumnNames="observing_procedure_id"
+            referencedTableName="observing_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

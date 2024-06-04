@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.modelom;
 
+import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
+
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.Plugin;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -40,26 +43,23 @@ public class PluginModelOM implements Plugin, ConfigDefaults {
 
     private boolean enabled;
 
-    public PluginModelOM() {
-        LOGGER.info("Creating new ModelOM Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_PDQ, PluginModelOM.class);
         if (enabled) {
             final PluginManager pluginManager = settings.getPluginManager();
-            pluginManager.registerPlugin(this);
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             if (pml == null || !pml.isEnabled()) {
-                LOGGER.error(INIT_FAILED);
-                throw new IllegalArgumentException(INIT_FAILED);
+                LOGGER.warn("PluginModelLoader must be enabled before the Actuation plugin, delaying initialisation...");
+                return INIT_DELAY;
             }
             pml.addLiquibaseFile("pluginmodelom/liquibase/tables.xml");
             pml.addModelFile("pluginmodelom/model/Deployment.json");
             pml.addModelFile("pluginmodelom/model/ObservingProcedure.json");
+            pluginManager.registerPlugin(this);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override
