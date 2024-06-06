@@ -246,6 +246,14 @@ public class PluginManager implements ConfigDefaults {
         }
     }
 
+    public <P extends Plugin> boolean isPluginEnabled(Class<P> pluginClass) {
+        P plugin = getPlugin(pluginClass);
+        if (plugin == null) {
+            return false;
+        }
+        return plugin.isEnabled();
+    }
+
     public <P extends Plugin> P getPlugin(Class<P> plugin) {
         return (P) plugins.get(plugin);
     }
