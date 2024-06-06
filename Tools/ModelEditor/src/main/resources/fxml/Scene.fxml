@@ -26,9 +26,10 @@
                      <top>
                         <GridPane BorderPane.alignment="CENTER">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints minWidth="10.0" />
+                              <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                             <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                              <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                           </columnConstraints>
@@ -37,11 +38,11 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label fx:id="labelFile" text="No File Opened" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS">
+                              <Label fx:id="labelFile" text="No File Opened" textOverrun="CENTER_ELLIPSIS" GridPane.columnSpan="4" GridPane.hgrow="ALWAYS">
                                  <GridPane.margin>
                                     <Insets left="5.0" />
                                  </GridPane.margin></Label>
-                              <HBox alignment="TOP_RIGHT" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
+                              <HBox alignment="TOP_RIGHT" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                  <children>
                                     <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#actionLoad" text="Load">
                                        <HBox.margin>
@@ -55,16 +56,22 @@
                                     <Insets right="5.0" />
                                  </GridPane.margin>
                               </HBox>
-                              <Button fx:id="buttonClose" mnemonicParsing="false" onAction="#actionClose" text="Close" GridPane.rowIndex="1">
+                              <Button fx:id="buttonClose" mnemonicParsing="false" onAction="#actionClose" text="Close" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets left="5.0" />
                                  </GridPane.margin></Button>
-                              <TextField fx:id="textFieldDate" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                              <TextField fx:id="textFieldLiquibasePath" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                              <TextField fx:id="textFieldDate" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                              <TextField fx:id="textFieldLiquibasePath" GridPane.columnIndex="5" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets right="5.0" />
                                  </GridPane.margin>
                               </TextField>
+                              <Button mnemonicParsing="false" onAction="#actionAdd" text="+" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="5.0" />
+                                 </GridPane.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#actionCloseAll" text="Close All" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                      </top>

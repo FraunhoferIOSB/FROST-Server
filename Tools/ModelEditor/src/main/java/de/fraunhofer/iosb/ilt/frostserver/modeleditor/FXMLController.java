@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -105,6 +106,7 @@ public class FXMLController implements Initializable {
         FileData fd = listViewEntityTypes.getSelectionModel().getSelectedItem();
         ConfigFileEditor cfe = fd.getEditor();
         cfe.saveModelWithChooser("Save Data Model", getWindow());
+        fd.updateFileName();
     }
 
     @FXML
@@ -112,12 +114,14 @@ public class FXMLController implements Initializable {
         List<DefModel> models = new ArrayList<>();
         for (FileData fd : listViewEntityTypes.getItems()) {
             ConfigFileEditor cfe = fd.getEditor();
-            String data = cfe.saveToCurrentFile();
             try {
+                String data = cfe.saveToCurrentFile();
                 DefModel value = JsonWriter.getObjectMapper().readValue(data, DefModel.class);
                 models.add(value);
             } catch (JsonProcessingException ex) {
-                LOGGER.error("Failed to instantiate.", ex);
+                LOGGER.error("Failed to parse.", ex);
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error("Failed to save.", ex);
             }
         }
         List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models, textFieldDate.getText());
@@ -142,10 +146,25 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
+    private void actionAdd(ActionEvent event) {
+        ConfigFileEditor cfe = new ConfigFileEditor(DefModel.class);
+        cfe.initialize();
+        addToList(cfe);
+    }
+
+    @FXML
     private void actionClose(ActionEvent event) {
         FileData fd = listViewEntityTypes.getSelectionModel().getSelectedItem();
         if (fd != null) {
             listViewEntityTypes.getItems().remove(fd);
+        }
+    }
+
+    @FXML
+    private void actionCloseAll(ActionEvent event) {
+        for (Iterator<FileData> it = listViewEntityTypes.getItems().iterator(); it.hasNext();) {
+            FileData fd = it.next();
+            it.remove();
         }
     }
 

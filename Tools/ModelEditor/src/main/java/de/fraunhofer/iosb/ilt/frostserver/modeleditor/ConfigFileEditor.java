@@ -125,6 +125,9 @@ public class ConfigFileEditor {
     }
 
     private void saveToCurrentFile(String config) {
+        if (currentFile == null) {
+            throw new IllegalArgumentException("No current file to save to!");
+        }
         try {
             FileUtils.writeStringToFile(currentFile, config, StandardCharsets.UTF_8);
         } catch (IOException ex) {
