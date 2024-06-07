@@ -23,7 +23,9 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.util.List;
 
 /**
  *
@@ -67,9 +69,13 @@ public class JsonRequest extends Request {
     @Override
     public String getContent(boolean allHeaders) {
         try {
-            return JsonWriter.writeObject(
-                    new ODataResponse(getContentId(), status, data.length() > 0 ? data.toString() : null,
-                            getInnerHeaders().get("Location")));
+            final List<String> locations = getInnerHeaders().get("Location");
+            String location = StringHelper.isNullOrEmpty(locations) ? null : locations.get(0);
+            return JsonWriter.writeObject(new ODataResponse(
+                    getContentId(),
+                    status,
+                    data.length() > 0 ? data.toString() : null,
+                    location));
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to generate JSON.", ex);
         }

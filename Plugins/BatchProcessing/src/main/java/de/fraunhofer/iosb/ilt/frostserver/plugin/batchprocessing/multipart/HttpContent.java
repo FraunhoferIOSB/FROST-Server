@@ -97,10 +97,12 @@ public class HttpContent extends Request implements MultipartContent {
         if (line.trim().isEmpty()) {
             parseState = State.COMMAND;
             if (requireContentId) {
-                contentId = headersOuter.get("content-id");
-                if (StringHelper.isNullOrEmpty(contentId)) {
+                List<String> contentIds = headersOuter.get("content-id");
+                if (StringHelper.isNullOrEmpty(contentIds)) {
                     parseFailed = true;
                     errors.add("All Changeset parts must have a valid content-id header.");
+                } else {
+                    contentId = contentIds.get(0);
                 }
             }
         } else {
@@ -228,8 +230,10 @@ public class HttpContent extends Request implements MultipartContent {
         if (statusLine != null) {
             content.append(statusLine).append('\n');
         }
-        for (Map.Entry<String, String> entry : headersInner.entrySet()) {
-            content.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');
+        for (Map.Entry<String, List<String>> entry : headersInner.entrySet()) {
+            for (String value : entry.getValue()) {
+                content.append(entry.getKey()).append(": ").append(value).append('\n');
+            }
         }
         content.append('\n');
         content.append(data);

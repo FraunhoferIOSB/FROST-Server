@@ -86,7 +86,7 @@ public class StringContent implements MultipartContent {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         return Collections.emptyMap();
     }
 

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
 
 public interface ServiceResponse {
@@ -37,9 +38,28 @@ public interface ServiceResponse {
      */
     public ServiceResponse setContentType(String contentType);
 
-    public Map<String, String> getHeaders();
+    public Map<String, List<String>> getHeaders();
 
     public ServiceResponse addHeader(String key, String value);
+
+    /**
+     * Adds all values to the given header.
+     *
+     * @param name The name of the header to set.
+     * @param values The values to set the header to.
+     * @return this-
+     */
+    public ServiceResponse addHeaders(String name, List<String> values);
+
+    /**
+     * Sets the header with the given key to the given value. Overwrites any
+     * existing header(s) with the given key.
+     *
+     * @param name The name of the header to set.
+     * @param value The value to set the header to.
+     * @return this.
+     */
+    public ServiceResponse setHeader(String name, String value);
 
     public int getCode();
 

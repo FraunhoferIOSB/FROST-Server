@@ -52,8 +52,8 @@ public abstract class Request implements Content {
      */
     protected Principal userPrincipal;
 
-    protected final Map<String, String> headersOuter = new HashMap<>();
-    protected final Map<String, String> headersInner = new HashMap<>();
+    protected final Map<String, List<String>> headersOuter = new HashMap<>();
+    protected final Map<String, List<String>> headersInner = new HashMap<>();
     /**
      * Flag indicating there is a problem with the syntax of the content. If
      * this is a changeSet, then the entire changeSet will be discarded.
@@ -161,12 +161,12 @@ public abstract class Request implements Content {
      *
      * @return the headers of the individual batch request.
      */
-    public Map<String, String> getInnerHeaders() {
+    public Map<String, List<String>> getInnerHeaders() {
         return headersInner;
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         return headersOuter;
     }
 

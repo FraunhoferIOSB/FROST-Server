@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -70,11 +71,15 @@ public class BatchProcessor<C extends Content> {
         final CoreSettings coreSettings = service.getSettings();
         final PluginManager pluginManager = coreSettings.getPluginManager();
         final Version version = pluginManager.getVersion(httpRequest.getVersion());
-        final String type = service.getRequestType(
-                httpRequest.getMethod(),
+        final List<String> ctHeaders = httpRequest.getInnerHeaders().get(CONTENT_TYPE);
+        String ct = null;
+        if (ctHeaders != null && !ctHeaders.isEmpty()) {
+            ct = ctHeaders.get(0);
+        }
+        final String type = service.getRequestType(httpRequest.getMethod(),
                 version,
                 httpRequest.getPath(),
-                httpRequest.getInnerHeaders().get(CONTENT_TYPE));
+                ct);
         boolean isCreate = RequestTypeUtils.CREATE.equals(type);
         UpdateMode updateMode;
         switch (version.urlPart) {
@@ -117,13 +122,14 @@ public class BatchProcessor<C extends Content> {
         int statusCode = serviceResponse.getCode();
         httpResponse.setStatus(statusCode, "no text");
 
-        Map<String, String> headers = httpResponse.getInnerHeaders();
-        serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
+        Map<String, List<String>> headers = httpResponse.getInnerHeaders();
+        serviceResponse.getHeaders().entrySet().forEach(
+                x -> headers.put(x.getKey(), x.getValue()));
 
         String resultFormatted = serviceResponse.getWriter().toString();
         if (statusCode >= 200 && statusCode < 300) {
             if (!StringHelper.isNullOrEmpty(resultFormatted)) {
-                headers.put("Content-Type", CONTENT_TYPE_APPLICATION_JSON + "; " + CHARSET_UTF8);
+                headers.put("Content-Type", Arrays.asList(CONTENT_TYPE_APPLICATION_JSON + "; " + CHARSET_UTF8));
                 httpResponse.addData(resultFormatted);
             }
         } else {

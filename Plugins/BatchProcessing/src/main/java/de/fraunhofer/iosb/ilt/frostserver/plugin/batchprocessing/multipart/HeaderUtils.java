@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,17 +61,17 @@ public class HeaderUtils {
     private HeaderUtils() {
     }
 
-    public static void addHeader(String line, Map<String, String> headers) {
+    public static void addHeader(String line, Map<String, List<String>> headers) {
         addHeader(line, headers, "");
     }
 
-    public static void addHeader(String line, Map<String, String> headers, String logIndent) {
+    public static void addHeader(String line, Map<String, List<String>> headers, String logIndent) {
         Matcher matcher = MixedContent.HEADER_PATTERN.matcher(line);
         if (matcher.find()) {
             String name = matcher.group(1).trim().toLowerCase();
             String value = matcher.group(2).trim();
             if (validateHeader(name, value)) {
-                headers.put(name, value);
+                headers.computeIfAbsent(name, t -> new ArrayList<>()).add(value);
                 LOGGER.debug("{}Found header '{}' : '{}'", logIndent, name, value);
             } else {
                 LOGGER.debug("{}Header '{}' has invalid value: '{}'", logIndent, name, value);
@@ -87,7 +89,7 @@ public class HeaderUtils {
             String subName = subHeaderMatcher.group(1).trim().toLowerCase();
             String subValue = subHeaderMatcher.group(2).trim();
             if (validateHeader(subName, subValue)) {
-                headers.put(subName, subValue);
+                headers.computeIfAbsent(subName, t -> new ArrayList<>()).add(subValue);
                 LOGGER.debug("{}  Found subheader '{}' : '{}'", logIndent, subName, subValue);
             } else {
                 LOGGER.warn("{}Header '{}' has invalid value: '{}'", logIndent, subName, subValue);

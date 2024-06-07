@@ -59,5 +59,5 @@ public interface Content {
      *
      * @return the headers.
      */
-    public Map<String, String> getHeaders();
+    public Map<String, List<String>> getHeaders();
 }
