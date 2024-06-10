@@ -1,0 +1,123 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-10-fk_tasks_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasks_tasking_capability_id" foreignKeyTableName="tasks" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasks_tasking_capability_id"
+            baseTableName="tasks" baseColumnNames="tasking_capability_id"
+            referencedTableName="tasking_capabilities" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasks_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasks_feature_id" foreignKeyTableName="tasks" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasks_feature_id"
+            baseTableName="tasks" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_actuator_id" foreignKeyTableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasking_capabilities_actuator_id"
+            baseTableName="tasking_capabilities" baseColumnNames="actuator_id"
+            referencedTableName="actuators" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasking_capability_observed_property_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_tasking_capability_id" foreignKeyTableName="tasking_capability_observed_property" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasking_capability_observed_property_tasking_capability_id"
+            baseTableName="tasking_capability_observed_property" baseColumnNames="tasking_capability_id"
+            referencedTableName="tasking_capabilities" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasking_capability_observed_property_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_observed_property_id" foreignKeyTableName="tasking_capability_observed_property" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasking_capability_observed_property_observed_property_id"
+            baseTableName="tasking_capability_observed_property" baseColumnNames="observed_property_id"
+            referencedTableName="observed_properties" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_thing_id" foreignKeyTableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasking_capabilities_thing_id"
+            baseTableName="tasking_capabilities" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_feature_id" foreignKeyTableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tasking_capabilities_feature_id"
+            baseTableName="tasking_capabilities" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

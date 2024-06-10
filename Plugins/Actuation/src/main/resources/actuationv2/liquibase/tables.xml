@@ -1,0 +1,38 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <property name="id-Actuator" value="LONG" />
+    <property name="idType-Actuator" value="BIGINT" />
+    <property name="id-Task" value="LONG" />
+    <property name="idType-Task" value="BIGINT" />
+    <property name="id-TaskingCapability" value="LONG" />
+    <property name="idType-TaskingCapability" value="BIGINT" />
+
+    <include relativeToChangelogFile="true" file="tableActuators.xml" />
+    <include relativeToChangelogFile="true" file="tableTasks.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingCapabilityObservedProperty.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+
+</databaseChangeLog>
+
