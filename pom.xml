@@ -35,52 +35,52 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <annotation-api.version>1.3.1</annotation-api.version>
-        <commons-csv.version>1.10.0</commons-csv.version>
-        <commons-io.version>2.15.1</commons-io.version>
+        <commons-csv.version>1.11.0</commons-csv.version>
+        <commons-io.version>2.16.1</commons-io.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
-        <commons-text.version>1.11.0</commons-text.version>
-        <configurable.version>0.34</configurable.version>
+        <commons-text.version>1.12.0</commons-text.version>
+        <configurable.version>0.35</configurable.version>
         <FROST-Client.version>0.44</FROST-Client.version>
-        <git-commit-id-plugin.version>7.0.0</git-commit-id-plugin.version>
+        <git-commit-id-plugin.version>9.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
-        <guava.version>33.0.0-jre</guava.version>
+        <guava.version>33.2.1-jre</guava.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <dbcp2.version>2.11.0</dbcp2.version>
-        <jackson.version>2.16.1</jackson.version>
+        <dbcp2.version>2.12.0</dbcp2.version>
+        <jackson.version>2.17.1</jackson.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.13</javacc.version>
-        <javacc-maven-plugin.version>3.0.1</javacc-maven-plugin.version>
+        <javacc-maven-plugin.version>3.1.0</javacc-maven-plugin.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
-        <jetty.version>10.0.20</jetty.version>
-        <jooq.version>3.16.23</jooq.version>
+        <jetty.version>10.0.21</jetty.version>
+        <jooq.version>3.19.9</jooq.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>5.10.2</junit.version>
-        <keycloak.version>23.0.6</keycloak.version>
+        <keycloak.version>24.0.5</keycloak.version>
         <liquibase.version>4.12.0</liquibase.version>
-        <logback.version>1.5.0</logback.version>
+        <logback.version>1.5.6</logback.version>
 
-        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
-        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
-        <maven-gpg-plugin>3.1.0</maven-gpg-plugin>
-        <maven-jacoco-plugin.version>0.8.11</maven-jacoco-plugin.version>
-        <maven-jar-plugin>3.3.0</maven-jar-plugin>
-        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-        <maven-nexus-staging-plugin>1.6.13</maven-nexus-staging-plugin>
+        <maven-gpg-plugin>3.2.4</maven-gpg-plugin>
+        <maven-jacoco-plugin.version>0.8.12</maven-jacoco-plugin.version>
+        <maven-jar-plugin>3.4.1</maven-jar-plugin>
+        <maven-javadoc-plugin.version>3.7.0</maven-javadoc-plugin.version>
+        <maven-nexus-staging-plugin>1.7.0</maven-nexus-staging-plugin>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
-        <owasp.version>9.0.9</owasp.version>
+        <owasp.version>9.2.0</owasp.version>
 
         <openjfx.version>19.0.2.1</openjfx.version>
-        <org.json.version>20240205</org.json.version>
+        <org.json.version>20240303</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2023.1.0</postgis.version>
-        <postgres.version>42.7.2</postgres.version>
-        <slf4j-api.version>2.0.12</slf4j-api.version>
-        <testcontainers.version>1.19.5</testcontainers.version>
+        <postgres.version>42.7.3</postgres.version>
+        <slf4j-api.version>2.0.13</slf4j-api.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
         <testcontainers-keycloak.version>2.6.0</testcontainers-keycloak.version>
         <time4j.version>5.9.4</time4j.version>
 
