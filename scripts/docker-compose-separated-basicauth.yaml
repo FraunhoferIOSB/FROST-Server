@@ -1,7 +1,6 @@
 # This compose file starts FROST as separate modules.
 # It also enables basic auth with the default users (read, write and admin),
 # and starts a pgadmin on port 80, with username 'example@example.com' and password 'admin'.
-version: '3'
 
 services:
   web:
