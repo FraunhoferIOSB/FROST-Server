@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -129,7 +130,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     private static final Map<String, Object> OPTIONS = new HashMap<>();
 
     @Override
-    public void init(CoreSettings coreSettings) {
+    public InitResult init(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
         OPTIONS.put("keycloak-config-file", FROST_SERVER_KEYCLOAKJSON);
         final Settings authSettings = coreSettings.getAuthSettings();
@@ -142,6 +143,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
             DatabaseHandler.init(coreSettings);
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override

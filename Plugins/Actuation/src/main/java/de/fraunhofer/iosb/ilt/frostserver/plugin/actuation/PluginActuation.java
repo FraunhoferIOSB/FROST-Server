@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -32,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -103,12 +105,8 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private boolean enabled;
     private boolean fullyInitialised;
 
-    public PluginActuation() {
-        LOGGER.info("Creating new Actuation Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, ActuationModelSettings.class);
@@ -116,6 +114,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             modelSettings = new ActuationModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
+        return INIT_OK;
     }
 
     @Override

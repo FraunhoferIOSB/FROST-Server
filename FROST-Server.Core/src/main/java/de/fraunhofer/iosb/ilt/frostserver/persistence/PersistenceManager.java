@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
@@ -138,8 +139,9 @@ public interface PersistenceManager extends AutoCloseable {
      * Initialise using the given settings.
      *
      * @param settings The settigns to use.
+     * @return the result of the initialisation.
      */
-    public void init(CoreSettings settings);
+    public InitResult init(CoreSettings settings);
 
     /**
      * Get the settings that were used to initialise this PM.

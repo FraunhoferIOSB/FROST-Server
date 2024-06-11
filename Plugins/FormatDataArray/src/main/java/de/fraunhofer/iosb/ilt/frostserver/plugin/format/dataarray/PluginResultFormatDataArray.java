@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayResultSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayValueSerializer;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
@@ -60,7 +61,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     private boolean enabled;
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
@@ -68,6 +69,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
             settings.getPluginManager().registerPlugin(this);
             modifyEntityFormatter();
         }
+        return InitResult.INIT_OK;
     }
 
     @Override

@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -88,7 +89,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
 
     @Override
-    public void init(CoreSettings coreSettings) {
+    public InitResult init(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
         DatabaseHandler.init(coreSettings);
         final Settings authSettings = coreSettings.getAuthSettings();
@@ -96,6 +97,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
+        return InitResult.INIT_OK;
     }
 
     @Override

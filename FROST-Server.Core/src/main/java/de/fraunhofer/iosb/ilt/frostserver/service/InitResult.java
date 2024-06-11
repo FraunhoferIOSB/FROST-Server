@@ -17,33 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-
 /**
- * The interface that extensions (plug-ins) should implement so they can be
- * properly registered.
- *
- * Extensions must have a no-args constructor that is side-effect free. This
- * constructor will be used to create an initial instance that is then
- * initialised.
  *
  * @author scf
  */
-public interface Plugin {
-
+public enum InitResult {
     /**
-     * Initialise the plugin using settings from the given CoreSettings.
-     *
-     * @param settings The settings to use.
-     * @return the result of the initialisation.
+     * Initialisation was successful.
      */
-    public InitResult init(CoreSettings settings);
-
+    INIT_OK,
     /**
-     * Check if this plugin is enabled.
-     *
-     * @return true if this plugin is enabled.
+     * Initialisation needs to be delayed because dependencies are not loaded
+     * yet.
      */
-    public boolean isEnabled();
-
+    INIT_DELAY,
+    /**
+     * Initialisation failed.
+     */
+    INIT_FAILED
 }

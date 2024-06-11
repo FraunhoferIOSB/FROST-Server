@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -90,12 +91,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private Map<String, Object> metadataExtra;
     private final List<String> conformance = new ArrayList<>();
 
-    public PluginModelLoader() {
-        LOGGER.info("Creating new ModelLoader Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(ModelLoaderSettings.TAG_ENABLE_MODELLOADER, ModelLoaderSettings.class);
@@ -122,11 +119,11 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             String metadataFilesString = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_FILES, ModelLoaderSettings.class);
             metadataFiles.addAll(Arrays.asList(StringUtils.split(metadataFilesString.trim(), ", ")));
         }
+        return InitResult.INIT_OK;
     }
 
     private void loadModelFiles() {
         for (String fileName : modelFiles) {
-            LOGGER.info("Loading Model file: {}", fileName);
             loadModelFile(fileName);
         }
         for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {

@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -365,8 +366,9 @@ class MqttManagerTest {
         }
 
         @Override
-        public void init(CoreSettings settings) {
+        public InitResult init(CoreSettings settings) {
             coreSettings = settings;
+            return InitResult.INIT_OK;
         }
 
         @Override

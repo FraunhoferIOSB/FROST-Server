@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -204,12 +205,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     private boolean enabled;
     private boolean fullyInitialised;
 
-    public PluginCoreModel() {
-        LOGGER.info("Creating new Core Model Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, CoreModelSettings.class);
@@ -220,6 +217,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             epResultTimeDs.setReadOnly(!modelSettings.dsPropsEditable);
             epObservedArea.setReadOnly(!modelSettings.dsPropsEditable);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override

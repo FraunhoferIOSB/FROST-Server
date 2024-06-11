@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -68,9 +69,10 @@ public class PluginResultFormatOData implements PluginResultFormat {
     private CoreSettings settings;
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         settings.getPluginManager().registerPlugin(this);
+        return InitResult.INIT_OK;
     }
 
     @Override

@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -166,8 +167,9 @@ public class TestModel implements PluginService {
     }
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         settings.getPluginManager().registerPlugin(this);
+        return InitResult.INIT_OK;
     }
 
     @Override

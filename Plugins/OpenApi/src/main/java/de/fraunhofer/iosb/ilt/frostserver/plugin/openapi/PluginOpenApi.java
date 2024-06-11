@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -51,13 +52,14 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     private boolean enabled;
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_OPENAPI, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override

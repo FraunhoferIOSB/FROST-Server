@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -59,8 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The V1.1 multiDatastream plugin.
  */
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
@@ -97,12 +97,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     private boolean enabled;
     private boolean fullyInitialised;
 
-    public PluginMultiDatastream() {
-        LOGGER.info("Creating new MultiDatastream Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(MdsModelSettings.TAG_ENABLE_MDS_MODEL, MdsModelSettings.class);
@@ -110,6 +106,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             modelSettings = new MdsModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override

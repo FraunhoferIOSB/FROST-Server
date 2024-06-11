@@ -72,6 +72,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -166,7 +167,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         tableCollection = getTableCollection(settings);
         persistenceSettings = settings.getPersistenceSettings();
@@ -182,6 +183,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
         schemaPriority = customSettings.get(TAG_DB_SCHEMA_PRIORITY, ConnectionUtils.class);
+        return InitResult.INIT_OK;
     }
 
     private void init() {
