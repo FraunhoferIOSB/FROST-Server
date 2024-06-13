@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -90,7 +91,7 @@ public class EntitySetSubscription extends AbstractSubscription {
             return QueryParser.parseQuery(queryString, queryDefaults, modelRegistry, path).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
-            return null;
+            return new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL).validate();
         }
     }
 
