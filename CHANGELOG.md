@@ -3,6 +3,7 @@
 ## Development version 2.3.3
 
 **Internal changes & Bugfixes**
+* [HELM] Added option to specify image pull secret name.
 
 
 ## Release version 2.3.2

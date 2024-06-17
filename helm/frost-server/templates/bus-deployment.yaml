@@ -27,6 +27,10 @@ spec:
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
+      {{- if .Values.frost.bus.image.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.frost.bus.image.imagePullSecret }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.bus.image.registry }}/{{ .Values.frost.bus.image.repository }}:{{ .Values.frost.bus.image.tag }}"

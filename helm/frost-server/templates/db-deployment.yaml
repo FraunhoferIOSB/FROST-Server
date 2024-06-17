@@ -44,6 +44,10 @@ spec:
       {{- end }}
       securityContext:
           {{- toYaml .Values.frost.db.securityContext | nindent 10 }}
+      {{- if .Values.frost.db.image.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.frost.db.image.imagePullSecret }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.db.image.registry }}/{{ .Values.frost.db.image.repository }}:{{ .Values.frost.db.image.tag }}"
