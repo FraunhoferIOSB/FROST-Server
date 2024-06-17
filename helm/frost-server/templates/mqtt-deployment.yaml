@@ -28,6 +28,10 @@ spec:
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
+      {{- if .Values.frost.mqtt.image.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.frost.mqtt.image.imagePullSecret }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.mqtt.image.registry }}/{{ .Values.frost.mqtt.image.repository }}:{{ .Values.frost.mqtt.image.tag }}"

@@ -110,6 +110,7 @@ frost:
       repository: fraunhoferiosb/frost-server-http
       tag: latest
       pullPolicy: IfNotPresent
+      imagePullSecret:
     # FROST-Server HTTP deployment settings
     replicas: 1
     ports:
@@ -188,6 +189,7 @@ frost:
       repository: fraunhoferiosb/frost-server-mqtt
       tag: latest
       pullPolicy: IfNotPresent
+      imagePullSecret:
     # FROST-Server MQTT deployment settings
     enabled: true
     annotations: {}
@@ -264,6 +266,7 @@ frost:
       repository: postgis/postgis
       tag: 14-3.2-alpine
       pullPolicy: IfNotPresent
+      imagePullSecret:
     # FROST-Server Database deployment settings
     ports:
       postgresql:
@@ -307,6 +310,7 @@ frost:
       repository: kartoza/pg-backup
       tag: 14-3.2
       pullPolicy: IfNotPresent
+      imagePullSecret:
 
     removeBefore: 14
 
@@ -332,6 +336,7 @@ frost:
         repository: eclipse-mosquitto
         tag: 1.4.12
         pullPolicy: IfNotPresent
+        imagePullSecret:
     # FROST-Server Messages Bus deployment settings
     ports:
       bus:

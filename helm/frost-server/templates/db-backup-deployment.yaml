@@ -30,6 +30,10 @@ spec:
     spec:
       securityContext:
           {{- toYaml .Values.frost.backup.securityContext | nindent 10 }}
+      {{- if .Values.frost.backup.image.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.frost.backup.image.imagePullSecret }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.backup.image.registry }}/{{ .Values.frost.backup.image.repository }}:{{ .Values.frost.backup.image.tag }}"
