@@ -39,7 +39,8 @@ is for _Datastreams(x)/observations?$orderby=phenomenonTime asc_:
 create index "OBS-DS_ID-PHTIME_SE-O_ID"
   on "OBSERVATIONS"
   using btree
-  ("DATASTREAM_ID", "PHENOMENON_TIME_START" asc, "PHENOMENON_TIME_END" asc);
+  ("DATASTREAM_ID", "PHENOMENON_TIME_START" asc, "PHENOMENON_TIME_END" asc, "ID" asc)
+  where ("DATASTREAM_ID" is not null);
 ```
 
 
