@@ -163,12 +163,12 @@ public class QueryBuilder implements ResourcePathVisitor {
             count = 1;
         }
         var limit = orderByStep.limit(skip, count);
-        if (forUpdate) {
-            return limit.forUpdate();
-        }
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, limit.getSQL(ParamType.INDEXED));
+        }
+        if (forUpdate) {
+            return limit.forUpdate();
         }
         return limit;
     }
