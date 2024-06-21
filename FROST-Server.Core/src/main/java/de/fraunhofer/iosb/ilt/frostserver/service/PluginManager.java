@@ -219,6 +219,7 @@ public class PluginManager implements ConfigDefaults {
             }
             if (count == pluginsToLoad.size()) {
                 LOGGER.error("All {} remaining plugins can not be initialised", count);
+                break;
             }
         }
     }
