@@ -304,7 +304,7 @@ public class PathParser extends Visitor {
             PathParser pp = new PathParser(modelRegistry, resourcePath, user.isAdmin());
             pp.visit(parser.rootNode());
         } catch (ParseException ex) {
-            throw new IllegalArgumentException("Path " + StringHelper.cleanForLogging(path) + " is not valid: " + ex.getMessage());
+            throw new IllegalArgumentException("Path is not valid: " + ex.getMessage());
         }
         return resourcePath;
     }

@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * [HELM] Added option to specify image pull secret name.
+* Fixed #1948: Sanitise user input in error output.
 
 
 ## Release version 2.3.2
