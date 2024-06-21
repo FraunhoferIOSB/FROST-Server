@@ -215,6 +215,9 @@ spec:
             - name: plugins_coreModel_idType_thing
               value: "{{ .Values.frost.plugins.coreModel.idType.thing }}"
             {{- end }}
+            {{- else }}
+            - name: plugins_coreModel_enable
+              value: "false"
             {{- end }}
 
             # MultiDatastream Plugin settings
