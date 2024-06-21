@@ -52,6 +52,7 @@ import net.time4j.format.expert.IsoDateStyle;
 import net.time4j.format.expert.IsoDecimalStyle;
 import net.time4j.range.MomentInterval;
 import net.time4j.tz.ZonalOffset;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,9 @@ import org.slf4j.LoggerFactory;
 public class StringHelper {
 
     public static final Charset UTF8 = StandardCharsets.UTF_8;
+
+    private static final String OUTPUT_CLEAN_REGEX = "[^A-Za-z0-9'.,;:()?/ _-]";
+    private static final String OUTPUT_CLEAN_REPLACE = " ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
     private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
@@ -88,6 +92,36 @@ public class StringHelper {
 
     public static boolean isNullOrEmpty(Collection collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    /**
+     * Replaces characters that might cause problems in HTML and limits the
+     * length of the string. Currently everything that is not [A-Za-z0-9',;?/-]
+     * is changed to a ?.
+     *
+     * @param string The string to clean.
+     * @param maxLength The maximum length of string to return.
+     * @return The cleaned string.
+     */
+    public static String cleanForOutput(String string, int maxLength) {
+        if (string == null) {
+            return "null";
+        }
+        return cleanForOutput(StringUtils.truncate(string, maxLength));
+    }
+
+    /**
+     * Replaces characters that might cause problems in HTML. Currently
+     * everything that is not [A-Za-z0-9',;?/-] is changed to a ?.
+     *
+     * @param string The string to clean.
+     * @return The cleaned string.
+     */
+    public static String cleanForOutput(String string) {
+        if (string == null) {
+            return "null";
+        }
+        return string.replaceAll(OUTPUT_CLEAN_REGEX, OUTPUT_CLEAN_REPLACE);
     }
 
     /**

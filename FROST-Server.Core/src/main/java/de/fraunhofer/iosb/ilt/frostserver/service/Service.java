@@ -110,7 +110,6 @@ public class Service implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
     private static final String EXCEPTION = "Exception:";
-    private static final String NOT_A_VALID_PATH = "Not a valid path";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG = "Failed to handle request (details in debug): {}";
@@ -375,8 +374,8 @@ public class Service implements AutoCloseable {
                     settings.getQueryDefaults().getServiceRootUrl(), version,
                     request.getUrlPath(),
                     request.getUserPrincipal());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return errorResponse(response, 404, ex.getMessage());
         }
         Query query;
         ResultFormatter formatter;
@@ -463,8 +462,8 @@ public class Service implements AutoCloseable {
                     version,
                     urlPath,
                     request.getUserPrincipal());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return errorResponse(response, 404, ex.getMessage());
         }
         if (!(path.getMainElement() instanceof PathElementEntitySet)) {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
@@ -635,8 +634,8 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     request.getUrlPath(),
                     request.getUserPrincipal());
-        } catch (IllegalArgumentException | IllegalStateException exc) {
-            throw new NoSuchEntityException(NOT_A_VALID_PATH + ": " + exc.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            throw new NoSuchEntityException(ex.getMessage());
         }
 
         if (!pm.validatePath(path)) {
@@ -728,8 +727,8 @@ public class Service implements AutoCloseable {
                     request.getVersion(),
                     request.getUrlPath(),
                     request.getUserPrincipal());
-        } catch (IllegalArgumentException | IllegalStateException exc) {
-            return errorResponse(response, 404, NOT_A_VALID_PATH + ": " + exc.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return errorResponse(response, 404, ex.getMessage());
         }
 
         if (path.isRef()) {
@@ -1017,16 +1016,17 @@ public class Service implements AutoCloseable {
     }
 
     public static ServiceResponse jsonResponse(ServiceResponse response, String type, int code, String message) {
+        String cleanMessage = StringHelper.cleanForOutput(message, 200);
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("code", code);
-        body.put("message", message);
+        body.put("message", cleanMessage);
         try {
             return response.setStatus(code, JsonWriter.writeObject(body));
         } catch (IOException ex) {
             LOGGER.error("Failed to serialise error response.", ex);
         }
-        return response.setStatus(code, message);
+        return response.setStatus(code, cleanMessage);
     }
 
 }
