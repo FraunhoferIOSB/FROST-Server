@@ -13,6 +13,7 @@ services:
       mosquitto:
         condition: service_started
     environment:
+      # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - logSensitiveData=true #disable on production!
@@ -47,6 +48,7 @@ services:
       mosquitto:
         condition: service_started
     environment:
+      # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - plugins.multiDatastream.enable=true
