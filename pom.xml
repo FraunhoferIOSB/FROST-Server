@@ -124,7 +124,7 @@
         <version.maven.plugin.build-helper>3.6.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.13.0</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.6.1</version.maven.plugin.dependency>
-        <version.maven.plugin.dependency-check>9.2.0</version.maven.plugin.dependency-check>
+        <version.maven.plugin.dependency-check>10.0.1</version.maven.plugin.dependency-check>
         <version.maven.plugin.download>1.9.0</version.maven.plugin.download>
         <version.maven.plugin.exec>3.3.0</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>9.0.0</version.maven.plugin.git-commit-id>

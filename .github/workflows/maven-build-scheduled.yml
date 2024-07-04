@@ -38,12 +38,19 @@ jobs:
         distribution: 'adopt'
         java-version: 17
 
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Restore CVD Database from Cache
       uses: actions/cache/restore@v4
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb
+        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
+        restore-keys: ${{ runner.os }}-maven-owasp-cvedb
 
     - name: Update CVD Database
       continue-on-error: true
@@ -59,7 +66,7 @@ jobs:
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb
+        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
 
     - name: Check OWASP
       env:
