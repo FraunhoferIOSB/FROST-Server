@@ -300,6 +300,12 @@ public class CoreSettings implements ConfigDefaults {
         if (isFilterDeleteEnabled()) {
             enabledExtensions.add(Extension.FILTERED_DELETES);
         }
+        if (mqttSettings.isAllowMqttExpand()) {
+            enabledExtensions.add(Extension.MQTT_EXPAND);
+        }
+        if (mqttSettings.isAllowMqttFilter()) {
+            enabledExtensions.add(Extension.MQTT_FILTER);
+        }
     }
 
     /**

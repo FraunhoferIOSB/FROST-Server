@@ -1,16 +1,17 @@
 ---
 layout: default
 title: Expanding Entities in MQTT
-category: gettingData
-topCategory: STA
-order: 26
+category: extensions
+order: 10
 ---
 
 # Extending MQTT Responses with nested Entities
 
-The function described here is an MQTT version of the function "Expanding", which is based on HTTP "Expanding" function. Therefore the purpose is similar.
+The function described here is an MQTT version of the function "Expanding", which is based on HTTP "Expanding" function.
+Therefore the purpose is similar.
 
-In many use cases, one wishes to join together related object types within one MQTT subscription topic. A common example is to provide a Thing, together with all associated Datastreams.
+In many use cases, one wishes to join together related object types within one MQTT subscription topic.
+A common example is to provide a Thing, together with all associated Datastreams.
 
 As MQTT is event based, whenever a parameter of any Thing changes (relations, e.g. Datastreams, excluded), responses will be sent to the subscribing clients.
 
@@ -52,7 +53,8 @@ This subscription topic will provide the identifier and description of all Thing
 
 ## More and Less Content
 
-In order to reduce the volume of the transferred data, it is possible to reduce the content of the Datastreams to selected parameters. This is done by adding the select parameter for the Datastreams:
+In order to reduce the volume of the transferred data, it is possible to reduce the content of the Datastreams to selected parameters.
+This is done by adding the select parameter for the Datastreams:
 
 The example below reduces the content of the returned Datastreams to their identifier and description.
 
@@ -138,3 +140,10 @@ The resulting response provides us with a simple overview of a Thing, together w
 We now see serveral new things in the response:
 * Inside each Datastream there is a field `Observations@iot.count` the holds the total number of Observations for this Datastream.
 * Each Datastream has an `Observations@iot.nextLink` that holds a URL that points to the next Observation in the Datastream.
+
+## Conformance Class
+
+The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
+
+    https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttExpand.html
+

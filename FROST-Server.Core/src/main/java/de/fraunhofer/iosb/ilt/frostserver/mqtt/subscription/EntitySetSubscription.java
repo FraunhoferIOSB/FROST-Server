@@ -67,6 +67,9 @@ public class EntitySetSubscription extends AbstractSubscription {
                     || query.getTop().isPresent()) {
                 throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $count, $skip, $top and $orderby are not allowed in query options.");
             }
+            if (!query.getExpand().isEmpty() && !settings.getMqttSettings().isAllowMqttExpand()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $expand is not allowed in query options.");
+            }
             if (query.getFilter() != null && !settings.getMqttSettings().isAllowMqttFilter()) {
                 throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $filter is not allowed in query options.");
             }
@@ -85,7 +88,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     }
 
     private Query parseQuery(String topic) {
-        String queryString = null;
+        String queryString;
         queryString = URLDecoder.decode(topic, StringHelper.UTF8);
         try {
             return QueryParser.parseQuery(queryString, queryDefaults, modelRegistry, path).validate();

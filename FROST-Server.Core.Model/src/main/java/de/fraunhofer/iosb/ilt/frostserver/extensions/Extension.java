@@ -41,7 +41,9 @@ public enum Extension {
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
             "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"),
-    FILTERED_DELETES("https://fraunhoferiosb.github.io/FROST-Server/extensions/FilteredDelete.html");
+    FILTERED_DELETES("https://fraunhoferiosb.github.io/FROST-Server/extensions/FilteredDelete.html"),
+    MQTT_EXPAND("https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttExpand.html"),
+    MQTT_FILTER("https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttFilter.html");
 
     /**
      * Flag indicating the server feature should be exposed on the index page.
@@ -51,11 +53,6 @@ public enum Extension {
      * The requirements implemented by this extension.
      */
     private final Set<String> requirements;
-
-    private Extension() {
-        this.exposedFeature = false;
-        this.requirements = Collections.emptySet();
-    }
 
     private Extension(String... requirements) {
         this.exposedFeature = true;
