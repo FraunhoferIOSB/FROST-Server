@@ -105,17 +105,17 @@
         <version.geolatte-common>0.8</version.geolatte-common>
         <version.guava>33.2.1-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
-        <version.jackson>2.17.1</version.jackson>
+        <version.jackson>2.17.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
         <version.jacksonGeojson>1.14</version.jacksonGeojson>
         <version.javaee-web-api>8.0.1</version.javaee-web-api>
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
-        <version.jetty>10.0.21</version.jetty>
-        <version.jooq>3.19.9</version.jooq>
+        <version.jetty>10.0.22</version.jetty>
+        <version.jooq>3.19.10</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.10.2</version.junit>
-        <version.junit-platform-suite>1.10.2</version.junit-platform-suite>
+        <version.junit>5.10.3</version.junit>
+        <version.junit-platform-suite>1.10.3</version.junit-platform-suite>
         <version.keycloak>24.0.5</version.keycloak>
         <version.liquibase>4.28.0</version.liquibase>
         <version.logback>1.5.6</version.logback>
@@ -123,21 +123,21 @@
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.13.0</version.maven.plugin.compiler>
-        <version.maven.plugin.dependency>3.6.1</version.maven.plugin.dependency>
-        <version.maven.plugin.dependency-check>10.0.1</version.maven.plugin.dependency-check>
+        <version.maven.plugin.dependency>3.7.1</version.maven.plugin.dependency>
+        <version.maven.plugin.dependency-check>10.0.2</version.maven.plugin.dependency-check>
         <version.maven.plugin.download>1.9.0</version.maven.plugin.download>
         <version.maven.plugin.exec>3.3.0</version.maven.plugin.exec>
-        <version.maven.plugin.git-commit-id>9.0.0</version.maven.plugin.git-commit-id>
+        <version.maven.plugin.git-commit-id>9.0.1</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.2.4</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.12</version.maven.plugin.jacoco>
-        <version.maven.plugin.jar>3.4.1</version.maven.plugin.jar>
+        <version.maven.plugin.jar>3.4.2</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.7.0</version.maven.plugin.javadoc>
         <version.maven.plugin.nexus-staging>1.7.0</version.maven.plugin.nexus-staging>
-        <version.maven.plugin.release>3.0.1</version.maven.plugin.release>
+        <version.maven.plugin.release>3.1.0</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.0</version.maven.plugin.shade>
         <version.maven.plugin.source>3.3.1</version.maven.plugin.source>
         <version.maven.plugin.spotless>2.43.0</version.maven.plugin.spotless>
-        <version.maven.plugin.surefire>3.2.5</version.maven.plugin.surefire>
+        <version.maven.plugin.surefire>3.3.0</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
         <version.openjfx>22.0.1</version.openjfx>
@@ -147,7 +147,7 @@
         <version.postgres>42.7.3</version.postgres>
         <version.slf4j-api>2.0.13</version.slf4j-api>
         <version.testcontainers>1.19.8</version.testcontainers>
-        <version.testcontainers-keycloak>3.3.1</version.testcontainers-keycloak>
+        <version.testcontainers-keycloak>3.4.0</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
