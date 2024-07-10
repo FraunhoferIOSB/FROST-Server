@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -94,6 +95,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
     private CoreSettings settings;
     private MdsModelSettings modelSettings;
+    private CoreModelSettings coreModelSettings;
     private boolean enabled;
     private boolean fullyInitialised;
 
@@ -104,6 +106,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         enabled = pluginSettings.getBoolean(MdsModelSettings.TAG_ENABLE_MDS_MODEL, MdsModelSettings.class);
         if (enabled) {
             modelSettings = new MdsModelSettings(settings);
+            coreModelSettings = new CoreModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
         return InitResult.INIT_OK;
@@ -221,9 +224,11 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
         if (pm instanceof JooqPersistenceManager ppm) {
             final TableCollection tableCollection = ppm.getTableCollection();
+            final DataType dataTypeSnsr = ppm.getDataTypeFor(coreModelSettings.idTypeSensor);
+            final DataType dataTypeThng = ppm.getDataTypeFor(coreModelSettings.idTypeThing);
             final DataType dataTypeMds = ppm.getDataTypeFor(modelSettings.idTypeMultiDatastream);
             final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getPkFields().get(0).getDataType();
-            tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(dataTypeMds, this, pluginCoreModel));
+            tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(dataTypeMds, dataTypeSnsr, dataTypeThng, this, pluginCoreModel));
             tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties(dataTypeMds, dataTypeObsProp));
         }
         fullyInitialised = true;
