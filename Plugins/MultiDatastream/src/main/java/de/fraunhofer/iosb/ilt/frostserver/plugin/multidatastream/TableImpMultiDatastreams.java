@@ -137,17 +137,17 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, ?> colId = createField(DSL.name("ID"), getIdType(), this);
+    public final TableField<Record, ?> colId = createField(DSL.name("ID"), getIdType().nullable(false), this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, ?> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType(), this);
+    public final TableField<Record, ?> colSensorId;
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, ?> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+    public final TableField<Record, ?> colThingId;
 
     private final transient PluginMultiDatastream pluginMultiDatastream;
     private final transient PluginCoreModel pluginCoreModel;
@@ -157,13 +157,19 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
      *
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
+     * @param idTypeSnsr The (SQL)DataType of the SENSOR_ID column used in the
+     * database.
+     * @param idTypeTng The (SQL)DataType of the THING_ID column used in the
+     * database.
      * @param pMultiDs the multiDatastream plugin this table belongs to.
      * @param pCoreModel the coreModel plugin that this data model links to.
      */
-    public TableImpMultiDatastreams(DataType<?> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+    public TableImpMultiDatastreams(DataType<?> idType, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null, null);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
+        colSensorId = createField(DSL.name("SENSOR_ID"), idTypeSnsr.nullable(false));
+        colThingId = createField(DSL.name("THING_ID"), idTypeTng.nullable(false));
     }
 
     private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
@@ -174,6 +180,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         super(aliased.getIdType(), alias, aliased, updatedSql);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
+        colSensorId = createField(DSL.name("SENSOR_ID"), aliased.colSensorId.getDataType().nullable(false));
+        colThingId = createField(DSL.name("THING_ID"), aliased.colThingId.getDataType().nullable(false));
     }
 
     @Override
