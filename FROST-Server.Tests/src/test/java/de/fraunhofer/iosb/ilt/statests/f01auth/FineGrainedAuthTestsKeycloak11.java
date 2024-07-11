@@ -20,12 +20,11 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 
 /**
- *
- * @author scf
+ * Runs the FineGrained Auth Tests using Keycloak Auth on the v1.1 API.
  */
-public class FineGrainedAuthTests11 extends FineGrainedAuthTests {
+public class FineGrainedAuthTestsKeycloak11 extends FineGrainedAuthTestsKeycloak {
 
-    public FineGrainedAuthTests11() {
+    public FineGrainedAuthTestsKeycloak11() {
         super(ServerVersion.v_1_1);
     }
 

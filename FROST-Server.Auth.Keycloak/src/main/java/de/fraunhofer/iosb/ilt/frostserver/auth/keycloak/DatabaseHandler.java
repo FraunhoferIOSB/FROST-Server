@@ -28,6 +28,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -54,6 +57,12 @@ public class DatabaseHandler {
     private final String connectionUrl;
     private final String userTable;
     private final String usernameColumn;
+    private final String uprInsertQuery = "insert into \"USER_PROJECT_ROLE\""
+            + " (\"USER_NAME\", \"PROJECT_ID\", \"ROLE_NAME\")"
+            + " VALUES (?,(select \"ID\" from \"PROJECTS\" where \"NAME\"=?),?)";
+
+    private final String projectRoleRegex = "^([a-zA-Z0-9 ]+)__([a-zA-Z0-9]+)$";
+    private final Pattern projectRoleMatcher = Pattern.compile(projectRoleRegex);
 
     public static void init(CoreSettings coreSettings) {
         if (INSTANCES.get(coreSettings) == null) {
@@ -87,8 +96,10 @@ public class DatabaseHandler {
      * Checks if the user is registered locally and if not, add the user.
      *
      * @param username the username
+     * @param roles the roles the user has.
      */
-    public void enureUserInUsertable(String username) {
+    public void enureUserInUsertable(String username, Set<String> roles) {
+        LOGGER.info("Checking user {} in database...", username);
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             final Field<String> usernameField = DSL.field(DSL.name(usernameColumn), String.class);
@@ -104,6 +115,22 @@ public class DatabaseHandler {
                         .set(usernameField, username)
                         .execute();
                 connectionProvider.commit();
+
+                for (String role : roles) {
+                    Matcher m = projectRoleMatcher.matcher(role);
+                    if (m.matches()) {
+                        String projectName = m.group(1);
+                        String roleName = m.group(2);
+                        try {
+                            LOGGER.info("Executed uprInsert: {}, {}, {}", username, projectName, roleName);
+                            int result = dslContext.execute(uprInsertQuery, username, projectName, roleName);
+                            LOGGER.info("Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
+                            connectionProvider.commit();
+                        } catch (RuntimeException ex) {
+                            LOGGER.info("Exception inserting role " + roleName, ex);
+                        }
+                    }
+                }
             }
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to register user locally.", exc);

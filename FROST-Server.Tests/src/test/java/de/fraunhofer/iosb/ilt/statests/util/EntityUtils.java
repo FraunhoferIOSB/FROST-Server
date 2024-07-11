@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.StaService;
+import de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.Expand;
 import de.fraunhofer.iosb.ilt.statests.util.model.PathElement;
@@ -504,22 +505,22 @@ public class EntityUtils {
         }
     }
 
-    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int expectedCode) {
+    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int... expectedCode) {
         filterForException(service.dao(type), filter, expectedCode);
     }
 
-    public static void filterForException(Dao doa, String filter, int expectedCode) {
+    public static void filterForException(Dao doa, String filter, int... expectedCode) {
         try {
             doa.query().filter(filter).list();
         } catch (StatusCodeException e) {
-            String message = "Filter " + filter + " did not respond with " + expectedCode + ", but with " + e.getStatusCode() + ".";
-            assertEquals(expectedCode, e.getStatusCode(), message);
+            String message = "Filter " + filter + " did not respond with one of " + Arrays.toString(expectedCode) + ", but with " + e.getStatusCode() + ".";
+            AuthTestHelper.expectStatusCodeException(message, e, expectedCode);
             return;
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);
             fail("Failed to call service for filter " + filter + " " + ex);
         }
-        fail("Filter " + filter + " did not respond with " + expectedCode + ".");
+        fail("Filter " + filter + " did not respond with " + Arrays.toString(expectedCode) + ".");
     }
 
     public static Entity createSensor(SensorThingsService srvc, String name, String desc, String type, String metadata, List<Entity> registry) throws ServiceFailureException {

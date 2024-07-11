@@ -217,11 +217,11 @@ public class KeycloakFilter implements Filter {
             } else {
                 final KeycloakAccount account = findKeycloakAccount(httpRequest);
                 final Principal principalBasic = account.getPrincipal();
-                final Set<String> roles = account.getRoles();
                 final String userName = principalBasic.getName();
+                final Set<String> roles = account.getRoles();
                 final PrincipalExtended pe = new PrincipalExtended(userName, roles.contains(roleAdmin), roles);
                 if (registerUserLocally) {
-                    databaseHandler.enureUserInUsertable(userName);
+                    databaseHandler.enureUserInUsertable(userName, roles);
                 }
                 if (authenticateOnly) {
                     chain.doFilter(new RequestWrapper(httpRequest, pe), response);

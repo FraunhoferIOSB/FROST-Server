@@ -112,9 +112,9 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
         sMdl = mdlSensing;
         super.setUpVersion();
         USERS.clear();
-        USERS.add(mdlUsers.newUser("c8e84639-9914-4b1e-b756-349afed255f6", null));
-        USERS.add(mdlUsers.newUser("1d6b3bb2-a869-4686-b781-c1ea481e6085", null));
-        USERS.add(mdlUsers.newUser("74fe01f1-2ecc-4696-87f0-340ee3fe1a86", null));
+        USERS.add(mdlUsers.newUser("admin", null));
+        USERS.add(mdlUsers.newUser("read", null));
+        USERS.add(mdlUsers.newUser("write", null));
     }
 
     @Test

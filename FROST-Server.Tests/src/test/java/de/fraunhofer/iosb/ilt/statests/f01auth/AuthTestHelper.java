@@ -66,7 +66,8 @@ public class AuthTestHelper {
         getDatabaseStatus(service, service.getEndpoint() + "../DatabaseStatus", expectedResponse);
     }
 
-    public void getDatabaseStatus(SensorThingsService service, int... expectedResponse) throws IOException {
+    public void getDatabaseStatus(String user, SensorThingsService service, int... expectedResponse) throws IOException {
+        LOGGER.info("  Database Status User {}", user);
         getDatabaseStatus(service, serverSettings.getServiceRootUrl() + "/DatabaseStatus", expectedResponse);
     }
 
@@ -76,6 +77,7 @@ public class AuthTestHelper {
         Integer code = response.getStatusLine().getStatusCode();
         final boolean found = ArrayUtils.contains(expectedResponse, code);
         if (!found) {
+            LOGGER.info("Did not find response code {} in {}", code, expectedResponse);
             LOGGER.info("Failed response: {}", org.apache.http.util.EntityUtils.toString(response.getEntity()));
         }
         Assertions.assertTrue(found, "Unexpected return code: " + code + ", expected one of " + Arrays.toString(expectedResponse));
@@ -162,7 +164,7 @@ public class AuthTestHelper {
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
+    public static void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
         int got = -1;
         if (ex instanceof StatusCodeException) {
             StatusCodeException scex = (StatusCodeException) ex;

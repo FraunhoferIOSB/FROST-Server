@@ -205,7 +205,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
                 CLIENTMAP.put(clientId, client);
                 client.getSubject().getPrincipals().stream().forEach(t -> userData.roles.add(t.getName()));
                 if (registerUserLocally) {
-                    databaseHandler.enureUserInUsertable(userData.userName);
+                    databaseHandler.enureUserInUsertable(userData.userName, userData.roles);
                 }
             }
             return login;

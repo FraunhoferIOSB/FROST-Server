@@ -18,12 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.annotation.WebServlet;
@@ -46,15 +48,14 @@ public class DatabaseStatus extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseStatus.class);
     private static final String DESCRIPTION = "Database status and upgrade servlet.";
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     */
-    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
+    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+        String authProviderClassName = coreSettings.getAuthSettings().get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
+        PrincipalExtended userPrincipal = PrincipalExtended.fromPrincipal(request.getUserPrincipal());
+        if (!isNullOrEmpty(authProviderClassName) && !userPrincipal.isAdmin()) {
+            response.sendError(403);
+            return;
+        }
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");
@@ -104,8 +105,14 @@ public class DatabaseStatus extends HttpServlet {
         return user.checkForUpgrades();
     }
 
-    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
+    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+        String authProviderClassName = coreSettings.getAuthSettings().get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
+        PrincipalExtended userPrincipal = PrincipalExtended.fromPrincipal(request.getUserPrincipal());
+        if (!isNullOrEmpty(authProviderClassName) && !userPrincipal.isAdmin()) {
+            response.sendError(403);
+            return;
+        }
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");
@@ -159,7 +166,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         processGetRequest(request, response);
     }
 
@@ -170,7 +177,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         processPostRequest(request, response);
     }
 

@@ -18,13 +18,11 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_404_NOT_FOUND;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERPASS;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,22 +43,17 @@ import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchResponseJson;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,6 +79,7 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
+    private final int H200 = HTTP_CODE_200_OK;
     private final int H401 = HTTP_CODE_401_UNAUTHORIZED;
     private final int H403 = HTTP_CODE_403_FORBIDDEN;
     private final int H404 = HTTP_CODE_404_NOT_FOUND;
@@ -93,8 +87,6 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTests.class);
-
-    private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     private static String modelUrl(String name) {
         return resourceUrl("finegrainedsecurity/model/", name);
@@ -113,92 +105,85 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
     }
 
-    static {
-        SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
-        SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
-        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
-        SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
-        final String dbName = "fineGrainedAuth";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
-        SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
-        SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
-        SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
+    protected static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    protected static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
+    protected static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
 
-        SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
-        SERVER_PROPERTIES.put("plugins.modelLoader.enable", "true");
-        SERVER_PROPERTIES.put("plugins.modelLoader.modelPath", "");
-        SERVER_PROPERTIES.put("plugins.modelLoader.modelFiles", modelUrl("Project.json") + ", " + modelUrl("Role.json") + ", " + modelUrl("User.json") + ", " + modelUrl("UserProjectRole.json"));
-        SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "target/test-classes/finegrainedsecurity/liquibase");
-        SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
-        SERVER_PROPERTIES.put("plugins.modelLoader.securityPath", "");
-        SERVER_PROPERTIES.put("plugins.modelLoader.securityFiles", modelUrl("secUsers.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
-        SERVER_PROPERTIES.put("plugins.modelLoader.metadataData", "{\"conformance\": [\"testModel\"],\"testModel\": 4}");
-        SERVER_PROPERTIES.put("plugins.modelLoader.metadataPath", "");
-        SERVER_PROPERTIES.put("plugins.modelLoader.metadataFiles", metaUrl("metadata_1.json") + ", " + metaUrl("metadata_2.json"));
-        SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
-        SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
-        SERVER_PROPERTIES.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
-        SERVER_PROPERTIES.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
-    }
+    protected static final List<Entity> THINGS = new ArrayList<>();
+    protected static final List<Entity> LOCATIONS = new ArrayList<>();
+    protected static final List<Entity> SENSORS = new ArrayList<>();
+    protected static final List<Entity> O_PROPS = new ArrayList<>();
+    protected static final List<Entity> DATASTREAMS = new ArrayList<>();
+    protected static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    protected static final List<Entity> PROJECTS = new ArrayList<>();
+    protected static final List<Entity> USERS = new ArrayList<>();
+    protected static final List<Entity> ROLES = new ArrayList<>();
+    protected static final List<Entity> USER_PROJECT_ROLES = new ArrayList<>();
 
-    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
-    private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
-    private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
+    protected static final String ADMIN = "admin";
+    protected static final String WRITE = "write";
+    protected static final String READ = "read";
+    protected static final String ANONYMOUS = "anonymous";
+    protected static final String ADMIN_P1 = "AdminProject1";
+    protected static final String ADMIN_P2 = "AdminProject2";
+    protected static final String OBS_CREATE_P1 = "ObsCreaterProject1";
+    protected static final String OBS_CREATE_P2 = "ObsCreaterProject2";
 
-    private static final List<Entity> THINGS = new ArrayList<>();
-    private static final List<Entity> LOCATIONS = new ArrayList<>();
-    private static final List<Entity> SENSORS = new ArrayList<>();
-    private static final List<Entity> O_PROPS = new ArrayList<>();
-    private static final List<Entity> DATASTREAMS = new ArrayList<>();
-    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
-    private static final List<Entity> PROJECTS = new ArrayList<>();
-    private static final List<Entity> USERS = new ArrayList<>();
-    private static final List<Entity> ROLES = new ArrayList<>();
-    private static final List<Entity> USER_PROJECT_ROLES = new ArrayList<>();
-
-    private static final String ADMIN = "admin";
-    private static final String WRITE = "write";
-    private static final String READ = "read";
-    private static final String ANONYMOUS = "anonymous";
-    private static final String ADMIN_P1 = "AdminProject1";
-    private static final String ADMIN_P2 = "AdminProject2";
-    private static final String OBS_CREATE_P1 = "ObsCreaterProject1";
-    private static final String OBS_CREATE_P2 = "ObsCreaterProject2";
-
-    private static SensorThingsService serviceAdmin;
-    private static SensorThingsService serviceWrite;
-    private static SensorThingsService serviceRead;
-    private static SensorThingsService serviceAnon;
-    private static SensorThingsService serviceAdminProject1;
-    private static SensorThingsService serviceAdminProject2;
-    private static SensorThingsService serviceObsCreaterProject1;
-    private static SensorThingsService serviceObsCreaterProject2;
+    protected static SensorThingsService serviceAdmin;
+    protected static SensorThingsService serviceWrite;
+    protected static SensorThingsService serviceRead;
+    protected static SensorThingsService serviceAnon;
+    protected static SensorThingsService serviceAdminProject1;
+    protected static SensorThingsService serviceAdminProject2;
+    protected static SensorThingsService serviceObsCreaterProject1;
+    protected static SensorThingsService serviceObsCreaterProject2;
 
     private final AuthTestHelper ath;
 
-    public FineGrainedAuthTests(ServerVersion version) {
-        super(version, SERVER_PROPERTIES);
+    protected static void addCommonProperties(Map<String, String> properties) {
+        properties.put("plugins.coreModel.idType", "LONG");
+        properties.put("plugins.modelLoader.enable", "true");
+        properties.put("plugins.modelLoader.modelPath", "");
+        properties.put("plugins.modelLoader.modelFiles", modelUrl("Project.json") + ", " + modelUrl("Role.json") + ", " + modelUrl("User.json") + ", " + modelUrl("UserProjectRole.json"));
+        properties.put("plugins.modelLoader.liquibasePath", "target/test-classes/finegrainedsecurity/liquibase");
+        properties.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
+        properties.put("plugins.modelLoader.securityPath", "");
+        properties.put("plugins.modelLoader.securityFiles", modelUrl("secUsers.json") + ", " + modelUrl("secDatastreams.json") + ", " + modelUrl("secObservations.json") + ", " + modelUrl("secProjects.json") + ", " + modelUrl("secThings.json"));
+        properties.put("plugins.modelLoader.metadataData", "{\"conformance\": [\"testModel\"],\"testModel\": 4}");
+        properties.put("plugins.modelLoader.metadataPath", "");
+        properties.put("plugins.modelLoader.metadataFiles", metaUrl("metadata_1.json") + ", " + metaUrl("metadata_2.json"));
+        properties.put("plugins.modelLoader.idType.Role", "STRING");
+        properties.put("plugins.modelLoader.idType.User", "STRING");
+        properties.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
+        properties.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
+    }
+
+    public FineGrainedAuthTests(ServerVersion version, Map<String, String> properties) {
+        super(version, properties);
         ath = new AuthTestHelper(serverSettings);
     }
 
     @Override
     protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-
-        serviceAdmin = AuthTestHelper.setAuthBasic(createService(), "admin", "admin");
-        serviceWrite = AuthTestHelper.setAuthBasic(createService(), "write", "write");
-        serviceRead = AuthTestHelper.setAuthBasic(createService(), "read", "read");
-        serviceAnon = createService();
-        serviceAdminProject1 = AuthTestHelper.setAuthBasic(createService(), "AdminProject1", "AdminProject1");
-        serviceAdminProject2 = AuthTestHelper.setAuthBasic(createService(), "AdminProject2", "AdminProject2");
-        serviceObsCreaterProject1 = AuthTestHelper.setAuthBasic(createService(), "ObsCreaterProject1", "ObsCreaterProject1");
-        serviceObsCreaterProject2 = AuthTestHelper.setAuthBasic(createService(), "ObsCreaterProject2", "ObsCreaterProject2");
+        createServices();
         createEntities();
     }
 
+    public abstract void createServices();
+
     public void createEntities() throws ServiceFailureException {
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        PROJECTS.clear();
+        USERS.clear();
+        ROLES.clear();
+        USER_PROJECT_ROLES.clear();
+
         USERS.add(mdlUsers.newUser("read", "read"));
         USERS.add(mdlUsers.newUser("write", "write"));
         USERS.add(mdlUsers.newUser("admin", "admin"));
@@ -208,11 +193,12 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ROLES.add(mdlUsers.newRole("delete", ""));
         ROLES.add(mdlUsers.newRole("admin", ""));
         try {
-            HTTPMethods.doPost(serviceAdmin.getHttpClient(), serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
+            HTTPMethods.doPost(serviceAdmin, serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
 
-            String batchPostData = IOUtils.resourceToString("finegrainedsecurity/dataBatchPost.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
+            String batchPostData = getBatchPostData();
             String response = postBatch(batchPostData);
             BatchResponseJson result = Utils.MAPPER.readValue(response, BatchResponseJson.class);
+            LOGGER.info("  Posted Batch with {} results.", result.getResponses().size());
             for (BatchResponseJson.ResponsePart part : result.getResponses()) {
                 final String location = part.getLocation();
                 Object[] pk = pkFromSelfLink(location);
@@ -254,12 +240,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
                 }
             }
-
+            Collections.sort(USERS, (o1, o2) -> o1.getProperty(EP_USERNAME).toLowerCase().compareTo(o2.getProperty(EP_USERNAME).toLowerCase()));
             OBSERVATIONS.addAll(serviceAdmin.query(mdlSensing.etObservation).top(100).orderBy("id").list().toList());
-        } catch (IOException ex) {
+        } catch (IOException | RuntimeException ex) {
             LOGGER.error("Failed to read resource", ex);
         }
     }
+
+    public abstract String getBatchPostData() throws IOException;
 
     public static Object[] pkFromSelfLink(String selfLink) {
         String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
@@ -275,25 +263,9 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         return matcher.group(1).toLowerCase();
     }
 
-    private SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
-            try {
-                baseService.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
-            } catch (URISyntaxException | MalformedURLException ex) {
-                throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
-            }
-        }
-        try {
-            return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
-        } catch (URISyntaxException | MalformedURLException ex) {
-            throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
-        }
-    }
-
     private String postBatch(String body) {
         String urlString = serverSettings.getServiceUrl(version) + "/$batch";
-        HTTPMethods.HttpResponse httpResponse = HTTPMethods.doPost(serviceAdmin.getHttpClient(), urlString, body, "application/json");
+        HTTPMethods.HttpResponse httpResponse = HTTPMethods.doPost(serviceAdmin, urlString, body, "application/json");
         assertEquals(200, httpResponse.code, "Batch response should be 200");
         return httpResponse.response;
     }
@@ -301,19 +273,19 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_01_UpdateDb() throws IOException {
         LOGGER.info("  test_01_UpdateDb");
-        ath.getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
-        ath.getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ADMIN, serviceAdmin, HTTP_CODE_200_OK);
+        ath.getDatabaseStatus(WRITE, serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(READ, serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ANONYMOUS, serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatusIndirect(serviceAdminProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceAdminProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ADMIN_P1, serviceAdminProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatusIndirect(serviceAdminProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceAdminProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ADMIN_P2, serviceAdminProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatusIndirect(serviceObsCreaterProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceObsCreaterProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(OBS_CREATE_P1, serviceObsCreaterProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatusIndirect(serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(OBS_CREATE_P2, serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -322,7 +294,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(serviceWrite, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(serviceRead, mdlUsers.etProject, "", PROJECTS);
-        filterForException(serviceAnon, mdlUsers.etProject, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAnon, mdlUsers.etProject, "", H401, H403);
         testFilterResults(serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
@@ -336,7 +308,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
@@ -351,7 +323,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         EntityCreator reset = (user) -> original.withOnlyPk().setProperty(EP_NAME, original.getProperty(EP_NAME));
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401, H403);
         updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H403);
         updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
@@ -366,7 +338,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
         filterForException(serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED, H403);
         filterForException(serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
@@ -377,13 +349,13 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     void test_04a_ReadUser() {
         LOGGER.info("  test_04a_ReadUser");
         testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
-        testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 1));
-        testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 0));
-        filterForException(serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
+        testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
+        testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
+        filterForException(serviceAnon, mdlUsers.etUser, "", H401, H403);
         testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", USERS);
-        testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 4));
-        testFilterResults(serviceObsCreaterProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
+        testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
+        testFilterResults(serviceObsCreaterProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 4));
     }
 
     @Test
@@ -392,58 +364,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         EntityCreator creator = (user) -> mdlUsers.newUser(user + "-User", user + "-password");
 
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-    }
-
-    @Test
-    void test_04c_ChangePassword() {
-        LOGGER.info("  test_04c_ChangePassword");
-        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
-                .setProperty(EP_USERPASS, user + "2");
-        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
-                .withOnlyPk()
-                .setProperty(EP_USERPASS, user + "2");
-
-        serviceRead = testChangePassword(READ, serviceRead, changed, Utils.getFromList(USERS, 0));
-        serviceWrite = testChangePassword(WRITE, serviceWrite, changed, Utils.getFromList(USERS, 1));
-        serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed, USERS);
-        serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed, USERS);
-        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed, Utils.getFromList(USERS, 4));
-        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed, Utils.getFromList(USERS, 6));
-
-        testChangePasswordFail(WRITE, serviceWrite, changedCopy, READ);
-        testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
-    }
-
-    private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
-        LOGGER.debug("    {}", user);
-        try {
-            service.update(creator.create(user2));
-            String failMessage = "User " + user + " should NOT be able to update password for user " + user2 + ".";
-            LOGGER.error(failMessage);
-            fail(failMessage);
-        } catch (ServiceFailureException ex) {
-            // Good!
-        }
-    }
-
-    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator, List<Entity> entityList) {
-        LOGGER.debug("    {}", user);
-        final Entity userEntity = creator.create(user);
-        try {
-            service.update(userEntity);
-        } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to update password. Got " + ex.getMessage();
-            LOGGER.error(failMessage, ex);
-            fail(failMessage);
-        }
-        SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
-        testFilterResults(newService, mdlUsers.etUser, "", entityList);
-        return newService;
     }
 
     @Test
@@ -452,7 +377,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etRole, "", ROLES);
         filterForException(serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAnon, mdlUsers.etRole, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAnon, mdlUsers.etRole, "", H401, H403);
         filterForException(serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
@@ -466,7 +391,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -481,7 +406,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -501,7 +426,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -518,7 +443,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         Entity original = DATASTREAMS.get(0);
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401, H403);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
         updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H404);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
@@ -533,7 +458,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
-        filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED, H403);
         testFilterResults(serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
@@ -547,7 +472,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, HTTP_CODE_401_UNAUTHORIZED);
+        filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, H401, H403);
         testFilterResults(serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
         testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
@@ -559,14 +484,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         LOGGER.info("  test_08c_DatastreamFromObservationRead");
 
         URL link = serviceAdmin.getFullPath(OBSERVATIONS.get(0), mdlSensing.npObservationDatastream);
-        fetchForCode(ADMIN, serviceAdmin, link, 200);
-        fetchForCode(WRITE, serviceWrite, link, 200);
-        fetchForCode(READ, serviceRead, link, 200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, 401);
-        fetchForCode(ADMIN_P1, serviceAdminProject1, link, 200);
-        fetchForCode(ADMIN_P2, serviceAdminProject2, link, 404);
-        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, 200);
-        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, 404);
+        fetchForCode(ADMIN, serviceAdmin, link, H200);
+        fetchForCode(WRITE, serviceWrite, link, H200);
+        fetchForCode(READ, serviceRead, link, H200);
+        fetchForCode(ANONYMOUS, serviceAnon, link, H401, H403);
+        fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
+        fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
+        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
+        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, H404);
     }
 
     @Test
@@ -574,14 +499,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         LOGGER.info("  test_08d_ObservationsFromDatastreamRead");
 
         URL link = serviceAdmin.getFullPath(DATASTREAMS.get(0), mdlSensing.npDatastreamObservations);
-        fetchForCode(ADMIN, serviceAdmin, link, 200);
-        fetchForCode(WRITE, serviceWrite, link, 200);
-        fetchForCode(READ, serviceRead, link, 200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, 401);
-        fetchForCode(ADMIN_P1, serviceAdminProject1, link, 200);
-        fetchForCode(ADMIN_P2, serviceAdminProject2, link, 404);
-        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, 200);
-        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, 404);
+        fetchForCode(ADMIN, serviceAdmin, link, H200);
+        fetchForCode(WRITE, serviceWrite, link, H200);
+        fetchForCode(READ, serviceRead, link, H200);
+        fetchForCode(ANONYMOUS, serviceAnon, link, H401, H403);
+        fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
+        fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
+        fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
+        fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, H404);
     }
 
     @Test
@@ -614,7 +539,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
@@ -626,7 +551,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         LOGGER.info("  test_10a_ThingDelete");
         EntityCreator creator = (user) -> THINGS.get(0);
 
-        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         deleteForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -659,14 +584,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private JsonNode getRootUrl() throws JsonProcessingException, ParseException, IOException {
         String urlString = serverSettings.getServiceUrl(version);
-        HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin.getHttpClient(), urlString);
+        HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin, urlString);
         assertEquals(200, responseMap.code, () -> "Error fetching root URI: " + urlString);
         return Utils.MAPPER.readTree(responseMap.response);
     }
 
     private void fetchForCode(String user, SensorThingsService service, URL link, int... codesWant) throws URISyntaxException {
         HttpGet get = new HttpGet(link.toURI());
-        try (CloseableHttpResponse response = service.getHttpClient().execute(get)) {
+        try (CloseableHttpResponse response = service.execute(get)) {
             int codeGot = response.getStatusLine().getStatusCode();
             for (int codeWant : codesWant) {
                 if (codeWant == codeGot) {
@@ -685,7 +610,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ath.createForOk(user, service, entity, validateDoa, entityList);
     }
 
-    private void createForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int expectedCodes) {
+    private void createForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int... expectedCodes) {
         ath.createForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
     }
 
@@ -709,11 +634,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ath.deleteForOk(user, service, toDelete, validateDoa, entityList);
     }
 
-    private void deleteForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int expectedCodes) {
+    private void deleteForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int... expectedCodes) {
         ath.deleteForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
     }
 
-    private static interface EntityCreator {
+    public static interface EntityCreator {
 
         public Entity create(String user);
     }

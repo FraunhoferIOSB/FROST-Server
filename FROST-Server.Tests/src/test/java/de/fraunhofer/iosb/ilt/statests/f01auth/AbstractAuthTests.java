@@ -160,26 +160,26 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test01AdminUpdateDb() throws IOException {
         LOGGER.info("  test01AdminUpdateDb");
-        ath.getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
+        ath.getDatabaseStatus("admin", serviceAdmin, HTTP_CODE_200_OK);
     }
 
     @Test
     void test02WriteUpdateDb() throws IOException {
         LOGGER.info("  test02WriteUpdateDb");
-        ath.getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("write", serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test03ReadUpdateDb() throws IOException {
         LOGGER.info("  test03ReadUpdateDb");
-        ath.getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("read", serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test04AnonUpdateDb() throws IOException {
         LOGGER.info("  test04AnonUpdateDb");
         ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("anonymous", serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test

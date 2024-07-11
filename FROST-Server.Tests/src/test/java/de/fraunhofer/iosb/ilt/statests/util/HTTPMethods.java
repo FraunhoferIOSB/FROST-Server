@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import org.apache.http.Consts;
 import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -145,6 +145,21 @@ public class HTTPMethods {
         }
     }
 
+    public static HttpResponse doGet(final SensorThingsService service, String urlString) throws ParseException, IOException {
+        LOGGER.debug("Getting: {}", urlString);
+        countGet++;
+        HttpGet request = new HttpGet(urlString);
+        try (CloseableHttpResponse response = service.execute(request)) {
+            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
+            if (result.code == 200) {
+                result.setResponse(EntityUtils.toString(response.getEntity()));
+            } else {
+                result.setResponse("");
+            }
+            return result;
+        }
+    }
+
     private static String responseToString(HttpURLConnection connection) throws IOException {
         final InputStream is = connection.getInputStream();
         if (is.available() == 0) {
@@ -244,7 +259,7 @@ public class HTTPMethods {
         }
     }
 
-    public static HttpResponse doPost(HttpClient httpClient, String urlString, String postBody, String contentType) {
+    public static HttpResponse doPost(SensorThingsService service, String urlString, String postBody, String contentType) {
         try {
             LOGGER.debug("Posting: {}", urlString);
             countPost++;
@@ -254,7 +269,7 @@ public class HTTPMethods {
             httpPost.setHeader("Content-Type", contentType);
             httpPost.setHeader("charset", "utf-8");
 
-            org.apache.http.HttpResponse httpResponse = httpClient.execute(httpPost);
+            org.apache.http.HttpResponse httpResponse = service.execute(httpPost);
             final int statusCode = httpResponse.getStatusLine().getStatusCode();
 
             HttpResponse result = new HttpResponse(statusCode);
