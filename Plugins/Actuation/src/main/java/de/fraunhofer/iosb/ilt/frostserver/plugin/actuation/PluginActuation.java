@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
@@ -65,6 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginActuation implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
+    public static final String PLUGIN_NAME = "Plugin.Actuation";
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginactuation/tables.xml";
     private static final String ACTUATOR = "Actuator";
     private static final String ACTUATORS = "Actuators";
@@ -242,18 +244,20 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     }
 
     public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
-        if (isVersion2) {
-            // Nothing to do if we run V2.
-            return target;
-        }
         if (target == null) {
             target = new LinkedHashMap<>();
+        }
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            target.put(CHANGE_SET_NAME, PLUGIN_NAME);
+            return target;
         }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pCoreModel.createLiqibaseParams(ppm, target);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_ACTUATOR, modelSettings.idTypeActuator);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASK, modelSettings.idTypeTask);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASKING_CAP, modelSettings.idTypeTaskingCap);
+        target.put(CHANGE_SET_NAME, PLUGIN_NAME);
 
         return target;
     }
@@ -262,7 +266,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     public String checkForUpgrades() {
         if (isVersion2) {
             // Nothing to do if we run V2.
-            return "";
+            return "Up to date, no changes to apply: " + PLUGIN_NAME + ".\n";
         }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
@@ -275,6 +279,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         if (isVersion2) {
+            out.append("Up to date, no changes to apply: ").append(PLUGIN_NAME).append(".\n");
             // Nothing to do if we run V2.
             return true;
         }

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader;
 
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.PLUGIN_NAME;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -369,6 +370,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
                     final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
+                    liquibaseParams.put(CHANGE_SET_NAME, file);
                     liquibaseParams.put("searchPath", liquibasePath);
                     result.append(jpm.checkForUpgrades(file, liquibaseParams));
                 }

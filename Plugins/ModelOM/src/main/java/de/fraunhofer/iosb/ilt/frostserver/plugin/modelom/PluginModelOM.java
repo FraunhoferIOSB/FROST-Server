@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 public class PluginModelOM implements Plugin, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginModelOM.class.getName());
-    private static final String INIT_FAILED = "PluginModelLoader must be enabled and initialised before the ModelOM plugin!";
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_PDQ = "modelOM.enable";
