@@ -1,0 +1,89 @@
+{
+  "entries": [
+    {
+      "tableName": "USERS",
+      "wrappers": [
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",
+          "checkInsertPreRel": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin"
+            ]
+          },
+          "checkInsert": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin"
+            ]
+          },
+          "checkUpdate": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "admin"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
+                "query": "$filter\u003dusername eq principalName()"
+              }
+            ]
+          },
+          "checkDelete": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin"
+            ]
+          }
+        },
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperMulti",
+          "wrappers": [
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "admin"
+                ]
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"
+              }
+            },
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckStandaloneQuery",
+                "entityTypeName": "UserProjectRole",
+                "query": "$filter=User/username eq principalName() and Role/rolename eq 'admin'&$top=1"
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"
+              }
+            },
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckFixed",
+                "valid": true
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
+                "joins": [],
+                "where": "t.\"USER_NAME\" \u003d ?",
+                "usernameParameter": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

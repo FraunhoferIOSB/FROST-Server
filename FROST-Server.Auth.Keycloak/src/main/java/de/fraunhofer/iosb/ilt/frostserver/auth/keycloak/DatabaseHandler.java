@@ -17,8 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USERNAME_COLUMN;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_TABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_CACHE_CLEANUP_INTERVAL;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_CACHE_LIFETIME;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_ROLE_DECODER_CLASS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
@@ -26,23 +27,23 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUti
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.SQLDialect;
-import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Database handler for the keycloak auth provider.
  */
 public class DatabaseHandler {
 
@@ -55,14 +56,12 @@ public class DatabaseHandler {
 
     private final Settings authSettings;
     private final String connectionUrl;
-    private final String userTable;
-    private final String usernameColumn;
-    private final String uprInsertQuery = "insert into \"USER_PROJECT_ROLE\""
-            + " (\"USER_NAME\", \"PROJECT_ID\", \"ROLE_NAME\")"
-            + " VALUES (?,(select \"ID\" from \"PROJECTS\" where \"NAME\"=?),?)";
+    private UserRoleDecoder userRoleDecoder;
+    private final Duration lifetime;
+    private final long cleanupIntervalMs;
+    private Thread cleanupThread;
 
-    private final String projectRoleRegex = "^([a-zA-Z0-9 ]+)__([a-zA-Z0-9]+)$";
-    private final Pattern projectRoleMatcher = Pattern.compile(projectRoleRegex);
+    private LinkedHashMap<String, SeenUser> seenUsers = new LinkedHashMap<>();
 
     public static void init(CoreSettings coreSettings) {
         if (INSTANCES.get(coreSettings) == null) {
@@ -88,8 +87,18 @@ public class DatabaseHandler {
     private DatabaseHandler(CoreSettings coreSettings) {
         authSettings = coreSettings.getAuthSettings();
         connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
-        userTable = authSettings.get(TAG_USER_TABLE, KeycloakAuthProvider.class);
-        usernameColumn = authSettings.get(TAG_USERNAME_COLUMN, KeycloakAuthProvider.class);
+        String userRoleDecoderClass = authSettings.get(TAG_USER_ROLE_DECODER_CLASS, KeycloakAuthProvider.class);
+        String lifeTimeString = authSettings.get(TAG_USER_CACHE_LIFETIME, KeycloakAuthProvider.class);
+        lifetime = Duration.parse(lifeTimeString);
+        try {
+            Class<?> urdClass = Class.forName(userRoleDecoderClass);
+            userRoleDecoder = (UserRoleDecoder) urdClass.getDeclaredConstructor().newInstance();
+            userRoleDecoder.init(coreSettings);
+        } catch (ReflectiveOperationException ex) {
+            LOGGER.error("Could not create UserRoleDecoder: Class '{}' could not be instantiated", userRoleDecoderClass, ex);
+        }
+        String cleanupIntervalString = authSettings.get(TAG_USER_CACHE_CLEANUP_INTERVAL, KeycloakAuthProvider.class);
+        cleanupIntervalMs = Duration.parse(cleanupIntervalString).toMillis();
     }
 
     /**
@@ -99,42 +108,100 @@ public class DatabaseHandler {
      * @param roles the roles the user has.
      */
     public void enureUserInUsertable(String username, Set<String> roles) {
-        LOGGER.info("Checking user {} in database...", username);
+        startCleanupThread();
+        SeenUser user = seenUsers.get(username);
+        Instant now = Instant.now();
+        if (user != null && user.expire.isAfter(now)) {
+            LOGGER.info("Already seen user {}", username);
+            return;
+        }
+        if (user != null) {
+            LOGGER.info("User {} timed out", username);
+            seenUsers.remove(username);
+        }
+
+        LOGGER.info("Decoding roles for user {}", username);
         try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, connectionUrl)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
-            final Field<String> usernameField = DSL.field(DSL.name(usernameColumn), String.class);
-            final Table<Record> table = DSL.table(DSL.name(userTable));
-            long count = dslContext
-                    .selectCount()
-                    .from(table)
-                    .where(usernameField.eq(username))
-                    .fetchOne()
-                    .component1();
-            if (count == 0) {
-                dslContext.insertInto(table)
-                        .set(usernameField, username)
-                        .execute();
-                connectionProvider.commit();
-
-                for (String role : roles) {
-                    Matcher m = projectRoleMatcher.matcher(role);
-                    if (m.matches()) {
-                        String projectName = m.group(1);
-                        String roleName = m.group(2);
-                        try {
-                            LOGGER.info("Executed uprInsert: {}, {}, {}", username, projectName, roleName);
-                            int result = dslContext.execute(uprInsertQuery, username, projectName, roleName);
-                            LOGGER.info("Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
-                            connectionProvider.commit();
-                        } catch (RuntimeException ex) {
-                            LOGGER.info("Exception inserting role " + roleName, ex);
-                        }
-                    }
-                }
-            }
+            userRoleDecoder.decodeUserRoles(username, roles, dslContext);
+            seenUsers.put(username, new SeenUser(username, lifetime));
         } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to register user locally.", exc);
         }
+    }
+
+    private void startCleanupThread() {
+        if (cleanupThread != null) {
+            return;
+        }
+        cleanupThread = new Thread(this::cleanUserCacheLoop, "userCacheCleaner");
+        cleanupThread.setDaemon(true);
+        cleanupThread.start();
+    }
+
+    private void cleanUserCacheLoop() {
+        while (!Thread.interrupted()) {
+            try {
+                cleanUserCache();
+            } catch (RuntimeException ex) {
+                LOGGER.trace("Exception during cleanup.", ex);
+            }
+            cleanupSleep();
+        }
+    }
+
+    private void cleanUserCache() {
+        Instant now = Instant.now();
+        for (Iterator<SeenUser> it = seenUsers.values().iterator(); it.hasNext();) {
+            SeenUser user = it.next();
+            if (user.expire.isBefore(now)) {
+                LOGGER.info("User {} timed out", user.username);
+                it.remove();
+            } else {
+                // The rest must also be still valid, since the are in insertion order.
+                return;
+            }
+        }
+    }
+
+    private void cleanupSleep() {
+        try {
+            Thread.sleep(cleanupIntervalMs);
+        } catch (InterruptedException ex) {
+            LOGGER.trace("Rude Wakeup.", ex);
+        }
+    }
+
+    private static class SeenUser {
+
+        final Instant expire;
+        final String username;
+
+        public SeenUser(String username, TemporalAmount lifetime) {
+            this.expire = Instant.now().plus(lifetime);
+            this.username = username;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.username);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final SeenUser other = (SeenUser) obj;
+            return Objects.equals(this.username, other.username);
+        }
+
     }
 
 }

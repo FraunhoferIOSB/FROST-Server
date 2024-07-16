@@ -1,0 +1,119 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Thing",
+      "plural": "Things",
+      "adminOnly": false,
+      "table": "THINGS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "RESTRICTED"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    },
+    {
+      "name": "Location",
+      "plural": "Locations",
+      "adminOnly": false,
+      "table": "LOCATIONS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "RESTRICTED"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "GeneratedFeature",
+          "entitySet": false,
+          "entityType": "FeatureOfInterest",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "GeneratedForLocations",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "GEN_FOI_ID",
+              "otherTable": "FEATURES",
+              "otherField": "ID"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    },
+    {
+      "name": "Datastream",
+      "plural": "Datastreams",
+      "adminOnly": false,
+      "table": "DATASTREAMS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "RESTRICTED"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    },
+    {
+      "name": "FeatureOfInterest",
+      "plural": "FeaturesOfInterest",
+      "adminOnly": false,
+      "table": "FEATURES",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "RESTRICTED"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}

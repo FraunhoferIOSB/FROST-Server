@@ -98,6 +98,15 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     @DefaultValueInt(MAX_USERNAME_LENGTH)
     public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
 
+    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoderDflt")
+    public static final String TAG_USER_ROLE_DECODER_CLASS = "userRoleDecoderClass";
+
+    @DefaultValue("PT5M")
+    public static final String TAG_USER_CACHE_LIFETIME = "userCacheLifetime";
+
+    @DefaultValue("PT5S")
+    public static final String TAG_USER_CACHE_CLEANUP_INTERVAL = "userCacheCleanupInterval";
+
     /**
      * The logger for this class.
      */

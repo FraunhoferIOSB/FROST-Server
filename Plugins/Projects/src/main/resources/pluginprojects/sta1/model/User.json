@@ -1,0 +1,67 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "User",
+      "plural": "Users",
+      "adminOnly": false,
+      "table": "USERS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "username",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "USER_NAME"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "userpass",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperPassword",
+              "field": "USER_PASS"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "Roles",
+          "entitySet": true,
+          "entityType": "Role",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Users",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "USER_NAME",
+              "linkTable": "USER_ROLES",
+              "linkOurField": "USER_NAME",
+              "linkOtherField": "ROLE_NAME",
+              "otherTable": "ROLES",
+              "otherField": "ROLE_NAME"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

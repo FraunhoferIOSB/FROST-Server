@@ -1,0 +1,252 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="2023-11-28-Table-user_roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USER_ROLES" />
+            </not>
+        </preConditions>
+        <createTable tableName="USER_ROLES">
+            <column name="USER_NAME" type="VARCHAR(36)" />
+            <column name="ROLE_NAME" type="VARCHAR(36)" />
+        </createTable>
+        <addPrimaryKey tableName="USER_ROLES" columnNames="USER_NAME,ROLE_NAME"/>
+        <addForeignKeyConstraint
+            constraintName="USER_ROLES_USERS_FKEY"
+            baseTableName="USER_ROLES" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+    <changeSet author="scf" id="2023-04-26-Table-Roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="HALT">
+            <tableExists tableName="USER_ROLES" />
+            <not>
+                <tableExists tableName="ROLES" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="ROLES">
+            <column name="ROLE_NAME" type="VARCHAR(36)">
+                <constraints primaryKey="true" primaryKeyName="PK_ROLES" />
+            </column>
+            <column name="DESCRIPTION" type="TEXT" />
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+
+        <sql>insert into "ROLES" ("ROLE_NAME","DESCRIPTION") select distinct "ROLE_NAME" rn, "ROLE_NAME" ds from "USER_ROLES"</sql>
+
+        <addForeignKeyConstraint
+            constraintName="FK_USER_ROLES_ROLE_NAME"
+            baseTableName="USER_ROLES" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+    <changeSet author="scf" id="2023-04-26-Table-Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="PROJECTS">
+            <column name="ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="PK_PROJECTS" />
+            </column>
+            <column name="NAME" type="VARCHAR(50)" />
+            <column name="DESCRIPTION" type="TEXT" />
+            <column name="ISPUBLIC" type="boolean" />
+            <column name="PROPERTIES" type="JSONB"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="THING_PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="THING_PROJECTS">
+            <column name="THING_ID" type="${idType-Thing}" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID"
+            constraintName="PK_THING_PROJECTS" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_THING_PROJECTS_THING_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_THING_PROJECTS_PROJECT_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-Sensor_Projects"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="SENSOR_PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="SENSOR_PROJECTS">
+            <column name="SENSOR_ID" type="${idType-Sensor}" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addPrimaryKey tableName="SENSOR_PROJECTS" columnNames="SENSOR_ID,PROJECT_ID"
+            constraintName="PK_SENSOR_PROJECTS" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_SENSOR_PROJECTS_SENSOR_ID"
+            baseTableName="SENSOR_PROJECTS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_SENSOR_PROJECTS_PROJECT_ID"
+            baseTableName="SENSOR_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-Feature_Projects"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="FEATURE_PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="FEATURE_PROJECTS">
+            <column name="FEATURE_ID" type="${idType-Feature}" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addPrimaryKey tableName="FEATURE_PROJECTS" columnNames="FEATURE_ID,PROJECT_ID"
+            constraintName="PK_FEATURE_PROJECTS" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_FEATURE_PROJECTS_FEATURE_ID"
+            baseTableName="FEATURE_PROJECTS" baseColumnNames="FEATURE_ID"
+            referencedTableName="FEATURES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_FEATURE_PROJECTS_PROJECT_ID"
+            baseTableName="FEATURE_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="USER_PROJECT_ROLE">
+            <column name="ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="PK_USER_PROJECT_ROLE" />
+            </column>
+            <column name="USER_NAME" type="VARCHAR(36)" />
+            <column name="ROLE_NAME" type="VARCHAR(36)" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_USER_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_ROLE_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_UPR_PROJECT_ID"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+    <!-- Restricted flag on Thing, Location, Datastream and FeatureOfInterest -->
+    <changeSet author="IOSB" id="2023-11-28_RestrictedFlags" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addColumn tableName="THINGS">
+            <column name="RESTRICTED" type="boolean" defaultValueBoolean="false" />
+        </addColumn>
+        <addColumn tableName="LOCATIONS">
+            <column name="RESTRICTED" type="boolean" defaultValueBoolean="false" />
+        </addColumn>
+        <addColumn tableName="DATASTREAMS">
+            <column name="RESTRICTED" type="boolean" defaultValueBoolean="false" />
+        </addColumn>
+        <addColumn tableName="FEATURES">
+            <column name="RESTRICTED" type="boolean" defaultValueBoolean="false" />
+        </addColumn>
+    </changeSet>
+
+    <!-- Restricted flag on Thing, Location, Datastream and FeatureOfInterest -->
+    <changeSet author="IOSB" id="2024-01-19_RestrictedFlagMD" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="MULTI_DATASTREAMS" />
+        </preConditions>
+        <addColumn tableName="MULTI_DATASTREAMS">
+            <column name="RESTRICTED" type="boolean" defaultValueBoolean="false" />
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

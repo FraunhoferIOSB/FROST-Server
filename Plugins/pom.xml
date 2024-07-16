@@ -26,6 +26,7 @@
         <module>MultiDatastream</module>
         <module>OData</module>
         <module>OpenApi</module>
+        <module>Projects</module>
     </modules>
 
     <properties>

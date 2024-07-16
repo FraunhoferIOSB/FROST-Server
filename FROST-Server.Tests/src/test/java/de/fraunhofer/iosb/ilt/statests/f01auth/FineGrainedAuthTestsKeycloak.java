@@ -26,6 +26,7 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.projects.ProjectRoleDecoder;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import java.io.IOException;
@@ -65,6 +66,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
         SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
         SERVER_PROPERTIES.put("auth.registerUserLocally", "true");
+        SERVER_PROPERTIES.put("auth.userRoleDecoderClass", ProjectRoleDecoder.class.getName());
     }
 
     public FineGrainedAuthTestsKeycloak(ServerVersion version) {
