@@ -1,8 +1,8 @@
 ---
 layout: default
-title: GeoJSON ResultFormat
+title: ResultFormat GeoJSON
 category: extensions
-order: 2
+order: 12
 ---
 
 # GeoJSON ResultFormat

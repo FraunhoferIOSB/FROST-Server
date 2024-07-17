@@ -2,7 +2,7 @@
 layout: default
 title: Filtering Entities in MQTT
 category: extensions
-order: 11
+order: 31
 ---
 
 # Filtering MQTT Responses

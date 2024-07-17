@@ -2,7 +2,7 @@
 layout: default
 title: JSON Batch Requests
 category: extensions
-order: 7
+order: 17
 ---
 
 # JSON Batch Requests

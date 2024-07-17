@@ -58,8 +58,8 @@ public class UserData {
      */
     public UserData(String userName, int maxNameLength, String userPass, int maxPassLength) {
         if (userName != null && userName.length() > maxNameLength) {
-            LOGGER.error("Password too long, aborting.");
-            throw new IllegalArgumentException("Password too long.");
+            LOGGER.error("Username too long, aborting.");
+            throw new IllegalArgumentException("Username too long.");
         }
         if (userPass != null && userPass.length() > maxPassLength) {
             LOGGER.error("Password too long, aborting.");

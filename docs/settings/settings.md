@@ -42,7 +42,7 @@ These are settings affecting both the MQTT and HTTP packages.
 * **maxTop:**  
   The maximum allowed value for the $top query option.
 * **maxDataSize:**  
-  The number of bytes that can be loaded before the server stops loading more entities and returns the result. The default is 25000000 (25 MB).
+  The number of bytes that can be loaded before the server stops loading more entities and returns the result. The defaultvalue: `25000000` (25 MB).
 * **useAbsoluteNavigationLinks:**  
   If true, navigationLinks are absolute, otherwise relative.
 * **alwaysOrderbyId:**  
@@ -50,7 +50,7 @@ These are settings affecting both the MQTT and HTTP packages.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 * **queueLoggingInterval:**  
-  If non-zero, log queue statistics ever x milliseconds. Default: 0 (off)
+  If non-zero, log queue statistics ever x milliseconds. Default value: `0` (off)
 
 
 ## HTTP settings

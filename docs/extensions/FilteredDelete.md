@@ -2,7 +2,7 @@
 layout: default
 title: Filtered Delete
 category: extensions
-order: 9
+order: 19
 ---
 
 # Filtered Delete

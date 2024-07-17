@@ -72,6 +72,10 @@ These are generic settings for authentication/authorisation.
   The role in the external authentication system that represents delete (DELETE) access.
 * **auth.role.admin:**  
   The role in the external authentication system that represents admin (DatabaseStatus) access.
+* **auth.maxUsernameLength:** Since 2.4.0  
+  The maximum accepted length of usernames. Longer usernames are not checked and directly rejected. Default value: `128`
+* **auth.maxPasswordLength:** Since 2.4.0  
+  The maximum accepted length of passwords. Longer passwords are not checked and directly rejected. Default value: `128`
 
 
 ### Settings for the auth provider class `BasicAuthProvider`
@@ -143,4 +147,25 @@ Realm roles do not automatically apply to FROST.
 * **auth.keycloakConfigSecret:**  
   If the client has "access-type" set to "confidential" then a secret is required to download the configuration.
         This secret can be found in the configuration itself, in Keycloak.
+* **auth.registerUserLocally:** Since 2.3.0  
+  If a user succesfully logs in through KeyCloak, the user account is also registered in a local database. Default value: `false`
+* **auth.userRoleDecoderClass:** Since 2.4.0  
+  If registerUserLocally is true, the java class used to decode Users and Roles coming from KeyCloak, and add them to a local database.
+        Default value: `de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoderDflt`
+* **auth.userCacheLifetime:** Since 2.4.0  
+  If registerUserLocally is true, decoded users and roles are cached for this long. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations). Default value: `PT5M`
+* **auth.userCacheCleanupInterval:** Since 2.4.0  
+  If registerUserLocally is true, the user cache is checked this often, to remove timed-out users. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations). Default value: `PT5S`
 
+
+### Settings for the UserRoleDecoder class `UserRoleDecoderDflt`
+
+When **auth.registerUserLocally** is used in the KeyCloak Auth Provider, this is the default class used for this registration.
+It checks if the username exist in the `userTable.usernameColumn` and if not, does an insert on this table/column.
+
+The Projects Plugin comes with its own UserRoleDecoder class.
+
+* **auth.userTable:** Since 2.3.0  
+  The table to register users in. Default value: `USERS`
+* **auth.usernameColumn:** Since 2.3.0  
+  The column for the user name. Default value: `USER_NAME`

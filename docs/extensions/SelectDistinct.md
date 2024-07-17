@@ -2,7 +2,7 @@
 layout: default
 title: Select Distinct
 category: extensions
-order: 6
+order: 16
 ---
 
 # Select Distinct
