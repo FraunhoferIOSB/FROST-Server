@@ -7,7 +7,7 @@
             "plural": "Observations",
             "adminOnly": false,
             "table": "observations",
-            "orderByDflt": [],
+            "orderByDflt": ["phenomenonTime"],
             "entityProperties": [
                 {
                     "name": "id",

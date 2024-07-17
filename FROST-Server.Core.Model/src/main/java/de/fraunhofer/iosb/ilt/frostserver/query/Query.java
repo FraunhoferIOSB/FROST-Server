@@ -202,7 +202,16 @@ public class Query {
         pkOrder = pkCount >= primaryKey.getKeyProperties().size();
         if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
-                orderBy.add(dfltOrder);
+                boolean found = false;
+                for (OrderBy order : orderBy) {
+                    if (order.getExpression().toUrl().equalsIgnoreCase(dfltOrder.getExpression().toUrl())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    orderBy.add(dfltOrder);
+                }
             }
             pkOrder = true;
         }
