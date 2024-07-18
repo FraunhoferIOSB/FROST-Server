@@ -150,25 +150,24 @@ public class EntitySetJooqCurser implements EntitySet {
             if (parent.size.isExceeded()) {
                 LOGGER.debug("Size limit reached: {} > {}.", parent.size.getDataSize(), parent.size.getMaxSize());
                 parent.maxFetch = fetchedCount;
-                generateNextAndClose(entity);
+                generateNextLinkAndClose(entity);
             } else if (fetchedCount >= parent.maxFetch) {
-                generateNextAndClose(entity);
+                generateNextLinkAndClose(entity);
             }
-            entity.setQuery(parent.staQuery);
             parent.resultBuilder.expandEntity(entity, parent.staQuery);
             return entity;
         }
 
         private Entity fetchNext() {
             final Record tuple = parent.results.fetchNext();
-            return parent.queryState.entityFromQuery(tuple, parent.size);
+            return parent.queryState.entityFromRecord(tuple, parent.size, parent.staQuery);
         }
 
         private void generateNextLink(Entity last, Entity next) {
             parent.nextLink = UrlHelper.generateNextLink(parent.resultBuilder.getPath(), parent.staQuery, parent.maxFetch, last, next);
         }
 
-        private void generateNextAndClose(Entity entity) {
+        private void generateNextLinkAndClose(Entity entity) {
             if (parent.results.hasNext()) {
                 final Entity next = fetchNext();
                 generateNextLink(entity, next);

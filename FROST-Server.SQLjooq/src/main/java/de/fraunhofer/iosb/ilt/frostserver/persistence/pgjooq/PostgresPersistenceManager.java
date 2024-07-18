@@ -295,8 +295,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (result == null) {
             return null;
         }
-        return queryBuilder.getQueryState().entityFromQuery(result, dataSize)
-                .setQuery(query);
+        return queryBuilder.getQueryState().entityFromRecord(result, dataSize, query);
     }
 
     @Override
@@ -314,11 +313,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             }
         }
 
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, queryBuilder, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 

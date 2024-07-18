@@ -287,8 +287,7 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         if (result == null) {
             return null;
         }
-        return queryBuilder.getQueryState().entityFromQuery(result, dataSize)
-                .setQuery(query);
+        return queryBuilder.getQueryState().entityFromRecord(result, dataSize, query);
     }
 
     @Override
@@ -306,11 +305,11 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
             }
         }
 
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, queryBuilder, dataSize);
         try {
             lastElement.visit(entityCreator);
         } catch (IllegalArgumentException ex) {

@@ -149,12 +149,14 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
 
         QueryState<?> queryState = sqlQueryBuilder.getQueryState();
-        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize(pm.getCoreSettings().getDataSizeMax()));
+        Entity entity = queryState.entityFromRecord(
+                results.get(0),
+                new DataSize(pm.getCoreSettings().getDataSizeMax()),
+                staQuery);
 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
         }
-        entity.setQuery(staQuery);
         expandEntity(entity, staQuery);
         resultObject = entity;
     }
