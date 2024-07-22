@@ -62,7 +62,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
     @ConfigurableField(editor = EditorBoolean.class,
             label = "Empty Allowed", description = "Is the Navigation property allowed to be empty?")
     @EditorBoolean.EdOptsBool(dflt = true)
-    private boolean emptyAllowed;
+    private boolean emptyAllowed = true;
 
     private EntityType entityType;
     private EntityType targetType;
