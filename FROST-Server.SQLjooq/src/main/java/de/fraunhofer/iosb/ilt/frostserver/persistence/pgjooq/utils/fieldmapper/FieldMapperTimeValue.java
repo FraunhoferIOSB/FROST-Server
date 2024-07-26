@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBind
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Table;
@@ -110,7 +110,7 @@ public class FieldMapperTimeValue extends FieldMapperAbstractEp {
 
     @Override
     public Map<String, String> getFieldTypes() {
-        Map<String, String> value = new HashMap<>();
+        Map<String, String> value = new LinkedHashMap<>();
         value.put(fieldStart, "TIMESTAMP WITH TIME ZONE");
         value.put(fieldEnd, "TIMESTAMP WITH TIME ZONE");
         return value;
