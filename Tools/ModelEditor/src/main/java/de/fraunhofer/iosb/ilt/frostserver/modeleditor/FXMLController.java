@@ -51,6 +51,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 public class FXMLController implements Initializable {
@@ -75,6 +76,10 @@ public class FXMLController implements Initializable {
     private Button buttonSaveAll;
     @FXML
     private Button buttonClose;
+    @FXML
+    private TextField textFieldIndent;
+    @FXML
+    private TextField textFieldAuthor;
     @FXML
     private TextField textFieldDate;
     @FXML
@@ -111,11 +116,12 @@ public class FXMLController implements Initializable {
 
     @FXML
     private void actionSaveAll(ActionEvent event) {
+        final String indentText = StringUtils.defaultString(textFieldIndent.getText());
         List<DefModel> models = new ArrayList<>();
         for (FileData fd : listViewEntityTypes.getItems()) {
             ConfigFileEditor cfe = fd.getEditor();
             try {
-                String data = cfe.saveToCurrentFile();
+                String data = cfe.saveConfigToCurrentFile(indentText);
                 DefModel value = JsonWriter.getObjectMapper().readValue(data, DefModel.class);
                 models.add(value);
             } catch (JsonProcessingException ex) {
@@ -124,7 +130,9 @@ public class FXMLController implements Initializable {
                 LOGGER.error("Failed to save.", ex);
             }
         }
-        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models, textFieldDate.getText());
+        final String dateText = textFieldDate.getText();
+        final String authorText = StringUtils.defaultIfBlank(textFieldAuthor.getText(), "generated");
+        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models, dateText, authorText);
         File liquibasePath = new File(currentPath, textFieldLiquibasePath.getText());
         if (!liquibaseChangeLogs.isEmpty()) {
             liquibasePath.mkdirs();

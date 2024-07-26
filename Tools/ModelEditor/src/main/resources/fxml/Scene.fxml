@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane id="AnchorPane" fx:id="paneRoot" prefHeight="541.0" prefWidth="545.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.fraunhofer.iosb.ilt.frostserver.modeleditor.FXMLController">
+<AnchorPane id="AnchorPane" fx:id="paneRoot" prefHeight="772.0" prefWidth="1062.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.fraunhofer.iosb.ilt.frostserver.modeleditor.FXMLController">
    <children>
       <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <tabs>
@@ -30,6 +30,8 @@
                               <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                             <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                               <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
                           </columnConstraints>
@@ -42,7 +44,7 @@
                                  <GridPane.margin>
                                     <Insets left="5.0" />
                                  </GridPane.margin></Label>
-                              <HBox alignment="TOP_RIGHT" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
+                              <HBox alignment="TOP_RIGHT" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.halignment="RIGHT">
                                  <children>
                                     <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#actionLoad" text="Load">
                                        <HBox.margin>
@@ -60,8 +62,10 @@
                                  <GridPane.margin>
                                     <Insets left="5.0" />
                                  </GridPane.margin></Button>
-                              <TextField fx:id="textFieldDate" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                              <TextField fx:id="textFieldLiquibasePath" GridPane.columnIndex="5" GridPane.rowIndex="1">
+                              <TextField fx:id="textFieldIndent" promptText="Indent" text="  " GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                              <TextField fx:id="textFieldAuthor" promptText="Author" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                              <TextField fx:id="textFieldDate" promptText="Date" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                              <TextField fx:id="textFieldLiquibasePath" promptText="Path" GridPane.columnIndex="7" GridPane.rowIndex="1">
                                  <GridPane.margin>
                                     <Insets right="5.0" />
                                  </GridPane.margin>
