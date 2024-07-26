@@ -59,19 +59,35 @@
             </not>
         </preConditions>
         <addColumn tableName="samplings">
-            <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
-            <column name="encoding_type" type="TEXT"/>
-            <column name="location" type="BOOLEAN"/>
-            <column name="geom" type="geometry(Geometry,4326)"/>
-            <column name="properties" type="JSONB"/>
-            <column name="sampling_time_end" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="sampling_time_start" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="sampled_feature_id" type="${idType-Feature}"/>
+            <column name="thing_id" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sampled_feature_id" type="${idType-Feature}">
+                <constraints nullable="false"/>
+            </column>
             <column name="sampler_id" type="${idType-Sampler}"/>
             <column name="procedure_id" type="${idType-SamplingProcedure}"/>
-            <column name="thing_id" type="${idType-Thing}"/>
+            <column name="name" type="TEXT"/>
+            <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
+            <column name="encoding_type" type="TEXT"/>
+            <column name="location" type="TEXT"/>
+            <column name="geom" type="geometry(Geometry,4326)"/>
+            <column name="properties" type="JSONB"/>
+            <column name="sampling_time_start" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="sampling_time_end" type="TIMESTAMP WITH TIME ZONE"/>
         </addColumn>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-samplings-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="samplings" indexName="samplings_thing_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="samplings" indexName="samplings_thing_id">
+            <column name="thing_id" />
+        </createIndex>
     </changeSet>
 
     <changeSet author="generated" id="2024-06-01-samplings-idx-sampled_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
@@ -104,17 +120,6 @@
         </preConditions>
         <createIndex tableName="samplings" indexName="samplings_procedure_id">
             <column name="procedure_id" />
-        </createIndex>
-    </changeSet>
-
-    <changeSet author="generated" id="2024-06-01-samplings-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="samplings" indexName="samplings_thing_id" />
-            </not>
-        </preConditions>
-        <createIndex tableName="samplings" indexName="samplings_thing_id">
-            <column name="thing_id" />
         </createIndex>
     </changeSet>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,7 +20,8 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <changeSet author="scf" id="2024-05-05-featureTypes-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+    <changeSet author="scf" id="2024-05-05-feature_types-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-FeatureType" value="LONG" />
             <not>
@@ -34,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-featureTypes-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-feature_types-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-FeatureType" value="STRING" />
@@ -51,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-featureTypes-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-feature_types-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="feature_types" />
@@ -59,10 +60,11 @@
         </preConditions>
         <addColumn tableName="feature_types">
             <column name="name" type="TEXT"/>
-            <column name="definition" type="TEXT"/>
             <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="properties" type="JSONB"/>
         </addColumn>
     </changeSet>
 
 </databaseChangeLog>
+

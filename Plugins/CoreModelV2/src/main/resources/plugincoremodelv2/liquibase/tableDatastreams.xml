@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,6 +20,7 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
+
     <changeSet author="scf" id="2024-05-05-datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Datastream" value="LONG" />
@@ -64,11 +65,12 @@
             <column name="thing_id" type="${idType-Thing}">
                 <constraints nullable="false"/>
             </column>
-            <column name="feature_id" type="${idType-Feature}" />
+            <column name="feature_id" type="${idType-Feature}"/>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
-            <column name="properties" type="JSONB"/>
+            <column name="definition" type="TEXT"/>
             <column name="result_type" type="JSONB"/>
+            <column name="properties" type="JSONB"/>
             <column name="phenomenon_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="phenomenon_time_end" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="result_time_start" type="TIMESTAMP WITH TIME ZONE"/>
@@ -77,21 +79,38 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-datastreams-idx-sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="datastreams" indexName="datastreams_thing_id" />
+                <indexExists tableName="datastreams" indexName="datastreams_sensor_id" />
             </not>
         </preConditions>
         <createIndex tableName="datastreams" indexName="datastreams_sensor_id">
             <column name="sensor_id" />
         </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-datastreams-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="datastreams" indexName="datastreams_thing_id" />
+            </not>
+        </preConditions>
         <createIndex tableName="datastreams" indexName="datastreams_thing_id">
             <column name="thing_id" />
         </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-datastreams-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="datastreams" indexName="datastreams_feature_id" />
+            </not>
+        </preConditions>
         <createIndex tableName="datastreams" indexName="datastreams_feature_id">
             <column name="feature_id" />
         </createIndex>
     </changeSet>
 
 </databaseChangeLog>
+

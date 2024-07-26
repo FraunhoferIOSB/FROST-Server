@@ -59,17 +59,22 @@
             </not>
         </preConditions>
         <addColumn tableName="deployments">
+            <column name="sensor_id" type="${idType-Sensor}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thing_id" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="properties" type="JSONB"/>
             <column name="reason" type="TEXT"/>
             <column name="encoding_type" type="TEXT"/>
-            <column name="position" type="BOOLEAN"/>
+            <column name="position" type="TEXT"/>
             <column name="geom" type="geometry(Geometry,4326)"/>
             <column name="time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="time_end" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="sensor_id" type="${idType-Sensor}"/>
-            <column name="thing_id" type="${idType-Thing}"/>
         </addColumn>
     </changeSet>
 

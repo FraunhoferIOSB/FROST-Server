@@ -61,21 +61,10 @@
         <addColumn tableName="samplers">
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="properties" type="JSONB"/>
             <column name="sampler_type" type="TEXT"/>
-            <column name="procedure_id" type="${idType-SamplingProcedure}"/>
         </addColumn>
-    </changeSet>
-
-    <changeSet author="generated" id="2024-06-01-samplers-idx-procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="samplers" indexName="samplers_procedure_id" />
-            </not>
-        </preConditions>
-        <createIndex tableName="samplers" indexName="samplers_procedure_id">
-            <column name="procedure_id" />
-        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

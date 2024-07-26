@@ -21,26 +21,26 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="scf" id="2024-05-05-datastreams_observed_properties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="generated" id="2024-06-01-sampler_sampling_procedure" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="datastreams_observed_properties" />
+                <tableExists tableName="sampler_sampling_procedure" />
             </not>
         </preConditions>
-        <createTable tableName="datastreams_observed_properties">
-            <column name="observed_property_id" type="${idType-ObservedProperty}">
+        <createTable tableName="sampler_sampling_procedure">
+            <column name="sampler_id" type="${idType-Sampler}">
                 <constraints nullable="false"/>
             </column>
-            <column name="datastream_id" type="${idType-Datastream}">
+            <column name="procedure_id" type="${idType-SamplingProcedure}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="observed_property_id, datastream_id" constraintName="pk_datastreams_observed_properties" tableName="datastreams_observed_properties"/>
-        <createIndex tableName="datastreams_observed_properties" indexName="datastreams_observed_properties_observed_property_id">
-            <column name="observed_property_id" />
+        <addPrimaryKey columnNames="sampler_id, procedure_id" constraintName="pk_sampler_sampling_procedure" tableName="sampler_sampling_procedure"/>
+        <createIndex tableName="sampler_sampling_procedure" indexName="sampler_sampling_procedure_sampler_id">
+            <column name="sampler_id" />
         </createIndex>
-        <createIndex tableName="datastreams_observed_properties" indexName="datastreams_observed_properties_datastream_id">
-            <column name="datastream_id" />
+        <createIndex tableName="sampler_sampling_procedure" indexName="sampler_sampling_procedure_procedure_id">
+            <column name="procedure_id" />
         </createIndex>
     </changeSet>
 

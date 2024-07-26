@@ -59,13 +59,15 @@
             </not>
         </preConditions>
         <addColumn tableName="tasks">
+            <column name="tasking_capability_id" type="${idType-TaskingCapability}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feature_id" type="${idType-Feature}"/>
             <column name="creation_time" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="run_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="run_time_end" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="status" type="TEXT"/>
             <column name="tasking_parameters" type="JSONB"/>
-            <column name="tasking_capability_id" type="${idType-TaskingCapability}"/>
-            <column name="feature_id" type="${idType-Feature}"/>
         </addColumn>
     </changeSet>
 

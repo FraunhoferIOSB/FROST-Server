@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,7 +20,8 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <changeSet author="scf" id="2024-05-05-locationsHistLocations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+    <changeSet author="scf" id="2024-05-05-locations_hist_locations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="locations_hist_locations" />
@@ -35,12 +36,13 @@
             </column>
         </createTable>
         <addPrimaryKey columnNames="location_id, hist_location_id" constraintName="pk_locations_hist_locations" tableName="locations_hist_locations"/>
-        <createIndex tableName="locations_hist_locations" indexName="locations_hist_locations_hist_location_id">
-            <column name="hist_location_id" />
-        </createIndex>
         <createIndex tableName="locations_hist_locations" indexName="locations_hist_locations_location_id">
             <column name="location_id" />
+        </createIndex>
+        <createIndex tableName="locations_hist_locations" indexName="locations_hist_locations_hist_location_id">
+            <column name="hist_location_id" />
         </createIndex>
     </changeSet>
 
 </databaseChangeLog>
+

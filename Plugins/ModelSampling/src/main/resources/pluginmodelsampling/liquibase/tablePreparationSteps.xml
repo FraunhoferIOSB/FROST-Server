@@ -59,13 +59,17 @@
             </not>
         </preConditions>
         <addColumn tableName="preparation_steps">
+            <column name="feature_id" type="${idType-Feature}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="preparation_procedure_id" type="${idType-PreparationProcedure}">
+                <constraints nullable="false"/>
+            </column>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
-            <column name="link" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="properties" type="JSONB"/>
             <column name="time" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="feature_id" type="${idType-Feature}"/>
-            <column name="preparation_procedure_id" type="${idType-PreparationProcedure}"/>
         </addColumn>
     </changeSet>
 

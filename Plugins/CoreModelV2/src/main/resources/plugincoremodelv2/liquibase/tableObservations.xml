@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,6 +20,7 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
+
     <changeSet author="scf" id="2024-05-05-observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Observation" value="LONG" />
@@ -54,41 +55,45 @@
     <changeSet author="scf" id="2024-05-05-observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists columnName="datastream_id" tableName="observations" />
+                <columnExists columnName="phenomenon_time_start" tableName="observations" />
             </not>
         </preConditions>
         <addColumn tableName="observations">
             <column name="datastream_id" type="${idType-Datastream}">
                 <constraints nullable="false"/>
             </column>
-            <column name="feature_id" type="${idType-Feature}">
-                <constraints nullable="true"/>
-            </column>
+            <column name="feature_id" type="${idType-Feature}"/>
             <column name="phenomenon_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="phenomenon_time_end" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="result_time" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="valid_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="valid_time_end" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="result_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="properties" type="JSONB"/>
             <column name="result_type" type="TINYINT"/>
             <column name="result_number" type="FLOAT8"/>
             <column name="result_boolean" type="BOOLEAN"/>
             <column name="result_json" type="JSONB"/>
             <column name="result_string" type="TEXT"/>
-            <column name="properties" type="JSONB"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-observations-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-observations-idx-datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="observations" indexName="observations_datastream_id" />
             </not>
         </preConditions>
-
         <createIndex tableName="observations" indexName="observations_datastream_id">
             <column name="datastream_id" />
         </createIndex>
+    </changeSet>
 
+    <changeSet author="scf" id="2024-05-05-observations-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="observations" indexName="observations_feature_id" />
+            </not>
+        </preConditions>
         <createIndex tableName="observations" indexName="observations_feature_id">
             <column name="feature_id" />
         </createIndex>
@@ -107,3 +112,4 @@
     </changeSet>
 
 </databaseChangeLog>
+

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,37 +20,36 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <property name="idTypeLong" value="BIGINT" />
 
     <property name="id-Datastream" value="LONG" />
     <property name="idType-Datastream" value="BIGINT" />
-    <property name="id-FeatureType" value="LONG" />
-    <property name="idType-FeatureType" value="BIGINT" />
     <property name="id-Feature" value="LONG" />
     <property name="idType-Feature" value="BIGINT" />
+    <property name="id-FeatureType" value="LONG" />
+    <property name="idType-FeatureType" value="BIGINT" />
     <property name="id-HistoricalLocation" value="LONG" />
     <property name="idType-HistoricalLocation" value="BIGINT" />
     <property name="id-Location" value="LONG" />
     <property name="idType-Location" value="BIGINT" />
-    <property name="id-ObservedProperty" value="LONG" />
-    <property name="idType-ObservedProperty" value="BIGINT" />
     <property name="id-Observation" value="LONG" />
     <property name="idType-Observation" value="BIGINT" />
+    <property name="id-ObservedProperty" value="LONG" />
+    <property name="idType-ObservedProperty" value="BIGINT" />
     <property name="id-Sensor" value="LONG" />
     <property name="idType-Sensor" value="BIGINT" />
     <property name="id-Thing" value="LONG" />
     <property name="idType-Thing" value="BIGINT" />
 
     <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
-    <include relativeToChangelogFile="true" file="tableFeatureTypes.xml" />
     <include relativeToChangelogFile="true" file="tableFeatures.xml" />
     <include relativeToChangelogFile="true" file="tableFeaturesFeatureTypes.xml" />
-    <include relativeToChangelogFile="true" file="tableHistLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableFeatureTypes.xml" />
+    <include relativeToChangelogFile="true" file="tableHistoricalLocations.xml" />
     <include relativeToChangelogFile="true" file="tableLocations.xml" />
     <include relativeToChangelogFile="true" file="tableLocationsHistLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableObservations.xml" />
     <include relativeToChangelogFile="true" file="tableObservedProperties.xml" />
     <include relativeToChangelogFile="true" file="tableDatastreamsObservedProperties.xml" />
-    <include relativeToChangelogFile="true" file="tableObservations.xml" />
     <include relativeToChangelogFile="true" file="tableSensors.xml" />
     <include relativeToChangelogFile="true" file="tableThings.xml" />
     <include relativeToChangelogFile="true" file="tableThingsLocations.xml" />
@@ -62,3 +61,4 @@
     </changeSet>
 
 </databaseChangeLog>
+

@@ -47,12 +47,12 @@
           "annotations": []
         },
         {
-          "name": "link",
+          "name": "definition",
           "type": "Edm.String",
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-              "field": "link"
+              "field": "definition"
             }
           ],
           "annotations": []

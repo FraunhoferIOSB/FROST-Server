@@ -47,6 +47,17 @@
           "annotations": []
         },
         {
+          "name": "definition",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "definition"
+            }
+          ],
+          "annotations": []
+        },
+        {
           "name": "properties",
           "type": "Object",
           "handlers": [
@@ -72,10 +83,10 @@
       ],
       "navigationProperties": [
         {
-          "name": "SamplingProcedure",
-          "entitySet": false,
+          "name": "SamplingProcedures",
+          "entitySet": true,
           "entityType": "SamplingProcedure",
-          "required": true,
+          "required": false,
           "symmetrical": false,
           "priority": 0,
           "inverse": {
@@ -87,8 +98,11 @@
           },
           "handlers": [
             {
-              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "procedure_id",
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "sampler_sampling_procedure",
+              "linkOurField": "sampler_id",
+              "linkOtherField": "procedure_id",
               "otherTable": "sampling_procedures",
               "otherField": "id"
             }

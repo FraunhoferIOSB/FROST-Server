@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,7 +20,8 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <changeSet author="scf" id="2024-05-05-histLocations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+    <changeSet author="scf" id="2024-05-05-hist_locations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-HistoricalLocation" value="LONG" />
             <not>
@@ -34,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-histLocations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-hist_locations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-HistoricalLocation" value="STRING" />
@@ -51,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-histLocations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-hist_locations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="time" tableName="hist_locations" />
@@ -65,7 +66,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-histLocations-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2024-05-05-hist_locations-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="hist_locations" indexName="hist_locations_thing_id" />
@@ -77,3 +78,4 @@
     </changeSet>
 
 </databaseChangeLog>
+

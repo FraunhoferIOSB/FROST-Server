@@ -35,6 +35,7 @@
     <include relativeToChangelogFile="true" file="tablePreparationProcedures.xml" />
     <include relativeToChangelogFile="true" file="tablePreparationSteps.xml" />
     <include relativeToChangelogFile="true" file="tableSamplers.xml" />
+    <include relativeToChangelogFile="true" file="tableSamplerSamplingProcedure.xml" />
     <include relativeToChangelogFile="true" file="tableSamplings.xml" />
     <include relativeToChangelogFile="true" file="tableSamplingProcedures.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />

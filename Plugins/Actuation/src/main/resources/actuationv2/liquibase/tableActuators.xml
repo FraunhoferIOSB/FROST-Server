@@ -61,6 +61,7 @@
         <addColumn tableName="actuators">
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="encoding_type" type="TEXT"/>
             <column name="metadata" type="TEXT"/>
             <column name="properties" type="JSONB"/>

@@ -59,13 +59,18 @@
             </not>
         </preConditions>
         <addColumn tableName="tasking_capabilities">
+            <column name="actuator_id" type="${idType-Actuator}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thing_id" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feature_id" type="${idType-Feature}"/>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
             <column name="properties" type="JSONB"/>
             <column name="tasking_parameters" type="JSONB"/>
-            <column name="actuator_id" type="${idType-Actuator}"/>
-            <column name="thing_id" type="${idType-Thing}"/>
-            <column name="feature_id" type="${idType-Feature}"/>
         </addColumn>
     </changeSet>
 

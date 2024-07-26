@@ -49,16 +49,44 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-fk_samplers_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="generated" id="2024-06-01-fk_sampler_sampling_procedure_sampler_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_samplers_procedure_id" foreignKeyTableName="samplers" />
+                <foreignKeyConstraintExists foreignKeyName="fk_sampler_sampling_procedure_sampler_id" foreignKeyTableName="sampler_sampling_procedure" />
             </not>
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_samplers_procedure_id"
-            baseTableName="samplers" baseColumnNames="procedure_id"
+            constraintName="fk_sampler_sampling_procedure_sampler_id"
+            baseTableName="sampler_sampling_procedure" baseColumnNames="sampler_id"
+            referencedTableName="samplers" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_sampler_sampling_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_sampler_sampling_procedure_procedure_id" foreignKeyTableName="sampler_sampling_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_sampler_sampling_procedure_procedure_id"
+            baseTableName="sampler_sampling_procedure" baseColumnNames="procedure_id"
             referencedTableName="sampling_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_samplings_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_samplings_thing_id" foreignKeyTableName="samplings" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_samplings_thing_id"
+            baseTableName="samplings" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
@@ -101,20 +129,6 @@
             constraintName="fk_samplings_procedure_id"
             baseTableName="samplings" baseColumnNames="procedure_id"
             referencedTableName="sampling_procedures" referencedColumnNames="id"
-            deferrable="false" initiallyDeferred="false"
-            onDelete="CASCADE" onUpdate="CASCADE"/>
-    </changeSet>
-
-    <changeSet author="generated" id="2024-06-01-fk_samplings_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_samplings_thing_id" foreignKeyTableName="samplings" />
-            </not>
-        </preConditions>
-        <addForeignKeyConstraint
-            constraintName="fk_samplings_thing_id"
-            baseTableName="samplings" baseColumnNames="thing_id"
-            referencedTableName="things" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>

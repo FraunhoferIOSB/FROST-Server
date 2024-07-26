@@ -49,6 +49,17 @@
           "annotations": []
         },
         {
+          "name": "definition",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "definition"
+            }
+          ],
+          "annotations": []
+        },
+        {
           "name": "encodingType",
           "type": "Edm.String",
           "handlers": [
@@ -97,6 +108,30 @@
         }
       ],
       "navigationProperties": [
+        {
+          "name": "Thing",
+          "entitySet": false,
+          "entityType": "Thing",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Samplings",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "thing_id",
+              "otherTable": "things",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
         {
           "name": "SampledFeature",
           "entitySet": false,
@@ -164,30 +199,6 @@
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
               "field": "procedure_id",
               "otherTable": "sampling_procedures",
-              "otherField": "id"
-            }
-          ],
-          "annotations": []
-        },
-        {
-          "name": "Thing",
-          "entitySet": false,
-          "entityType": "Thing",
-          "required": true,
-          "symmetrical": false,
-          "priority": 0,
-          "inverse": {
-            "name": "Samplings",
-            "entitySet": true,
-            "required": false,
-            "priority": 0,
-            "annotations": []
-          },
-          "handlers": [
-            {
-              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "thing_id",
-              "otherTable": "things",
               "otherField": "id"
             }
           ],

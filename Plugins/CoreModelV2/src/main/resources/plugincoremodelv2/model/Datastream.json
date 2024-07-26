@@ -48,6 +48,17 @@
                     "annotations": []
                 },
                 {
+                    "name": "definition",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "definition"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
                     "name": "resultType",
                     "type": "Object",
                     "required": true,
@@ -76,18 +87,6 @@
                     "annotations": []
                 },
                 {
-                    "name": "observedArea",
-                    "type": "Edm.Geometry",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
-                            "fieldSource": "",
-                            "fieldGeom": "observed_area"
-                        }
-                    ],
-                    "annotations": []
-                },
-                {
                     "name": "phenomenonTime",
                     "type": "TimeInterval",
                     "handlers": [
@@ -107,6 +106,18 @@
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInterval",
                             "fieldStart": "result_time_start",
                             "fieldEnd": "result_time_end"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "observedArea",
+                    "type": "Edm.Geometry",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
+                            "fieldSource": "",
+                            "fieldGeom": "observed_area"
                         }
                     ],
                     "annotations": []
