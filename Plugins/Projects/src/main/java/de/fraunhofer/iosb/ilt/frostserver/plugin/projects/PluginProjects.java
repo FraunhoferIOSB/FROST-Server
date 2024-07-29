@@ -77,12 +77,12 @@ public class PluginProjects implements Plugin, ConfigDefaults {
             }
 
             if (rules) {
-                pml.addSecurityFile("pluginprojects/sta1/model/secDatastream.json");
-                pml.addSecurityFile("pluginprojects/sta1/model/secFeature.json");
-                pml.addSecurityFile("pluginprojects/sta1/model/secHistoricalLocation.json");
-                pml.addSecurityFile("pluginprojects/sta1/model/secLocation.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secDatastream.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secFeature.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secHistoricalLocation.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secLocation.json");
                 if (multiDatastream) {
-                    pml.addSecurityFile("pluginprojects/model/secMultiDatastream.json");
+                    pml.addSecurityFile("pluginprojects/security/secMultiDatastream.json");
                 }
                 pml.addSecurityFile("pluginprojects/sta1/security/secObservation.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secProject.json");
