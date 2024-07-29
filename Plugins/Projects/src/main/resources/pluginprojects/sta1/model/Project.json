@@ -98,6 +98,33 @@
           "annotations": []
         },
         {
+          "name": "Locations",
+          "entitySet": true,
+          "entityType": "Location",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Projects",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "ID",
+              "linkTable": "LOCATION_PROJECTS",
+              "linkOurField": "PROJECT_ID",
+              "linkOtherField": "LOCATION_ID",
+              "otherTable": "LOCATIONS",
+              "otherField": "ID"
+            }
+          ],
+          "annotations": []
+        },
+        {
           "name": "Things",
           "entitySet": true,
           "entityType": "Thing",

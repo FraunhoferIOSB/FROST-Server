@@ -24,6 +24,20 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
+    <changeSet author="scf" id="2023-11-28-Table-Users" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USERS" />
+            </not>
+        </preConditions>
+        <createTable tableName="USERS">
+            <column name="USER_NAME" type="VARCHAR(36)">
+                <constraints primaryKey="true" primaryKeyName="USERS_PKEY"/>
+            </column>
+            <column name="USER_PASS" type="VARCHAR(255)" />
+        </createTable>
+    </changeSet>
+
     <changeSet author="scf" id="2023-11-28-Table-user_roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -85,6 +99,38 @@
             <column name="ISPUBLIC" type="boolean" />
             <column name="PROPERTIES" type="JSONB"/>
         </createTable>
+    </changeSet>
+
+
+    <changeSet author="scf" id="2023-04-26-Table-Location_Projects"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="LOCATION_PROJECTS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="LOCATION_PROJECTS">
+            <column name="LOCATION_ID" type="${idType-Location}" />
+            <column name="PROJECT_ID" type="BIGINT" />
+        </createTable>
+
+        <addPrimaryKey tableName="LOCATION_PROJECTS" columnNames="LOCATION_ID,PROJECT_ID"
+            constraintName="PK_LOCATION_PROJECTS" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_LOCATION_PROJECTS_LOCATION_ID"
+            baseTableName="LOCATION_PROJECTS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addForeignKeyConstraint
+            constraintName="FK_LOCATION_PROJECTS_PROJECT_ID"
+            baseTableName="LOCATION_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
     </changeSet>
 
 

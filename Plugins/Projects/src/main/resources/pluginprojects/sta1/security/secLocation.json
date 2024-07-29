@@ -23,9 +23,15 @@
                 "subChecks": [
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                    "targetNavLink": "Projects",
+                    "query": "$filter\u003dUserProjectRoles/User/username eq principalName() and UserProjectRoles/Role/rolename in (\u0027create\u0027,\u0027admin\u0027)",
+                    "emptyAllowed": false
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
                     "targetNavLink": "Things",
                     "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and Projects/UserProjectRoles/Role/rolename in (\u0027create\u0027,\u0027admin\u0027)",
-                    "emptyAllowed": false
+                    "emptyAllowed": true
                   },
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkEmpty",
@@ -53,7 +59,13 @@
                 "subChecks": [
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
-                    "query": "$filter\u003dThings/Projects/UserProjectRoles/User/username eq principalName() and Things/Projects/UserProjectRoles/Role/rolename in (\u0027update\u0027,\u0027admin\u0027)"
+                    "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and Projects/UserProjectRoles/Role/rolename in (\u0027update\u0027,\u0027admin\u0027)"
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                    "targetNavLink": "Projects",
+                    "query": "$filter\u003dUserProjectRoles/User/username eq principalName() and UserProjectRoles/Role/rolename in (\u0027update\u0027,\u0027admin\u0027)",
+                    "emptyAllowed": true
                   },
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
@@ -83,7 +95,7 @@
               },
               {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
-                "query": "$filter\u003dThings/Projects/UserProjectRoles/User/username eq principalName() and Things/Projects/UserProjectRoles/Role/rolename in (\u0027delete\u0027,\u0027admin\u0027)"
+                "query": "$filter\u003dProjects/UserProjectRoles/User/username eq principalName() and Projects/UserProjectRoles/Role/rolename in (\u0027delete\u0027,\u0027admin\u0027)"
               }
             ]
           }
@@ -112,21 +124,9 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
                 "joins": [
                   {
-                    "targetTable": "THINGS_LOCATIONS",
-                    "targetAlias": "tl",
-                    "joinOnSql": "t.\"ID\" \u003d tl.\"LOCATION_ID\"",
-                    "joinType": "INNER"
-                  },
-                  {
-                    "targetTable": "THINGS",
-                    "targetAlias": "th",
-                    "joinOnSql": "tl.\"THING_ID\" \u003d th.\"ID\"",
-                    "joinType": "INNER"
-                  },
-                  {
-                    "targetTable": "THING_PROJECTS",
-                    "targetAlias": "tp",
-                    "joinOnSql": "th.\"ID\" \u003d tp.\"THING_ID\"",
+                    "targetTable": "LOCATION_PROJECTS",
+                    "targetAlias": "lp",
+                    "joinOnSql": "t.\"ID\" \u003d lp.\"LOCATION_ID\"",
                     "joinType": "INNER"
                   },
                   {
@@ -148,7 +148,7 @@
                     "joinType": "LEFT"
                   }
                 ],
-                "where": "(pr.\"ISPUBLIC\" and not t.\"RESTRICTED\" and not th.\"RESTRICTED\") or u.\"USER_NAME\" \u003d ?",
+                "where": "(pr.\"ISPUBLIC\" and not t.\"RESTRICTED\") or u.\"USER_NAME\" \u003d ?",
                 "usernameParameter": true
               }
             }
