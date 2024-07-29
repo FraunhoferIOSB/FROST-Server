@@ -107,4 +107,9 @@ public class PkValue implements Iterable<Object> {
         return new PkValue(value);
     }
 
+    @Override
+    public String toString() {
+        return Arrays.toString(values);
+    }
+
 }

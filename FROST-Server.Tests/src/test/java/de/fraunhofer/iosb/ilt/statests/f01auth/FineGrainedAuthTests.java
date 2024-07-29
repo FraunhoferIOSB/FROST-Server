@@ -291,14 +291,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_02a_ReadProjects() {
         LOGGER.info("  test_02a_ReadProjects");
-        testFilterResults(serviceAdmin, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(serviceWrite, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(serviceRead, mdlUsers.etProject, "", PROJECTS);
-        filterForException(serviceAnon, mdlUsers.etProject, "", H401, H403);
-        testFilterResults(serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(serviceObsCreaterProject2, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(WRITE, serviceWrite, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(READ, serviceRead, mdlUsers.etProject, "", PROJECTS);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401, H403);
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etProject, "", PROJECTS);
     }
 
     @Test
@@ -336,13 +336,13 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     void test_03_ReadUserProjectRole() {
         LOGGER.info("  test_03_ReadUserProjectRole");
         testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
-        filterForException(serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED, H403);
-        filterForException(serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(WRITE, serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(READ, serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED, H403);
+        filterForException(ADMIN_P1, serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(ADMIN_P2, serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
     }
 
     @Test
@@ -351,7 +351,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
         testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
-        filterForException(serviceAnon, mdlUsers.etUser, "", H401, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", H401, H403);
         testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
@@ -374,14 +374,14 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_05_ReadRole() {
         LOGGER.info("  test_05_ReadRole");
-        testFilterResults(serviceAdmin, mdlUsers.etRole, "", ROLES);
-        filterForException(serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAnon, mdlUsers.etRole, "", H401, H403);
-        filterForException(serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(serviceObsCreaterProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etRole, "", ROLES);
+        filterForException(WRITE, serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(READ, serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", H401, H403);
+        filterForException(ADMIN_P1, serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(ADMIN_P2, serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
+        filterForException(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
     }
 
     @Test
@@ -455,28 +455,28 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_08a_ObservationRead() {
         LOGGER.info("  test_08a_ObservationRead");
-        testFilterResults(serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
-        testFilterResults(serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
-        testFilterResults(serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
-        filterForException(serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED, H403);
-        testFilterResults(serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
-        testFilterResults(serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
-        testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
-        testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
+        testFilterResults(WRITE, serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
+        testFilterResults(READ, serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
+        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED, H403);
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
     }
 
     @Test
     void test_08b_ObservationReadFilter() {
         LOGGER.info("  test_08b_ObservationReadFilter");
         final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues()[0]);
-        testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        filterForException(serviceAnon, mdlSensing.etObservedProperty, filter, H401, H403);
-        testFilterResults(serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        testFilterResults(serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
-        testFilterResults(serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        testFilterResults(serviceObsCreaterProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(WRITE, serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(READ, serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401, H403);
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
     }
 
     @Test

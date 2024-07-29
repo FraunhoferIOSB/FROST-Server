@@ -120,8 +120,8 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     @Test
     void test_100_ReadUser() {
         LOGGER.info("  test_100_ReadUser");
-        testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
-        filterForException(serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
+        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etUser, "", USERS);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
     }
 
     @Override

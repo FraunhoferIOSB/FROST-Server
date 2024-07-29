@@ -153,7 +153,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
             fail(failMessage);
         }
         SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
-        testFilterResults(newService, mdlUsers.etUser, "", entityList);
+        testFilterResults(user, newService, mdlUsers.etUser, "", entityList);
         return newService;
     }
 

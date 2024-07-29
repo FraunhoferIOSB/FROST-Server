@@ -56,10 +56,10 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuthTests.class);
 
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
-    private static final String ADMIN = "admin";
-    private static final String WRITE = "write";
-    private static final String READ = "read";
-    private static final String ANONYMOUS = "anonymous";
+    public static final String ADMIN = "admin";
+    public static final String WRITE = "write";
+    public static final String READ = "read";
+    public static final String ANONYMOUS = "anonymous";
 
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
@@ -193,7 +193,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test06AdminRead() {
         LOGGER.info("  test06AdminRead");
-        EntityUtils.testFilterResults(serviceAdmin.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(ADMIN, serviceAdmin.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -225,7 +225,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test10WriteRead() {
         LOGGER.info("  test10WriteRead");
-        EntityUtils.testFilterResults(serviceWrite.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(WRITE, serviceWrite.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -269,7 +269,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error("Failed to create test entity.");
         }
 
-        EntityUtils.testFilterResults(serviceRead.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(READ, serviceRead.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -306,7 +306,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
-            EntityUtils.testFilterResults(serviceAnon.dao(sMdl.etThing), "", THINGS);
+            EntityUtils.testFilterResults(ANONYMOUS, serviceAnon.dao(sMdl.etThing), "", THINGS);
         } else {
             try {
                 serviceAnon.dao(sMdl.etThing).query().list();

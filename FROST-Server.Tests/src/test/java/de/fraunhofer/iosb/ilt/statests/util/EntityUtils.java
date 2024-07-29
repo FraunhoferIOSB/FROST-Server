@@ -484,16 +484,25 @@ public class EntityUtils {
     }
 
     public static void testFilterResults(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
-        testFilterResults(service.dao(type), filter, expected);
+        testFilterResults("-", service, type, filter, expected);
+    }
+
+    public static void testFilterResults(String user, SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
+        testFilterResults(user, service.dao(type), filter, expected);
     }
 
     public static void testFilterResults(Dao doa, String filter, List<Entity> expected) {
+        testFilterResults("-", doa, filter, expected);
+    }
+
+    public static void testFilterResults(String user, Dao doa, String filter, List<Entity> expected) {
         try {
             EntitySet result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String message = "Failed on filter: " + filter + " Cause: " + check.message;
+            String message = "Failed for " + user + " on filter: " + filter + " Cause: " + check.message;
             if (!check.testOk) {
-                LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
+                LOGGER.info("Failed for {} on filter: {}\nexpected {},\n     got {}.",
+                        user,
                         filter,
                         EntityUtils.listEntities(expected),
                         EntityUtils.listEntities(result.toList()));
@@ -506,21 +515,29 @@ public class EntityUtils {
     }
 
     public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int... expectedCode) {
-        filterForException(service.dao(type), filter, expectedCode);
+        filterForException("-", service, type, filter, expectedCode);
+    }
+
+    public static void filterForException(String user, SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int... expectedCode) {
+        filterForException(user, service.dao(type), filter, expectedCode);
     }
 
     public static void filterForException(Dao doa, String filter, int... expectedCode) {
+        filterForException("-", doa, filter, expectedCode);
+    }
+
+    public static void filterForException(String user, Dao doa, String filter, int... expectedCode) {
         try {
             doa.query().filter(filter).list();
         } catch (StatusCodeException e) {
-            String message = "Filter " + filter + " did not respond with one of " + Arrays.toString(expectedCode) + ", but with " + e.getStatusCode() + ".";
+            String message = "User " + user + ", Filter " + filter + " did not respond with one of " + Arrays.toString(expectedCode) + ", but with " + e.getStatusCode() + ".";
             AuthTestHelper.expectStatusCodeException(message, e, expectedCode);
             return;
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);
-            fail("Failed to call service for filter " + filter + " " + ex);
+            fail("Failed to call service for filter User " + user + ", " + filter + " " + ex);
         }
-        fail("Filter " + filter + " did not respond with " + Arrays.toString(expectedCode) + ".");
+        fail("User " + user + ", Filter " + filter + " did not respond with " + Arrays.toString(expectedCode) + ".");
     }
 
     public static Entity createSensor(SensorThingsService srvc, String name, String desc, String type, String metadata, List<Entity> registry) throws ServiceFailureException {
