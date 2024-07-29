@@ -6,6 +6,7 @@
 * [HELM] Added option to specify image pull secret name.
 * Fixed #1948: Sanitise user input in error output.
 * Fixed MultiDatastream not picking up ID type of Thing and Sensor.
+* Fixed Tomcat Docker images already having UID/GID 1000, FROST now uses 1001.
 
 
 ## Release version 2.3.2
