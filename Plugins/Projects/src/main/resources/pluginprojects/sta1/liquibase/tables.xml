@@ -83,6 +83,34 @@
             onDelete="CASCADE" onUpdate="CASCADE" />
     </changeSet>
 
+    <changeSet author="scf" id="2024-07-29-Table-Roles-data" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <tableIsEmpty tableName="ROLES" />
+        </preConditions>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="read" />
+            <column name="DESCRIPTION" value="Read data" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="create" />
+            <column name="DESCRIPTION" value="Create (POST) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="update" />
+            <column name="DESCRIPTION" value="Update (PUT/PATCH) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="delete" />
+            <column name="DESCRIPTION" value="Delete Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="admin" />
+            <column name="DESCRIPTION" value="All actions" />
+        </insert>
+    </changeSet>
+
     <changeSet author="scf" id="2023-04-26-Table-Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -102,8 +130,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-Location_Projects"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-Location_Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="LOCATION_PROJECTS" />
@@ -115,8 +142,7 @@
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>
 
-        <addPrimaryKey tableName="LOCATION_PROJECTS" columnNames="LOCATION_ID,PROJECT_ID"
-            constraintName="PK_LOCATION_PROJECTS" />
+        <addPrimaryKey tableName="LOCATION_PROJECTS" columnNames="LOCATION_ID,PROJECT_ID" constraintName="PK_LOCATION_PROJECTS" />
 
         <addForeignKeyConstraint
             constraintName="FK_LOCATION_PROJECTS_LOCATION_ID"
@@ -134,8 +160,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-Thing_Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="THING_PROJECTS" />
@@ -147,8 +172,7 @@
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>
 
-        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID"
-            constraintName="PK_THING_PROJECTS" />
+        <addPrimaryKey tableName="THING_PROJECTS" columnNames="THING_ID,PROJECT_ID" constraintName="PK_THING_PROJECTS" />
 
         <addForeignKeyConstraint
             constraintName="FK_THING_PROJECTS_THING_ID"
@@ -166,8 +190,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-Sensor_Projects"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-Sensor_Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="SENSOR_PROJECTS" />
@@ -179,8 +202,7 @@
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>
 
-        <addPrimaryKey tableName="SENSOR_PROJECTS" columnNames="SENSOR_ID,PROJECT_ID"
-            constraintName="PK_SENSOR_PROJECTS" />
+        <addPrimaryKey tableName="SENSOR_PROJECTS" columnNames="SENSOR_ID,PROJECT_ID" constraintName="PK_SENSOR_PROJECTS" />
 
         <addForeignKeyConstraint
             constraintName="FK_SENSOR_PROJECTS_SENSOR_ID"
@@ -198,8 +220,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-Feature_Projects"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-Feature_Projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="FEATURE_PROJECTS" />
@@ -211,8 +232,7 @@
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>
 
-        <addPrimaryKey tableName="FEATURE_PROJECTS" columnNames="FEATURE_ID,PROJECT_ID"
-            constraintName="PK_FEATURE_PROJECTS" />
+        <addPrimaryKey tableName="FEATURE_PROJECTS" columnNames="FEATURE_ID,PROJECT_ID" constraintName="PK_FEATURE_PROJECTS" />
 
         <addForeignKeyConstraint
             constraintName="FK_FEATURE_PROJECTS_FEATURE_ID"
@@ -230,8 +250,7 @@
     </changeSet>
 
 
-    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role"
-        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2023-04-26-Table-User_Project_Role" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="USER_PROJECT_ROLE" />
