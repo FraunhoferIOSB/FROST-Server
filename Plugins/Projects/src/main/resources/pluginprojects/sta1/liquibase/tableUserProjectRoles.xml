@@ -1,0 +1,108 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-UserProjectRole" value="LONG" />
+            <not>
+                <tableExists tableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <createTable tableName="USER_PROJECT_ROLE">
+            <column name="ID" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_USER_PROJECT_ROLE" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-UserProjectRole" value="STRING" />
+                <changeLogPropertyDefined property="id-UserProjectRole" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <createTable tableName="USER_PROJECT_ROLE">
+            <column name="ID" type="${idType-UserProjectRole}" defaultValueComputed="${defaultValueComputed-UserProjectRole}">
+                <constraints primaryKey="true" primaryKeyName="pk_USER_PROJECT_ROLE"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="PROJECT_ID" tableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <addColumn tableName="USER_PROJECT_ROLE">
+            <column name="PROJECT_ID" type="${idType-Project}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_NAME" type="${idType-Role}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="${idType-User}">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-idx-PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_PROJECT_ID" />
+            </not>
+        </preConditions>
+        <createIndex tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_PROJECT_ID">
+            <column name="PROJECT_ID" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-idx-ROLE_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_ROLE_NAME" />
+            </not>
+        </preConditions>
+        <createIndex tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_ROLE_NAME">
+            <column name="ROLE_NAME" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-USER_PROJECT_ROLE-idx-USER_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_USER_NAME" />
+            </not>
+        </preConditions>
+        <createIndex tableName="USER_PROJECT_ROLE" indexName="USER_PROJECT_ROLE_USER_NAME">
+            <column name="USER_NAME" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

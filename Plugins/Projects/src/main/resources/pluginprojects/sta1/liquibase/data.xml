@@ -1,0 +1,66 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="scf" id="2024-07-29-ROLES-data-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <tableIsEmpty tableName="ROLES" />
+            <tableExists tableName="USER_ROLES" />
+            <not>
+                <tableIsEmpty tableName="USER_ROLES" />
+            </not>
+        </preConditions>
+
+        <sql>insert into "ROLES" ("ROLE_NAME","DESCRIPTION") select distinct "ROLE_NAME" rn, "ROLE_NAME" ds from "USER_ROLES"</sql>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-07-29-ROLES-data-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <tableIsEmpty tableName="ROLES" />
+        </preConditions>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="read" />
+            <column name="DESCRIPTION" value="Read data" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="create" />
+            <column name="DESCRIPTION" value="Create (POST) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="update" />
+            <column name="DESCRIPTION" value="Update (PUT/PATCH) Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="delete" />
+            <column name="DESCRIPTION" value="Delete Entities" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="admin" />
+            <column name="DESCRIPTION" value="All actions" />
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
+

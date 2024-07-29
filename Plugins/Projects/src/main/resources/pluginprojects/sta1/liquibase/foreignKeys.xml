@@ -1,0 +1,221 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-07-29-fk_SENSOR_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_SENSOR_PROJECTS_PROJECT_ID" foreignKeyTableName="SENSOR_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_SENSOR_PROJECTS_PROJECT_ID"
+            baseTableName="SENSOR_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_SENSOR_PROJECTS_SENSOR_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_SENSOR_PROJECTS_SENSOR_ID" foreignKeyTableName="SENSOR_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_SENSOR_PROJECTS_SENSOR_ID"
+            baseTableName="SENSOR_PROJECTS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_LOCATION_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_LOCATION_PROJECTS_PROJECT_ID" foreignKeyTableName="LOCATION_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_LOCATION_PROJECTS_PROJECT_ID"
+            baseTableName="LOCATION_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_LOCATION_PROJECTS_LOCATION_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_LOCATION_PROJECTS_LOCATION_ID" foreignKeyTableName="LOCATION_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_LOCATION_PROJECTS_LOCATION_ID"
+            baseTableName="LOCATION_PROJECTS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_THING_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_THING_PROJECTS_PROJECT_ID" foreignKeyTableName="THING_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_THING_PROJECTS_PROJECT_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_THING_PROJECTS_THING_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_THING_PROJECTS_THING_ID" foreignKeyTableName="THING_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_THING_PROJECTS_THING_ID"
+            baseTableName="THING_PROJECTS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_FEATURE_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_FEATURE_PROJECTS_PROJECT_ID" foreignKeyTableName="FEATURE_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_FEATURE_PROJECTS_PROJECT_ID"
+            baseTableName="FEATURE_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_FEATURE_PROJECTS_FEATURE_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_FEATURE_PROJECTS_FEATURE_ID" foreignKeyTableName="FEATURE_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_FEATURE_PROJECTS_FEATURE_ID"
+            baseTableName="FEATURE_PROJECTS" baseColumnNames="FEATURE_ID"
+            referencedTableName="FEATURES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_LOCATIONS_GEN_FOI_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_LOCATIONS_GEN_FOI_ID" foreignKeyTableName="LOCATIONS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_LOCATIONS_GEN_FOI_ID"
+            baseTableName="LOCATIONS" baseColumnNames="GEN_FOI_ID"
+            referencedTableName="FEATURES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_USER_ROLES_USER_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_USER_ROLES_USER_NAME" foreignKeyTableName="USER_ROLES" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_USER_ROLES_USER_NAME"
+            baseTableName="USER_ROLES" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_USER_ROLES_ROLE_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_USER_ROLES_ROLE_NAME" foreignKeyTableName="USER_ROLES" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_USER_ROLES_ROLE_NAME"
+            baseTableName="USER_ROLES" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_USER_PROJECT_ROLE_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_USER_PROJECT_ROLE_PROJECT_ID" foreignKeyTableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_USER_PROJECT_ROLE_PROJECT_ID"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_USER_PROJECT_ROLE_ROLE_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_USER_PROJECT_ROLE_ROLE_NAME" foreignKeyTableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_USER_PROJECT_ROLE_ROLE_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="ROLE_NAME"
+            referencedTableName="ROLES" referencedColumnNames="ROLE_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-07-29-fk_USER_PROJECT_ROLE_USER_NAME" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_USER_PROJECT_ROLE_USER_NAME" foreignKeyTableName="USER_PROJECT_ROLE" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_USER_PROJECT_ROLE_USER_NAME"
+            baseTableName="USER_PROJECT_ROLE" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+
