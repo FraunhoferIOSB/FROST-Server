@@ -1,4 +1,4 @@
-From tomcat:9-jdk17
+FROM tomcat:9-jdk17
 
 RUN apt-get update && apt-get install unzip && apt-get clean
 
@@ -10,8 +10,8 @@ COPY target/${ARTIFACT_FILE} /tmp/FROST-Server.war
 
 RUN unzip -d ${CATALINA_HOME}/webapps/FROST-Server /tmp/FROST-Server.war \
     && rm /tmp/FROST-Server.war \
-    && addgroup --system --gid 1000 tomcat \
-    && adduser --system --uid 1000 --gid 1000 tomcat \
+    && addgroup --system --gid 1001 tomcat \
+    && adduser --system --uid 1001 --gid 1001 tomcat \
     && chgrp -R 0 $CATALINA_HOME \
     && chmod -R g=u $CATALINA_HOME
 
