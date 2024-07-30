@@ -65,9 +65,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
 
     /**
      * The URL on the Keycloak server that can be used to download the Keycloak
-     * config file. Usually this url is in the for of:
-     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client
-     * id]
+     * config file. Usually this URL is in the form of:
+     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[clientId]
      */
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";

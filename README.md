@@ -56,6 +56,7 @@ To compile FROST-Server you need to have a JDK and Maven installed.
    * `FROST-Server.MQTTP/target/`
    * `FROST-Server.HTTP/target/`
    * `FROST-Server.MQTT/target/`
+   You may have to add the option `-Djavafx.platform=win` (`win` can be replaced with `linux` or `mac`) if the JavaFx platform is not detected automatically.
 
 
 ## Contributing
