@@ -116,9 +116,8 @@ public class LiquibaseTemplates {
             for (var ep : et.getEntityProperties()) {
                 idField = handleEntityProperty(ep, idField, clEntityType, etName, csColumns);
             }
-            if (!csColumns.isEmpty()) {
-                clEntityType.addChangesetColumnsBuilder(csColumns);
-            }
+            clEntityType.addChangesetColumnsBuilder(csColumns);
+
             for (var ep : et.getNavigationProperties()) {
                 String otherEntityType = ep.getEntityType();
                 for (var handler : ep.getHandlers()) {
@@ -136,6 +135,9 @@ public class LiquibaseTemplates {
                             clEntityType.addChangsetIndex(otherTable, otherColumn);
                         } else {
                             csColumns.prependColumn(ourColumn, idColumnType(otherEntityType), !ep.isRequired());
+                            if (!csColumns.isTestColumnNameSet()) {
+                                csColumns.setTestColumnName(ourColumn);
+                            }
                             clForeignKeys.addChangsetForeignKey(tableName, ourColumn, otherTable, otherColumn);
                             clEntityType.addChangsetIndex(ourColumn);
                         }
@@ -194,6 +196,8 @@ public class LiquibaseTemplates {
 
     public static interface ChangeSetBuilder {
 
+        public boolean isEmpty();
+
         public String build();
     }
 
@@ -203,6 +207,11 @@ public class LiquibaseTemplates {
 
         public WrappedSetBuilder(String data) {
             this.data = data;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return StringUtils.isAllBlank(data);
         }
 
         @Override
@@ -382,7 +391,9 @@ public class LiquibaseTemplates {
         public String build() {
             StringBuilder changeSetString = new StringBuilder();
             for (var cs : changesets) {
-                changeSetString.append(cs.build()).append('\n');
+                if (!cs.isEmpty()) {
+                    changeSetString.append(cs.build()).append('\n');
+                }
             }
             return StringUtils.replace(base, S_NAME_BLOCK_CHANGESETS, changeSetString.toString().trim());
         }
