@@ -36,17 +36,17 @@ These are settings affecting both the MQTT and HTTP packages.
 * **serviceRootUrl:**  
   The base URL of the SensorThings Server without version.
 * **defaultCount:**  
-  The default value for the $count query option.
+  The default value for the $count query option. Default: `false`.
 * **defaultTop:**  
-  The default value for the $top query option.
+  The default value for the $top query option. Default: `100`.
 * **maxTop:**  
-  The maximum allowed value for the $top query option.
+  The maximum allowed value for the $top query option. Default: `10000`.
 * **maxDataSize:**  
-  The number of bytes that can be loaded before the server stops loading more entities and returns the result. The defaultvalue: `25000000` (25 MB).
+  The number of bytes that can be loaded before the server stops loading more entities and returns the result. Default: `25000000` (25 MB).
 * **useAbsoluteNavigationLinks:**  
-  If true, navigationLinks are absolute, otherwise relative.
+  If true, navigationLinks are absolute, otherwise relative. Default: `true`.
 * **alwaysOrderbyId:**  
-  Always add an 'orderby=id asc' to queries to ensure consistent paging.
+  Always add an 'orderby=id asc' to queries to ensure consistent paging. Default: `true`.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 * **queueLoggingInterval:**  

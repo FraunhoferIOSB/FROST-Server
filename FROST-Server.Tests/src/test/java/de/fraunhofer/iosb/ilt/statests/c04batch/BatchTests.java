@@ -300,7 +300,7 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch("batch_test", "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");
@@ -333,14 +333,14 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
                 + "GET " + serverSettings.getServiceUrl(version)
-                + "/Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "/Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
                 + "GET " + serverSettings.getServiceUrl(version)
-                + "/Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
+                + "/Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");
@@ -378,13 +378,13 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch("batch_test", "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");

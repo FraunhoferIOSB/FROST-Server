@@ -71,11 +71,11 @@ public class CoreSettings implements ConfigDefaults {
      */
     @DefaultValueBoolean(false)
     public static final String TAG_LOG_SENSITIVE_DATA = "logSensitiveData";
-    @DefaultValueBoolean(true)
+    @DefaultValueBoolean(false)
     public static final String TAG_DEFAULT_COUNT = "defaultCount";
     @DefaultValueInt(100)
     public static final String TAG_DEFAULT_TOP = "defaultTop";
-    @DefaultValueInt(100)
+    @DefaultValueInt(10000)
     public static final String TAG_MAX_TOP = "maxTop";
     @DefaultValueInt(25_000_000)
     public static final String TAG_MAX_DATASIZE = "maxDataSize";
