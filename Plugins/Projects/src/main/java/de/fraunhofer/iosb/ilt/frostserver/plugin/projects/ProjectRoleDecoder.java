@@ -78,7 +78,7 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
 
     @Override
     public void decodeUserRoles(String username, Set<String> roles, DSLContext dslContext) {
-        LOGGER.info("Checking user {} in database...", username);
+        LOGGER.debug("Checking user {} in database...", username);
         final Field<String> usernameField = DSL.field(DSL.name(usernameColumn), String.class);
         final Table<org.jooq.Record> table = DSL.table(DSL.name(userTable));
         long count = dslContext
@@ -89,14 +89,14 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
                 .component1();
 
         if (count == 0) {
-            LOGGER.info("Adding user {} to database...", username);
+            LOGGER.debug("Adding user {} to database...", username);
             dslContext.insertInto(table)
                     .set(usernameField, username)
                     .execute();
             dslContext.commit().execute();
         }
         int result = dslContext.execute(uprCleanupQuery, username);
-        LOGGER.info("Executed uprCleanup: {} -> {}", username, result);
+        LOGGER.debug("Executed uprCleanup: {} -> {}", username, result);
         for (String role : roles) {
             decodeRole(role, username, dslContext);
         }
@@ -109,11 +109,11 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
             String projectName = m.group(1);
             String roleName = m.group(2);
             try {
-                LOGGER.info("Executing uprInsert: {}, {}, {}", username, projectName, roleName);
+                LOGGER.debug("Executing uprInsert: {}, {}, {}", username, projectName, roleName);
                 int result = dslContext.execute(uprInsertQuery, username, projectName, roleName);
-                LOGGER.info(" Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
+                LOGGER.debug(" Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
             } catch (RuntimeException ex) {
-                LOGGER.info("Exception inserting role " + roleName, ex);
+                LOGGER.warn("Exception inserting role " + roleName, ex);
             }
         }
     }

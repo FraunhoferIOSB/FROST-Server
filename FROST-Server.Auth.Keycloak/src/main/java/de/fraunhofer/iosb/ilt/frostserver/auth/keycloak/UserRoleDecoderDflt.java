@@ -46,7 +46,7 @@ public class UserRoleDecoderDflt implements UserRoleDecoder {
 
     @Override
     public void decodeUserRoles(String username, Set<String> roles, DSLContext dslContext) {
-        LOGGER.info("Checking user {} in database...", username);
+        LOGGER.debug("Checking user {} in database...", username);
         final Field<String> usernameField = DSL.field(DSL.name(usernameColumn), String.class);
         final Table<org.jooq.Record> table = DSL.table(DSL.name(userTable));
         long count = dslContext
