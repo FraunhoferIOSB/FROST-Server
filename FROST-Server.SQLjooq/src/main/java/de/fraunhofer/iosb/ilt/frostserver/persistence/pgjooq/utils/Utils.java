@@ -113,6 +113,9 @@ public class Utils {
     }
 
     public static TimeValue valueFromTimes(Moment timeStart, Moment timeEnd) {
+        if (timeStart == null && timeEnd == null) {
+            return null;
+        }
         if (timeEnd == null || timeEnd.equals(timeStart)) {
             return new TimeValue(instantFromTime(timeStart));
         }
