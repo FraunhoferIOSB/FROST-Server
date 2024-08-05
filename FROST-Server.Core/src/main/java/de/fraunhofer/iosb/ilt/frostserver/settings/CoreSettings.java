@@ -48,8 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The core settings of FROST-Server.
  */
 public class CoreSettings implements ConfigDefaults {
 

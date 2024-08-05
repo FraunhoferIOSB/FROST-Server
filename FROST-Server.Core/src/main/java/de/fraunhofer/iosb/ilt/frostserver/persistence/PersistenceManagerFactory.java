@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +58,7 @@ public class PersistenceManagerFactory {
         return instance;
     }
 
-    private final Class persistenceManagerClass;
+    private final Class<PersistenceManager> persistenceManagerClass;
     private final CoreSettings settings;
 
     private PersistenceManagerFactory(CoreSettings settings) {
@@ -69,7 +68,12 @@ public class PersistenceManagerFactory {
         this.settings = settings;
         try {
             String pmiClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
-            persistenceManagerClass = Class.forName(pmiClsName);
+            Class<?> clazz = Class.forName(pmiClsName, false, getClass().getClassLoader());
+            if (PersistenceManager.class.isAssignableFrom(clazz)) {
+                persistenceManagerClass = (Class<PersistenceManager>) clazz;
+            } else {
+                throw new IllegalArgumentException("Class " + pmiClsName + " does not implement the interface PersistenceManager");
+            }
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
         }
@@ -79,9 +83,9 @@ public class PersistenceManagerFactory {
     public PersistenceManager create() {
         PersistenceManager persistenceManager = null;
         try {
-            persistenceManager = (PersistenceManager) persistenceManagerClass.getDeclaredConstructor().newInstance();
+            persistenceManager = persistenceManagerClass.getDeclaredConstructor().newInstance();
             persistenceManager.init(settings);
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (ReflectiveOperationException | SecurityException | IllegalArgumentException ex) {
             LOGGER.error("{} Class '{}' could not be instantiated", ERROR_MSG, settings.getPersistenceSettings().getPersistenceManagerImplementationClass(), ex);
         }
         return persistenceManager;

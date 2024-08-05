@@ -98,7 +98,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private static String resourceUrl(String path, String name) {
         try {
-            return IOUtils.resourceToURL(path + "/" + name, FineGrainedAuthTests.class.getClassLoader()).getFile();
+            return IOUtils.resourceToURL(path + name, FineGrainedAuthTests.class.getClassLoader()).getFile();
         } catch (IOException ex) {
             LOGGER.error("Failed", ex);
             return "";

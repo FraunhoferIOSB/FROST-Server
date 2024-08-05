@@ -36,8 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * Settings for the MQTT service in FROST.
  */
 public class MqttSettings implements ConfigDefaults {
 

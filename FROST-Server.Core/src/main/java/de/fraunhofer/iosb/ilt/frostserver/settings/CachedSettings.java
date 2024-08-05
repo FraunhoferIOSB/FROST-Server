@@ -35,28 +35,6 @@ public class CachedSettings extends Settings {
     private final Map<String, Double> valuesDouble = new HashMap<>();
 
     /**
-     * Creates a new settings, containing only environment variables with the
-     * given prefix.
-     *
-     * @param prefix The prefix to use. Only parameters with the given prefix
-     * are accessed.
-     */
-    public CachedSettings(String prefix) {
-        super(prefix);
-    }
-
-    /**
-     * Creates a new settings, containing the given properties, and environment
-     * variables, with no prefix.
-     *
-     * @param properties The properties to use. These can be overridden by
-     * environment variables.
-     */
-    public CachedSettings(Properties properties) {
-        super(properties);
-    }
-
-    /**
      * Creates a new settings, containing the given properties, and environment
      * variables, with the given prefix.
      *
