@@ -85,7 +85,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     @DefaultValue("memory")
     public static final String TAG_PERSISTENT_STORE_TYPE = "persistentStoreType";
     @DefaultValue("")
-    public static final String TAG_MQTT_TOPIC_ALLOWLIST = "topicAllowList";
+    public static final String TAG_MQTT_TOPIC_ALLOWLIST = "mqtt.topicAllowList";
 
     private static final String VALUE_STORE_TYPE_H2 = "h2";
 

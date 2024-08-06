@@ -76,6 +76,10 @@ These are generic settings for authentication/authorisation.
   The maximum accepted length of usernames. Longer usernames are not checked and directly rejected. Default value: `128`
 * **auth.maxPasswordLength:** Since 2.4.0  
   The maximum accepted length of passwords. Longer passwords are not checked and directly rejected. Default value: `128`
+* **auth.mqtt.topicAllowList:** Since 2.4.0  
+  A regular expression that MQTT topics must match for users that do not have global admin or read rights.
+  The topic matched starts with the first slash after the version number and ends before the `?` of the query (if present).
+  Suggested value: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`. Default value: empty
 
 
 ### Settings for the auth provider class `BasicAuthProvider`

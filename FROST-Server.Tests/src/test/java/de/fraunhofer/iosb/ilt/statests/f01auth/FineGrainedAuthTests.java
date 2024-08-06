@@ -171,7 +171,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         properties.put("plugins.modelLoader.idType.User", "STRING");
         properties.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
         properties.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
-        properties.put("auth.topicAllowList", "v[0-9].[0-9]/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+");
+        properties.put("auth.mqtt.topicAllowList", "^/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+$");
     }
 
     public FineGrainedAuthTests(ServerVersion version, Map<String, String> properties) {

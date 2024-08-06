@@ -189,24 +189,31 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             return true;
         }
         if (topicAllowPattern != null) {
-            if (!topicAllowPattern.matcher(topic).matches()) {
-                LOGGER.debug("Denied access to {}, not matching allow pattern.", topic);
+            Version version;
+            try {
+                version = MqttManager.getVersionFromTopic(coreSettings, topic);
+            } catch (UnknownVersionException ex) {
+                LOGGER.debug("Denied access to {}, unknown version.", topic);
+                return false;
+            }
+            String internalTopic = topic.substring(version.urlPart.length() + 1);
+            internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
+
+            if (!topicAllowPattern.matcher(internalTopic).matches()) {
+                LOGGER.debug("Denied access to {}, not matching allow pattern.", internalTopic);
                 return false;
             }
 
-            return validatePath(topic, userPrincipal);
+            return validatePath(version, internalTopic, userPrincipal);
         }
 
         return anonymousRead;
     }
 
-    private boolean validatePath(String topic, PrincipalExtended userPrincipal) {
+    private boolean validatePath(Version version, String topic, PrincipalExtended userPrincipal) {
         PrincipalExtended lp = PrincipalExtended.getLocalPrincipal();
         try {
-            Version version = MqttManager.getVersionFromTopic(coreSettings, topic);
-            String internalTopic = topic.substring(version.urlPart.length() + 1);
-            internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
-            internalTopic = URLDecoder.decode(internalTopic, StringHelper.UTF8.name());
+            String internalTopic = URLDecoder.decode(topic, StringHelper.UTF8.name());
             ResourcePath path = PathParser.parsePath(
                     coreSettings.getModelRegistry(),
                     coreSettings.getQueryDefaults().getServiceRootUrl(),
@@ -221,7 +228,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
                 LOGGER.debug(" Denying access for user {} to {}.", topic, userPrincipal);
             }
             return validPath;
-        } catch (RuntimeException | UnknownVersionException | UnsupportedEncodingException ex) {
+        } catch (RuntimeException | UnsupportedEncodingException ex) {
             LOGGER.warn("Exception trying to validate access for user {} to topic {}.", userPrincipal, topic, ex);
             return false;
         } finally {
