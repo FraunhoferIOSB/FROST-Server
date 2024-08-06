@@ -37,4 +37,9 @@ public class SubscriptionEvent {
         this.topic = topic;
     }
 
+    @Override
+    public String toString() {
+        return getTopic();
+    }
+
 }

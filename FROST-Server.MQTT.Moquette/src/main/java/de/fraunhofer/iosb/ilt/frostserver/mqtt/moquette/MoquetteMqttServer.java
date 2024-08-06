@@ -288,7 +288,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             final String topicFilter = msg.getTopicFilter();
             LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
             clientSubscriptions
-                    .getOrDefault(clientId, new ArrayList<>())
+                    .computeIfAbsent(clientId, t -> new ArrayList<>())
                     .add(topicFilter);
             fireSubscribe(new SubscriptionEvent(topicFilter));
         }
@@ -301,9 +301,11 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             }
             final String topicFilter = msg.getTopicFilter();
             LOGGER.trace("      Client {} unsubscribed from {}", clientId, topicFilter);
-            clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+            boolean removed = clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
                     .remove(topicFilter);
-            fireUnsubscribe(new SubscriptionEvent(topicFilter));
+            if (removed) {
+                fireUnsubscribe(new SubscriptionEvent(topicFilter));
+            }
         }
 
         @Override
