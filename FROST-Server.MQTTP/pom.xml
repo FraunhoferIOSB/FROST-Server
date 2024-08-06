@@ -116,12 +116,17 @@
                                 <artifactItem>
                                     <groupId>org.postgresql</groupId>
                                     <artifactId>postgresql</artifactId>
-                                    <version>${postgres.version}</version>
+                                    <version>${version.postgres}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>net.postgis</groupId>
                                     <artifactId>postgis-jdbc</artifactId>
-                                    <version>${postgis.version}</version>
+                                    <version>${version.postgis}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.mariadb.jdbc</groupId>
+                                    <artifactId>mariadb-java-client</artifactId>
+                                    <version>${version.mariadb}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

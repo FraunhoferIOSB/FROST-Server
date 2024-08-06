@@ -119,6 +119,7 @@
         <version.keycloak>24.0.5</version.keycloak>
         <version.liquibase>4.28.0</version.liquibase>
         <version.logback>1.5.6</version.logback>
+        <version.mariadb>3.4.1</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.0</version.maven.plugin.build-helper>
@@ -321,6 +322,11 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
                 <version>${version.liquibase}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${version.mariadb}</version>
             </dependency>
             <dependency>
                 <groupId>org.openjfx</groupId>
