@@ -17,7 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -26,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -465,8 +465,8 @@ public abstract class BatchTests extends AbstractTestClass {
             assertEquals(expected, actual, "Response not as expected.");
 
             Entity updatedThing1 = service.service.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
-            assertEquals("Thing 1 Updated", updatedThing1.getProperty(SensorThingsSensingV11.EP_NAME));
-            assertEquals("Changes", updatedThing1.getProperty(SensorThingsSensingV11.EP_PROPERTIES).get("new"));
+            assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
+            assertEquals("Changes", updatedThing1.getProperty(EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {
             fail("Failed to parse response as json.");
         }

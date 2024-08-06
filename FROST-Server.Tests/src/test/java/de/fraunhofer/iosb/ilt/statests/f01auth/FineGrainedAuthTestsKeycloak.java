@@ -114,16 +114,18 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
     }
 
     protected SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
+        if (!baseService.isBaseUrlSet()) {
             try {
-                baseService.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException | URISyntaxException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -137,6 +139,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
                         .setClientId(KEYCLOAK_FROST_CLIENT_ID)
                         .setUserName(username)
                         .setPassword(password));
+        service.getOrCreateMqttConfig().setAuth(username, password);
         return service;
     }
 

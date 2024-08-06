@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propertiesBuilder;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createDatastream;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservedProperty;
@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * Tests non-standard MQTT extensions.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public abstract class MqttExtraTests extends AbstractTestClass {
+public class MqttExtraTests extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttExtraTests.class.getName());
 

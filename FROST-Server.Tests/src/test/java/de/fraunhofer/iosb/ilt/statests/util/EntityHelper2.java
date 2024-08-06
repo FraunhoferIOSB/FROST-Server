@@ -17,31 +17,31 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DEFINITION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DESCRIPTION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_ENCODINGTYPE;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_FEATURE;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_LOCATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_METADATA;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_OBSERVATIONTYPE;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIMEDS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULT;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTTIMEDS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_TIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_UNITOFMEASUREMENT;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_DATASTREAM;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_FEATUREOFINTEREST;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_HISTORICALLOCATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_LOCATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_OBSERVATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_OBSERVEDPROPERTY;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_SENSOR;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_THING;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFINITION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_FEATUREOFINTEREST;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_HISTORICALLOCATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVEDPROPERTY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_SENSOR;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_THING;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_ENCODINGTYPE;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_FEATURE;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_METADATA;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_OBSERVATIONTYPE;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PHENOMENONTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PHENOMENONTIMEDS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULT;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTTIMEDS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_TIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_UNITOFMEASUREMENT;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propertiesBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -54,9 +54,9 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -82,15 +82,15 @@ public class EntityHelper2 {
     public final Map<EntityType, List<Entity>> entities = new HashMap<>();
 
     private final SensorThingsService sSrvc;
-    private final SensorThingsSensingV11 sMdl;
-    private final SensorThingsMultiDatastreamV11 mMdl;
-    private final SensorThingsTaskingV11 tMdl;
+    private final SensorThingsV11Sensing sMdl;
+    private final SensorThingsV11MultiDatastream mMdl;
+    private final SensorThingsV11Tasking tMdl;
 
     public EntityHelper2(SensorThingsService sSrvc) {
         this.sSrvc = sSrvc;
-        sMdl = sSrvc.getModel(SensorThingsSensingV11.class);
-        mMdl = sSrvc.getModel(SensorThingsMultiDatastreamV11.class);
-        tMdl = sSrvc.getModel(SensorThingsTaskingV11.class);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+        mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
+        tMdl = sSrvc.getModel(SensorThingsV11Tasking.class);
     }
 
     public void clearCaches() {
@@ -134,6 +134,11 @@ public class EntityHelper2 {
             return null;
         }
         return list.get(idx);
+    }
+
+    public EntityHelper2 setCache(EntityType et, List<Entity> cache) {
+        entities.put(et, cache);
+        return this;
     }
 
     /**
@@ -205,19 +210,19 @@ public class EntityHelper2 {
 
     public String createUrl(EntityType target) {
         return sSrvc.getVersion().getUrlPart()
-                + '/' + target.getContainerName();
+                + '/' + target.getMainSetName();
     }
 
     public String createUrl(EntityType target, Object id, String subPath) {
         return sSrvc.getVersion().getUrlPart()
-                + '/' + target.getContainerName()
+                + '/' + target.getMainSetName()
                 + '(' + Utils.quoteForUrl(id) + ')'
                 + subPath;
     }
 
     public String createUrl(Entity target) {
         return sSrvc.getVersion().getUrlPart()
-                + '/' + target.getEntityType().getContainerName()
+                + '/' + target.getEntityType().getMainSetName()
                 + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues()[0]) + ')';
     }
 
@@ -261,8 +266,8 @@ public class EntityHelper2 {
         if (!StringHelper.isNullOrEmpty(orderby)) {
             query += join + "$orderby=" + orderby;
         }
-        String urlString = sSrvc.getEndpoint().toString()
-                + entityType.mainContainer;
+        String urlString = sSrvc.getBaseUrl().toString()
+                + entityType.mainSet;
         if (pk != null) {
             urlString += '(' + Utils.quoteForUrl(pk[0]) + ')';
         }
@@ -568,8 +573,8 @@ public class EntityHelper2 {
     public JsonNode sendHttpPutEntity(Entity entity) {
         EntityType entityType = entity.getEntityType();
         Object[] pk = entity.getPrimaryKeyValues();
-        String urlString = sSrvc.getEndpoint().toString()
-                + '/' + entityType.mainContainer
+        String urlString = sSrvc.getBaseUrl().toString()
+                + '/' + entityType.mainSet
                 + '(' + Utils.quoteForUrl(pk[0]) + ')';
         try {
             String data = JsonWriter.writeEntity(entity);

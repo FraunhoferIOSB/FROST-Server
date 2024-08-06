@@ -95,23 +95,25 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
     }
 
     private SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
+        if (!baseService.isBaseUrlSet()) {
             try {
-                baseService.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (URISyntaxException | MalformedURLException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
     }
 
     @Test
-    void test_04c_ChangePassword() {
+    void test_99_ChangePassword() {
         LOGGER.info("  test_04c_ChangePassword");
         FineGrainedAuthTests.EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .setProperty(EP_USERPASS, user + "2");

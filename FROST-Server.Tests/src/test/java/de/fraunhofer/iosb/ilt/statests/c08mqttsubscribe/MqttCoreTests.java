@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_DATASTREAM;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_FEATUREOFINTEREST;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_HISTORICALLOCATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_LOCATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_OBSERVATION;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_OBSERVEDPROPERTY;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_SENSOR;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.NAME_THING;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_FEATUREOFINTEREST;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_HISTORICALLOCATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVATION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVEDPROPERTY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_SENSOR;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_THING;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_CLEANUP;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.waitMillis;
 
@@ -130,7 +130,7 @@ public class MqttCoreTests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             final QueryJsonFuture future = QueryJsonFuture.build();
             final Callable<Object> insertAction = getInsertAction(entityType, future);
-            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainContainer)
+            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(insertAction)
@@ -180,7 +180,7 @@ public class MqttCoreTests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             final QueryJsonFuture future = QueryJsonFuture.build();
             final Callable<Object> updateAction = getPatchUpdateAction(entityType, future);
-            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainContainer)
+            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(updateAction)
@@ -201,7 +201,7 @@ public class MqttCoreTests extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
             final QueryJsonFuture future = QueryJsonFuture.build();
             final Callable<Object> updateAction = getPutUpdateAction(entityType, future);
-            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainContainer)
+            final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(updateAction)
@@ -226,11 +226,11 @@ public class MqttCoreTests extends AbstractTestClass {
                     .setSelect(eh2.getSelectedProperties(entityType, false));
             final Callable<Object> insertAction = getInsertAction(entityType, futureEven, futureOdd);
             final TestSubscription evenSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureEven.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureEven.getSelect()))
                     .addExpectedJson(futureEven.getFuture())
                     .createReceivedListener(entityType);
             final TestSubscription oddSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureOdd.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureOdd.getSelect()))
                     .addExpectedJson(futureOdd.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(insertAction)
@@ -257,11 +257,11 @@ public class MqttCoreTests extends AbstractTestClass {
                     .setSelect(eh2.getSelectedProperties(entityType, false));
             final Callable<Object> patchAction = getPatchUpdateAction(entityType, futureEven, futureOdd);
             final TestSubscription evenSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureEven.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureEven.getSelect()))
                     .addExpectedJson(futureEven.getFuture())
                     .createReceivedListener(entityType);
             final TestSubscription oddSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureOdd.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureOdd.getSelect()))
                     .addExpectedJson(futureOdd.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(patchAction)
@@ -288,11 +288,11 @@ public class MqttCoreTests extends AbstractTestClass {
                     .setSelect(eh2.getSelectedProperties(entityType, false));
             final Callable<Object> putAction = getPutUpdateAction(entityType, futureEven, futureOdd);
             final TestSubscription evenSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureEven.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureEven.getSelect()))
                     .addExpectedJson(futureEven.getFuture())
                     .createReceivedListener(entityType);
             final TestSubscription oddSubscription = new TestSubscription(mqttHelper)
-                    .setTopic("v1.1/" + entityType.mainContainer + '?' + eh2.createSelect(futureOdd.getSelect()))
+                    .setTopic("v1.1/" + entityType.mainSet + '?' + eh2.createSelect(futureOdd.getSelect()))
                     .addExpectedJson(futureOdd.getFuture())
                     .createReceivedListener(entityType);
             final MqttAction mqttAction = new MqttAction(putAction)
@@ -378,22 +378,22 @@ public class MqttCoreTests extends AbstractTestClass {
             return null;
         };
 
-        final var tsThing = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etThing.mainContainer)
+        final var tsThing = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etThing.mainSet)
                 .addExpectedJson(futureThing.getFuture())
                 .createReceivedListener(sMdl.etThing);
-        final var tsDatastream = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etDatastream.mainContainer)
+        final var tsDatastream = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etDatastream.mainSet)
                 .addExpectedJson(futureDatastream.getFuture())
                 .createReceivedListener(sMdl.etDatastream);
-        final var tsSensor = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etSensor.mainContainer)
+        final var tsSensor = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etSensor.mainSet)
                 .addExpectedJson(futureSensor.getFuture())
                 .createReceivedListener(sMdl.etSensor);
-        final var tsObsProp = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservedProperty.mainContainer)
+        final var tsObsProp = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservedProperty.mainSet)
                 .addExpectedJson(futureObservedProperty.getFuture())
                 .createReceivedListener(sMdl.etObservedProperty);
-        final var tsLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etLocation.mainContainer)
+        final var tsLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etLocation.mainSet)
                 .addExpectedJson(futureLocation.getFuture())
                 .createReceivedListener(sMdl.etLocation);
-        final var tsHistLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etHistoricalLocation.mainContainer)
+        final var tsHistLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etHistoricalLocation.mainSet)
                 .addExpectedJson(futureHistLoc.getFuture())
                 .createReceivedListener(sMdl.etHistoricalLocation);
         final MqttAction mqttAction = new MqttAction(updateAction)
@@ -456,28 +456,28 @@ public class MqttCoreTests extends AbstractTestClass {
             return null;
         };
 
-        final var tsThing = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etThing.mainContainer)
+        final var tsThing = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etThing.mainSet)
                 .addExpectedJson(futureThing.getFuture())
                 .createReceivedListener(sMdl.etThing);
-        final var tsFeature = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etFeatureOfInterest.mainContainer)
+        final var tsFeature = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etFeatureOfInterest.mainSet)
                 .addExpectedJson(futureFeature.getFuture())
                 .createReceivedListener(sMdl.etFeatureOfInterest);
-        final var tsDatastream = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etDatastream.mainContainer)
+        final var tsDatastream = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etDatastream.mainSet)
                 .addExpectedJson(futureDatastream.getFuture())
                 .createReceivedListener(sMdl.etDatastream);
-        final var tsSensor = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etSensor.mainContainer)
+        final var tsSensor = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etSensor.mainSet)
                 .addExpectedJson(futureSensor.getFuture())
                 .createReceivedListener(sMdl.etSensor);
-        final var tsObsProp = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservedProperty.mainContainer)
+        final var tsObsProp = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservedProperty.mainSet)
                 .addExpectedJson(futureObservedProperty.getFuture())
                 .createReceivedListener(sMdl.etObservedProperty);
-        final var tsLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etLocation.mainContainer)
+        final var tsLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etLocation.mainSet)
                 .addExpectedJson(futureLocation.getFuture())
                 .createReceivedListener(sMdl.etLocation);
-        final var tsHistLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etHistoricalLocation.mainContainer)
+        final var tsHistLoc = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etHistoricalLocation.mainSet)
                 .addExpectedJson(futureHistLoc.getFuture())
                 .createReceivedListener(sMdl.etHistoricalLocation);
-        final var tsObservation = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservation.mainContainer)
+        final var tsObservation = new TestSubscription(mqttHelper, "v1.1/" + sMdl.etObservation.mainSet)
                 .addExpectedJson(futureObservation.getFuture())
                 .createReceivedListener(sMdl.etObservation);
         final MqttAction mqttAction = new MqttAction(updateAction)

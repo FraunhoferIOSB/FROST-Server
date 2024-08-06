@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTQUALITY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,7 +37,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
@@ -545,7 +545,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity sensor = sMdl.newSensor(name, desc, type, metadata)
                 .setProperty(EP_PROPERTIES, properties);
         srvc.create(sensor);
@@ -558,7 +558,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity ds = sMdl.newDatastream(name, desc, type, uom)
                 .setProperty(EP_PROPERTIES, properties)
                 .setProperty(sMdl.npDatastreamThing, thing)
@@ -574,7 +574,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obsProp = sMdl.newObservedProperty(name, definition, description)
                 .setProperty(EP_PROPERTIES, properties);
         srvc.create(obsProp);
@@ -596,7 +596,7 @@ public class EntityUtils {
         int idx = registry.size();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("idx", idx);
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
                 .setProperty(EP_VALIDTIME, validTime)
                 .setProperty(EP_PARAMETERS, parameters);
@@ -611,7 +611,7 @@ public class EntityUtils {
     }
 
     public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, List<Entity> registry) throws ServiceFailureException {
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream);
         srvc.create(obs);
         registry.add(obs);
