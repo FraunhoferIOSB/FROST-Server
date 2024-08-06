@@ -84,6 +84,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
     @DefaultValue("memory")
     public static final String TAG_PERSISTENT_STORE_TYPE = "persistentStoreType";
+    @DefaultValue("")
+    public static final String TAG_MQTT_TOPIC_ALLOWLIST = "topicAllowList";
 
     private static final String VALUE_STORE_TYPE_H2 = "h2";
 

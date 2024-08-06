@@ -192,6 +192,8 @@ public class AuthTestHelper {
                 .setDefaultCredentialsProvider(credsProvider);
 
         service.rebuildHttpClient();
+
+        service.getOrCreateMqttConfig().setAuth(username, password);
         return service;
     }
 

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostclient.utils.MqttConfig;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener.ReceivedListener;
@@ -59,12 +59,13 @@ public class MqttHelper2 {
     public static final int WAIT_AFTER_INSERT = 100;
     public static final int WAIT_AFTER_CLEANUP = 1;
     public static final int QOS = 2;
-    public static final String CLIENT_ID = "STA-test_suite";
+    public static final String CLIENT_ID = "TS";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttHelper2.class);
 
     private final SensorThingsService sSrvc;
     private final String mqttServerUri;
+
     /**
      * The MQTT timeout in ms
      */
@@ -74,6 +75,10 @@ public class MqttHelper2 {
         this.sSrvc = sSrvc;
         this.mqttServerUri = mqttServerUri;
         this.mqttTimeoutMs = mqttTimeoutMs;
+    }
+
+    public boolean isAuthSet() {
+        return sSrvc.getOrCreateMqttConfig().isAuthSet();
     }
 
     public static void waitMillis(long millis) {
@@ -122,8 +127,12 @@ public class MqttHelper2 {
             for (TestSubscription tl : ma.topics) {
                 LOGGER.debug("  Creating Subsctiption for {} messages on {}", tl.getExpectedCount(), tl.topic);
                 MqttListener listener = new MqttListener(mqttServerUri, tl.getTopic(), tl.getExpectedCount());
-                listener.connect();
+                if (tl.mqttHelper.isAuthSet()) {
+                    MqttConfig mqttConfig = tl.mqttHelper.sSrvc.getMqttConfig();
+                    listener.setAuth(mqttConfig.getUsername(), mqttConfig.getPassword());
+                }
                 listener.setListener(tl.mqttReceivedListener);
+                listener.connect();
                 executor.submit(listener);
             }
             LOGGER.debug("  Calling action...");
@@ -154,15 +163,6 @@ public class MqttHelper2 {
                     () -> "Errors encountered on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
         }
 
-    }
-
-    private static void assertJsonEqualsWithLinkResolving(JsonNode expected, JsonNode received, String topic) {
-        String message = "";
-        boolean equals = jsonEqualsWithLinkResolving(expected, received, topic);
-        if (!equals) {
-            message = "Expected " + expected.toString() + " got " + received.toString() + " for topic " + topic;
-        }
-        assertTrue(equals, message);
     }
 
     private static boolean jsonEqualsWithLinkResolving(JsonNode node1, JsonNode node2, String topic) {
@@ -307,6 +307,11 @@ public class MqttHelper2 {
         private final List<Future<JsonNode>> expectedJson = new ArrayList<>();
 
         /**
+         * The list of receivedErrors that we expect to receive.
+         */
+        private final List<String> expectedErrors = new ArrayList<>();
+
+        /**
          * Flag indicating this Subscription expects an Entity for each received
          * message.
          */
@@ -320,8 +325,7 @@ public class MqttHelper2 {
 
         private final List<Entity> receivedEntities = new ArrayList<>();
         private final List<JsonNode> receivedJson = new ArrayList<>();
-
-        private final List<String> errors = new ArrayList<>();
+        private final List<String> receivedErrors = new ArrayList<>();
 
         private ReceivedListener mqttReceivedListener;
 
@@ -353,6 +357,10 @@ public class MqttHelper2 {
             return this;
         }
 
+        public List<Future<Entity>> getExpectedEntities() {
+            return expectedEntities;
+        }
+
         public boolean isJsonExpected() {
             return expectsJson;
         }
@@ -363,16 +371,21 @@ public class MqttHelper2 {
             return this;
         }
 
-        public List<Future<Entity>> getExpectedEntities() {
-            return expectedEntities;
-        }
-
         public List<Future<JsonNode>> getExpectedJson() {
             return expectedJson;
         }
 
+        public TestSubscription addExpectedError(String errorPrefix) {
+            expectedErrors.add(errorPrefix);
+            return this;
+        }
+
+        public List<String> getExpectedErrors() {
+            return expectedErrors;
+        }
+
         public int getExpectedCount() {
-            return expectedEntities.size() + expectedJson.size();
+            return expectedEntities.size() + expectedJson.size() + expectedErrors.size();
         }
 
         public TestSubscription setMqttReceivedListener(ReceivedListener mqttReceivedListener) {
@@ -436,6 +449,19 @@ public class MqttHelper2 {
                     return false;
                 }
             }
+            while (!receivedErrors.isEmpty()) {
+                String gotError = receivedErrors.remove(0);
+                boolean found = false;
+                for (String expErr : expectedErrors) {
+                    if (gotError.startsWith(expErr)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -467,7 +493,7 @@ public class MqttHelper2 {
                     return false;
                 }
             }
-            errors.add("    Received entity " + receivedEntity + " matches nothing");
+            receivedErrors.add("    Received entity " + receivedEntity + " matches nothing");
             return false;
         }
 
@@ -508,20 +534,24 @@ public class MqttHelper2 {
         }
 
         public List<String> getErrors() {
-            return errors;
+            return receivedErrors;
         }
 
         public boolean hasErrors() {
-            return !errors.isEmpty();
+            return !receivedErrors.isEmpty();
         }
 
         public TestSubscription addError(String error) {
-            errors.add(error);
+            receivedErrors.add(error);
             return this;
         }
 
         public TestSubscription createReceivedListener(EntityType et) {
-            final ReceivedListener listener = (result) -> {
+            final ReceivedListener listener = (result, isError) -> {
+                if (isError) {
+                    addError(result);
+                    return;
+                }
                 try {
                     if (expectsEntities) {
                         Entity entity = mqttHelper.getService().getJsonReader().parseEntity(et, result);

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,9 +44,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
- * @author scf
+ * Helper for connecting to MQTT and listening on topics.
  */
 public class MqttListener implements Callable<JsonNode> {
 
@@ -54,6 +53,9 @@ public class MqttListener implements Callable<JsonNode> {
     private final CountDownLatch barrier;
     private final String topic;
     private final String mqttServerUri;
+
+    private String username;
+    private String password;
 
     private MqttAsyncClient mqttClient;
     private JsonNode result;
@@ -67,21 +69,51 @@ public class MqttListener implements Callable<JsonNode> {
         this.mqttServerUri = mqttServer;
         this.topic = topic;
         barrier = new CountDownLatch(expectedMessages);
+        LOGGER.debug("Created MqttListener for {} expecting {} on {}", mqttServer, expectedMessages, topic);
     }
 
     public void setListener(ReceivedListener listener) {
         this.listener = listener;
     }
 
-    public void connect() {
+    public MqttListener setAuth(String username, String password) {
+        this.username = username;
+        this.password = password;
+        return this;
+    }
+
+    private void notifyMessage(String message) {
+        barrier.countDown();
+        LOGGER.debug("Received message, barrier now at {}", barrier.getCount());
+        if (listener != null) {
+            listener.received(message, false);
+        }
+    }
+
+    private void notifyError(String message) {
+        barrier.countDown();
+        LOGGER.debug("Received error, barrier now at {}", barrier.getCount());
+        if (listener != null) {
+            listener.received(message, true);
+        }
+    }
+
+    public MqttListener connect() {
         try {
             final CountDownLatch connectBarrier = new CountDownLatch(2);
             mqttClient = new MqttAsyncClient(mqttServerUri, MqttHelper2.CLIENT_ID + "-" + topic + "-" + UUID.randomUUID(), new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
+            if (!isNullOrEmpty(username)) {
+                connOpts.setUserName(username);
+                connOpts.setPassword(password.toCharArray());
+            }
             connOpts.setCleanSession(true);
+            // Listen on the side channel to get confirmation of subscriptions.
             MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
                 @Override
                 public void onSubscribe(SubscriptionEvent subscription) {
+                    LOGGER.debug("sc: Subscribe to {}", subscription);
                     if (topic.equals(subscription.getTopic())) {
                         connectBarrier.countDown();
                     }
@@ -89,9 +121,10 @@ public class MqttListener implements Callable<JsonNode> {
 
                 @Override
                 public void onUnsubscribe(SubscriptionEvent subscription) {
+                    LOGGER.debug("sc: Unsubscribe from {}", subscription);
                 }
             });
-            mqttClient.connect(connOpts, new IMqttActionListener() {
+            mqttClient.connect(connOpts, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     mqttClient.setCallback(new MqttCallback() {
@@ -104,16 +137,13 @@ public class MqttListener implements Callable<JsonNode> {
                         @Override
                         public void messageArrived(String topic, MqttMessage mm) {
                             if (barrier.getCount() > 0) {
+                                final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
                                 try {
-                                    final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
                                     result = Utils.MAPPER.readTree(payload);
-                                    if (listener != null) {
-                                        listener.received(payload);
-                                    }
                                 } catch (JsonProcessingException ex) {
                                     LOGGER.error("Failed to parse result", ex);
                                 }
-                                barrier.countDown();
+                                notifyMessage(payload);
                                 LOGGER.debug("Received on {}. To go: {}", topic, barrier.getCount());
                             } else {
                                 LOGGER.error("Received on {}. Barrier already empty!", topic);
@@ -129,26 +159,33 @@ public class MqttListener implements Callable<JsonNode> {
                         mqttClient.subscribe(topic, MqttHelper2.QOS, null, new IMqttActionListener() {
                             @Override
                             public void onSuccess(IMqttToken imt) {
-                                LOGGER.debug("Subscribed to {}", topic);
+                                if (imt.getGrantedQos()[0] == 128) {
+                                    LOGGER.debug("Subscribed Failed on {}", topic);
+                                    notifyError("Failed to subscribe to " + topic);
+                                    // Extra countdown
+                                    connectBarrier.countDown();
+                                } else {
+                                    LOGGER.debug("Subscribed to {}", topic);
+                                }
                                 connectBarrier.countDown();
                             }
 
                             @Override
                             public void onFailure(IMqttToken imt, Throwable thrwbl) {
                                 LOGGER.error("Exception:", thrwbl);
-                                fail("MQTT subscribe failed: " + thrwbl.getMessage());
+                                notifyError("Failed to subscribe to " + topic);
                             }
                         });
                     } catch (MqttException ex) {
                         LOGGER.error("Exception:", ex);
-                        fail("Error MQTT subscribe: " + ex.getMessage());
+                        notifyError("Failed to subscribe to " + topic + ": " + ex.getMessage());
                     }
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     LOGGER.error("Exception:", exception);
-                    fail("MQTT connect failed: " + exception.getMessage());
+                    notifyError("MQTT connect failed: " + exception.getMessage());
                 }
             });
             try {
@@ -160,6 +197,7 @@ public class MqttListener implements Callable<JsonNode> {
             LOGGER.error("Exception:", ex);
             fail("Could not connect to MQTT server: " + ex.getMessage());
         }
+        return this;
     }
 
     @Override
@@ -221,7 +259,7 @@ public class MqttListener implements Callable<JsonNode> {
 
     public interface ReceivedListener {
 
-        public void received(String result);
+        public void received(String result, boolean isError);
     }
 
 }

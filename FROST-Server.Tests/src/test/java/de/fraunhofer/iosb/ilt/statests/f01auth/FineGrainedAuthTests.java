@@ -44,12 +44,15 @@ import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchResponseJson;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +60,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -138,10 +143,20 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceObsCreaterProject1;
     protected static SensorThingsService serviceObsCreaterProject2;
 
+    protected static EntityHelper2 ehAdmin;
+    protected static EntityHelper2 ehAdminProject1;
+    protected static EntityHelper2 ehAdminProject2;
+
+    private static MqttHelper2 mqttHelperAdmin;
+    private static MqttHelper2 mqttHelperAdminProject1;
+    private static MqttHelper2 mqttHelperAdminProject2;
+
     private final AuthTestHelper ath;
 
     protected static void addCommonProperties(Map<String, String> properties) {
         properties.put("plugins.coreModel.idType", "LONG");
+        properties.put("plugins.projects.enable", "false");
+        properties.put("plugins.projects.enableDefaultRules", "true");
         properties.put("plugins.modelLoader.enable", "true");
         properties.put("plugins.modelLoader.modelPath", "");
         properties.put("plugins.modelLoader.modelFiles", modelUrl("Project.json") + ", " + modelUrl("Role.json") + ", " + modelUrl("User.json") + ", " + modelUrl("UserProjectRole.json"));
@@ -156,6 +171,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         properties.put("plugins.modelLoader.idType.User", "STRING");
         properties.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
         properties.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
+        properties.put("auth.topicAllowList", "v[0-9].[0-9]/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+");
     }
 
     public FineGrainedAuthTests(ServerVersion version, Map<String, String> properties) {
@@ -167,7 +183,21 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         createServices();
+        ehAdmin = setCaches(new EntityHelper2(serviceAdmin));
+        ehAdminProject1 = setCaches(new EntityHelper2(serviceAdminProject1));
+        ehAdminProject2 = setCaches(new EntityHelper2(serviceAdminProject2));
+
+        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperAdminProject1 = new MqttHelper2(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperAdminProject2 = new MqttHelper2(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         createEntities();
+    }
+
+    protected EntityHelper2 setCaches(EntityHelper2 eh) {
+        return eh.setCache(mdlSensing.etThing, THINGS)
+                .setCache(mdlSensing.etDatastream, DATASTREAMS)
+                .setCache(mdlSensing.etObservation, OBSERVATIONS)
+                .setCache(mdlUsers.etProject, PROJECTS);
     }
 
     public abstract void createServices();
@@ -510,7 +540,60 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_08e_ObservationCreate() {
+    void test_09a_SubscribeObservationDirect() {
+        LOGGER.info("  test_09a_SubscribeObservationDirect");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 0),
+                    0,
+                    ZonedDateTime.parse("2024-01-01T01:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs);
+            obsFuture.complete(obs);
+            return null;
+        };
+
+        Entity ds0 = ehAdmin.getCache(mdlSensing.etDatastream, 0);
+        String relationPath = ParserUtils.relationPath(ds0, mdlSensing.npDatastreamObservations);
+        String dsTopic = "v1.1/" + relationPath;
+        final MqttHelper2.TestSubscription testSubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(mdlSensing.etObservation);
+
+        final MqttHelper2.TestSubscription testSubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic)
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(mdlSensing.etObservation);
+
+        final MqttHelper2.TestSubscription testSubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
+                .addExpectedError("Failed to subscribe to")
+                .createReceivedListener(mdlSensing.etObservation);
+
+        final MqttHelper2.TestSubscription testSubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic)
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(mdlSensing.etObservation);
+
+        final MqttHelper2.TestSubscription testSubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
+                .addExpectedError("Failed to subscribe to")
+                .createReceivedListener(mdlSensing.etObservation);
+
+        final MqttHelper2.TestSubscription testSubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic)
+                .addExpectedError("Failed to subscribe to")
+                .createReceivedListener(mdlSensing.etObservation);
+
+        MqttHelper2.MqttAction mqttAction = new MqttHelper2.MqttAction(insertAction)
+                .add(testSubAdmin)
+                .add(testSubDsAdmin)
+                .add(testSubAdminP1)
+                .add(testSubDsAdminP1)
+                .add(testSubAdminP2)
+                .add(testSubDsAdminP2);
+        mqttHelperAdmin.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test_18a_ObservationCreate() {
         LOGGER.info("  test_08e_ObservationCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
 
@@ -519,7 +602,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_08f_ObservationCreateNewFoi() throws ServiceFailureException {
+    void test_18b_ObservationCreateNewFoi() throws ServiceFailureException {
         LOGGER.info("  test_08f_ObservationCreateNewFoi");
         // Create a new Location for Thing 1, so a new FoI must be generated.
         Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
@@ -533,7 +616,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_09_ObservedPropertyCreate() {
+    void test_18c_ObservedPropertyCreate() {
         LOGGER.info("  test_09_ObservedPropertyCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
 
@@ -547,7 +630,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_10a_ThingDelete() {
+    void test_19a_ThingDelete() {
         LOGGER.info("  test_10a_ThingDelete");
         EntityCreator creator = (user) -> THINGS.get(0);
 
@@ -561,7 +644,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_11_TestLandingPage() {
+    void test_20_TestLandingPage() {
         LOGGER.info("  test_11_TestLandingPage");
         try {
             JsonNode data = getRootUrl();
