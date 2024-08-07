@@ -1,3 +1,4 @@
+{{- if .Values.frost.http.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 apiVersion: apps/v1
@@ -406,3 +407,4 @@ spec:
             {{- if .Values.frost.http.extraEnv }}
                 {{- .Values.frost.http.extraEnv | nindent 12 }}
             {{- end }}
+{{- end -}}

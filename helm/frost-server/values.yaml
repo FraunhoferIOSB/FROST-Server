@@ -105,6 +105,7 @@ frost:
   # FROST-Server HTTP module configuration #
   ##########################################
   http:
+    enabled: true
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-http
@@ -184,6 +185,7 @@ frost:
   # FROST-Server MQTT module configuration #
   ##########################################
   mqtt:
+    enabled: true
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-mqtt
@@ -191,7 +193,6 @@ frost:
       pullPolicy: IfNotPresent
       imagePullSecret:
     # FROST-Server MQTT deployment settings
-    enabled: true
     annotations: {}
     serviceType: NodePort
     replicas: 1
