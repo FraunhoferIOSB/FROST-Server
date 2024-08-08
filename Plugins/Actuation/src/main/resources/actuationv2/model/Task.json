@@ -117,6 +117,17 @@
           "annotations": []
         }
       ],
+      "validators": {
+        "createValidators": [
+          {
+            "name": "AC-Task-CrationTime",
+            "validator": {
+              "className": "de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.CreateTimeValidator"
+            }
+          }
+        ],
+        "updateValidators": []
+      },
       "annotations": []
     }
   ]

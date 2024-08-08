@@ -139,6 +139,17 @@
                     "annotations": []
                 }
             ],
+            "validators": {
+                "createValidators": [
+                    {
+                        "name": "CM-ObsPhenTime",
+                        "validator": {
+                            "className": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PhenomenonTimeValidator"
+                        }
+                    }
+                ],
+                "updateValidators": []
+            },
             "annotations": []
         }
     ]

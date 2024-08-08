@@ -188,11 +188,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityType etSensor = new EntityType(NAME_NP_SENSOR, NAME_NP_SENSORS);
     public final EntityType etObservedProperty = new EntityType(NAME_NP_OBSERVEDPROPERTY, NAME_NP_OBSERVEDPROPERTIES);
     public final EntityType etObservation = new EntityType(NAME_NP_OBSERVATION, NAME_NP_OBSERVATIONS)
-            .addCreateValidator("CM-ObsPhenTime", entity -> {
-                if (entity.getProperty(epPhenomenonTime) == null) {
-                    entity.setProperty(epPhenomenonTime, new TimeValue(TimeInstant.now()));
-                }
-            });
+            .addCreateValidator("CM-ObsPhenTime", new PhenomenonTimeValidator());
     public final EntityType etLocation = new EntityType(NAME_NP_LOCATION, NAME_NP_LOCATIONS);
     public final EntityType etHistoricalLocation = new EntityType(NAME_NP_HISTORICALLOCATION, NAME_NP_HISTORICALLOCATIONS);
     public final EntityType etFeatureOfInterest = new EntityType(NAME_NP_FEATUREOFINTEREST, NAME_NP_FEATURESOFINTEREST);

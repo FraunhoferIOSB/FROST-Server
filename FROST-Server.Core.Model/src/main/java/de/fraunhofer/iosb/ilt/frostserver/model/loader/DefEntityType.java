@@ -111,11 +111,10 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     /**
      * Validators that are used to validate entities of this type.
      */
-    @ConfigurableField(editor = EditorList.class, optional = true,
+    @ConfigurableField(editor = EditorClass.class, optional = true,
             label = "Validators", description = "Entity Validators")
-    @EditorList.EdOptsList(editor = EditorSubclass.class)
-    @EditorSubclass.EdOptsSubclass(iface = DefValidator.class, merge = true, nameField = "@class", shortenClassNames = true)
-    private List<DefValidator> validators = new ArrayList<>();
+    @EditorClass.EdOptsClass(clazz = DefValidator.class)
+    private DefValidator validators;
 
     /**
      * Hooks that are used to validate entities of this type.
@@ -165,8 +164,8 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
             } else if (adminOnly && !entityType.isAdminOnly()) {
                 entityType.setAdminOnly(adminOnly);
             }
-            for (DefValidator validator : validators) {
-                validator.createValidators(modelRegistry, entityType);
+            if (validators != null) {
+                validators.createValidators(modelRegistry, entityType);
             }
             entityType.addAnnotations(annotations);
         }
@@ -338,7 +337,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      *
      * @return the validators
      */
-    public List<DefValidator> getValidators() {
+    public DefValidator getValidators() {
         return validators;
     }
 
@@ -348,7 +347,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      * @param validators the validators to set
      * @return this.
      */
-    public DefEntityType setValidators(List<DefValidator> validators) {
+    public DefEntityType setValidators(DefValidator validators) {
         this.validators = validators;
         return this;
     }

@@ -25,7 +25,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -55,7 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.time4j.Moment;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,11 +211,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epCreationTime)
                 .registerProperty(epTaskingParameters)
                 .registerProperty(npTaskingCapabilityTask)
-                .addCreateValidator("AC-Task-CrationTime", entity -> {
-                    if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
-                        entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
-                    }
-                });
+                .addCreateValidator("AC-Task-CrationTime", new CreateTimeValidator());
         etTaskingCapability
                 .registerProperty(epIdTaskingCap)
                 .registerProperty(pluginCoreModel.epName)
