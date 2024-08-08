@@ -126,10 +126,18 @@ frost:
         servicePort: 80
     ingress:
       enabled: true
-      rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
-      rewriteTarget: /FROST-Server/$1
       path: /FROST-Server/(.*)
       annotations:
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: /FROST-Server/$1
+      
+      # Set a specific ingress-class for the ingress
+      # ingressClassName: nginx
+      
+      # Additional annotations
+      # annotations:
+      #   cert-manager.io/cluster-issuer: letsencrypt
+      #   cert-manager.io/issue-temporary-certificate: 'true'
       tls:
         enabled: false
         secretName: []
