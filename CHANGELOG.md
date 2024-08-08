@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.3.3
+## Release version 2.3.3
 
 **Internal changes & Bugfixes**
 * [HELM] Added option to specify image pull secret name.
@@ -8,6 +8,7 @@
 * Fixed MultiDatastream not picking up ID type of Thing and Sensor.
 * Fixed Tomcat Docker images already having UID/GID 1000, FROST now uses 1001.
 * Fixed unsubscribe messages reducing counters when not subscribed.
+* Updated depencencies.
 
 
 ## Release version 2.3.2
