@@ -2,12 +2,19 @@
 name:
 
 frost:
+
   ######################################
   # FROST-Server general configuration #
   ######################################
   alwaysOrderbyId: true
   logSensitiveData: false
   queueLoggingInterval: 0
+  ## @param commonLabels Add labels to all the deployed resources
+  ##
+  commonLabels: {}
+  ## @param commonAnnotations Add annotations to all the deployed resources
+  ##
+  commonAnnotations: {}
 
   #####################################
   # FROST-Server plugin configuration #
