@@ -1,15 +1,32 @@
 {{- if .Values.frost.http.ingress.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+{{- if and .Values.frost.http.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class" .Values.frost.http.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+  {{- if .Values.frost.http.ingress.annotations or and .Values.frost.http.ingress.rewriteAnnotation .Values.frost.http.ingress.rewriteTarget }}
   annotations:
+    {{- if and .Values.frost.http.ingress.rewriteAnnotation .Values.frost.http.ingress.rewriteTarget }}
     {{ .Values.frost.http.ingress.rewriteAnnotation}}: {{ .Values.frost.http.ingress.rewriteTarget}}
+    {{- end }}
     {{- if .Values.frost.http.ingress.annotations }}
-    {{- toYaml .Values.frost.http.ingress.annotations | nindent 4 }}
-    {{ end }}
+      {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -17,6 +34,9 @@ metadata:
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:
+  {{- if and .Values.frost.http.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.frost.http.ingress.className }}
+  {{- end }}
   {{- if .Values.frost.http.ingress.tls.enabled }}
   tls:
     - hosts:
