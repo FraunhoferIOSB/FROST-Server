@@ -2,12 +2,19 @@
 name:
 
 frost:
+
   ######################################
   # FROST-Server general configuration #
   ######################################
   alwaysOrderbyId: true
   logSensitiveData: false
   queueLoggingInterval: 0
+  ## @param commonLabels Add labels to all the deployed resources
+  ##
+  commonLabels: {}
+  ## @param commonAnnotations Add annotations to all the deployed resources
+  ##
+  commonAnnotations: {}
 
   # Extra global environment variables added to both MQTT and HTTP pods.
   # This can be simple key-value pairs
