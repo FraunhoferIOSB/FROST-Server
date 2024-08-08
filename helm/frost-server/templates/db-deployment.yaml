@@ -55,6 +55,28 @@ spec:
           ports:
             - name: postgresql
               containerPort: 5432
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U {{ default "postgres" $customUser | quote }} -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U {{ default "postgres" $customUser | quote }} -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
           {{- if or (.Values.frost.db.persistence.enabled) (.Values.frost.db.persistence.hostPath) }}
           volumeMounts:
             - name: {{ $fullName }}
