@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.2.4
+## Release version 2.2.4
 
 **Internal changes & Bugfixes**
 * Fixed Tomcat Docker images already having UID/GID 1000, FROST now uses 1001.
