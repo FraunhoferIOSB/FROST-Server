@@ -2,19 +2,12 @@
 name:
 
 frost:
-
   ######################################
   # FROST-Server general configuration #
   ######################################
   alwaysOrderbyId: true
   logSensitiveData: false
   queueLoggingInterval: 0
-  ## @param commonLabels Add labels to all the deployed resources
-  ##
-  commonLabels: {}
-  ## @param commonAnnotations Add annotations to all the deployed resources
-  ##
-  commonAnnotations: {}
 
   #####################################
   # FROST-Server plugin configuration #
@@ -126,13 +119,12 @@ frost:
         servicePort: 80
     ingress:
       enabled: true
+      rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
+      rewriteTarget: /FROST-Server/$1
       path: /FROST-Server/(.*)
-      annotations:
-        nginx.ingress.kubernetes.io/use-regex: "true"
-        nginx.ingress.kubernetes.io/rewrite-target: /FROST-Server/$1
       
       # Set a specific ingress-class for the ingress
-      # ingressClassName: nginx
+      # className: nginx
       
       # Additional annotations
       # annotations:
