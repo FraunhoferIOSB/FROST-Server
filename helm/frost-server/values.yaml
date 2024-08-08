@@ -264,10 +264,16 @@ frost:
     ingress:
       enabled: false
       path: /mqtt
+
+      # Set a specific ingress-class for the ingress
+      # className: nginx
+      
+      # Additional annotations
       annotations:
-        kubernetes.io/ingress.class: nginx
         nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      #   cert-manager.io/cluster-issuer: letsencrypt
+      #   cert-manager.io/issue-temporary-certificate: 'true'
       tls:
         enabled: false
         secretName:
