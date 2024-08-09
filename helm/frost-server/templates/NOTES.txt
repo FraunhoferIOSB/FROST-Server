@@ -32,10 +32,10 @@ Hereafter the list of available exposed FROST-Server's resources:
 FROST-Server's resource     | Access URL
 --------------------------- | ----------------------------------------------
 HTTP - Homepage             | {{ include "frost-server.http.serviceRootUrl" . }}
-HTTP - SensorThings API     | {{ include "frost-server.http.serviceRootUrl" . }}/{{ include "frost-server.http.apiVersion" . }}
+HTTP - SensorThings API     | {{ include "frost-server.http.serviceRootUrl" . }}{{ include "frost-server.http.apiVersion" . }}
 {{- if .Values.frost.mqtt.enabled }}
-MQTT - TCP                  | {{ .Values.frost.http.serviceHost }}:{{ .Values.frost.mqtt.ports.mqtt.nodePort }}
-MQTT - Websocket            | {{ .Values.frost.http.serviceHost }}:{{ .Values.frost.mqtt.ports.websocket.nodePort }}
+MQTT - TCP                  | {{ include "frost-server.mqtt.serviceEndpoint" . }}
+MQTT - Websocket            | {{ include "frost-server.mqtt.serviceRootUrl" . }}
 {{- end }}
 
 For more information about FROST-Server, please visit https://github.com/FraunhoferIOSB/FROST-Server
