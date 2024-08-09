@@ -131,15 +131,16 @@ frost:
       path: /FROST-Server/(.*)
       
       # Set a specific ingress-class for the ingress
-      # className: nginx
+      className: azure-application-gateway
       
       # Additional annotations
-      # annotations:
-      #   cert-manager.io/cluster-issuer: letsencrypt
-      #   cert-manager.io/issue-temporary-certificate: 'true'
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        cert-manager.io/issue-temporary-certificate: "true"
+        appgw.ingress.kubernetes.io/ssl-redirect: "true"
       tls:
-        enabled: false
-        secretName: []
+        enabled: true
+        secretName: frost-server-tls
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
@@ -152,7 +153,7 @@ frost:
 
 
     # FROST-Server HTTP business settings
-    serviceHost: frost-server
+    serviceHost: frost-server.customer-1004100.cnap-d.regioit.cloud
     serviceProtocol: http
     servicePort:
     urlSubPath:
