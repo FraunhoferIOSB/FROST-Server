@@ -23,8 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import java.util.Map;
 
 /**
- *
- * @author scf
+ * Wrapper for JSON values in the database.
  */
 public class JsonValue {
 

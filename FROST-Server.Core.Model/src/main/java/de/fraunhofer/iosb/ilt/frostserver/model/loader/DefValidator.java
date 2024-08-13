@@ -97,7 +97,7 @@ public class DefValidator {
 
         @ConfigurableField(editor = EditorSubclass.class,
                 label = "validator", description = "The implementation class of the validator.")
-        @EditorSubclass.EdOptsSubclass(iface = EntityValidator.class)
+        @EditorSubclass.EdOptsSubclass(iface = EntityValidator.class, merge = true, nameField = "@class", shortenClassNames = true)
         public EntityValidator validator;
     }
 

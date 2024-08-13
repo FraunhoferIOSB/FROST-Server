@@ -66,8 +66,8 @@ public class PersistenceManagerFactory {
             throw new IllegalArgumentException("settings must be non-null");
         }
         this.settings = settings;
+        String pmiClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
         try {
-            String pmiClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
             Class<?> clazz = Class.forName(pmiClsName, false, getClass().getClassLoader());
             if (PersistenceManager.class.isAssignableFrom(clazz)) {
                 persistenceManagerClass = (Class<PersistenceManager>) clazz;
@@ -75,7 +75,7 @@ public class PersistenceManagerFactory {
                 throw new IllegalArgumentException("Class " + pmiClsName + " does not implement the interface PersistenceManager");
             }
         } catch (ClassNotFoundException ex) {
-            throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
+            throw new IllegalArgumentException(ERROR_MSG + "Class '" + pmiClsName + "' could not be found", ex);
         }
 
     }

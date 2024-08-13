@@ -122,7 +122,7 @@
           {
             "name": "AC-Task-CrationTime",
             "validator": {
-              "className": "de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.CreateTimeValidator"
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.CreateTimeValidator"
             }
           }
         ],
