@@ -85,6 +85,8 @@ These are settings for the HTTP package.
   response header to pre-flight response. Default: `1800`.
 * **http.cors.request.decorate:**  
   A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Default: `true`.
+* **http.sessionCookiePath:** Since 2.4.0  
+  If set, overrides the session cookie path of Tomcat. Usefull when FROST is behind a path-rewriting reverse proxy. Default: ``.
 
 
 ## Auth settings

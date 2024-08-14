@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_SESSION_COOKIE_PATH;
 
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
@@ -36,6 +37,7 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.SessionCookieConfig;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +100,13 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 MessageBusFactory.createMessageBus(coreSettings);
 
                 setupAuthFilter(context, coreSettings);
+
+                SessionCookieConfig scc = context.getSessionCookieConfig();
+                Settings httpSettings = coreSettings.getHttpSettings();
+                String sessionCookiePath = httpSettings.get(TAG_SESSION_COOKIE_PATH, CoreSettings.class);
+                if (!StringHelper.isNullOrEmpty(sessionCookiePath)) {
+                    scc.setPath(sessionCookiePath);
+                }
             } catch (RuntimeException ex) {
                 // We must log-and-rethrow here, because Tomcat eats the exception.
                 LOGGER.error("Failed to initialise.", ex);

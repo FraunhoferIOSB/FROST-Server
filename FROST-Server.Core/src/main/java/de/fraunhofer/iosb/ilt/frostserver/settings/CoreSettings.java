@@ -113,6 +113,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
     @DefaultValueBoolean(true)
     public static final String TAG_CORS_REQUEST_DECORATE = "cors.request.decorate";
+    @DefaultValue("")
+    public static final String TAG_SESSION_COOKIE_PATH = "sessionCookiePath";
 
     // Auth Tags
     @DefaultValue("")
