@@ -48,12 +48,12 @@ public class PluginProjects implements Plugin, ConfigDefaults {
     private boolean enabled;
 
     @Override
-    public InitResult init(CoreSettings settings) {
-        Settings pluginSettings = settings.getPluginSettings();
+    public InitResult init(CoreSettings coreSettings) {
+        Settings pluginSettings = coreSettings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_PROJECTS, PluginProjects.class);
         if (enabled) {
             boolean rules = pluginSettings.getBoolean(TAG_DEFAULT_RULES, PluginProjects.class);
-            final PluginManager pluginManager = settings.getPluginManager();
+            final PluginManager pluginManager = coreSettings.getPluginManager();
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             boolean pCoreModelV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
             boolean multiDatastream = pluginManager.isPluginEnabled(PluginMultiDatastream.class);
@@ -64,6 +64,19 @@ public class PluginProjects implements Plugin, ConfigDefaults {
             if (!pCoreModelV1) {
                 LOGGER.warn("PluginCoreModelV1 must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
+            }
+            if (!pluginSettings.containsName("modelLoader.idType.Role")) {
+                pluginSettings.set("modelLoader.idType.Role", "STRING");
+            }
+            if (!pluginSettings.containsName("modelLoader.idType.User")) {
+                pluginSettings.set("modelLoader.idType.User", "STRING");
+            }
+            final Settings settings = coreSettings.getSettings();
+            if (!settings.containsName("persistence.idGenerationMode.Role")) {
+                settings.set("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
+            }
+            if (!settings.containsName("persistence.idGenerationMode.User")) {
+                settings.set("persistence.idGenerationMode.User", "ClientGeneratedOnly");
             }
             pml.addLiquibaseFile("pluginprojects/sta1/liquibase/tables.xml");
 
