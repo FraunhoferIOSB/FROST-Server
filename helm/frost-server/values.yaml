@@ -72,6 +72,7 @@ frost:
   auth:
     provider:
     allowAnonymousRead: false
+    authenticateOnly:
     role:
       read:
       create:

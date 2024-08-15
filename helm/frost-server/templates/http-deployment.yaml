@@ -267,6 +267,10 @@ spec:
             {{- if .Values.frost.auth.provider }}
             - name: auth_allowAnonymousRead
               value: "{{ .Values.frost.auth.allowAnonymousRead }}"
+            {{- if .Values.frost.auth.authenticateOnly }}
+            - name: auth_authenticateOnly
+              value: "{{ .Values.frost.auth.authenticateOnly }}"
+            {{- end }}
             {{- if .Values.frost.auth.role.read }}
             - name: auth_role_read
               value: "{{ .Values.frost.auth.role.read }}"
@@ -287,14 +291,6 @@ spec:
             - name: auth_role_admin
               value: "{{ .Values.frost.auth.role.admin }}"
             {{- end }}
-            {{- if contains "basic" (lower .Values.frost.auth.provider) }}
-            # Basic auth requested
-            - name: auth_provider
-              value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
-            - name: auth_realmName
-              value: "{{ .Values.frost.auth.realmName }}"
-            - name: auth_plainTextPassword
-              value: "{{ .Values.frost.auth.plainTextPassword }}"
             - name: auth_db_jndi_datasource
               value: ""
             - name: auth_db_driver
@@ -324,6 +320,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "frost-server.db.secret" . }}
                   key: {{ .Values.frost.db.secretPasswordKey }}
+            {{- if contains "basic" (lower .Values.frost.auth.provider) }}
+            # Basic auth requested
+            - name: auth_provider
+              value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
+            - name: auth_realmName
+              value: "{{ .Values.frost.auth.realmName }}"
+            - name: auth_plainTextPassword
+              value: "{{ .Values.frost.auth.plainTextPassword }}"
             {{- else if contains "keycloak" (lower .Values.frost.auth.provider) }}
             # KeyCloak auth requested
             - name: auth_provider
