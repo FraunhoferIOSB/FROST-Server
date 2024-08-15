@@ -407,8 +407,19 @@ spec:
               value: "{{ .Values.frost.logging.jooq }}"
             {{- end }}
 
-            # Extra Environment Variables
+            # New style extra environment variables, global scope
+            {{- range $key, $value := .Values.frost.envExtra }}
+            - name: {{ $key }}
+              value: {{ quote $value }}
+            {{- end }}
+            # New style extra environment variables, http scope
+            {{- range $key, $value := .Values.frost.http.envExtra }}
+            - name: {{ $key }}
+              value: {{ quote $value }}
+            {{- end }}
+            # Old style extra Environment Variables
             {{- if .Values.frost.http.extraEnv }}
                 {{- .Values.frost.http.extraEnv | nindent 12 }}
             {{- end }}
+
 {{- end -}}

@@ -9,6 +9,11 @@ frost:
   logSensitiveData: false
   queueLoggingInterval: 0
 
+  # Extra global environment variables added to both MQTT and HTTP pods.
+  # This can be simple key-value pairs
+  envExtra:
+    #some_var_one: one
+
   #####################################
   # FROST-Server plugin configuration #
   #####################################
@@ -182,6 +187,9 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
+    # Extra environment variables added to HTTP pods.
+    envExtra:
+
   ##########################################
   # FROST-Server MQTT module configuration #
   ##########################################
@@ -256,6 +264,9 @@ frost:
       tls:
         enabled: false
         secretName:
+  
+      # Extra environment variables added to MQTT pods.
+      envExtra:
 
   ##############################################
   # FROST-Server Database module configuration #
