@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propertiesBuilder;
-import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createDatastream;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservationSet;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservedProperty;

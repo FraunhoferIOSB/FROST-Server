@@ -332,18 +332,15 @@ More information about the FROST-Server configuration can be found [here](https:
 
 ### ExtraEnv
 
-It is possible to pass extra environment variables to FROST using `frost.http.extraEnv` and `frost.mqtt.extraEnv`.
-This variable accepts a YAML string with the `env` variables.
+It is possible to pass extra environment variables to FROST using `frost.envExtra`, `frost.http.envExtra` and `frost.mqtt.envExtra`.
+This variable accepts key-value pairs. Keys must be names usable for environment variables, values are quoted automatically.
 
 ```
 # values.yaml
 frost:
-  http:
-    extraEnv: |
-      - name: plugins_modelLoader_idType_User
-        value: "string"
-      - name: plugins_modelLoader_idType_Role
-        value: "string"
+  envExtra:
+    plugins_modelLoader_idType_User: string
+    plugins_modelLoader_idType_Role: string
 ```
 
 They can also be passed directly on the command line.

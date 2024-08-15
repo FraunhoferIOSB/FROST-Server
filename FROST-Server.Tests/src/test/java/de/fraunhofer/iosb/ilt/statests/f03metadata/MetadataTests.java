@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
@@ -120,7 +121,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
         Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
         properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
                 .build();
         thing2.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing2);
@@ -128,7 +129,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
         properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues()[0])
+                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
                 .build();
         thing3.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing3);
@@ -136,7 +137,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
         Entity thing4 = sMdl.newThing("Thing 4", "The fourth thing.");
         properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues()[0])
+                .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues().get(0))
                 .build();
         thing4.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing4);
@@ -248,7 +249,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(
                 serverSettings.getServiceUrl(version),
                 EntityType.THING,
-                THINGS.get(1).getPrimaryKeyValues()[0],
+                THINGS.get(1).getPrimaryKeyValues().get(0),
                 null,
                 "?$resultMetadata=" + metadata);
         HttpResponse result = HTTPMethods.doGet(urlString);
@@ -265,7 +266,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     }
 
     private void testMetadataInExpand(String metadata, boolean hasSelfLink, boolean hasNavigationLink) {
-        String queryString = "?$filter=id%20eq%20" + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues()[0])
+        String queryString = "?$filter=id%20eq%20" + Utils.quoteForUrl(THINGS.get(1).getPrimaryKeyValues().get(0))
                 + "&$expand=properties/parent.Thing&$resultMetadata=" + metadata;
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, queryString);
         HttpResponse result = HTTPMethods.doGet(urlString);
@@ -303,7 +304,7 @@ public abstract class MetadataTests extends AbstractTestClass {
                 .append('/')
                 .append(version.urlPart)
                 .append("/Things(")
-                .append(Utils.quoteForUrl(THINGS.get(thingIndex).getPrimaryKeyValues()[0]))
+                .append(Utils.quoteForUrl(THINGS.get(thingIndex).getPrimaryKeyValues().get(0)))
                 .append(')')
                 .toString();
     }
@@ -326,7 +327,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         String jsonString = "[\n"
                 + "  {\n"
                 + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": " + Utils.quoteForJson(ds1.getPrimaryKeyValues()[0]) + "\n"
+                + "      \"@iot.id\": " + Utils.quoteForJson(ds1.getPrimaryKeyValues().get(0)) + "\n"
                 + "    },\n"
                 + "    \"components\": [\n"
                 + "      \"phenomenonTime\",\n"
@@ -338,7 +339,7 @@ public abstract class MetadataTests extends AbstractTestClass {
                 + "      [\n"
                 + "        \"2010-12-23T10:20:00-07:00\",\n"
                 + "        20,\n"
-                + "        " + Utils.quoteForJson(foi1.getPrimaryKeyValues()[0]) + "\n"
+                + "        " + Utils.quoteForJson(foi1.getPrimaryKeyValues().get(0)) + "\n"
                 + "      ],\n"
                 + "      [\n"
                 + "        \"2010-12-23T10:21:00-07:00\",\n"
@@ -349,7 +350,7 @@ public abstract class MetadataTests extends AbstractTestClass {
                 + "  },\n"
                 + "  {\n"
                 + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": " + Utils.quoteForJson(ds2.getPrimaryKeyValues()[0]) + "\n"
+                + "      \"@iot.id\": " + Utils.quoteForJson(ds2.getPrimaryKeyValues().get(0)) + "\n"
                 + "    },\n"
                 + "    \"components\": [\n"
                 + "      \"phenomenonTime\",\n"
@@ -407,7 +408,7 @@ public abstract class MetadataTests extends AbstractTestClass {
             }
 
             if (hasLinks) {
-                Object[] obsId = Utils.pkFromPostResult(textValue);
+                PkValue obsId = Utils.pkFromPostResult(textValue);
                 Entity obs;
                 try {
                     obs = sSrvc.dao(sMdl.etObservation).find(obsId);
@@ -433,7 +434,7 @@ public abstract class MetadataTests extends AbstractTestClass {
                 return;
             }
             message = "Autogenerated Features of interest should be equal.";
-            Assertions.assertArrayEquals(foiObs8.getPrimaryKeyValues(), foiObs7.getPrimaryKeyValues(), message);
+            Assertions.assertEquals(foiObs8.getPrimaryKeyValues(), foiObs7.getPrimaryKeyValues(), message);
         }
     }
 

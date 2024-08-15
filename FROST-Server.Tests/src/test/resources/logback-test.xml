@@ -7,6 +7,9 @@
         </encoder>
     </appender>
 
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.AuthWrapper" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSet" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables" level="INFO"/>
@@ -14,6 +17,9 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service.Service" level="INFO"/>
 
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener" level="INFO"/>
+    
+    <logger name="de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests" level="INFO"/>
 
     <logger name="de.fraunhofer.iosb.ilt.frostclient.query.Query" level="INFO"/>
 

@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
@@ -189,6 +190,11 @@ public class SensorThingsUserModel implements DataModel {
     }
 
     public Entity newUserProjectRole(Object... pk) {
+        return newUserProjectRole()
+                .setPrimaryKeyValues(PkValue.of(pk));
+    }
+
+    public Entity newUserProjectRole(PkValue pk) {
         return newUserProjectRole()
                 .setPrimaryKeyValues(pk);
     }

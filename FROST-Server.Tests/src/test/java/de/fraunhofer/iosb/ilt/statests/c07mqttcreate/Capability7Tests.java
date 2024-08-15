@@ -192,8 +192,8 @@ public abstract class Capability7Tests extends AbstractTestClass {
                     + "  \"validTime\": \"2016-01-01T01:01:01.000Z/2016-01-01T23:59:59.000Z\",\n"
                     + "  \"result\": " + value + ",\n"
                     + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + Utils.quoteForJson(datastream.getPrimaryKeyValues()[0]) + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + Utils.quoteForJson(featureOfInterest.getPrimaryKeyValues()[0]) + "}  \n"
+                    + "  \"Datastream\":{\"@iot.id\": " + Utils.quoteForJson(datastream.getPrimaryKeyValues().get(0)) + "},\n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + Utils.quoteForJson(featureOfInterest.getPrimaryKeyValues().get(0)) + "}  \n"
                     + "}");
         } catch (IOException ex) {
             LOGGER.error("Exception:", ex);

@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.c04batch;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
-import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -114,8 +114,8 @@ public abstract class BatchTests extends AbstractTestClass {
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues()[0]));
-        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
+        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues().get(0)));
+        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
     }
 
     /**
@@ -236,7 +236,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
@@ -496,7 +496,7 @@ public abstract class BatchTests extends AbstractTestClass {
                   "ObservedProperty": {"@iot.id": $ObservedProperty0},
                   "Sensor": {"@iot.id": "$sensor1"}
                 }""";
-        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
+        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
         String request = """
                 {
                     "requests":[{

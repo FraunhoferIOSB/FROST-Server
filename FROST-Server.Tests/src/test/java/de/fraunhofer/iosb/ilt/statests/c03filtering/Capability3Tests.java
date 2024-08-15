@@ -1415,7 +1415,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         String sValue = (String) value;
                         value = sValue.substring(1, sValue.length() - 1);
                         if (!(propertyValue instanceof String)) {
-                            propertyValue = propertyValue.toString();
+                            propertyValue = String.valueOf(propertyValue);
                         }
                     } else if (value instanceof ZonedDateTime) {
                         propertyValue = ZonedDateTime.parse(propertyValue.toString());
@@ -1459,7 +1459,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private static Object postAndGetId(String urlString, String postContent) {
         HttpResponse responseMap = HTTPMethods.doPost(urlString, postContent);
         String response = responseMap.response;
-        return Utils.pkFromPostResult(response)[0];
+        return Utils.pkFromPostResult(response).get(0);
     }
 
     /**

@@ -52,6 +52,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
@@ -190,7 +191,7 @@ public class EntityHelper2 {
         return getEntity(entityType, null, null, null, null, null);
     }
 
-    public JsonNode getEntity(EntityType entityType, Object[] pk) {
+    public JsonNode getEntity(EntityType entityType, PkValue pk) {
         return getEntity(entityType, pk, null, null, null, null);
     }
 
@@ -223,7 +224,7 @@ public class EntityHelper2 {
     public String createUrl(Entity target) {
         return sSrvc.getVersion().getUrlPart()
                 + '/' + target.getEntityType().getMainSetName()
-                + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues()[0]) + ')';
+                + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues().get(0)) + ')';
     }
 
     public JsonNode getEntityWithRetry(EntityType entityType, String expand, int retries) {
@@ -245,8 +246,8 @@ public class EntityHelper2 {
         return getEntity(entityType, null, null, null, expand, null);
     }
 
-    public JsonNode getEntity(EntityType entityType, Object[] pk, NavigationProperty np, List<String> select, String expand, String orderby) {
-        if (pk != null && pk.length == 0) {
+    public JsonNode getEntity(EntityType entityType, PkValue pk, NavigationProperty np, List<String> select, String expand, String orderby) {
+        if (pk != null && pk.size() == 0) {
             return null;
         }
         String query = "";
@@ -269,7 +270,7 @@ public class EntityHelper2 {
         String urlString = sSrvc.getBaseUrl().toString()
                 + entityType.mainSet;
         if (pk != null) {
-            urlString += '(' + Utils.quoteForUrl(pk[0]) + ')';
+            urlString += '(' + Utils.quoteForUrl(pk.get(0)) + ')';
         }
         if (np != null) {
             urlString += '/' + np.getName();
@@ -572,10 +573,10 @@ public class EntityHelper2 {
 
     public JsonNode sendHttpPutEntity(Entity entity) {
         EntityType entityType = entity.getEntityType();
-        Object[] pk = entity.getPrimaryKeyValues();
+        PkValue pk = entity.getPrimaryKeyValues();
         String urlString = sSrvc.getBaseUrl().toString()
                 + '/' + entityType.mainSet
-                + '(' + Utils.quoteForUrl(pk[0]) + ')';
+                + '(' + Utils.quoteForUrl(pk.get(0)) + ')';
         try {
             String data = JsonWriter.writeEntity(entity);
             HTTPMethods.HttpResponse responseMap = HTTPMethods.doPut(urlString, data);

@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
@@ -231,7 +232,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             LOGGER.info("  Posted Batch with {} results.", result.getResponses().size());
             for (BatchResponseJson.ResponsePart part : result.getResponses()) {
                 final String location = part.getLocation();
-                Object[] pk = pkFromSelfLink(location);
+                PkValue pk = pkFromSelfLink(location);
                 final String type = typeFromSelfLink(location);
                 switch (type) {
                     case "things":
@@ -279,7 +280,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     public abstract String getBatchPostData() throws IOException;
 
-    public static Object[] pkFromSelfLink(String selfLink) {
+    public static PkValue pkFromSelfLink(String selfLink) {
         String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
         return ParserUtils.tryToParse(idString);
     }
@@ -498,7 +499,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_08b_ObservationReadFilter() {
         LOGGER.info("  test_08b_ObservationReadFilter");
-        final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues()[0]);
+        final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues().get(0));
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(READ, serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
