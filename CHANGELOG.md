@@ -7,6 +7,9 @@
 * Added options for adding extra meta data to the landing page using the modelLoader plugin.
 * Implemented $filter for MQTT topics. Can be enabled using the `mqtt.allowFilter` setting.
 * Plugins can be loaded in any order.
+* [HELM] Improved method for setting extra env variables on HTTP and MQTT pods.
+* [HELM] Add database connection to Keycloak provider.
+* Added setting for sessionCookiePath.
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.
