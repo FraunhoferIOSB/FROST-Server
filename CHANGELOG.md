@@ -10,6 +10,7 @@
 * [HELM] Improved method for setting extra env variables on HTTP and MQTT pods.
 * [HELM] Add database connection to Keycloak provider.
 * Added setting for sessionCookiePath.
+* Added support for [Tomcat Remote IP Filter](https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter).
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.

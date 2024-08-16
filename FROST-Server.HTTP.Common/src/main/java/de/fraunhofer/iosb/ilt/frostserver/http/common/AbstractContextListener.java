@@ -93,6 +93,8 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 initCoreSettings(context);
                 context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
 
+                IpFilterHelper.setupRemoteIpFilter(context, coreSettings);
+
                 setUpCorsFilter(context, coreSettings);
 
                 PersistenceManagerFactory.init(coreSettings);
