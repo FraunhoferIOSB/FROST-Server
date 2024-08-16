@@ -27,9 +27,13 @@ import java.util.Set;
  * Interface defining default methods for working with classes with fields
  * annotated with {@link DefaultValue} or {@link DefaultValueInt}.
  *
- * @author Brian Miles, scf
+ * @author Brian Miles, Scf
  */
 public interface ConfigDefaults {
+
+    default boolean isSensitive(String fieldValue) {
+        return ConfigUtils.isSensitive(getClass(), fieldValue);
+    }
 
     /**
      * Returns the default value of a field annotated with either
@@ -40,7 +44,7 @@ public interface ConfigDefaults {
      * field, an IllegalArgumentException is thrown.
      */
     default String defaultValue(String fieldValue) {
-        return ConfigUtils.getDefaultValue(this.getClass(), fieldValue);
+        return ConfigUtils.getDefaultValue(getClass(), fieldValue);
     }
 
     /**
@@ -52,7 +56,7 @@ public interface ConfigDefaults {
      * field, an IllegalArgumentException is thrown.
      */
     default int defaultValueInt(String fieldValue) {
-        return ConfigUtils.getDefaultValueInt(this.getClass(), fieldValue);
+        return ConfigUtils.getDefaultValueInt(getClass(), fieldValue);
     }
 
     /**
@@ -64,7 +68,7 @@ public interface ConfigDefaults {
      * field, an IllegalArgumentException is thrown.
      */
     default boolean defaultValueBoolean(String fieldValue) {
-        return ConfigUtils.getDefaultValueBoolean(this.getClass(), fieldValue);
+        return ConfigUtils.getDefaultValueBoolean(getClass(), fieldValue);
     }
 
     /**
@@ -74,7 +78,7 @@ public interface ConfigDefaults {
      * @return The list of field names so annotated.
      */
     default Set<String> configTags() {
-        return ConfigUtils.getConfigTags(this.getClass());
+        return ConfigUtils.getConfigTags(getClass());
     }
 
     /**
@@ -84,7 +88,7 @@ public interface ConfigDefaults {
      * @return Mapping of config tag value and default value
      */
     default Map<String, String> configDefaults() {
-        return ConfigUtils.getConfigDefaults(this.getClass());
+        return ConfigUtils.getConfigDefaults(getClass());
     }
 
     /**
@@ -94,6 +98,6 @@ public interface ConfigDefaults {
      * @return Mapping of config tag value and default value
      */
     default Map<String, Integer> configDefaultsInt() {
-        return ConfigUtils.getConfigDefaultsInt(this.getClass());
+        return ConfigUtils.getConfigDefaultsInt(getClass());
     }
 }

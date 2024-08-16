@@ -284,13 +284,14 @@ public class CoreSettings implements ConfigDefaults {
 
     private void initChildSettings() {
         pluginManager.setCoreSettings(this);
-        mqttSettings = new MqttSettings(this, new CachedSettings(settings.getProperties(), PREFIX_MQTT, false, logSensitiveData));
-        persistenceSettings = new PersistenceSettings(new CachedSettings(settings.getProperties(), PREFIX_PERSISTENCE, false, logSensitiveData));
-        busSettings = new BusSettings(new CachedSettings(settings.getProperties(), PREFIX_BUS, false, logSensitiveData));
-        httpSettings = new CachedSettings(settings.getProperties(), PREFIX_HTTP, false, logSensitiveData);
-        authSettings = new CachedSettings(settings.getProperties(), PREFIX_AUTH, false, logSensitiveData);
-        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false, logSensitiveData);
-        extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
+
+        mqttSettings = new MqttSettings(this, settings.getSubSettings(PREFIX_MQTT));
+        persistenceSettings = new PersistenceSettings(settings.getSubSettings(PREFIX_PERSISTENCE));
+        busSettings = new BusSettings(settings.getSubSettings(PREFIX_BUS));
+        httpSettings = settings.getSubSettings(PREFIX_HTTP);
+        authSettings = settings.getSubSettings(PREFIX_AUTH);
+        pluginSettings = settings.getSubSettings(PREFIX_PLUGINS);
+        extensionSettings = settings.getSubSettings(PREFIX_EXTENSION);
     }
 
     private void initExtensions() {

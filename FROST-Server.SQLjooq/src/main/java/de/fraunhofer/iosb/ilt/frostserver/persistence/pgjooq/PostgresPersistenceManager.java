@@ -174,7 +174,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         final Settings customSettings = persistenceSettings.getCustomSettings();
-        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class);
         if (StringHelper.isNullOrEmpty(connectionUrl)) {
             connectionName = SOURCE_NAME_FROST;
         } else {

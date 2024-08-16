@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -58,6 +59,7 @@ import org.slf4j.LoggerFactory;
 public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
     @DefaultValue("")
+    @SensitiveValue
     public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
 
     @DefaultValue("")
@@ -77,6 +79,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
      * configuration itself, in Keycloak.
      */
     @DefaultValue("")
+    @SensitiveValue
     public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
 
     @DefaultValueInt(10)

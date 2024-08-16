@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -41,8 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Utility class for creating database connections.
  */
 public class ConnectionUtils implements ConfigDefaults {
 
@@ -53,10 +53,12 @@ public class ConnectionUtils implements ConfigDefaults {
     public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
     @DefaultValue("")
     public static final String TAG_DB_DRIVER = "db.driver";
+    @SensitiveValue
     @DefaultValue("")
     public static final String TAG_DB_URL = "db.url";
     @DefaultValue("")
     public static final String TAG_DB_USERNAME = "db.username";
+    @SensitiveValue
     @DefaultValue("")
     public static final String TAG_DB_PASSWRD = "db.password";
 
@@ -103,7 +105,7 @@ public class ConnectionUtils implements ConfigDefaults {
         synchronized (EXISTING_POOLS) {
             DataSource source = EXISTING_POOLS.get(name);
             if (source == null) {
-                if (!settings.get(TAG_DB_URL, ConnectionUtils.class, false).isEmpty()) {
+                if (!settings.get(TAG_DB_URL, ConnectionUtils.class).isEmpty()) {
                     source = setupBasicDataSource(settings);
                 } else {
                     source = setupDataSource(settings);
@@ -123,9 +125,9 @@ public class ConnectionUtils implements ConfigDefaults {
         try {
             Class.forName(driver);
             BasicDataSource ds = new BasicDataSource();
-            ds.setUrl(settings.get(TAG_DB_URL, ConnectionUtils.class, false));
+            ds.setUrl(settings.get(TAG_DB_URL, ConnectionUtils.class));
             ds.setUsername(settings.get(TAG_DB_USERNAME, ConnectionUtils.class));
-            ds.setPassword(settings.get(TAG_DB_PASSWRD, ConnectionUtils.class, false));
+            ds.setPassword(settings.get(TAG_DB_PASSWRD, ConnectionUtils.class));
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));

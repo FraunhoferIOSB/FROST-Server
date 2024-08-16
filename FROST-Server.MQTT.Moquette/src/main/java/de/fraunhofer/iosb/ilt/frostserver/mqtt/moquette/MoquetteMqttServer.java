@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
@@ -74,8 +75,10 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
     @DefaultValue("")
     public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
+    @SensitiveValue
     @DefaultValue("")
     public static final String TAG_KEYSTORE_PASS = "keyStorePassword";
+    @SensitiveValue
     @DefaultValue("")
     public static final String TAG_KEYMANAGER_PASS = "keyManagerPassword";
     @DefaultValueInt(8883)
@@ -196,8 +199,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         if (!keystorePath.isEmpty()) {
             LOGGER.info("Configuring keystore for ssl");
             config.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, keystorePath);
-            config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass(), false));
-            config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass(), false));
+            config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass()));
+            config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass()));
             config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
             config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }

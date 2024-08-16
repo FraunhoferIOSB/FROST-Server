@@ -19,12 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * A settings-holder.
  */
 public class Settings {
 
@@ -43,7 +43,8 @@ public class Settings {
         Map<String, String> environment = System.getenv();
         Properties wrapper = new Properties(wrapped);
 
-        for (Map.Entry<String, String> entry : environment.entrySet()) {
+        Map<String, String> sortedEnv = new TreeMap<>(environment);
+        for (Map.Entry<String, String> entry : sortedEnv.entrySet()) {
             String key = entry.getKey().replace('_', '.');
             LOGGER.debug("Added environment variable: {}", key);
             wrapper.setProperty(key, entry.getValue());
@@ -56,17 +57,6 @@ public class Settings {
      */
     public Settings() {
         this(new Properties(), "", true, false);
-    }
-
-    /**
-     * Creates a new settings, containing only environment variables with the
-     * given prefix.
-     *
-     * @param prefix The prefix to use. Only parameters with the given prefix
-     * are accessed.
-     */
-    public Settings(String prefix) {
-        this(new Properties(), prefix, true, false);
     }
 
     /**
@@ -122,6 +112,10 @@ public class Settings {
      */
     public Properties getProperties() {
         return properties;
+    }
+
+    public Settings getSubSettings(String prefix) {
+        return new CachedSettings(this, prefix);
     }
 
     public boolean getLogSensitiveData() {
@@ -181,7 +175,8 @@ public class Settings {
 
     /**
      * Get the property with the given name, prefixed with the prefix of this
-     * properties.
+     * properties. The value of the property will be logged. Use {@link #getSensitive(String)
+     * } to fetch a sensitive value.
      *
      * @param name The name of the property to get. The prefix will be prepended
      * to this name.
@@ -189,45 +184,91 @@ public class Settings {
      * PropertyMissingException if the property is not found.
      */
     public String get(String name) {
+        return get(name, false);
+    }
+
+    /**
+     * Get the property with the given name, prefixed with the prefix of this
+     * properties. The value of the property will NOT be logged.
+     *
+     * @param name The name of the property to get. The prefix will be prepended
+     * to this name.
+     * @return The value of the requested property. Throws a
+     * PropertyMissingException if the property is not found.
+     */
+    public String getSensitive(String name) {
         return get(name, true);
     }
 
-    public String get(String name, boolean nonSensitiveValue) {
+    private String get(String name, boolean sensitiveValue) {
         String key = getPropertyKey(name);
         checkExists(key);
         String value = properties.getProperty(key);
-        logHasValue(nonSensitiveValue, name, value);
+        logHasValue(name, value, sensitiveValue);
         return value;
     }
 
+    /**
+     * Get the property with the given name, prefixed with the prefix of this
+     * properties. The value of the property will be logged. Use {@link #getSensitive(String)
+     * } to fetch a sensitive value.
+     *
+     * @param name The name of the property to get. The prefix will be prepended
+     * to this name.
+     * @param defaultValue The default value to use when the property is not
+     * set.
+     * @return The value of the requested property.
+     */
     public String get(String name, String defaultValue) {
+        return get(name, defaultValue, false);
+    }
+
+    /**
+     * Get the property with the given name, prefixed with the prefix of this
+     * properties. The value of the property will NOT be logged.
+     *
+     * @param name The name of the property to get. The prefix will be prepended
+     * to this name.
+     * @param defaultValue The default value to use when the property is not
+     * set.
+     * @return The value of the requested property.
+     */
+    public String getSensitive(String name, String defaultValue) {
         return get(name, defaultValue, true);
     }
 
-    public String get(String name, String defaultValue, boolean nonSensitiveValue) {
+    private String get(String name, String defaultValue, boolean sensitive) {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
-            logDefaultValue(nonSensitiveValue, name, defaultValue);
+            logDefaultValue(name, defaultValue, sensitive);
             return defaultValue;
         }
-        logHasValue(nonSensitiveValue, name, value);
+        logHasValue(name, value, sensitive);
         return value;
     }
 
+    /**
+     * Get the property with the given name, using the defaultsProvider to
+     * provide a default value and the sensitivity status of the property. For
+     * properties tagged as sensitive, the value will not be logged.
+     *
+     * @param name The name of the property to get. The prefix will be prepended
+     * to this name.
+     * @param defaultsProvider The provider for default values and sensitivity
+     * information.
+     * @return The configured value, or a default value.
+     */
     public String get(String name, Class<? extends ConfigDefaults> defaultsProvider) {
-        return get(name, defaultsProvider, true);
-    }
-
-    public String get(String name, Class<? extends ConfigDefaults> defaultsProvider, boolean nonSensitiveValue) {
-        String key = getPropertyKey(name);
-        String value = properties.getProperty(key);
+        final String key = getPropertyKey(name);
+        final String value = properties.getProperty(key);
+        final boolean sensitive = ConfigUtils.isSensitive(defaultsProvider, name);
         if (value == null) {
-            String defaultValue = ConfigUtils.getDefaultValue(defaultsProvider, name);
-            logDefaultValue(nonSensitiveValue, name, defaultValue);
+            final String defaultValue = ConfigUtils.getDefaultValue(defaultsProvider, name);
+            logDefaultValue(name, defaultValue, sensitive);
             return defaultValue;
         }
-        logHasValue(nonSensitiveValue, name, value);
+        logHasValue(name, value, sensitive);
         return value;
     }
 
@@ -318,9 +359,23 @@ public class Settings {
         return defaultValue;
     }
 
+    public double getDouble(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        if (containsName(name)) {
+            try {
+                return getDouble(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
+        }
+        double defaultValue = ConfigUtils.getDefaultValueDouble(defaultsProvider, name);
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
+
+    }
+
     public boolean getBoolean(String name) {
         try {
-            return Boolean.valueOf(get(name));
+            return Boolean.parseBoolean(get(name));
         } catch (PropertyMissingException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -353,16 +408,16 @@ public class Settings {
         return defaultValue;
     }
 
-    private void logHasValue(boolean nonSensitiveValue, String name, String value) {
-        if (nonSensitiveValue || logSensitiveData) {
+    private void logHasValue(String name, String value, boolean sensitive) {
+        if (!sensitive || logSensitiveData) {
             LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
         } else {
             LOGGER.info(SETTING_HAS_VALUE, prefix, name, HIDDEN_VALUE);
         }
     }
 
-    private void logDefaultValue(boolean nonSensitiveValue, String name, String defaultValue) {
-        if (nonSensitiveValue || logSensitiveData) {
+    private void logDefaultValue(String name, String defaultValue, boolean sensitive) {
+        if (!sensitive || logSensitiveData) {
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
         } else {
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, HIDDEN_VALUE);

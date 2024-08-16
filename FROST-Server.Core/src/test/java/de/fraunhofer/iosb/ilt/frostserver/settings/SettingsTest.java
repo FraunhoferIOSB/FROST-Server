@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 class SettingsTest {
 
     @Test
-    void testSettingsBase() {
+    void testSettingsBase1() {
         Properties properties = new Properties();
         properties.setProperty("property1", "value1");
         properties.setProperty("property2", "value2");
@@ -44,9 +44,60 @@ class SettingsTest {
         properties.setProperty("prefix1.property3", "value4");
         properties.setProperty("prefix2.property1", "value5");
         properties.setProperty("prefix2.property4", "value6");
+        properties.setProperty("prefix1.subprefix1.property1", "value7");
+        properties.setProperty("prefix1.subprefix2.property3", "value8");
+        properties.setProperty("prefix2.subprefix1.property1", "value9");
+        properties.setProperty("prefix2.subprefix2.property4", "value10");
         Settings base = new Settings(properties);
         Settings prefix1 = new Settings(base.getProperties(), "prefix1.", false, false);
         Settings prefix2 = new Settings(base.getProperties(), "prefix2.", false, false);
+        Settings prefix11 = prefix1.getSubSettings("subprefix1.");
+        Settings prefix12 = prefix1.getSubSettings("subprefix2.");
+        Settings prefix21 = prefix2.getSubSettings("subprefix1.");
+        Settings prefix22 = prefix2.getSubSettings("subprefix2.");
+
+        assertEquals("value1", base.get("property1"));
+        assertEquals("value2", base.get("property2"));
+        assertEquals("value3", prefix1.get("property1"));
+        assertEquals("value4", prefix1.get("property3"));
+        assertEquals("value5", prefix2.get("property1"));
+        assertEquals("value6", prefix2.get("property4"));
+
+        assertEquals("value7", prefix1.get("subprefix1.property1"));
+        assertEquals("value7", prefix11.get("property1"));
+        assertEquals("value8", prefix1.get("subprefix2.property3"));
+        assertEquals("value8", prefix12.get("property3"));
+        assertEquals("value9", prefix2.get("subprefix1.property1"));
+        assertEquals("value9", prefix21.get("property1"));
+        assertEquals("value10", prefix2.get("subprefix2.property4"));
+        assertEquals("value10", prefix22.get("property4"));
+
+        assertTrue(base.containsName("property1"));
+        assertFalse(base.containsName("property3"));
+        assertTrue(prefix1.containsName("property1"));
+        assertFalse(prefix1.containsName("property2"));
+        assertTrue(prefix1.containsName("property3"));
+        assertTrue(prefix2.containsName("property1"));
+        assertFalse(prefix2.containsName("property3"));
+        assertTrue(prefix2.containsName("property4"));
+    }
+
+    @Test
+    void testSettingsBase2() {
+        Properties properties = new Properties();
+        properties.setProperty("property1", "value1");
+        properties.setProperty("property2", "value2");
+        properties.setProperty("prefix1.property1", "value3");
+        properties.setProperty("prefix1.property3", "value4");
+        properties.setProperty("prefix2.property1", "value5");
+        properties.setProperty("prefix2.property4", "value6");
+        properties.setProperty("prefix1.subprefix1.property1", "value7");
+        properties.setProperty("prefix1.subprefix2.property3", "value8");
+        properties.setProperty("prefix2.subprefix1.property1", "value9");
+        properties.setProperty("prefix2.subprefix2.property4", "value10");
+        Settings base = new Settings(properties);
+        Settings prefix1 = base.getSubSettings("prefix1.");
+        Settings prefix2 = base.getSubSettings("prefix2.");
 
         assertEquals("value1", base.get("property1"));
         assertEquals("value2", base.get("property2"));

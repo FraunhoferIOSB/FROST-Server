@@ -23,8 +23,6 @@ import java.util.Properties;
 
 /**
  * A caching wrapper around a Settings instance.
- *
- * @author scf
  */
 public class CachedSettings extends Settings {
 
@@ -33,6 +31,37 @@ public class CachedSettings extends Settings {
     private final Map<String, Long> valuesLong = new HashMap<>();
     private final Map<String, Boolean> valuesBoolean = new HashMap<>();
     private final Map<String, Double> valuesDouble = new HashMap<>();
+
+    /**
+     * Creates a new cached settings, with no prefix, containing only
+     * environment variables, not logging sensitive data.
+     */
+    public CachedSettings() {
+        super();
+    }
+
+    /**
+     * Creates a new settings, containing the given properties, and environment
+     * variables, with no prefix and not logging sensitive data.
+     *
+     * @param properties The properties to use. These can be overridden by
+     * environment variables.
+     */
+    public CachedSettings(Properties properties) {
+        super(properties);
+    }
+
+    /**
+     * Creates a new settings, containing the parent settings with the given
+     * prefix, using the same logging settings for sensitive data as the parent
+     * settings.
+     *
+     * @param parent The parent settings to get settings from.
+     * @param prefix The prefix to apply.
+     */
+    public CachedSettings(Settings parent, String prefix) {
+        super(parent.getProperties(), parent.getPrefix() + prefix, false, parent.getLogSensitiveData());
+    }
 
     /**
      * Creates a new settings, containing the given properties, and environment
@@ -60,6 +89,16 @@ public class CachedSettings extends Settings {
     }
 
     @Override
+    public String getSensitive(String name) {
+        if (valuesString.containsKey(name)) {
+            return valuesString.get(name);
+        }
+        String value = super.getSensitive(name);
+        valuesString.put(name, value);
+        return value;
+    }
+
+    @Override
     public String get(String name, String defaultValue) {
         if (valuesString.containsKey(name)) {
             return valuesString.get(name);
@@ -70,11 +109,11 @@ public class CachedSettings extends Settings {
     }
 
     @Override
-    public String get(String name, String defaultValue, boolean nonSensitiveValue) {
+    public String getSensitive(String name, String defaultValue) {
         if (valuesString.containsKey(name)) {
             return valuesString.get(name);
         }
-        String value = super.get(name, defaultValue, nonSensitiveValue);
+        String value = super.getSensitive(name, defaultValue);
         valuesString.put(name, value);
         return value;
     }
@@ -85,16 +124,6 @@ public class CachedSettings extends Settings {
             return valuesString.get(name);
         }
         String value = super.get(name, defaultsProvider);
-        valuesString.put(name, value);
-        return value;
-    }
-
-    @Override
-    public String get(String name, Class<? extends ConfigDefaults> defaultsProvider, boolean nonSensitiveValue) {
-        if (valuesString.containsKey(name)) {
-            return valuesString.get(name);
-        }
-        String value = super.get(name, defaultsProvider, nonSensitiveValue);
         valuesString.put(name, value);
         return value;
     }
@@ -216,6 +245,16 @@ public class CachedSettings extends Settings {
             return valuesDouble.get(name);
         }
         double value = super.getDouble(name, defaultValue);
+        valuesDouble.put(name, value);
+        return value;
+    }
+
+    @Override
+    public double getDouble(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        if (valuesDouble.containsKey(name)) {
+            return valuesDouble.get(name);
+        }
+        double value = super.getDouble(name, defaultsProvider);
         valuesDouble.put(name, value);
         return value;
     }

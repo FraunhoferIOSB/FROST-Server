@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * An annotation specifying a default int value for a field.
  *
- * @author Brian Miles, scf
+ * @author Brian Miles, Scf
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

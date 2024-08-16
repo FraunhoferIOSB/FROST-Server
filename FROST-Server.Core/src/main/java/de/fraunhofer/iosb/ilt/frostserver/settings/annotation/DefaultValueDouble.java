@@ -15,23 +15,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.settings;
+package de.fraunhofer.iosb.ilt.frostclient.settings.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Thrown when a property is requested in a type that the value of the property
- * can not be converted to.
+ * An annotation specifying a default double value for a field.
  */
-public class PropertyTypeException extends PropertyException {
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefaultValueDouble {
 
-    public PropertyTypeException(String key, Class<?> typeExpected, Throwable cause) {
-        super(key + " has not expected type" + typeExpected.getName(), cause);
-    }
-
-    public PropertyTypeException(String key, Class<?> typeExpected) {
-        this(key, typeExpected, null);
-    }
-
-    public PropertyTypeException(Throwable cause) {
-        super(cause);
-    }
+    /**
+     * @return The default double value.
+     */
+    double value();
 }

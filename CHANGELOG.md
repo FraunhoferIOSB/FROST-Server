@@ -17,6 +17,7 @@
 * Fixed #1934, incorrect URL parameter in docs.
 * Changed header handling to allow for duplicate headers.
 * Fixed MultiDatastream not picking up ID type of Thing and Sensor.
+* Improved settings handling code, added annotation for sensitive values.
 
 
 ## Release version 2.3.0

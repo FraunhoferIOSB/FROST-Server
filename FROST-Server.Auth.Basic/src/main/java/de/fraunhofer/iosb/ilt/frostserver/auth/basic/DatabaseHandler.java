@@ -98,7 +98,7 @@ public class DatabaseHandler {
         authSettings = coreSettings.getAuthSettings();
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEXT_PASSWORD, BasicAuthProvider.class);
-        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class);
         int userCacheLifeMs = authSettings.getInt(TAG_USER_CACHE_LIFE_MS, BasicAuthProvider.class);
         if (userCacheLifeMs > 0) {
             LOGGER.info("Enabling user cache.");

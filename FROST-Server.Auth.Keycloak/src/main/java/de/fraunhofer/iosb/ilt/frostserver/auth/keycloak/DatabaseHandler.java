@@ -86,7 +86,7 @@ public class DatabaseHandler {
 
     private DatabaseHandler(CoreSettings coreSettings) {
         authSettings = coreSettings.getAuthSettings();
-        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class);
         String userRoleDecoderClass = authSettings.get(TAG_USER_ROLE_DECODER_CLASS, KeycloakAuthProvider.class);
         String lifeTimeString = authSettings.get(TAG_USER_CACHE_LIFETIME, KeycloakAuthProvider.class);
         lifetime = Duration.parse(lifeTimeString);

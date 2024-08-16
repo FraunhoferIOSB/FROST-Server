@@ -124,7 +124,7 @@ public class Utils {
         if (StringHelper.isNullOrEmpty(keycloakConfigUrl)) {
             return "";
         }
-        String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "", false);
+        String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "");
 
         LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
         try (CloseableHttpClient client = HttpClients.createSystem()) {
