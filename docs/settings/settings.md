@@ -87,6 +87,9 @@ These are settings for the HTTP package.
   A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Default: `true`.
 * **http.sessionCookiePath:** Since 2.4.0  
   If set, overrides the session cookie path of Tomcat. Usefull when FROST is behind a path-rewriting reverse proxy. Default: ``.
+* **http.remoteIpFilter.enable:** Since 2.4.0  
+  If true, a [remoteIpFilter](https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter) is added.
+  All configuration parameters of the filter are exposed as `http.remoteIpFilter.enable`. Default: `false`.
 
 
 ## Auth settings
