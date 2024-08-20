@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.statests.util;
+package de.fraunhofer.iosb.ilt.statests.util.model;
 
 import static de.fraunhofer.iosb.ilt.statests.util.Extension.ACTUATION;
 import static de.fraunhofer.iosb.ilt.statests.util.Extension.CORE;
 
+import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

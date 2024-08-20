@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,10 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JsonValue {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonValue.class.getName());
-
     private Object value;
-    private TypeReference type;
     private String stringValue;
     private int stringLength = 0;
 
@@ -64,19 +59,11 @@ public class JsonValue {
     }
 
     public Map<String, Object> getMapValue() {
-        return getValue(Utils.TYPE_SORTED_MAP_STRING_OBJECT);
+        return Utils.jsonToObject(stringValue, Utils.TYPE_SORTED_MAP_STRING_OBJECT);
     }
 
     public <T> T getValue(TypeReference<T> typeReference) {
-        if (type != null && !type.equals(typeReference)) {
-            LOGGER.warn("Type Switch, from {} to {}", type, typeReference);
-            type = null;
-        }
-        if (type == null) {
-            type = typeReference;
-            value = Utils.jsonToObject(stringValue, typeReference);
-        }
-        return (T) value;
+        return Utils.jsonToObject(stringValue, typeReference);
     }
 
     public int getStringLength() {

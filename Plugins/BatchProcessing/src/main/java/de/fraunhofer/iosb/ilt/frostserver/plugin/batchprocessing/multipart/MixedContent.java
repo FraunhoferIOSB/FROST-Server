@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -247,12 +249,12 @@ public class MixedContent extends Batch<MultipartContent> implements MultipartCo
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         if (boundary == null) {
             generateBoundary();
         }
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "multipart/mixed; boundary=" + boundary);
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Content-Type", Arrays.asList("multipart/mixed; boundary=" + boundary));
         return headers;
     }
 

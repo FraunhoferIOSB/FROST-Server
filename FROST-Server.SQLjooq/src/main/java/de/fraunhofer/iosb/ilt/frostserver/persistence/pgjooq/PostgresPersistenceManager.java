@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_SCHEMA_PRIORITY;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_UUID;
@@ -33,11 +34,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefPmHook;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -45,6 +49,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostUpdate;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -62,6 +72,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -85,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import net.time4j.Moment;
 import net.time4j.format.expert.Iso8601Format;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
@@ -155,7 +167,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         tableCollection = getTableCollection(settings);
         persistenceSettings = settings.getPersistenceSettings();
@@ -171,6 +183,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         entityFactories = new EntityFactories(settings.getModelRegistry(), tableCollection);
         dataSize = new DataSize(settings.getDataSizeMax());
         schemaPriority = customSettings.get(TAG_DB_SCHEMA_PRIORITY, ConnectionUtils.class);
+        return InitResult.INIT_OK;
     }
 
     private void init() {
@@ -227,11 +240,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         int idCount = 0;
         while (element != null) {
             if (element instanceof PathElementEntity entityPathElement) {
-                Id id = entityPathElement.getId();
-                if (id != null) {
+                PkValue pkValues = entityPathElement.getPkValues();
+                if (pkValues != null) {
                     idCount++;
                     final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
-                    if (!entityFactories.entityExists(this, entityPathElement.getEntityType(), id, userIsAdmin)) {
+                    if (!entityFactories.entityExists(this, entityPathElement.getEntityType(), pkValues, userIsAdmin)) {
                         return false;
                     }
                 }
@@ -251,13 +264,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public Entity get(EntityType entityType, Id id) {
-        return get(entityType, id, false, null);
+    public Entity get(EntityType entityType, PkValue pk) {
+        return get(entityType, pk, false, null);
     }
 
     @Override
-    public Entity get(EntityType entityType, Id id, Query query) {
-        return get(entityType, id, false, query);
+    public Entity get(EntityType entityType, PkValue pk, Query query) {
+        return get(entityType, pk, false, query);
     }
 
     /**
@@ -265,14 +278,14 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      * transaction quickly to release the lock.
      *
      * @param entityType The type of entity to fetch.
-     * @param id The EP_ID of the entity to fetch.
+     * @param pk The Primary Key of the entity to fetch.
      * @param forUpdate if true, lock the entities row for update.
      * @return the requested entity.
      */
-    private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
+    private Entity get(EntityType entityType, PkValue pk, boolean forUpdate, Query query) {
         init();
         QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection());
-        ResultQuery sqlQuery = queryBuilder.forTypeAndId(entityType, id)
+        ResultQuery sqlQuery = queryBuilder.forTypeAndId(entityType, pk)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
@@ -331,8 +344,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         final EntityFactories ef = getEntityFactories();
-        final Id id = pathElement.getId();
-        entity.setId(id);
+        final PkValue id = pathElement.getPkValues();
+        entity.setPrimaryKeyValues(id);
         final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
         if (!ef.entityExists(this, entity, userIsAdmin)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
@@ -346,7 +359,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
         init();
         final EntityType entityType = pathElement.getEntityType();
-        final Id id = pathElement.getId();
+        final PkValue id = pathElement.getPkValues();
 
         Entity original = get(entityType, id, true, null);
         if (original == null) {
@@ -369,7 +382,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, PrincipalExtended.getLocalPrincipal());
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
-            newEntity.setId(id);
+            newEntity.setPrimaryKeyValues(id);
         } catch (IOException ex) {
             LOGGER.error("Failed to parse JSON after patch.");
             throw new IllegalArgumentException("Exception", ex);
@@ -401,13 +414,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
         final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
         final Relation<?> relation = sourceTable.findRelation(np.getName());
-        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getId());
+        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getPkValues());
         if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getId() + ")");
+            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
         }
-        final Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getId());
+        final Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getPkValues());
         if (!entityFactories.entityExists(this, targetEntity, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getId() + ")");
+            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPkValues() + ")");
         }
         relation.unLink(this, sourceEntity, targetEntity, np);
     }
@@ -417,7 +430,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         init();
         EntityType type = pathElement.getEntityType();
         StaMainTable<?> table = getTableCollection().getTableForType(type);
-        table.delete(this, pathElement.getId());
+        table.delete(this, pathElement.getPkValues());
         return true;
     }
 
@@ -466,8 +479,8 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
-    protected boolean validateClientSuppliedId(Id entityId) {
-        return entityId != null && entityId.getValue() != null;
+    protected boolean validateClientSuppliedId(PkValue entityId) {
+        return entityId != null && entityId.isFullySet();
     }
 
     /**
@@ -494,12 +507,12 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      */
     @Override
     public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
-        final Id entityId = entity.getId();
+        final PkValue entityId = entity.getPrimaryKeyValues();
         final EntityType entityType = entity.getEntityType();
         final IdGenerationType typeIdGenerationMode = (IdGenerationType) entityType.getIdGenerationMode();
         switch (typeIdGenerationMode) {
             case SERVER_GENERATED_ONLY:
-                if (entityId == null || entityId.getValue() == null) {
+                if (entityId.isFullyUnSet()) {
                     LOGGER.trace("Using server generated id.");
                     return false;
                 } else {
@@ -614,6 +627,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         for (DefModel modelDefinition : modelDefinitions) {
             registerModelMappings(modelDefinition);
         }
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            registerHooks(modelDefinition);
+        }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
     }
@@ -680,6 +697,34 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
     }
 
+    private void registerHooks(DefModel modelDefinition) {
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
+            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
+            for (DefPmHook hookDef : entityTypeDef.getHooks()) {
+                PmHook hook = hookDef.getHook();
+                if (hook instanceof HookPreInsert h) {
+                    table.registerHookPreInsert(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostInsert h) {
+                    table.registerHookPostInsert(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPreUpdate h) {
+                    table.registerHookPreUpdate(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostUpdate h) {
+                    table.registerHookPostUpdate(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPreDelete h) {
+                    table.registerHookPreDelete(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostDelete h) {
+                    table.registerHookPostDelete(hookDef.getPriority(), h);
+                }
+            }
+        }
+    }
+
     private void registerMappingForEntityProperties(DefEntityProperty propertyDef, StaMainTable orCreateTable) {
         for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
             maybeRegisterMapping(handler, orCreateTable);
@@ -739,8 +784,13 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
         StaMainTable<?> table = tableCollection.getTableForType(entityType);
         if (table == null) {
+            final PrimaryKey primaryKey = entityType.getPrimaryKey();
+            if (primaryKey.size() > 1) {
+                throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+            }
             LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
-            StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, getDataTypeFor(entityType.getPrimaryKey().getType().getName()));
+            final DataType<?> pkDataType = getDataTypeFor(primaryKey.getKeyProperty(0).getType().getName());
+            StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, pkDataType);
             tableCollection.registerTable(entityType, newTable);
             table = newTable;
         }

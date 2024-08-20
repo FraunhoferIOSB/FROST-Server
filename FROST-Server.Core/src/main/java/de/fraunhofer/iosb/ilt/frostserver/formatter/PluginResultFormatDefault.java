@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Arrays;
@@ -30,8 +31,9 @@ import java.util.Collection;
 public class PluginResultFormatDefault implements PluginResultFormat {
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         settings.getPluginManager().registerPlugin(this);
+        return InitResult.INIT_OK;
     }
 
     @Override

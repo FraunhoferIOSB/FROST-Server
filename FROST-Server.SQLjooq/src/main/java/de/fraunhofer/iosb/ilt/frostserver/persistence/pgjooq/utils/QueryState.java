@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -43,11 +44,13 @@ import org.jooq.impl.DSL;
  */
 public class QueryState<T extends StaMainTable<T>> {
 
+    public static final String ALIAS_ROOT = "_ROOT";
+
     private final JooqPersistenceManager persistenceManager;
     private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
-    private final Field<?> sqlMainIdField;
+    private final List<Field> sqlMainPkFields;
     private Table sqlFrom;
     private Condition sqlWhere = DSL.noCondition();
     private Condition sqlSkipWhere;
@@ -57,13 +60,28 @@ public class QueryState<T extends StaMainTable<T>> {
     private boolean isFilter = false;
 
     private int aliasNr = 0;
+    private QueryState parent;
+    private String staAlias;
+
+    /**
+     * The table reference for the main table of the request.
+     */
+    private final TableRef tableRef;
+
+    public QueryState(T table, QueryState parent, String staAlias) {
+        this(parent.getPersistenceManager(), table, null);
+        this.parent = parent;
+        this.staAlias = staAlias;
+    }
 
     public QueryState(JooqPersistenceManager pm, T table, Set<PropertyFields<T>> sqlSelectFields) {
         this.persistenceManager = pm;
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         mainTable = table;
-        sqlMainIdField = table.getId();
+        sqlMainPkFields = table.getPkFields();
+        tableRef = new TableRef(table);
+        staAlias = ALIAS_ROOT;
     }
 
     public JooqPersistenceManager getPersistenceManager() {
@@ -74,6 +92,10 @@ public class QueryState<T extends StaMainTable<T>> {
         return mainTable;
     }
 
+    public TableRef getTableRef() {
+        return tableRef;
+    }
+
     public Entity entityFromQuery(Record tuple, DataSize dataSize) {
         return mainTable.entityFromQuery(tuple, this, dataSize);
     }
@@ -82,8 +104,21 @@ public class QueryState<T extends StaMainTable<T>> {
         return new EntitySetJooqCurser(mainTable.getEntityType(), tuples, this, resultBuilder);
     }
 
+    public QueryState findStateForAlias(String alias) {
+        if (staAlias.equalsIgnoreCase(alias)) {
+            return this;
+        }
+        if (parent == null) {
+            return this;
+        }
+        return parent.findStateForAlias(alias);
+    }
+
     public String getNextAlias() {
-        return ALIAS_PREFIX + (++aliasNr);
+        if (parent == null) {
+            return ALIAS_PREFIX + (++aliasNr);
+        }
+        return parent.getNextAlias();
     }
 
     public boolean isSqlSortFieldsSet() {
@@ -130,8 +165,8 @@ public class QueryState<T extends StaMainTable<T>> {
     /**
      * @return the sqlMainIdField
      */
-    public Field<?> getSqlMainIdField() {
-        return sqlMainIdField;
+    public List<Field> getSqlMainIdFields() {
+        return sqlMainPkFields;
     }
 
     /**

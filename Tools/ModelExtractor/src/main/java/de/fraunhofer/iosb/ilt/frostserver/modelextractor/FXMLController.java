@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,9 +62,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -74,7 +71,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
@@ -167,7 +163,7 @@ public class FXMLController implements Initializable {
     private String setPostFix;
 
     private final Map<String, TableData> tables = new HashMap<>();
-    private final Map<String, ConfigEditor<DefModel>> models = new TreeMap<>();
+    private final Map<String, ConfigEditor<DefModel>> editors = new TreeMap<>();
 
     private final Set<String> includeSchemas = new HashSet<>();
 
@@ -205,204 +201,6 @@ public class FXMLController implements Initializable {
             includeSchemas.add(schema.trim());
         }
         readFromDatabase();
-    }
-
-    private static class FieldData {
-
-        final String name;
-        boolean pk;
-        boolean fk;
-        String typeName;
-        String castTypeName;
-        String comment;
-
-        public static FieldData from(Field field, boolean pk) {
-            return new FieldData(field.getName())
-                    .setPk(pk)
-                    .setTypeName(field.getDataType().getTypeName())
-                    .setCastTypeName(field.getDataType().getCastTypeName())
-                    .setComment(field.getComment());
-
-        }
-
-        public FieldData(String name) {
-            this.name = name;
-        }
-
-        public FieldData setPk(boolean pk) {
-            this.pk = pk;
-            return this;
-        }
-
-        public FieldData setFk(boolean fk) {
-            this.fk = fk;
-            return this;
-        }
-
-        public FieldData setTypeName(String typeName) {
-            this.typeName = typeName;
-            return this;
-        }
-
-        public FieldData setCastTypeName(String castTypeName) {
-            this.castTypeName = castTypeName;
-            return this;
-        }
-
-        public FieldData setComment(String comment) {
-            this.comment = comment;
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return name + "(" + typeName + " / " + castTypeName + ") " + (pk ? "PK" : "") + (fk ? "FK" : "");
-        }
-    }
-
-    private static class ForeignKeyData {
-
-        final String myTableName;
-        final String otherTableName;
-        FieldData fieldMine;
-        FieldData fieldTheirs;
-
-        public ForeignKeyData(String myTableName, String otherTableName) {
-            this.myTableName = myTableName;
-            this.otherTableName = otherTableName;
-        }
-
-        public ForeignKeyData setFieldMine(FieldData fieldMine) {
-            this.fieldMine = fieldMine;
-            return this;
-        }
-
-        public ForeignKeyData setFieldTheirs(FieldData fieldTheirs) {
-            this.fieldTheirs = fieldTheirs;
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return myTableName + "." + fieldMine.name + " -> " + otherTableName + "." + fieldTheirs.name + "";
-        }
-
-    }
-
-    static class TableData {
-
-        private final String tableName;
-        private final Map<String, List<ForeignKeyData>> refsToOther = new TreeMap<>();
-        private final Map<String, List<ForeignKeyData>> refsFromOther = new TreeMap<>();
-        private final Map<String, FieldData> fields = new TreeMap<>();
-        private int pkSize;
-        private Node node;
-        private TableDataController controller;
-        private String setPostFix;
-
-        public TableData(String tableName, String setPostFix) {
-            this.tableName = tableName;
-            this.setPostFix = setPostFix;
-            getNode();
-        }
-
-        public Node getNode() {
-            if (node == null) {
-                try {
-                    FXMLLoader loader = new FXMLLoader(TableDataController.class.getResource("/fxml/TableData.fxml"));
-                    node = (Pane) loader.load();
-                    controller = loader.getController();
-                    controller.setTableName(tableName);
-                    String prettyName = CaseUtils.toCamelCase(tableName, true, '_');
-                    controller.setSingular(prettyName);
-                    controller.setPlural(prettyName + setPostFix);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to load FXML", ex);
-                }
-            }
-            return node;
-        }
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public String getEntityName() {
-            return controller.getSingular();
-        }
-
-        public String getEntityPlural() {
-            return controller.getPlural();
-        }
-
-        public TableChoice getTableType() {
-            return controller.getChoice();
-        }
-
-        public boolean isEntityType() {
-            return controller.getChoice() == TableChoice.ENTITY_TYPE;
-        }
-
-        public boolean isLinkTable() {
-            return controller.getChoice() == TableChoice.LINK_TABLE;
-        }
-
-        public boolean isIgnored() {
-            return controller.getChoice() == TableChoice.IGNORE;
-        }
-
-        public void addReferenceToOther(ForeignKeyData fk) {
-            refsToOther.computeIfAbsent(fk.otherTableName, t -> new ArrayList<>()).add(fk);
-        }
-
-        public void addReferenceFromOther(ForeignKeyData fk) {
-            refsFromOther.computeIfAbsent(fk.myTableName, t -> new ArrayList<>()).add(fk);
-        }
-
-        public void setPkSize(int pkSize) {
-            this.pkSize = pkSize;
-        }
-
-        public void analyse() {
-            if ((pkSize == 0 || pkSize > 1) && refsToOther.size() >= 1) {
-                controller.setChoice(TableChoice.LINK_TABLE);
-                return;
-            }
-            if (pkSize == 1 && refsFromOther.size() + refsToOther.size() > 0) {
-                controller.setChoice(TableChoice.ENTITY_TYPE);
-                return;
-            }
-            controller.setChoice(TableChoice.IGNORE);
-        }
-
-        public Map<String, FieldData> getFields() {
-            return fields;
-        }
-
-        public boolean hasField(String fieldName) {
-            return fields.containsKey(fieldName.toLowerCase());
-        }
-
-        public FieldData getField(String fieldName) {
-            return fields.get(fieldName.toLowerCase());
-        }
-
-        public void addFields(List<Field> tableFields, boolean pks) {
-            for (Field field : tableFields) {
-                final String fieldName = field.getName();
-                if (fields.containsKey(fieldName.toLowerCase())) {
-                    continue;
-                }
-                final FieldData fieldData = FieldData.from(field, pks);
-                fields.put(fieldData.name.toLowerCase(), fieldData);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return tableName;
-        }
-
     }
 
     private TableData getTable(String tableName) {
@@ -495,7 +293,7 @@ public class FXMLController implements Initializable {
     }
 
     private void generate() {
-        models.clear();
+        editors.clear();
         Map<String, DefEntityType> entityTypes = new TreeMap<>();
         DefModel fullModel = new DefModel();
 
@@ -503,7 +301,7 @@ public class FXMLController implements Initializable {
 
         generateRelations(entityTypes);
         for (DefEntityType defEt : fullModel.getEntityTypes()) {
-            models.put(defEt.getTable(), createEditorForModel(new DefModel().addEntityType(defEt)));
+            editors.put(defEt.getTable(), createEditorForModel(new DefModel().addEntityType(defEt)));
         }
     }
 
@@ -776,7 +574,7 @@ public class FXMLController implements Initializable {
     @FXML
     private void actionSave(ActionEvent event) {
         if (currentFile.isDirectory()) {
-            for (ConfigEditor<DefModel> editor : models.values()) {
+            for (ConfigEditor<DefModel> editor : editors.values()) {
                 try {
                     DefModel subModel = new DefModel();
                     ((ContentConfigEditor) editor).setContentsOn(subModel);
@@ -789,7 +587,7 @@ public class FXMLController implements Initializable {
             }
         } else {
             DefModel composite = new DefModel();
-            for (ConfigEditor<DefModel> editor : models.values()) {
+            for (ConfigEditor<DefModel> editor : editors.values()) {
                 try {
                     DefModel subModel = new DefModel();
                     ((ContentConfigEditor) editor).setContentsOn(subModel);
@@ -832,7 +630,7 @@ public class FXMLController implements Initializable {
             return;
         }
         LOGGER.info("Selected: {}", table);
-        ConfigEditor<?> model = models.get(table.tableName);
+        ConfigEditor<?> model = editors.get(table.tableName);
         replaceEditor(model);
     }
 
@@ -859,7 +657,7 @@ public class FXMLController implements Initializable {
         listViewFound.setCellFactory(new TableDataCellFactory());
     }
 
-    public class TableDataCellFactory implements Callback<ListView<TableData>, ListCell<TableData>> {
+    public static class TableDataCellFactory implements Callback<ListView<TableData>, ListCell<TableData>> {
 
         @Override
         public ListCell<TableData> call(ListView<TableData> list) {

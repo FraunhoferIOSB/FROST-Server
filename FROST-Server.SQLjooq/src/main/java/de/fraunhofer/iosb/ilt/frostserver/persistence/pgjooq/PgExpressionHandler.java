@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState.ALIAS_ROOT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.ArrayConstandFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
@@ -32,13 +35,19 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDur
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.WrapperHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
@@ -87,6 +96,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
@@ -133,6 +143,7 @@ import net.time4j.PlainDate;
 import net.time4j.PlainTime;
 import net.time4j.ZonalDateTime;
 import net.time4j.range.MomentInterval;
+import org.apache.commons.lang3.NotImplementedException;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
@@ -157,16 +168,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
 
     private final QueryBuilder queryBuilder;
-    /**
-     * The table reference for the main table of the request.
-     */
-    private final TableRef tableRef;
+    private QueryState queryState;
 
     private int maxCustomLinkDepth = -1;
 
-    public PgExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder, TableRef tableRef) {
+    public PgExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
-        this.tableRef = tableRef;
+        this.queryState = queryBuilder.getQueryState();
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             maxCustomLinkDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
@@ -223,9 +231,27 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(Path path) {
         PathState state = new PathState();
-        state.pathTableRef = tableRef;
         state.elements = path.getElements();
-        for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
+        var storedQueryState = queryState;
+        try {
+            Property firstElement = state.elements.get(0);
+            int startIdx = 0;
+            if (firstElement instanceof PropertyReference pr) {
+                startIdx = 1;
+                queryState = queryState.findStateForAlias(pr.getName());
+            } else {
+                queryState = queryState.findStateForAlias(ALIAS_ROOT);
+            }
+            state.pathTableRef = queryState.getTableRef();
+            walkPath(state, startIdx, path);
+        } finally {
+            queryState = storedQueryState;
+        }
+        return state.finalExpression;
+    }
+
+    private void walkPath(PathState state, int startIdx, Path path) throws IllegalArgumentException {
+        for (state.curIndex = startIdx; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             Property element = state.elements.get(state.curIndex);
             if (element instanceof EntityPropertyCustom) {
                 handleCustomProperty(state, path);
@@ -247,7 +273,6 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
             state.finalExpression = new StaDateTimeWrapper(dateTimePath);
         }
-        return state.finalExpression;
     }
 
     private void handleCustomProperty(PathState state, Path path) {
@@ -283,7 +308,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private void handleCustomLink(final EntityPropertyCustomLink epcl, JsonFieldWrapper jsonFactory, String name, PathState state) {
         JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).materialise();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
-        state.pathTableRef = queryBuilder.queryEntityType(epcl, state.pathTableRef, sourceIdField);
+        state.pathTableRef = queryEntityType(epcl, state.pathTableRef, sourceIdField);
         state.finalExpression = null;
     }
 
@@ -307,7 +332,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        state.pathTableRef = queryBuilder.queryEntityType(np, state.pathTableRef);
+        state.pathTableRef = queryEntityType(np, state.pathTableRef);
     }
 
     private FieldWrapper getSubExpression(PathState state, Map<String, Field> pathExpressions) {
@@ -328,6 +353,52 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             return new StaTimeIntervalWrapper(pathExpressions);
         }
         return new FieldListWrapper(pathExpressions);
+    }
+
+    /**
+     * Queries the given entity type, as relation to the given table reference
+     * and returns a new table reference. Effectively, this generates a join.
+     *
+     * @param np The NavigationProperty to query
+     * @param last The table the requested entity is related to.
+     * @return The table reference of the requested entity.
+     */
+    public TableRef queryEntityType(NavigationProperty np, TableRef last) {
+        if (queryState == null) {
+            throw new IllegalStateException("QueryState should not be null");
+        }
+        if (last == null) {
+            throw new IllegalStateException("last result should not be null");
+        }
+
+        TableRef existingJoin = last.getJoin(np);
+        if (existingJoin != null) {
+            return existingJoin;
+        }
+
+        return last.createJoin(np.getName(), queryState);
+    }
+
+    /**
+     * Directly query an entity type. Used for custom linking.
+     *
+     * @param epcl the custom link.
+     * @param sourceRef The source table ref.
+     * @param sourceIdField The source ID field.
+     * @return A new table ref with the target entity type table joined.
+     */
+    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
+        final EntityType targetEntityType = epcl.getEntityType();
+        final StaMainTable<?> target = queryBuilder.getTableCollection().getTablesByType().get(targetEntityType);
+        final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), queryBuilder.getPersistenceManager());
+        final List<Field> targetField = targetAliased.getPkFields();
+        if (targetField.size() > 1) {
+            throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+        }
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.get(0).eq(sourceIdField)));
+        TableRef newRef = new TableRef(targetAliased);
+        sourceRef.addJoin(epcl, newRef);
+        return newRef;
     }
 
     public Field[] findPair(FieldWrapper p1, FieldWrapper p2) {
@@ -356,6 +427,87 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         result[0] = p1.getDefaultField();
         result[1] = p2.getDefaultField();
         return result;
+    }
+
+    @Override
+    public FieldWrapper visit(Any node) {
+        final TableCollection tc = queryBuilder.getTableCollection();
+        final QueryState<?> parentQueryState = queryState;
+
+        QueryState existsQueryState = walkAnyPath(parentQueryState, node, tc);
+        if (existsQueryState == null) {
+            throw new IllegalStateException("Failed to parse any().");
+        }
+
+        // Set our subQuery state to be the active one.
+        queryState = existsQueryState;
+        try {
+            List<Expression> params = node.getParameters();
+            FieldWrapper p1 = params.get(0).accept(this);
+            if (!p1.isCondition()) {
+                throw new IllegalArgumentException("Any() requires a condition, got " + p1);
+            }
+            Condition exists = DSL.exists(DSL.selectOne().from(existsQueryState.getSqlFrom()).where(existsQueryState.getSqlWhere().and(p1.getCondition())));
+            return new SimpleFieldWrapper(exists);
+        } finally {
+            // Set the query state back to what it was.
+            queryState = parentQueryState;
+        }
+    }
+
+    private QueryState walkAnyPath(final QueryState<?> parentQueryState, Any node, final TableCollection tc) throws IllegalArgumentException {
+        final StaMainTable parentMainTable = parentQueryState.getMainTable();
+        final EntityType parentEntityType = parentMainTable.getEntityType();
+        final Path path = node.getCollection();
+        final List<Property> elements = path.getElements();
+        QueryState existsQueryState = null;
+        TableRef lastJoin = null;
+        Property firstElement = elements.get(0);
+        int startIdx = 0;
+        if (firstElement instanceof PropertyReference) {
+            startIdx = 1;
+        }
+        for (int idx = elements.size() - 1; idx >= startIdx; idx--) {
+            Property element = elements.get(idx);
+            if ((lastJoin == null)) {
+                if (element instanceof NavigationPropertyEntitySet npes) {
+                    // Last entry in the path: the target collection.
+                    EntityType finalType = npes.getEntityType();
+                    final StaMainTable<?> tableForType = tc.getTableForType(finalType).asSecure(parentQueryState.getNextAlias(), parentQueryState.getPersistenceManager());
+                    existsQueryState = new QueryState(tableForType, parentQueryState, node.getLambdaName());
+                    lastJoin = existsQueryState.getTableRef();
+                } else {
+                    throw new IllegalArgumentException("Path before any() MUST end in an EntitySet. Found: " + element);
+                }
+            }
+            if (element instanceof NavigationPropertyMain npm) {
+                var inverse = npm.getInverse();
+                if (idx == startIdx) {
+                    // First entry in the path: Link to the main table!
+                    if (inverse.getEntityType() != parentEntityType) {
+                        throw new IllegalArgumentException("path of any() did not track back to main entity type. Expected " + parentEntityType + " got " + inverse.getEntityType());
+                    }
+                    lastJoin.createSemiJoin(inverse.getName(), parentMainTable, existsQueryState);
+
+                } else {
+                    TableRef existingJoin = lastJoin.getJoin(inverse);
+                    if (existingJoin != null) {
+                        lastJoin = existingJoin;
+                    }
+                    lastJoin = lastJoin.createJoin(inverse.getName(), existsQueryState);
+                }
+
+            } else if (element instanceof EntityPropertyCustomLink) {
+                throw new IllegalArgumentException("Path before any() should not contain Custom Links. Found: " + element);
+            } else if (element instanceof EntityPropertyCustom) {
+                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
+            } else if (element instanceof EntityPropertyMain) {
+                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
+            } else {
+                throw new IllegalArgumentException("Path before any() contains unknown element. Found: " + element);
+            }
+        }
+        return existsQueryState;
     }
 
     @Override

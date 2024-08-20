@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,20 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.serialise;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import net.time4j.Moment;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,17 +79,14 @@ class SerialisationTest {
     }
 
     @Test
-    void deSerialiseDate() throws IOException {
-        String input = "\"1987-06-05\"";
-        Date expResult = new Date(87, 5, 5);
-        expResult.setHours(0);
-        expResult.setMinutes(0);
-        expResult.setSeconds(0);
-        Date result = new JsonReaderDefault(modelRegistry).parseObject(Date.class, input);
-        result.setHours(0);
-        result.setMinutes(0);
-        result.setSeconds(0);
-        assertEquals(expResult, result);
+    void parseDateTimeOffset() {
+        TimeInstant expected = TimeInstant.create(Moment.from(Instant.ofEpochSecond(1_700_000_000)));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T22:13:20Z"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T22:13:20+00:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T23:13:20+01:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-15T00:13:20+02:00"));
+        Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T21:13:20-01"));
+        // Not supported at the moment: Assertions.assertEquals(expected, TimeInstant.parse("20231114T221320+00:00"));
     }
 
     private boolean jsonEqual(String string1, String string2) {

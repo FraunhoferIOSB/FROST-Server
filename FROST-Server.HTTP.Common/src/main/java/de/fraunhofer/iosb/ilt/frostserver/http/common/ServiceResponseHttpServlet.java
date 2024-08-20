@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,10 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -38,7 +41,7 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
     private Object result;
     private int code;
     private String message;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, List<String>> headers = new HashMap<>();
 
     public ServiceResponseHttpServlet(HttpServletResponse httpResponse, int code, String message) {
         this.httpResponse = httpResponse;
@@ -58,20 +61,36 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
     }
 
     @Override
-    public ServiceResponse setContentType(String contentType) {
+    public ServiceResponseHttpServlet setContentType(String contentType) {
         httpResponse.setContentType(contentType);
         return this;
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         return headers;
     }
 
     @Override
-    public ServiceResponse addHeader(String key, String value) {
-        headers.put(key, value);
-        httpResponse.setHeader(key, value);
+    public ServiceResponseHttpServlet addHeader(String name, String value) {
+        headers.computeIfAbsent(name, t -> new ArrayList<>()).add(value);
+        httpResponse.addHeader(name, value);
+        return this;
+    }
+
+    @Override
+    public ServiceResponseHttpServlet addHeaders(String name, List<String> values) {
+        headers.computeIfAbsent(name, t -> new ArrayList<>()).addAll(values);
+        for (String value : values) {
+            httpResponse.addHeader(name, value);
+        }
+        return this;
+    }
+
+    @Override
+    public ServiceResponseHttpServlet setHeader(String name, String value) {
+        headers.put(name, Arrays.asList(value));
+        httpResponse.setHeader(name, value);
         return this;
     }
 
@@ -81,7 +100,7 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
     }
 
     @Override
-    public ServiceResponse setCode(int code) {
+    public ServiceResponseHttpServlet setCode(int code) {
         this.code = code;
         httpResponse.setStatus(code);
         return this;
@@ -93,13 +112,13 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
     }
 
     @Override
-    public ServiceResponse setMessage(String message) {
+    public ServiceResponseHttpServlet setMessage(String message) {
         this.message = message;
         return this;
     }
 
     @Override
-    public ServiceResponse setStatus(int code, String message) {
+    public ServiceResponseHttpServlet setStatus(int code, String message) {
         setCode(code);
         setMessage(message);
         return this;
@@ -111,7 +130,7 @@ public class ServiceResponseHttpServlet implements ServiceResponse {
     }
 
     @Override
-    public ServiceResponse setResult(Object result) {
+    public ServiceResponseHttpServlet setResult(Object result) {
         this.result = result;
         return this;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -29,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.slf4j.Logger;
@@ -102,6 +106,9 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         this.targetType = navProp.getEntityType();
         this.name = navProp.getName();
         this.symmetrical = symmetrical;
+        if (source.getPkFields().size() != 1 || target.getPkFields().size() != 1) {
+            throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+        }
     }
 
     public FieldAccessor<S> getSourceFieldAcc() {
@@ -171,21 +178,37 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
+    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState) {
+        if (joinTarget.getEntityType() != target.getEntityType()) {
+            throw new IllegalArgumentException("SemiJoin target entity type incorrect. Expected " + target.getEntityType() + ", got " + joinTarget.getEntityType());
+        }
+        L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
+        Field<Object> sourceField = sourceFieldAcc.getField(joinSource);
+        Field<Object> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
+        Field<Object> targetField = targetFieldAcc.getField((T) joinTarget);
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
+        queryState.setSqlWhere(queryState.getSqlWhere().and(targetField.eq(targetLinkField)));
+    }
+
+    @Override
     public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
-        final Object sourceId = source.getId().getValue();
+        final PkValue primaryKeyValues = source.getPrimaryKeyValues();
+
+        final Object sourceId = primaryKeyValues.get(0);
         int count = pm.getDslContext().deleteFrom(linkTable)
                 .where(sourceLinkFieldAcc.getField(linkTable).eq(sourceId))
                 .execute();
         LOGGER.debug("Removed {} relations from {}", count, linkTable.getName());
         for (Entity targetEntity : targets) {
-            link(pm, sourceId, targetEntity.getId().getValue());
+            link(pm, sourceId, targetEntity.getPrimaryKeyValues().get(0));
         }
 
     }
 
     @Override
     public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
-        link(pm, source.getId().getValue(), target.getId().getValue());
+        link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
     }
 
     protected void link(JooqPersistenceManager pm, Object sourceId, Object targetId) {
@@ -205,8 +228,8 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
 
     @Override
     public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
-        final Object sourceId = source.getId().getValue();
-        final Object targetId = target.getId().getValue();
+        final Object sourceId = source.getPrimaryKeyValues().get(0);
+        final Object targetId = target.getPrimaryKeyValues().get(0);
         final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(sourceId);
         final Condition targetCondition = targetLinkFieldAcc.getField(linkTable).eq(targetId);
         pm.getDslContext().deleteFrom(linkTable)

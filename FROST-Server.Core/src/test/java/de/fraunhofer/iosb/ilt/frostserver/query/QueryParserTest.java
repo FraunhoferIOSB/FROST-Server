@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
@@ -54,6 +55,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.L
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context.PrincipalName;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Round;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
@@ -172,12 +174,21 @@ class QueryParserTest {
 
     @Test
     void testFilterLinked() {
-        String query = "$filter=House/id eq 1";
+        String query = "$filter=id eq 1";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.setFilter(new Equal(
-                new Path(testModel.NP_ROOM_HOUSE, testModel.ET_HOUSE.getPrimaryKey()),
+                new Path(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0)),
                 new IntegerConstant(1)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_ROOM);
+        assertEquals(expResult, result);
+
+        query = "$filter=House/id eq 1";
+        expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(new Equal(
+                new Path(testModel.NP_ROOM_HOUSE, testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0)),
+                new IntegerConstant(1)));
+        result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
 
@@ -510,7 +521,7 @@ class QueryParserTest {
     void testOrderByAlias() {
         String query = "$orderby=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
+        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -520,7 +531,7 @@ class QueryParserTest {
     void testOrderByEntityProperty() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
+        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -530,8 +541,8 @@ class QueryParserTest {
     void testOrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey())));
-        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey()), OrderBy.OrderType.DESCENDING));
+        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0))));
+        expResult.getOrderBy().add(new OrderBy(new Path(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0)), OrderBy.OrderType.DESCENDING));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -541,7 +552,7 @@ class QueryParserTest {
     void testOrderByMixedPath() {
         String query = "$orderby=House/@iot.id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(testModel.NP_ROOM_HOUSE, testModel.ET_HOUSE.getPrimaryKey())));
+        expResult.getOrderBy().add(new OrderBy(new Path(testModel.NP_ROOM_HOUSE, testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0))));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
@@ -563,18 +574,18 @@ class QueryParserTest {
     void testSelect() {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getSelect().add(testModel.NP_HOUSE_ROOMS);
-        expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey());
+        expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0));
         Query result = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         result.addSelect(testModel.NP_HOUSE_ROOMS)
-                .addSelect(testModel.ET_HOUSE.getPrimaryKey());
+                .addSelect(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0));
         assertEquals(expResult, result);
 
         expResult.getSelect().clear();
         expResult.getSelect().add(testModel.NP_ROOM_HOUSE);
-        expResult.getSelect().add(testModel.ET_ROOM.getPrimaryKey());
+        expResult.getSelect().add(testModel.ET_ROOM.getPrimaryKey().getKeyProperties().get(0));
         result.clearSelect();
         result.addSelect(testModel.NP_ROOM_HOUSE)
-                .addSelect(testModel.ET_ROOM.getPrimaryKey());
+                .addSelect(testModel.ET_ROOM.getPrimaryKey().getKeyProperties().get(0));
         assertEquals(expResult, result);
     }
 
@@ -582,7 +593,7 @@ class QueryParserTest {
     void testSelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey());
+        expResult.getSelect().add(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -633,7 +644,7 @@ class QueryParserTest {
             String query = "$select=distinct:id,name,properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult
-                    .addSelect(testModel.ET_HOUSE.getPrimaryKey())
+                    .addSelect(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0))
                     .addSelect(testModel.EP_NAME)
                     .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
                             .addToSubPath("my")
@@ -687,7 +698,7 @@ class QueryParserTest {
         String query = "$select=Rooms, id";
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.addSelect(testModel.NP_HOUSE_ROOMS)
-                .addSelect(testModel.ET_HOUSE.getPrimaryKey());
+                .addSelect(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_HOUSE);
         assertEquals(expResult, result);
@@ -784,7 +795,7 @@ class QueryParserTest {
         String query = "$expand=Rooms/House($select=@iot.id)";
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         Query subSubQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
-        subSubQuery.getSelect().add(testModel.ET_HOUSE.getPrimaryKey());
+        subSubQuery.getSelect().add(testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0));
         subQuery.getExpand().add(new Expand(modelRegistry, subSubQuery, testModel.NP_ROOM_HOUSE));
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         expResult.getExpand().add(new Expand(modelRegistry, subQuery, testModel.NP_HOUSE_ROOMS));
@@ -835,8 +846,8 @@ class QueryParserTest {
         Query subQuery = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery.setFilter(new Equal(new Path(testModel.EP_VALUE), new IntegerConstant(1)));
         subQuery.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOM_HOUSE));
-        subQuery.getSelect().add(testModel.ET_ROOM.getPrimaryKey());
-        subQuery.getOrderBy().add(new OrderBy(new Path(testModel.ET_ROOM.getPrimaryKey())));
+        subQuery.getSelect().add(testModel.ET_ROOM.getPrimaryKey().getKeyProperties().get(0));
+        subQuery.getOrderBy().add(new OrderBy(new Path(testModel.ET_ROOM.getPrimaryKey().getKeyProperties().get(0))));
         subQuery.setSkip(5);
         subQuery.setTop(10);
         subQuery.setCount(true);
@@ -855,7 +866,7 @@ class QueryParserTest {
         Query subQuery1 = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
         subQuery1.setFilter(new Equal(new Path(testModel.EP_VALUE), new IntegerConstant(1)));
         subQuery1.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOM_HOUSE));
-        subQuery1.getSelect().add(testModel.ET_ROOM.getPrimaryKey());
+        subQuery1.getSelect().add(testModel.ET_ROOM.getPrimaryKey().getKeyProperties().get(0));
         expResult.getExpand().add(new Expand(modelRegistry, subQuery1, testModel.NP_HOUSE_ROOMS));
         expResult.getExpand().add(new Expand(modelRegistry, testModel.NP_ROOM_HOUSE));
         expResult.setTop(10);
@@ -875,7 +886,7 @@ class QueryParserTest {
                                         new Path(
                                                 testModel.NP_HOUSE_ROOMS,
                                                 testModel.NP_ROOM_HOUSE,
-                                                testModel.ET_HOUSE.getPrimaryKey()),
+                                                testModel.ET_HOUSE.getPrimaryKey().getKeyProperties().get(0)),
                                         new StringConstant("FOI_1")),
                                 new GreaterEqual(
                                         new Path(testModel.NP_ROOM_HOUSE,
@@ -890,6 +901,90 @@ class QueryParserTest {
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         result.validate(testModel.ET_ROOM);
         assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAny1() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z)";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Any(
+                        new Path(testModel.NP_HOUSE_ROOMS),
+                        "r",
+                        new LessEqual(
+                                new Path(
+                                        new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
+                                        testModel.EP_TIME),
+                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAny2() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z) and Rooms/any(r : r/time ge 2010-07-01T00:00:00Z)";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new And(
+                        new Any(
+                                new Path(testModel.NP_HOUSE_ROOMS),
+                                "r",
+                                new LessEqual(
+                                        new Path(
+                                                new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))),
+                        new Any(
+                                new Path(testModel.NP_HOUSE_ROOMS),
+                                "r",
+                                new GreaterEqual(
+                                        new Path(
+                                                new PropertyReference("r", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAnyNested() {
+        String query = "$filter=Rooms/any(r1 : r1/time le 2010-07-01T00:00:00Z and r1/House/Rooms/any(r2 : r2/time ge 2010-07-01T00:00:00Z))";
+        Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Any(
+                        new Path(testModel.NP_HOUSE_ROOMS),
+                        "r1",
+                        new And(
+                                new LessEqual(
+                                        new Path(
+                                                new PropertyReference("r1", testModel.NP_HOUSE_ROOMS),
+                                                testModel.EP_TIME),
+                                        new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC))),
+                                new Any(
+                                        new Path(
+                                                new PropertyReference("r1", testModel.NP_HOUSE_ROOMS),
+                                                testModel.NP_ROOM_HOUSE,
+                                                testModel.NP_HOUSE_ROOMS),
+                                        "r2",
+                                        new GreaterEqual(
+                                                new Path(
+                                                        new PropertyReference("r2", testModel.NP_HOUSE_ROOMS),
+                                                        testModel.EP_TIME),
+                                                new DateTimeConstant(PlainTimestamp.of(2010, 07, 01, 0, 0).inZonalView(TIMEZONE_UTC)))))));
+        Query result = QueryParser.parseQuery(query, coreSettings, path);
+        result.validate(testModel.ET_HOUSE);
+        assertEquals(expResult, result);
+    }
+
+    @Test
+    void testFilterAnyDupicateName() {
+        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z and r/House/Rooms/any(r : r/time ge 2010-07-01T00:00:00Z))";
+        assertThrows(IllegalArgumentException.class, () -> {
+            QueryParser.parseQuery(query, coreSettings, path)
+                    .validate(testModel.ET_HOUSE);
+        });
     }
 
     // TODO add tests for all functions

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -50,11 +50,11 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import net.time4j.Moment;
 import org.geojson.GeoJsonObject;
@@ -334,7 +334,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                     return true;
                 });
         obsPropsTable.registerHookPreUpdate(-1,
-                (pm, entity, entityId) -> {
+                (pm, entity, entityId, updateMode) -> {
                     EntitySet mds = entity.getProperty(pluginMultiDatastream.npMultiDatastreamsObsProp);
                     if (mds != null && !mds.isEmpty()) {
                         throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
@@ -351,7 +351,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             ((TableField) tMd.getId()).in(
                                     DSL.select(tMdOp.getMultiDatastreamId())
                                             .from(tMdOp)
-                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId))))
+                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId.get(0)))))
                     .execute();
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
@@ -370,7 +370,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                     throw new IllegalArgumentException("Multidatastream only accepts array results.");
                 }
                 List list = (List) result;
-                Object mdsId = mds.getId().getValue();
+                Object mdsId = mds.getPrimaryKeyValues().get(0);
                 TableImpMultiDatastreamsObsProperties tableMdsOps = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
                 Integer count = pm.getDslContext()
                         .selectCount()
@@ -382,7 +382,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 }
                 Entity f = entity.getProperty(pluginCoreModel.npFeatureOfInterestObservation);
                 if (f == null) {
-                    f = generateFeatureOfInterest(pm, mds.getId());
+                    f = generateFeatureOfInterest(pm, mds.getPrimaryKeyValues());
                     if (f != null) {
                         entity.setProperty(pluginCoreModel.npFeatureOfInterestObservation, f);
                     }
@@ -393,8 +393,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             return true;
         });
         // On update, make sure we still have either a DS or MDS, but not both.
-        observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {
-            Entity oldObservation = pm.get(pluginCoreModel.etObservation, ParserUtils.idFromObject(entityId));
+        observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId, updateMode) -> {
+            Entity oldObservation = pm.get(pluginCoreModel.etObservation, entityId);
             boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
             boolean newHasMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);
             if (newHasDatastream == newHasMultiDatastream) {
@@ -409,6 +409,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }
@@ -441,8 +445,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         return this;
     }
 
-    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
-        final Object dsId = datastreamId.getValue();
+    public Entity generateFeatureOfInterest(JooqPersistenceManager pm, PkValue datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+        final Object dsId = datastreamId.get(0);
         final DSLContext dslContext = pm.getDslContext();
         TableCollection tableCollection = getTables();
         TableImpLocations tl = tableCollection.getTableForClass(TableImpLocations.class);

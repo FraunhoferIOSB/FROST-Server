@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import java.util.Collections;
+import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -155,4 +157,10 @@ public class FieldMapperOneToMany extends FieldMapperAbstractNp {
         this.otherField = otherField;
         return this;
     }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        return Collections.emptyMap();
+    }
+
 }

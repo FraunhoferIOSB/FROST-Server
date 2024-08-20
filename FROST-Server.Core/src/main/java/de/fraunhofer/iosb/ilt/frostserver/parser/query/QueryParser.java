@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -62,8 +62,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.slf4j.Logger;
@@ -199,13 +197,13 @@ public class QueryParser extends Visitor {
 
     public PropertyPlaceholder handle(P_PlainPath pp) {
         List<Token> children = pp.childrenOfType(Token.class);
-        PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).getImage());
+        PropertyPlaceholder property = new PropertyPlaceholder(children.get(0).toString());
         for (int i = 1; i < children.size(); i++) {
             final Token child = children.get(i);
             if (child instanceof T_PATH_SEPARATOR) {
                 continue;
             }
-            final String img = child.getImage();
+            final String img = child.toString();
             if (child instanceof T_ARRAYINDEX) {
                 property.addToSubPath(img.substring(1, img.length() - 1));
             } else {
@@ -322,9 +320,7 @@ public class QueryParser extends Visitor {
             return new Query(modelRegistry, queryDefaults, path, user);
         }
         LOGGER.debug("Parsing: {}", query);
-
-        InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        QParser t = new QParser(is);
+        QParser t = new QParser(query);
         try {
             Start start = t.Start();
             QueryParser v = new QueryParser(queryDefaults, modelRegistry, path, user, context);

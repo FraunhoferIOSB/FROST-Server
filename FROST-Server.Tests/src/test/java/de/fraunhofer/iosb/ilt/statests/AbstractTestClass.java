@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,10 +28,11 @@ import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -73,6 +74,7 @@ public abstract class AbstractTestClass {
         defaultProperties.put(PREFIX_PLUGINS + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
         defaultProperties.put(PREFIX_PLUGINS + MdsModelSettings.TAG_ENABLE_MDS_MODEL, "true");
         defaultProperties.put(TAG_FILTER_DELETE_ENABLE, "true");
+        defaultProperties.put(PREFIX_MQTT + MqttSettings.TAG_MQTT_ALLOW_FILTER, "true");
         defaultProperties.put(PREFIX_MQTT + "session.timeout.seconds", "100");
     }
 
@@ -96,7 +98,7 @@ public abstract class AbstractTestClass {
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
-                    service = new StaService(new URL(serverSettings.getServiceUrl(version)));
+                    service = new StaService(new URI(serverSettings.getServiceUrl(version)).toURL());
                     sSrvc = service.service;
                     sMdl = service.modelSensing;
                     mMdl = service.modelMultiDatastream;

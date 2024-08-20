@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -165,14 +165,14 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
                     final String[] groups = ((PrincipalExtended) principal).getRoles().toArray(String[]::new);
                     Arrays.fill(params, groups);
                 }
-                SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where, params);
+                SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.joinSelf(tableIn)).and(where, params);
                 return table.whereExists(finalExists).asTable("tOut");
             }
-            SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId())).and(where);
+            SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.joinSelf(tableIn)).and(where);
             return table.whereExists(finalExists).asTable("tOut");
         }
 
-        SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.getId().eq(tableIn.getId()));
+        SelectConditionStep<Record1<Integer>> finalExists = exists.where(table.joinSelf(tableIn));
         return table.whereExists(finalExists).asTable("tOut");
     }
 

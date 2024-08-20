@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -36,9 +36,24 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
  */
 public interface Entity extends NavigableElement {
 
-    public Id getId();
+    /**
+     * Get the primary key definition of the (EntityType of the) Entity. This is
+     * a shorthand for getEntityType().getPrimaryKey();
+     *
+     * @return The primary key definition of the Entity.
+     */
+    public PrimaryKey getPrimaryKey();
 
-    public Entity setId(Id id);
+    /**
+     * Key the values of the primary key fields for this Entity.
+     *
+     * @return the primary key values.
+     */
+    public PkValue getPrimaryKeyValues();
+
+    public boolean primaryKeyFullySet();
+
+    public Entity setPrimaryKeyValues(PkValue values);
 
     /**
      * @return self link. Might be null.
@@ -193,7 +208,7 @@ public interface Entity extends NavigableElement {
     public default ResourcePath getPath() {
         EntityType type = getEntityType();
         PathElementEntity epe = new PathElementEntity(type, null);
-        epe.setId(getId());
+        epe.setPkValues(getPrimaryKeyValues());
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.addPathElement(epe, true, false);
         return resourcePath;

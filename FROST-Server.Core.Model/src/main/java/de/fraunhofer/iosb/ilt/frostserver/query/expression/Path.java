@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -30,6 +30,7 @@ import java.util.Objects;
 
 /**
  *
+ * @author scf
  * @author jab
  */
 public class Path implements Variable {
@@ -57,21 +58,14 @@ public class Path implements Variable {
         this.elements = elements;
     }
 
-    /**
-     * Validate the raw elements in this Path against the given EntityType,
-     * turning it into a usable Path.
-     *
-     * @param type The starting point of this Path, or null to validate against
-     * the service Root.
-     */
     @Override
-    public void validate(ParserHelper helper, EntityType type) {
+    public void validate(ParserContext context, EntityType type) {
         if (!elements.isEmpty()) {
             throw new IllegalStateException("Double Validation of Path!");
         }
         EntityType localType = type;
         String topName = rawElements.getName();
-        Property property = localType.getProperty(topName);
+        Property property = context.parseProperty(localType, topName, null);
         if (property == null) {
             throw new IllegalArgumentException("Unknown Property: " + topName);
         }
@@ -80,7 +74,7 @@ public class Path implements Variable {
             localType = npm.getEntityType();
         }
         for (String rawElement : rawElements.getSubPath()) {
-            property = helper.parseProperty(localType, rawElement, property);
+            property = context.parseProperty(localType, rawElement, property);
             if (property instanceof NavigationProperty navigationProperty) {
                 localType = navigationProperty.getEntityType();
             }
@@ -96,6 +90,13 @@ public class Path implements Variable {
             throw new IllegalStateException("Path with raw elements must be validated before use.");
         }
         return elements;
+    }
+
+    public Property lastElement() {
+        if (elements.isEmpty() && rawElements != null) {
+            throw new IllegalStateException("Path with raw elements must be validated before use.");
+        }
+        return elements.get(elements.size() - 1);
     }
 
     @Override

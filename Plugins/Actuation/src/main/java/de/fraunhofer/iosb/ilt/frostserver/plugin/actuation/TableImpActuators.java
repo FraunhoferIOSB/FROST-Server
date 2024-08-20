@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Arrays;
+import java.util.List;
 import org.jooq.DataType;
+import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -126,6 +129,10 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

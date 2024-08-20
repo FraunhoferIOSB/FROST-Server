@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
@@ -65,8 +66,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         }
 
         @Override
-        public void init(CoreSettings coreSettings) {
+        public InitResult init(CoreSettings coreSettings) {
             // This dummy needs no initialisation.
+            return InitResult.INIT_OK;
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,10 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.ArrayList;
+import java.util.List;
+import org.jooq.Binding;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -36,22 +40,24 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
 
     private final Name tableName;
     private final transient EntityType entityType;
-    private int idFieldIdx;
+    private int[] pkFieldIdx;
+    private List<Field> pkFields;
 
     public StaTableDynamic(Name tableName, EntityType entityType, DataType<?> idType) {
         super(idType, tableName, null, null);
         this.tableName = tableName;
         this.entityType = entityType;
+        this.pkFieldIdx = new int[entityType.getPrimaryKey().size()];
     }
 
-    private StaTableDynamic(Name alias, StaTableDynamic aliased, int idFieldIdx) {
+    private StaTableDynamic(Name alias, StaTableDynamic aliased, int[] idFieldIdx) {
         this(alias, aliased, aliased, idFieldIdx);
     }
 
-    private StaTableDynamic(Name alias, StaTableDynamic aliased, Table updatedSql, int idFieldIdx) {
+    private StaTableDynamic(Name alias, StaTableDynamic aliased, Table updatedSql, int[] idFieldIdx) {
         super(aliased.getIdType(), alias, aliased, updatedSql);
         this.tableName = aliased.getTableName();
-        this.idFieldIdx = idFieldIdx;
+        this.pkFieldIdx = idFieldIdx;
         this.entityType = aliased.getEntityType();
     }
 
@@ -59,18 +65,21 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
         return tableName;
     }
 
-    public final int registerIdField(String name, DataType<?> type) {
-        return registerIdField(DSL.name(name), type);
-    }
-
-    public final int registerIdField(Name name, DataType<?> type) {
-        idFieldIdx = registerField(name, type);
-        return idFieldIdx;
+    @Override
+    public final int registerField(Name name, DataType type, Binding binding) {
+        int fieldId = super.registerField(name, type, binding);
+        PrimaryKey primaryKey = entityType.getPrimaryKey();
+        for (int idx = 0; idx < primaryKey.size(); idx++) {
+            if (primaryKey.getKeyProperty(idx).getName().equals(name.toString())) {
+                pkFieldIdx[idx] = fieldId;
+            }
+        }
+        return fieldId;
     }
 
     @Override
     public StaTableDynamic as(Name as) {
-        return new StaTableDynamic(as, this, idFieldIdx).initCustomFields();
+        return new StaTableDynamic(as, this, pkFieldIdx).initCustomFields();
     }
 
     @Override
@@ -80,12 +89,18 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
             return as(name);
         }
         final Table wrappedTable = securityWrapper.wrap(this, pm);
-        return new StaTableDynamic(DSL.name(name), this, wrappedTable, idFieldIdx).initCustomFields();
+        return new StaTableDynamic(DSL.name(name), this, wrappedTable, pkFieldIdx).initCustomFields();
     }
 
     @Override
-    public Field<?> getId() {
-        return field(idFieldIdx);
+    public List<Field> getPkFields() {
+        if (pkFields == null) {
+            pkFields = new ArrayList<>();
+            for (int fieldId : pkFieldIdx) {
+                pkFields.add(field(fieldId));
+            }
+        }
+        return pkFields;
     }
 
     @Override

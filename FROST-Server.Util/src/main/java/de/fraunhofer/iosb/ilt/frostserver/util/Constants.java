@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,8 @@ public class Constants {
     public static final String VALUE_ID_TYPE_UUID = "UUID";
     public static final String VALUE_RETURN_REPRESENTATION = "representation";
     public static final String VALUE_RETURN_MINIMAL = "minimal";
+
+    public static final String NOT_IMPLEMENTED_MULTI_VALUE_PK = "Multi-valued primary keys are not implemented yet.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
 

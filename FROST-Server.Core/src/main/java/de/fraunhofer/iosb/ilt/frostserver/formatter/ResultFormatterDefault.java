@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
@@ -63,8 +62,6 @@ public class ResultFormatterDefault implements ResultFormatter {
                 LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = JsonWriter.writeObject(result);
-                } else if (result instanceof Id id) {
-                    entityJsonString = id.getValue().toString();
                 } else {
                     entityJsonString = Objects.toString(result);
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,7 +44,7 @@ public class CsvComplexProperty implements CsvEntityEntry {
     public void writeHeader(CsvRowCollector collector) {
         final String baseName = property.getJsonName();
         final TypeComplex type = (TypeComplex) property.getType();
-        for (Map.Entry<String, PropertyType> subProperty : type.getProperties().entrySet()) {
+        for (Map.Entry<String, Property> subProperty : type.getPropertiesByName().entrySet()) {
             String subName = subProperty.getKey();
             int idx = collector.registerHeader(headerPrefix + baseName + "/" + subName);
             subProperties.put(idx, subName);
@@ -56,7 +56,7 @@ public class CsvComplexProperty implements CsvEntityEntry {
         Object value = source.getProperty(property);
         if (value instanceof ComplexValue complexValue) {
             for (Map.Entry<Integer, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(entry.getKey(), complexValue.get(entry.getValue()));
+                collector.collectEntry(entry.getKey(), complexValue.getProperty(entry.getValue()));
             }
         } else if (value instanceof Map mapValue) {
             for (Map.Entry<Integer, String> entry : subProperties.entrySet()) {

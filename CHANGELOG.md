@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD
 ## Development version 2.3.4
 
 **Internal changes & Bugfixes**
@@ -26,11 +27,28 @@
 
 
 ## Release version 2.3.1
+=======
+## Development version 2.4.0
+
+**New Features**
+* Implemented OData any() filters.
+* Added options for adding extra meta data to the landing page using the modelLoader plugin.
+* Implemented $filter for MQTT topics. Can be enabled using the `mqtt.allowFilter` setting.
+* Plugins can be loaded in any order.
+>>>>>>> v2.x
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.
 * Fixed deep select for complex properties in GeoJSON and CSV output.
 * Fixed automatic generation of Features when Feature and Location use different idTypes.
+<<<<<<< HEAD
+=======
+* Fixed GeoJSON output not containing geometries.
+* Fixed $select not properly working on unitOfMeasurement sub-properties.
+* Fixed #1934, incorrect URL parameter in docs.
+* Changed header handling to allow for duplicate headers.
+* Fixed MultiDatastream not picking up ID type of Thing and Sensor.
+>>>>>>> v2.x
 
 
 ## Release version 2.3.0

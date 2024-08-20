@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -129,8 +129,8 @@ public class Utils {
         if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
                 return new GeoJsonDeserializier().deserialize(location);
-            } catch (IOException ex) {
-                LOGGER.error("Failed to deserialise geoJson.", ex);
+            } catch (Error | Exception ex) {
+                LOGGER.error("Failed to deserialise geoJson: {}.", location.toString(), ex);
             }
             return location;
         }
@@ -232,6 +232,12 @@ public class Utils {
                 sqlSortFields.add(field.desc());
             }
             sqlSortSelectFields.add(field);
+        }
+
+        public void addAll(List<Field> fields) {
+            for (var field : fields) {
+                add(field, OrderBy.OrderType.ASCENDING);
+            }
         }
 
         public List<OrderField> getSqlSortFields() {

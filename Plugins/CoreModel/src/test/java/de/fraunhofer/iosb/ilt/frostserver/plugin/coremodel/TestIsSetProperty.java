@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -351,7 +351,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
-        assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey()), "Failed isSet for ID");
+        assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey().getKeyProperty(0)), "Failed isSet for ID");
         assertEquals(true, entity.isSetProperty(ModelRegistry.EP_SELFLINK), "Failed isSet for SelfLink");
     }
 }

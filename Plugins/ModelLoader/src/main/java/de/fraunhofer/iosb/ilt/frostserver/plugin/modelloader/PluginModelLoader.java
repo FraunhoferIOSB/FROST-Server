@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -73,10 +74,16 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private boolean fullyInitialised;
     private String idTypeDefault;
     private List<DefModel> modelDefinitions = new ArrayList<>();
-    private Map<String, DefEntityProperty> primaryKeys;
+    private final Map<String, DefEntityProperty> primaryKeys = new HashMap<>();
 
     private String modelPath;
+    private final List<String> modelFiles = new ArrayList<>();
 
+<<<<<<< HEAD
+    private String modelPath;
+
+=======
+>>>>>>> v2.x
     private String liquibasePath;
     private final List<String> liquibaseFiles = new ArrayList<>();
 
@@ -88,13 +95,16 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     private final List<String> metadataFiles = new ArrayList<>();
     private Map<String, Object> metadataExtra;
     private final List<String> conformance = new ArrayList<>();
+<<<<<<< HEAD
 
     public PluginModelLoader() {
         LOGGER.info("Creating new ModelLoader Plugin.");
     }
+=======
+>>>>>>> v2.x
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(ModelLoaderSettings.TAG_ENABLE_MODELLOADER, ModelLoaderSettings.class);
@@ -108,15 +118,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
             modelPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
             String modelFilesString = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_FILES, ModelLoaderSettings.class);
-            String[] modelFiles = StringUtils.split(modelFilesString.trim(), ", ");
-
-            primaryKeys = new HashMap<>();
-            for (String fileName : modelFiles) {
-                loadModelFile(fileName);
-            }
-            for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
-                String typeName = entry.getKey();
-                primaryKeys.get(typeName).setType(getTypeFor(settings, typeName));
+            for (var modelFile : StringUtils.split(modelFilesString.trim(), ", ")) {
+                addModelFileWithPath(modelFile);
             }
 
             securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
@@ -127,16 +130,47 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             metadataPath = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_PATH, ModelLoaderSettings.class);
             String metadataFilesString = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_FILES, ModelLoaderSettings.class);
             metadataFiles.addAll(Arrays.asList(StringUtils.split(metadataFilesString.trim(), ", ")));
+<<<<<<< HEAD
+=======
+        }
+        return InitResult.INIT_OK;
+    }
+
+    private void loadModelFiles() {
+        for (String fileName : modelFiles) {
+            loadModelFile(fileName);
+        }
+        for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
+            String typeName = entry.getKey();
+            primaryKeys.get(typeName).setType(getTypeFor(settings, typeName));
+>>>>>>> v2.x
         }
     }
 
-    private void loadModelFile(String fileName) {
+    private void addModelFileWithPath(String fileName) {
         final Path fullPath;
         if (StringHelper.isNullOrEmpty(modelPath)) {
             fullPath = Path.of(fileName);
         } else {
             fullPath = Path.of(modelPath, fileName);
         }
+        modelFiles.add(fullPath.toString());
+    }
+
+    public void addModelFile(String filename) {
+        modelFiles.add(filename);
+    }
+
+    public void addSecurityFile(String filename) {
+        securityFiles.add(filename);
+    }
+
+    public void addLiquibaseFile(String filename) {
+        liquibaseFiles.add(filename);
+    }
+
+    public void loadModelFile(String fullPathString) {
+        Path fullPath = Path.of(fullPathString);
         LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
         String data;
         try {
@@ -297,6 +331,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public void registerEntityTypes() {
+        loadModelFiles();
+
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (DefModel modelDefinition : modelDefinitions) {
             modelDefinition.registerEntityTypes(modelRegistry);
@@ -340,6 +376,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public String checkForUpgrades() {
+        if (!isFullyInitialised()) {
+            return "ModelLoader not fully initialised yet.";
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 StringBuilder result = new StringBuilder();
@@ -357,6 +396,10 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        if (!isFullyInitialised()) {
+            out.append("ModelLoader not fully initialised yet.");
+            return false;
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 for (String file : liquibaseFiles) {

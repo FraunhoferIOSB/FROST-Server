@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
@@ -159,9 +159,9 @@ public abstract class Function implements Expression {
     }
 
     @Override
-    public void validate(ParserHelper helper, EntityType type) {
+    public void validate(ParserContext context, EntityType type) {
         for (Expression p : parameters) {
-            p.validate(helper, type);
+            p.validate(context, type);
         }
     }
 

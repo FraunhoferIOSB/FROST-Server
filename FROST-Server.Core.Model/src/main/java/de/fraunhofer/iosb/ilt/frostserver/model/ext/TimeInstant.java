@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ import java.util.Objects;
 import net.time4j.Moment;
 import net.time4j.SystemClock;
 import net.time4j.format.expert.Iso8601Format;
+import net.time4j.format.expert.MultiFormatParser;
 
 /**
  * Represents ISO8601 Instant.
@@ -31,6 +32,7 @@ import net.time4j.format.expert.Iso8601Format;
  */
 public class TimeInstant implements TimeObject {
 
+    public static final MultiFormatParser<Moment> ISO_FORMAT = MultiFormatParser.of(Iso8601Format.EXTENDED_DATE_TIME_OFFSET, Iso8601Format.BASIC_DATE_TIME_OFFSET);
     private final Moment dateTime;
 
     public TimeInstant(Moment dateTime) {
@@ -68,8 +70,9 @@ public class TimeInstant implements TimeObject {
     }
 
     public static TimeInstant parse(String value) {
+
         try {
-            return new TimeInstant(Iso8601Format.EXTENDED_DATE_TIME_OFFSET.parse(value));
+            return new TimeInstant(ISO_FORMAT.parse(value));
         } catch (ParseException ex) {
             throw new IllegalArgumentException("Failed to parse TimeInstant " + StringHelper.cleanForLogging(value), ex);
         }

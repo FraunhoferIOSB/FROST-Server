@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.FORMAT_MOMENT;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -45,9 +45,9 @@ public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
             final MomentInterval interval = value.getInterval();
             final Moment start = interval.getStartAsMoment();
             final Moment end = interval.getEndAsMoment();
-            gen.writeObjectField(KEY_INTERVAL_START, FORMAT_MOMENT.print(start));
+            gen.writeObjectField(NAME_INTERVAL_START, FORMAT_MOMENT.print(start));
             if (!start.equals(end)) {
-                gen.writeObjectField(KEY_INTERVAL_END, FORMAT_MOMENT.print(end));
+                gen.writeObjectField(NAME_INTERVAL_END, FORMAT_MOMENT.print(end));
             }
             gen.writeEndObject();
         }

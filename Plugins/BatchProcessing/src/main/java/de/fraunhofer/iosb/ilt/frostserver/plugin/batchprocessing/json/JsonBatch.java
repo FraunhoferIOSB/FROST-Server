@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -99,11 +99,20 @@ public class JsonBatch extends Batch<Content> {
                     }
                     if (req.has(FIELD_NAME_HEADERS) && req.get(FIELD_NAME_HEADERS).isObject()) {
                         JsonNode headers = req.get(FIELD_NAME_HEADERS);
-                        Map<String, String> innerHeaders = request.getInnerHeaders();
+                        Map<String, List<String>> innerHeaders = request.getInnerHeaders();
                         Iterator<Map.Entry<String, JsonNode>> fields = headers.fields();
                         while (fields.hasNext()) {
                             Map.Entry<String, JsonNode> next = fields.next();
-                            innerHeaders.put(next.getKey(), next.getValue().asText());
+                            final JsonNode value = next.getValue();
+                            if (value.isValueNode()) {
+                                innerHeaders.put(next.getKey(), Arrays.asList(value.asText()));
+                            } else {
+                                List<String> result = new ArrayList<>();
+                                for (JsonNode v : value) {
+                                    result.add(v.asText());
+                                }
+                                innerHeaders.put(next.getKey(), result);
+                            }
                         }
                     }
                 }
@@ -157,9 +166,9 @@ public class JsonBatch extends Batch<Content> {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", CONTENT_TYPE_APPLICATION_JSON);
+    public Map<String, List<String>> getHeaders() {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.computeIfAbsent("Content-Type", t -> new ArrayList<>()).add(CONTENT_TYPE_APPLICATION_JSON);
         return headers;
     }
 }

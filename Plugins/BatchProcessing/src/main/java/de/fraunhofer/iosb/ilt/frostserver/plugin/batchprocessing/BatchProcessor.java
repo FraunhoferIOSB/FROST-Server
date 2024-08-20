@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CHARSET_UTF8;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
@@ -42,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -69,11 +71,15 @@ public class BatchProcessor<C extends Content> {
         final CoreSettings coreSettings = service.getSettings();
         final PluginManager pluginManager = coreSettings.getPluginManager();
         final Version version = pluginManager.getVersion(httpRequest.getVersion());
-        final String type = service.getRequestType(
-                httpRequest.getMethod(),
+        final List<String> ctHeaders = httpRequest.getInnerHeaders().get(CONTENT_TYPE);
+        String ct = null;
+        if (ctHeaders != null && !ctHeaders.isEmpty()) {
+            ct = ctHeaders.get(0);
+        }
+        final String type = service.getRequestType(httpRequest.getMethod(),
                 version,
                 httpRequest.getPath(),
-                httpRequest.getInnerHeaders().get(CONTENT_TYPE));
+                ct);
         boolean isCreate = RequestTypeUtils.CREATE.equals(type);
         UpdateMode updateMode;
         switch (version.urlPart) {
@@ -107,7 +113,8 @@ public class BatchProcessor<C extends Content> {
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity entity) {
-                httpRequest.setContentIdValue(entity.getId());
+                httpRequest.setContentIdValue(entity.getPrimaryKeyValues());
+                httpRequest.setEntityType(entity.getEntityType());
             }
         }
         Request httpResponse = batchFactory.createRequest(serviceRequest.getVersion(), inChangeSet);
@@ -115,13 +122,14 @@ public class BatchProcessor<C extends Content> {
         int statusCode = serviceResponse.getCode();
         httpResponse.setStatus(statusCode, "no text");
 
-        Map<String, String> headers = httpResponse.getInnerHeaders();
-        serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
+        Map<String, List<String>> headers = httpResponse.getInnerHeaders();
+        serviceResponse.getHeaders().entrySet().forEach(
+                x -> headers.put(x.getKey(), x.getValue()));
 
         String resultFormatted = serviceResponse.getWriter().toString();
         if (statusCode >= 200 && statusCode < 300) {
             if (!StringHelper.isNullOrEmpty(resultFormatted)) {
-                headers.put("Content-Type", CONTENT_TYPE_APPLICATION_JSON + "; " + CHARSET_UTF8);
+                headers.put("Content-Type", Arrays.asList(CONTENT_TYPE_APPLICATION_JSON + "; " + CHARSET_UTF8));
                 httpResponse.addData(resultFormatted);
             }
         } else {
@@ -164,10 +172,11 @@ public class BatchProcessor<C extends Content> {
                     response.addPart(newPart);
                 }
 
-                String contentId = request.getContentId();
-                Id contentIdValue = request.getContentIdValue();
-                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null) {
-                    contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
+                final String contentId = request.getContentId();
+                final PkValue contentIdValue = request.getContentIdValue();
+                final EntityType entityType = request.getEntityType();
+                if (!StringHelper.isNullOrEmpty(contentId) && contentIdValue != null && entityType != null) {
+                    contentIds.add(new ContentIdPair("$" + contentId, contentIdValue, entityType));
                 }
             } else {
                 LOGGER.warn("Only http requests allowed in changset. Found type: {}", content.getClass().getName());

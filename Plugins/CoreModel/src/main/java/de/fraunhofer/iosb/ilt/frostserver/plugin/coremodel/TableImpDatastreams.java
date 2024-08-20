@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import net.time4j.Moment;
 import org.geojson.GeoJsonObject;
@@ -289,6 +290,10 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     }
 
     @Override
+    public List<Field> getPkFields() {
+        return Arrays.asList(colId);
+    }
+
     public TableField<Record, ?> getId() {
         return colId;
     }

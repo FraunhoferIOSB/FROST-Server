@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
+
+import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -126,7 +128,7 @@ public class PluginManager implements ConfigDefaults {
         Settings pluginSettings = settings.getPluginSettings();
         String provided = pluginSettings.get(TAG_PROVIDED_PLUGINS, getClass()).trim();
         String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
-        LOGGER.info("Loading plugins.");
+        LOGGER.info("Loading plugins...");
         loadPlugins(provided);
         loadPlugins(extra);
         initPlugins(PersistenceManagerFactory.getInstance(settings).create());
@@ -166,22 +168,58 @@ public class PluginManager implements ConfigDefaults {
         if (classList.isEmpty()) {
             return;
         }
-        String[] split = classList.trim().split(",");
+        final List<Plugin> pluginsToLoad = new ArrayList<>();
+        final String[] split = classList.trim().split(",");
+        LOGGER.info("Loading {} plugins...", split.length);
         for (String className : split) {
             try {
                 LOGGER.info("Loading {}", className);
-                Class<?> clazz = Class.forName(className.trim());
-                Object newInstance = clazz.getDeclaredConstructor().newInstance();
-                if (newInstance instanceof Plugin plugin) {
-                    plugin.init(settings);
-                }
+                Class<? extends Plugin> clazz = getClass().getClassLoader().loadClass(className.trim()).asSubclass(Plugin.class);
+                Plugin plugin = clazz.getDeclaredConstructor().newInstance();
+                pluginsToLoad.add(plugin);
             } catch (NoClassDefFoundError | ClassNotFoundException ex) {
                 LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 LOGGER.warn("Could not load given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
                 LOGGER.info("Exception:", ex);
             } catch (RuntimeException ex) {
-                LOGGER.warn("Plugin caused an exception during initialisation.", ex);
+                LOGGER.warn("Plugin caused an exception during loading.", ex);
+            }
+        }
+
+        while (!pluginsToLoad.isEmpty()) {
+            int count = pluginsToLoad.size();
+            LOGGER.info("Initialising {} plugins...", count);
+            for (Iterator<Plugin> it = pluginsToLoad.iterator(); it.hasNext();) {
+                Plugin plugin = it.next();
+                try {
+                    LOGGER.info("Initialising {}", plugin.getClass().getName());
+                    InitResult result = plugin.init(settings);
+                    switch (result) {
+                        case INIT_DELAY:
+                            // don't remove, try again later.
+                            break;
+
+                        case INIT_FAILED:
+                            // Failed, don't try again.
+                            LOGGER.warn("Failed to initialise plugin: '{}'", plugin);
+                            it.remove();
+                            break;
+
+                        default:
+                        case INIT_OK:
+                            // All is fine.
+                            it.remove();
+                            break;
+                    }
+
+                } catch (RuntimeException ex) {
+                    LOGGER.warn("Plugin caused an exception during initialisation.", ex);
+                }
+            }
+            if (count == pluginsToLoad.size()) {
+                LOGGER.error("All {} remaining plugins can not be initialised", count);
+                break;
             }
         }
     }
@@ -246,6 +284,14 @@ public class PluginManager implements ConfigDefaults {
                 }
             }
         }
+    }
+
+    public <P extends Plugin> boolean isPluginEnabled(Class<P> pluginClass) {
+        P plugin = getPlugin(pluginClass);
+        if (plugin == null) {
+            return false;
+        }
+        return plugin.isEnabled();
     }
 
     public <P extends Plugin> P getPlugin(Class<P> plugin) {

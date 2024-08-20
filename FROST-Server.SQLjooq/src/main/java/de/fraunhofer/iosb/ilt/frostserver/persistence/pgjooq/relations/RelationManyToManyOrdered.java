@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -118,8 +118,8 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
         final var targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
         Field<Integer> orderField = orderFieldAcc.getField(linkTable);
 
-        final var sourceCondition = sourceLinkField.eq(source.getId().getValue());
-        final var targetCondition = targetLinkField.eq(target.getId().getValue());
+        final var sourceCondition = sourceLinkField.eq(source.getPrimaryKeyValues().get(0));
+        final var targetCondition = targetLinkField.eq(target.getPrimaryKeyValues().get(0));
         final DSLContext dslContext = pm.getDslContext();
         int deletedOrderIdx = dslContext.deleteFrom(linkTable)
                 .where(sourceCondition.and(targetCondition))

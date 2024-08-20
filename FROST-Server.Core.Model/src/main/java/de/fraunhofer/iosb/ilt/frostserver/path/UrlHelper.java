@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkSingle;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -42,7 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,6 +207,18 @@ public class UrlHelper {
                 .toString();
     }
 
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, PkValue pkValues) {
+        return new StringBuilder(serviceRootUrl)
+                .append('/')
+                .append(version.urlPart)
+                .append('/')
+                .append(entityType.plural)
+                .append('(')
+                .append(quoteForUrl(entityType.getPrimaryKey(), pkValues))
+                .append(')')
+                .toString();
+    }
+
     public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {
         return new StringBuilder(serviceRootUrl)
                 .append('/')
@@ -213,24 +231,12 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Id id) {
-        return new StringBuilder(serviceRootUrl)
-                .append('/')
-                .append(version.urlPart)
-                .append('/')
-                .append(entityType.plural)
-                .append('(')
-                .append(id.getUrl())
-                .append(')')
-                .toString();
-    }
-
     public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
-        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getId());
+        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getPrimaryKeyValues());
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
-        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
+        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getPrimaryKeyValues());
     }
 
     /**
@@ -321,6 +327,13 @@ public class UrlHelper {
         return relative.toString();
     }
 
+    public static String quoteForUrl(PrimaryKey pk, PkValue pkValue) {
+        if (pk instanceof PkSingle) {
+            return quoteForUrl(pkValue.get(0));
+        }
+        throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
+    }
+
     public static String quoteForUrl(Object in) {
         if (in == null) {
             return "'null'";
@@ -329,6 +342,16 @@ public class UrlHelper {
             return in.toString();
         }
         return "'" + StringHelper.escapeForStringConstant(in.toString()) + "'";
+    }
+
+    public static String quoteForJson(Object in) {
+        if (in == null) {
+            return "null";
+        }
+        if (in instanceof Number) {
+            return in.toString();
+        }
+        return '"' + StringEscapeUtils.escapeJson(in.toString()) + '"';
     }
 
     public static Map<String, List<String>> splitQuery(String queryString) {

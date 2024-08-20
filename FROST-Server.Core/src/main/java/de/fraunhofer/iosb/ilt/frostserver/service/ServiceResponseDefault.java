@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,7 +45,7 @@ public class ServiceResponseDefault implements ServiceResponse {
     private String contentType;
     private int code;
     private String message;
-    private final Map<String, String> headers;
+    private final Map<String, List<String>> headers;
 
     public ServiceResponseDefault() {
         this.headers = new HashMap<>();
@@ -109,13 +112,25 @@ public class ServiceResponseDefault implements ServiceResponse {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         return headers;
     }
 
     @Override
-    public ServiceResponseDefault addHeader(String key, String value) {
-        headers.put(key, value);
+    public ServiceResponseDefault addHeader(String name, String value) {
+        headers.computeIfAbsent(name, t -> new ArrayList<>()).add(value);
+        return this;
+    }
+
+    @Override
+    public ServiceResponseDefault addHeaders(String name, List<String> values) {
+        headers.computeIfAbsent(name, t -> new ArrayList<>()).addAll(values);
+        return this;
+    }
+
+    @Override
+    public ServiceResponseDefault setHeader(String name, String value) {
+        headers.put(name, Arrays.asList(value));
         return this;
     }
 

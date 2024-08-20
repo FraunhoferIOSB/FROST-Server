@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterEmpty;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -69,9 +69,10 @@ public class PluginResultFormatOData implements PluginResultFormat {
     private CoreSettings settings;
 
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         settings.getPluginManager().registerPlugin(this);
+        return InitResult.INIT_OK;
     }
 
     @Override
@@ -150,8 +151,6 @@ public class PluginResultFormatOData implements PluginResultFormat {
                     LOGGER.trace("Formatting as $Value.");
                     if (result instanceof Map || result instanceof GeoJsonObject) {
                         entityJsonString = JsonWriterOdata401.writeObject(result);
-                    } else if (result instanceof Id id) {
-                        entityJsonString = id.getValue().toString();
                     } else {
                         entityJsonString = result.toString();
                     }

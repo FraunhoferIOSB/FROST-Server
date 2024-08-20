@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
@@ -86,19 +86,19 @@ class EntityParserTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(1L));
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of(1L));
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
 
-        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2L));
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of(2L));
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
-        Entity mds1 = new DefaultEntity(etMultiDatastream).setId(new IdLong(2L));
+        Entity mds1 = new DefaultEntity(etMultiDatastream).setPrimaryKeyValues(PkValue.of(2L));
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));

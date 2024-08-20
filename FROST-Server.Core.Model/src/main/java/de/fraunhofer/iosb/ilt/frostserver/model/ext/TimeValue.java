@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,22 +17,33 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import java.time.Instant;
 import java.util.Objects;
 import net.time4j.Moment;
 
 /**
  * Common interface for time values. Needed as STA sometimes does not specify
  * wether an instant or an interval will be passed.
- *
- * @author jab
  */
-public class TimeValue implements TimeObject, ComplexValue {
+public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
 
-    private final TimeInstant instant;
-    private final TimeInterval interval;
+    public static EntityPropertyMain<TimeInstant> EP_START_TIME = TypeComplex.EP_START_TIME;
+    public static EntityPropertyMain<TimeInstant> EP_END_TIME = TypeComplex.EP_INTERVAL_END_TIME;
+
+    private TimeInstant instant;
+    private TimeInterval interval;
+
+    public TimeValue() {
+        this.instant = null;
+        this.interval = null;
+    }
 
     public TimeValue(TimeInstant timeInstant) {
         this.instant = timeInstant;
@@ -111,14 +122,87 @@ public class TimeValue implements TimeObject, ComplexValue {
     }
 
     @Override
-    public Object get(String name) {
+    public <P> P getProperty(Property<P> property) {
+        if (property != EP_START_TIME && property != EP_END_TIME) {
+            throw new IllegalArgumentException("Unknown sub-property: " + property);
+        }
         if (isInterval()) {
-            return interval.get(name);
+            return interval.getProperty(property);
         } else {
-            if (KEY_INTERVAL_START.equals(name)) {
-                return instant;
+            return (P) instant;
+        }
+    }
+
+    @Override
+    public TimeValue setProperty(Property property, Object value) {
+        Moment moment;
+        if (value == null) {
+            moment = null;
+        } else if (value instanceof Moment m) {
+            moment = m;
+        } else if (value instanceof Instant i) {
+            moment = Moment.from(i);
+        } else {
+            throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
+        }
+        if (property == EP_START_TIME) {
+            if (moment == null) {
+                return this;
             }
-            return null;
+            if (instant != null) {
+                instant = new TimeInstant(moment);
+            } else {
+                interval.setProperty(property, moment);
+            }
+            return this;
+        }
+        if (property == EP_END_TIME) {
+            if (instant != null) {
+                if (moment == null) {
+                    return this;
+                }
+                // setting end on instant, convert to interval.
+                interval = TimeInterval.create(instant.getDateTime(), moment);
+                instant = null;
+            } else {
+                if (moment == null) {
+                    // Removing end from interval, convert to instant
+                    instant = TimeInstant.create(interval.getStart());
+                    interval = null;
+                } else {
+                    interval.setProperty(property, moment);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
+
+    }
+
+    @Override
+    public Object getProperty(String name) {
+        switch (name) {
+            case NAME_INTERVAL_START:
+                return getProperty(EP_START_TIME);
+
+            case NAME_INTERVAL_END:
+                return getProperty(EP_END_TIME);
+
+            default:
+                throw new IllegalArgumentException("Unknown sub-property: " + name);
+        }
+    }
+
+    @Override
+    public TimeValue setProperty(String name, Object value) {
+        switch (name) {
+            case NAME_INTERVAL_START:
+                return setProperty(EP_START_TIME, value);
+
+            case NAME_INTERVAL_END:
+                return setProperty(EP_END_TIME, value);
+
+            default:
+                throw new IllegalArgumentException("Unknown sub-property: " + name);
         }
     }
 

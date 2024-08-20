@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -61,6 +61,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
@@ -100,6 +101,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Token;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_AdditiveExpression;
+import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_Any;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_BoolFunction;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ComparativeExpression;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.P_ConstantsList;
@@ -288,10 +290,25 @@ public class ExpressionParser extends Visitor {
         }
     }
 
+    public void handleAny(P_Any node, Path path) {
+        Node lambdaName = node.get(1);
+        Any any = new Any(path, lambdaName.toString());
+        Expression previousExpression = currentExpression;
+        currentExpression = any;
+        visit(node.get(3));
+        currentExpression = previousExpression;
+        addToCurrentExpression(any);
+    }
+
     public void visit(P_PlainPath node) {
         PropertyPlaceholder property = queryParser.handle(node);
         Path path = new Path(property);
-        addToCurrentExpression(path);
+        final Node lastChild = node.getLastChild();
+        if (lastChild instanceof P_Any pAny) {
+            handleAny(pAny, path);
+        } else {
+            addToCurrentExpression(path);
+        }
     }
 
     public void visit(P_LogicalExpression node) {
@@ -313,24 +330,24 @@ public class ExpressionParser extends Visitor {
     private void handleOperatorFunction(Node node) {
         Expression previousExpression = currentExpression;
 
-        final int childCount = node.getChildCount();
+        final int childCount = node.size();
         if (childCount < 3 || childCount % 2 == 0) {
             throw new IllegalArgumentException("'" + node.getClass().getName() + "' must have at least two parameters");
         }
         // Find first operator
-        String operatorName = ((Token) node.getChild(1)).getImage();
+        String operatorName = ((Token) node.get(1)).toString();
         Function function = getFunction(operatorName);
         currentExpression = function;
         // Put the first two parameters into the first (current) operator
-        visit(node.getChild(0));
-        visit(node.getChild(2));
+        visit(node.get(0));
+        visit(node.get(2));
 
         for (int i = 3; i < childCount; i += 2) {
-            operatorName = ((Token) node.getChild(i)).getImage();
+            operatorName = ((Token) node.get(i)).toString();
             function = getFunction(operatorName);
             function.addParameter(currentExpression);
             currentExpression = function;
-            visit(node.getChild(i + 1));
+            visit(node.get(i + 1));
         }
         currentExpression = previousExpression;
         addToCurrentExpression(function);
@@ -338,13 +355,13 @@ public class ExpressionParser extends Visitor {
 
     public void handleFunction(Node node) {
         Expression previousExpression = currentExpression;
-        final int childCount = node.getChildCount();
+        final int childCount = node.size();
 
-        String operator = node.getFirstToken().getImage();
+        String operator = node.getFirstChild().getImage();
         Function function = getFunction(operator);
         currentExpression = function;
         for (int i = 1; i < childCount; i += 2) {
-            visit(node.getChild(i));
+            visit(node.get(i));
         }
 
         currentExpression = previousExpression;
@@ -380,7 +397,7 @@ public class ExpressionParser extends Visitor {
             throw new IllegalArgumentException("comparison must have exactly 2 children");
         }
 
-        String operator = ((Token) node.getChild(1)).getImage();
+        String operator = ((Token) node.getChild(1)).toString();
         Function function = getFunction(operator);
         currentExpression = function;
         visit(node.getChild(0));
@@ -406,7 +423,7 @@ public class ExpressionParser extends Visitor {
     }
 
     public void visit(T_STR_LIT node) {
-        String image = node.getImage();
+        String image = node.toString();
         if (image.length() < 2) {
             throw new IllegalArgumentException("String constant too short.");
         }
@@ -414,7 +431,7 @@ public class ExpressionParser extends Visitor {
     }
 
     public void visit(T_GEO_STR_LIT node) {
-        String image = node.getImage();
+        String image = node.toString();
         Matcher matcher = GEORAPHY_PATTERN.matcher(image);
         if (matcher.matches()) {
             addToCurrentExpression(GeoJsonConstant.fromString(matcher.group(1).trim()));
@@ -424,49 +441,49 @@ public class ExpressionParser extends Visitor {
     }
 
     public void visit(T_DURATION node) {
-        String image = node.getImage();
+        String image = node.toString();
         DurationConstant value = DurationConstant.parse(image.substring(9, image.length() - 1));
         addToCurrentExpression(value);
     }
 
     public void visit(T_DATETIMEINTERVAL node) {
-        String image = node.getImage();
+        String image = node.toString();
         IntervalConstant value = IntervalConstant.parse(image);
         addToCurrentExpression(value);
     }
 
     public void visit(T_DATETIME node) {
-        String image = node.getImage();
+        String image = node.toString();
         DateTimeConstant value = DateTimeConstant.parse(image);
         addToCurrentExpression(value);
     }
 
     public void visit(T_DATE node) {
-        String image = node.getImage();
+        String image = node.toString();
         DateConstant value = DateConstant.parse(image);
         addToCurrentExpression(value);
     }
 
     public void visit(T_TIME node) {
-        String image = node.getImage();
+        String image = node.toString();
         TimeConstant value = TimeConstant.parse(image);
         addToCurrentExpression(value);
     }
 
     public void visit(T_LONG node) {
-        String image = node.getImage();
+        String image = node.toString();
         IntegerConstant value = new IntegerConstant(Long.valueOf(image));
         addToCurrentExpression(value);
     }
 
     public void visit(T_DOUBLE node) {
-        String image = node.getImage();
+        String image = node.toString();
         DoubleConstant value = new DoubleConstant(Double.valueOf(image));
         addToCurrentExpression(value);
     }
 
     public void visit(T_BOOL node) {
-        String image = node.getImage();
+        String image = node.toString();
         BooleanConstant value = new BooleanConstant(image);
         addToCurrentExpression(value);
     }

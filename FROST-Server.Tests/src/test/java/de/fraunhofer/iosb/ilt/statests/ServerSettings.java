@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
-import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +38,7 @@ public class ServerSettings {
     /**
      * The timeout to use when waiting for MQTT messages.
      */
-    public static final long MQTT_TIMEOUT = 30000;
+    public static final long MQTT_TIMEOUT_MS = 30000;
 
     /**
      * The root of FROST, without the v1.0.
@@ -176,8 +176,8 @@ public class ServerSettings {
      *
      * @return the mqttTimeOut
      */
-    public long getMqttTimeOut() {
-        return MQTT_TIMEOUT;
+    public long getMqttTimeOutMs() {
+        return MQTT_TIMEOUT_MS;
     }
 
 }

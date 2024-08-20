@@ -193,4 +193,25 @@ Function | Description &amp; Example
 `fractionalseconds(t1)` <br/> double | Returns the millisecond part of time t1 <br/> `fractionalseconds(phenomenonTime) eq 0`
 `totaloffsetminutes(t1)` <br/> int | Returns the offset part of time t1 <br/> `totaloffsetminutes(phenomenonTime) eq 60`
 
+### Grouping Functions
+
+Grouping functions allow clients to search for items in lists or sets.
+Clients can use `any()` to search in related entity sets and `in` to search in properties.
+
+| Function | Description &amp; Example |
+| --- | --- |
+| `in` <br/> bool | Returns true if the item on the left is in the array on the right. <br/> `properties/countryCode in ('IT','NL')` <br/> `'myTag' in properties/tags` |
+| `relatedSet/any(x: <predicate>)` | Returns true if any of the Entities in the set match the predicate. <br/> `Datastreams/any(d: d/ObservedProperty/name eq 'NO2')`|
+
+
+Give me all Things that have both Datastreams that measure NO2 and Datastreams that measure O3:
+```
+v1.1/Things?$filter=Datastreams/any(d1: d1/ObservedProperty/name eq 'NO2') and Datastreams/any(d2: d2/ObservedProperty/name eq 'O3')
+```
+
+Give me all Things that have Datastreams that have Observations in the last 10 minutes that exceed the threshold specified in the Datastream:
+```
+v1.1/Things?$filter=Datastreams/any(d: d/Observations/any(o: o/phenomenonTime ge now() sub duration'PT10m' and o/result gt d/properties/threshold))
+```
+
 

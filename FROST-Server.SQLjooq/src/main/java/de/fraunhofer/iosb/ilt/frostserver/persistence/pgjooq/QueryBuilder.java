@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -41,12 +40,13 @@ import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.RegExUtils;
 import org.jooq.AggregateFunction;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
 import org.jooq.DeleteConditionStep;
@@ -90,20 +90,18 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private final JooqPersistenceManager pm;
     private final CoreSettings coreSettings;
-    private final PersistenceSettings settings;
     private final TableCollection tableCollection;
     private Query staQuery;
 
     private Set<Property> selectedProperties;
     private TableRef lastPath;
-    private TableRef mainTable;
     private NavigationPropertyMain lastNavProp;
 
     private boolean forPath = false;
     private ResourcePath requestedPath;
     private boolean forTypeAndId = false;
     private EntityType requestedEntityType;
-    private Id requestedId;
+    private PkValue requestedId;
 
     private boolean forUpdate = false;
     private boolean single = false;
@@ -114,8 +112,11 @@ public class QueryBuilder implements ResourcePathVisitor {
     public QueryBuilder(JooqPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
         this.pm = pm;
         this.coreSettings = coreSettings;
-        this.settings = coreSettings.getPersistenceSettings();
         this.tableCollection = tableCollection;
+    }
+
+    public JooqPersistenceManager getPersistenceManager() {
+        return pm;
     }
 
     public QueryState<?> getQueryState() {
@@ -132,13 +133,13 @@ public class QueryBuilder implements ResourcePathVisitor {
         } else if (queryState.isDistinctRequired()) {
             if (queryState.isSqlSortFieldsSet()) {
                 if (staQuery == null || !staQuery.isPkOrder()) {
-                    queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                    queryState.getSqlSortFields().addAll(queryState.getSqlMainIdFields());
                 }
                 selectStep = dslContext.select(queryState.getSqlSelectFields())
                         .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
             } else {
                 selectStep = dslContext.select(queryState.getSqlSelectFields())
-                        .distinctOn(queryState.getSqlMainIdField());
+                        .distinctOn(queryState.getSqlMainIdFields());
             }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
@@ -162,12 +163,12 @@ public class QueryBuilder implements ResourcePathVisitor {
             count = 1;
         }
         var limit = orderByStep.limit(skip, count);
-        if (forUpdate) {
-            return limit.forUpdate();
-        }
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, limit.getSQL(ParamType.INDEXED));
+        }
+        if (forUpdate) {
+            return limit.forUpdate();
         }
         return limit;
     }
@@ -186,9 +187,15 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             count = DSL.countDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            count = DSL.countDistinct(queryState.getSqlMainIdField());
+            final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+            count = DSL.countDistinct(sqlMainIdFields.toArray(Field[]::new));
         } else {
-            count = DSL.count(queryState.getSqlMainIdField());
+            final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+            if (sqlMainIdFields.size() > 1) {
+                count = DSL.count();
+            } else {
+                count = DSL.count(sqlMainIdFields.get(0));
+            }
         }
         SelectConditionStep<Record1<Integer>> query = dslContext.select(count)
                 .from(queryState.getSqlFrom())
@@ -209,9 +216,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             subSelect = DSL.selectDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            subSelect = DSL.selectDistinct(queryState.getSqlMainIdField());
+            subSelect = DSL.selectDistinct(queryState.getSqlMainIdFields());
         } else {
-            subSelect = DSL.select(queryState.getSqlMainIdField());
+            subSelect = DSL.select(queryState.getSqlMainIdFields());
         }
         var selectFromWhere = subSelect.from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere())
@@ -259,9 +266,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             final Set<Field> sqlSelectFields = queryState.getSqlSelectFields();
             select = dslContext.selectDistinct(sqlSelectFields.toArray(Field[]::new));
         } else if (queryState.isDistinctRequired()) {
-            select = dslContext.selectDistinct(queryState.getSqlMainIdField());
+            select = dslContext.selectDistinct(queryState.getSqlMainIdFields());
         } else {
-            select = dslContext.select(queryState.getSqlMainIdField());
+            select = dslContext.select(queryState.getSqlMainIdFields());
         }
         String selectQuery = select
                 .from(queryState.getSqlFrom())
@@ -285,22 +292,22 @@ public class QueryBuilder implements ResourcePathVisitor {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().entityName, new IllegalArgumentException("Unknown type for delete"));
         }
 
-        SelectConditionStep idSelect = DSL.select(queryState.getSqlMainIdField())
+        final List<Field> sqlMainIdFields = queryState.getSqlMainIdFields();
+        SelectConditionStep idSelect = DSL.select(sqlMainIdFields)
                 .from(queryState.getSqlFrom())
                 .where(queryState.getSqlWhere());
 
         DeleteConditionStep<? extends Record> delete = dslContext
                 .deleteFrom(table)
                 .where(
-                        table.getId().in(idSelect));
-
+                        DSL.row(table.getPkFields()).in(idSelect));
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, delete.getSQL(ParamType.INDEXED));
         }
         return delete;
     }
 
-    public QueryBuilder forTypeAndId(EntityType entityType, Id id) {
+    public QueryBuilder forTypeAndId(EntityType entityType, PkValue id) {
         if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
@@ -345,7 +352,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
             // Joins created when generating the path should not be merged with
             // joins generated for the filter or orderby.
-            mainTable.clearJoins();
+            queryState.getTableRef().clearJoins();
 
             parseFilter(staQuery);
             parseOrder(staQuery);
@@ -372,18 +379,18 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
         for (Property property : query.getSelect()) {
             if (property instanceof NavigationPropertyMain) {
-                selectedProperties.add(requestedEntityType.getPrimaryKey());
+                selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             }
             selectedProperties.add(property);
         }
         if (query.isPkOrder() && !query.isSelectDistinct() && !selectedProperties.isEmpty()) {
             // We're ordering by PK, make sure we select it too, so we can build better nextLinks
-            selectedProperties.add(requestedEntityType.getPrimaryKey());
+            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
         }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(requestedEntityType.getPrimaryKey());
+            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -395,7 +402,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private void parseOrder(Query query) {
         if (query != null) {
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -407,7 +414,7 @@ public class QueryBuilder implements ResourcePathVisitor {
             queryState.setFilter(true);
             final Expression filter = query.getFilter();
             final Expression skipFilter = query.getSkipFilter();
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this, mainTable);
+            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
             if (filter != null) {
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
@@ -419,7 +426,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        lastPath = queryEntityType(element, element.getId(), lastPath);
+        lastPath = queryEntityType(element, element.getPkValues(), lastPath);
     }
 
     @Override
@@ -451,7 +458,7 @@ public class QueryBuilder implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef queryEntityType(PathElementEntityType pe, Id targetId, TableRef last) {
+    private TableRef queryEntityType(PathElementEntityType pe, PkValue targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
         if (last != null) {
             TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
@@ -464,7 +471,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         if (last == null) {
             StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX, pm);
             queryState = new QueryState(pm, tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
-            result = new TableRef(entityType, tableForType);
+            result = queryState.getTableRef();
         } else {
             if (entityType.equals(last.getType()) && lastNavProp == null) {
                 result = last;
@@ -474,60 +481,24 @@ public class QueryBuilder implements ResourcePathVisitor {
         }
 
         if (targetId != null) {
+<<<<<<< HEAD
             final Object id = targetId.asBasicPersistenceType();
             final Field lastId = result.getTable().getId();
             final Field optimisedLastId = result.getJoinEqual(lastId);
             queryState.setSqlWhere(queryState.getSqlWhere().and(optimisedLastId.eq(id)));
+=======
+            final List<Field> lastId = result.getTable().getPkFields();
+            result.getJoinEqual(lastId);
+            Condition where = lastId.get(0).eq(targetId.get(0));
+            for (int idx = 1; idx < lastId.size(); idx++) {
+                where = where.and(lastId.get(idx).eq(targetId.get(idx)));
+            }
+            queryState.setSqlWhere(queryState.getSqlWhere().and(where));
+>>>>>>> v2.x
         }
 
-        if (mainTable == null) {
-            mainTable = result;
-        }
         lastNavProp = pe.getNavigationProperty();
         return result;
-    }
-
-    /**
-     * Queries the given entity type, as relation to the given table reference
-     * and returns a new table reference. Effectively, this generates a join.
-     *
-     * @param np The NavigationProperty to query
-     * @param last The table the requested entity is related to.
-     * @return The table reference of the requested entity.
-     */
-    public TableRef queryEntityType(NavigationProperty np, TableRef last) {
-        if (mainTable == null) {
-            throw new IllegalStateException("mainTable should not be null");
-        }
-        if (last == null) {
-            throw new IllegalStateException("last result should not be null");
-        }
-
-        TableRef existingJoin = last.getJoin(np);
-        if (existingJoin != null) {
-            return existingJoin;
-        }
-
-        return last.createJoin(np.getName(), queryState);
-    }
-
-    /**
-     * Directly query an entity type. Used for custom linking.
-     *
-     * @param epcl the custom link.
-     * @param sourceRef The source table ref.
-     * @param sourceIdField The source ID field.
-     * @return A new table ref with the target entity type table joined.
-     */
-    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
-        final EntityType targetEntityType = epcl.getEntityType();
-        final StaMainTable<?> target = tableCollection.getTablesByType().get(targetEntityType);
-        final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), pm);
-        final Field<?> targetField = targetAliased.getId();
-        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.eq(sourceIdField)));
-        TableRef newRef = new TableRef(targetEntityType, targetAliased);
-        sourceRef.addJoin(epcl, newRef);
-        return newRef;
     }
 
     public TableCollection getTableCollection() {
@@ -535,7 +506,10 @@ public class QueryBuilder implements ResourcePathVisitor {
     }
 
     public static TableRef createJoinedRef(TableRef base, NavigationProperty np, StaMainTable<?> table) {
-        TableRef newRef = new TableRef(np.getEntityType(), table);
+        if (np.getEntityType() != table.getEntityType()) {
+            throw new IllegalArgumentException("NavProp does not point to given table: " + np.getEntityType() + " != " + table.getEntityType());
+        }
+        TableRef newRef = new TableRef(table);
         if (base != null) {
             base.addJoin(np, newRef);
         }

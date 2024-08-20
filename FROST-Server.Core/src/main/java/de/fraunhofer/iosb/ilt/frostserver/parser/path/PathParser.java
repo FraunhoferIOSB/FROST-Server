@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.UTF8;
-
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -35,6 +34,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.PParser;
@@ -48,9 +49,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_REF;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_STR_LIT;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_VALUE;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +73,7 @@ public class PathParser extends Visitor {
     private void addAsEntity(EntityType type, String id) {
         PathElementEntity epa = new PathElementEntity(type, resourcePath.getLastElement());
         if (id != null) {
-            epa.setId(type.parsePrimaryKey(id));
+            epa.setPkValues(type.parsePrimaryKey(id));
             resourcePath.setIdentifiedElement(epa);
         }
         resourcePath.addPathElement(epa, true, false);
@@ -84,7 +82,7 @@ public class PathParser extends Visitor {
     private void addAsEntity(NavigationPropertyEntity type, String id) {
         PathElementEntity epa = new PathElementEntity(type, resourcePath.getLastElement());
         if (id != null) {
-            epa.setId((type).getEntityType().parsePrimaryKey(id));
+            epa.setPkValues(type.getEntityType().parsePrimaryKey(id));
             resourcePath.setIdentifiedElement(epa);
         }
         resourcePath.addPathElement(epa, true, false);
@@ -259,7 +257,7 @@ public class PathParser extends Visitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+        return parsePath(modelRegistry, serviceRootUrl, version, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
     /**
@@ -273,21 +271,6 @@ public class PathParser extends Visitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, PrincipalExtended user) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, UTF8, user);
-    }
-
-    /**
-     * Parse the given path.
-     *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @param encoding The character encoding to use when parsing.
-     * @param user The principal of the user.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, Charset encoding, PrincipalExtended user) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setVersion(version);
@@ -297,8 +280,7 @@ public class PathParser extends Visitor {
         }
         resourcePath.setPath(path);
         LOGGER.debug("Parsing: {}", path);
-        InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        PParser parser = new PParser(is);
+        PParser parser = new PParser(path);
         try {
             parser.Start();
             PathParser pp = new PathParser(modelRegistry, resourcePath, user.isAdmin());
@@ -307,6 +289,14 @@ public class PathParser extends Visitor {
             throw new IllegalArgumentException("Path is not valid: " + ex.getMessage());
         }
         return resourcePath;
+    }
+
+    public static Query parsePathAndQuery(String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
+        int index = pathAndQuery.indexOf('?');
+        String pathString = pathAndQuery.substring(0, index);
+        String queryString = pathAndQuery.substring(index + 1);
+        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), serviceRootUrl, version, pathString);
+        return QueryParser.parseQuery(queryString, settings, path).validate(null, path.getMainElementType());
     }
 
 }

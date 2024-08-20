@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        refs: [refs/tags/v2.2.3, refs/tags/v2.0.13]
+        refs: [refs/tags/v2.3.2, refs/tags/v2.2.3, refs/tags/v2.0.13]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
@@ -38,14 +38,22 @@ jobs:
         distribution: 'adopt'
         java-version: 17
 
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Restore CVD Database from Cache
       uses: actions/cache/restore@v4
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb
+        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
+        restore-keys: ${{ runner.os }}-maven-owasp-cvedb
 
     - name: Update CVD Database
+      continue-on-error: true
       env:
         OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
         OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
@@ -58,7 +66,7 @@ jobs:
       with:
         path: |
           ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb
+        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
 
     - name: Check OWASP
       env:
@@ -66,7 +74,7 @@ jobs:
         OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
         NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
       run: |
-        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
+        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp -DautoUpdate=false --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
 
     - name: Build with Maven
       run: |
@@ -100,7 +108,7 @@ jobs:
 
 
     - name: Build and push - HTTP
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -113,7 +121,7 @@ jobs:
 
 
     - name: Build and push - MQTTP
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -126,7 +134,7 @@ jobs:
 
 
     - name: Build and push - MQTT
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"

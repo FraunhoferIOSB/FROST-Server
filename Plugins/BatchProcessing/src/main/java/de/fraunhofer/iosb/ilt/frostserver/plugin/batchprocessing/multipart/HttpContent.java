@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
@@ -96,10 +97,12 @@ public class HttpContent extends Request implements MultipartContent {
         if (line.trim().isEmpty()) {
             parseState = State.COMMAND;
             if (requireContentId) {
-                contentId = headersOuter.get("content-id");
-                if (StringHelper.isNullOrEmpty(contentId)) {
+                List<String> contentIds = headersOuter.get("content-id");
+                if (StringHelper.isNullOrEmpty(contentIds)) {
                     parseFailed = true;
                     errors.add("All Changeset parts must have a valid content-id header.");
+                } else {
+                    contentId = contentIds.get(0);
                 }
             }
         } else {
@@ -172,21 +175,21 @@ public class HttpContent extends Request implements MultipartContent {
     }
 
     @Override
-    public Id getContentIdValue() {
+    public PkValue getContentIdValue() {
         return contentIdValue;
     }
 
     @Override
-    public void setContentIdValue(Id contentIdValue) {
+    public void setContentIdValue(PkValue contentIdValue) {
         this.contentIdValue = contentIdValue;
     }
 
     @Override
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value.getUrl());
+            path = path.replace(pair.key, pair.getKey());
             final String quotedKey = '"' + pair.key + '"';
-            final String valueJson = pair.value.getJson();
+            final String valueJson = UrlHelper.quoteForJson(pair.value.get(0));
             int keyIndex = 0;
             while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
                 data.replace(keyIndex, keyIndex + quotedKey.length(), valueJson);
@@ -227,8 +230,10 @@ public class HttpContent extends Request implements MultipartContent {
         if (statusLine != null) {
             content.append(statusLine).append('\n');
         }
-        for (Map.Entry<String, String> entry : headersInner.entrySet()) {
-            content.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');
+        for (Map.Entry<String, List<String>> entry : headersInner.entrySet()) {
+            for (String value : entry.getValue()) {
+                content.append(entry.getKey()).append(": ").append(value).append('\n');
+            }
         }
         content.append('\n');
         content.append(data);

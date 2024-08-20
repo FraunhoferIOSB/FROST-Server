@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,29 +15,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
-
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
+package de.fraunhofer.iosb.ilt.frostserver.service;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public class IdConstant extends Constant<Id> {
-
-    public IdConstant(Id value) {
-        super(value);
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        throw new UnsupportedOperationException("Not supported for this type.");
-    }
-
-    @Override
-    public String toUrl() {
-        return value.getUrl();
-    }
-
+public enum InitResult {
+    /**
+     * Initialisation was successful.
+     */
+    INIT_OK,
+    /**
+     * Initialisation needs to be delayed because dependencies are not loaded
+     * yet.
+     */
+    INIT_DELAY,
+    /**
+     * Initialisation failed.
+     */
+    INIT_FAILED
 }

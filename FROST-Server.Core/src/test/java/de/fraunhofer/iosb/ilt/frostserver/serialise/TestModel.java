@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,9 +98,9 @@ public class TestModel {
         propertyValues.put(ET_HOUSE, propertyValuesHouse);
         propertyValues.put(ET_ROOM, propertyValuesRoom);
 
-        propertyValuesStreet.put(ET_STREET.getPrimaryKey(), new IdLong(1));
-        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey(), new IdLong(1));
-        propertyValuesRoom.put(ET_ROOM.getPrimaryKey(), new IdLong(1));
+        propertyValuesStreet.put(ET_STREET.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesRoom.put(ET_ROOM.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
         propertyValuesStreet.put(EP_NAME, "StreetName");
         propertyValuesHouse.put(EP_NAME, "HouseName");
         propertyValuesRoom.put(EP_NAME, "RoomName");
@@ -116,24 +117,24 @@ public class TestModel {
         propertyValuesHouse.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
         propertyValuesRoom.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
 
-        int nextId = 100;
-        propertyValuesRoom.put(NP_BATHROOMFOR_ROOM, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
-        propertyValuesRoom.put(NP_HOUSE_ROOM, new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        long nextId = 100;
+        propertyValuesRoom.put(NP_BATHROOMFOR_ROOM, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
+        propertyValuesRoom.put(NP_HOUSE_ROOM, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
 
         EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
-        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
-        rooms.add(new DefaultEntity(ET_ROOM, new IdLong(nextId++)));
+        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
+        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
         propertyValuesHouse.put(NP_ROOMS_HOUSE, rooms);
         propertyValuesHouse.put(NP_BATHROOMS_HOUSE, rooms);
 
         EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
-        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
-        houses.add(new DefaultEntity(ET_HOUSE, new IdLong(nextId++)));
+        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
+        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
         propertyValuesStreet.put(NP_HOUSES_STREET, houses);
 
         EntitySetImpl streets = new EntitySetImpl(ET_STREET);
-        streets.add(new DefaultEntity(ET_STREET, new IdLong(nextId++)));
-        streets.add(new DefaultEntity(ET_STREET, new IdLong(nextId++)));
+        streets.add(new DefaultEntity(ET_STREET, PkValue.of(nextId++)));
+        streets.add(new DefaultEntity(ET_STREET, PkValue.of(nextId++)));
         propertyValuesHouse.put(NP_STREETS_HOUSE, streets);
 
         for (EntityType et : modelRegistry.getEntityTypes()) {

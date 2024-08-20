@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Objects;
 
@@ -27,7 +31,11 @@ import java.util.Objects;
  *
  * @author jab
  */
-public class UnitOfMeasurement implements ComplexValue {
+public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
+
+    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", EDM_STRING);
+    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>("definition", EDM_STRING);
+    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>("symbol", EDM_STRING);
 
     private String name;
     private String symbol;
@@ -46,7 +54,7 @@ public class UnitOfMeasurement implements ComplexValue {
     }
 
     @Override
-    public Object get(String name) {
+    public Object getProperty(String name) {
         switch (name) {
             case "name":
                 return getName();
@@ -57,6 +65,48 @@ public class UnitOfMeasurement implements ComplexValue {
             default:
                 return null;
         }
+    }
+
+    @Override
+    public UnitOfMeasurement setProperty(String name, Object value) {
+        switch (name) {
+            case "name":
+                return setName((String) value);
+            case "symbol":
+                return setSymbol((String) value);
+            case "definition":
+                return setDefinition((String) value);
+            default:
+                return this;
+        }
+    }
+
+    @Override
+    public <P> P getProperty(Property<P> property) {
+        if (property == EP_NAME) {
+            return (P) name;
+        }
+        if (property == EP_DEFINITION) {
+            return (P) definition;
+        }
+        if (property == EP_SYMBOL) {
+            return (P) symbol;
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
+    }
+
+    @Override
+    public <P> UnitOfMeasurement setProperty(Property<P> property, P value) {
+        if (property == EP_NAME) {
+            return setName((String) value);
+        }
+        if (property == EP_DEFINITION) {
+            return setDefinition((String) value);
+        }
+        if (property == EP_SYMBOL) {
+            return setSymbol((String) value);
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
     }
 
     /**

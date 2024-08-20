@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -56,7 +57,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.GeoJsonObject;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,12 +133,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET, false, false);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, true, false);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_GEOJSON, true, false, true, false);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, true, false);
-    public final EntityPropertyMain<GeoJsonObject> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
+    public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
     public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, false, false, true, false);
     public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, false, true, true, false);
     public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, false, true, true, false);
@@ -205,12 +205,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     private boolean enabled;
     private boolean fullyInitialised;
 
-    public PluginCoreModel() {
-        LOGGER.info("Creating new Core Model Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, CoreModelSettings.class);
@@ -221,6 +217,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             epResultTimeDs.setReadOnly(!modelSettings.dsPropsEditable);
             epObservedArea.setReadOnly(!modelSettings.dsPropsEditable);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override
@@ -249,12 +246,12 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", TYPE_REFERENCE_UOM)
-                .addProperty("name", EDM_STRING, false)
-                .addProperty("symbol", EDM_STRING, false)
-                .addProperty(NAME_DEFINITION, EDM_STRING, false);
+        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false, UnitOfMeasurement::new, TYPE_REFERENCE_UOM)
+                .registerProperty(UnitOfMeasurement.EP_NAME)
+                .registerProperty(UnitOfMeasurement.EP_DEFINITION)
+                .registerProperty(UnitOfMeasurement.EP_SYMBOL);
         mr.registerPropertyType(eptUom)
-                .registerPropertyType(TypeSimpleCustom.STA_GEOJSON)
+                .registerPropertyType(TypeSimpleCustom.STA_LOCATION)
                 .registerPropertyType(TypeComplex.STA_OBJECT)
                 .registerPropertyType(TypeComplex.STA_MAP)
                 .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)
@@ -384,8 +381,10 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_DATASTREAM, modelSettings.idTypeDatastream);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_FEATURE, modelSettings.idTypeFeature);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_HIST_LOCATION, modelSettings.idTypeHistLoc);
+        ppm.generateLiquibaseVariables(target, NAME_ET_HISTORICALLOCATION, modelSettings.idTypeHistLoc);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_LOCATION, modelSettings.idTypeLocation);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_OBS_PROP, modelSettings.idTypeObsProp);
+        ppm.generateLiquibaseVariables(target, NAME_ET_OBSERVEDPROPERTY, modelSettings.idTypeObsProp);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_OBSERVATION, modelSettings.idTypeObservation);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_SENSOR, modelSettings.idTypeSensor);
         ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_THING, modelSettings.idTypeThing);

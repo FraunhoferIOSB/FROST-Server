@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -646,7 +646,7 @@ public class Service implements AutoCloseable {
             throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
         }
         PathElementEntity mainElement = (PathElementEntity) path.getMainElement();
-        if (mainElement.getId() == null) {
+        if (!mainElement.primaryKeyFullySet()) {
             throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
         }
         if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
@@ -750,7 +750,7 @@ public class Service implements AutoCloseable {
             if (mainEntity != path.getLastElement()) {
                 return errorResponse(response, 400, "DELETE not allowed on properties.");
             }
-            if (mainEntity.getId() == null) {
+            if (!mainEntity.primaryKeyFullySet()) {
                 return errorResponse(response, 400, "No ID found.");
             }
             if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
@@ -987,7 +987,7 @@ public class Service implements AutoCloseable {
         } else {
             return LinkData.error("Not a valid DELETE-Reference action.");
         }
-        if (sourceEntity.getId() == null || lastElement.getId() == null) {
+        if (!sourceEntity.primaryKeyFullySet() || !lastElement.primaryKeyFullySet()) {
             return LinkData.error("Could not find Id for source or target entity.");
         }
         return LinkData.ok(sourceEntity, navigationProperty, lastElement);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -85,7 +85,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     LOGGER.debug("  Check on {}.{} (empty): {}", entityType, targetNp, isEmptyAllowed());
                     return isEmptyAllowed();
                 }
-                final Id targetId = targetEntity.getId();
+                final PkValue targetId = targetEntity.getPrimaryKeyValues();
 
                 // Run the actual query as admin, but with the user in the context.
                 PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
@@ -103,10 +103,10 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     return isEmptyAllowed();
                 }
                 for (Entity te : targetEntities) {
-                    final Id targetId = te.getId();
-                    if (targetId == null) {
+                    if (!te.primaryKeyFullySet()) {
                         // Entity does not exist yet. Will be checked wen it is created.
                     } else {
+                        final PkValue targetId = te.getPrimaryKeyValues();
                         // Run the actual query as admin, but with the user in the context.
                         PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
                         Entity result = pm.get(targetType, targetId, parsedQuery);
@@ -140,7 +140,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
                     .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
             parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                    .validate(targetType);
+                    .validate(null, targetType);
             LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
         } catch (RuntimeException ex) {
             LOGGER.error("Failed to initialise check.", ex);

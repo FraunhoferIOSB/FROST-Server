@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -60,9 +59,6 @@ public class TypeReferencesHelper {
         // Empty on purpose.
     };
     public static final TypeReference<GeoJsonObject> TYPE_REFERENCE_GEOJSONOBJECT = new TypeReference<GeoJsonObject>() {
-        // Empty on purpose.
-    };
-    public static final TypeReference<Id> TYPE_REFERENCE_ID = new TypeReference<Id>() {
         // Empty on purpose.
     };
     public static final TypeReference<Integer> TYPE_REFERENCE_INTEGER = new TypeReference<Integer>() {

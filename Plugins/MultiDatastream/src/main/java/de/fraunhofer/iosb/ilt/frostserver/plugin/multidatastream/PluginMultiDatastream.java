@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -60,8 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The V1.1 multiDatastream plugin.
  */
 public class PluginMultiDatastream implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
@@ -99,12 +99,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     private boolean enabled;
     private boolean fullyInitialised;
 
-    public PluginMultiDatastream() {
-        LOGGER.info("Creating new MultiDatastream Plugin.");
-    }
-
     @Override
-    public void init(CoreSettings settings) {
+    public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(MdsModelSettings.TAG_ENABLE_MDS_MODEL, MdsModelSettings.class);
@@ -113,6 +109,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             coreModelSettings = new CoreModelSettings(settings);
             settings.getPluginManager().registerPlugin(this);
         }
+        return InitResult.INIT_OK;
     }
 
     @Override
@@ -230,7 +227,11 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             final DataType dataTypeSnsr = ppm.getDataTypeFor(coreModelSettings.idTypeSensor);
             final DataType dataTypeThng = ppm.getDataTypeFor(coreModelSettings.idTypeThing);
             final DataType dataTypeMds = ppm.getDataTypeFor(modelSettings.idTypeMultiDatastream);
+<<<<<<< HEAD
             final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getId().getDataType();
+=======
+            final DataType dataTypeObsProp = tableCollection.getTableForType(pluginCoreModel.etObservedProperty).getPkFields().get(0).getDataType();
+>>>>>>> v2.x
             tableCollection.registerTable(etMultiDatastream, new TableImpMultiDatastreams(dataTypeMds, dataTypeSnsr, dataTypeThng, this, pluginCoreModel));
             tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties(dataTypeMds, dataTypeObsProp));
         }

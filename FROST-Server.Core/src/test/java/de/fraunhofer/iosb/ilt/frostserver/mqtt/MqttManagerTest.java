@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -57,6 +57,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ class MqttManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManagerTest.class.getName());
 
-    private static final int REPEAT_COUNT = 0;
+    private static final int REPEAT_COUNT = 1;
     private static final int MESSAGE_COUNT = 2000;
 
     private CoreSettings coreSettings;
@@ -166,21 +167,24 @@ class MqttManagerTest {
         });
 
         Calendar start = Calendar.getInstance();
-        int topicId = 0;
-        for (int pubId = 0; pubId < publishCount; pubId++) {
+        long topicId = 0;
+        for (long pubId = 0; pubId < publishCount; pubId++) {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new DefaultEntity(testModel.ET_ROOM, new IdLong(pubId))
+                            new DefaultEntity(testModel.ET_ROOM, PkValue.of(pubId))
                                     .setProperty(testModel.EP_NAME, "" + pubId)
-                                    .setProperty(testModel.NP_ROOM_HOUSE, new DefaultEntity(testModel.ET_HOUSE, new IdLong(topicId))));
+                                    .setProperty(testModel.NP_ROOM_HOUSE, new DefaultEntity(testModel.ET_HOUSE, PkValue.of(topicId))));
             topicId++;
             if (topicId >= subscriptionCount) {
                 topicId = 0;
             }
             mqttManager.messageReceived(ecm);
         }
-        barrier.await(15, TimeUnit.SECONDS);
+        boolean finished = barrier.await(15, TimeUnit.SECONDS);
+        if (!finished) {
+            Assertions.fail("Failed to receive all messages.");
+        }
         Calendar end = Calendar.getInstance();
         LOGGER.info("subscribed to, {}, {}, {}, ms", subscriptionCount, publishedCount.get(), (end.getTimeInMillis() - start.getTimeInMillis()));
         mqttServer.unsubscribeAll();
@@ -324,7 +328,7 @@ class MqttManagerTest {
         }
 
         @Override
-        public Entity get(EntityType entityType, Id id) {
+        public Entity get(EntityType entityType, PkValue id) {
             return null;
         }
 
@@ -362,8 +366,9 @@ class MqttManagerTest {
         }
 
         @Override
-        public void init(CoreSettings settings) {
+        public InitResult init(CoreSettings settings) {
             coreSettings = settings;
+            return InitResult.INIT_OK;
         }
 
         @Override

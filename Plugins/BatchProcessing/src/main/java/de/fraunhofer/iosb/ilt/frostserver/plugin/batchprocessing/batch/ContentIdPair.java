@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 
 /**
  *
@@ -26,19 +28,29 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 public final class ContentIdPair {
 
     public final String key;
-    public final Id value;
+    public final PkValue value;
+    public final EntityType type;
 
-    public ContentIdPair(String key, Id value) {
+    public ContentIdPair(String key, PkValue value, EntityType type) {
         this.key = key;
         this.value = value;
+        this.type = type;
     }
 
     public String getKey() {
         return key;
     }
 
-    public Id getValue() {
+    public PkValue getValue() {
         return value;
+    }
+
+    public EntityType getType() {
+        return type;
+    }
+
+    public String keyToUrl() {
+        return UrlHelper.quoteForUrl(type.getPrimaryKey(), value);
     }
 
     @Override

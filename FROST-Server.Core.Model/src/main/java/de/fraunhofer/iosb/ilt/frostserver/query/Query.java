@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
@@ -141,11 +142,18 @@ public class Query {
         if (pathEntityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
-        validate(pathEntityType);
+        validate(null, pathEntityType);
         return this;
     }
 
     public Query validate(EntityType entityType) {
+        return validate(null, entityType);
+    }
+
+    public Query validate(ParserContext context, EntityType entityType) {
+        if (context == null) {
+            context = new ParserContext(modelRegistry);
+        }
         if (this.entityType == null) {
             this.entityType = entityType;
         }
@@ -170,24 +178,28 @@ public class Query {
         }
 
         for (Expand e : expand) {
-            e.validate(entityType);
+            e.validate(context, entityType);
         }
         reNestExpands();
 
         if (filter != null) {
-            filter.validate(modelRegistry.getParserHelper(), entityType);
+            filter.validate(context, entityType);
         }
         if (skipFilter != null) {
-            skipFilter.validate(modelRegistry.getParserHelper(), entityType);
+            skipFilter.validate(context, entityType);
         }
-        final EntityPropertyMain<Id> primaryKey = entityType.getPrimaryKey();
-        final String pkName = primaryKey.getName();
-        for (OrderBy order : orderBy) {
-            order.getExpression().validate(modelRegistry.getParserHelper(), entityType);
-            if (pkName.equals(order.getExpression().toUrl())) {
-                pkOrder = true;
+        PrimaryKey primaryKey = entityType.getPrimaryKey();
+        int pkCount = 0;
+        for (var keyProp : primaryKey.getKeyProperties()) {
+            final String pkName = keyProp.getName();
+            for (OrderBy order : orderBy) {
+                order.getExpression().validate(context, entityType);
+                if (pkName.equals(order.getExpression().toUrl())) {
+                    pkCount++;
+                }
             }
         }
+        pkOrder = pkCount >= primaryKey.getKeyProperties().size();
         if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
                 orderBy.add(dfltOrder);
@@ -297,6 +309,11 @@ public class Query {
 
     public Query addSelect(Property... properties) {
         select.addAll(Arrays.asList(properties));
+        return this;
+    }
+
+    public Query addSelect(List<EntityPropertyMain> properties) {
+        select.addAll(properties);
         return this;
     }
 

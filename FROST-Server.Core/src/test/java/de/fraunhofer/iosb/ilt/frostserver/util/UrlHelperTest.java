@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -178,12 +178,12 @@ class UrlHelperTest {
         Query queryBase = null;
         Query queryExpected = null;
         try {
-            queryBase = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+            queryBase = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse base url: " + baseUrl, e);
         }
         try {
-            queryExpected = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+            queryExpected = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
         }
@@ -194,7 +194,7 @@ class UrlHelperTest {
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
         Query nextQuery = null;
         try {
-            nextQuery = ParserUtils.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+            nextQuery = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed for base url {}", baseUrl);
             LOGGER.error("Expected nextLink   {}", expectedNextUrl);

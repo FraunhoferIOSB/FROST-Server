@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdUuid;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkSingle;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -46,7 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     /**
      * The Property that is the primary key of the entity.
      */
-    private EntityPropertyMain primaryKey;
+    private PrimaryKey primaryKey;
     /**
      * The Set of PROPERTIES that Entities of this type have.
      */
@@ -141,13 +142,12 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     public EntityType registerProperty(Property property) {
         properties.add(property);
         propertiesByName.put(property.getName(), property);
-        if (property instanceof EntityPropertyMain) {
-            EntityPropertyMain<?> propertyMain = (EntityPropertyMain<?>) property;
-            for (String alias : propertyMain.getAliases()) {
+        if (property instanceof EntityPropertyMain<?> epm) {
+            for (String alias : epm.getAliases()) {
                 propertiesByName.put(alias, property);
             }
             if (primaryKey == null) {
-                primaryKey = propertyMain;
+                primaryKey = new PkSingle(epm);
             }
         }
         return this;
@@ -196,15 +196,19 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
             }
         }
         // Make sure we have a default orderby and that it contains the primary key last.
-        boolean pkOrder = false;
-        final String pkName = primaryKey.getName();
-        for (OrderBy order : orderbyDefaults) {
-            if (pkName.equals(order.getExpression().toUrl())) {
-                pkOrder = true;
+        int pkCount = 0;
+        for (var keyProp : primaryKey.getKeyProperties()) {
+            String pkName = keyProp.getName();
+            for (OrderBy order : orderbyDefaults) {
+                if (pkName.equals(order.getExpression().toUrl())) {
+                    pkCount++;
+                }
             }
         }
-        if (!pkOrder) {
-            orderbyDefaults.add(new OrderBy(new Path(primaryKey), OrderBy.OrderType.ASCENDING));
+        if (pkCount < primaryKey.getKeyProperties().size()) {
+            for (var keyProp : primaryKey.getKeyProperties()) {
+                orderbyDefaults.add(new OrderBy(new Path(keyProp), OrderBy.OrderType.ASCENDING));
+            }
         }
     }
 
@@ -276,7 +280,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return validatorsUpdateEntity.remove(name);
     }
 
-    public EntityPropertyMain<Id> getPrimaryKey() {
+    public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 
@@ -296,6 +300,22 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         Property property = propertiesByName.get(name);
         if (property instanceof NavigationPropertyMain navigationPropertyMain) {
             return navigationPropertyMain;
+        }
+        return null;
+    }
+
+    public NavigationPropertyEntity getNavigationPropertyEntity(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyEntity npe) {
+            return npe;
+        }
+        return null;
+    }
+
+    public NavigationPropertyEntitySet getNavigationPropertyEntitySet(String name) {
+        Property property = propertiesByName.get(name);
+        if (property instanceof NavigationPropertyEntitySet npes) {
+            return npes;
         }
         return null;
     }
@@ -407,28 +427,28 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
             throw new IllegalArgumentException("Set does not have a parent entity!");
         }
         if (parent instanceof PathElementEntity parentEntity) {
-            Id parentId = parentEntity.getId();
-            if (parentId == null) {
+            if (!parentEntity.primaryKeyFullySet()) {
                 return;
             }
-            setParent(entity, containingSet.getNavigationProperty().getInverse(), parentId);
+            PkValue parentKeyValues = parentEntity.getPkValues();
+            setParent(entity, containingSet.getNavigationProperty().getInverse(), parentKeyValues);
         }
     }
 
-    private void setParent(Entity entity, NavigationPropertyMain navPropToParent, Id parentId) throws IncompleteEntityException {
+    private void setParent(Entity entity, NavigationPropertyMain navPropToParent, PkValue parentPkValues) throws IncompleteEntityException {
         if (navPropToParent == null) {
             LOGGER.error("Incorrect 'parent' entity type for {}: {}", entityName, navPropToParent);
             throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + navPropToParent);
         }
         EntityType parentType = navPropToParent.getEntityType();
         if (navPropToParent instanceof NavigationPropertyEntitySet navPropToParentSet) {
-            entity.addNavigationEntity(navPropToParentSet, new DefaultEntity(parentType).setId(parentId));
+            entity.addNavigationEntity(navPropToParentSet, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
         } else if (navPropToParent instanceof NavigationPropertyEntity navPropToParentEntity) {
             Entity parent = entity.getProperty(navPropToParentEntity);
-            if (parent != null && !parentId.equals(parent.getId())) {
+            if (parent != null && !Objects.equals(parentPkValues, parent.getPrimaryKeyValues())) {
                 throw new IllegalArgumentException("Navigation property " + navPropToParent.getName() + " set in both JSON and URL.");
             }
-            entity.setProperty(navPropToParent, new DefaultEntity(parentType).setId(parentId));
+            entity.setProperty(navPropToParent, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
         } else {
             throw new IllegalStateException("Unknown navigation property type: " + navPropToParent);
         }
@@ -522,18 +542,14 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return hash;
     }
 
-    public Id parsePrimaryKey(String input) {
-        Object rawId = primaryKey.getType().parseFromUrl(input);
-        if (rawId instanceof UUID uuid) {
-            return new IdUuid(uuid);
+    public PkValue parsePrimaryKey(String input) {
+        if (primaryKey instanceof PkSingle pks) {
+            EntityPropertyMain keyProp = pks.getKeyProperties().get(0);
+            return new PkValue(1)
+                    .set(0, keyProp.getType().parseFromUrl(input));
+        } else {
+            throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
         }
-        if (rawId instanceof Number number) {
-            return new IdLong(number.longValue());
-        }
-        if (rawId instanceof CharSequence) {
-            return new IdString(rawId.toString());
-        }
-        throw new IllegalArgumentException("Can not use " + ((rawId == null) ? "null" : rawId.getClass().getName()) + " (" + input + ") as an Id");
     }
 
     public List<OrderBy> getOrderbyDefaults() {

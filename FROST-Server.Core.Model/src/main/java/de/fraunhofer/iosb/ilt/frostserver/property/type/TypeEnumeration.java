@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,8 +31,8 @@ public class TypeEnumeration<K extends Enum<K>> extends PropertyType {
 
     private final Class<K> enumClass;
 
-    public TypeEnumeration(String name, String description, Class<K> enumClass, TypeReference typeReference) {
-        super(name, description, typeReference);
+    public TypeEnumeration(String name, String description, Class<K> enumClass, TypeReference tr) {
+        super(name, description, ParserUtils.getDefaultDeserializer(tr), ParserUtils.getDefaultSerializer());
         this.enumClass = enumClass;
     }
 

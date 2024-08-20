@@ -16,6 +16,8 @@ As MQTT is event based, whenever a parameter of any Thing changes (relations, e.
 
 **ATTENTION:** This function may create a high number of database reads and cause a performance drop.
 
+## Basic Use
+
 To activate the function, the expand parameter is added to the subscription topic:
 
 ```

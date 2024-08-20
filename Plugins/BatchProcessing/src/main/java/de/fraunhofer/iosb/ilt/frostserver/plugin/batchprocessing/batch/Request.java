@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.security.Principal;
@@ -50,8 +52,8 @@ public abstract class Request implements Content {
      */
     protected Principal userPrincipal;
 
-    protected final Map<String, String> headersOuter = new HashMap<>();
-    protected final Map<String, String> headersInner = new HashMap<>();
+    protected final Map<String, List<String>> headersOuter = new HashMap<>();
+    protected final Map<String, List<String>> headersInner = new HashMap<>();
     /**
      * Flag indicating there is a problem with the syntax of the content. If
      * this is a changeSet, then the entire changeSet will be discarded.
@@ -62,7 +64,8 @@ public abstract class Request implements Content {
 
     protected final boolean requireContentId;
     protected String contentId;
-    protected Id contentIdValue;
+    protected PkValue contentIdValue;
+    protected EntityType entityType;
     protected final StringBuilder data = new StringBuilder();
     protected final Version batchVersion;
 
@@ -136,12 +139,20 @@ public abstract class Request implements Content {
         this.contentId = contentId;
     }
 
-    public Id getContentIdValue() {
+    public PkValue getContentIdValue() {
         return contentIdValue;
     }
 
-    public void setContentIdValue(Id contentIdValue) {
+    public void setContentIdValue(PkValue contentIdValue) {
         this.contentIdValue = contentIdValue;
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
 
     /**
@@ -150,12 +161,12 @@ public abstract class Request implements Content {
      *
      * @return the headers of the individual batch request.
      */
-    public Map<String, String> getInnerHeaders() {
+    public Map<String, List<String>> getInnerHeaders() {
         return headersInner;
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
         return headersOuter;
     }
 
@@ -178,10 +189,10 @@ public abstract class Request implements Content {
 
     public void updateUsingContentIds(List<ContentIdPair> contentIds) {
         for (ContentIdPair pair : contentIds) {
-            path = path.replace(pair.key, pair.value.getUrl());
+            path = path.replace(pair.key, pair.keyToUrl());
             int keyIndex = 0;
             String quotedKey = '"' + pair.key + '"';
-            String value = pair.value.getJson();
+            String value = UrlHelper.quoteForJson(pair.value.get(0));
             while ((keyIndex = data.indexOf(quotedKey, keyIndex)) != -1) {
                 data.replace(keyIndex, keyIndex + quotedKey.length(), value);
                 keyIndex += value.length();

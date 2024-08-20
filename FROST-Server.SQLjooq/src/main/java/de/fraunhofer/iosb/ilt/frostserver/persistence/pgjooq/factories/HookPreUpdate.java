@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
@@ -29,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
  *
  * @author hylke
  */
-public interface HookPreUpdate {
+public interface HookPreUpdate extends JooqPmHook {
 
-    public void updateInDatabase(JooqPersistenceManager pm, Entity entity, Id entityId) throws NoSuchEntityException, IncompleteEntityException;
+    public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 }

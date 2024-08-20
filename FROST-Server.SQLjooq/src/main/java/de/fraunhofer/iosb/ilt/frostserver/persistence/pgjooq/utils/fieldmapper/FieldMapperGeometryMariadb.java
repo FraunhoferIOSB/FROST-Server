@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -139,6 +141,18 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
     public FieldMapperGeometryMariadb setFieldGeom(String fieldGeom) {
         this.fieldGeom = fieldGeom;
         return this;
+    }
+
+    @Override
+    public Map<String, String> getFieldTypes() {
+        Map<String, String> value = new HashMap<>();
+        if (!StringHelper.isNullOrEmpty(fieldSource)) {
+            value.put(fieldSource, "BOOLEAN");
+        }
+        if (!StringHelper.isNullOrEmpty(fieldGeom)) {
+            value.put(fieldGeom, "geometry(Geometry,4326)");
+        }
+        return value;
     }
 
 }

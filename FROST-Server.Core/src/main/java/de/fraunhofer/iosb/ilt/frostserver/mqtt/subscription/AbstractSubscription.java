@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,12 +22,14 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANO
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -38,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,7 +67,7 @@ public abstract class AbstractSubscription implements Subscription {
      * If the subscription is over a one-to-many relation, this has a value.
      */
     private NavigationPropertyMain parentRelation;
-    private Id parentId;
+    private PkValue parentId;
 
     protected ResourcePath path;
     protected CoreSettings settings;
@@ -94,12 +97,13 @@ public abstract class AbstractSubscription implements Subscription {
         return true;
     }
 
-    protected void generateFilter(int pathElementOffset) {
+    protected void generateFilter(int pathElementOffset, Expression extraFilter) {
         final List<Property> properties = new ArrayList<>();
-        boolean direct = true;
+        boolean direct = extraFilter == null;
         final int size = path.size();
         final int startIdx = size - 1 - pathElementOffset;
         if (startIdx < 0) {
+            createMatchExpression(extraFilter);
             return;
         }
         PathElement nextPathElement = startIdx < size ? path.get(startIdx + 1) : null;
@@ -122,7 +126,7 @@ public abstract class AbstractSubscription implements Subscription {
                     navProp = peet.getNavigationProperty().getInverse();
                 }
 
-                final Id id = epe.getId();
+                final PkValue id = epe.getPkValues();
                 if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
                     createMatcher(navProp, id);
                     assert (i <= 1);
@@ -132,7 +136,7 @@ public abstract class AbstractSubscription implements Subscription {
                 properties.add(navProp);
 
                 if (id != null) {
-                    createMatchExpression(properties, epe);
+                    createMatchExpression(properties, epe, extraFilter);
                     // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
                     assert (i <= 1);
                     return;
@@ -142,11 +146,11 @@ public abstract class AbstractSubscription implements Subscription {
         }
     }
 
-    private void createMatcher(final NavigationPropertyMain navProp, Id id) {
+    private void createMatcher(final NavigationPropertyMain navProp, PkValue pkValue) {
         // We have a collectionSubscription of type one-to-many.
         // Create a (cheap) matcher instead of an (expensive) Expression
         parentRelation = navProp;
-        parentId = id;
+        parentId = pkValue;
 
         matcher = (Entity t) -> {
             Entity parent = (Entity) t.getProperty(navProp);
@@ -154,17 +158,30 @@ public abstract class AbstractSubscription implements Subscription {
                 // can be for Observation->Datastream when Observation is MultiDatastream.
                 return false;
             }
-            return id.equals(parent.getId());
+            return pkValue.equals(parent.getPrimaryKeyValues());
         };
     }
 
-    private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
-        properties.add(entityType.getPrimaryKey());
-        String epeId = epe.getId().getUrl();
+    private void createMatchExpression(Expression extraFilter) {
+        if (extraFilter == null) {
+            return;
+        }
+        matchExpression = extraFilter;
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
+        query.setFilter(extraFilter);
+    }
+
+    private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {
+        final PrimaryKey primaryKey = entityType.getPrimaryKey();
+        properties.addAll(primaryKey.getKeyProperties());
+        String epeId = UrlHelper.quoteForUrl(primaryKey, epe.getPkValues());
         if (epeId.startsWith("'")) {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
+        }
+        if (extraFilter != null) {
+            matchExpression = new And(matchExpression, extraFilter);
         }
         query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
         query.setFilter(matchExpression);
@@ -191,7 +208,7 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     @Override
-    public Id getParentId() {
+    public PkValue getParentId() {
         return parentId;
     }
 

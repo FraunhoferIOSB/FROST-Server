@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class MxGraphGenerator {
 
     private static final String STYLE_LIST = "swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=32;fontSize=16;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#98D095;strokeColor=#82b366;swimlaneFillColor=#E3F7E2;";
     private static final String STYLE_LIST_ITEM = "text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=visible;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;html=1;fontSize=14;";
-    private static final String STYLE_CONNECTOR = "endArrow=classic;startArrow=classic;html=1;rounded=0;";
+    private static final String STYLE_CONNECTOR = "endArrow=classic;startArrow=classic;html=1;rounded=1;edgeStyle=orthogonalEdgeStyle;strokeWidth=1.5;";
     private static final String STYLE_LABEL = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=12;spacingLeft=1;spacing=3;spacingRight=2;";
 
     private static final String AS_SOURCEPOINT = "sourcePoint";
@@ -174,7 +175,7 @@ public class MxGraphGenerator {
             globalY += rowHeight + DISTANCE;
             rowHeight = DISTANCE;
         }
-        Map<String, PropertyType> properties = tc.getProperties();
+        Map<String, Property> properties = tc.getPropertiesByName();
         int boxHeight = BOX_HEIGHT_BASE + properties.size() * BOX_HEIGHT_ITEM;
         if (boxHeight > rowHeight) {
             rowHeight = boxHeight;
@@ -194,10 +195,10 @@ public class MxGraphGenerator {
         root.addMxCell(typeCell);
 
         int listItemY = BOX_HEIGHT_BASE;
-        for (Map.Entry<String, PropertyType> prop : properties.entrySet()) {
-            final String name = prop.getKey();
-            final PropertyType type = prop.getValue();
-            addTypeProperty(listItemY, typeCell, tc, name, type, tc.isRequired(name), root);
+        for (Map.Entry<String, Property> entry : properties.entrySet()) {
+            final String name = entry.getKey();
+            final Property prop = entry.getValue();
+            addTypeProperty(listItemY, typeCell, tc, name, prop.getType(), !prop.isNullable(), root);
             listItemY += BOX_HEIGHT_ITEM;
         }
     }

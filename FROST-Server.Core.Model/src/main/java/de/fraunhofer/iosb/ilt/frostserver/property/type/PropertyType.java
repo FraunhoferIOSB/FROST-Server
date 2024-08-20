@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,28 +17,34 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author hylke
+ * Class for defining property types.
  */
 public class PropertyType implements Annotatable {
 
     private final String name;
     private final String description;
-    private final TypeReference typeReference;
-
+    private JsonDeserializer deserializer;
+    private JsonSerializer serializer;
     private final List<Annotation> annotations = new ArrayList<>();
 
-    public PropertyType(String name, String description, TypeReference typeReference) {
+    public PropertyType(String name, String description, JsonDeserializer deserializer, JsonSerializer serializer) {
         this.name = name;
         this.description = description;
-        this.typeReference = typeReference;
+        this.deserializer = deserializer;
+        this.serializer = serializer;
+    }
+
+    public PropertyType(String name, String description, JsonDeserializer deserializer) {
+        this(name, description, deserializer, ParserUtils.getDefaultSerializer());
     }
 
     public String getName() {
@@ -49,8 +55,22 @@ public class PropertyType implements Annotatable {
         return description;
     }
 
-    public TypeReference getTypeReference() {
-        return typeReference;
+    public JsonDeserializer getDeserializer() {
+        return deserializer;
+    }
+
+    public PropertyType setDeserializer(JsonDeserializer deserializer) {
+        this.deserializer = deserializer;
+        return this;
+    }
+
+    public JsonSerializer getSerializer() {
+        return serializer;
+    }
+
+    public PropertyType setSerializer(JsonSerializer serializer) {
+        this.serializer = serializer;
+        return this;
     }
 
     public Object parseFromUrl(String input) {

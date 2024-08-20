@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,14 +15,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
-import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 
-public class Capability8Tests11 extends Capability8Tests {
-
-    public Capability8Tests11() {
-        super(ServerVersion.v_1_1);
-    }
+/**
+ * Interface for JooqPersistenceManager compatible Hooks.
+ */
+public interface JooqPmHook extends PmHook {
 
 }

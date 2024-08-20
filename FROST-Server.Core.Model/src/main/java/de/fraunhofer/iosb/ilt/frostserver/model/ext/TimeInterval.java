@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,33 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.KEY_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Objects;
 import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
 
 /**
  * Represent an ISO8601 time interval.
- *
- * @author jab
  */
-public class TimeInterval implements TimeObject, ComplexValue {
+public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
 
-    private final MomentInterval interval;
+    public static EntityPropertyMain<TimeInstant> EP_START_TIME = TypeComplex.EP_START_TIME;
+    public static EntityPropertyMain<TimeInstant> EP_END_TIME = TypeComplex.EP_INTERVAL_END_TIME;
+
+    private MomentInterval interval;
+
+    public TimeInterval() {
+        this.interval = MomentInterval.between(Moment.nowInSystemTime(), Moment.nowInSystemTime());
+    }
 
     public TimeInterval(MomentInterval interval) {
         if (interval == null) {
@@ -94,15 +103,75 @@ public class TimeInterval implements TimeObject, ComplexValue {
         return asISO8601();
     }
 
+    public Moment getStart() {
+        return interval.getStartAsMoment();
+    }
+
+    public Moment getEnd() {
+        return interval.getEndAsMoment();
+    }
+
     @Override
-    public Object get(String name) {
-        return switch (name) {
-            case KEY_INTERVAL_START -> interval.getStartAsMoment();
+    public Object getProperty(String name) {
+        switch (name) {
+            case NAME_INTERVAL_START:
+                return interval.getStartAsMoment();
 
-            case KEY_INTERVAL_END -> interval.getEndAsMoment();
+            case NAME_INTERVAL_END:
+                return interval.getEndAsMoment();
 
-            default -> throw new IllegalArgumentException("Unknown sub-property: " + name);
-        };
+            default:
+                throw new IllegalArgumentException("Unknown sub-property: " + name);
+        }
+    }
+
+    @Override
+    public TimeInterval setProperty(String name, Object value) {
+        switch (name) {
+            case NAME_INTERVAL_START:
+                return setProperty(EP_START_TIME, value);
+
+            case NAME_INTERVAL_END:
+                return setProperty(EP_END_TIME, value);
+
+            default:
+                throw new IllegalArgumentException("Unknown sub-property: " + name);
+        }
+    }
+
+    @Override
+    public <P> P getProperty(Property<P> property) {
+        if (property == EP_START_TIME) {
+            return (P) interval.getStartAsMoment();
+        }
+        if (property == EP_END_TIME) {
+            return (P) interval.getStartAsMoment();
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
+    }
+
+    @Override
+    public TimeInterval setProperty(Property property, Object value) {
+        if (value == null) {
+            return this;
+        }
+        Moment moment;
+        if (value instanceof Moment m) {
+            moment = m;
+        } else if (value instanceof Instant i) {
+            moment = Moment.from(i);
+        } else {
+            throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
+        }
+        if (property == EP_START_TIME) {
+            interval = interval.withStart(moment);
+            return this;
+        }
+        if (property == EP_END_TIME) {
+            interval = interval.withEnd(moment).withOpenEnd();
+            return this;
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
     }
 
 }

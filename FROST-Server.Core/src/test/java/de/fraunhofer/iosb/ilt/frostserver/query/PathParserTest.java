@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -122,7 +122,7 @@ class PathParserTest {
                 ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
                 PathElementEntitySet espe = new PathElementEntitySet(entityType);
                 expResult.addPathElement(espe, false, false);
-                PathElementEntity epe = new PathElementEntity(new IdLong(1), entityType, espe);
+                PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), entityType, espe);
                 expResult.addPathElement(epe, true, true);
 
                 if (property instanceof EntityPropertyMain) {
@@ -151,7 +151,7 @@ class PathParserTest {
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
         expResult.addPathElement(epe, true, true);
         PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
@@ -168,7 +168,7 @@ class PathParserTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -182,7 +182,7 @@ class PathParserTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -196,7 +196,7 @@ class PathParserTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -212,7 +212,7 @@ class PathParserTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -230,7 +230,7 @@ class PathParserTest {
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -281,7 +281,7 @@ class PathParserTest {
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(id), testModel.ET_HOUSE, espe);
+        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{id}), testModel.ET_HOUSE, espe);
         expResult.addPathElement(epe, true, true);
 
         assertEquals(expResult, result);

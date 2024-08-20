@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -27,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -57,33 +59,42 @@ public class EntitySetSubscription extends AbstractSubscription {
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
         query = parseQuery(queryString);
-        if (query != null && (query.getCount().isPresent()
-                || query.getFilter() != null
-                || !query.getOrderBy().isEmpty()
-                || query.getSkip().isPresent()
-                || query.getTop().isPresent())) {
-            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select and $expand is allowed in query options.");
-        } else if (query != null && !query.getExpand().isEmpty()) {
-            Query queryCopy = parseQuery(queryString);
-            if (queryCopy != null) {
-                List<Expand> expandList = queryCopy.getExpand();
-                expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
-                        .setExpand(expandList)
-                        .addSelect(entityType.getPrimaryKey());
+        Expression filter = null;
+        if (query != null) {
+            if (query.getCount().isPresent()
+                    || !query.getOrderBy().isEmpty()
+                    || query.getSkip().isPresent()
+                    || query.getTop().isPresent()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $count, $skip, $top and $orderby are not allowed in query options.");
+            }
+            if (!query.getExpand().isEmpty() && !settings.getMqttSettings().isAllowMqttExpand()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $expand is not allowed in query options.");
+            }
+            if (query.getFilter() != null && !settings.getMqttSettings().isAllowMqttFilter()) {
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': $filter is not allowed in query options.");
+            }
+            filter = query.getFilter();
+            if (!query.getExpand().isEmpty()) {
+                Query queryCopy = parseQuery(queryString);
+                if (queryCopy != null) {
+                    List<Expand> expandList = queryCopy.getExpand();
+                    expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
+                            .setExpand(expandList)
+                            .addSelect(entityType.getPrimaryKey().getKeyProperties());
+                }
             }
         }
-
-        generateFilter(1);
+        generateFilter(1, filter);
     }
 
     private Query parseQuery(String topic) {
-        String queryString = null;
+        String queryString;
         queryString = URLDecoder.decode(topic, StringHelper.UTF8);
         try {
             return QueryParser.parseQuery(queryString, queryDefaults, modelRegistry, path).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
-            return null;
+            return new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL).validate();
         }
     }
 

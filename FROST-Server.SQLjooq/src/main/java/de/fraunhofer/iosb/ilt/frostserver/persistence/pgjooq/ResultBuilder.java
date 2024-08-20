@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -44,7 +46,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.CountMode;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,7 +179,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (o instanceof NavigableElement navigableElement) {
             existing = navigableElement;
         } else if (firstNp instanceof NavigationPropertyCustom firstNpCust) {
-            Object id = firstNpCust.getTargetIdFrom(entity);
+            PkValue id = firstNpCust.getTargetIdFrom(entity);
             if (id == null) {
                 return;
             }
@@ -199,9 +200,9 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
     }
 
-    private Entity loadEntity(EntityType type, Object id, Expand expand) {
+    private Entity loadEntity(EntityType type, PkValue pkValues, Expand expand) {
         try {
-            return pm.get(type, ParserUtils.idFromObject(id), expand.getSubQuery());
+            return pm.get(type, pkValues, expand.getSubQuery());
         } catch (IllegalArgumentException ex) {
             // not a valid id.
         }
@@ -210,7 +211,7 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
         PathElementEntitySet parentCollection = new PathElementEntitySet(entity.getEntityType());
-        PathElementEntity parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
+        PathElementEntity parent = new PathElementEntity(entity.getPrimaryKeyValues(), entity.getEntityType(), parentCollection);
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
@@ -411,7 +412,11 @@ public class ResultBuilder implements ResourcePathVisitor {
                     return;
                 }
             } else if (inner instanceof ComplexValue cv) {
+<<<<<<< HEAD
                 Object propertyValue = cv.get(name);
+=======
+                Object propertyValue = cv.getProperty(name);
+>>>>>>> v2.x
                 Map<String, Object> entityMap = new HashMap<>();
                 entityName = name;
                 entityMap.put(entityName, propertyValue);

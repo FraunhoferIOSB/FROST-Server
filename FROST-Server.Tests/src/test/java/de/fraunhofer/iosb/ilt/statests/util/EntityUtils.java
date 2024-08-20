@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,12 +37,26 @@ import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.StaService;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.model.Expand;
+import de.fraunhofer.iosb.ilt.statests.util.model.PathElement;
+import de.fraunhofer.iosb.ilt.statests.util.model.Query;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -503,4 +521,83 @@ public class EntityUtils {
         }
         fail("Filter " + filter + " did not respond with " + expectedCode + ".");
     }
+
+    public static Entity createSensor(SensorThingsService srvc, String name, String desc, String type, String metadata, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity sensor = sMdl.newSensor(name, desc, type, metadata)
+                .setProperty(EP_PROPERTIES, properties);
+        srvc.create(sensor);
+        registry.add(sensor);
+        return sensor;
+    }
+
+    public static Entity createDatastream(SensorThingsService srvc, String name, String desc, String type, UnitOfMeasurement uom, Entity thing, Entity sensor, Entity op, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity ds = sMdl.newDatastream(name, desc, type, uom)
+                .setProperty(EP_PROPERTIES, properties)
+                .setProperty(sMdl.npDatastreamThing, thing)
+                .setProperty(sMdl.npDatastreamSensor, sensor)
+                .setProperty(sMdl.npDatastreamObservedproperty, op);
+        srvc.create(ds);
+        registry.add(ds);
+        return ds;
+    }
+
+    public static Entity createObservedProperty(SensorThingsService srvc, String name, String definition, String description, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity obsProp = sMdl.newObservedProperty(name, definition, description)
+                .setProperty(EP_PROPERTIES, properties);
+        srvc.create(obsProp);
+        registry.add(obsProp);
+        return obsProp;
+    }
+
+    public static void createObservationSet(SensorThingsService srvc, Entity datastream, long resultStart, ZonedDateTime phenomenonTimeStart, TimeInterval validTimeStart, long count, List<Entity> registry) throws ServiceFailureException {
+        for (int i = 0; i < count; i++) {
+            ZonedDateTime phenTime = phenomenonTimeStart.plus(i, ChronoUnit.HOURS);
+            TimeInterval validTime = TimeInterval.create(
+                    validTimeStart.getStart().plus(count, TimeUnit.HOURS),
+                    validTimeStart.getEnd().plus(count, TimeUnit.HOURS));
+            createObservation(srvc, datastream, resultStart + i, phenTime, validTime, registry);
+        }
+    }
+
+    public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("idx", idx);
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
+                .setProperty(EP_VALIDTIME, validTime)
+                .setProperty(EP_PARAMETERS, parameters);
+        if (idx % 2 == 0) {
+            obs.setProperty(EP_RESULTQUALITY, idx);
+        } else {
+            obs.setProperty(EP_RESULTQUALITY, "number-" + idx);
+        }
+        srvc.create(obs);
+        registry.add(obs);
+        return obs;
+    }
+
+    public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, List<Entity> registry) throws ServiceFailureException {
+        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream);
+        srvc.create(obs);
+        registry.add(obs);
+        return obs;
+    }
+
 }

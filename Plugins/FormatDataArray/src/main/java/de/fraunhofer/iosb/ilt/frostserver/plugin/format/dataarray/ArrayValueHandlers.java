@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,14 +21,13 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class ArrayValueHandlers {
             return;
         }
 
-        ArrayValueHandler idHandler = (Object value, Entity target) -> target.setId(ParserUtils.idFromObject(value));
+        ArrayValueHandler idHandler = (Object value, Entity target) -> target.setPrimaryKeyValues(PkValue.of(value));
         handlers.put("id", idHandler);
         handlers.put(AT_IOT_ID, idHandler);
         handlers.put(
@@ -114,7 +113,7 @@ public class ArrayValueHandlers {
             }
         });
         handlers.put("FeatureOfInterest/id", (Object value, Entity target) -> {
-            Id foiId = ParserUtils.idFromObject(value);
+            PkValue foiId = PkValue.of(value);
             target.setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, foiId));
         });
 

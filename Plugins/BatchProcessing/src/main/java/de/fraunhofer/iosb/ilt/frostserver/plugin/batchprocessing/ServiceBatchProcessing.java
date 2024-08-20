@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -80,7 +80,7 @@ public class ServiceBatchProcessing {
 
     private ServiceResponse sendResponse(final Batch batch, final ServiceResponse response) {
         response.setCode(200);
-        batch.getHeaders().entrySet().forEach(x -> response.addHeader(x.getKey(), x.getValue()));
+        batch.getHeaders().entrySet().forEach(x -> response.addHeaders(x.getKey(), x.getValue()));
         try {
             new FormatWriterGeneric(batch.getContent(false)).writeFormatted(response.getWriter());
         } catch (IOException ex) {

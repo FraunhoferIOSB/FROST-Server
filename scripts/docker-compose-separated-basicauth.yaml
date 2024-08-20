@@ -1,7 +1,6 @@
 # This compose file starts FROST as separate modules.
 # It also enables basic auth with the default users (read, write and admin),
 # and starts a pgadmin on port 80, with username 'example@example.com' and password 'admin'.
-version: '3'
 
 services:
   web:
@@ -9,9 +8,12 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - database
-      - mosquitto
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     environment:
+      # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - logSensitiveData=true #disable on production!
@@ -34,15 +36,19 @@ services:
       - auth_db_password=ChangeMe
       - auth_autoUpdateDatabase=true
 
+
   mqtt:
     image: fraunhoferiosb/frost-server-mqtt:latest
     ports:
       - 1883:1883
       - 9876:9876
     depends_on:
-      - database
-      - mosquitto
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     environment:
+      # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - plugins.multiDatastream.enable=true
@@ -65,10 +71,12 @@ services:
       - auth_db_password=ChangeMe
       - auth_autoUpdateDatabase=true
 
+
   mosquitto:
     image: eclipse-mosquitto
     volumes:
       - "./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
+
 
   database:
     image: postgis/postgis:14-3.2-alpine
@@ -78,6 +86,12 @@ services:
       - POSTGRES_PASSWORD=ChangeMe
     volumes:
       - postgis_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   pgadmin:
     image: dpage/pgadmin4
@@ -90,3 +104,4 @@ services:
 
 volumes:
     postgis_volume:
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
 import java.util.Objects;
 
@@ -44,7 +44,7 @@ public abstract class Constant<T> implements Value {
     }
 
     @Override
-    public void validate(ParserHelper helper, EntityType type) {
+    public void validate(ParserContext context, EntityType type) {
         // Nothing to validate by default.
     }
 

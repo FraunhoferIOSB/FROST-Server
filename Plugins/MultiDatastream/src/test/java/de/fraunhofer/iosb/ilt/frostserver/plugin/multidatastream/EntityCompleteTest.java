@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -134,22 +134,22 @@ class EntityCompleteTest {
         entity.setProperty(epMultiObservationDataTypes, multiObservationDataTypes);
         assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(npThingMds, new DefaultEntity(pluginCoreModel.etThing).setId(new IdLong(1)));
+        entity.setProperty(npThingMds, new DefaultEntity(pluginCoreModel.etThing).setPrimaryKeyValues(PkValue.of(1L)));
         assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(npSensorMds, new DefaultEntity(pluginCoreModel.etSensor).setId(new IdLong(2)));
+        entity.setProperty(npSensorMds, new DefaultEntity(pluginCoreModel.etSensor).setPrimaryKeyValues(PkValue.of(2L)));
         assertFalse(isEntityComplete(entity, containingSet));
 
         EntitySet observedProperties = new EntitySetImpl(pluginCoreModel.etObservedProperty);
-        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setId(new IdLong(3)));
+        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setPrimaryKeyValues(PkValue.of(3L)));
         entity.setProperty(npObservedPropertiesMds, observedProperties);
         assertTrue(isEntityComplete(entity, containingSet));
 
         entity.setProperty(npThingMds, null);
         assertFalse(isEntityComplete(entity, containingSet));
-        assertTrue(isEntityComplete(entity, new PathElementEntitySet(npMultiDatastreamsThing, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
+        assertTrue(isEntityComplete(entity, new PathElementEntitySet(npMultiDatastreamsThing, new PathElementEntity(PkValue.of(2L), pluginCoreModel.etThing, null))));
 
-        assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
+        assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, new PathElementEntity(PkValue.of(2L), pluginCoreModel.etThing, null))));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
@@ -159,7 +159,7 @@ class EntityCompleteTest {
         entity.setProperty(epMultiObservationDataTypes, multiObservationDataTypes);
         assertFalse(isEntityComplete(entity, containingSet));
 
-        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setId(new IdLong(3)));
+        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setPrimaryKeyValues(PkValue.of(3L)));
         entity.setProperty(npObservedPropertiesMds, observedProperties);
         assertTrue(isEntityComplete(entity, containingSet));
     }
@@ -173,10 +173,10 @@ class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.epResult, "result");
         assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
+        entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of(2L)));
         assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream).setId(new IdLong(2)));
+        entity.setProperty(npMultiDatastreamObservation, new DefaultEntity(etMultiDatastream).setPrimaryKeyValues(PkValue.of(2L)));
         assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(pluginCoreModel.npDatastreamObservation, null);
@@ -185,18 +185,18 @@ class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(new IdLong(1), pluginCoreModel.etThing, null));
+        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(PkValue.of(1L), pluginCoreModel.etThing, null));
         assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
+        entity.setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream).setPrimaryKeyValues(PkValue.of(2L)));
         entity.setProperty(npMultiDatastreamObservation, null);
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(new IdLong(1), pluginCoreModel.etDatastream, null));
+        containingSet = new PathElementEntitySet(pluginCoreModel.npObservationsDatastream, new PathElementEntity(PkValue.of(1L), pluginCoreModel.etDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, "result");
         assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(npObservationsMds, new PathElementEntity(new IdLong(1), etMultiDatastream, null));
+        containingSet = new PathElementEntitySet(npObservationsMds, new PathElementEntity(PkValue.of(1L), etMultiDatastream, null));
         entity = new DefaultEntity(pluginCoreModel.etObservation);
         entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         assertTrue(isEntityComplete(entity, containingSet));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
@@ -74,7 +74,7 @@ public class ModelRegistry {
      */
     private final Map<String, PropertyType> propertyTypes = new TreeMap<>();
 
-    private ParserHelper parserHelper;
+    private CustomLinksHelper customLinksHelper;
 
     /**
      * Entities need queries, even when sent through messages.
@@ -166,10 +166,14 @@ public class ModelRegistry {
         }
         type = TypeSimpleCustom.getType(name);
         if (type != null) {
+            // This provided custom type was not registered yet, do it now.
+            registerPropertyType(type);
             return type;
         }
         type = TypeComplex.getType(name);
         if (type != null) {
+            // This provided custom type was not registered yet, do it now.
+            registerPropertyType(type);
             return type;
         }
         throw new IllegalArgumentException("unknown property type: " + name);
@@ -190,10 +194,10 @@ public class ModelRegistry {
         }
     }
 
-    public ParserHelper getParserHelper() {
-        if (parserHelper == null) {
-            parserHelper = new ParserHelper(this);
+    public CustomLinksHelper getCustomLinksHelper() {
+        if (customLinksHelper == null) {
+            customLinksHelper = new CustomLinksHelper(this, false, 0);
         }
-        return parserHelper;
+        return customLinksHelper;
     }
 }

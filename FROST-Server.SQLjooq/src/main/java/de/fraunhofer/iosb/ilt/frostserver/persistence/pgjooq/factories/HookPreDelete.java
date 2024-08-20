@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
- * A hook that can be registered on a table and will get executed after a delete
- * has happened.
+ * A hook that can be registered on a table and will get executed before a
+ * preDelete has happened.
  *
  * @author hylke
  */
-public interface HookPreDelete {
+public interface HookPreDelete extends JooqPmHook {
 
     /**
      *
@@ -36,5 +36,5 @@ public interface HookPreDelete {
      * @throws NoSuchEntityException if something is wrong. This will cancel the
      * action.
      */
-    public void delete(JooqPersistenceManager pm, Id entityId) throws NoSuchEntityException;
+    public void preDelete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 }

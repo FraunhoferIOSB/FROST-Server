@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ public class CheckEntityQuery implements ValidationCheck {
 
             // Run the actual query as admin, but with the user in the context.
             PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
-            final Entity result = pm.get(entityType, contextEntity.getId(), parsedQuery);
+            final Entity result = pm.get(entityType, contextEntity.getPrimaryKeyValues(), parsedQuery);
             PrincipalExtended.setLocalPrincipal(localPrincipal);
 
             final boolean valid = result != null;
@@ -86,7 +86,7 @@ public class CheckEntityQuery implements ValidationCheck {
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                .validate(entityType);
+                .validate(null, entityType);
         LOGGER.info("Initialised check on {}", entityType);
     }
 
