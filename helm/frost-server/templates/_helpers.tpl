@@ -87,110 +87,44 @@ Get the MQTT Websock-Path.
 {{- end -}}
 
 {{/*
-Get the MQTT TCP service EndPoint
+Get the default agic rewriteAnnotations for ingress.
 */}}
-{{- define "frost-server.mqtt.serviceEndpoint" -}}
-  {{- if and .Values.frost.http.serviceHost .Values.frost.mqtt.ports.mqtt.nodePort -}}
-      {{- printf "%s:%s" .Values.frost.http.serviceHost .Values.frost.mqtt.ports.mqtt.nodePort -}}
-  {{- else -}}
-      {{- printf "NOT CONFIGURED -- please set frost.mqtt.ports.mqtt.nodePort in values.yaml" -}}
+{{- define "frost-server.ingress.rewriteAnnotation" -}}
+  {{- $myannotations := dict -}}  
+  {{- if eq .scope.ingress.ingressProvider "agic" -}} {{/* Set annotations for ingress of type azure agic */}}
+    {{- if .scope.ingress.tls.enabled -}}
+      {{- $_ := set $myannotations "appgw.ingress.kubernetes.io/ssl-redirect" "true" -}}
+    {{- end -}}
+    {{- if eq .type "http" -}}
+      {{- $_ := set $myannotations "appgw.ingress.kubernetes.io/backend-path-prefix" "/FROST-Server/" -}}
+      {{/* put here default annotations for http-service */}}
+    {{- else if eq .type "mqtt" -}}
+      {{/* put here default annotations for mqtt-service */}}
+    {{- end -}}
+  {{- else if eq .scope.ingress.ingressProvider "traefik" -}} {{/* Set annotations for ingress of type traefik */}}
+    {{- if .scope.ingress.tls.enabled -}}
+      {{- $_ := set $myannotations "traefik.ingress.kubernetes.io/router.tls" "true" -}}
+    {{- end -}}
+    {{- if eq .type "http" -}}
+      {{/* put here default annotations for http-service */}}
+    {{- else if eq .type "mqtt" -}}
+      {{/* put here default annotations for mqtt-service */}}
+    {{- end -}}
+  {{- else if eq .scope.ingress.ingressProvider "nginx" -}} {{/* Set annotations for ingress of type kubernetes.nginx */}}
+    {{- if .scope.ingress.tls.enabled -}}
+      {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/ssl-redirect" "true" -}}
+    {{- end -}}
+    {{- if eq .type "http" -}}
+      {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/rewrite-target" "/FROST-Server/$1" -}}
+      {{/* put here default annotations for http-service */}}
+    {{- else if eq .type "mqtt" -}}
+      {{- $_ := set $myannotations "nginx.mqtt.hamel.test" "true" -}}
+      {{/* put here default annotations for mqtt-service */}}
+    {{- end -}}
   {{- end -}}
+  {{- $myannotations | toYaml -}}
 {{- end -}}
 
-{{/*
-Get the default HTTP nginx rewriteAnnotations.
-*/}}
-{{- define "frost-server.http.ingressProvider.nginx.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.http.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "nginx.ingress.kubernetes.io/ssl-redirect" "true" -}}
-  {{- end -}}
-  {{- $_ := set $mydict "nginx.ingress.kubernetes.io/rewrite-target" "/FROST-Server/$1" -}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-{{/*
-Get the default HTTP agic rewriteAnnotations.
-*/}}
-{{- define "frost-server.http.ingressProvider.agic.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.http.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "appgw.ingress.kubernetes.io/ssl-redirect" "true" -}}
-  {{- end -}}
-  {{- $_ := set $mydict "appgw.ingress.kubernetes.io/backend-path-prefix" "/FROST-Server/" -}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-{{/*
-Get the default HTTP traefik rewriteAnnotations.
-*/}}
-{{- define "frost-server.http.ingressProvider.traefik.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.http.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "traefik.ingress.kubernetes.io/router.tls" "true" -}}
-  {{- end -}}
-  {{/*
-    rewrite path annotation to implement: /FROST-Server/
-  */}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-{{/*
-Get the default agic rewriteAnnotations for HTTP.
-*/}}
-{{- define "frost-server.http.ingress.rewriteAnnotation" -}}
-  {{- if eq .Values.frost.http.ingress.ingressProvider "agic" -}}
-    {{ template "frost-server.http.ingressProvider.agic.rewriteAnnotation" . }}
-  {{- else -}} # default to nginx
-    {{ template "frost-server.http.ingressProvider.nginx.rewriteAnnotation" . }}
-  {{- end -}}
-{{- end -}}
-
-
-{{/*
-Get the default MQTT nginx rewriteAnnotations.
-*/}}
-{{- define "frost-server.mqtt.ingressProvider.nginx.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.mqtt.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "nginx.ingress.kubernetes.io/ssl-redirect" "true" -}}
-  {{- end -}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-{{/*
-Get the default MQTT agic rewriteAnnotations.
-*/}}
-{{- define "frost-server.mqtt.ingressProvider.agic.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.mqtt.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "appgw.ingress.kubernetes.io/ssl-redirect" "true" -}}
-  {{- end -}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-{{/*
-Get the default MQTT traefik rewriteAnnotations.
-*/}}
-{{- define "frost-server.mqtt.ingressProvider.traefik.rewriteAnnotation" -}}
-  {{- $mydict := dict -}}
-  {{- if .Values.frost.mqtt.ingress.tls.enabled -}}
-    {{- $_ := set $mydict "traefik.ingress.kubernetes.io/router.tls" "true" -}}
-  {{- end -}}
-  {{- $mydict | toYaml -}}
-{{- end -}}
-
-
-{{/*
-Get the default agic rewriteAnnotations for MQTT.
-*/}}
-{{- define "frost-server.mqtt.ingress.rewriteAnnotation" -}}
-  {{- if eq .Values.frost.mqtt.ingress.ingressProvider "agic" -}}
-    {{ template "frost-server.mqtt.ingressProvider.agic.rewriteAnnotation" . }}
-  {{- else -}} # default to nginx
-    {{ template "frost-server.mqtt.ingressProvider.nginx.rewriteAnnotation" . }}
-  {{- end -}}
-{{- end -}}
 
 {{/*
 Get the DB secret.
