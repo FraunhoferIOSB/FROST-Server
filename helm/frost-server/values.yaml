@@ -127,9 +127,9 @@ frost:
     ingress:
       enabled: true      
       ## Set a specific ingress-class for the ingress ([default] not set)
-      className: nginx
+      # className: nginx-hamel
       ## Defines the type of ingress-Controller in use (nginx [default], agic ) 
-      # ingressProvider: nginx 
+      # ingressProvider: agic
       ## Additional annotations
       # annotations:
       #   cert-manager.io/cluster-issuer: letsencrypt
@@ -234,11 +234,11 @@ frost:
         message_size: 8092
 
     ingress:
-      enabled: false      
+      enabled: true      
       ## Set a specific ingress-class for the ingress ([default] not set)
       # className: azure-application-gateway
       ## Defines the type of ingress-Controller in use (nginx [default], agic or traefik) 
-      # ingressProvider: nginx 
+      # ingressProvider: agic
       ## Additional annotations
       annotations:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
@@ -246,8 +246,8 @@ frost:
         # cert-manager.io/cluster-issuer: letsencrypt
         # cert-manager.io/issue-temporary-certificate: "true"
       tls:
-        enabled: true
-        secretName: frost-server-tls
+        enabled: false
+        secretName: []
 
     # FROST-Server MQTT business settings
     serviceHost: "" # default URI is the same then frost.http.serviceHost"

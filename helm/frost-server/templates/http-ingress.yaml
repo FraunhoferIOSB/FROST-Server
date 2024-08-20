@@ -1,7 +1,7 @@
 {{- if .Values.frost.http.ingress.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
-{{- $defaultRewriteAnnotations := include "frost-server.http.ingress.rewriteAnnotation" . -}}
+{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" "http") -}}
 {{- if and .Values.frost.http.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class" .Values.frost.http.ingress.className}}
@@ -28,7 +28,7 @@ metadata:
     component: {{ $tier }}
 spec:
   {{- if and .Values.frost.http.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.frost.http.ingress.className | default "nginx" }}
+  ingressClassName: {{ .Values.frost.http.ingress.className }}
   {{- end }}
   {{- if .Values.frost.http.ingress.tls.enabled }}
   tls:
