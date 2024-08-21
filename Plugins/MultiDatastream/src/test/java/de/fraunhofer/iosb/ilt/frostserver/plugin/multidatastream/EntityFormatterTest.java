@@ -172,14 +172,14 @@ class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id,name", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id,name", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -227,7 +227,7 @@ class EntityFormatterTest {
     void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -285,7 +285,7 @@ class EntityFormatterTest {
                 + thing
                 + "]}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings, path)
+        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -334,7 +334,7 @@ class EntityFormatterTest {
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings, path)
+        Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -361,7 +361,7 @@ class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -387,7 +387,7 @@ class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -414,7 +414,7 @@ class EntityFormatterTest {
                 + "  \"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -462,7 +462,7 @@ class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/MultiDatastreams(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(etMultiDatastream)
                 .setQuery(query)
@@ -496,7 +496,7 @@ class EntityFormatterTest {
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
                 .setQuery(query)
@@ -519,7 +519,7 @@ class EntityFormatterTest {
                 + " \"Datastreams\": []"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
-        Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
                 .setQuery(query)
@@ -543,7 +543,7 @@ class EntityFormatterTest {
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/ObservedProperties(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setQuery(query)
@@ -566,7 +566,7 @@ class EntityFormatterTest {
                 + "	\"result\": 70.40\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
@@ -591,7 +591,7 @@ class EntityFormatterTest {
                 + "	\"result\": 70.40\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
@@ -616,7 +616,7 @@ class EntityFormatterTest {
                 + "	\"result\": null\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
@@ -641,7 +641,7 @@ class EntityFormatterTest {
                 + "	\"result\": \"70.4\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
@@ -665,7 +665,7 @@ class EntityFormatterTest {
                 + "	\"encodingType\": \"application/geo+json\""
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setQuery(query)
@@ -698,7 +698,7 @@ class EntityFormatterTest {
                 + "	}\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
+        Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setQuery(query)

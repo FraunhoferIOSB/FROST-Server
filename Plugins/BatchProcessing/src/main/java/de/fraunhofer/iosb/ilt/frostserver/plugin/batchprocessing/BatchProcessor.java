@@ -36,7 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -94,13 +93,14 @@ public class BatchProcessor<C extends Content> {
             default:
                 updateMode = isCreate ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11;
         }
-        final ServiceRequest serviceRequest = new ServiceRequestBuilder(coreSettings, version)
-                .withRequestType(type)
-                .withUpdateMode(updateMode)
-                .withUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
-                .withContent(httpRequest.getData())
-                .withUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()))
-                .build();
+        final ServiceRequest serviceRequest = new ServiceRequest()
+                .setCoreSettings(coreSettings)
+                .setVersion(version)
+                .setRequestType(type)
+                .setUpdateMode(updateMode)
+                .setUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
+                .setContent(httpRequest.getData())
+                .setUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()));
         PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
         if (plugin == null) {

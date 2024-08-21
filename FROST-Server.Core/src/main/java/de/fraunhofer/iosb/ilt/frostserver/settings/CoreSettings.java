@@ -146,13 +146,10 @@ public class CoreSettings implements ConfigDefaults {
      * The core plugin manager. All plugins should register themselves here.
      */
     private final PluginManager pluginManager = new PluginManager();
-
-    private final QueryDefaults queryDefaults = new QueryDefaults(
-            defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
-            defaultValueBoolean(TAG_DEFAULT_COUNT),
-            defaultValueInt(TAG_DEFAULT_TOP),
-            defaultValueInt(TAG_MAX_TOP),
-            defaultValueBoolean(TAG_ALWAYS_ORDERBY_ID));
+    /**
+     * Default values used by queries.
+     */
+    private QueryDefaults queryDefaults;
     /**
      * The maximum data size.
      */
@@ -214,6 +211,8 @@ public class CoreSettings implements ConfigDefaults {
 
     private final ModelRegistry modelRegistry = new ModelRegistry();
 
+    private Object requestDecoder;
+
     private MessageBus messageBus;
 
     private CustomLinksHelper customLinksHelper;
@@ -222,6 +221,7 @@ public class CoreSettings implements ConfigDefaults {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
+        createQueryDefaults();
         settings = new Settings(new Properties());
         initChildSettings();
     }
@@ -234,10 +234,20 @@ public class CoreSettings implements ConfigDefaults {
      * override these.
      */
     public CoreSettings(Properties properties) {
+        createQueryDefaults();
         if (properties == null) {
             throw new IllegalArgumentException("properties must be non-null");
         }
         init(properties);
+    }
+
+    private void createQueryDefaults() {
+        queryDefaults = new QueryDefaults(
+                defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
+                defaultValueBoolean(TAG_DEFAULT_COUNT),
+                defaultValueInt(TAG_DEFAULT_TOP),
+                defaultValueInt(TAG_MAX_TOP),
+                defaultValueBoolean(TAG_ALWAYS_ORDERBY_ID));
     }
 
     private void init(Properties properties) {
@@ -253,9 +263,6 @@ public class CoreSettings implements ConfigDefaults {
         logSensitiveData = settings.getBoolean(TAG_LOG_SENSITIVE_DATA, getClass());
         settings.setLogSensitiveData(logSensitiveData);
 
-        if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
-        }
         if (!settings.containsName(TAG_TEMP_PATH)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_TEMP_PATH + "'");
         }
@@ -272,7 +279,7 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
 
-        queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
+        queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL, getClass()));
         queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
         queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
@@ -386,6 +393,14 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getPluginSettings() {
         return pluginSettings;
+    }
+
+    public Object getRequestDecoder() {
+        return requestDecoder;
+    }
+
+    public void setRequestDecoder(Object requestDecoder) {
+        this.requestDecoder = requestDecoder;
     }
 
     public String getTempPath() {

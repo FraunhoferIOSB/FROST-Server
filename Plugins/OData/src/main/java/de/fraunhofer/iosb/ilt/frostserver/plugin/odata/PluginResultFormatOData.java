@@ -135,7 +135,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
             final Version version = path.getVersion();
-            final String contextBase = settings.getQueryDefaults().getServiceRootUrl()
+            final String contextBase = path.getServiceRootUrl()
                     + '/' + version.urlPart
                     + "/$metadata";
             if (Entity.class.isAssignableFrom(result.getClass())) {

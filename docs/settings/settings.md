@@ -57,6 +57,18 @@ These are settings affecting both the MQTT and HTTP packages.
 
 These are settings for the HTTP package.
 
+* **http.requestDecoder.autodetectRootUrl:** Since 2.4.0  
+  If true, FROST will try to automatically detect the serviceRootUrl. Default `false` if the serviceRootUrl is not set, otherwise `true`.
+* **http.requestDecoder.useXForwardedHeaders:** Since 2.4.0  
+  If true, FROST will use the X-Forwarded headers to detect the serviceRootUrl. Default `false`.
+* **http.requestDecoder.XForwardedHostHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Host equivalent header. Default `X-Forwarded-Host`.
+* **http.requestDecoder.XForwardedPathHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Path equivalent header. Default `X-Forwarded-Path`.
+* **http.requestDecoder.XForwardedPortHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Port equivalent header. Default `X-Forwarded-Port`.
+* **http.requestDecoder.XForwardedProtoHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Proto equivalent header. Default `X-Forwarded-Proto`.
 * **http.cors.enable:**  
   If true, a filter is added to allow cross-site-scripting. Default: `false`.
 * **http.cors.allowed.origins:**  

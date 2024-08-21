@@ -22,12 +22,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
+import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -43,18 +46,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Decodes HttpServletRequest requests from Tomcat into ServiceRequest requests
+ * for the FROST Service.
  */
-class HttpRequestDecoder {
+public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestDecoder.class.getName());
 
-    private HttpRequestDecoder() {
-        // Not for public instantiation
+    @DefaultValueBoolean(false)
+    public static final String TAG_AUTODETECT_ROOT_URL = "autodetectRootUrl";
+    @DefaultValueBoolean(false)
+    public static final String TAG_USE_X_HEADERS = "useXForwardedHeaders";
+    @DefaultValue("X-Forwarded-Host")
+    public static final String TAG_HEADER_XF_HOST = "XForwardedHostHeader";
+    @DefaultValue("X-Forwarded-Path")
+    public static final String TAG_HEADER_XF_PATH = "XForwardedPathHeader";
+    @DefaultValue("X-Forwarded-Port")
+    public static final String TAG_HEADER_XF_PORT = "XForwardedPortHeader";
+    @DefaultValue("X-Forwarded-Proto")
+    public static final String TAG_HEADER_XF_PROTO = "XForwardedProtoHeader";
+
+    private final CoreSettings coreSettings;
+    private final boolean autodetectRootUrl;
+    private final boolean useXHeaders;
+    private String headerXfHost;
+    private String headerXfPath;
+    private String headerXfPort;
+    private String headerXfProto;
+
+    private HttpRequestDecoder(CoreSettings coreSettings) {
+        this.coreSettings = coreSettings;
+        setSettings(coreSettings.getHttpSettings().getSubSettings("requestDecoder."));
+        String serviceRootUrl = coreSettings.getQueryDefaults().getServiceRootUrl();
+        boolean myAutodetectRootUrl = getBoolean(TAG_AUTODETECT_ROOT_URL);
+        if (!myAutodetectRootUrl && StringHelper.isNullOrEmpty(serviceRootUrl)) {
+            LOGGER.warn("serviceRootUrl is not set and autodetectRootUrl is false! Setting autodetectRootUrl to true!");
+            autodetectRootUrl = true;
+        } else {
+            autodetectRootUrl = myAutodetectRootUrl;
+        }
+        useXHeaders = getBoolean(TAG_USE_X_HEADERS);
+        if (useXHeaders) {
+            headerXfHost = get(TAG_HEADER_XF_HOST);
+            headerXfPath = get(TAG_HEADER_XF_PATH);
+            headerXfPort = get(TAG_HEADER_XF_PORT);
+            headerXfProto = get(TAG_HEADER_XF_PROTO);
+        }
     }
 
-    static ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request) throws IOException {
+    public ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request) throws IOException {
         if (request.getCharacterEncoding() == null) {
             request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         }
@@ -63,10 +103,10 @@ class HttpRequestDecoder {
         final String requestURI = request.getRequestURI();
         final String contextPath = request.getContextPath();
         final String servletPath = request.getServletPath();
-        final String fullPath = contextPath + servletPath;
+        final String basePath = contextPath + servletPath;
         final String pathInfo;
-        if (requestURI.startsWith(fullPath)) {
-            pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
+        if (requestURI.startsWith(basePath)) {
+            pathInfo = StringHelper.urlDecode(requestURI.substring(basePath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -85,6 +125,13 @@ class HttpRequestDecoder {
             return null;
         }
 
+        QueryDefaults queryDefaults = coreSettings.getQueryDefaults().copy();
+        if (autodetectRootUrl) {
+            String detectedRootUrl = generateRootUrl(request, version, basePath);
+            LOGGER.debug("Detected serviceRootURL: {}", detectedRootUrl);
+            queryDefaults.setServiceRootUrl(detectedRootUrl);
+        }
+
         final PluginService plugin = coreSettings.getPluginManager().getServiceForPath(version, path);
         if (plugin == null) {
             return null;
@@ -97,29 +144,70 @@ class HttpRequestDecoder {
         decodeAccepHeader(request, parameterMap);
         decodePreferHeader(request, parameterMap);
 
-        final ServiceRequestBuilder serviceRequestBuilder = new ServiceRequestBuilder(coreSettings, version)
-                .withRequestType(requestType)
-                .withUrlPath(path)
-                .withUrlQuery(request.getQueryString() != null
+        final ServiceRequest serviceRequest = new ServiceRequest()
+                .setCoreSettings(coreSettings)
+                .setQueryDefaults(queryDefaults)
+                .setVersion(version)
+                .setRequestType(requestType)
+                .setUrlPath(path)
+                .setUrlQuery(request.getQueryString() != null
                         ? StringHelper.urlDecode(request.getQueryString())
                         : null)
-                .withContent(request.getInputStream())
-                .withContentType(request.getContentType())
-                .withParameterMap(parameterMap)
-                .withUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11)
-                .withUserPrincipal(PrincipalExtended.fromPrincipal(request.getUserPrincipal()));
+                .setContent(request.getInputStream())
+                .setContentType(request.getContentType())
+                .setParameterMap(parameterMap)
+                .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11)
+                .setUserPrincipal(PrincipalExtended.fromPrincipal(request.getUserPrincipal()));
 
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String name = attributeNames.nextElement();
-            serviceRequestBuilder.withAttribute(name, request.getAttribute(name));
+            serviceRequest.setAttribute(name, request.getAttribute(name));
         }
 
-        ServiceRequest serivceRequest = serviceRequestBuilder.build();
+        logServiceRequest(request, serviceRequest);
 
-        logServiceRequest(request, serivceRequest);
+        return serviceRequest;
+    }
 
-        return serivceRequest;
+    private String generateRootUrl(HttpServletRequest request, Version version, String reqBasePath) {
+        if (useXHeaders) {
+            String xfHost = request.getHeader(headerXfHost);
+            String xfProto = request.getHeader(headerXfProto);
+            String xfPort = request.getHeader(headerXfPort);
+            String xfPath = request.getHeader(headerXfPath);
+            String basePath;
+            if (!StringHelper.isNullOrEmpty(xfPath)) {
+                basePath = xfPath;
+            } else {
+                basePath = reqBasePath;
+            }
+            int versionIdx = xfPath.indexOf(version.urlPart);
+            if (versionIdx > 0) {
+                basePath = xfPath.substring(0, versionIdx - 1);
+            }
+            return xfProto + "://" + xfHost + ":" + xfPort + basePath;
+        } else {
+            final StringBuffer requestURL = request.getRequestURL();
+            int versionIdx = requestURL.indexOf(version.urlPart);
+            return requestURL.substring(0, versionIdx - 1);
+        }
+    }
+
+    @Override
+    public HttpRequestDecoder getThis() {
+        return this;
+    }
+
+    static ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request) throws IOException {
+        final Object requestDecoder = coreSettings.getRequestDecoder();
+        if (requestDecoder instanceof HttpRequestDecoder hrd) {
+            return hrd.serviceRequestFromHttpRequest(request);
+        }
+        LOGGER.info("Creating new HttpRequestDecoder");
+        HttpRequestDecoder hrd = new HttpRequestDecoder(coreSettings);
+        coreSettings.setRequestDecoder(hrd);
+        return hrd.serviceRequestFromHttpRequest(request);
     }
 
     public static void logServiceRequest(HttpServletRequest request, ServiceRequest serivceRequest) {
@@ -163,4 +251,5 @@ class HttpRequestDecoder {
             parameterMap.putIfAbsent(entry.getKey(), Arrays.asList(entry.getValue()));
         }
     }
+
 }

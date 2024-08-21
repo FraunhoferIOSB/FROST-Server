@@ -11,6 +11,7 @@
 * [HELM] Add database connection to Keycloak provider.
 * Added setting for sessionCookiePath.
 * Added support for [Tomcat Remote IP Filter](https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter).
+* Added option to auto-detect the `serviceRootUrl`, optionally using X-Forwarded headers.
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.

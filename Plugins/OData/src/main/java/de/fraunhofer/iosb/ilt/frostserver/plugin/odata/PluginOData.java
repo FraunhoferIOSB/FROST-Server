@@ -222,7 +222,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         Map<String, Object> result = new LinkedHashMap<>();
         ModelRegistry modelRegistry = settings.getModelRegistry();
 
-        String path = settings.getQueryDefaults().getServiceRootUrl()
+        String path = request.getQueryDefaults().getServiceRootUrl()
                 + '/' + request.getVersion().urlPart
                 + '/';
         if (request.getVersion() == VERSION_ODATA_40) {

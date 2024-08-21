@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -213,13 +212,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         final String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
-            final ServiceRequest serviceRequest = new ServiceRequestBuilder(settings, version)
-                    .withRequestType(RequestTypeUtils.CREATE)
-                    .withUpdateMode(UpdateMode.INSERT_STA_11)
-                    .withContent(e.getPayload())
-                    .withUrlPath(url)
-                    .withUserPrincipal(e.getPrincipal())
-                    .build();
+            final ServiceRequest serviceRequest = new ServiceRequest()
+                    .setCoreSettings(settings)
+                    .setVersion(version)
+                    .setRequestType(RequestTypeUtils.CREATE)
+                    .setUpdateMode(UpdateMode.INSERT_STA_11)
+                    .setContent(e.getPayload())
+                    .setUrlPath(url)
+                    .setUserPrincipal(e.getPrincipal());
             ServiceRequest.setLocalRequest(serviceRequest);
             service.execute(serviceRequest, serviceResponse);
             ServiceRequest.removeLocalRequest();

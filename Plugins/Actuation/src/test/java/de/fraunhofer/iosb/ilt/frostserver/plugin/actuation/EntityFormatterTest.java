@@ -141,7 +141,7 @@ class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id,name", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id,name", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -196,7 +196,7 @@ class EntityFormatterTest {
     void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
+        Query query = QueryParser.parseQuery("$select=id", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -256,7 +256,7 @@ class EntityFormatterTest {
                 + thing
                 + "]}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings, path)
+        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)

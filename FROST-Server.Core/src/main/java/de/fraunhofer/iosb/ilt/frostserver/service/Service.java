@@ -50,6 +50,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
@@ -281,16 +282,12 @@ public class Service implements AutoCloseable {
 
         final List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
-        try {
-            for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
-                URL collectionUri = URI.create(settings.getQueryDefaults().getServiceRootUrl()
-                        + "/" + version.urlPart
-                        + "/" + entityType.plural).normalize().toURL();
-                capList.add(createCapability(entityType.plural, collectionUri));
-            }
-        } catch (MalformedURLException ex) {
-            LOGGER.error("Failed to build url.", ex);
-            return errorResponse(response, 500, ex.getMessage());
+        final String serviceRootUrl = request.getQueryDefaults().getServiceRootUrl();
+        for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
+            String collectionUri = URI.create(serviceRootUrl
+                    + "/" + version.urlPart
+                    + "/" + entityType.plural).normalize().toString();
+            capList.add(createCapability(entityType.plural, collectionUri));
         }
 
         if (version == Version.V_1_1) {
@@ -338,10 +335,10 @@ public class Service implements AutoCloseable {
         return response;
     }
 
-    private Map<String, String> createCapability(String name, URL url) {
+    private Map<String, String> createCapability(String name, String url) {
         Map<String, String> val = new HashMap<>();
         val.put("name", name);
-        val.put("url", url.toString());
+        val.put("url", url);
         return Collections.unmodifiableMap(val);
     }
 
@@ -368,10 +365,10 @@ public class Service implements AutoCloseable {
     private ServiceResponse handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
         final ResourcePath path;
         final Version version = request.getVersion();
+        final QueryDefaults queryDefaults = request.getQueryDefaults();
         try {
-            path = PathParser.parsePath(
-                    modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(), version,
+            path = PathParser.parsePath(modelRegistry,
+                    queryDefaults.getServiceRootUrl(), version,
                     request.getUrlPath(),
                     request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException ex) {
@@ -381,7 +378,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = settings.getFormatter(version, query.getFormat());
@@ -455,10 +452,10 @@ public class Service implements AutoCloseable {
     private ServiceResponse handlePost(PersistenceManager pm, String urlPath, ServiceResponse response, ServiceRequest request) throws IOException {
         ResourcePath path;
         final Version version = request.getVersion();
+        final QueryDefaults queryDefaults = request.getQueryDefaults();
         try {
-            path = PathParser.parsePath(
-                    modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(),
+            path = PathParser.parsePath(modelRegistry,
+                    queryDefaults.getServiceRootUrl(),
                     version,
                     urlPath,
                     request.getUserPrincipal());
@@ -473,7 +470,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = findFormatter(query, request, version);
@@ -630,7 +627,7 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath(),
                     request.getUserPrincipal());
@@ -723,7 +720,7 @@ public class Service implements AutoCloseable {
         try {
             path = PathParser.parsePath(
                     modelRegistry,
-                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
                     request.getUrlPath(),
                     request.getUserPrincipal());
@@ -831,7 +828,7 @@ public class Service implements AutoCloseable {
         Query query;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), request.getQueryDefaults(), modelRegistry, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
@@ -933,16 +930,17 @@ public class Service implements AutoCloseable {
             return LinkData.error("NavigationProperty must be preceded by an Entity.");
         }
         Query query;
+        final QueryDefaults queryDefaults = request.getQueryDefaults();
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), settings, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException ex) {
             return LinkData.error("Failed to parse query: " + ex.getMessage());
         }
         String targetUrl = query.getId();
-        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
+        final String serviceRootUrl = queryDefaults.getServiceRootUrl();
         final Version version = request.getVersion();
         final String versionUrl = version.urlPart;
         if (!targetUrl.startsWith(serviceRootUrl)) {
