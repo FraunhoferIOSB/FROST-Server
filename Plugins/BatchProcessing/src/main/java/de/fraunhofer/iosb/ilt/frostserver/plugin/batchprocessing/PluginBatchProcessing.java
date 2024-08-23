@@ -37,8 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
- * @author scf
+ * Plugin that handles batch requests.
  */
 public class PluginBatchProcessing implements PluginService, PluginRootDocument, ConfigDefaults {
 

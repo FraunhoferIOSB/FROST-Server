@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import org.geojson.GeoJsonObject;
@@ -47,33 +46,26 @@ public class ResultFormatterDefault implements ResultFormatter {
 
     @Override
     public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
-        try {
-            if (result instanceof Entity entity) {
-                LOGGER.trace("Formatting as Entity.");
-                return target -> JsonWriter.writeEntity(target, entity);
-            }
-            if (result instanceof EntitySet entitySet) {
-                LOGGER.trace("Formatting as EntitySet.");
-                return target -> JsonWriter.writeEntityCollection(target, entitySet, query);
-            }
-            // Not an Entity nor an EntitySet.
-            String entityJsonString;
-            if (path != null && path.isValue()) {
-                LOGGER.trace("Formatting as $Value.");
-                if (result instanceof Map || result instanceof GeoJsonObject) {
-                    entityJsonString = JsonWriter.writeObject(result);
-                } else {
-                    entityJsonString = Objects.toString(result);
-                }
-            } else {
-                LOGGER.trace("Formatting as Object.");
-                entityJsonString = JsonWriter.writeObject(result);
-            }
-            return new FormatWriterGeneric(entityJsonString);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to format response.", ex);
+        if (result instanceof Entity entity) {
+            LOGGER.trace("Formatting as Entity.");
+            return target -> JsonWriter.writeEntity(target, entity);
         }
-        return null;
+        if (result instanceof EntitySet entitySet) {
+            LOGGER.trace("Formatting as EntitySet.");
+            return target -> JsonWriter.writeEntityCollection(target, entitySet, query);
+        }
+        // Not an Entity nor an EntitySet.
+        if (path != null && path.isValue()) {
+            LOGGER.trace("Formatting as $Value.");
+            if (result instanceof Map || result instanceof GeoJsonObject) {
+                return target -> JsonWriter.writeObject(target, result);
+            } else {
+                return target -> target.append(Objects.toString(result));
+            }
+        } else {
+            LOGGER.trace("Formatting as Object.");
+            return target -> JsonWriter.writeObject(target, result);
+        }
     }
 
     @Override

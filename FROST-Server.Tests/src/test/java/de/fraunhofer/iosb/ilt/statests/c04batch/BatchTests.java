@@ -468,7 +468,7 @@ public abstract class BatchTests extends AbstractTestClass {
             assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
             assertEquals("Changes", updatedThing1.getProperty(EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.", ex);
         }
 
     }
@@ -523,15 +523,16 @@ public abstract class BatchTests extends AbstractTestClass {
 
         try {
             BatchResponseJson expected = mapper.readValue("{\"responses\":["
-                    + "{\"id\":\"sensor1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                    + "/Sensors(" + sensorId + ")\"},"
+                    + "{\"id\":\"sensor1\","
+                    + "\"status\":201,"
+                    + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
                     + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
                     + "/Datastreams(" + datastreamId + ")\"}"
                     + "]}", BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
         } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.", ex);
         }
 
     }

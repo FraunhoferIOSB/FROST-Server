@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Constants {
 
     public static final String CONTENT_TYPE = "content-type";
+    public static final String CONTENT_TYPE_MULTIPART_MIXED = "multipart/mixed";
     public static final String CONTENT_TYPE_APPLICATION_GEOJSON = "application/geo+json";
     public static final String CONTENT_TYPE_APPLICATION_HTTP = "application/http";
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";

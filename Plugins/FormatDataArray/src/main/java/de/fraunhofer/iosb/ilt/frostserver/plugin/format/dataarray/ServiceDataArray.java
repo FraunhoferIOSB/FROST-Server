@@ -107,10 +107,11 @@ public class ServiceDataArray {
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
             response.setContentType(formatter.getContentType());
+            response.setCode(201);
             formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
                     .writeFormatted(response.getWriter());
 
-            return Service.successResponse(response, 201, "Created");
+            return response;
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return Service.errorResponse(response, 400, e.getMessage());
