@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -31,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
@@ -138,7 +138,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         }
 
         final String method = request.getMethod();
-        String requestType = decodeRequestType(plugin, version, path, method, request);
+        String requestType = PluginManager.decodeRequestType(plugin, version, path, method, request.getContentType());
 
         final Map<String, List<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
         decodeAccepHeader(request, parameterMap);
@@ -225,15 +225,6 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         }
     }
 
-    private static String decodeRequestType(final PluginService plugin, final Version version, final String path, final String method, HttpServletRequest request) throws IllegalArgumentException {
-        final String requestType = plugin.getRequestTypeFor(version, path, HttpMethod.fromString(method), request.getContentType());
-        if (requestType == null) {
-            final String cleanedPath = StringHelper.cleanForLogging(path);
-            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
-            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
-        }
-        return requestType;
-    }
 
     private static void decodeAccepHeader(HttpServletRequest request, final Map<String, List<String>> parameterMap) {
         String accept = request.getHeader(HEADER_ACCEPT);

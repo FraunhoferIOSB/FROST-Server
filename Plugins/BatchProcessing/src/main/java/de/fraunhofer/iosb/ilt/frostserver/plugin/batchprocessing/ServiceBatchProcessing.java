@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
  * /$batch.
- *
- * @author scf
  */
 public class ServiceBatchProcessing {
 

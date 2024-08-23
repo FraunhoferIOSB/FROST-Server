@@ -130,16 +130,7 @@ public class Service implements AutoCloseable {
 
     public String getRequestType(HttpMethod method, Version version, String path, String contentType) {
         PluginService plugin = settings.getPluginManager().getServiceForPath(version, path);
-        String requestType = null;
-        if (plugin != null) {
-            requestType = plugin.getRequestTypeFor(version, path, method, contentType);
-        }
-        if (requestType == null) {
-            final String cleanedPath = StringHelper.cleanForLogging(path);
-            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
-            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
-        }
-        return requestType;
+        return PluginManager.decodeRequestType(plugin, version, path, method, contentType);
     }
 
     /**
@@ -229,7 +220,7 @@ public class Service implements AutoCloseable {
     }
 
     /**
-     * Notifies the backend that it is no longer needed.Call either commit, or
+     * Notifies the backend that it is no longer needed. Call either commit, or
      * rollback before this.
      *
      */
