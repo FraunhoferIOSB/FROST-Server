@@ -140,6 +140,52 @@ Example referencing the first batch request example above, assume all the reques
 }
 ```
 
+## Advanced Features
+
+### Non-unique request ids
+
+Request `id` values do not have to be unique.
+When a back-reference is resolved, the result of the latest, successful request with a matching id is used.
+
+
+### Back-references to GET requests
+
+In contrast to OData, this exension allows back-references to GET requests in the same atomicityGroup.
+If the result of the GET is a single entity, this entity is used for the reference, as if this entity was created by a POST.
+If the result of the GET is an entity set, the first entity of the set is used.
+
+### Skipping requests in a batch
+
+Requests in a batch can be skipped using the `if` property.
+The value of `if` is a reference a preceding request, optionally prefixed with `not `.
+
+An example, creating an ObservedProperty only if no ObservedProperty with a name `Temperature` already exists:
+```
+{
+    "requests": [
+        {
+            "id": "op_Temperature",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "ObservedProperties?$select=id&$filter=name eq 'Temperature'"
+        },
+        {
+            "id": "op_Temperature",
+            "if": "not $op_Temperature",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "ObservedProperties",
+            "body": {
+                "name": "Temperature",
+                "description": "Temperature",
+                "definition": "http://dd.eionet.europa.eu/vocabulary/aq/meteoparameter/54"
+            }
+        }
+    ]
+}
+```
+Further requests in the same atomicityGroup can reference `$op_Temperature`, regardless of if it already existed, or was created by the batch request.
+
 ## Conformance Class
 
 The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:

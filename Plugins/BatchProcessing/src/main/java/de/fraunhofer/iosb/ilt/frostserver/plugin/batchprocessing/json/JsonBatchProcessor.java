@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -69,7 +70,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
 
     private String currentGroup = "";
     private boolean groupFailed = false;
-    private Map<String, ContentIdPair> ids = new HashMap<>();
+    private final Map<String, ContentIdPair> ids = new HashMap<>();
 
     public JsonBatchProcessor(Service service, ServiceRequest request, ServiceResponse response) {
         this.service = service;
@@ -117,6 +118,9 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
     }
 
     public void processNextRequest() {
+        if (parser == null) {
+            return;
+        }
         try {
             if (parser.nextToken() == JsonToken.START_OBJECT) {
                 JsonBatchRequestItem item = parser.readValueAs(JsonBatchRequestItem.class);
@@ -147,6 +151,10 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             }
         } catch (IOException ex) {
             LOGGER.debug("Failed to parse json.", ex);
+            parser = null;
+            next = new JsonBatchResultItem()
+                    .setStatus(400)
+                    .setBodyNotFormatted("Failed to parse json: " + ex.getMessage());
         }
     }
 
@@ -196,6 +204,12 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         final String requestId = requestItem.getId();
         String path = requestItem.getUrl();
         path = replaceIdsUrl(path);
+        if (!requestItem.matchesIfCondition(ids)) {
+            return new JsonBatchResultItem()
+                    .setId(requestId)
+                    .setStatus(200)
+                    .setBodyNotFormatted("Skipped due to if.");
+        }
 
         final PluginService plugin = coreSettings.getPluginManager().getServiceForPath(version, path);
         if (plugin == null) {
@@ -219,21 +233,13 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
 
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
         plugin.execute(service, serviceRequest, serviceResponse);
-        JsonBatchResultItem result = new JsonBatchResultItem();
-        if (RequestTypeUtils.CREATE.equals(requestType)) {
-            Object createdObject = serviceResponse.getResult();
-            if (createdObject instanceof Entity entity) {
-                final PkValue pkValues = entity.getPrimaryKeyValues();
-                final EntityType entityType = entity.getEntityType();
-                result.setIdValue(pkValues);
-                result.setEntityType(entityType);
-                ids.put(requestId, new ContentIdPair(requestId, pkValues, entityType));
-            }
-        }
+
         final int statusCode = serviceResponse.getCode();
-        result.setId(requestId)
+        JsonBatchResultItem result = new JsonBatchResultItem()
+                .setId(requestId)
                 .setStatus(statusCode)
                 .addHeaders(serviceResponse.getHeaders());
+
         final String contentType = serviceResponse.getContentType();
         final String responseContent = serviceResponse.getWriter().toString();
         if (contentType == null || CONTENT_TYPE_APPLICATION_JSON.equalsIgnoreCase(contentType.split(";", 2)[0])) {
@@ -243,7 +249,35 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             result.setBodyNotFormatted(responseContent);
         }
 
+        if (RequestTypeUtils.READ.equals(requestType) && (!requestId.startsWith("-"))) {
+            Object item = serviceResponse.getResult();
+            if (item instanceof Entity entity) {
+                storeEntityId(entity, result, requestId);
+            } else if (item instanceof EntitySet set) {
+                storeEntityId(set.first(), result, requestId);
+            }
+        }
+        if (RequestTypeUtils.CREATE.equals(requestType)) {
+            Object createdObject = serviceResponse.getResult();
+            if (createdObject instanceof Entity entity) {
+                storeEntityId(entity, result, requestId);
+            }
+        }
+
         return result;
+    }
+
+    public void storeEntityId(Entity entity, JsonBatchResultItem result, final String requestId) {
+        if (entity == null) {
+            return;
+        }
+        final PkValue pkValues = entity.getPrimaryKeyValues();
+        final EntityType entityType = entity.getEntityType();
+        result.setIdValue(pkValues);
+        result.setEntityType(entityType);
+        if (!requestId.startsWith("-")) {
+            ids.put(requestId, new ContentIdPair(requestId, pkValues, entityType));
+        }
     }
 
     @Override

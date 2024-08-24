@@ -90,18 +90,20 @@ public class JsonBatchResultItem {
         return headers;
     }
 
-    public void addHeaders(Map<String, List<String>> values) {
+    public JsonBatchResultItem addHeaders(Map<String, List<String>> values) {
         values.entrySet()
                 .forEach(x -> addHeaders(x.getKey(), x.getValue()));
+        return this;
     }
 
-    public void addHeaders(String name, List<String> values) {
+    public JsonBatchResultItem addHeaders(String name, List<String> values) {
         for (String value : values) {
             addHeader(name, value);
         }
+        return this;
     }
 
-    public void addHeader(String name, String value) {
+    public JsonBatchResultItem addHeader(String name, String value) {
         Object oldVal = headers.get(name);
         if (oldVal instanceof String s) {
             List<String> list = new ArrayList<>();
@@ -116,10 +118,12 @@ public class JsonBatchResultItem {
         if ("location".equalsIgnoreCase(name)) {
             location = value;
         }
+        return this;
     }
 
-    public void setHeader(String name, String value) {
+    public JsonBatchResultItem setHeader(String name, String value) {
         headers.put(name, Arrays.asList(value));
+        return this;
     }
 
     public String getId() {

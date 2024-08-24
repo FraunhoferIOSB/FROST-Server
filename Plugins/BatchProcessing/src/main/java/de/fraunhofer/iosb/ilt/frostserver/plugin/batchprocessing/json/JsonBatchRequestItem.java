@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A single request from a JSON Batch request.
@@ -46,6 +49,7 @@ public class JsonBatchRequestItem {
     private String id;
     private String method;
     private String url;
+    private String ifCondition;
 
     public String getAtomicityGroup() {
         return atomicityGroup;
@@ -94,6 +98,30 @@ public class JsonBatchRequestItem {
     public JsonBatchRequestItem setId(String id) {
         this.id = id;
         return this;
+    }
+
+    public String getIfCondition() {
+        return ifCondition;
+    }
+
+    @JsonProperty(value = "if")
+    public void setIfCondition(String ifCondition) {
+        this.ifCondition = ifCondition;
+    }
+
+    public boolean matchesIfCondition(Map<String, ContentIdPair> ids) {
+        if (StringHelper.isNullOrEmpty(ifCondition)) {
+            return true;
+        }
+        String myIfCondition = ifCondition.trim();
+        boolean not = myIfCondition.startsWith("not ");
+        myIfCondition = StringUtils.removeStart(myIfCondition, "not ").trim();
+        boolean found = ids.containsKey(StringUtils.removeStart(myIfCondition, "$"));
+        if (not) {
+            return !found;
+        }
+        return found;
+
     }
 
     public String getMethod() {

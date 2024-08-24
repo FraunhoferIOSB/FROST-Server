@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * An entity set backed by a database Curser. This can iterated over exactly
+ * once.
  */
 public class EntitySetJooqCurser implements EntitySet {
 
@@ -54,6 +54,8 @@ public class EntitySetJooqCurser implements EntitySet {
     private NavigationPropertyMain.NavigationPropertyEntitySet navigationProperty;
 
     private CursorIterator iterator;
+    private Entity first;
+    private int fetchedCount;
 
     public EntitySetJooqCurser(EntityType type, Cursor<Record> results, QueryState queryState, ResultBuilder resultBuilder) {
         this.type = type;
@@ -63,6 +65,11 @@ public class EntitySetJooqCurser implements EntitySet {
         this.queryState = queryState;
         this.resultBuilder = resultBuilder;
         this.maxFetch = staQuery.getTopOrDefault();
+    }
+
+    @Override
+    public Entity first() {
+        return first;
     }
 
     @Override
@@ -129,7 +136,6 @@ public class EntitySetJooqCurser implements EntitySet {
     private static class CursorIterator implements Iterator<Entity> {
 
         private final EntitySetJooqCurser parent;
-        private int fetchedCount = 0;
 
         public CursorIterator(EntitySetJooqCurser parent) {
             this.parent = parent;
@@ -137,7 +143,7 @@ public class EntitySetJooqCurser implements EntitySet {
 
         @Override
         public boolean hasNext() {
-            return parent.results.hasNext() && parent.maxFetch > fetchedCount;
+            return parent.results.hasNext() && parent.maxFetch > parent.fetchedCount;
         }
 
         @Override
@@ -145,16 +151,19 @@ public class EntitySetJooqCurser implements EntitySet {
             if (!hasNext()) {
                 throw new NoSuchElementException("Cursor is closed or empty.");
             }
-            fetchedCount++;
+            parent.fetchedCount++;
             final Entity entity = fetchNext();
             if (parent.size.isExceeded()) {
                 LOGGER.debug("Size limit reached: {} > {}.", parent.size.getDataSize(), parent.size.getMaxSize());
-                parent.maxFetch = fetchedCount;
+                parent.maxFetch = parent.fetchedCount;
                 generateNextLinkAndClose(entity);
-            } else if (fetchedCount >= parent.maxFetch) {
+            } else if (parent.fetchedCount >= parent.maxFetch) {
                 generateNextLinkAndClose(entity);
             }
             parent.resultBuilder.expandEntity(entity, parent.staQuery);
+            if (parent.first == null) {
+                parent.first = entity;
+            }
             return entity;
         }
 
