@@ -95,7 +95,7 @@ public class PluginProjects implements Plugin, ConfigDefaults {
                 pml.addSecurityFile("pluginprojects/sta1/security/secHistoricalLocation.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secLocation.json");
                 if (multiDatastream) {
-                    pml.addSecurityFile("pluginprojects/security/secMultiDatastream.json");
+                    pml.addSecurityFile("pluginprojects/sta1/security/secMultiDatastream.json");
                 }
                 pml.addSecurityFile("pluginprojects/sta1/security/secObservation.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secProject.json");
