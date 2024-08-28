@@ -56,9 +56,9 @@ import org.slf4j.LoggerFactory;
 public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonBatchProcessor.class.getName());
-    private static final String REFERENCE_URL_REGEX = "^" + Pattern.quote("$") + "([a-zA-Z0-9_-]+)";
+    private static final String REFERENCE_URL_REGEX = "^" + Pattern.quote("$") + "([a-zA-Z0-9_.:,;-]+)";
     private static final Pattern REFERENCE_URL_PATTERN = Pattern.compile(REFERENCE_URL_REGEX);
-    private static final String REFERENCE_JSON_REGEX = Pattern.quote("\"$") + "([a-zA-Z0-9_-]+)" + Pattern.quote("\"");
+    private static final String REFERENCE_JSON_REGEX = Pattern.quote("\"$") + "([a-zA-Z0-9_.:,;-]+)" + Pattern.quote("\"");
     private static final Pattern REFERENCE_JSON_PATTERN = Pattern.compile(REFERENCE_JSON_REGEX);
 
     private final Service service;

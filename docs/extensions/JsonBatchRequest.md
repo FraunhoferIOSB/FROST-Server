@@ -67,10 +67,11 @@ The following example shows a Batch Request that contains the following operatio
 ## Referencing new entities in a change set example
 
 
-Actions can reference entities previously created. To make a created entity referenceable, the POST that creates the entity must have
-a id property, the content of which can be any string. Subsequent requests in the same
-change set can now use the value of this property, prefixed with a $, in places where the ID of the
-created entity is required.
+Actions can reference entities previously created or fetched.
+To make a created entity referenceable, the POST that creates the entity must have a id property,
+the content of which must be a string limited to the characters `a-zA-Z0-9_.:,;-`.
+Subsequent requests in the same change set can now use the value of this property, prefixed with a $,
+in places where the ID of the created entity is required.
 
 Example: A Batch Request that containing a single change set that contains the following requests:
 
@@ -157,7 +158,7 @@ If the result of the GET is an entity set, the first entity of the set is used.
 ### Skipping requests in a batch
 
 Requests in a batch can be skipped using the `if` property.
-The value of `if` is a reference a preceding request, optionally prefixed with `not `.
+The value of `if` is a reference to a preceding request, optionally prefixed with `not `.
 
 An example, creating an ObservedProperty only if no ObservedProperty with a name `Temperature` already exists:
 ```
