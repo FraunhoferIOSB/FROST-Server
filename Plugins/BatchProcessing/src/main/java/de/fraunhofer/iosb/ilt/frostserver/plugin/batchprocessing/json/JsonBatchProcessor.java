@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -291,7 +292,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
     @Override
     public JsonBatchResultItem next() {
         if (!hasNext()) {
-            return null;
+            throw new NoSuchElementException("Iterator reached the end.");
         }
         JsonBatchResultItem myNext = next;
         next = null;
