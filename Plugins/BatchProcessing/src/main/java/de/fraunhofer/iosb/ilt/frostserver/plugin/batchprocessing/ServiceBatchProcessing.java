@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
+import java.io.StringWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +54,15 @@ public class ServiceBatchProcessing {
     public static final String REQUEST_TYPE_BATCH = "batchProcess";
 
     private final CoreSettings settings;
+    private boolean streaming = true;
 
     public ServiceBatchProcessing(final CoreSettings settings) {
         this.settings = settings;
+    }
+
+    public ServiceBatchProcessing setStreaming(boolean streaming) {
+        this.streaming = streaming;
+        return this;
     }
 
     public ServiceResponse executeBatchOperation(final Service service, final ServiceRequest request, final ServiceResponse response) {
@@ -72,9 +79,17 @@ public class ServiceBatchProcessing {
                 JsonBatchResponse batchResponse = new JsonBatchProcessor(service, request, response)
                         .processRequest();
                 try {
-                    new ResultFormatterDefault()
-                            .format(null, null, batchResponse, false)
-                            .writeFormatted(response.getWriter());
+                    if (streaming) {
+                        new ResultFormatterDefault()
+                                .format(null, null, batchResponse, false)
+                                .writeFormatted(response.getWriter());
+                    } else {
+                        StringWriter sw = new StringWriter();
+                        new ResultFormatterDefault()
+                                .format(null, null, batchResponse, false)
+                                .writeFormatted(sw);
+                        response.getWriter().write(sw.toString());
+                    }
                 } catch (IOException ex) {
                     LOGGER.error("Failed to format", ex);
                     throw new IllegalArgumentException("Failed to execute batch.");

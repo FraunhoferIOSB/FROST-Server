@@ -151,7 +151,9 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                 }
             }
         } catch (IOException ex) {
+            LOGGER.info("Failed to parse json.", ex.getMessage());
             LOGGER.debug("Failed to parse json.", ex);
+            service.rollbackTransaction();
             parser = null;
             next = new JsonBatchResultItem()
                     .setStatus(400)

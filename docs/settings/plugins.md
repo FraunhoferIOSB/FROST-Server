@@ -197,6 +197,9 @@ in the SensorThings API standard.
 
 * **plugins.batchProcessing.enable:**  
   Toggle indicating the BatchProcessing plugin should be enabled. Default: `true`.
+* **plugins.batchProcessing.streaming:** Since 2.4.0  
+  Toggle indicating the BatchProcessing plugin can start sending the response before the batch is fully received.
+  Turn this off if you are behind a proxy that does not support this (like nginx). Default: `true`.
 
 
 ### OData
