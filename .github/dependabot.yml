@@ -15,6 +15,18 @@ updates:
   # Maintain dependencies for Maven in the v2.3.x branch
   - package-ecosystem: "maven"
     directory: "/"
+    target-branch: v2.4.x
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
+
+  # Maintain dependencies for Maven in the v2.3.x branch
+  - package-ecosystem: "maven"
+    directory: "/"
     target-branch: v2.3.x
     schedule:
       interval: "weekly"

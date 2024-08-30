@@ -1,5 +1,12 @@
 # Changelog
 
+## Development version 2.5.0
+
+**New Features**
+
+**Internal changes & Bugfixes**
+
+
 ## Release version 2.4.0
 
 **New Features**
