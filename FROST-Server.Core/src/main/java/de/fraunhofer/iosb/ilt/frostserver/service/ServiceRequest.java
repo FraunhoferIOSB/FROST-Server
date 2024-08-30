@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -34,13 +35,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract request for the Service.
  */
 public class ServiceRequest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequest.class);
     private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
 
     private String requestType;
@@ -102,9 +106,13 @@ public class ServiceRequest {
         if (contentString != null) {
             return contentString;
         }
-        return new BufferedReader(new InputStreamReader(contentBinary, StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining("\n"));
+        try {
+            return IOUtils.toString(contentBinary, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            LOGGER.debug("Failed to convert input to a string", ex);
+            LOGGER.error("Failed to convert input to a string: " + ex.getMessage());
+            throw new IllegalStateException("Failed to read input.");
+        }
     }
 
     /**
