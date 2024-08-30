@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.4.0
+## Release version 2.4.0
 
 **New Features**
 * Implemented OData any() filters.

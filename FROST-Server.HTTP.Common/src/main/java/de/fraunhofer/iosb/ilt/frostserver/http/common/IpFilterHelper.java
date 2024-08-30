@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Helper class for setting up the tomcat Remote-IP-Filter.
  *
- * @see
+ * See
  * https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter
  */
 public class IpFilterHelper extends ConfigProvider<IpFilterHelper> {
