@@ -40,13 +40,17 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +71,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
     private final ServiceRequest request;
     private final ServiceResponse response;
 
+    private Path tempFile;
     private JsonParser parser;
     private JsonBatchResultItem next;
 
@@ -86,7 +91,12 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             if (stream) {
                 parser = mapper.createParser(request.getContentReader());
             } else {
-                parser = mapper.createParser(request.getContentString());
+                tempFile = Files.createTempFile(null, null);
+                try (BufferedWriter tempWriter = Files.newBufferedWriter(tempFile)) {
+                    IOUtils.copy(request.getContentReader(), tempWriter);
+                    tempWriter.flush();
+                }
+                parser = mapper.createParser(tempFile.toFile());
             }
             JsonToken currentToken = parser.nextToken();
             while (currentToken != null) {
@@ -112,12 +122,21 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         throw new IllegalArgumentException("No requests found in input");
     }
 
-    private void close() {
+    public void close() {
         if (parser != null) {
             try {
                 parser.close();
             } catch (IOException ex) {
-                LOGGER.warn("Failed to close parser!", ex);
+                LOGGER.warn("Failed to close parser: {}", ex.getMessage());
+                LOGGER.debug("Failed to close parser.", ex);
+            }
+        }
+        if (tempFile != null) {
+            try {
+                Files.deleteIfExists(tempFile);
+            } catch (IOException ex) {
+                LOGGER.warn("Failed to delete temp file: {}", ex.getMessage());
+                LOGGER.debug("Failed to delete temp file.", ex);
             }
         }
     }

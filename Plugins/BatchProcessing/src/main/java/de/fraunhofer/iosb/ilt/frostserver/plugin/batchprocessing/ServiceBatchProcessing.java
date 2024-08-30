@@ -75,8 +75,8 @@ public class ServiceBatchProcessing {
                 return sendResponse(resultContent, response);
 
             case CONTENT_TYPE_APPLICATION_JSON:
-                JsonBatchResponse batchResponse = new JsonBatchProcessor(service, request, response)
-                        .processRequest(streaming);
+                final JsonBatchProcessor jsonBatchProcessor = new JsonBatchProcessor(service, request, response);
+                final JsonBatchResponse batchResponse = jsonBatchProcessor.processRequest(streaming);
                 try {
                     new ResultFormatterDefault()
                             .format(null, null, batchResponse, false)

@@ -110,7 +110,7 @@ public class ServiceRequest {
             return IOUtils.toString(contentBinary, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             LOGGER.debug("Failed to convert input to a string", ex);
-            LOGGER.error("Failed to convert input to a string: " + ex.getMessage());
+            LOGGER.error("Failed to convert input to a string: {}", ex.getMessage());
             throw new IllegalStateException("Failed to read input.");
         }
     }
