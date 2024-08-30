@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -79,11 +80,14 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         this.response = response;
     }
 
-    public JsonBatchResponse processRequest() {
+    public JsonBatchResponse processRequest(boolean stream) {
         try {
-            parser = request.getJsonReader()
-                    .getMapper()
-                    .createParser(request.getContentReader());
+            final ObjectMapper mapper = request.getJsonReader().getMapper();
+            if (stream) {
+                parser = mapper.createParser(request.getContentReader());
+            } else {
+                parser = mapper.createParser(request.getContentString());
+            }
             JsonToken currentToken = parser.nextToken();
             while (currentToken != null) {
                 if (currentToken == JsonToken.FIELD_NAME) {

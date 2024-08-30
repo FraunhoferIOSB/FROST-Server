@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
-import java.io.StringWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,19 +76,11 @@ public class ServiceBatchProcessing {
 
             case CONTENT_TYPE_APPLICATION_JSON:
                 JsonBatchResponse batchResponse = new JsonBatchProcessor(service, request, response)
-                        .processRequest();
+                        .processRequest(streaming);
                 try {
-                    if (streaming) {
-                        new ResultFormatterDefault()
-                                .format(null, null, batchResponse, false)
-                                .writeFormatted(response.getWriter());
-                    } else {
-                        StringWriter sw = new StringWriter();
-                        new ResultFormatterDefault()
-                                .format(null, null, batchResponse, false)
-                                .writeFormatted(sw);
-                        response.getWriter().write(sw.toString());
-                    }
+                    new ResultFormatterDefault()
+                            .format(null, null, batchResponse, false)
+                            .writeFormatted(response.getWriter());
                 } catch (IOException ex) {
                     LOGGER.error("Failed to format", ex);
                     throw new IllegalArgumentException("Failed to execute batch.");
