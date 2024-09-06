@@ -17,23 +17,27 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -50,7 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.time4j.Moment;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginActuation implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
 
+    public static final String PLUGIN_NAME = "Plugin.Actuation";
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/pluginactuation/tables.xml";
     private static final String ACTUATOR = "Actuator";
     private static final String ACTUATORS = "Actuators";
@@ -104,6 +108,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     private ActuationModelSettings modelSettings;
     private boolean enabled;
     private boolean fullyInitialised;
+    private boolean isVersion2;
 
     @Override
     public InitResult init(CoreSettings settings) {
@@ -111,7 +116,29 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, ActuationModelSettings.class);
         if (enabled) {
+            final PluginManager pluginManager = settings.getPluginManager();
             modelSettings = new ActuationModelSettings(settings);
+            boolean pcmV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
+            boolean pcmV2 = pluginManager.isPluginEnabled(PluginCoreModelV2.class);
+            PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
+            if (pcmV1 && !pcmV2) {
+                LOGGER.info("Using STA Version 1 model.");
+                isVersion2 = false;
+            } else if (!pcmV1 && pcmV2) {
+                LOGGER.info("Using STA Version 2 model.");
+                isVersion2 = true;
+                if (pml == null || !pml.isEnabled()) {
+                    LOGGER.warn("PluginModelLoader must be enabled before the Actuation plugin, delaying initialisation...");
+                    return INIT_DELAY;
+                }
+                pml.addLiquibaseFile("actuationv2/liquibase/tables.xml");
+                pml.addModelFile("actuationv2/model/Actuator.json");
+                pml.addModelFile("actuationv2/model/Task.json");
+                pml.addModelFile("actuationv2/model/TaskingCapability.json");
+            } else {
+                LOGGER.warn("Either CoreModel or CoreModelV2 must be enabled, delaying initialisation...");
+                return INIT_DELAY;
+            }
             settings.getPluginManager().registerPlugin(this);
         }
         return INIT_OK;
@@ -129,6 +156,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            return;
+        }
         Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
         if (serverSettings == null) {
             // Nothing to add to.
@@ -140,6 +171,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public void registerEntityTypes() {
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            return;
+        }
         LOGGER.info("Initialising Actuation Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
@@ -154,6 +189,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            return true;
+        }
         LOGGER.info("Linking Actuation Types...");
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
@@ -172,11 +211,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epCreationTime)
                 .registerProperty(epTaskingParameters)
                 .registerProperty(npTaskingCapabilityTask)
-                .addCreateValidator("AC-Task-CrationTime", entity -> {
-                    if (entity.getProperty(pluginCoreModel.epCreationTime) == null) {
-                        entity.setProperty(pluginCoreModel.epCreationTime, new TimeInstant(Moment.nowInSystemTime()));
-                    }
-                });
+                .addCreateValidator("AC-Task-CrationTime", new CreateTimeValidator());
         etTaskingCapability
                 .registerProperty(epIdTaskingCap)
                 .registerProperty(pluginCoreModel.epName)
@@ -206,17 +241,27 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         if (target == null) {
             target = new LinkedHashMap<>();
         }
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            target.put(CHANGE_SET_NAME, PLUGIN_NAME);
+            return target;
+        }
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pCoreModel.createLiqibaseParams(ppm, target);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_ACTUATOR, modelSettings.idTypeActuator);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASK, modelSettings.idTypeTask);
         ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASKING_CAP, modelSettings.idTypeTaskingCap);
+        target.put(CHANGE_SET_NAME, PLUGIN_NAME);
 
         return target;
     }
 
     @Override
     public String checkForUpgrades() {
+        if (isVersion2) {
+            // Nothing to do if we run V2.
+            return "Up to date, no changes to apply: " + PLUGIN_NAME + ".\n";
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
                 return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
@@ -227,6 +272,11 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        if (isVersion2) {
+            out.append("Up to date, no changes to apply: ").append(PLUGIN_NAME).append(".\n");
+            // Nothing to do if we run V2.
+            return true;
+        }
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
                 return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);

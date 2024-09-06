@@ -1,0 +1,103 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-RelatedDatastream" value="LONG" />
+            <not>
+                <tableExists tableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <createTable tableName="related_datastreams">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_related_datastreams" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-RelatedDatastream" value="STRING" />
+                <changeLogPropertyDefined property="id-RelatedDatastream" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <createTable tableName="related_datastreams">
+            <column name="id" type="${idType-RelatedDatastream}" defaultValueComputed="${defaultValueComputed-RelatedDatastream}">
+                <constraints primaryKey="true" primaryKeyName="pk_related_datastreams"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="external_target" tableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <addColumn tableName="related_datastreams">
+            <column name="external_target" type="TEXT"/>
+            <column name="source_datastream_id" type="${idType-Datastream}"/>
+            <column name="target_datastream_id" type="${idType-Datastream}"/>
+            <column name="relation_role_id" type="${idType-RelationRole}"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-source_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_datastreams" indexName="related_datastreams_source_datastream_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_datastreams" indexName="related_datastreams_source_datastream_id">
+            <column name="source_datastream_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-target_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_datastreams" indexName="related_datastreams_target_datastream_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_datastreams" indexName="related_datastreams_target_datastream_id">
+            <column name="target_datastream_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_datastreams" indexName="related_datastreams_relation_role_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_datastreams" indexName="related_datastreams_relation_role_id">
+            <column name="relation_role_id" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

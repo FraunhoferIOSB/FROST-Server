@@ -20,10 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -33,14 +35,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * An abstract request for the Service.
  */
 public class ServiceRequest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequest.class);
     private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
 
     private String requestType;
@@ -51,38 +55,46 @@ public class ServiceRequest {
     private Version version;
     private String contentType;
     private Map<String, List<String>> parameterMap;
-    private Map<String, Object> attributeMap;
-    private PrincipalExtended userPrincipal;
+    private Map<String, Object> attributeMap = new HashMap<>();
+    private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
     private CoreSettings coreSettings;
+    private QueryDefaults queryDefaults;
     private UpdateMode updateMode;
     private JsonReader jsonReader;
-
-    protected ServiceRequest() {
-        // empty by design.
-    }
 
     public Map<String, Object> getAttributeMap() {
         return attributeMap;
     }
 
-    public void setAttributeMap(Map<String, Object> attributeMap) {
+    public ServiceRequest setAttributeMap(Map<String, Object> attributeMap) {
         this.attributeMap = attributeMap;
+        return this;
+    }
+
+    public ServiceRequest setAttribute(String key, Object value) {
+        attributeMap.put(key, value);
+        return this;
     }
 
     public CoreSettings getCoreSettings() {
         return coreSettings;
     }
 
-    protected void setCoreSettings(CoreSettings coreSettings) {
+    public ServiceRequest setCoreSettings(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
+        if (queryDefaults == null) {
+            queryDefaults = coreSettings.getQueryDefaults();
+        }
+        return this;
     }
 
     public String getRequestType() {
         return requestType;
     }
 
-    public void setRequestType(String requestType) {
+    public ServiceRequest setRequestType(String requestType) {
         this.requestType = requestType;
+        return this;
     }
 
     /**
@@ -94,9 +106,13 @@ public class ServiceRequest {
         if (contentString != null) {
             return contentString;
         }
-        return new BufferedReader(new InputStreamReader(contentBinary, StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining("\n"));
+        try {
+            return IOUtils.toString(contentBinary, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            LOGGER.debug("Failed to convert input to a string", ex);
+            LOGGER.error("Failed to convert input to a string: {}", ex.getMessage());
+            throw new IllegalStateException("Failed to read input.");
+        }
     }
 
     /**
@@ -123,28 +139,32 @@ public class ServiceRequest {
         return contentBinary;
     }
 
-    public void setContent(InputStream content) {
+    public ServiceRequest setContent(InputStream content) {
         this.contentBinary = content;
+        return this;
     }
 
-    public void setContent(String content) {
+    public ServiceRequest setContent(String content) {
         this.contentString = content;
+        return this;
     }
 
     public String getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public ServiceRequest setContentType(String contentType) {
         this.contentType = contentType;
+        return this;
     }
 
     public UpdateMode getUpdateMode() {
         return updateMode;
     }
 
-    public void setUpdateMode(UpdateMode updateMode) {
+    public ServiceRequest setUpdateMode(UpdateMode updateMode) {
         this.updateMode = updateMode;
+        return this;
     }
 
     public Map<String, List<String>> getParameterMap() {
@@ -154,8 +174,9 @@ public class ServiceRequest {
         return parameterMap;
     }
 
-    public void setParameterMap(Map<String, List<String>> parameterMap) {
+    public ServiceRequest setParameterMap(Map<String, List<String>> parameterMap) {
         this.parameterMap = parameterMap;
+        return this;
     }
 
     public String getParameter(String parameter) {
@@ -178,20 +199,31 @@ public class ServiceRequest {
         return this;
     }
 
+    public QueryDefaults getQueryDefaults() {
+        return queryDefaults;
+    }
+
+    public ServiceRequest setQueryDefaults(QueryDefaults queryDefaults) {
+        this.queryDefaults = queryDefaults;
+        return this;
+    }
+
     public String getUrlPath() {
         return urlPath;
     }
 
-    public void setUrlPath(String urlPath) {
+    public ServiceRequest setUrlPath(String urlPath) {
         this.urlPath = urlPath;
+        return this;
     }
 
     public String getUrlQuery() {
         return urlQuery;
     }
 
-    public void setUrlQuery(String urlQuery) {
+    public ServiceRequest setUrlQuery(String urlQuery) {
         this.urlQuery = urlQuery;
+        return this;
     }
 
     public String getUrl() {
@@ -201,7 +233,7 @@ public class ServiceRequest {
         return urlPath + "?" + urlQuery;
     }
 
-    public final void setUrl(String url) {
+    public final ServiceRequest setUrl(String url) {
         if (url.contains("?")) {
             this.urlPath = url.substring(0, url.lastIndexOf('?'));
             this.urlQuery = url.substring(url.indexOf('?') + 1);
@@ -209,6 +241,7 @@ public class ServiceRequest {
             this.urlPath = url;
             this.urlQuery = null;
         }
+        return this;
     }
 
     public JsonReader getJsonReader() {
@@ -227,8 +260,9 @@ public class ServiceRequest {
         return userPrincipal;
     }
 
-    public void setUserPrincipal(PrincipalExtended userPrincipal) {
+    public ServiceRequest setUserPrincipal(PrincipalExtended userPrincipal) {
         this.userPrincipal = userPrincipal;
+        return this;
     }
 
     /**
@@ -244,9 +278,11 @@ public class ServiceRequest {
      * Set the API version for this request.
      *
      * @param version the API version for this request.
+     * @return this.
      */
-    public void setVersion(Version version) {
+    public ServiceRequest setVersion(Version version) {
         this.version = version;
+        return this;
     }
 
     public static ServiceRequest getLocalRequest() {

@@ -2,7 +2,7 @@
 layout: default
 title: Deep Select
 category: extensions
-order: 5
+order: 15
 ---
 
 # Deep Select

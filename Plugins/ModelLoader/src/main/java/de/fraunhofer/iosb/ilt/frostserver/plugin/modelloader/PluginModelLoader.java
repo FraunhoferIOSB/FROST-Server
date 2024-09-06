@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader;
 
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.PLUGIN_NAME;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,12 +43,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,13 +149,13 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     private void addModelFileWithPath(String fileName) {
-        final Path fullPath;
+        final File fullFile;
         if (StringHelper.isNullOrEmpty(modelPath)) {
-            fullPath = Path.of(fileName);
+            fullFile = new File(fileName);
         } else {
-            fullPath = Path.of(modelPath, fileName);
+            fullFile = new File(modelPath, fileName);
         }
-        modelFiles.add(fullPath.toString());
+        modelFiles.add(fullFile.toString());
     }
 
     public void addModelFile(String filename) {
@@ -170,17 +171,17 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     public void loadModelFile(String fullPathString) {
-        Path fullPath = Path.of(fullPathString);
-        LOGGER.info("Loading model definition from {}", fullPath.toAbsolutePath());
+        File fullFile = new File(fullPathString);
+        LOGGER.info("Loading model definition from {}", fullFile.toString());
         String data;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             DefModel modelDefinition;
-            if (fullPath.toFile().exists()) {
-                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+            if (fullFile.exists()) {
+                data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
                 modelDefinition = objectMapper.readValue(data, DefModel.class);
             } else {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
                 modelDefinition = objectMapper.readValue(stream, DefModel.class);
             }
             modelDefinition.init();
@@ -214,19 +215,19 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     private SecurityModel loadSecurityFile(String fileName) {
-        final Path fullPath = Path.of(securityPath, fileName);
-        LOGGER.info("Loading security definition from {}", fullPath.toAbsolutePath());
+        final File fullFile = new File(securityPath, fileName);
+        LOGGER.info("Loading security definition from {}", fullFile.toString());
         String data;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             SecurityModel securityModel;
-            if (fullPath.toFile().exists()) {
-                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+            if (fullFile.exists()) {
+                data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
                 securityModel = objectMapper.readValue(data, SecurityModel.class);
             } else {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
                 if (stream == null) {
-                    LOGGER.info("  Not found: {}", fullPath);
+                    LOGGER.info("  Not found: {}", fullFile);
                     return null;
                 }
                 securityModel = objectMapper.readValue(stream, SecurityModel.class);
@@ -297,18 +298,18 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     private Map<String, Object> loadExtraMetadataFile(String fileName) {
-        final Path fullPath = Path.of(metadataPath, fileName);
-        LOGGER.info("Loading extra landing page meta data from {}", fullPath.toAbsolutePath());
+        final File fullFile = new File(metadataPath, fileName);
+        LOGGER.info("Loading extra landing page meta data from {}", fullFile.toString());
         String data;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            if (fullPath.toFile().exists()) {
-                data = new String(Files.readAllBytes(fullPath), StandardCharsets.UTF_8);
+            if (fullFile.exists()) {
+                data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
                 return objectMapper.readValue(data, TYPE_REFERENCE_MAP);
             } else {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath.toString());
+                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
                 if (stream == null) {
-                    LOGGER.info("  Not found: {}", fullPath);
+                    LOGGER.info("  Not found: {}", fullFile);
                 } else {
                     return objectMapper.readValue(stream, TYPE_REFERENCE_MAP);
                 }
@@ -384,6 +385,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
                     final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
+                    liquibaseParams.put(CHANGE_SET_NAME, file);
                     liquibaseParams.put("searchPath", liquibasePath);
                     result.append(jpm.checkForUpgrades(file, liquibaseParams));
                 }

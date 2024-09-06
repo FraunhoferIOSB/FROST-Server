@@ -90,7 +90,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     @ConfigurableField(editor = EditorBoolean.class, optional = true,
             label = "Nullable", description = "Flag indicating the property may be set to null.")
     @EditorBoolean.EdOptsBool(dflt = true)
-    private boolean nullable;
+    private boolean nullable = true;
 
     /**
      * Flag indicating this property must always be serialised, even if it is

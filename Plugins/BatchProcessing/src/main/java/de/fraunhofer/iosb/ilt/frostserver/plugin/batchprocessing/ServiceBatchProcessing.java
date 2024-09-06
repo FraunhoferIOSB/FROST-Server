@@ -17,27 +17,27 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_MULTIPART_MIXED;
+
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterDefault;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchFactory;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchProcessor;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchResponse;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartFactory;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
  * /$batch.
- *
- * @author scf
  */
 public class ServiceBatchProcessing {
 
@@ -52,30 +52,44 @@ public class ServiceBatchProcessing {
      */
     public static final String REQUEST_TYPE_BATCH = "batchProcess";
 
-    private static final Map<String, BatchFactory<?>> CONTENT_TYPE_TO_FACTORY = new HashMap<>();
-
-    static {
-        for (BatchFactory<?> factory : Arrays.asList(new MultipartFactory(), new JsonBatchFactory())) {
-            CONTENT_TYPE_TO_FACTORY.put(factory.getContentType(), factory);
-        }
-    }
-
     private final CoreSettings settings;
+    private boolean streaming = true;
 
     public ServiceBatchProcessing(final CoreSettings settings) {
         this.settings = settings;
     }
 
+    public ServiceBatchProcessing setStreaming(boolean streaming) {
+        this.streaming = streaming;
+        return this;
+    }
+
     public ServiceResponse executeBatchOperation(final Service service, final ServiceRequest request, final ServiceResponse response) {
-        BatchFactory<?> batchFactory = CONTENT_TYPE_TO_FACTORY
-                .get(request.getContentType().split(";", 2)[0].toLowerCase());
-        if (batchFactory == null) {
-            throw new IllegalArgumentException("Invalid Content-Type: " + request.getContentType());
+        String ct = request.getContentType().split(";", 2)[0].toLowerCase();
+        switch (ct) {
+            case CONTENT_TYPE_MULTIPART_MIXED:
+                BatchFactory<?> batchFactory = new MultipartFactory();
+                Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
+                batch.parse(request);
+                Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service, batch);
+                return sendResponse(resultContent, response);
+
+            case CONTENT_TYPE_APPLICATION_JSON:
+                final JsonBatchProcessor jsonBatchProcessor = new JsonBatchProcessor(service, request, response);
+                final JsonBatchResponse batchResponse = jsonBatchProcessor.processRequest(streaming);
+                try {
+                    new ResultFormatterDefault()
+                            .format(null, null, batchResponse, false)
+                            .writeFormatted(response.getWriter());
+                } catch (IOException ex) {
+                    LOGGER.error("Failed to format", ex);
+                    throw new IllegalArgumentException("Failed to execute batch.");
+                }
+                return response;
+
+            default:
+                throw new IllegalArgumentException("Invalid Content-Type: " + request.getContentType());
         }
-        Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
-        batch.parse(request);
-        Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service, batch);
-        return sendResponse(resultContent, response);
     }
 
     private ServiceResponse sendResponse(final Batch batch, final ServiceResponse response) {

@@ -1,0 +1,48 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-observed_property_observing_procedure" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="observed_property_observing_procedure" />
+            </not>
+        </preConditions>
+        <createTable tableName="observed_property_observing_procedure">
+            <column name="procedure_id" type="${idType-ObservingProcedure}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="observed_property_id" type="${idType-ObservedProperty}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="procedure_id, observed_property_id" constraintName="pk_observed_property_observing_procedure" tableName="observed_property_observing_procedure"/>
+        <createIndex tableName="observed_property_observing_procedure" indexName="observed_property_observing_procedure_procedure_id">
+            <column name="procedure_id" />
+        </createIndex>
+        <createIndex tableName="observed_property_observing_procedure" indexName="observed_property_observing_procedure_observed_property_id">
+            <column name="observed_property_id" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

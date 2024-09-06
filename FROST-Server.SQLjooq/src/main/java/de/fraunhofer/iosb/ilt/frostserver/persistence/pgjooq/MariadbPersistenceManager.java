@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_SCHEMA_PRIORITY;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
@@ -30,6 +31,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -40,6 +42,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefPmHook;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -47,6 +51,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostUpdate;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -82,7 +92,6 @@ import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +174,7 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         final Settings customSettings = persistenceSettings.getCustomSettings();
-        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class);
         if (StringHelper.isNullOrEmpty(connectionUrl)) {
             connectionName = SOURCE_NAME_FROST;
         } else {
@@ -286,8 +295,7 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         if (result == null) {
             return null;
         }
-        return queryBuilder.getQueryState().entityFromQuery(result, dataSize)
-                .setQuery(query);
+        return queryBuilder.getQueryState().entityFromRecord(result, dataSize, query);
     }
 
     @Override
@@ -305,11 +313,11 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
             }
         }
 
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, queryBuilder, dataSize);
         try {
             lastElement.visit(entityCreator);
         } catch (IllegalArgumentException ex) {
@@ -624,6 +632,10 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         for (DefModel modelDefinition : modelDefinitions) {
             registerModelMappings(modelDefinition);
         }
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            registerHooks(modelDefinition);
+        }
         // Done, release the model definitions.
         tableCollection.clearModelDefinitions();
     }
@@ -686,6 +698,34 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
             }
             for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties()) {
                 registerMappingForNavProperties(propertyDef, table);
+            }
+        }
+    }
+
+    private void registerHooks(DefModel modelDefinition) {
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
+            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
+            for (DefPmHook hookDef : entityTypeDef.getHooks()) {
+                PmHook hook = hookDef.getHook();
+                if (hook instanceof HookPreInsert h) {
+                    table.registerHookPreInsert(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostInsert h) {
+                    table.registerHookPostInsert(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPreUpdate h) {
+                    table.registerHookPreUpdate(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostUpdate h) {
+                    table.registerHookPostUpdate(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPreDelete h) {
+                    table.registerHookPreDelete(hookDef.getPriority(), h);
+                }
+                if (hook instanceof HookPostDelete h) {
+                    table.registerHookPostDelete(hookDef.getPriority(), h);
+                }
             }
         }
     }
@@ -822,11 +862,17 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
 
     @Override
     public String checkForUpgrades() {
-        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap());
+        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
+                .addProperty(CHANGE_SET_NAME, "MariadbPersistenceManager")
+                .build();
+        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props);
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap(), out);
+        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
+                .addProperty(CHANGE_SET_NAME, "MariadbPersistenceManager")
+                .build();
+        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props, out);
     }
 }

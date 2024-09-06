@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
@@ -291,20 +290,12 @@ public class QueryParser extends Visitor {
         return expressionParser;
     }
 
-    public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path, ANONYMOUS_PRINCIPAL, new DynamicContext());
-    }
-
-    public static Query parseQuery(String query, CoreSettings settings, ResourcePath path, PrincipalExtended user) {
-        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path, user, new DynamicContext());
-    }
-
-    public static Query parseQuery(String query, CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        return parseQuery(query, StringHelper.UTF8, settings.getQueryDefaults(), settings.getModelRegistry(), path, user, context);
-    }
-
     public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
         return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
+    }
+
+    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user) {
+        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, user, new DynamicContext());
     }
 
     public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user, DynamicContext context) {

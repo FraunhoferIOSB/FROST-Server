@@ -1,0 +1,151 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-fk_preparation_steps_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_preparation_steps_feature_id" foreignKeyTableName="preparation_steps" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_preparation_steps_feature_id"
+            baseTableName="preparation_steps" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_preparation_steps_preparation_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_preparation_steps_preparation_procedure_id" foreignKeyTableName="preparation_steps" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_preparation_steps_preparation_procedure_id"
+            baseTableName="preparation_steps" baseColumnNames="preparation_procedure_id"
+            referencedTableName="preparation_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_sampler_sampling_procedure_sampler_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_sampler_sampling_procedure_sampler_id" foreignKeyTableName="sampler_sampling_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_sampler_sampling_procedure_sampler_id"
+            baseTableName="sampler_sampling_procedure" baseColumnNames="sampler_id"
+            referencedTableName="samplers" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_sampler_sampling_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_sampler_sampling_procedure_procedure_id" foreignKeyTableName="sampler_sampling_procedure" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_sampler_sampling_procedure_procedure_id"
+            baseTableName="sampler_sampling_procedure" baseColumnNames="procedure_id"
+            referencedTableName="sampling_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_samplings_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_samplings_thing_id" foreignKeyTableName="samplings" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_samplings_thing_id"
+            baseTableName="samplings" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_samplings_sampled_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_samplings_sampled_feature_id" foreignKeyTableName="samplings" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_samplings_sampled_feature_id"
+            baseTableName="samplings" baseColumnNames="sampled_feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_samplings_sampler_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_samplings_sampler_id" foreignKeyTableName="samplings" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_samplings_sampler_id"
+            baseTableName="samplings" baseColumnNames="sampler_id"
+            referencedTableName="samplers" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_samplings_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_samplings_procedure_id" foreignKeyTableName="samplings" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_samplings_procedure_id"
+            baseTableName="samplings" baseColumnNames="procedure_id"
+            referencedTableName="sampling_procedures" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_features_creator_sampling_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_features_creator_sampling_id" foreignKeyTableName="features" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_features_creator_sampling_id"
+            baseTableName="features" baseColumnNames="creator_sampling_id"
+            referencedTableName="samplings" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

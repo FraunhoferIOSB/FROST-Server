@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +60,12 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader";
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.projects.PluginProjects";
 
     /**
      * The plugins provided with FROST by default. When editing these, also
@@ -360,6 +366,20 @@ public class PluginManager implements ConfigDefaults {
 
     public Map<String, Version> getVersions() {
         return versions;
+    }
+
+    public static String decodeRequestType(final PluginService plugin, final Version version, final String path, final String method, String contentType) throws IllegalArgumentException {
+        return decodeRequestType(plugin, version, path, HttpMethod.fromString(method), contentType);
+    }
+
+    public static String decodeRequestType(final PluginService plugin, final Version version, final String path, final HttpMethod method, String contentType) throws IllegalArgumentException {
+        final String requestType = plugin.getRequestTypeFor(version, path, method, contentType);
+        if (requestType == null) {
+            final String cleanedPath = StringHelper.cleanForLogging(path);
+            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
+            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
+        }
+        return requestType;
     }
 
 }

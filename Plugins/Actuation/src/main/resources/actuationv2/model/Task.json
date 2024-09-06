@@ -1,0 +1,134 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Task",
+      "plural": "Tasks",
+      "adminOnly": false,
+      "table": "tasks",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "creationTime",
+          "type": "TM_Instant",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+              "field": "creation_time"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "runTime",
+          "type": "TM_Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
+              "fieldStart": "run_time_start",
+              "fieldEnd": "run_time_end"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "status",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "status"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "taskingParameters",
+          "type": "Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+              "field": "tasking_parameters",
+              "isMap": true
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "TaskingCapability",
+          "entitySet": false,
+          "entityType": "TaskingCapability",
+          "required": true,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Tasks",
+            "entitySet": false,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "tasking_capability_id",
+              "otherTable": "tasking_capabilities",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "proximateFeatureOfInterest",
+          "entitySet": false,
+          "entityType": "Feature",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Tasks",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "feature_id",
+              "otherTable": "features",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "validators": {
+        "createValidators": [
+          {
+            "name": "AC-Task-CrationTime",
+            "validator": {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.CreateTimeValidator"
+            }
+          }
+        ],
+        "updateValidators": []
+      },
+      "annotations": []
+    }
+  ]
+}

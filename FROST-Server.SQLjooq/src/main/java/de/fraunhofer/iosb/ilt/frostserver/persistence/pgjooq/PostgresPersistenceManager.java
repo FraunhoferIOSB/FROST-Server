@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_SCHEMA_PRIORITY;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
@@ -30,6 +31,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -90,7 +92,6 @@ import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +174,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         persistenceSettings = settings.getPersistenceSettings();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         final Settings customSettings = persistenceSettings.getCustomSettings();
-        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class);
         if (StringHelper.isNullOrEmpty(connectionUrl)) {
             connectionName = SOURCE_NAME_FROST;
         } else {
@@ -294,8 +295,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (result == null) {
             return null;
         }
-        return queryBuilder.getQueryState().entityFromQuery(result, dataSize)
-                .setQuery(query);
+        return queryBuilder.getQueryState().entityFromRecord(result, dataSize, query);
     }
 
     @Override
@@ -313,11 +313,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             }
         }
 
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb, dataSize);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, queryBuilder, dataSize);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
@@ -857,11 +857,17 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
 
     @Override
     public String checkForUpgrades() {
-        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap());
+        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
+                .addProperty(CHANGE_SET_NAME, "PostgresPersistenceManager")
+                .build();
+        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props);
     }
 
     @Override
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, Collections.emptyMap(), out);
+        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
+                .addProperty(CHANGE_SET_NAME, "PostgresPersistenceManager")
+                .build();
+        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props, out);
     }
 }

@@ -1,0 +1,28 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "MultiDatastream",
+      "plural": "MultiDatastreams",
+      "adminOnly": false,
+      "table": "MULTI_DATASTREAMS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "RESTRICTED"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}

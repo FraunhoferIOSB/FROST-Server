@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
+import static de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper.quoteForUrl;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
@@ -47,6 +49,10 @@ public final class ContentIdPair {
 
     public EntityType getType() {
         return type;
+    }
+
+    public String selfLink() {
+        return '/' + type.plural + '(' + quoteForUrl(type.getPrimaryKey(), value) + ')';
     }
 
     public String keyToUrl() {

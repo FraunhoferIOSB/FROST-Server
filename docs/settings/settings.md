@@ -36,27 +36,39 @@ These are settings affecting both the MQTT and HTTP packages.
 * **serviceRootUrl:**  
   The base URL of the SensorThings Server without version.
 * **defaultCount:**  
-  The default value for the $count query option.
+  The default value for the $count query option. Default: `false`.
 * **defaultTop:**  
-  The default value for the $top query option.
+  The default value for the $top query option. Default: `100`.
 * **maxTop:**  
-  The maximum allowed value for the $top query option.
+  The maximum allowed value for the $top query option. Default: `10000`.
 * **maxDataSize:**  
-  The number of bytes that can be loaded before the server stops loading more entities and returns the result. The default is 25000000 (25 MB).
+  The number of bytes that can be loaded before the server stops loading more entities and returns the result. Default: `25000000` (25 MB).
 * **useAbsoluteNavigationLinks:**  
-  If true, navigationLinks are absolute, otherwise relative.
+  If true, navigationLinks are absolute, otherwise relative. Default: `true`.
 * **alwaysOrderbyId:**  
-  Always add an 'orderby=id asc' to queries to ensure consistent paging.
+  Always add an 'orderby=id asc' to queries to ensure consistent paging. Default: `true`.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 * **queueLoggingInterval:**  
-  If non-zero, log queue statistics ever x milliseconds. Default: 0 (off)
+  If non-zero, log queue statistics ever x milliseconds. Default value: `0` (off)
 
 
 ## HTTP settings
 
 These are settings for the HTTP package.
 
+* **http.requestDecoder.autodetectRootUrl:** Since 2.4.0  
+  If true, FROST will try to automatically detect the serviceRootUrl. Default `false` if the serviceRootUrl is not set, otherwise `true`.
+* **http.requestDecoder.useXForwardedHeaders:** Since 2.4.0  
+  If true, FROST will use the X-Forwarded headers to detect the serviceRootUrl. Default `false`.
+* **http.requestDecoder.XForwardedHostHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Host equivalent header. Default `X-Forwarded-Host`.
+* **http.requestDecoder.XForwardedPathHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Path equivalent header. Default `X-Forwarded-Path`.
+* **http.requestDecoder.XForwardedPortHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Port equivalent header. Default `X-Forwarded-Port`.
+* **http.requestDecoder.XForwardedProtoHeader:** Since 2.4.0  
+  The name of the X-Forwarded-Proto equivalent header. Default `X-Forwarded-Proto`.
 * **http.cors.enable:**  
   If true, a filter is added to allow cross-site-scripting. Default: `false`.
 * **http.cors.allowed.origins:**  
@@ -85,6 +97,11 @@ These are settings for the HTTP package.
   response header to pre-flight response. Default: `1800`.
 * **http.cors.request.decorate:**  
   A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Default: `true`.
+* **http.sessionCookiePath:** Since 2.4.0  
+  If set, overrides the session cookie path of Tomcat. Usefull when FROST is behind a path-rewriting reverse proxy. Default: ``.
+* **http.remoteIpFilter.enable:** Since 2.4.0  
+  If true, a [remoteIpFilter](https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter) is added.
+  All configuration parameters of the filter are exposed as `http.remoteIpFilter.enable`. Default: `false`.
 
 
 ## Auth settings

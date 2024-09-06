@@ -1,0 +1,193 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-fk_related_datastreams_source_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_datastreams_source_datastream_id" foreignKeyTableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_datastreams_source_datastream_id"
+            baseTableName="related_datastreams" baseColumnNames="source_datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_datastreams_target_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_datastreams_target_datastream_id" foreignKeyTableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_datastreams_target_datastream_id"
+            baseTableName="related_datastreams" baseColumnNames="target_datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_datastreams_relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_datastreams_relation_role_id" foreignKeyTableName="related_datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_datastreams_relation_role_id"
+            baseTableName="related_datastreams" baseColumnNames="relation_role_id"
+            referencedTableName="relation_roles" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_features_source_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_features_source_feature_id" foreignKeyTableName="related_features" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_features_source_feature_id"
+            baseTableName="related_features" baseColumnNames="source_feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_features_target_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_features_target_feature_id" foreignKeyTableName="related_features" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_features_target_feature_id"
+            baseTableName="related_features" baseColumnNames="target_feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_features_relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_features_relation_role_id" foreignKeyTableName="related_features" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_features_relation_role_id"
+            baseTableName="related_features" baseColumnNames="relation_role_id"
+            referencedTableName="relation_roles" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_observations_source_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_observations_source_observation_id" foreignKeyTableName="related_observations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_observations_source_observation_id"
+            baseTableName="related_observations" baseColumnNames="source_observation_id"
+            referencedTableName="observations" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_observations_target_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_observations_target_observation_id" foreignKeyTableName="related_observations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_observations_target_observation_id"
+            baseTableName="related_observations" baseColumnNames="target_observation_id"
+            referencedTableName="observations" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_observations_relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_observations_relation_role_id" foreignKeyTableName="related_observations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_observations_relation_role_id"
+            baseTableName="related_observations" baseColumnNames="relation_role_id"
+            referencedTableName="relation_roles" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_things_source_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_things_source_thing_id" foreignKeyTableName="related_things" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_things_source_thing_id"
+            baseTableName="related_things" baseColumnNames="source_thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_things_target_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_things_target_thing_id" foreignKeyTableName="related_things" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_things_target_thing_id"
+            baseTableName="related_things" baseColumnNames="target_thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-fk_related_things_relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_related_things_relation_role_id" foreignKeyTableName="related_things" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_related_things_relation_role_id"
+            baseTableName="related_things" baseColumnNames="relation_role_id"
+            referencedTableName="relation_roles" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

@@ -37,19 +37,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
- * @author scf
+ * Plugin that handles batch requests.
  */
 public class PluginBatchProcessing implements PluginService, PluginRootDocument, ConfigDefaults {
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_BATCH_PROCESSING = "batchProcessing.enable";
 
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLE_BATCH_STREAMING = "batchProcessing.streaming";
+
     private static final String REQUIREMENT_BATCH_PROCESSING = "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request";
     private static final String REQUIREMENT_JSON_BATCH_PROCESSING = "https://fraunhoferiosb.github.io/FROST-Server/extensions/JsonBatchRequest.html";
 
     private CoreSettings settings;
     private boolean enabled;
+    private boolean streaming;
 
     @Override
     public InitResult init(CoreSettings settings) {
@@ -58,6 +61,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
         enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
+            streaming = pluginSettings.getBoolean(TAG_ENABLE_BATCH_STREAMING, getClass());
         }
         return InitResult.INIT_OK;
     }
@@ -105,6 +109,7 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
         return new ServiceBatchProcessing(settings)
+                .setStreaming(streaming)
                 .executeBatchOperation(service, request, response);
     }
 }

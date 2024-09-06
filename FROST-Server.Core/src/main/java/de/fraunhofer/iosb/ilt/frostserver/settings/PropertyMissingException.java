@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 /**
- *
- * @author jab
+ * Thrown when a non-existing property is requested without a default value.
  */
 public class PropertyMissingException extends PropertyException {
 

@@ -220,9 +220,9 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * @return this
      */
     public EntityType addCreateValidator(String name, EntityValidator validator) {
-        EntityValidator value = validatorsCreateEntity.putIfAbsent(name, validator);
+        EntityValidator value = validatorsCreateEntity.put(name, validator);
         if (value != null) {
-            throw new IllegalArgumentException("A CreateValidator for " + entityName + " already exists with name " + name);
+            LOGGER.warn("Replaced CreateValidator {} on {}", name, entityName);
         }
         return this;
     }
@@ -254,9 +254,9 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * @return this
      */
     public EntityType addUpdateValidator(String name, EntityValidator validator) {
-        EntityValidator value = validatorsUpdateEntity.putIfAbsent(name, validator);
+        EntityValidator value = validatorsUpdateEntity.put(name, validator);
         if (value != null) {
-            throw new IllegalArgumentException("An UpdateValidator for " + entityName + " already exists with name " + name);
+            LOGGER.warn("Replaced UpdateValidator {} on {}", name, entityName);
         }
         return this;
     }

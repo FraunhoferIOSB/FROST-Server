@@ -2,7 +2,7 @@
 layout: default
 title: Expanding Entities in MQTT
 category: extensions
-order: 10
+order: 30
 ---
 
 # Extending MQTT Responses with nested Entities

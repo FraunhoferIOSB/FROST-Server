@@ -65,7 +65,8 @@ class UrlHelperTest {
         modelRegistry.initFinalise();
         queryDefaults = coreSettings.getQueryDefaults()
                 .setAlwaysOrder(true)
-                .setUseAbsoluteNavigationLinks(false);
+                .setUseAbsoluteNavigationLinks(false)
+                .setServiceRootUrl(SERVICE_ROOT_URL);
     }
 
     @Test
@@ -174,16 +175,15 @@ class UrlHelperTest {
     }
 
     private static void testNextLink(CoreSettings settings, Entity last, Entity next, String baseUrl, String expectedNextUrl) {
-
         Query queryBase = null;
         Query queryExpected = null;
         try {
-            queryBase = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+            queryBase = PathParser.parsePathAndQuery(Version.V_1_1, baseUrl, settings, settings.getQueryDefaults());
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse base url: " + baseUrl, e);
         }
         try {
-            queryExpected = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+            queryExpected = PathParser.parsePathAndQuery(Version.V_1_1, expectedNextUrl, settings, settings.getQueryDefaults());
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
         }
@@ -194,7 +194,7 @@ class UrlHelperTest {
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
         Query nextQuery = null;
         try {
-            nextQuery = PathParser.parsePathAndQuery(SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+            nextQuery = PathParser.parsePathAndQuery(Version.V_1_1, nextLink, settings, settings.getQueryDefaults());
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed for base url {}", baseUrl);
             LOGGER.error("Expected nextLink   {}", expectedNextUrl);

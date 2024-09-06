@@ -36,7 +36,7 @@ By default, only primary and foreign keys have indices on them. A very common in
 is for _Datastreams(x)/observations?$orderby=phenomenonTime asc_:
 
 ```sql
-create index "OBS-DS_ID-PHTIME_SE-O_ID"
+create index concurrently "OBS-DS_ID-PHTIME_SE-O_ID"
   on "OBSERVATIONS"
   using btree
   ("DATASTREAM_ID", "PHENOMENON_TIME_START" asc, "PHENOMENON_TIME_END" asc, "ID" asc)
@@ -52,14 +52,14 @@ in the PostGIS manual.
 
 For the Locations table:
 ```sql
-create index "LOCATIONS_GEOM"
+create index concurrently "LOCATIONS_GEOM"
   on "LOCATION"
   using gist ("GEOM");
 ```
 
 For the FeaturesOfInterest table:
 ```sql
-create index "FEATURES_GEOM"
+create index concurrently "FEATURES_GEOM"
   on "FEATURES"
   using gist ("GEOM");
 ```
@@ -71,7 +71,7 @@ Indices can be added to fields within `jsonb`-type columns to speed up queries
 like _Observations?$filter=parameters/secondary_id eq 123_:
 
 ```sql
-create index "IDX_OBS_PARAM_SECONDARYID"
+create index concurrently "IDX_OBS_PARAM_SECONDARYID"
   on "OBSERVATIONS"
   using btree (("PARAMETERS" #> '{ secondary_id }') asc);
 ```

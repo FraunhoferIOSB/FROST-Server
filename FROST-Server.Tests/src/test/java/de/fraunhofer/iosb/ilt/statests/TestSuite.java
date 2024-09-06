@@ -76,7 +76,8 @@ import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests11;
-import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests11;
+import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTestsBasic11;
+import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTestsKeycloak11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests10;
@@ -170,7 +171,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     BasicAuthAnonReadTests11.class,
     BasicAuthCryptPwTests10.class,
     BasicAuthCryptPwTests11.class,
-    FineGrainedAuthTests11.class,
+    FineGrainedAuthTestsBasic11.class,
+    FineGrainedAuthTestsKeycloak11.class,
     KeyCloakTests10.class,
     KeyCloakTests11.class,
     KeyCloakAnonReadTests10.class,

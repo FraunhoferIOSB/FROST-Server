@@ -1,0 +1,221 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="scf" id="2024-05-05-fk_datastreams_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_sensor_id" foreignKeyTableName="datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_sensor_id"
+            baseTableName="datastreams" baseColumnNames="sensor_id"
+            referencedTableName="sensors" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_datastreams_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_thing_id" foreignKeyTableName="datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_thing_id"
+            baseTableName="datastreams" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_datastreams_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_feature_id" foreignKeyTableName="datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_feature_id"
+            baseTableName="datastreams" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_features_feature_types_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_id" foreignKeyTableName="features_feature_types" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_features_feature_types_feature_id"
+            baseTableName="features_feature_types" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_features_feature_types_feature_type_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_type_id" foreignKeyTableName="features_feature_types" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_features_feature_types_feature_type_id"
+            baseTableName="features_feature_types" baseColumnNames="feature_type_id"
+            referencedTableName="feature_types" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_hist_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_hist_locations_thing_id" foreignKeyTableName="hist_locations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_hist_locations_thing_id"
+            baseTableName="hist_locations" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_locations_hist_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_location_id" foreignKeyTableName="locations_hist_locations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_locations_hist_locations_location_id"
+            baseTableName="locations_hist_locations" baseColumnNames="location_id"
+            referencedTableName="locations" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_locations_hist_locations_hist_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_hist_location_id" foreignKeyTableName="locations_hist_locations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_locations_hist_locations_hist_location_id"
+            baseTableName="locations_hist_locations" baseColumnNames="hist_location_id"
+            referencedTableName="hist_locations" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_observations_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_observations_datastream_id" foreignKeyTableName="observations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_observations_datastream_id"
+            baseTableName="observations" baseColumnNames="datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_observations_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_observations_feature_id" foreignKeyTableName="observations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_observations_feature_id"
+            baseTableName="observations" baseColumnNames="feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_datastreams_observed_properties_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_observed_property_id" foreignKeyTableName="datastreams_observed_properties" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_observed_properties_observed_property_id"
+            baseTableName="datastreams_observed_properties" baseColumnNames="observed_property_id"
+            referencedTableName="observed_properties" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_datastreams_observed_properties_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_datastream_id" foreignKeyTableName="datastreams_observed_properties" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_observed_properties_datastream_id"
+            baseTableName="datastreams_observed_properties" baseColumnNames="datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_things_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_things_locations_thing_id" foreignKeyTableName="things_locations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_things_locations_thing_id"
+            baseTableName="things_locations" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-05-05-fk_things_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_things_locations_location_id" foreignKeyTableName="things_locations" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_things_locations_location_id"
+            baseTableName="things_locations" baseColumnNames="location_id"
+            referencedTableName="locations" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

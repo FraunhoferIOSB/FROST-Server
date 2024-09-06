@@ -1,0 +1,150 @@
+{
+  "entries": [
+    {
+      "tableName": "OBSERVATIONS",
+      "wrappers": [
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",
+          "checkInsert": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "admin",
+                  "create"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                "targetNavLink": "Datastream",
+                "query": "$filter\u003dThing/Projects/UserProjectRoles/User/username eq principalName() and Thing/Projects/UserProjectRoles/Role/rolename in (\u0027obscreate\u0027,\u0027create\u0027,\u0027admin\u0027)",
+                "emptyAllowed": false
+              }
+            ]
+          },
+          "checkUpdate": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "admin",
+                  "update"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+                "combineType": "AND",
+                "subChecks": [
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
+                    "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and (Datastream/Thing/Projects/UserProjectRoles/Role/rolename eq \u0027update\u0027 or Datastream/Thing/Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
+                    "targetNavLink": "Datastream",
+                    "query": "$filter\u003dThing/Projects/UserProjectRoles/User/username eq principalName() and Thing/Projects/UserProjectRoles/Role/rolename in (\u0027update\u0027,\u0027admin\u0027)",
+                    "emptyAllowed": true
+                  },
+                  {
+                    "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkEmpty",
+                    "targetNavLink": "FeatureOfInterest"
+                  }
+                ]
+              }
+            ]
+          },
+          "checkDelete": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckMulti",
+            "combineType": "OR",
+            "subChecks": [
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "admin",
+                  "delete"
+                ]
+              },
+              {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
+                "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and Datastream/Thing/Projects/UserProjectRoles/Role/rolename in (\u0027delete\u0027,\u0027admin\u0027)"
+              }
+            ]
+          }
+        },
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperMulti",
+          "wrappers": [
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+                "checkType": "ANY",
+                "roles": [
+                  "read"
+                ]
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperPass"
+              }
+            },
+            {
+              "condition": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckFixed",
+                "valid": true
+              },
+              "wrapper": {
+                "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
+                "joins": [
+                  {
+                    "targetTable": "DATASTREAMS",
+                    "targetAlias": "ds",
+                    "joinOnSql": "t.\"DATASTREAM_ID\" \u003d ds.\"ID\"",
+                    "joinType": "INNER"
+                  },
+                  {
+                    "targetTable": "THINGS",
+                    "targetAlias": "th",
+                    "joinOnSql": "ds.\"THING_ID\" \u003d th.\"ID\"",
+                    "joinType": "INNER"
+                  },
+                  {
+                    "targetTable": "THING_PROJECTS",
+                    "targetAlias": "tp",
+                    "joinOnSql": "th.\"ID\" \u003d tp.\"THING_ID\"",
+                    "joinType": "INNER"
+                  },
+                  {
+                    "targetTable": "PROJECTS",
+                    "targetAlias": "pr",
+                    "joinOnSql": "tp.\"PROJECT_ID\" \u003d pr.\"ID\"",
+                    "joinType": "INNER"
+                  },
+                  {
+                    "targetTable": "USER_PROJECT_ROLE",
+                    "targetAlias": "upr",
+                    "joinOnSql": "pr.\"ID\" \u003d upr.\"PROJECT_ID\"",
+                    "joinType": "LEFT"
+                  },
+                  {
+                    "targetTable": "USERS",
+                    "targetAlias": "u",
+                    "joinOnSql": "upr.\"USER_NAME\" \u003d u.\"USER_NAME\" ",
+                    "joinType": "LEFT"
+                  }
+                ],
+                "where": "(pr.\"ISPUBLIC\" and not ds.\"RESTRICTED\" and not th.\"RESTRICTED\") or u.\"USER_NAME\" \u003d ?",
+                "usernameParameter": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

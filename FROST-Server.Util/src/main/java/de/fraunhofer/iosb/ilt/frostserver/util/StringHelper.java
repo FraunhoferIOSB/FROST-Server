@@ -186,23 +186,6 @@ public class StringHelper {
     }
 
     /**
-     * Urlencodes the given string, optionally not encoding forward slashes.
-     *
-     * In urls, forward slashes before the "?" must never be urlEncoded.
-     * Urlencoding of slashes could otherwise be used to obfuscate phising URLs.
-     *
-     * @param string The string to urlEncode.
-     * @param notSlashes If true, forward slashes are not encoded.
-     * @return The urlEncoded string.
-     */
-    public static String urlEncode(String string, boolean notSlashes) {
-        if (notSlashes) {
-            return urlEncodeNotSlashes(string);
-        }
-        return urlEncode(string);
-    }
-
-    /**
      * Urlencodes the given string, except for the forward slashes.
      *
      * @param string The string to urlEncode.

@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
  */
 public class LiquibaseHelper {
 
+    public static final String CHANGE_SET_NAME = "changeSetName";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LiquibaseHelper.class.getName());
 
     private LiquibaseHelper() {
@@ -88,6 +90,7 @@ public class LiquibaseHelper {
     }
 
     private static void runLiquibaseCheck(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, StringWriter out) {
+        String changeSetName = Objects.toString(params.get(CHANGE_SET_NAME), "Unnamed Changeset");
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -106,10 +109,10 @@ public class LiquibaseHelper {
                 }
             }
             if (toRunCount == 0) {
-                out.append("Up to date, no changes to apply.");
+                out.append("Up to date, no changes to apply: " + changeSetName + ".\n");
             }
         } catch (LiquibaseException ex) {
-            outputError(ex, out, "Failed to upgrade database");
+            outputError(ex, out, "Failed to upgrade database: " + changeSetName + ".");
         } catch (Exception ex) {
             LOGGER.warn("Exception happened when closing liquibase.", ex);
         }
@@ -127,14 +130,15 @@ public class LiquibaseHelper {
     }
 
     private static void runLiquibaseUpdate(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
+        String changeSetName = Objects.toString(params.get(CHANGE_SET_NAME), "Unnamed Changeset");
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
             liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
-            out.append("Update Completed.");
+            out.append("Update Completed: " + changeSetName + ".");
         } catch (LiquibaseException ex) {
-            outputError(ex, out, "Failed to upgrade database");
+            outputError(ex, out, "Failed to upgrade database: " + changeSetName + ".");
             throw new UpgradeFailedException(ex);
         } catch (Exception ex) {
             LOGGER.warn("Exception happened when closing liquibase.", ex);

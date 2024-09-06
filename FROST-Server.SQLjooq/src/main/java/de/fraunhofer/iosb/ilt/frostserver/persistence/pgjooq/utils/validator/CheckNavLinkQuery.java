@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
@@ -62,7 +63,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
     @ConfigurableField(editor = EditorBoolean.class,
             label = "Empty Allowed", description = "Is the Navigation property allowed to be empty?")
     @EditorBoolean.EdOptsBool(dflt = true)
-    private boolean emptyAllowed;
+    private boolean emptyAllowed = true;
 
     private EntityType entityType;
     private EntityType targetType;
@@ -135,11 +136,12 @@ public class CheckNavLinkQuery implements ValidationCheck {
             targetNp = entityType.getNavigationProperty(getTargetNavLink());
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
-            final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-            final ResourcePath path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, '/' + targetType.plural)
+            final ResourcePath path = new ResourcePath("", Version.V_1_1, '/' + targetType.plural)
                     .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
-            parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+            final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
+            final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
+            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                     .validate(null, targetType);
             LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
         } catch (RuntimeException ex) {

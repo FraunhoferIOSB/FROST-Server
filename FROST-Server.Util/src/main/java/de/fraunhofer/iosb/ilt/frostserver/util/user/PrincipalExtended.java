@@ -63,6 +63,10 @@ public class PrincipalExtended implements Principal {
         return roles;
     }
 
+    public boolean hasRole(String role) {
+        return roles.contains(role);
+    }
+
     @Override
     public String toString() {
         return name + " (" + admin + ")";

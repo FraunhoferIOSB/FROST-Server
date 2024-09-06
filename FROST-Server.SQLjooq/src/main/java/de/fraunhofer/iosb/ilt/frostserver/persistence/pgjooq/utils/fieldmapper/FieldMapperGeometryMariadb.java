@@ -30,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -145,9 +145,9 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
 
     @Override
     public Map<String, String> getFieldTypes() {
-        Map<String, String> value = new HashMap<>();
+        Map<String, String> value = new LinkedHashMap<>();
         if (!StringHelper.isNullOrEmpty(fieldSource)) {
-            value.put(fieldSource, "BOOLEAN");
+            value.put(fieldSource, "TEXT");
         }
         if (!StringHelper.isNullOrEmpty(fieldGeom)) {
             value.put(fieldGeom, "geometry(Geometry,4326)");

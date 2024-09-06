@@ -17,14 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonWriter;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditor;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditors;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorNull;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
@@ -114,17 +117,30 @@ public class ConfigFileEditor {
             return;
         }
         setCurrentFile(file);
-        saveToCurrentFile(config);
+        saveStringToCurrentFile(config);
     }
 
-    public String saveToCurrentFile() {
+    public String saveConfigToCurrentFile(String indent) {
         JsonElement json = configEditorModel.getConfig();
-        String config = new GsonBuilder().setPrettyPrinting().create().toJson(json);
-        saveToCurrentFile(config);
-        return config;
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (final StringWriter sw = new StringWriter()) {
+            JsonWriter jw = gson.newJsonWriter(sw);
+            jw.setIndent(indent);
+            gson.toJson(json, jw);
+            String config = sw.toString();
+            saveStringToCurrentFile(config);
+            return config;
+        } catch (IOException ex) {
+            LOGGER.error("Failed to write", ex);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("failed to write file");
+            alert.setContentText(ex.getLocalizedMessage());
+            alert.showAndWait();
+            return "";
+        }
     }
 
-    private void saveToCurrentFile(String config) {
+    private void saveStringToCurrentFile(String config) {
         if (currentFile == null) {
             throw new IllegalArgumentException("No current file to save to!");
         }

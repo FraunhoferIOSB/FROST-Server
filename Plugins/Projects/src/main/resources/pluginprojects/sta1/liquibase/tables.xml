@@ -1,0 +1,61 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <property name="id-Project" value="LONG" />
+    <property name="idType-Project" value="BIGINT" />
+    <property name="id-Thing" value="LONG" />
+    <property name="idType-Thing" value="BIGINT" />
+    <property name="id-Location" value="LONG" />
+    <property name="idType-Location" value="BIGINT" />
+    <property name="id-Datastream" value="LONG" />
+    <property name="idType-Datastream" value="BIGINT" />
+    <property name="id-FeatureOfInterest" value="LONG" />
+    <property name="idType-FeatureOfInterest" value="BIGINT" />
+    <property name="id-MultiDatastream" value="LONG" />
+    <property name="idType-MultiDatastream" value="BIGINT" />
+    <property name="id-Role" value="LONG" />
+    <property name="idType-Role" value="BIGINT" />
+    <property name="id-User" value="LONG" />
+    <property name="idType-User" value="BIGINT" />
+    <property name="id-UserProjectRole" value="LONG" />
+    <property name="idType-UserProjectRole" value="BIGINT" />
+
+    <include relativeToChangelogFile="true" file="tableProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableSensorProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableLocationProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableThingProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableFeatureProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableThings.xml" />
+    <include relativeToChangelogFile="true" file="tableLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
+    <include relativeToChangelogFile="true" file="tableFeaturesOfInterest.xml" />
+    <include relativeToChangelogFile="true" file="tableMultiDatastreams.xml" />
+    <include relativeToChangelogFile="true" file="tableRoles.xml" />
+    <include relativeToChangelogFile="true" file="tableUsers.xml" />
+    <include relativeToChangelogFile="true" file="tableUserRoles.xml" />
+    <include relativeToChangelogFile="true" file="tableUserProjectRoles.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+    <include relativeToChangelogFile="true" file="data.xml" />
+
+</databaseChangeLog>
+

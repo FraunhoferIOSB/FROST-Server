@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
 /**
- *
- * @author hylke
+ * Class holding default values for queries.
  */
 public class QueryDefaults {
 
@@ -31,7 +30,7 @@ public class QueryDefaults {
     /**
      * Flag indicating generated URLs should be absolute.
      */
-    private boolean useAbsoluteNavigationLinks;
+    private boolean absNavLinks;
 
     /**
      * The default count to use when no specific count is set.
@@ -58,7 +57,7 @@ public class QueryDefaults {
     }
 
     public QueryDefaults(boolean absNavLinks, boolean countDefault, int topDefault, int topMax, boolean alwaysOrder) {
-        this.useAbsoluteNavigationLinks = absNavLinks;
+        this.absNavLinks = absNavLinks;
         this.countDefault = countDefault;
         this.topDefault = topDefault;
         this.topMax = topMax;
@@ -130,7 +129,7 @@ public class QueryDefaults {
      * @return the useAbsoluteNavigationLinks
      */
     public boolean useAbsoluteNavigationLinks() {
-        return useAbsoluteNavigationLinks;
+        return absNavLinks;
     }
 
     /**
@@ -138,7 +137,7 @@ public class QueryDefaults {
      * @return this.
      */
     public QueryDefaults setUseAbsoluteNavigationLinks(boolean useAbsoluteNavigationLinks) {
-        this.useAbsoluteNavigationLinks = useAbsoluteNavigationLinks;
+        this.absNavLinks = useAbsoluteNavigationLinks;
         return this;
     }
 
@@ -162,4 +161,13 @@ public class QueryDefaults {
         return this;
     }
 
+    /**
+     * Create a copy of this QueryDefaults.
+     *
+     * @return A copy of this query defaults, with the same values.
+     */
+    public QueryDefaults copy() {
+        return new QueryDefaults(absNavLinks, countDefault, topDefault, topMax, alwaysOrder)
+                .setServiceRootUrl(serviceRootUrl);
+    }
 }

@@ -22,7 +22,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_PLAIN_TEXT_PASSWORD;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_USER_CACHE_LIFE_MS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
@@ -96,7 +98,7 @@ public class DatabaseHandler {
         authSettings = coreSettings.getAuthSettings();
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEXT_PASSWORD, BasicAuthProvider.class);
-        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class, false);
+        connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class);
         int userCacheLifeMs = authSettings.getInt(TAG_USER_CACHE_LIFE_MS, BasicAuthProvider.class);
         if (userCacheLifeMs > 0) {
             LOGGER.info("Enabling user cache.");
@@ -245,7 +247,10 @@ public class DatabaseHandler {
     }
 
     public String checkForUpgrades() {
-        return checkForUpgrades(Collections.emptyMap());
+        Map<String, Object> params = CollectionsHelper.propertiesBuilder()
+                .addProperty(CHANGE_SET_NAME, "Auth.Basic")
+                .build();
+        return checkForUpgrades(params);
     }
 
     public String checkForUpgrades(Map<String, Object> params) {

@@ -1,11 +1,18 @@
 # Changelog
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## Development version 2.3.4
+=======
+## Development version 2.5.0
+
+**New Features**
+>>>>>>> v2.x
 
 **Internal changes & Bugfixes**
 
 
+<<<<<<< HEAD
 ## Release version 2.3.3
 
 **Internal changes & Bugfixes**
@@ -29,12 +36,26 @@
 ## Release version 2.3.1
 =======
 ## Development version 2.4.0
+=======
+## Release version 2.4.0
+>>>>>>> v2.x
 
 **New Features**
 * Implemented OData any() filters.
 * Added options for adding extra meta data to the landing page using the modelLoader plugin.
 * Implemented $filter for MQTT topics. Can be enabled using the `mqtt.allowFilter` setting.
 * Plugins can be loaded in any order.
+<<<<<<< HEAD
+>>>>>>> v2.x
+=======
+* [HELM] Improved method for setting extra env variables on HTTP and MQTT pods.
+* [HELM] Add database connection to Keycloak provider.
+* Added setting for sessionCookiePath.
+* Added support for [Tomcat Remote IP Filter](https://tomcat.apache.org/tomcat-9.0-doc/config/filter.html#Remote_IP_Filter).
+* Added option to auto-detect the `serviceRootUrl`, optionally using X-Forwarded headers.
+* Improved Batch Requests extension to stream results to the client, while processing the batch.
+* Added option to Batch Request extension, to allow back-references to GET results.
+* Added option to Batch Request extension, to allow skipping requests based on back references.
 >>>>>>> v2.x
 
 **Internal changes & Bugfixes**
@@ -48,6 +69,10 @@
 * Fixed #1934, incorrect URL parameter in docs.
 * Changed header handling to allow for duplicate headers.
 * Fixed MultiDatastream not picking up ID type of Thing and Sensor.
+<<<<<<< HEAD
+>>>>>>> v2.x
+=======
+* Improved settings handling code, added annotation for sensitive values.
 >>>>>>> v2.x
 
 

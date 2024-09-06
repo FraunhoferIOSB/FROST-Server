@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -58,6 +59,7 @@ import org.slf4j.LoggerFactory;
 public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
     @DefaultValue("")
+    @SensitiveValue
     public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
 
     @DefaultValue("")
@@ -65,9 +67,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
 
     /**
      * The URL on the Keycloak server that can be used to download the Keycloak
-     * config file. Usually this url is in the for of:
-     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client
-     * id]
+     * config file. Usually this URL is in the form of:
+     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[clientId]
      */
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
@@ -78,6 +79,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
      * configuration itself, in Keycloak.
      */
     @DefaultValue("")
+    @SensitiveValue
     public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
 
     @DefaultValueInt(10)
@@ -97,6 +99,15 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
 
     @DefaultValueInt(MAX_USERNAME_LENGTH)
     public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
+
+    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoderDflt")
+    public static final String TAG_USER_ROLE_DECODER_CLASS = "userRoleDecoderClass";
+
+    @DefaultValue("PT5M")
+    public static final String TAG_USER_CACHE_LIFETIME = "userCacheLifetime";
+
+    @DefaultValue("PT5S")
+    public static final String TAG_USER_CACHE_CLEANUP_INTERVAL = "userCacheCleanupInterval";
 
     /**
      * The logger for this class.
@@ -205,7 +216,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
                 CLIENTMAP.put(clientId, client);
                 client.getSubject().getPrincipals().stream().forEach(t -> userData.roles.add(t.getName()));
                 if (registerUserLocally) {
-                    databaseHandler.enureUserInUsertable(userData.userName);
+                    databaseHandler.enureUserInUsertable(userData.userName, userData.roles);
                 }
             }
             return login;

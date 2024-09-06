@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
 import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
@@ -246,7 +247,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pCoreModel.createLiqibaseParams(ppm, target);
         ppm.generateLiquibaseVariables(target, MULTI_DATASTREAM, modelSettings.idTypeMultiDatastream);
-
+        target.put(CHANGE_SET_NAME, "Plugin.MultiDatastream");
         return target;
     }
 

@@ -48,8 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The core settings of FROST-Server.
  */
 public class CoreSettings implements ConfigDefaults {
 
@@ -71,11 +70,11 @@ public class CoreSettings implements ConfigDefaults {
      */
     @DefaultValueBoolean(false)
     public static final String TAG_LOG_SENSITIVE_DATA = "logSensitiveData";
-    @DefaultValueBoolean(true)
+    @DefaultValueBoolean(false)
     public static final String TAG_DEFAULT_COUNT = "defaultCount";
     @DefaultValueInt(100)
     public static final String TAG_DEFAULT_TOP = "defaultTop";
-    @DefaultValueInt(100)
+    @DefaultValueInt(10000)
     public static final String TAG_MAX_TOP = "maxTop";
     @DefaultValueInt(25_000_000)
     public static final String TAG_MAX_DATASIZE = "maxDataSize";
@@ -114,6 +113,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
     @DefaultValueBoolean(true)
     public static final String TAG_CORS_REQUEST_DECORATE = "cors.request.decorate";
+    @DefaultValue("")
+    public static final String TAG_SESSION_COOKIE_PATH = "sessionCookiePath";
 
     // Auth Tags
     @DefaultValue("")
@@ -145,13 +146,10 @@ public class CoreSettings implements ConfigDefaults {
      * The core plugin manager. All plugins should register themselves here.
      */
     private final PluginManager pluginManager = new PluginManager();
-
-    private final QueryDefaults queryDefaults = new QueryDefaults(
-            defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
-            defaultValueBoolean(TAG_DEFAULT_COUNT),
-            defaultValueInt(TAG_DEFAULT_TOP),
-            defaultValueInt(TAG_MAX_TOP),
-            defaultValueBoolean(TAG_ALWAYS_ORDERBY_ID));
+    /**
+     * Default values used by queries.
+     */
+    private QueryDefaults queryDefaults;
     /**
      * The maximum data size.
      */
@@ -213,6 +211,8 @@ public class CoreSettings implements ConfigDefaults {
 
     private final ModelRegistry modelRegistry = new ModelRegistry();
 
+    private Object requestDecoder;
+
     private MessageBus messageBus;
 
     private CustomLinksHelper customLinksHelper;
@@ -221,6 +221,7 @@ public class CoreSettings implements ConfigDefaults {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
+        createQueryDefaults();
         settings = new Settings(new Properties());
         initChildSettings();
     }
@@ -233,10 +234,20 @@ public class CoreSettings implements ConfigDefaults {
      * override these.
      */
     public CoreSettings(Properties properties) {
+        createQueryDefaults();
         if (properties == null) {
             throw new IllegalArgumentException("properties must be non-null");
         }
         init(properties);
+    }
+
+    private void createQueryDefaults() {
+        queryDefaults = new QueryDefaults(
+                defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
+                defaultValueBoolean(TAG_DEFAULT_COUNT),
+                defaultValueInt(TAG_DEFAULT_TOP),
+                defaultValueInt(TAG_MAX_TOP),
+                defaultValueBoolean(TAG_ALWAYS_ORDERBY_ID));
     }
 
     private void init(Properties properties) {
@@ -252,9 +263,6 @@ public class CoreSettings implements ConfigDefaults {
         logSensitiveData = settings.getBoolean(TAG_LOG_SENSITIVE_DATA, getClass());
         settings.setLogSensitiveData(logSensitiveData);
 
-        if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
-        }
         if (!settings.containsName(TAG_TEMP_PATH)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_TEMP_PATH + "'");
         }
@@ -271,7 +279,7 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
 
-        queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
+        queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL, getClass()));
         queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
         queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
@@ -283,13 +291,14 @@ public class CoreSettings implements ConfigDefaults {
 
     private void initChildSettings() {
         pluginManager.setCoreSettings(this);
-        mqttSettings = new MqttSettings(this, new CachedSettings(settings.getProperties(), PREFIX_MQTT, false, logSensitiveData));
-        persistenceSettings = new PersistenceSettings(new CachedSettings(settings.getProperties(), PREFIX_PERSISTENCE, false, logSensitiveData));
-        busSettings = new BusSettings(new CachedSettings(settings.getProperties(), PREFIX_BUS, false, logSensitiveData));
-        httpSettings = new CachedSettings(settings.getProperties(), PREFIX_HTTP, false, logSensitiveData);
-        authSettings = new CachedSettings(settings.getProperties(), PREFIX_AUTH, false, logSensitiveData);
-        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false, logSensitiveData);
-        extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
+
+        mqttSettings = new MqttSettings(this, settings.getSubSettings(PREFIX_MQTT));
+        persistenceSettings = new PersistenceSettings(settings.getSubSettings(PREFIX_PERSISTENCE));
+        busSettings = new BusSettings(settings.getSubSettings(PREFIX_BUS));
+        httpSettings = settings.getSubSettings(PREFIX_HTTP);
+        authSettings = settings.getSubSettings(PREFIX_AUTH);
+        pluginSettings = settings.getSubSettings(PREFIX_PLUGINS);
+        extensionSettings = settings.getSubSettings(PREFIX_EXTENSION);
     }
 
     private void initExtensions() {
@@ -384,6 +393,14 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getPluginSettings() {
         return pluginSettings;
+    }
+
+    public Object getRequestDecoder() {
+        return requestDecoder;
+    }
+
+    public void setRequestDecoder(Object requestDecoder) {
+        this.requestDecoder = requestDecoder;
     }
 
     public String getTempPath() {

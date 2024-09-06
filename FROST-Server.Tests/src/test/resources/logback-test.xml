@@ -7,18 +7,31 @@
         </encoder>
     </appender>
 
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.AuthWrapper" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSet" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.service.Service" level="INFO"/>
+
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener" level="INFO"/>
+    
+    <logger name="de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests" level="INFO"/>
+
+    <logger name="de.fraunhofer.iosb.ilt.frostclient.query.Query" level="INFO"/>
+
     <logger name="io.moquette" level="INFO"/>
     <logger name="io.moquette.broker.PostOffice" level="WARN"/>
     <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
     <logger name="io.moquette.broker.SessionEventLoop" level="WARN"/>
+
     <logger name="liquibase" level="WARN"/>
+
     <logger name="org.jooq" level="WARN"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostclient.query.Query" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

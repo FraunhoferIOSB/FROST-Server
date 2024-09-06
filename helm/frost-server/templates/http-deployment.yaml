@@ -1,3 +1,4 @@
+{{- if .Values.frost.http.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 apiVersion: apps/v1
@@ -283,6 +284,10 @@ spec:
             {{- if .Values.frost.auth.provider }}
             - name: auth_allowAnonymousRead
               value: "{{ .Values.frost.auth.allowAnonymousRead }}"
+            {{- if .Values.frost.auth.authenticateOnly }}
+            - name: auth_authenticateOnly
+              value: "{{ .Values.frost.auth.authenticateOnly }}"
+            {{- end }}
             {{- if .Values.frost.auth.role.read }}
             - name: auth_role_read
               value: "{{ .Values.frost.auth.role.read }}"
@@ -303,14 +308,6 @@ spec:
             - name: auth_role_admin
               value: "{{ .Values.frost.auth.role.admin }}"
             {{- end }}
-            {{- if contains "basic" (lower .Values.frost.auth.provider) }}
-            # Basic auth requested
-            - name: auth_provider
-              value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
-            - name: auth_realmName
-              value: "{{ .Values.frost.auth.realmName }}"
-            - name: auth_plainTextPassword
-              value: "{{ .Values.frost.auth.plainTextPassword }}"
             - name: auth_db_jndi_datasource
               value: ""
             - name: auth_db_driver
@@ -340,6 +337,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "frost-server.db.secret" . }}
                   key: {{ .Values.frost.db.secretPasswordKey }}
+            {{- if contains "basic" (lower .Values.frost.auth.provider) }}
+            # Basic auth requested
+            - name: auth_provider
+              value: "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider"
+            - name: auth_realmName
+              value: "{{ .Values.frost.auth.realmName }}"
+            - name: auth_plainTextPassword
+              value: "{{ .Values.frost.auth.plainTextPassword }}"
             {{- else if contains "keycloak" (lower .Values.frost.auth.provider) }}
             # KeyCloak auth requested
             - name: auth_provider
@@ -419,7 +424,19 @@ spec:
               value: "{{ .Values.frost.logging.jooq }}"
             {{- end }}
 
-            # Extra Environment Variables
+            # New style extra environment variables, global scope
+            {{- range $key, $value := .Values.frost.envExtra }}
+            - name: {{ $key }}
+              value: {{ quote $value }}
+            {{- end }}
+            # New style extra environment variables, http scope
+            {{- range $key, $value := .Values.frost.http.envExtra }}
+            - name: {{ $key }}
+              value: {{ quote $value }}
+            {{- end }}
+            # Old style extra Environment Variables
             {{- if .Values.frost.http.extraEnv }}
                 {{- .Values.frost.http.extraEnv | nindent 12 }}
             {{- end }}
+
+{{- end -}}

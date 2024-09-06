@@ -72,6 +72,7 @@ public class BatchResponseJson {
         private int status;
         private Map<String, Object> body;
         private String location;
+        private Map<String, Object> headers;
 
         /**
          * @return the id
@@ -113,6 +114,14 @@ public class BatchResponseJson {
          */
         public void setBody(Map<String, Object> body) {
             this.body = body;
+        }
+
+        public Map<String, Object> getHeaders() {
+            return headers;
+        }
+
+        public void setHeaders(Map<String, Object> headers) {
+            this.headers = headers;
         }
 
         /**

@@ -17,8 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
-import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -26,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -114,8 +114,8 @@ public abstract class BatchTests extends AbstractTestClass {
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues()[0]));
-        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
+        ID_TYPES.put(EntityType.THING, IdType.findFor(THINGS.get(0).getPrimaryKeyValues().get(0)));
+        ID_TYPES.put(EntityType.OBSERVED_PROPERTY, IdType.findFor(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
     }
 
     /**
@@ -236,7 +236,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n"
                 + "  },\n"
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\r\n"
-                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]) + "},\r\n"
+                + "  \"ObservedProperty\": {\"@iot.id\": " + Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)) + "},\r\n"
                 + "  \"Sensor\": {\"@iot.id\": \"$sensor1\"}\r\n"
                 + "}";
         final String batchContent = "--batch_36522ad7-fc75-4b56-8c71-56071383e77b\r\n"
@@ -300,7 +300,7 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch("batch_test", "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");
@@ -333,14 +333,14 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
                 + "GET " + serverSettings.getServiceUrl(version)
-                + "/Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "/Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
                 + "GET " + serverSettings.getServiceUrl(version)
-                + "/Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
+                + "/Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");
@@ -378,13 +378,13 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch("batch_test", "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test\r\n"
                 + "Content-Type: application/http\r\n"
                 + "\r\n"
-                + "GET Things?$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
+                + "GET Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
                 + "\r\n"
                 + "\r\n"
                 + "--batch_test--");
@@ -465,10 +465,10 @@ public abstract class BatchTests extends AbstractTestClass {
             assertEquals(expected, actual, "Response not as expected.");
 
             Entity updatedThing1 = service.service.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
-            assertEquals("Thing 1 Updated", updatedThing1.getProperty(SensorThingsSensingV11.EP_NAME));
-            assertEquals("Changes", updatedThing1.getProperty(SensorThingsSensingV11.EP_PROPERTIES).get("new"));
+            assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
+            assertEquals("Changes", updatedThing1.getProperty(EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.", ex);
         }
 
     }
@@ -496,7 +496,7 @@ public abstract class BatchTests extends AbstractTestClass {
                   "ObservedProperty": {"@iot.id": $ObservedProperty0},
                   "Sensor": {"@iot.id": "$sensor1"}
                 }""";
-        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues()[0]));
+        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
         String request = """
                 {
                     "requests":[{
@@ -523,15 +523,16 @@ public abstract class BatchTests extends AbstractTestClass {
 
         try {
             BatchResponseJson expected = mapper.readValue("{\"responses\":["
-                    + "{\"id\":\"sensor1\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                    + "/Sensors(" + sensorId + ")\"},"
+                    + "{\"id\":\"sensor1\","
+                    + "\"status\":201,"
+                    + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
                     + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
                     + "/Datastreams(" + datastreamId + ")\"}"
                     + "]}", BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
         } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.");
+            fail("Failed to parse response as json.", ex);
         }
 
     }

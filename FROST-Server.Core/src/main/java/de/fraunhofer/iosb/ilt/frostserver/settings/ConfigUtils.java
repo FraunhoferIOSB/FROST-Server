@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.DefaultValueDouble;
+import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -33,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility classes for the ConfigDefaults interface.
  *
- * @author Brian Miles, scf
+ * @author Brian Miles, Scf
  */
 public class ConfigUtils {
 
@@ -150,6 +152,29 @@ public class ConfigUtils {
     }
 
     /**
+     * Returns true if the given class has a field with the given value that is
+     * annotated with the {@link SensitiveValue} annotation.
+     *
+     * @param <T> The class that extends ConfigDefaults.
+     * @param target The class to get the config default for.
+     * @param fieldValue The value of the annotated field.
+     * @return true if the field is annotated with the SensitiveValue
+     * annotation.
+     */
+    public static <T extends ConfigDefaults> boolean isSensitive(Class<T> target, String fieldValue) {
+        for (final Field f : target.getFields()) {
+            try {
+                if (f.isAnnotationPresent(SensitiveValue.class) && f.get(target).toString().equals(fieldValue)) {
+                    return true;
+                }
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the default value of a field annotated with any of
      * {@link DefaultValue}, {@link DefaultValueInt} or
      * {@link DefaultValueBoolean}. If there is no such a field, an
@@ -157,7 +182,7 @@ public class ConfigUtils {
      *
      * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config default for.
-     * @param fieldValue The value of the annotated field
+     * @param fieldValue The value of the annotated field.
      * @return The default value of the annotated field. If there is no such a
      * field, an IllegalArgumentException is thrown.
      */
@@ -175,6 +200,9 @@ public class ConfigUtils {
 
                 } else if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
                     return Boolean.toString(f.getAnnotation(DefaultValueBoolean.class).value());
+
+                } else if (f.isAnnotationPresent(DefaultValueDouble.class)) {
+                    return Double.toString(f.getAnnotation(DefaultValueDouble.class).value());
                 }
             } catch (IllegalAccessException e) {
                 LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
@@ -206,6 +234,31 @@ public class ConfigUtils {
             }
         }
         throw new IllegalArgumentException(target.getName() + " has no integer-default-annotated field " + fieldValue);
+    }
+
+    /**
+     * Returns the default value of a field annotated with
+     * {@link DefaultValueDouble}.
+     *
+     * @param <T> The class that extends ConfigDefaults.
+     * @param target The class to get the config default for.
+     * @param fieldValue The value of the annotated field
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
+     */
+    public static <T extends ConfigDefaults> double getDefaultValueDouble(Class<T> target, String fieldValue) {
+        for (final Field f : target.getFields()) {
+            if (f.isAnnotationPresent(DefaultValueDouble.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return f.getAnnotation(DefaultValueDouble.class).value();
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
+            }
+        }
+        throw new IllegalArgumentException(target.getName() + " has no double-default-annotated field " + fieldValue);
     }
 
     /**

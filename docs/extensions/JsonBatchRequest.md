@@ -2,7 +2,7 @@
 layout: default
 title: JSON Batch Requests
 category: extensions
-order: 7
+order: 17
 ---
 
 # JSON Batch Requests
@@ -67,10 +67,11 @@ The following example shows a Batch Request that contains the following operatio
 ## Referencing new entities in a change set example
 
 
-Actions can reference entities previously created. To make a created entity referenceable, the POST that creates the entity must have
-a id property, the content of which can be any string. Subsequent requests in the same
-change set can now use the value of this property, prefixed with a $, in places where the ID of the
-created entity is required.
+Actions can reference entities previously created or fetched.
+To make a created entity referenceable, the POST that creates the entity must have a id property,
+the content of which must be a string limited to the characters `a-zA-Z0-9_.:,;-`.
+Subsequent requests in the same change set can now use the value of this property, prefixed with a $,
+in places where the ID of the created entity is required.
 
 Example: A Batch Request that containing a single change set that contains the following requests:
 
@@ -139,6 +140,52 @@ Example referencing the first batch request example above, assume all the reques
   ]
 }
 ```
+
+## Advanced Features
+
+### Non-unique request ids
+
+Request `id` values do not have to be unique.
+When a back-reference is resolved, the result of the latest, successful request with a matching id is used.
+
+
+### Back-references to GET requests
+
+In contrast to OData, this exension allows back-references to GET requests in the same atomicityGroup.
+If the result of the GET is a single entity, this entity is used for the reference, as if this entity was created by a POST.
+If the result of the GET is an entity set, the first entity of the set is used.
+
+### Skipping requests in a batch
+
+Requests in a batch can be skipped using the `if` property.
+The value of `if` is a reference to a preceding request, optionally prefixed with `not `.
+
+An example, creating an ObservedProperty only if no ObservedProperty with a name `Temperature` already exists:
+```
+{
+    "requests": [
+        {
+            "id": "op_Temperature",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "ObservedProperties?$select=id&$filter=name eq 'Temperature'"
+        },
+        {
+            "id": "op_Temperature",
+            "if": "not $op_Temperature",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "ObservedProperties",
+            "body": {
+                "name": "Temperature",
+                "description": "Temperature",
+                "definition": "http://dd.eionet.europa.eu/vocabulary/aq/meteoparameter/54"
+            }
+        }
+    ]
+}
+```
+Further requests in the same atomicityGroup can reference `$op_Temperature`, regardless of if it already existed, or was created by the batch request.
 
 ## Conformance Class
 

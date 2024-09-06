@@ -54,6 +54,11 @@ public class EntitySetImpl implements EntitySet {
     }
 
     @Override
+    public Entity first() {
+        return data.get(0);
+    }
+
+    @Override
     public int size() {
         return data.size();
     }

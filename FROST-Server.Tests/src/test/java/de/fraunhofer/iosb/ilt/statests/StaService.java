@@ -18,9 +18,9 @@
 package de.fraunhofer.iosb.ilt.statests;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -34,18 +34,20 @@ public class StaService {
      * A FROST-Client instance that can be used to access the server.
      */
     public final SensorThingsService service;
-    public final SensorThingsSensingV11 modelSensing;
-    public final SensorThingsMultiDatastreamV11 modelMultiDatastream;
-    public final SensorThingsTaskingV11 modelTasking;
+    public final SensorThingsV11Sensing modelSensing;
+    public final SensorThingsV11MultiDatastream modelMultiDatastream;
+    public final SensorThingsV11Tasking modelTasking;
 
     public StaService(URL url) throws MalformedURLException {
-        this.modelSensing = new SensorThingsSensingV11();
-        this.modelMultiDatastream = new SensorThingsMultiDatastreamV11();
-        this.modelTasking = new SensorThingsTaskingV11();
-        this.service = new SensorThingsService(url, modelSensing, modelMultiDatastream, modelTasking);
+        this.modelSensing = new SensorThingsV11Sensing();
+        this.modelMultiDatastream = new SensorThingsV11MultiDatastream();
+        this.modelTasking = new SensorThingsV11Tasking();
+        this.service = new SensorThingsService(modelSensing, modelMultiDatastream, modelTasking)
+                .setBaseUrl(url)
+                .init();
     }
 
-    public StaService(SensorThingsService service, SensorThingsSensingV11 modelSensing, SensorThingsTaskingV11 modelTasking, SensorThingsMultiDatastreamV11 modelMds) {
+    public StaService(SensorThingsService service, SensorThingsV11Sensing modelSensing, SensorThingsV11Tasking modelTasking, SensorThingsV11MultiDatastream modelMds) {
         this.service = service;
         this.modelSensing = modelSensing;
         this.modelMultiDatastream = modelMds;

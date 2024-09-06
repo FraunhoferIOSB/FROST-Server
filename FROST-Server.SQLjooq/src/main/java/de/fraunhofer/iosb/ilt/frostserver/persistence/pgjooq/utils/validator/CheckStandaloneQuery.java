@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -68,11 +69,12 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
     private void init(JooqPersistenceManager pm) {
         entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
         final CoreSettings coreSettings = pm.getCoreSettings();
-        final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        path = new ResourcePath(queryDefaults.getServiceRootUrl(), Version.V_1_1, '/' + entityType.plural)
+        path = new ResourcePath("", Version.V_1_1, '/' + entityType.plural)
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
-        parsedQuery = QueryParser.parseQuery(getQuery(), coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+        final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
+        final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
+        parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                 .validate(null, entityType);
         LOGGER.info("Initialised check on {}", entityType);
     }

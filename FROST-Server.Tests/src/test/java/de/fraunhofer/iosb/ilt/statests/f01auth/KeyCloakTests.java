@@ -24,7 +24,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
@@ -59,7 +59,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     public static final String KEYCLOAK_FROST_CONFIG_SECRET = "5aa9087d-817f-47b6-92a1-2b5f7caac967";
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
-    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    private static final SensorThingsV11Sensing mdlSensing = new SensorThingsV11Sensing();
     private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
     private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
     private static final List<Entity> USERS = new ArrayList<>();
@@ -112,30 +112,32 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
         sMdl = mdlSensing;
         super.setUpVersion();
         USERS.clear();
-        USERS.add(mdlUsers.newUser("c8e84639-9914-4b1e-b756-349afed255f6", null));
-        USERS.add(mdlUsers.newUser("1d6b3bb2-a869-4686-b781-c1ea481e6085", null));
-        USERS.add(mdlUsers.newUser("74fe01f1-2ecc-4696-87f0-340ee3fe1a86", null));
+        USERS.add(mdlUsers.newUser("admin", null));
+        USERS.add(mdlUsers.newUser("read", null));
+        USERS.add(mdlUsers.newUser("write", null));
     }
 
     @Test
     void test_100_ReadUser() {
         LOGGER.info("  test_100_ReadUser");
-        testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
-        filterForException(serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
+        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etUser, "", USERS);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
     }
 
     @Override
     protected SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
+        if (!baseService.isBaseUrlSet()) {
             try {
-                baseService.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException | URISyntaxException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }

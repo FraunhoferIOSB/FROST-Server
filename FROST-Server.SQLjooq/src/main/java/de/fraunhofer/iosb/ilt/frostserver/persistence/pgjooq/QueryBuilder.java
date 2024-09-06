@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -341,7 +342,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         if (!parsed) {
             parsed = true;
 
-            findSelectedProperties(staQuery);
+            selectedProperties = findSelectedProperties(staQuery);
 
             if (forPath) {
                 parsePath();
@@ -353,6 +354,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             // Joins created when generating the path should not be merged with
             // joins generated for the filter or orderby.
             queryState.getTableRef().clearJoins();
+
+            // Add joins for NavPropEntity expands
+            handleEntityExpands(staQuery, queryState);
 
             parseFilter(staQuery);
             parseOrder(staQuery);
@@ -372,32 +376,58 @@ public class QueryBuilder implements ResourcePathVisitor {
         single = true;
     }
 
-    private void findSelectedProperties(Query query) {
-        selectedProperties = new HashSet<>();
+    private Set<Property> findSelectedProperties(Query query) {
+        Set<Property> foundProperties = new HashSet<>();
         if (query == null) {
-            return;
+            return foundProperties;
         }
         for (Property property : query.getSelect()) {
             if (property instanceof NavigationPropertyMain) {
-                selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
+                foundProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             }
-            selectedProperties.add(property);
+            foundProperties.add(property);
         }
-        if (query.isPkOrder() && !query.isSelectDistinct() && !selectedProperties.isEmpty()) {
+        if (query.isPkOrder() && !query.isSelectDistinct() && !foundProperties.isEmpty()) {
             // We're ordering by PK, make sure we select it too, so we can build better nextLinks
-            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
+            foundProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
         }
-        if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
+        if (!query.getExpand().isEmpty() && !foundProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
+            foundProperties.addAll(requestedEntityType.getPrimaryKey().getKeyProperties());
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
-                    selectedProperties.add(expandPath);
+                    foundProperties.add(expandPath);
                 }
             }
         }
+        return foundProperties;
+    }
+
+    private void handleEntityExpands(Query staQuery, QueryState sqlState) {
+        if (staQuery == null) {
+            return;
+        }
+        for (Expand expand : staQuery.getExpand()) {
+            NavigationProperty expandPath = expand.getPath();
+            if (expandPath instanceof NavigationPropertyEntity navPropEntity) {
+                handleEntityExpand(sqlState, expand, navPropEntity);
+            }
+        }
+    }
+
+    private void handleEntityExpand(QueryState sqlState, Expand expand, NavigationPropertyEntity navPropEntity) {
+        Query subQuery = expand.getSubQuery();
+        TableRef tableRef = sqlState.getTableRef();
+        TableRef joinRef = tableRef.createJoin(navPropEntity.getName(), queryState);
+        tableRef.addJoin(navPropEntity, joinRef);
+        StaMainTable<?> joinedTable = joinRef.getTable();
+        QueryState subState = new QueryState(joinedTable, sqlState, sqlState.getNextAlias());
+        Set<Property> subProperties = findSelectedProperties(subQuery);
+        subState.setSelectedProperties(joinedTable.getPropertyFieldRegistry().getFieldsForProperties(subProperties));
+        sqlState.addChildState(navPropEntity, subState);
+        handleEntityExpands(subQuery, subState);
     }
 
     private void parseOrder(Query query) {
@@ -460,19 +490,17 @@ public class QueryBuilder implements ResourcePathVisitor {
      */
     private TableRef queryEntityType(PathElementEntityType pe, PkValue targetId, TableRef last) {
         final EntityType entityType = pe.getEntityType();
-        if (last != null) {
-            TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
-            if (existingJoin != null) {
-                return existingJoin;
-            }
-        }
-
         TableRef result;
         if (last == null) {
             StaMainTable<?> tableForType = tableCollection.getTableForType(entityType).asSecure(DEFAULT_PREFIX, pm);
             queryState = new QueryState(pm, tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = queryState.getTableRef();
         } else {
+            TableRef existingJoin = last.getJoin(pe.getNavigationProperty());
+            if (existingJoin != null) {
+                return existingJoin;
+            }
+
             if (entityType.equals(last.getType()) && lastNavProp == null) {
                 result = last;
             } else {

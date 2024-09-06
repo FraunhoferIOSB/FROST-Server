@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORM
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
@@ -32,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArray
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -87,8 +89,10 @@ public class ServiceDataArray {
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
-            Query query = QueryParser.parseQuery(request.getUrlQuery(), settings, null, request.getUserPrincipal());
-            JsonReaderDefault entityParser = new JsonReaderDefault(settings.getModelRegistry(), request.getUserPrincipal());
+            final ModelRegistry modelRegistry = settings.getModelRegistry();
+            final QueryDefaults queryDefaults = request.getQueryDefaults();
+            Query query = QueryParser.parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, null, request.getUserPrincipal());
+            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
@@ -103,10 +107,11 @@ public class ServiceDataArray {
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
             response.setContentType(formatter.getContentType());
+            response.setCode(201);
             formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
                     .writeFormatted(response.getWriter());
 
-            return Service.successResponse(response, 201, "Created");
+            return response;
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return Service.errorResponse(response, 400, e.getMessage());

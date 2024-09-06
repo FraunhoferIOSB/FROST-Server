@@ -23,10 +23,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 
 /**
  * Should be implemented by all collections of entities.
- *
- * @author jab
  */
 public interface EntitySet extends NavigableElement, Iterable<Entity> {
+
+    public Entity first();
 
     public void add(Entity entity);
 

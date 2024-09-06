@@ -1,0 +1,148 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "Location",
+            "plural": "Locations",
+            "adminOnly": false,
+            "table": "locations",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "name",
+                    "type": "Edm.String",
+                    "required": true,
+                    "nullable": false,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "name"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "description"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "definition",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "definition"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "encodingType",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "encoding_type"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "location",
+                    "type": "Geometry",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
+                            "fieldSource": "location",
+                            "fieldGeom": "geom"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "properties",
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "properties",
+                            "isMap": true
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "HistoricalLocations",
+                    "entitySet": true,
+                    "entityType": "HistoricalLocation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "Locations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "locations_hist_locations",
+                            "linkOurField": "location_id",
+                            "linkOtherField": "hist_location_id",
+                            "otherTable": "hist_locations",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "hooks": [
+                {
+                    "hook": {
+                        "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.HookPostDeleteLocation"
+                    }
+                },
+                {
+                    "hook": {
+                        "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.HookPrePostInsertUpdateLocation",
+                        "ttlName": "things_locations",
+                        "ttlThingIdName": "thing_id",
+                        "ttlLocationIdName": "location_id",
+                        "tlhlName": "locations_hist_locations",
+                        "tlhlHistLocationIdName": "hist_location_id",
+                        "thlTimeName": "time"
+                    }
+                }
+            ],
+            "annotations": []
+        }
+    ]
+}

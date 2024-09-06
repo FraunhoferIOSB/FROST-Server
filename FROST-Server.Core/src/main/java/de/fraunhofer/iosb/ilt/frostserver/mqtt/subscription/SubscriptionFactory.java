@@ -43,7 +43,7 @@ public class SubscriptionFactory {
 
     private final CoreSettings settings;
 
-    private static String getPathFromTopic(String topic) {
+    public static String getPathFromTopic(String topic) {
         String pathString = topic.contains("?")
                 ? topic.substring(0, topic.indexOf('?'))
                 : topic;

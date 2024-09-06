@@ -9,6 +9,11 @@ frost:
   logSensitiveData: false
   queueLoggingInterval: 0
 
+  # Extra global environment variables added to both MQTT and HTTP pods.
+  # This can be simple key-value pairs
+  envExtra:
+    #some_var_one: one
+
   #####################################
   # FROST-Server plugin configuration #
   #####################################
@@ -72,6 +77,7 @@ frost:
   auth:
     provider:
     allowAnonymousRead: false
+    authenticateOnly:
     role:
       read:
       create:
@@ -105,6 +111,7 @@ frost:
   # FROST-Server HTTP module configuration #
   ##########################################
   http:
+    enabled: true
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-http
@@ -184,10 +191,14 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
+    # Extra environment variables added to HTTP pods.
+    envExtra:
+
   ##########################################
   # FROST-Server MQTT module configuration #
   ##########################################
   mqtt:
+    enabled: true
     image:
       registry: docker.io
       repository: fraunhoferiosb/frost-server-mqtt
@@ -195,7 +206,6 @@ frost:
       pullPolicy: IfNotPresent
       imagePullSecret:
     # FROST-Server MQTT deployment settings
-    enabled: true
     annotations: {}
     serviceType: ClusterIP
     replicas: 1
@@ -266,7 +276,24 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
+<<<<<<< HEAD
       
+=======
+    ingress:
+      enabled: false
+      path: /mqtt
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      tls:
+        enabled: false
+        secretName:
+  
+      # Extra environment variables added to MQTT pods.
+      envExtra:
+
+>>>>>>> v2.x
   ##############################################
   # FROST-Server Database module configuration #
   ##############################################

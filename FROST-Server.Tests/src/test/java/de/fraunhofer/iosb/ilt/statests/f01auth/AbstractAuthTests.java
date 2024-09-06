@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
@@ -56,10 +56,10 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuthTests.class);
 
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
-    private static final String ADMIN = "admin";
-    private static final String WRITE = "write";
-    private static final String READ = "read";
-    private static final String ANONYMOUS = "anonymous";
+    public static final String ADMIN = "admin";
+    public static final String WRITE = "write";
+    public static final String READ = "read";
+    public static final String ANONYMOUS = "anonymous";
 
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
@@ -91,16 +91,18 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     protected SensorThingsService createService() {
-        if (!sSrvc.isEndpointSet()) {
+        if (!sSrvc.isBaseUrlSet()) {
             try {
-                sSrvc.setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                sSrvc.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException | URISyntaxException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(sSrvc.getModelRegistry())
-                    .setEndpoint(new URI(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -160,26 +162,26 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test01AdminUpdateDb() throws IOException {
         LOGGER.info("  test01AdminUpdateDb");
-        ath.getDatabaseStatus(serviceAdmin, HTTP_CODE_200_OK);
+        ath.getDatabaseStatus("admin", serviceAdmin, HTTP_CODE_200_OK);
     }
 
     @Test
     void test02WriteUpdateDb() throws IOException {
         LOGGER.info("  test02WriteUpdateDb");
-        ath.getDatabaseStatus(serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("write", serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test03ReadUpdateDb() throws IOException {
         LOGGER.info("  test03ReadUpdateDb");
-        ath.getDatabaseStatus(serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("read", serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
     void test04AnonUpdateDb() throws IOException {
         LOGGER.info("  test04AnonUpdateDb");
         ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus("anonymous", serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -193,7 +195,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test06AdminRead() {
         LOGGER.info("  test06AdminRead");
-        EntityUtils.testFilterResults(serviceAdmin.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(ADMIN, serviceAdmin.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -225,7 +227,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test10WriteRead() {
         LOGGER.info("  test10WriteRead");
-        EntityUtils.testFilterResults(serviceWrite.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(WRITE, serviceWrite.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -269,7 +271,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             LOGGER.error("Failed to create test entity.");
         }
 
-        EntityUtils.testFilterResults(serviceRead.dao(sMdl.etThing), "", THINGS);
+        EntityUtils.testFilterResults(READ, serviceRead.dao(sMdl.etThing), "", THINGS);
     }
 
     @Test
@@ -306,7 +308,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
-            EntityUtils.testFilterResults(serviceAnon.dao(sMdl.etThing), "", THINGS);
+            EntityUtils.testFilterResults(ANONYMOUS, serviceAnon.dao(sMdl.etThing), "", THINGS);
         } else {
             try {
                 serviceAnon.dao(sMdl.etThing).query().list();

@@ -1,0 +1,103 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-01-related_observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-RelatedObservation" value="LONG" />
+            <not>
+                <tableExists tableName="related_observations" />
+            </not>
+        </preConditions>
+        <createTable tableName="related_observations">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_related_observations" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-RelatedObservation" value="STRING" />
+                <changeLogPropertyDefined property="id-RelatedObservation" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="related_observations" />
+            </not>
+        </preConditions>
+        <createTable tableName="related_observations">
+            <column name="id" type="${idType-RelatedObservation}" defaultValueComputed="${defaultValueComputed-RelatedObservation}">
+                <constraints primaryKey="true" primaryKeyName="pk_related_observations"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="external_target" tableName="related_observations" />
+            </not>
+        </preConditions>
+        <addColumn tableName="related_observations">
+            <column name="external_target" type="TEXT"/>
+            <column name="source_observation_id" type="${idType-Observation}"/>
+            <column name="target_observation_id" type="${idType-Observation}"/>
+            <column name="relation_role_id" type="${idType-RelationRole}"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_observations-idx-source_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_observations" indexName="related_observations_source_observation_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_observations" indexName="related_observations_source_observation_id">
+            <column name="source_observation_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_observations-idx-target_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_observations" indexName="related_observations_target_observation_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_observations" indexName="related_observations_target_observation_id">
+            <column name="target_observation_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-01-related_observations-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="related_observations" indexName="related_observations_relation_role_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="related_observations" indexName="related_observations_relation_role_id">
+            <column name="relation_role_id" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

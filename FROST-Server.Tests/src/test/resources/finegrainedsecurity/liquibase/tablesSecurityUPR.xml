@@ -30,6 +30,7 @@
             <column name="USER_NAME" type="VARCHAR(36)">
                 <constraints primaryKey="true" primaryKeyName="USERS_PKEY"/>
             </column>
+            <column name="USER_PASS" type="VARCHAR(255)" />
         </createTable>
     </changeSet>
 
@@ -165,7 +166,7 @@
             <column name="ID" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="PK_USER_PROJECT_ROLE" />
             </column>
-            <column name="USER_NAME" type="VARCHAR(25)" />
+            <column name="USER_NAME" type="VARCHAR(36)" />
             <column name="ROLE_NAME" type="VARCHAR(15)" />
             <column name="PROJECT_ID" type="BIGINT" />
         </createTable>

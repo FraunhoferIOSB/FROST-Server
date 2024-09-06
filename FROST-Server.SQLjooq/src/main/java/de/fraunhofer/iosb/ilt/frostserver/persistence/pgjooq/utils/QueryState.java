@@ -27,8 +27,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -61,6 +67,7 @@ public class QueryState<T extends StaMainTable<T>> {
 
     private int aliasNr = 0;
     private QueryState parent;
+    private Map<NavigationPropertyEntity, QueryState> childStates = new HashMap<>();
     private String staAlias;
 
     /**
@@ -96,8 +103,22 @@ public class QueryState<T extends StaMainTable<T>> {
         return tableRef;
     }
 
-    public Entity entityFromQuery(Record tuple, DataSize dataSize) {
-        return mainTable.entityFromQuery(tuple, this, dataSize);
+    public Entity entityFromRecord(Record tuple, DataSize dataSize, Query staQuery) {
+        Entity mainEntity = mainTable.entityFromQuery(tuple, this, dataSize)
+                .setQuery(staQuery);
+
+        if (staQuery != null) {
+            for (Expand expand : staQuery.getExpand()) {
+                NavigationProperty expandPath = expand.getPath();
+                if (expandPath instanceof NavigationPropertyEntity navPropEntity) {
+                    QueryState childState = getChildState(navPropEntity);
+                    Entity subEntity = childState.entityFromRecord(tuple, dataSize, expand.getSubQuery());
+                    mainEntity.setProperty(navPropEntity, subEntity);
+                }
+            }
+        }
+
+        return mainEntity;
     }
 
     public EntitySet createSetFromRecords(Cursor<Record> tuples, ResultBuilder resultBuilder) {
@@ -119,6 +140,14 @@ public class QueryState<T extends StaMainTable<T>> {
             return ALIAS_PREFIX + (++aliasNr);
         }
         return parent.getNextAlias();
+    }
+
+    public void addChildState(NavigationPropertyEntity property, QueryState state) {
+        childStates.put(property, state);
+    }
+
+    public QueryState getChildState(NavigationPropertyEntity property) {
+        return childStates.get(property);
     }
 
     public boolean isSqlSortFieldsSet() {
@@ -145,6 +174,9 @@ public class QueryState<T extends StaMainTable<T>> {
                 for (ExpressionFactory f : sp.fields.values()) {
                     sqlSelectFields.add(f.get(mainTable));
                 }
+            }
+            for (QueryState childState : childStates.values()) {
+                sqlSelectFields.addAll(childState.getSqlSelectFields());
             }
         }
         return sqlSelectFields;

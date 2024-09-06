@@ -127,6 +127,33 @@ Therefore, we strongly recommend you contact us for support if your use case req
   A comma-separated list of meta data files to load. Each entry is prefixed with **plugins.modelLoader.metadataPath**. Each file is loaded and its JSON-content is merged into the serverSettings object on the ROOT-URL.
 
 
+### Projects
+
+The [Projects plugin](../extensions/DataModel-Projects.md) extends the standard data model with a Project class and User/Role classes that allow fine-grained access control.
+This plugin requires the CoreModel and ModelLoader plugins.
+
+* **plugins.projects.enable:**  
+  Toggle indicating the Projects plugin should be enabled. Default: `false`.
+* **plugins.projects.enableDefaultRules:**  
+  Toggle indicating the default fine-grained access control rules should be activated.
+
+#### Settings for the UserRoleDecoder class `UserRoleDecoderDflt`
+
+When **auth.registerUserLocally** is used in the KeyCloak Auth Provider, the class `de.fraunhofer.iosb.ilt.frostserver.plugin.projects.ProjectRoleDecoder` can be used to register users and user-roles in the relevant tables.
+
+* **auth.userTable:** Since 2.4.0  
+  The table to register users in. Default value: `USERS`
+* **auth.usernameColumn:** Since 2.4.0  
+  The column for the user name. Default value: `USER_NAME`
+* **auth.prd.insertQuery:** Since 2.4.0  
+  Query used to register a role for a user. The query parameters are the username and two match-groups from the **roleRegex**. Default value: `insert into "USER_PROJECT_ROLE" ("USER_NAME", "PROJECT_ID", "ROLE_NAME") VALUES (?,(select "ID" from "PROJECTS" where "NAME"=?),?)`
+* **auth.prd.roleRegex:** Since 2.4.0  
+  The regular expression used to split a role from KeyCloak into a project name and a local role name. Default value: `^([a-zA-Z0-9 ]+)__([a-zA-Z0-9]+)$`
+* **auth.prd.cleanupQuery:** Since 2.4.0  
+  The query used to remove all old roles for a user, before inserting the current roles. Default value: `delete from \"USER_PROJECT_ROLE\" where \"USER_NAME\" = ?`
+
+
+
 ## Response Format Plugins
 
 These plugins enable various response formats.
@@ -170,6 +197,9 @@ in the SensorThings API standard.
 
 * **plugins.batchProcessing.enable:**  
   Toggle indicating the BatchProcessing plugin should be enabled. Default: `true`.
+* **plugins.batchProcessing.streaming:** Since 2.4.0  
+  Toggle indicating the BatchProcessing plugin can start sending the response before the batch is fully received.
+  Turn this off if you are behind a proxy that does not support this (like nginx). Default: `true`.
 
 
 ### OData

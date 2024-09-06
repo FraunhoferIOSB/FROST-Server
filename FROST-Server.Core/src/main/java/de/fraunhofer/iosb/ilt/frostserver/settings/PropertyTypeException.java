@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 /**
- *
- * @author jab
+ * Thrown when a property is requested in a type that the value of the property
+ * can not be converted to.
  */
 public class PropertyTypeException extends PropertyException {
 

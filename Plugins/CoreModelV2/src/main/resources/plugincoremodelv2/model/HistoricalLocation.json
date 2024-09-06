@@ -1,0 +1,76 @@
+{
+    "conformance": [],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "HistoricalLocation",
+            "plural": "HistoricalLocations",
+            "adminOnly": false,
+            "table": "hist_locations",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "time",
+                    "type": "Edm.DateTimeOffset",
+                    "required": true,
+                    "nullable": false,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+                            "field": "time"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "Thing",
+                    "entitySet": false,
+                    "entityType": "Thing",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "HistoricalLocations",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "thing_id",
+                            "otherTable": "things",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "hooks": [
+                {
+                    "hook": {
+                        "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.HookPostInsertHistLoc"
+                    }
+                }
+            ],
+            "annotations": []
+        }
+    ]
+}

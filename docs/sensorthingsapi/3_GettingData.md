@@ -16,8 +16,12 @@ For more information, please see the following sections:
 * [Basic Requests](requestingData/STA-Basic-Requests.html)
 * [Tailoring Responses](requestingData/STA-Tailoring-Responses.html)
 * [Filtering Entities](requestingData/STA-Filtering.html)
-* [Expading Entities](requestingData/STA-Expading.html)
+* [Expading Entities](requestingData/STA-Expanding.html)
+* [Designing Queries](requestingData/STA-QueryDesign.html)
+* [CSV & GeoJSON](requestingData/STA-ResultFormats.html)
 * [Example Queries](requestingData/STA-Example-Queries.html)
+* [Using MQTT from JavaScript](requestingData/STA-mqtt-javascript.html)
+* [Expanding Entities in MQTT](requestingData/STA-mqtt-expanding.html)
 
 
 If you're more for a hands-on approach, you can also just start playing with some of our services. Here's the link for near-real-time air quality data:

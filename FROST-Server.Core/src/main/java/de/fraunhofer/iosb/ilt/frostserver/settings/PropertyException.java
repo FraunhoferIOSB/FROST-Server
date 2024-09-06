@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 /**
- *
- * @author jab
+ * Abstract exception for situations when fetching properties fails.
  */
 public abstract class PropertyException extends RuntimeException {
 

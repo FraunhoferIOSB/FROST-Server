@@ -1,0 +1,111 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="id-TaskingCapability" value="LONG" />
+            <not>
+                <tableExists tableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <createTable tableName="tasking_capabilities">
+            <column name="id" type="${idTypeLong}" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_tasking_capabilities" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <changeLogPropertyDefined property="id-TaskingCapability" value="STRING" />
+                <changeLogPropertyDefined property="id-TaskingCapability" value="UUID" />
+            </or>
+            <not>
+                <tableExists tableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <createTable tableName="tasking_capabilities">
+            <column name="id" type="${idType-TaskingCapability}" defaultValueComputed="${defaultValueComputed-TaskingCapability}">
+                <constraints primaryKey="true" primaryKeyName="pk_tasking_capabilities"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="name" tableName="tasking_capabilities" />
+            </not>
+        </preConditions>
+        <addColumn tableName="tasking_capabilities">
+            <column name="actuator_id" type="${idType-Actuator}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thing_id" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feature_id" type="${idType-Feature}"/>
+            <column name="name" type="TEXT"/>
+            <column name="description" type="TEXT"/>
+            <column name="definition" type="TEXT"/>
+            <column name="properties" type="JSONB"/>
+            <column name="tasking_parameters" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_actuator_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="tasking_capabilities" indexName="tasking_capabilities_actuator_id">
+            <column name="actuator_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_thing_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="tasking_capabilities" indexName="tasking_capabilities_thing_id">
+            <column name="thing_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_feature_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="tasking_capabilities" indexName="tasking_capabilities_feature_id">
+            <column name="feature_id" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

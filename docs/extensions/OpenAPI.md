@@ -2,7 +2,7 @@
 layout: default
 title: OpenAPI
 category: extensions
-order: 4
+order: 14
 ---
 
 # OpenAPI Plugin

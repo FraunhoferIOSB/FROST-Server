@@ -147,7 +147,7 @@ The following table lists the configurable parameters of the FROST-Server chart 
 | `frost.auth.db.minimumIdleConnection`       | (Basic Auth) The minimum number of idle database connections to keep open.                                                                                                                                                                                                              | ``                                                                                                                             |
 | `frost.auth.keycloakConfig`                 | (Keycloak Auth) The json content of the keycloak json config file.                                                                                                                                                                                                                      | ``                                                                                                                             |
 | `frost.auth.keycloakConfigFile`             | (Keycloak Auth) The path to the keycloak json config file.                                                                                                                                                                                                                              | ``                                                                                                                             |
-| `frost.auth.keycloakConfigUrl`              | (Keycloak Auth) The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the form of: `https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]`.                                                 | ``                                                                                                                             |
+| `frost.auth.keycloakConfigUrl`              | (Keycloak Auth) The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the form of: `https://keycloak.example.com/realms/[realm]/clients-registrations/install/[client id]`.                                                 | ``                                                                                                                             |
 | `frost.auth.keycloakConfigSecret`           | (Keycloak Auth) If the client has “access-type” set to “confidential” then a secret is required to download the configuration. This secret can be found in the configuration itself, in Keycloak.                                                                                       | ``                                                                                                                             |
 | `frost.http.replicas`                       | Number of FROST-Server HTTP module replicas.                                                                                                                                                                                                                                            | `1`                                                                                                                            |
 | `frost.http.ports.http.nodePort`            | The external port (node port) of the FROST-Server HTTP service, **if not using Ingress**.                                                                                                                                                                                               | `30080`                                                                                                                        |
@@ -332,18 +332,15 @@ More information about the FROST-Server configuration can be found [here](https:
 
 ### ExtraEnv
 
-It is possible to pass extra environment variables to FROST using `frost.http.extraEnv` and `frost.mqtt.extraEnv`.
-This variable accepts a YAML string with the `env` variables.
+It is possible to pass extra environment variables to FROST using `frost.envExtra`, `frost.http.envExtra` and `frost.mqtt.envExtra`.
+This variable accepts key-value pairs. Keys must be names usable for environment variables, values are quoted automatically.
 
 ```
 # values.yaml
 frost:
-  http:
-    extraEnv: |
-      - name: plugins_modelLoader_idType_User
-        value: "string"
-      - name: plugins_modelLoader_idType_Role
-        value: "string"
+  envExtra:
+    plugins_modelLoader_idType_User: string
+    plugins_modelLoader_idType_Role: string
 ```
 
 They can also be passed directly on the command line.

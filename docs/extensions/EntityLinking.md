@@ -2,7 +2,7 @@
 layout: default
 title: Custom Entity Linking
 category: extensions
-order: 3
+order: 13
 ---
 
 # Custom Entity Linking

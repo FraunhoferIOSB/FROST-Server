@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PARAMETERS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PROPERTIES;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_RESULTQUALITY;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_VALIDTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTQUALITY;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,14 +35,16 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.StaService;
+import de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.Expand;
 import de.fraunhofer.iosb.ilt.statests.util.model.PathElement;
@@ -114,7 +116,7 @@ public class EntityUtils {
             Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
             if (!testExpectedList.remove(inExpectedList)) {
                 LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
-                return new ResultTestResult(false, "Entity with pk " + Arrays.toString(nextResult.getPrimaryKeyValues()) + " found in result that is not expected.");
+                return new ResultTestResult(false, "Entity with pk " + nextResult.getPrimaryKeyValues() + " found in result that is not expected.");
             }
         }
         if (!testExpectedList.isEmpty()) {
@@ -133,9 +135,9 @@ public class EntityUtils {
      * or null.
      */
     public static Entity findEntityIn(Entity entity, List<Entity> entities) {
-        Object[] pk = entity.getPrimaryKeyValues();
+        PkValue pk = entity.getPrimaryKeyValues();
         for (Entity inList : entities) {
-            if (Arrays.equals(inList.getPrimaryKeyValues(), pk)) {
+            if (inList.getPrimaryKeyValues().equals(pk)) {
                 return inList;
             }
         }
@@ -431,7 +433,7 @@ public class EntityUtils {
     public static String listEntities(List<Entity> list) {
         StringBuilder result = new StringBuilder();
         for (Entity item : list) {
-            result.append(Arrays.toString(item.getPrimaryKeyValues()));
+            result.append(item.getPrimaryKeyValues().toString());
             result.append(", ");
         }
         if (result.length() == 0) {
@@ -483,16 +485,25 @@ public class EntityUtils {
     }
 
     public static void testFilterResults(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
-        testFilterResults(service.dao(type), filter, expected);
+        testFilterResults("-", service, type, filter, expected);
+    }
+
+    public static void testFilterResults(String user, SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, List<Entity> expected) {
+        testFilterResults(user, service.dao(type), filter, expected);
     }
 
     public static void testFilterResults(Dao doa, String filter, List<Entity> expected) {
+        testFilterResults("-", doa, filter, expected);
+    }
+
+    public static void testFilterResults(String user, Dao doa, String filter, List<Entity> expected) {
         try {
             EntitySet result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String message = "Failed on filter: " + filter + " Cause: " + check.message;
+            String message = "Failed for " + user + " on filter: " + filter + " Cause: " + check.message;
             if (!check.testOk) {
-                LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
+                LOGGER.info("Failed for {} on filter: {}\nexpected {},\n     got {}.",
+                        user,
                         filter,
                         EntityUtils.listEntities(expected),
                         EntityUtils.listEntities(result.toList()));
@@ -504,22 +515,30 @@ public class EntityUtils {
         }
     }
 
-    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int expectedCode) {
-        filterForException(service.dao(type), filter, expectedCode);
+    public static void filterForException(SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int... expectedCode) {
+        filterForException("-", service, type, filter, expectedCode);
     }
 
-    public static void filterForException(Dao doa, String filter, int expectedCode) {
+    public static void filterForException(String user, SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, int... expectedCode) {
+        filterForException(user, service.dao(type), filter, expectedCode);
+    }
+
+    public static void filterForException(Dao doa, String filter, int... expectedCode) {
+        filterForException("-", doa, filter, expectedCode);
+    }
+
+    public static void filterForException(String user, Dao doa, String filter, int... expectedCode) {
         try {
             doa.query().filter(filter).list();
         } catch (StatusCodeException e) {
-            String message = "Filter " + filter + " did not respond with " + expectedCode + ", but with " + e.getStatusCode() + ".";
-            assertEquals(expectedCode, e.getStatusCode(), message);
+            String message = "User " + user + ", Filter " + filter + " did not respond with one of " + Arrays.toString(expectedCode) + ", but with " + e.getStatusCode() + ".";
+            AuthTestHelper.expectStatusCodeException(message, e, expectedCode);
             return;
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);
-            fail("Failed to call service for filter " + filter + " " + ex);
+            fail("Failed to call service for filter User " + user + ", " + filter + " " + ex);
         }
-        fail("Filter " + filter + " did not respond with " + expectedCode + ".");
+        fail("User " + user + ", Filter " + filter + " did not respond with " + Arrays.toString(expectedCode) + ".");
     }
 
     public static Entity createSensor(SensorThingsService srvc, String name, String desc, String type, String metadata, List<Entity> registry) throws ServiceFailureException {
@@ -527,7 +546,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity sensor = sMdl.newSensor(name, desc, type, metadata)
                 .setProperty(EP_PROPERTIES, properties);
         srvc.create(sensor);
@@ -540,7 +559,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity ds = sMdl.newDatastream(name, desc, type, uom)
                 .setProperty(EP_PROPERTIES, properties)
                 .setProperty(sMdl.npDatastreamThing, thing)
@@ -556,7 +575,7 @@ public class EntityUtils {
         MapValue properties = CollectionsHelper.propertiesBuilder()
                 .addItem("idx", idx)
                 .build();
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obsProp = sMdl.newObservedProperty(name, definition, description)
                 .setProperty(EP_PROPERTIES, properties);
         srvc.create(obsProp);
@@ -578,7 +597,7 @@ public class EntityUtils {
         int idx = registry.size();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("idx", idx);
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
                 .setProperty(EP_VALIDTIME, validTime)
                 .setProperty(EP_PARAMETERS, parameters);
@@ -593,7 +612,7 @@ public class EntityUtils {
     }
 
     public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, List<Entity> registry) throws ServiceFailureException {
-        SensorThingsSensingV11 sMdl = srvc.getModel(SensorThingsSensingV11.class);
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream);
         srvc.create(obs);
         registry.add(obs);

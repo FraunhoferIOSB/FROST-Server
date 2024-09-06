@@ -59,8 +59,8 @@ class StringHelperTest {
 
     @Test
     void testUrlEncode() {
-        assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
-        assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
+        assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", StringHelper.urlEncodeNotSlashes("http://example.org/Things[xyz'xyz]"));
+        assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", StringHelper.urlEncode("http://example.org/Things[xyz'xyz]"));
     }
 
 }

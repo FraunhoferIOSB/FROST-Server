@@ -11,6 +11,19 @@ updates:
         patterns:
           - "*"
 
+  
+  # Maintain dependencies for Maven in the v2.3.x branch
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: v2.4.x
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
+
   # Maintain dependencies for Maven in the v2.3.x branch
   - package-ecosystem: "maven"
     directory: "/"
@@ -22,23 +35,6 @@ updates:
         patterns:
           - "*"
 
-  # Maintain dependencies for Maven in the v2.0.x branch
-  - package-ecosystem: "maven"
-    directory: "/"
-    target-branch: v2.0.x
-    schedule:
-      interval: "weekly"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-    ignore:
-      - dependency-name: "org.jooq:jooq"
-        versions: ["[3.17,)"]
-      - dependency-name: "org.liquibase:liquibase-core"
-        versions: ["[4.13,)"]
-      - dependency-name: "org.openjfx:*"
-        versions: ["[20.0,)"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"

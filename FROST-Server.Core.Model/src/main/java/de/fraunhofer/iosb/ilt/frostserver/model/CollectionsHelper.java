@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import de.fraunhofer.iosb.ilt.frostserver.property.ComplexValue;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * A collection of tools for Collections.
  */
 public class CollectionsHelper {
 
@@ -106,9 +106,21 @@ public class CollectionsHelper {
         return new PropertyBuilder();
     }
 
+    public static PropertyBuilder LinkedHashMapBuilder() {
+        return new PropertyBuilder(new LinkedHashMap<>());
+    }
+
     public static class PropertyBuilder {
 
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties;
+
+        public PropertyBuilder() {
+            this.properties = new HashMap<>();
+        }
+
+        public PropertyBuilder(Map<String, Object> properties) {
+            this.properties = properties;
+        }
 
         public PropertyBuilder addProperty(String key, Object value) {
             properties.put(key, value);
