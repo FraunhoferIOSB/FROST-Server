@@ -20,6 +20,7 @@
 * Improved Batch Requests extension to stream results to the client, while processing the batch.
 * Added option to Batch Request extension, to allow back-references to GET results.
 * Added option to Batch Request extension, to allow skipping requests based on back references.
+* Added 'Projects' plugin with fine-grained authorisation capabilities.
 
 **Internal changes & Bugfixes**
 * Improved generated queries when fetching entities over a one-to-many relation.
