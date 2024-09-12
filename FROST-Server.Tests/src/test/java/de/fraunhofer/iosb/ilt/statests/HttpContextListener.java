@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests;
 
 import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.annotation.WebListener;
 
 /**
  * @author jab, scf

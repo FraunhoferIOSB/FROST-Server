@@ -18,9 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import java.security.Principal;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 class RequestWrapper extends HttpServletRequestWrapper {
 

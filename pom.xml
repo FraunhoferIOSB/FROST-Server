@@ -108,10 +108,9 @@
         <version.jackson>2.17.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
         <version.jacksonGeojson>1.14</version.jacksonGeojson>
-        <version.javaee-web-api>8.0.1</version.javaee-web-api>
-        <version.javax-activation>1.1.1</version.javax-activation>
-        <version.javax-servlet>4.0.1</version.javax-servlet>
-        <version.jetty>10.0.23</version.jetty>
+        <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
+        <version.jakartaee-web-api>10.0.0</version.jakartaee-web-api>
+        <version.jetty>12.0.12</version.jetty>
         <version.jooq>3.19.11</version.jooq>
         <version.json-patch>1.13</version.json-patch>
         <version.junit>5.11.0</version.junit>
@@ -222,14 +221,14 @@
                 <version>${version.jacksonGeojson}</version>
             </dependency>
             <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-web-api</artifactId>
-                <version>${version.javaee-web-api}</version>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-web-api</artifactId>
+                <version>${version.jakartaee-web-api}</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${version.javax-servlet}</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${version.jakarta-servlet}</version>
             </dependency>
             <dependency>
                 <groupId>net.postgis</groupId>
@@ -272,8 +271,8 @@
                 <version>${version.httpclient}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-servlet</artifactId>
                 <version>${version.jetty}</version>
             </dependency>
             <dependency>
@@ -315,7 +314,7 @@
             </dependency>
             <dependency>
                 <groupId>org.keycloak</groupId>
-                <artifactId>keycloak-servlet-filter-adapter</artifactId>
+                <artifactId>keycloak-jakarta-servlet-filter-adapter</artifactId>
                 <version>${version.keycloak}</version>
             </dependency>
             <dependency>

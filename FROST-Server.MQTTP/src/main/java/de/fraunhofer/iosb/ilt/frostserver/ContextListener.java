@@ -21,8 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.annotation.WebListener;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**

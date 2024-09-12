@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -26,13 +27,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * A service response wrapping a HttpServletResponse, supporting streaming. When
+ * using Writer to write data, it is sent directly to the client.
  */
 public class ServiceResponseHttpServlet implements ServiceResponse {
 

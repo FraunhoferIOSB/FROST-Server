@@ -101,11 +101,11 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -341,7 +341,7 @@ public class TestSuite {
         parameters.forEach((t, u) -> paramsMap.put(t, u));
 
         Server myServer = new Server(0);
-        HandlerCollection contextHandlerCollection = new HandlerCollection(true);
+        ContextHandlerCollection contextHandlerCollection = new ContextHandlerCollection(true);
         myServer.setHandler(contextHandlerCollection);
         try {
             myServer.start();
@@ -356,7 +356,6 @@ public class TestSuite {
         serverSetting.setServiceRootUrl("http://localhost:" + connecor.getLocalPort() + "");
 
         ServletContextHandler handler = new ServletContextHandler();
-        handler.getServletContext().setExtendedListenerTypes(true);
         handler.setInitParameter(CoreSettings.TAG_LOG_SENSITIVE_DATA, Boolean.TRUE.toString());
         handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));

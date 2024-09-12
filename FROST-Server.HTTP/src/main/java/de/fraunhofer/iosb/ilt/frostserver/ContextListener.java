@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver;
 
 import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.annotation.WebListener;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**

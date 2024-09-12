@@ -3,6 +3,7 @@
 ## Development version 2.5.0
 
 **New Features**
+* Updated to jakarta EE 10: FROST-Server is now runs on Tomcat 10 and later.
 
 **Internal changes & Bugfixes**
 
