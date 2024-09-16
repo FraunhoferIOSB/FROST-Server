@@ -3,8 +3,9 @@
 ## Development version 2.4.1
 
 **Internal changes & Bugfixes**
-* Set limit to 1 for entity-by-primary-key requests
-* Added a validator that sets a time to now(), unless otherwise set
+* Set limit to 1 for entity-by-primary-key requests.
+* Added a validator that sets a time to now(), unless otherwise set.
+* Improved OpenAPI generator, better property types.
 
 
 ## Release version 2.4.0

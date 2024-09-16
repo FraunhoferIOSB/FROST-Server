@@ -120,17 +120,20 @@ public final class OASchema {
     }
 
     public OASchema(Version version, PropertyType propertyType) {
+        final String propertyTypeName = propertyType.getName();
         switch (version.urlPart) {
             case VERSION_STA_V10_NAME:
             case VERSION_STA_V11_NAME:
-                type = Type.STRING;
-                return;
+                if (STA_TIMEINTERVAL_NAME.equals(propertyTypeName) || STA_TIMEVALUE_NAME.equals(propertyTypeName)) {
+                    type = Type.STRING;
+                    return;
+                }
+                break;
 
             case VERSION_ODATA_40_NAME:
             case VERSION_ODATA_401_NAME:
             default:
-                final String propertyName = propertyType.getName();
-                if (STA_TIMEINTERVAL_NAME.equals(propertyName) || STA_TIMEVALUE_NAME.equals(propertyName)) {
+                if (STA_TIMEINTERVAL_NAME.equals(propertyTypeName) || STA_TIMEVALUE_NAME.equals(propertyTypeName)) {
                     type = Type.OBJECT;
                     addSubtypeComplex(version, (TypeComplex) propertyType);
                     return;
@@ -178,8 +181,11 @@ public final class OASchema {
                 break;
 
             case EDM_UNTYPED_NAME:
-            case STA_OBJECT_NAME:
                 type = null;
+                break;
+
+            case STA_OBJECT_NAME:
+                type = Type.OBJECT;
                 break;
 
             case EDM_STRING_NAME:

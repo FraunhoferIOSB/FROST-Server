@@ -393,19 +393,21 @@ public class OpenApiGenerator {
 
         for (Property property : entityType.getPropertySet()) {
             String propertyName = property.getJsonName();
-            if ("@iot.id".equals(propertyName)) {
-                propertyName = version.getIdName();
-            }
-            if (property instanceof EntityPropertyMain) {
+            if (property instanceof EntityPropertyMain epm) {
+                if (epm.getAliases().contains("@iot.id")) {
+                    propertyName = version.getIdName();
+                }
+
                 OASchema propSchema;
-                if (entityType.getPrimaryKey().equals(property)) {
-                    propSchema = new OASchema("#/components/schemas/entityId");
-                } else if (ModelRegistry.EP_PROPERTIES.equals(property)) {
+                if (ModelRegistry.EP_PROPERTIES.equals(epm)) {
                     propSchema = new OASchema("#/components/schemas/properties");
-                } else if (ModelRegistry.EP_SELFLINK.equals(property)) {
+                } else if (ModelRegistry.EP_SELFLINK.equals(epm)) {
                     propSchema = new OASchema("#/components/schemas/selfLink");
                 } else {
-                    propSchema = new OASchema(context.getVersion(), property.getType());
+                    propSchema = new OASchema(context.getVersion(), epm.getType());
+                }
+                if (entityType.getPrimaryKey().getKeyProperties().contains(epm)) {
+                    propSchema.setReadOnly(true);
                 }
                 schema.addProperty(propertyName, propSchema);
             } else {
