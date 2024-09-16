@@ -105,7 +105,6 @@ public class QueryBuilder implements ResourcePathVisitor {
     private PkValue requestedId;
 
     private boolean forUpdate = false;
-    private boolean single = false;
     private boolean parsed = false;
 
     private QueryState<?> queryState;
@@ -153,9 +152,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
         int skip = 0;
         int count;
-        if (single) {
-            count = 2;
-        } else if (staQuery != null) {
+        if (staQuery != null) {
             count = staQuery.getTopOrDefault() + 1;
             if (staQuery.getSkipFilter() == null) {
                 skip = staQuery.getSkip(0);
@@ -373,7 +370,6 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private void parseTypeAndId() {
         lastPath = queryEntityType(new PathElementEntity(requestedEntityType, null), requestedId, lastPath);
-        single = true;
     }
 
     private Set<Property> findSelectedProperties(Query query) {
