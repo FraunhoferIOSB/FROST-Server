@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Set limit to 1 for entity-by-primary-key requests
+* Added a validator that sets a time to now(), unless otherwise set
 
 
 ## Release version 2.4.0
