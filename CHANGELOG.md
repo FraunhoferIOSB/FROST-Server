@@ -2,10 +2,15 @@
 
 ## Development version 2.5.0
 
+FROST-Server version 2.5 and higher requires Java 21. This is because some libraries that are used now require Java 21.
+
 **New Features**
 * Updated to jakarta EE 10: FROST-Server is now runs on Tomcat 10 and later.
+* Added a validator that sets a time to now(), unless otherwise set.
 
 **Internal changes & Bugfixes**
+* Set limit to 1 for entity-by-primary-key requests.
+* Improved OpenAPI generator, better property types.
 
 
 ## Release version 2.4.0
