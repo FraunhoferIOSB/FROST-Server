@@ -63,7 +63,7 @@ public class AuthTestHelper {
     }
 
     public void getDatabaseStatusIndirect(SensorThingsService service, int... expectedResponse) throws IOException {
-        getDatabaseStatus(service, service.getEndpoint() + "../DatabaseStatus", expectedResponse);
+        getDatabaseStatus(service, service.getBaseUrl() + "../DatabaseStatus", expectedResponse);
     }
 
     public void getDatabaseStatus(SensorThingsService service, int... expectedResponse) throws IOException {
@@ -180,7 +180,7 @@ public class AuthTestHelper {
 
     public static SensorThingsService setAuthBasic(SensorThingsService service, String username, String password) {
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        URL url = service.getEndpoint();
+        URL url = service.getBaseUrl();
 
         credsProvider.setCredentials(
                 new AuthScope(url.getHost(), url.getPort()),

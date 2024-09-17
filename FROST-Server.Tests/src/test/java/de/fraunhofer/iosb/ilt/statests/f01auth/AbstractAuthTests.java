@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
@@ -90,16 +90,18 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     protected SensorThingsService createService() {
-        if (!sSrvc.isEndpointSet()) {
+        if (!sSrvc.isBaseUrlSet()) {
             try {
-                sSrvc.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                sSrvc.setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(sSrvc.getModelRegistry())
-                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }

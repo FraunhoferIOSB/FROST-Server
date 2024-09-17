@@ -23,9 +23,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_FILTE
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsTaskingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
 import java.io.IOException;
@@ -63,9 +63,9 @@ public abstract class AbstractTestClass {
      */
     protected static StaService service;
     protected static SensorThingsService sSrvc;
-    protected static SensorThingsSensingV11 sMdl;
-    protected static SensorThingsMultiDatastreamV11 mMdl;
-    protected static SensorThingsTaskingV11 tMdl;
+    protected static SensorThingsV11Sensing sMdl;
+    protected static SensorThingsV11MultiDatastream mMdl;
+    protected static SensorThingsV11Tasking tMdl;
 
     private static final Map<String, String> defaultProperties = new TreeMap<>();
 

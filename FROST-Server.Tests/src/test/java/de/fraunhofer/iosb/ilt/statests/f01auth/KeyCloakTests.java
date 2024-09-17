@@ -24,7 +24,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
@@ -58,7 +58,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     public static final String KEYCLOAK_FROST_CONFIG_SECRET = "5aa9087d-817f-47b6-92a1-2b5f7caac967";
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
-    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    private static final SensorThingsV11Sensing mdlSensing = new SensorThingsV11Sensing();
     private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
     private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
     private static final List<Entity> USERS = new ArrayList<>();
@@ -125,16 +125,18 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
 
     @Override
     protected SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
+        if (!baseService.isBaseUrlSet()) {
             try {
-                baseService.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                baseService.setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }

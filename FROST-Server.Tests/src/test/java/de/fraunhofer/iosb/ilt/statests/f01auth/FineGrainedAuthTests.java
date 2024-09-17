@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement.EP_NAME;
 import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
@@ -37,9 +37,10 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
@@ -142,7 +143,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
     }
 
-    private static final SensorThingsSensingV11 mdlSensing = new SensorThingsSensingV11();
+    private static final SensorThingsV11Sensing mdlSensing = new SensorThingsV11Sensing();
     private static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
     private static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
 
@@ -214,7 +215,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             BatchResponseJson result = Utils.MAPPER.readValue(response, BatchResponseJson.class);
             for (BatchResponseJson.ResponsePart part : result.getResponses()) {
                 final String location = part.getLocation();
-                Object[] pk = pkFromSelfLink(location);
+                PkValue pk = pkFromSelfLink(location);
                 final String type = typeFromSelfLink(location);
                 switch (type) {
                     case "things":
@@ -260,7 +261,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
     }
 
-    public static Object[] pkFromSelfLink(String selfLink) {
+    public static PkValue pkFromSelfLink(String selfLink) {
         String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
         return ParserUtils.tryToParse(idString);
     }
@@ -275,16 +276,18 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     private SensorThingsService createService() {
-        if (!baseService.isEndpointSet()) {
+        if (!baseService.isBaseUrlSet()) {
             try {
-                baseService.setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                baseService.setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                        .init();
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
         }
         try {
             return new SensorThingsService(baseService.getModelRegistry())
-                    .setEndpoint(new URL(serverSettings.getServiceUrl(version)));
+                    .setBaseUrl(new URL(serverSettings.getServiceUrl(version)))
+                    .init();
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
@@ -542,7 +545,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_08b_ObservationReadFilter() {
         LOGGER.info("  test_08b_ObservationReadFilter");
-        final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues()[0]);
+        final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(0).getPrimaryKeyValues().get(0));
         testFilterResults(serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));

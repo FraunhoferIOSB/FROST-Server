@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.statests.StaService;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -96,7 +98,7 @@ public class EntityUtils {
             Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
             if (!testExpectedList.remove(inExpectedList)) {
                 LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
-                return new ResultTestResult(false, "Entity with pk " + Arrays.toString(nextResult.getPrimaryKeyValues()) + " found in result that is not expected.");
+                return new ResultTestResult(false, "Entity with pk " + nextResult.getPrimaryKeyValues() + " found in result that is not expected.");
             }
         }
         if (!testExpectedList.isEmpty()) {
@@ -115,9 +117,9 @@ public class EntityUtils {
      * or null.
      */
     public static Entity findEntityIn(Entity entity, List<Entity> entities) {
-        Object[] pk = entity.getPrimaryKeyValues();
+        PkValue pk = entity.getPrimaryKeyValues();
         for (Entity inList : entities) {
-            if (Arrays.equals(inList.getPrimaryKeyValues(), pk)) {
+            if (Objects.equals(inList.getPrimaryKeyValues(), pk)) {
                 return inList;
             }
         }
@@ -413,7 +415,7 @@ public class EntityUtils {
     public static String listEntities(List<Entity> list) {
         StringBuilder result = new StringBuilder();
         for (Entity item : list) {
-            result.append(Arrays.toString(item.getPrimaryKeyValues()));
+            result.append(Objects.toString(item.getPrimaryKeyValues()));
             result.append(", ");
         }
         if (result.length() == 0) {

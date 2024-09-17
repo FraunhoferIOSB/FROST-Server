@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_PHENOMENONTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsSensingV11.EP_TIME;
-import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PHENOMENONTIME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_TIME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -254,13 +254,13 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         // PUT tests
         String urlObsGood = serverSettings.getServiceUrl(version)
-                + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")"
-                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
-                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing1) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1) + ")";
         String urlObsBad = serverSettings.getServiceUrl(version)
-                + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")"
-                + "/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")"
-                + "/Observations(" + formatKeyValuesForUrl(obs1.getPrimaryKeyValues()) + ")";
+                + "/Things(" + formatKeyValuesForUrl(thing2) + ")"
+                + "/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")"
+                + "/Observations(" + formatKeyValuesForUrl(obs1) + ")";
 
         testPut(urlObsGood, urlObsBad);
         testPatch(urlObsGood, urlObsBad);
@@ -270,16 +270,16 @@ public abstract class AdditionalTests extends AbstractTestClass {
     private void testGet(Entity thing1, Entity datastream1, Entity thing2) {
         // GET tests
         HTTPMethods.HttpResponse response;
-        String url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
+        String url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(200, response.code, "Get should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")/Observations";
         response = HTTPMethods.doGet(url);
         assertEquals(404, response.code, "Get should return 404 Not Found for url " + url);
 
         // POST tests
-        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")/Observations";
         String observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 300\n"
@@ -287,7 +287,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
         response = HTTPMethods.doPost(url, observationJson);
         assertEquals(201, response.code, "Post should return 201 Created for url " + url);
 
-        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2.getPrimaryKeyValues()) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1.getPrimaryKeyValues()) + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing2) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
         assertNotEquals(201, response.code, "Post should not return 201 Created for url " + url);
     }

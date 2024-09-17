@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -100,18 +101,18 @@ public class Utils {
         return "'" + StringHelper.escapeForStringConstant(Objects.toString(value)) + "'";
     }
 
-    public static Object[] pkFromPostResult(String postResultLine) {
+    public static PkValue pkFromPostResult(String postResultLine) {
         int pos1 = postResultLine.lastIndexOf('(') + 1;
         int pos2 = postResultLine.lastIndexOf(')');
         String part = postResultLine.substring(pos1, pos2);
         try {
-            return new Object[]{Long.valueOf(part)};
+            return new PkValue(new Object[]{Long.valueOf(part)});
         } catch (NumberFormatException exc) {
             // Id was not a long, thus a String.
             if (!part.startsWith("'") || !part.endsWith("'")) {
                 throw new IllegalArgumentException("Strings in urls must be quoted with single quotes.");
             }
-            return new Object[]{part.substring(1, part.length() - 1)};
+            return new PkValue(new Object[]{part.substring(1, part.length() - 1)});
         }
     }
 

@@ -1459,7 +1459,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private static Object postAndGetId(String urlString, String postContent) {
         HttpResponse responseMap = HTTPMethods.doPost(urlString, postContent);
         String response = responseMap.response;
-        return Utils.pkFromPostResult(response)[0];
+        return Utils.pkFromPostResult(response).get(0);
     }
 
     /**

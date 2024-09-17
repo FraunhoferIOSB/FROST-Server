@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsMultiDatastreamV11.EP_MULTIOBSERVATIONDATATYPES;
-import static de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils.formatKeyValuesForUrl;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream.EP_MULTIOBSERVATIONDATATYPES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -305,9 +305,9 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
         Entity md2 = MULTIDATASTREAMS.get(1);
         Entity op2 = OBSERVED_PROPS.get(1);
         Entity op3 = OBSERVED_PROPS.get(2);
-        String md2Id = formatKeyValuesForUrl(md2.getPrimaryKeyValues());
-        String op2Id = formatKeyValuesForUrl(op2.getPrimaryKeyValues());
-        String op3Id = formatKeyValuesForUrl(op3.getPrimaryKeyValues());
+        String md2Id = formatKeyValuesForUrl(md2);
+        String op2Id = formatKeyValuesForUrl(op2);
+        String op3Id = formatKeyValuesForUrl(op3);
 
         HttpResponse response = HTTPMethods.doDelete(serverSettings.getServiceUrl(version) + "/MultiDatastreams(" + md2Id + ")/ObservedProperties/$ref?$id=../../Observations(" + op2Id + ")");
         assertEquals(400, response.code);

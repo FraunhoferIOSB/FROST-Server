@@ -1911,7 +1911,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
             String response = responseMap.response;
-            THING_IDS.add(Utils.pkFromPostResult(response)[0]);
+            THING_IDS.add(Utils.pkFromPostResult(response).get(0));
 
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
@@ -1949,7 +1949,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     }""";
             responseMap = HTTPMethods.doPost(urlString, urlParameters);
             response = responseMap.response;
-            OBSERVATION_IDS.add(Utils.pkFromPostResult(response)[0]);
+            OBSERVATION_IDS.add(Utils.pkFromPostResult(response).get(0));
 
             //FeatureOfInterest
             urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
