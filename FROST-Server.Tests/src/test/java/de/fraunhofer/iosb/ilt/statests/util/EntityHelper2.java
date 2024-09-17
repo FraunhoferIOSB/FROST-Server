@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.util;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFINITION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_ENCODINGTYPE;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_DATASTREAM;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_FEATUREOFINTEREST;
@@ -28,7 +29,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OB
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVEDPROPERTY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_SENSOR;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_THING;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_ENCODINGTYPE;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_FEATURE;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_LOCATION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_METADATA;
