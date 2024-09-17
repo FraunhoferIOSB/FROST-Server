@@ -12,7 +12,7 @@ updates:
           - "*"
 
   
-  # Maintain dependencies for Maven in the v2.3.x branch
+  # Maintain dependencies for Maven in the v2.4.x branch
   - package-ecosystem: "maven"
     directory: "/"
     target-branch: v2.4.x
@@ -22,6 +22,11 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "org.eclipse.jetty:jetty-servlet"
+        versions: ["[10,)"]
+      - dependency-name: "org.openjfx:*"
+        versions: ["[22,)"]
 
 
   # Maintain dependencies for Maven in the v2.3.x branch
@@ -34,6 +39,11 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "org.eclipse.jetty:jetty-servlet"
+        versions: ["[10,)"]
+      - dependency-name: "org.openjfx:*"
+        versions: ["[22,)"]
 
 
   # Maintain dependencies for GitHub Actions
