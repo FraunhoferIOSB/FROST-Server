@@ -11,6 +11,7 @@ FROST-Server version 2.5 and higher requires Java 21. This is because some libra
 **Internal changes & Bugfixes**
 * Set limit to 1 for entity-by-primary-key requests.
 * Improved OpenAPI generator, better property types.
+* Fixed substring not working on PostgreSQL due to failing cast.
 
 
 ## Release version 2.4.0
