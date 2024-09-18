@@ -328,7 +328,9 @@ public abstract class FilterTests extends AbstractTestClass {
         LOGGER.info("  testSubString");
         Dao doa = sSrvc.dao(sMdl.etThing);
 
+        testFilterResults(doa, "substring(properties/string, 1) eq 'wo'", getFromList(THINGS, 2));
         testFilterResults(doa, "substring(properties/string, 1, 1) eq 'w'", getFromList(THINGS, 2));
+        testFilterResults(doa, "substring(name, 4) eq 'g 4'", getFromList(THINGS, 3));
         testFilterResults(doa, "substring(name, 4, 3) eq 'g 4'", getFromList(THINGS, 3));
     }
 

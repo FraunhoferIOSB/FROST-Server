@@ -1100,9 +1100,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             Expression p3 = node.getParameters().get(2);
             FieldWrapper e3 = p3.accept(this);
             Field<Integer> n3 = e3.getFieldAsType(Integer.class, true);
-            return new SimpleFieldWrapper(DSL.substring(s1, n2, n3));
+            return new SimpleFieldWrapper(DSL.substring(s1, n2.add(1), n3));
         }
-        return new SimpleFieldWrapper(DSL.substring(s1, n2));
+        return new SimpleFieldWrapper(DSL.substring(s1, n2.add(1)));
     }
 
     @Override
