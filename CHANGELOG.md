@@ -6,6 +6,7 @@
 * Set limit to 1 for entity-by-primary-key requests.
 * Added a validator that sets a time to now(), unless otherwise set.
 * Improved OpenAPI generator, better property types.
+* Fixed substring not working on PostgreSQL due to failing cast.
 
 
 ## Release version 2.4.0

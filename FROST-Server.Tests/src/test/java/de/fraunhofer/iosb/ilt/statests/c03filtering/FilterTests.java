@@ -107,12 +107,20 @@ public abstract class FilterTests extends AbstractTestClass {
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 2", "The second thing.")
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build());
+                .setProperty(EP_PROPERTIES,
+                        propertiesBuilder()
+                                .addItem("field", 2)
+                                .addItem("string", "one")
+                                .build());
         sSrvc.create(thing);
         THINGS.add(thing);
 
         thing = sMdl.newThing("Thing 3", "The third thing.")
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build());
+                .setProperty(EP_PROPERTIES,
+                        propertiesBuilder()
+                                .addItem("field", 3)
+                                .addItem("string", "two")
+                                .build());
         sSrvc.create(thing);
         THINGS.add(thing);
 
@@ -244,6 +252,20 @@ public abstract class FilterTests extends AbstractTestClass {
 
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
         testFilterResults(doa, "Datastreams/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
+    }
+
+    /**
+     * Test equals null.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
+    @Test
+    void testSubString() throws ServiceFailureException {
+        LOGGER.info("  testSubString");
+        Dao doa = sSrvc.dao(sMdl.etThing);
+
+        testFilterResults(doa, "substring(properties/string, 1, 1) eq 'w'", getFromList(THINGS, 2));
+        testFilterResults(doa, "substring(name, 4, 3) eq 'g 4'", getFromList(THINGS, 3));
     }
 
     /**
