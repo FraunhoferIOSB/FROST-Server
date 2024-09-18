@@ -1095,11 +1095,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
-        Field<Number> n2 = e2.getFieldAsType(Number.class, true);
+        Field<Integer> n2 = e2.getFieldAsType(Integer.class, true);
         if (params.size() > 2) {
             Expression p3 = node.getParameters().get(2);
             FieldWrapper e3 = p3.accept(this);
-            Field<Number> n3 = e3.getFieldAsType(Number.class, true);
+            Field<Integer> n3 = e3.getFieldAsType(Integer.class, true);
             return new SimpleFieldWrapper(DSL.substring(s1, n2, n3));
         }
         return new SimpleFieldWrapper(DSL.substring(s1, n2));

@@ -3,6 +3,7 @@
 ## Development version 2.3.4
 
 **Internal changes & Bugfixes**
+* Fixed substring not working on PostgreSQL due to failing cast.
 
 
 ## Release version 2.3.3

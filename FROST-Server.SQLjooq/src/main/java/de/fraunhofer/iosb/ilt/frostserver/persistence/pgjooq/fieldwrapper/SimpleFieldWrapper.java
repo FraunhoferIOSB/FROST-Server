@@ -77,6 +77,10 @@ public class SimpleFieldWrapper implements FieldWrapper {
         if (canCast && expectedClazz == Date.class) {
             return defaultField.cast(Date.class);
         }
+        if (canCast && expectedClazz == Integer.class && Number.class.isAssignableFrom(expectedClazz)) {
+            // We want an Int, but have a non-int Number
+            return defaultField.cast(expectedClazz);
+        }
         LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), defaultField, defaultField.getClass().getName(), fieldType.getName());
         return null;
     }
