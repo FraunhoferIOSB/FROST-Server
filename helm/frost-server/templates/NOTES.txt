@@ -34,7 +34,7 @@ FROST-Server's resource     | Access URL
 HTTP - Homepage             | {{ include "frost-server.http.serviceRootUrl" . }}
 HTTP - SensorThings API     | {{ include "frost-server.http.serviceRootUrl" . }}{{ include "frost-server.http.apiVersion" . }}
 {{- if .Values.frost.mqtt.enabled }}
-MQTT - TCP                  | {{ include "frost-server.mqtt.serviceHost" . }}
+MQTT - TCP                  | {{ include "frost-server.mqtt.serviceEndpoint" . }}
 MQTT - Websocket            | {{ include "frost-server.mqtt.serviceRootUrl" . }}
 {{- end }}
 

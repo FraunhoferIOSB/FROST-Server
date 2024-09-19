@@ -73,9 +73,6 @@ Get the MQTT service root URL.
 {{- end -}}
 
 {{/*
-{{- end -}}
-
-{{/*
 Get the MQTT Websock-Path.
 */}}
 {{- define "frost-server.mqtt.websockPath" -}}
@@ -83,6 +80,17 @@ Get the MQTT Websock-Path.
       {{- printf "/%s/" .Values.frost.mqtt.urlSubPath | replace "//" "/" -}}
   {{- else -}}
       {{- printf "/mqtt/" -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Get the MQTT TCP service EndPoint
+*/}}
+{{- define "frost-server.mqtt.serviceEndpoint" -}}
+  {{- if and .Values.frost.http.serviceHost .Values.frost.mqtt.ports.mqtt.nodePort -}}
+      {{- printf "%s:%s" .Values.frost.http.serviceHost .Values.frost.mqtt.ports.mqtt.nodePort -}}
+  {{- else -}}
+      {{- printf "NOT CONFIGURED -- please set frost.mqtt.ports.mqtt.nodePort in values.yaml" -}}
   {{- end -}}
 {{- end -}}
 
