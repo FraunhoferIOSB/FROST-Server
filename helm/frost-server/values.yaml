@@ -248,6 +248,9 @@ frost:
       tls:
         enabled: false
         secretName: []
+        
+      # Extra environment variables added to MQTT pods.
+      envExtra:
 
     # FROST-Server MQTT business settings
     serviceHost: "" # default URI is the same then frost.http.serviceHost"
@@ -276,24 +279,6 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
-<<<<<<< HEAD
-      
-=======
-    ingress:
-      enabled: false
-      path: /mqtt
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-      tls:
-        enabled: false
-        secretName:
-  
-      # Extra environment variables added to MQTT pods.
-      envExtra:
-
->>>>>>> v2.x
   ##############################################
   # FROST-Server Database module configuration #
   ##############################################
