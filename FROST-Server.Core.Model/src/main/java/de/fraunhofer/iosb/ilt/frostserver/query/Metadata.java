@@ -30,7 +30,7 @@ public enum Metadata {
 
     public static Metadata lookup(String metadata, Metadata dflt) {
         if (metadata == null) {
-            return DEFAULT;
+            return dflt;
         }
         try {
             return lookup(metadata);

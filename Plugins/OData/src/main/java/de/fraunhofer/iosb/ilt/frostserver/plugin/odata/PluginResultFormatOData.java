@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
@@ -99,12 +100,15 @@ public class PluginResultFormatOData implements PluginResultFormat {
             return;
         }
         String[] formatSplit = StringUtils.split(format, ';');
-        if (CONTENT_TYPE_APPLICATION_JSON.equalsIgnoreCase(formatSplit[0])) {
+        final String mainType = formatSplit[0];
+
+        if (CONTENT_TYPE_JSON.equalsIgnoreCase(mainType) || CONTENT_TYPE_APPLICATION_JSON.equalsIgnoreCase(mainType)) {
             query.setFormat(FORMAT_NAME_ODATA_JSON);
-            if (formatSplit.length > 1) {
-                String[] paramSplit = StringUtils.split(formatSplit[1], '=');
+            for (int i = 1; i < formatSplit.length; i++) {
+                final String formatParam = formatSplit[i];
+                String[] paramSplit = StringUtils.split(formatParam, '=');
                 if (paramSplit == null) {
-                    return;
+                    continue;
                 }
                 if (paramSplit.length == 2 && (FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0]) || FORMAT_PARAM_METADATA40.equalsIgnoreCase(paramSplit[0]))) {
                     query.setMetadata(Metadata.lookup(paramSplit[1], Metadata.DEFAULT));
