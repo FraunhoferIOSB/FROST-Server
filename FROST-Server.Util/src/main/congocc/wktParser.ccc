@@ -50,6 +50,7 @@ Start Start :
   | MultiPointWithData
   | LineStringWithData
   | PolygonWithData
+  | MultiPolygonWithData
   ) <EOF>
   { return jjtThis; }
 ;
@@ -77,11 +78,25 @@ LineStringWithData #WktLineString :
 
 PolygonWithData #WktPolygon :
   <POLYGON> 
-  ( <ZoM> <LB> LinearRing3 ( <COMMA> LinearRing3 )* <RB>
-  |       <LB> LinearRing2 ( <COMMA> LinearRing2 )* <RB>
+  ( <ZoM> LinearRingList3
+  |       LinearRingList2
   )
 ;
 
+MultiPolygonWithData #WktMultiPolygon :
+  <MULTIPOLYGON> 
+  ( <ZoM> <LB> LinearRingList3 ( <COMMA> LinearRingList3 )* <RB>
+  |       <LB> LinearRingList2 ( <COMMA> LinearRingList2 )* <RB>
+  )
+;
+
+LinearRingList2 #LinearRingList :
+  <LB> LinearRing2 ( <COMMA> LinearRing2 )* <RB>
+;
+
+LinearRingList3 #LinearRingList :
+  <LB> LinearRing3 ( <COMMA> LinearRing3 )* <RB>
+;
 
 LinearRing2 #LinearRing :
   <LB> Coords2List <RB>

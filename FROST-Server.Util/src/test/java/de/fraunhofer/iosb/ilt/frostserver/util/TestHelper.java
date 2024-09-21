@@ -25,6 +25,7 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
+import org.geojson.MultiPolygon;
 import org.geojson.Point;
 import org.geojson.Polygon;
 
@@ -41,6 +42,14 @@ public class TestHelper {
 
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
         return new Polygon(getPointList(dimensions, values));
+    }
+
+    public static MultiPolygon getMutliPolygon(Polygon... polygons) {
+        final MultiPolygon multiPolygon = new MultiPolygon();
+        for (Polygon polygon : polygons) {
+            multiPolygon.add(polygon);
+        }
+        return multiPolygon;
     }
 
     public static <T extends Number> Point getPoint(T... values) {
