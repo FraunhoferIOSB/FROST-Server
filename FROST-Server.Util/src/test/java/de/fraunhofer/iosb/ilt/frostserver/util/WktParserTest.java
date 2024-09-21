@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.MultiPoint;
+import org.geojson.MultiPolygon;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -135,6 +136,24 @@ class WktParserTest {
     }
 
     @Test
+    void testParseMultiPolygon2DOnlyExterior() {
+        String text = "MULTIPOLYGON (((30 10, 10 30, 40 40)),((40 20, 20 40, 50 50)))";
+        final MultiPolygon expected = TestHelper.getMutliPolygon(
+                TestHelper.getPolygon(
+                        2,
+                        30, 10,
+                        10, 30,
+                        40, 40),
+                TestHelper.getPolygon(
+                        2,
+                        40, 20,
+                        20, 40,
+                        50, 50));
+        GeoJsonObject result = WktParser.parseWkt(text);
+        assertEquals(expected, result);
+    }
+
+    @Test
     void testParsePolygon2DWithInteriorRing() {
         Polygon expected = TestHelper.getPolygon(
                 2,
@@ -181,6 +200,24 @@ class WktParserTest {
                 30, 10, 1,
                 10, 30, 1,
                 40, 40, 1);
+        GeoJsonObject result = WktParser.parseWkt(text);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testParseMultiPolygon3DOnlyExterior() {
+        String text = "MULTIPOLYGONZ (((30 10 1, 10 30 1, 40 40 1)),((40 20 11, 20 40 11, 50 50 11)))";
+        final MultiPolygon expected = TestHelper.getMutliPolygon(
+                TestHelper.getPolygon(
+                        3,
+                        30, 10, 1,
+                        10, 30, 1,
+                        40, 40, 1),
+                TestHelper.getPolygon(
+                        3,
+                        40, 20, 11,
+                        20, 40, 11,
+                        50, 50, 11));
         GeoJsonObject result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }
