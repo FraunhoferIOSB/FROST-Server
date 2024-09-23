@@ -55,7 +55,7 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     void doDelete(ResourcePath path, Query query);
 
-    boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    Entity doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 

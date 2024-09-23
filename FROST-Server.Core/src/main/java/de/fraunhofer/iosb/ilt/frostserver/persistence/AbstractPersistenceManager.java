@@ -60,21 +60,20 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     @Override
     public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
-        boolean result = doInsert(entity, updateMode);
-        if (result) {
-            Entity newEntity = fetchEntity(
-                    entity.getEntityType(),
-                    entity.getPrimaryKeyValues());
+        Entity newEntity = doInsert(entity, updateMode);
+        if (newEntity != null) {
             newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
             changedEntities.add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)
                             .setEntity(newEntity));
+            return true;
+        } else {
+            return false;
         }
-        return result;
     }
 
-    public abstract boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    public abstract Entity doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     @Override
     public boolean delete(PathElementEntity pathElement) throws NoSuchEntityException {
