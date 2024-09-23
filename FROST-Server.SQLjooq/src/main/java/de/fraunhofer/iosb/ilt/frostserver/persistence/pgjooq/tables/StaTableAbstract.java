@@ -54,12 +54,14 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -256,16 +258,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public boolean insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> insertFields = new HashMap<>();
 
-        // First, run the pre-insert hooks in the PRE_RELATION fase.
+        // First, run the pre-insert hooks in the PRE_RELATION phase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
             if (!hookWrapper.getObject().preInsertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
-                return false;
+                return null;
             }
         }
 
@@ -281,10 +283,10 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
-        // Third, run the pre-insert hooks in POST_RELATION fase.
+        // Third, run the pre-insert hooks in POST_RELATION phase.
         for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
             if (!hookWrapper.getObject().preInsertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
-                return false;
+                return null;
             }
         }
 
@@ -305,13 +307,19 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         // Sixth, do the actual insert.
+        // This returns the entire inserted row. It may or may not be changed by databse rules or before-triggers.
         DSLContext dslContext = pm.getDslContext();
-        Object[] entityPkValues = dslContext.insertInto(thisTable)
+        Record result = dslContext.insertInto(thisTable)
                 .set(insertFields)
-                .returningResult(thisTable.getPkFields())
-                .fetchOneArray();
-        LOGGER.debug("Inserted {} with id = {}.", entityType, entityPkValues);
-        entity.setPrimaryKeyValues(new PkValue(entityPkValues));
+                .returningResult(thisTable.fields())
+                .fetchAny();
+        LOGGER.debug("Inserted {} with id = {}.", entityType, result);
+        if (result == null) {
+            return null;
+        }
+        Set<Object> pks = new HashSet<>();
+        thisTable.getPkFields().stream().map(result::get).forEachOrdered(pks::add);
+        entity.setPrimaryKeyValues(new PkValue(pks.toArray()));
 
         // Seventh, deal with set-navigation links.
         // TODO: add Priority number, handle priorities >= 0 here
@@ -322,14 +330,21 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             }
         }
 
-        // Finally, run the post-insert hooks in POST_INSERT fase.
+        // Eigth, run the post-insert hooks in POST_INSERT phase.
         for (SortingWrapper<Double, HookPostInsert> hookWrapper : hooksPostInsert) {
             if (!hookWrapper.getObject().postInsertIntoDatabase(pm, entity, insertFields)) {
-                return false;
+                return null;
             }
         }
 
-        return true;
+        // Finally, create a new Entity from the returned result and return it.
+        Set<Property> propertySet = entityType.getPropertySet();
+        Set<PropertyFields<T>> propertyFieldsSet = getPropertyFieldRegistry().getFieldsForProperties(propertySet);
+        Entity newEntity = new DefaultEntity(getEntityType(), entity.getPrimaryKeyValues());
+        for (PropertyFields<T> sp : propertyFieldsSet) {
+            sp.converter.convert(thisTable, result, newEntity, dataSize);
+        }
+        return newEntity;
     }
 
     /**

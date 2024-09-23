@@ -334,10 +334,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public boolean doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
-        return table.insertIntoDatabase(this, entity, updateMode);
+        return table.insertIntoDatabase(this, entity, updateMode, dataSize);
     }
 
     @Override
