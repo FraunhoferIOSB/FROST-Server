@@ -28,7 +28,7 @@ jobs:
 
     - name: Set up Helm
       env:
-        HELM_VERSION: "v3.4.2"
+        HELM_VERSION: "v3.16.1"
       run: |
         wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
         tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1

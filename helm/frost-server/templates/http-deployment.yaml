@@ -39,6 +39,23 @@ spec:
           ports:
             - name: tomcat
               containerPort: 8080
+          livenessProbe:
+            tcpSocket:
+              port: tomcat
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /FROST-Server/
+              port: tomcat
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
           resources:
           {{- toYaml .Values.frost.http.resources | nindent 12 }}
           env:

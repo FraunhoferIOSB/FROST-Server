@@ -125,11 +125,15 @@ frost:
         nodePort:
         servicePort: 80
     ingress:
-      enabled: true
-      rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
-      rewriteTarget: /FROST-Server/$1
-      path: /FROST-Server/(.*)
-      annotations:
+      enabled: true      
+      ## Set a specific ingress-class for the ingress ([default] not set)
+      # className: nginx-hamel
+      ## Defines the type of ingress-Controller in use (nginx [default], agic ) 
+      # ingressProvider: agic
+      ## Additional annotations
+      # annotations:
+      #   cert-manager.io/cluster-issuer: letsencrypt
+      #   cert-manager.io/issue-temporary-certificate: "true"
       tls:
         enabled: false
         secretName: []
@@ -146,9 +150,9 @@ frost:
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
+    urlSubPath: ""
     serviceProtocol: http
     servicePort:
-    urlSubPath:
     defaultCount: false
     defaultTop: 100
     maxTop: 1000
@@ -203,14 +207,14 @@ frost:
       imagePullSecret:
     # FROST-Server MQTT deployment settings
     annotations: {}
-    serviceType: NodePort
+    serviceType: ClusterIP
     replicas: 1
     ports:
       mqtt:
-        nodePort:
+        nodePort: 
         servicePort: 1883
       websocket:
-        nodePort:
+        nodePort: 
         servicePort: 9876
     host: 0.0.0.0
     internalHost: localhost
@@ -229,8 +233,26 @@ frost:
       mqtt:
         message_size: 8092
 
+    ingress:
+      enabled: true      
+      ## Set a specific ingress-class for the ingress ([default] not set)
+      # className: azure-application-gateway
+      ## Defines the type of ingress-Controller in use (nginx [default], agic or traefik) 
+      # ingressProvider: agic
+      ## Additional annotations
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+        # cert-manager.io/cluster-issuer: letsencrypt
+        # cert-manager.io/issue-temporary-certificate: "true"
+      tls:
+        enabled: false
+        secretName: []
+
     # FROST-Server MQTT business settings
-    serviceHost: "{{ .Values.frost.http.serviceHost }}"
+    serviceHost: "" # default URI is the same then frost.http.serviceHost"
+    urlSubPath: "" # default is mqtt 
+    serviceProtocol: http
     qos: 2
     subscribeMessageQueueSize: 100
     subscribeThreadPoolSize: 10
@@ -254,19 +276,8 @@ frost:
       recvQueueSize: 2000
       maxInFlight: 50
 
-    ingress:
-      enabled: false
-      path: /mqtt
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-      tls:
-        enabled: false
-        secretName:
-  
-      # Extra environment variables added to MQTT pods.
-      envExtra:
+    # Extra environment variables added to MQTT pods.
+    envExtra:
 
   ##############################################
   # FROST-Server Database module configuration #
