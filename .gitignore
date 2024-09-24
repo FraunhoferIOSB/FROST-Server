@@ -22,4 +22,6 @@ FROST-Server.HTTP/keycloak.json
 FROST-Server.MQTT/FrostMqtt.properties
 logs
 Tools/ModelExtractor/examples
+*.tgz
+.vscode/
 

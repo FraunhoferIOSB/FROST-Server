@@ -1,15 +1,25 @@
 {{- if .Values.frost.http.ingress.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" "http") -}}
+{{- if and .Values.frost.http.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class" .Values.frost.http.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
-  annotations:
-    {{ .Values.frost.http.ingress.rewriteAnnotation}}: {{ .Values.frost.http.ingress.rewriteTarget}}
-    {{- if .Values.frost.http.ingress.annotations }}
-    {{- toYaml .Values.frost.http.ingress.annotations | nindent 4 }}
-    {{ end }}
+  namespace: {{ .Release.Namespace }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -17,23 +27,26 @@ metadata:
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:
+  {{- if and .Values.frost.http.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.frost.http.ingress.className }}
+  {{- end }}
   {{- if .Values.frost.http.ingress.tls.enabled }}
   tls:
-    - hosts:
-        - {{ .Values.frost.http.serviceHost }}
+    - hosts: 
+        - {{ include "frost-server.http.serviceHost" . }}
     {{- if .Values.frost.http.ingress.tls.secretName }}
       secretName: {{ .Values.frost.http.ingress.tls.secretName }}
     {{- end -}}
   {{- end }}
   rules:
-  - host: {{ .Values.frost.http.serviceHost }}
+  - host: {{ include "frost-server.http.serviceHost" . }}
     http:
       paths:
-      - path:  {{ .Values.frost.http.ingress.path  }}
+      - path:  {{ template "frost-server.http.serviceSubPath" . }}
         pathType: Prefix
         backend:
           service:
             name:  {{ $fullName }}
             port:
-              number: 80
+              number: {{ .Values.frost.http.ports.http.servicePort }}
 {{- end -}}

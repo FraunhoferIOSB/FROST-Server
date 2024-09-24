@@ -41,10 +41,26 @@ spec:
               containerPort: 1883
             - name: websocket
               containerPort: 9876
+          livenessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
           env:
             # Internal properties
             - name: serviceRootUrl
-              value: {{ include "frost-server.http.serviceRootUrl" . | quote }}
+              value: {{ include "frost-server.mqtt.serviceRootUrl" . | quote }}
             - name: alwaysOrderbyId
               value: "{{ .Values.frost.alwaysOrderbyId }}"
             - name: logSensitiveData
