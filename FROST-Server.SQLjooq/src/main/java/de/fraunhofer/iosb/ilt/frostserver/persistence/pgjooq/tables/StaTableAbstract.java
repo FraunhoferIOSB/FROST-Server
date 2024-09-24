@@ -471,14 +471,13 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             hookWrapper.getObject().postUpdateInDatabase(pm, entity, entityId, updateMode);
         }
 
-        if (result == null) {
-            return message;
-        }
         Entity newEntity = new DefaultEntity(entityType, entity.getPrimaryKeyValues());
         message.setEntity(newEntity);
 
-        for (PropertyFields<T> sp : propertyFields) {
-            sp.converter.convert(thisTable, result, newEntity, dataSize);
+        if (result != null) {
+            for (PropertyFields<T> sp : propertyFields) {
+                sp.converter.convert(thisTable, result, newEntity, dataSize);
+            }
         }
 
         return message;
