@@ -169,12 +169,7 @@ public class QueryState<T extends StaMainTable<T>> {
      */
     public Set<Field> getSqlSelectFields() {
         if (sqlSelectFields == null) {
-            sqlSelectFields = new HashSet<>();
-            for (PropertyFields<?> sp : selectedProperties) {
-                for (ExpressionFactory f : sp.fields.values()) {
-                    sqlSelectFields.add(f.get(mainTable));
-                }
-            }
+            sqlSelectFields = propertiesToFields(mainTable, selectedProperties);
             for (QueryState childState : childStates.values()) {
                 sqlSelectFields.addAll(childState.getSqlSelectFields());
             }
@@ -296,6 +291,24 @@ public class QueryState<T extends StaMainTable<T>> {
      */
     public void setFilter(boolean isFilter) {
         this.isFilter = isFilter;
+    }
+
+    /**
+     * Convert a set of PropertyFields to a set of Fields for the given Table.
+     *
+     * @param <U> The table class.
+     * @param table The table to generate the Fields for.
+     * @param properties The properties to generate the Fields for.
+     * @return a set of Fields.
+     */
+    public static <U extends StaMainTable<U>> Set<Field> propertiesToFields(StaMainTable<U> table, Set<PropertyFields<U>> properties) {
+        Set<Field> fields = new HashSet<>();
+        for (PropertyFields<?> sp : properties) {
+            for (ExpressionFactory f : sp.fields.values()) {
+                fields.add(f.get(table));
+            }
+        }
+        return fields;
     }
 
 }
