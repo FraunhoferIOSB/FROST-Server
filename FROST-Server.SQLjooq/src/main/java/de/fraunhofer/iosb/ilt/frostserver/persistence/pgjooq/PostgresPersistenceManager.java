@@ -352,7 +352,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
-        return table.updateInDatabase(this, entity, id, updateMode);
+        return table.updateInDatabase(this, entity, id, updateMode, dataSize);
     }
 
     @Override
@@ -395,7 +395,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, id, UpdateMode.UPDATE_ODATA_40);
+        table.updateInDatabase(this, newEntity, id, UpdateMode.UPDATE_ODATA_40, dataSize);
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
