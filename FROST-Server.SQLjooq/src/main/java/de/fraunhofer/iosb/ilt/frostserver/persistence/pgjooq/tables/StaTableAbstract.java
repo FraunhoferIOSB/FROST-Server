@@ -75,6 +75,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.exception.TooManyRowsException;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
@@ -402,7 +403,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         final EntityFactories entityFactories = pm.getEntityFactories();
         final EntityType entityType = entity.getEntityType();
@@ -444,16 +445,20 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         DSLContext dslContext = pm.getDslContext();
-        long count = 0;
+        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getSelectFields(new HashSet<>());
+        final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
+        Record result = null;
         if (!updateFields.isEmpty()) {
-            count = dslContext.update(thisTable)
-                    .set(updateFields)
-                    .where(where)
-                    .execute();
-        }
-        if (count > 1) {
-            LOGGER.error("Updating {} {} caused {} rows to change!", getEntityType(), entityId, count);
-            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+            try {
+                result = dslContext.update(thisTable)
+                        .set(updateFields)
+                        .where(where)
+                        .returningResult(selectFields)
+                        .fetchOne();
+            } catch (TooManyRowsException e) {
+                LOGGER.error("Updating {} {} caused too many rows to change (more than one)!", entityType, entityId);
+                throw new IllegalStateException(CHANGED_MULTIPLE_ROWS, e);
+            }
         }
 
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
@@ -464,6 +469,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         for (SortingWrapper<Double, HookPostUpdate> hookWrapper : hooksPostUpdate) {
             hookWrapper.getObject().postUpdateInDatabase(pm, entity, entityId, updateMode);
+        }
+
+        if (result == null) {
+            return message;
+        }
+        Entity newEntity = new DefaultEntity(entityType, entity.getPrimaryKeyValues());
+        message.setEntity(newEntity);
+
+        for (PropertyFields<T> sp : propertyFields) {
+            sp.converter.convert(thisTable, result, newEntity, dataSize);
         }
 
         return message;
