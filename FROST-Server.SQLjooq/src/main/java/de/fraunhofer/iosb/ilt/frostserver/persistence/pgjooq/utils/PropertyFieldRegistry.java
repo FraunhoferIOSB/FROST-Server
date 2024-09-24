@@ -230,13 +230,14 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * Get the Fields for the given class, that are allowed to be used in the
      * select clause of a query.
      *
-     * @param target The list to add to. If null a new list will be created.
+     * @param <C> The type of collection given as a target.
+     * @param target The list to add to. If null a new ArrayList will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<PropertyFields<T>> getSelectFields(Collection<PropertyFields<T>> target) {
-        Collection<PropertyFields<T>> result = target;
+    public <C extends Collection<PropertyFields<T>>> C getSelectFields(C target) {
+        C result = target;
         if (result == null) {
-            result = new ArrayList<>();
+            result = (C) new ArrayList();
         }
         result.addAll(allSelectPropertyFields);
         return result;

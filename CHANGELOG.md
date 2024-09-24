@@ -15,6 +15,7 @@ FROST-Server version 2.5 and higher requires Java 21. This is because some libra
 * Fixed substring function to be 0-based. substring(name,1) should return name after
   the first character, but it returned name including the first character.
 * Fixed #2016: MultiPolygon not supported in spatial queries.
+* Improved insert efficiency by not doing a separate select to get the full inserted entity. (georghas)
 
 
 ## Release version 2.4.0

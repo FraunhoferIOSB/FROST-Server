@@ -24,6 +24,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservedPro
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createSensor;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -43,6 +44,7 @@ import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -65,11 +67,16 @@ public class MqttExtraTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws URISyntaxException, ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         eh = new EntityHelper2(sSrvc);
         mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        createEntities();
+        try {
+            createEntities();
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Failed to create test entities: {}\n{}", ex.getStatusCode(), ex.getReturnedContent());
+            Assertions.fail("Failed to create test entities");
+        }
     }
 
     @Override

@@ -54,7 +54,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -309,9 +308,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         // Sixth, do the actual insert.
         // This returns the entire inserted row. It may or may not be changed by databse rules or before-triggers.
         DSLContext dslContext = pm.getDslContext();
+        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getSelectFields(new HashSet<>());
+        final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
         Record result = dslContext.insertInto(thisTable)
                 .set(insertFields)
-                .returningResult(thisTable.fields())
+                .returningResult(selectFields)
                 .fetchAny();
         LOGGER.debug("Inserted {} with id = {}.", entityType, result);
         if (result == null) {
@@ -338,10 +339,8 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         // Finally, create a new Entity from the returned result and return it.
-        Set<Property> propertySet = entityType.getPropertySet();
-        Set<PropertyFields<T>> propertyFieldsSet = getPropertyFieldRegistry().getFieldsForProperties(propertySet);
         Entity newEntity = new DefaultEntity(getEntityType(), entity.getPrimaryKeyValues());
-        for (PropertyFields<T> sp : propertyFieldsSet) {
+        for (PropertyFields<T> sp : propertyFields) {
             sp.converter.convert(thisTable, result, newEntity, dataSize);
         }
         return newEntity;
