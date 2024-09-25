@@ -11,6 +11,7 @@
   the first character, but it returned name including the first character.
 * Fixed #2016: MultiPolygon not supported in spatial queries.
 * Improved insert efficiency by not doing a separate select to get the full inserted entity. (georghas)
+* Improved update efficiency by not doing a separate select to get the full updated entity. (georghas)
 
 
 ## Release version 2.4.0
