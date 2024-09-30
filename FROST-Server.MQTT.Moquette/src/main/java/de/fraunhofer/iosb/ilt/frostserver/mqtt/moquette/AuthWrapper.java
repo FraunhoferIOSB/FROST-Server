@@ -180,8 +180,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             return false;
         }
         PrincipalExtended userPrincipal = authProvider.getUserPrincipal(clientId);
-        if (!user.equals(userPrincipal.getName())) {
+        if (user != null && !user.equals(userPrincipal.getName())) {
             LOGGER.warn("Username {} does not match name in Principal: {}", user, userPrincipal);
+            return false;
+        }
+        if (user == null && userPrincipal != PrincipalExtended.ANONYMOUS_PRINCIPAL) {
+            LOGGER.warn("Username is null, but Principal is: {}", userPrincipal);
             return false;
         }
         if (userPrincipal.hasRole(roleRead) || userPrincipal.hasRole(roleAdmin)) {

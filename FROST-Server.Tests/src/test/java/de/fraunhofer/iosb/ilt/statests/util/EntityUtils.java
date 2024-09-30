@@ -619,4 +619,17 @@ public class EntityUtils {
         return obs;
     }
 
+    public static Entity createThing(SensorThingsService srvc, String name, String desc, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        MapValue properties = CollectionsHelper.propertiesBuilder()
+                .addItem("idx", idx)
+                .build();
+        SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
+        Entity thing = sMdl.newThing(name, desc)
+                .setProperty(EP_PROPERTIES, properties);
+        srvc.create(thing);
+        registry.add(thing);
+        return thing;
+    }
+
 }

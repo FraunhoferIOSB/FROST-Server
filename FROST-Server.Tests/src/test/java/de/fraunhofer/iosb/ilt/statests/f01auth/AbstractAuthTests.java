@@ -28,7 +28,11 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttAction;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,6 +40,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -72,9 +78,17 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceWrite;
     protected static SensorThingsService serviceRead;
     protected static SensorThingsService serviceAnon;
+    private static EntityHelper2 ehAdmin;
+    private static EntityHelper2 ehWrite;
+    private static EntityHelper2 ehRead;
+    private static EntityHelper2 ehAnon;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
+    private static MqttHelper2 mqttHelperAdmin;
+    private static MqttHelper2 mqttHelperWrite;
+    private static MqttHelper2 mqttHelperRead;
+    private static MqttHelper2 mqttHelperAnon;
 
     public AbstractAuthTests(ServerVersion serverVersion, Map<String, String> properties, boolean anonymousReadAllowed) {
         super(serverVersion, properties);
@@ -88,6 +102,14 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         serviceWrite = getServiceWrite();
         serviceRead = getServiceRead();
         serviceAnon = getServiceAnonymous();
+        ehAdmin = new EntityHelper2(serviceAdmin);
+        ehWrite = new EntityHelper2(serviceWrite);
+        ehRead = new EntityHelper2(serviceRead);
+        ehAnon = new EntityHelper2(serviceAnon);
+        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperAnon = new MqttHelper2(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
     }
 
     protected SensorThingsService createService() {
@@ -337,6 +359,94 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         ath.deleteForFail(ANONYMOUS, serviceAnon, thing,
                 serviceRead.dao(sMdl.etThing), THINGS,
                 HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+    }
+
+    @Test
+    void test30SubscribeThingAdmin() {
+        LOGGER.info("  test30SubscribeThingAdmin");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity thing = EntityUtils.createThing(
+                    serviceAdmin,
+                    "newThing",
+                    "A new Thing for Testing",
+                    ehAdmin.getCache(sMdl.etThing));
+            obsFuture.complete(thing);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(sMdl.etThing);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription);
+        mqttHelperAdmin.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test31SubscribeThingWrite() {
+        LOGGER.info("  test31SubscribeThingWrite");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity thing = EntityUtils.createThing(
+                    serviceAdmin,
+                    "newThing",
+                    "A new Thing for Testing",
+                    ehAdmin.getCache(sMdl.etThing));
+            obsFuture.complete(thing);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelperWrite, "v1.1/Things")
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(sMdl.etThing);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription);
+        mqttHelperAdmin.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test32SubscribeThingRead() {
+        LOGGER.info("  test32SubscribeThingRead");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity thing = EntityUtils.createThing(
+                    serviceAdmin,
+                    "newThing",
+                    "A new Thing for Testing",
+                    ehAdmin.getCache(sMdl.etThing));
+            obsFuture.complete(thing);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelperRead, "v1.1/Things")
+                .addExpectedEntity(obsFuture)
+                .createReceivedListener(sMdl.etThing);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription);
+        mqttHelperAdmin.executeRequest(mqttAction);
+    }
+
+    @Test
+    void test33SubscribeThingAnon() {
+        LOGGER.info("  test33SubscribeThingAnon");
+        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity thing = EntityUtils.createThing(
+                    serviceAdmin,
+                    "newThing",
+                    "A new Thing for Testing",
+                    ehAdmin.getCache(sMdl.etThing));
+            obsFuture.complete(thing);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelperAnon, "v1.1/Things")
+                .createReceivedListener(sMdl.etThing);
+        if (anonymousReadAllowed) {
+            testSubscription.addExpectedEntity(obsFuture);
+        } else {
+            testSubscription.addExpectedError("Failed to subscribe to v1.1/Things");
+        }
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription);
+        mqttHelperAdmin.executeRequest(mqttAction);
     }
 
 }
