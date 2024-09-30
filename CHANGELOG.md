@@ -12,6 +12,7 @@
 * Fixed #2016: MultiPolygon not supported in spatial queries.
 * Improved insert efficiency by not doing a separate select to get the full inserted entity. (georghas)
 * Improved update efficiency by not doing a separate select to get the full updated entity. (georghas)
+* Fixed #2030: NPE when using anonymous access when authentication is enabled on MQTT.
 
 
 ## Release version 2.4.0

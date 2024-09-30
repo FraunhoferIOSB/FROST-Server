@@ -459,6 +459,7 @@ public class MqttHelper2 {
                     }
                 }
                 if (!found) {
+                    LOGGER.debug("    Received unexpected error: {}", gotError);
                     return false;
                 }
             }
