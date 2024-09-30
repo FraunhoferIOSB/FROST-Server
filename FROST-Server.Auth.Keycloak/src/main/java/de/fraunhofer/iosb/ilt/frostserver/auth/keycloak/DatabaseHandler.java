@@ -112,11 +112,11 @@ public class DatabaseHandler {
         SeenUser user = seenUsers.get(username);
         Instant now = Instant.now();
         if (user != null && user.expire.isAfter(now)) {
-            LOGGER.info("Already seen user {}", username);
+            LOGGER.debug("Already seen user {}", username);
             return;
         }
         if (user != null) {
-            LOGGER.info("User {} timed out", username);
+            LOGGER.debug("User {} timed out", username);
             seenUsers.remove(username);
         }
 
@@ -155,7 +155,7 @@ public class DatabaseHandler {
         for (Iterator<SeenUser> it = seenUsers.values().iterator(); it.hasNext();) {
             SeenUser user = it.next();
             if (user.expire.isBefore(now)) {
-                LOGGER.info("User {} timed out", user.username);
+                LOGGER.debug("User {} timed out", user.username);
                 it.remove();
             } else {
                 // The rest must also be still valid, since the are in insertion order.
