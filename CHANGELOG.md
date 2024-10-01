@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.4.1
+## Release version 2.4.1
 
 **Internal changes & Bugfixes**
 * Set limit to 1 for entity-by-primary-key requests.
