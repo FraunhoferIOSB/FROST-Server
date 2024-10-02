@@ -13,6 +13,7 @@ RUN unzip -d ${CATALINA_HOME}/webapps/FROST-Server /tmp/FROST-Server.war \
     && groupadd --system --gid 1001 tomcat \
     && useradd --system --uid 1001 --gid 1001 tomcat \
     && chgrp -R 0 $CATALINA_HOME \
-    && chmod -R g=u $CATALINA_HOME
+    && chmod -R g=u $CATALINA_HOME \
+    && chown tomcat:tomcat /use/local/tomcat/lib/security/cacerts
 
 USER tomcat
