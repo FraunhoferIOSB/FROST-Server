@@ -23,7 +23,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; th
 fi
 
 # Only deploy master branch and tagged builds to snapshot repository
-if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "${DEFAULT_BRANCH}" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]] || [[ "${GITHUB_REF}" == "develop-2.x" ]]); then
+if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "${DEFAULT_BRANCH}" ]] || [[ "${GITHUB_REF}" == "refs/tags"* ]] || [[ "${GITHUB_REF}" == "refs/heads/develop-2.x" ]]); then
 
     echo -e "${HELM_SSH_KEY_SNAPSHOT}" > ~/.ssh/id_rsa
     chmod 600 ~/.ssh/id_rsa
