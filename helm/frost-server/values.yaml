@@ -145,13 +145,13 @@ frost:
         memory: 1Gi
 
     # FROST-Server HTTP lifecycle options.
-    lifecycle: {}
+    lifecycle:
 
     # FROST-Server HTTP volumeMounts options.
-    volumeMounts: {}
+    volumeMounts:
 
     # FROST-Server HTTP volumes.
-    volumes: {}
+    volumes:
 
     securityContext:
 
@@ -266,13 +266,13 @@ frost:
       maxInFlight: 50
 
     # FROST-Server MQTT lifecycle options.
-    lifecycle: {}
+    lifecycle:
 
     # FROST-Server MQTT volumeMounts options.
-    volumeMounts: {}
+    volumeMounts:
 
     # FROST-Server MQTT volumes.
-    volumes: {}
+    volumes:
 
     securityContext:
 
