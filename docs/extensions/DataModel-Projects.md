@@ -67,3 +67,9 @@ The image below shows the core STA data model in blue, with the security extensi
 ![Data Model](../images/Datamodel-SensorThingsApi-Projects.drawio.png)
 
 
+## Conformance Class
+
+The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
+
+    https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-Projects.html
+
