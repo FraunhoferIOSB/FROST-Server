@@ -32,10 +32,19 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.frost.http.image.imagePullSecret }}
       {{- end}}
+      {{- if .Values.frost.http.volumes }}
+      volumes: {{ .Values.frost.http.volumes }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.http.image.registry }}/{{ .Values.frost.http.image.repository }}:{{ .Values.frost.http.image.tag }}"
           imagePullPolicy: {{ .Values.frost.http.image.pullPolicy | quote }}
+          {{- if .Values.frost.http.lifecycle }}
+          lifecycle: {{ .Values.frost.http.lifecycle }}
+          {{- end}}
+          {{- if .Values.frost.http.volumeMounts }}
+          lifecycle: {{ .Values.frost.http.volumeMounts }}
+          {{- end}}
           ports:
             - name: tomcat
               containerPort: 8080

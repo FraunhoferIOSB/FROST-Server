@@ -143,6 +143,14 @@ frost:
         cpu: 500m
         memory: 1Gi
 
+    # FROST-Server HTTP lifecycle options.
+    lifecycle: {}
+
+    # FROST-Server HTTP volumeMounts options.
+    volumeMounts: {}
+
+    # FROST-Server HTTP volumes.
+    volumes: {}
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
@@ -253,6 +261,15 @@ frost:
       recvWorkerPoolSize: 10
       recvQueueSize: 2000
       maxInFlight: 50
+
+    # FROST-Server MQTT lifecycle options.
+    lifecycle: {}
+
+    # FROST-Server MQTT volumeMounts options.
+    volumeMounts: {}
+
+    # FROST-Server MQTT volumes.
+    volumes: {}
 
     ingress:
       enabled: false

@@ -32,10 +32,19 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.frost.mqtt.image.imagePullSecret }}
       {{- end}}
+      {{- if .Values.frost.mqtt.volumes }}
+      volumes: {{ .Values.frost.mqtt.volumes }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.mqtt.image.registry }}/{{ .Values.frost.mqtt.image.repository }}:{{ .Values.frost.mqtt.image.tag }}"
           imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
+          {{- if .Values.frost.mqtt.lifecycle }}
+          lifecycle: {{ .Values.frost.mqtt.lifecycle }}
+          {{- end}}
+          {{- if .Values.frost.mqtt.volumeMounts }}
+          lifecycle: {{ .Values.frost.mqtt.volumeMounts }}
+          {{- end}}
           ports:
             - name: mqtt
               containerPort: 1883
