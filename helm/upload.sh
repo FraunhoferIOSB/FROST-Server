@@ -5,7 +5,7 @@ set -e
 mkdir -p ~/.ssh
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-echo "Running for branch: ${GITHUB_REF}"
+echo "Running for branch: ${GITHUB_REF} / ${GITHUB_BASE_REF}"
 
 # release version
 if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; then
