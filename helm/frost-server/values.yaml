@@ -153,6 +153,8 @@ frost:
     # FROST-Server HTTP volumes.
     volumes: {}
 
+    securityContext:
+
     # FROST-Server HTTP business settings
     serviceHost: frost-server
     serviceProtocol: http
@@ -271,6 +273,8 @@ frost:
 
     # FROST-Server MQTT volumes.
     volumes: {}
+
+    securityContext:
 
     ingress:
       enabled: false

@@ -42,6 +42,9 @@ spec:
           {{- if .Values.frost.http.lifecycle }}
           lifecycle: {{ .Values.frost.http.lifecycle }}
           {{- end}}
+          {{- if .Values.frost.http.securityContext }}
+          securityContext: {{ .Values.frost.http.securityContext }}
+          {{- end}}
           {{- if .Values.frost.http.volumeMounts }}
           lifecycle: {{ .Values.frost.http.volumeMounts }}
           {{- end}}

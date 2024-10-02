@@ -45,6 +45,9 @@ spec:
           {{- if .Values.frost.mqtt.volumeMounts }}
           lifecycle: {{ .Values.frost.mqtt.volumeMounts }}
           {{- end}}
+          {{- if .Values.frost.mqtt.securityContext }}
+          securityContext: {{ .Values.frost.mqtt.securityContext }}
+          {{- end}}
           ports:
             - name: mqtt
               containerPort: 1883
