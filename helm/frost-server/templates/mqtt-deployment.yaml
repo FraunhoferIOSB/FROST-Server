@@ -33,20 +33,20 @@ spec:
         - name: {{ .Values.frost.mqtt.image.imagePullSecret }}
       {{- end}}
       {{- if .Values.frost.mqtt.volumes }}
-      volumes: {{ .Values.frost.mqtt.volumes }}
+      volumes: {{ toYaml .Values.frost.mqtt.volumes | nindent 12 }}
       {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.mqtt.image.registry }}/{{ .Values.frost.mqtt.image.repository }}:{{ .Values.frost.mqtt.image.tag }}"
           imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
           {{- if .Values.frost.mqtt.lifecycle }}
-          lifecycle: {{ .Values.frost.mqtt.lifecycle }}
+          lifecycle: {{ toYaml .Values.frost.mqtt.lifecycle | nindent 12 }}
           {{- end}}
           {{- if .Values.frost.mqtt.volumeMounts }}
-          lifecycle: {{ .Values.frost.mqtt.volumeMounts }}
+          volumeMounts: {{ toYaml .Values.frost.mqtt.volumeMounts | nindent 12 }}
           {{- end}}
           {{- if .Values.frost.mqtt.securityContext }}
-          securityContext: {{ .Values.frost.mqtt.securityContext }}
+          securityContext: {{ toYaml .Values.frost.mqtt.securityContext | nindent 12 }}
           {{- end}}
           ports:
             - name: mqtt

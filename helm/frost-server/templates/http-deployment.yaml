@@ -33,20 +33,20 @@ spec:
         - name: {{ .Values.frost.http.image.imagePullSecret }}
       {{- end}}
       {{- if .Values.frost.http.volumes }}
-      volumes: {{ .Values.frost.http.volumes }}
+      volumes: {{ toYaml .Values.frost.http.volumes | nindent 12 }}
       {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.http.image.registry }}/{{ .Values.frost.http.image.repository }}:{{ .Values.frost.http.image.tag }}"
           imagePullPolicy: {{ .Values.frost.http.image.pullPolicy | quote }}
           {{- if .Values.frost.http.lifecycle }}
-          lifecycle: {{ .Values.frost.http.lifecycle }}
+          lifecycle: {{ toYaml .Values.frost.http.lifecycle | nindent 12 }}
           {{- end}}
           {{- if .Values.frost.http.securityContext }}
-          securityContext: {{ .Values.frost.http.securityContext }}
+          securityContext: {{ toYaml .Values.frost.http.securityContext | nindent 12 }}
           {{- end}}
           {{- if .Values.frost.http.volumeMounts }}
-          lifecycle: {{ .Values.frost.http.volumeMounts }}
+          volumeMounts: {{ toYaml .Values.frost.http.volumeMounts | nindent 12 }}
           {{- end}}
           ports:
             - name: tomcat
