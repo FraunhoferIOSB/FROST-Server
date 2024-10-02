@@ -17,13 +17,13 @@ spec:
     helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
-  {{- if not .Values.frost.http.ingress.enabled }}
+  {{- if eq .Values.frost.mqtt.serviceType "NodePort" }}
   type: NodePort
   {{- end }}
   ports:
     - name: http
       port: {{ .Values.frost.http.ports.http.servicePort }}
-      {{- if not .Values.frost.http.ingress.enabled }}
+      {{- if eq .Values.frost.mqtt.serviceType "NodePort" && .Values.frost.http.ports.http.nodePort }}
       nodePort: {{ .Values.frost.http.ports.http.nodePort }}
       {{- end }}
       targetPort: tomcat

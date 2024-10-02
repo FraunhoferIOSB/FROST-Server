@@ -120,6 +120,7 @@ frost:
       imagePullSecret:
     # FROST-Server HTTP deployment settings
     replicas: 1
+    serviceType: ClusterIP
     ports:
       http:
         nodePort:
