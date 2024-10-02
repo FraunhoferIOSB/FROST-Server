@@ -14,7 +14,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "refs/tags"* ]]; th
   cd helm-charts
   git add .
   git remote rm origin
-  git remote add origin git@github.com:FraunhoferIOSB/helm-charts.git
+  git remote add origin git@github.com:kernblick/helm-charts.git
   git commit -m "Github build ${GITHUB_RUN_NUMBER} pushed"
   git push origin master -fq
   cd ../
@@ -31,7 +31,7 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "${DEFAULT_BRANCH}
     cd helm-charts-snapshot
     git add .
     git remote rm origin
-    git remote add origin git@github.com:FraunhoferIOSB/helm-charts-snapshot.git
+    git remote add origin git@github.com:kernblick/helm-charts-snapshot.git
     git commit -m "Github build ${GITHUB_RUN_NUMBER} pushed"
     git push origin master -fq
     cd ../
