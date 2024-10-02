@@ -23,7 +23,7 @@ spec:
   ports:
     - name: http
       port: {{ .Values.frost.http.ports.http.servicePort }}
-      {{- if eq .Values.frost.mqtt.serviceType "NodePort" && .Values.frost.http.ports.http.nodePort }}
+      {{- if eq .Values.frost.mqtt.serviceType "NodePort" }}
       nodePort: {{ .Values.frost.http.ports.http.nodePort }}
       {{- end }}
       targetPort: tomcat
