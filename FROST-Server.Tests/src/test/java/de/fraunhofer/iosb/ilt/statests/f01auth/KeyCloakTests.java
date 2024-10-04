@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 
@@ -121,7 +122,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     void test_100_ReadUser() {
         LOGGER.info("  test_100_ReadUser");
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etUser, "", USERS);
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", AuthTestHelper.HTTP_CODE_403_FORBIDDEN);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", HTTP_CODE_401_UNAUTHORIZED);
     }
 
     @Override

@@ -305,18 +305,18 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     void test_01_UpdateDb() throws IOException {
         LOGGER.info("  test_01_UpdateDb");
         ath.getDatabaseStatus(ADMIN, serviceAdmin, HTTP_CODE_200_OK);
-        ath.getDatabaseStatus(WRITE, serviceWrite, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(READ, serviceRead, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(ANONYMOUS, serviceAnon, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatusIndirect(serviceAdminProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(ADMIN_P1, serviceAdminProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatusIndirect(serviceAdminProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(ADMIN_P2, serviceAdminProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatusIndirect(serviceObsCreaterProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(OBS_CREATE_P1, serviceObsCreaterProject1, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatusIndirect(serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-        ath.getDatabaseStatus(OBS_CREATE_P2, serviceObsCreaterProject2, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(WRITE, serviceWrite, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(READ, serviceRead, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatusIndirect(serviceAnon, HTTP_CODE_401_UNAUTHORIZED);
+        ath.getDatabaseStatus(ANONYMOUS, serviceAnon, HTTP_CODE_401_UNAUTHORIZED);
+        ath.getDatabaseStatusIndirect(serviceAdminProject1, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ADMIN_P1, serviceAdminProject1, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatusIndirect(serviceAdminProject2, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(ADMIN_P2, serviceAdminProject2, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatusIndirect(serviceObsCreaterProject1, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(OBS_CREATE_P1, serviceObsCreaterProject1, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatusIndirect(serviceObsCreaterProject2, HTTP_CODE_403_FORBIDDEN);
+        ath.getDatabaseStatus(OBS_CREATE_P2, serviceObsCreaterProject2, HTTP_CODE_403_FORBIDDEN);
     }
 
     @Test
@@ -325,7 +325,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(READ, serviceRead, mdlUsers.etProject, "", PROJECTS);
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401);
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
@@ -339,7 +339,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H401, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
@@ -422,7 +422,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -437,7 +437,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -457,7 +457,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -474,7 +474,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         Entity original = DATASTREAMS.get(0);
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401, H403);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
         updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H404);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
@@ -489,7 +489,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(READ, serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
-        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
@@ -503,7 +503,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(READ, serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
@@ -518,7 +518,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN, serviceAdmin, link, H200);
         fetchForCode(WRITE, serviceWrite, link, H200);
         fetchForCode(READ, serviceRead, link, H200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, H401, H403);
+        fetchForCode(ANONYMOUS, serviceAnon, link, H401);
         fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
@@ -533,7 +533,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN, serviceAdmin, link, H200);
         fetchForCode(WRITE, serviceWrite, link, H200);
         fetchForCode(READ, serviceRead, link, H200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, H401, H403);
+        fetchForCode(ANONYMOUS, serviceAnon, link, H401);
         fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
@@ -623,7 +623,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
@@ -635,7 +635,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         LOGGER.info("  test_10a_ThingDelete");
         EntityCreator creator = (user) -> THINGS.get(0);
 
-        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
+        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
         deleteForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);

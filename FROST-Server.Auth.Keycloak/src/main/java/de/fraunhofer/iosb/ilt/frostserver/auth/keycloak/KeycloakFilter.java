@@ -231,6 +231,10 @@ public class KeycloakFilter implements Filter {
                     LOGGER.debug("User has correct role.");
                     chain.doFilter(new RequestWrapper(httpRequest, pe), response);
                     return;
+                } else {
+                    LOGGER.debug("User is not allowed.");
+                    throwHttpError(403, httpResponse);
+                    return;
                 }
             }
         }
@@ -246,7 +250,7 @@ public class KeycloakFilter implements Filter {
             }
         }
         LOGGER.debug("User is not allowed.");
-        throwHttpError(403, httpResponse);
+        throwHttpError(401, httpResponse);
     }
 
     private KeycloakAccount findKeycloakAccount(HttpServletRequest httpRequest) {

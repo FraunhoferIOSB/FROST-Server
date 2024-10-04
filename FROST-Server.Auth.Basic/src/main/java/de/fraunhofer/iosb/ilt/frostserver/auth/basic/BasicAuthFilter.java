@@ -161,7 +161,7 @@ public class BasicAuthFilter implements Filter {
 
         if (!userData.roles.contains(roleName)) {
             LOGGER.debug("Rejecting request: User {} does not have role {}.", userData.userName, roleName);
-            throwAuthRequired(response);
+            throwInsufficientRights(response);
             return false;
         }
         LOGGER.debug("Accepting request: User {} has role {}.", userData.userName, roleName);
@@ -179,7 +179,7 @@ public class BasicAuthFilter implements Filter {
         } catch (IllegalArgumentException exc) {
             LOGGER.debug("Rejecting request: Unknown method: {}.", request.getMethod());
             LOGGER.trace("", exc);
-            throwAuthRequired(response);
+            throwInsufficientRights(response);
             return;
         }
 
@@ -199,7 +199,7 @@ public class BasicAuthFilter implements Filter {
         AuthChecker checker = methodCheckers.get(method);
         if (checker == null) {
             LOGGER.debug("Rejecting request: No checker for method: {}.", request.getMethod());
-            throwAuthRequired(response);
+            throwInsufficientRights(response);
             return;
         }
 
@@ -218,6 +218,15 @@ public class BasicAuthFilter implements Filter {
         response.addHeader(AUTHORIZATION_REQUIRED_HEADER, authHeaderValue);
         try {
             response.sendError(401);
+        } catch (IOException exc) {
+            LOGGER.error("Exception sending back error.", exc);
+        }
+    }
+
+    private void throwInsufficientRights(HttpServletResponse response) {
+        response.addHeader(AUTHORIZATION_REQUIRED_HEADER, authHeaderValue);
+        try {
+            response.sendError(403);
         } catch (IOException exc) {
             LOGGER.error("Exception sending back error.", exc);
         }
