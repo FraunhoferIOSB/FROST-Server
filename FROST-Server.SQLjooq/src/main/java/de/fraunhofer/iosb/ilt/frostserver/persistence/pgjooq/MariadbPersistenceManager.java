@@ -861,6 +861,11 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
     }
 
     @Override
+    public ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder) {
+        return new MariaDBExpressionHandler(settings, queryBuilder);
+    }
+
+    @Override
     public String checkForUpgrades() {
         Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
                 .addProperty(CHANGE_SET_NAME, "MariadbPersistenceManager")
