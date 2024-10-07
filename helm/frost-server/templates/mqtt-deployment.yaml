@@ -332,7 +332,8 @@ spec:
             {{ else }}
             - name: auth_db_url
               value: "{{ .Values.frost.db.dbExternalConnectionString }}"
-            {{ end }}            - name: auth_autoUpdateDatabase
+            {{ end }}
+            - name: auth_autoUpdateDatabase
               value: "{{tpl .Values.frost.auth.db.autoUpdate . }}"
             - name: auth_db_conn_max
               value: "{{ .Values.frost.http.db.maximumConnection }}"
