@@ -1,8 +1,9 @@
 # Changelog
 
-## Development version 2.4.2
+## Release version 2.4.2
 
 **Internal changes & Bugfixes**
+* Updated depencencies.
 
 
 ## Release version 2.4.1
