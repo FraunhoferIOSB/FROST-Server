@@ -1,5 +1,7 @@
 {
-  "conformance": [],
+  "conformance": [
+    "https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-Projects.html"
+  ],
   "simplePropertyTypes": [],
   "entityTypes": [
     {

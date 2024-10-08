@@ -52,9 +52,14 @@ public class DatabaseStatus extends HttpServlet {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         String authProviderClassName = coreSettings.getAuthSettings().get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
         PrincipalExtended userPrincipal = PrincipalExtended.fromPrincipal(request.getUserPrincipal());
-        if (!isNullOrEmpty(authProviderClassName) && !userPrincipal.isAdmin()) {
-            response.sendError(403);
-            return;
+        if (!isNullOrEmpty(authProviderClassName)) {
+            if (userPrincipal == PrincipalExtended.ANONYMOUS_PRINCIPAL) {
+                response.sendError(401);
+                return;
+            } else if (!userPrincipal.isAdmin()) {
+                response.sendError(403);
+                return;
+            }
         }
         PersistenceManagerFactory.init(coreSettings);
 

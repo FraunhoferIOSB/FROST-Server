@@ -30,3 +30,9 @@ The plugin has the following setting:
 * **plugins.openApi.enable:**  
   Toggle indicating the OpenAPI plugin should be enabled. Default: `false`.
 
+## Conformance Class
+
+The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
+
+    https://fraunhoferiosb.github.io/FROST-Server/extensions/OpenAPI.html
+

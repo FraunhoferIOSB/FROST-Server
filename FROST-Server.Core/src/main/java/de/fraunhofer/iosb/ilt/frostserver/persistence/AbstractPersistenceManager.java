@@ -111,10 +111,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         EntityChangedMessage result = doUpdate(pathElement, entity, updateMode);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
-            final EntityType entityType = entity.getEntityType();
-            Entity newEntity = fetchEntity(entityType, entity.getPrimaryKeyValues());
-            newEntity.setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
-            result.setEntity(newEntity);
+            result.getEntity().setQuery(getCoreSettings().getModelRegistry().getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
             changedEntities.add(result);
         }
         return result != null;

@@ -108,7 +108,7 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
 
     public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 
