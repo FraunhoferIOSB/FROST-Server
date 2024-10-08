@@ -1,11 +1,12 @@
 # Changelog
 
-## Development version 2.3.4
+## Release version 2.3.4
 
 **Internal changes & Bugfixes**
 * Fixed substring not working on PostgreSQL due to failing cast.
 * Fixed substring function to be 0-based. substring(name,1) should return name after
   the first character, but it returned name including the first character.
+* Updated depencencies.
 
 
 ## Release version 2.3.3
