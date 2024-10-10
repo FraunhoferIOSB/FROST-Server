@@ -3,6 +3,7 @@
 ## Development version 2.4.3
 
 **Internal changes & Bugfixes**
+* Added support for spatial queries on MariaDB.
 
 
 ## Release version 2.4.2

@@ -856,6 +856,11 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
+    public ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder) {
+        return new PgExpressionHandler(settings, queryBuilder);
+    }
+
+    @Override
     public String checkForUpgrades() {
         Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
                 .addProperty(CHANGE_SET_NAME, "PostgresPersistenceManager")

@@ -65,6 +65,8 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     void generateLiquibaseVariables(Map<String, Object> target, String entity, String type);
 
+    ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder);
+
     Entity get(EntityType entityType, PkValue id, Query query);
 
     ConnectionUtils.ConnectionWrapper getConnectionProvider();
