@@ -29,18 +29,13 @@ import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Hylke van der Schaaf
+ * Handles translation of OData expressions to PostgreSQL expressions.
  */
 public class PgExpressionHandler extends ExpressionHandler {
 
     private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PgExpressionHandler.class);
 
     public PgExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder) {
         super(settings, queryBuilder);

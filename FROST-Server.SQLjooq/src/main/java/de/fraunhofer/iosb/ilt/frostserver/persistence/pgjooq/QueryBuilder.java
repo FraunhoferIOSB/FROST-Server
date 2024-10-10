@@ -40,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,7 +89,6 @@ public class QueryBuilder implements ResourcePathVisitor {
     public static final String DEFAULT_PREFIX = QueryBuilder.ALIAS_PREFIX + "0";
 
     private final JooqPersistenceManager pm;
-    private final CoreSettings coreSettings;
     private final TableCollection tableCollection;
     private Query staQuery;
 
@@ -109,10 +107,9 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private QueryState<?> queryState;
 
-    public QueryBuilder(JooqPersistenceManager pm, CoreSettings coreSettings, TableCollection tableCollection) {
+    public QueryBuilder(JooqPersistenceManager pm) {
         this.pm = pm;
-        this.coreSettings = coreSettings;
-        this.tableCollection = tableCollection;
+        this.tableCollection = pm.getTableCollection();
     }
 
     public JooqPersistenceManager getPersistenceManager() {

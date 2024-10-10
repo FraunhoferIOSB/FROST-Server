@@ -71,15 +71,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Superclass for the specific implementations to form the database-dialect specific SQL-Queries.
- *
- * @author Tobias Hellmund (IOSB)
+ * Superclass for the specific implementations to form the database-dialect
+ * specific SQL-Queries.
  */
 public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionHandler.class);
 
     private final QueryBuilder queryBuilder;

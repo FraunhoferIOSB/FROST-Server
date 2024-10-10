@@ -29,40 +29,37 @@ import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * @author Hylke van der Schaaf
+ * Handles translation of OData expressions to MariaDB expressions.
  */
-public class MariaDBExpressionHandler extends ExpressionHandler {
+public class MariadbExpressionHandler extends ExpressionHandler {
 
-    private static final String ST_GeomFromText = "ST_GeomFromText(?)";
+    private static final String ST_GEOMFROMTEXT = "ST_GeomFromText(?)";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MariaDBExpressionHandler.class);
-
-    public MariaDBExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder) {
+    public MariadbExpressionHandler(CoreSettings settings, QueryBuilder queryBuilder) {
         super(settings, queryBuilder);
     }
 
     @Override
     public FieldWrapper visit(LineStringConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GeomFromText, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GeomFromText, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GeomFromText, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
     }
 
+    @Override
     public Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
         if (node.getValue().getCrs() == null) {
             return Wkt.fromWkt(node.getSource());
