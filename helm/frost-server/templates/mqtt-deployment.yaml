@@ -32,10 +32,22 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.frost.mqtt.image.imagePullSecret }}
       {{- end}}
+      {{- if .Values.frost.mqtt.volumes }}
+      volumes: {{ toYaml .Values.frost.mqtt.volumes | nindent 12 }}
+      {{- end}}
       containers:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.mqtt.image.registry }}/{{ .Values.frost.mqtt.image.repository }}:{{ .Values.frost.mqtt.image.tag }}"
           imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
+          {{- if .Values.frost.mqtt.lifecycle }}
+          lifecycle: {{ toYaml .Values.frost.mqtt.lifecycle | nindent 12 }}
+          {{- end}}
+          {{- if .Values.frost.mqtt.volumeMounts }}
+          volumeMounts: {{ toYaml .Values.frost.mqtt.volumeMounts | nindent 12 }}
+          {{- end}}
+          {{- if .Values.frost.mqtt.securityContext }}
+          securityContext: {{ toYaml .Values.frost.mqtt.securityContext | nindent 12 }}
+          {{- end}}
           ports:
             - name: mqtt
               containerPort: 1883
@@ -330,8 +342,13 @@ spec:
               value: ""
             - name: auth_db_driver
               value: "{{ .Values.frost.db.driver }}"
+            {{ if .Values.frost.db.enableIntegratedDb }}
             - name: auth_db_url
               value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            {{ else }}
+            - name: auth_db_url
+              value: "{{ .Values.frost.db.dbExternalConnectionString }}"
+            {{ end }}
             - name: auth_autoUpdateDatabase
               value: "{{tpl .Values.frost.auth.db.autoUpdate . }}"
             - name: auth_db_conn_max

@@ -120,6 +120,7 @@ frost:
       imagePullSecret:
     # FROST-Server HTTP deployment settings
     replicas: 1
+    serviceType: ClusterIP
     ports:
       http:
         nodePort:
@@ -147,6 +148,16 @@ frost:
         cpu: 500m
         memory: 1Gi
 
+    # FROST-Server HTTP lifecycle options.
+    lifecycle:
+
+    # FROST-Server HTTP volumeMounts options.
+    volumeMounts:
+
+    # FROST-Server HTTP volumes.
+    volumes:
+
+    securityContext:
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
@@ -275,6 +286,17 @@ frost:
       recvWorkerPoolSize: 10
       recvQueueSize: 2000
       maxInFlight: 50
+
+    # FROST-Server MQTT lifecycle options.
+    lifecycle:
+
+    # FROST-Server MQTT volumeMounts options.
+    volumeMounts:
+
+    # FROST-Server MQTT volumes.
+    volumes:
+
+    securityContext:
 
     # Extra environment variables added to MQTT pods.
     envExtra:
