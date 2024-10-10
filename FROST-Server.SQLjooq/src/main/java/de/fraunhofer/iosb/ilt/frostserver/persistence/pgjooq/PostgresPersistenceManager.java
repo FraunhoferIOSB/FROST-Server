@@ -256,7 +256,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         if (idCount < 2) {
             return true;
         }
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection());
+        QueryBuilder psb = new QueryBuilder(this);
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
@@ -285,7 +285,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
      */
     private Entity get(EntityType entityType, PkValue pk, boolean forUpdate, Query query) {
         init();
-        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection());
+        QueryBuilder queryBuilder = new QueryBuilder(this);
         ResultQuery sqlQuery = queryBuilder.forTypeAndId(entityType, pk)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
@@ -313,7 +313,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
             }
         }
 
-        QueryBuilder queryBuilder = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder queryBuilder = new QueryBuilder(this)
                 .forPath(path)
                 .usingQuery(query);
 
@@ -439,7 +439,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
         init();
         query.clearSelect();
         query.addSelect(path.getMainElementType().getEntityProperty("id"));
-        QueryBuilder psb = new QueryBuilder(this, settings, getTableCollection())
+        QueryBuilder psb = new QueryBuilder(this)
                 .forPath(path)
                 .usingQuery(query);
 
