@@ -289,7 +289,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public EntityPropertyMain getEntityProperty(String name) {
-        Property property = propertiesByName.get(name);
+        Property<?> property = propertiesByName.get(name);
         if (property instanceof EntityPropertyMain entityPropertyMain) {
             return entityPropertyMain;
         }
@@ -297,7 +297,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public NavigationPropertyMain getNavigationProperty(String name) {
-        Property property = propertiesByName.get(name);
+        Property<?> property = propertiesByName.get(name);
         if (property instanceof NavigationPropertyMain navigationPropertyMain) {
             return navigationPropertyMain;
         }
@@ -305,7 +305,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public NavigationPropertyEntity getNavigationPropertyEntity(String name) {
-        Property property = propertiesByName.get(name);
+        Property<?> property = propertiesByName.get(name);
         if (property instanceof NavigationPropertyEntity npe) {
             return npe;
         }
@@ -313,7 +313,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public NavigationPropertyEntitySet getNavigationPropertyEntitySet(String name) {
-        Property property = propertiesByName.get(name);
+        Property<?> property = propertiesByName.get(name);
         if (property instanceof NavigationPropertyEntitySet npes) {
             return npes;
         }

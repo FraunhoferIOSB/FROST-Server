@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_CACHE_CLEANUP_INTERVAL;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_CACHE_LIFETIME;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_ROLE_DECODER_CLASS;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_CACHE_CLEANUP_INTERVAL;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_CACHE_LIFETIME;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_ROLE_DECODER_CLASS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
@@ -87,8 +87,8 @@ public class DatabaseHandler {
     private DatabaseHandler(CoreSettings coreSettings) {
         authSettings = coreSettings.getAuthSettings();
         connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class);
-        String userRoleDecoderClass = authSettings.get(TAG_USER_ROLE_DECODER_CLASS, KeycloakAuthProvider.class);
-        String lifeTimeString = authSettings.get(TAG_USER_CACHE_LIFETIME, KeycloakAuthProvider.class);
+        String userRoleDecoderClass = authSettings.get(TAG_USER_ROLE_DECODER_CLASS, KeycloakSettings.class);
+        String lifeTimeString = authSettings.get(TAG_USER_CACHE_LIFETIME, KeycloakSettings.class);
         lifetime = Duration.parse(lifeTimeString);
         try {
             Class<?> urdClass = Class.forName(userRoleDecoderClass);
@@ -97,7 +97,7 @@ public class DatabaseHandler {
         } catch (ReflectiveOperationException ex) {
             LOGGER.error("Could not create UserRoleDecoder: Class '{}' could not be instantiated", userRoleDecoderClass, ex);
         }
-        String cleanupIntervalString = authSettings.get(TAG_USER_CACHE_CLEANUP_INTERVAL, KeycloakAuthProvider.class);
+        String cleanupIntervalString = authSettings.get(TAG_USER_CACHE_CLEANUP_INTERVAL, KeycloakSettings.class);
         cleanupIntervalMs = Duration.parse(cleanupIntervalString).toMillis();
     }
 
@@ -169,6 +169,7 @@ public class DatabaseHandler {
             Thread.sleep(cleanupIntervalMs);
         } catch (InterruptedException ex) {
             LOGGER.trace("Rude Wakeup.", ex);
+            Thread.currentThread().interrupt();
         }
     }
 

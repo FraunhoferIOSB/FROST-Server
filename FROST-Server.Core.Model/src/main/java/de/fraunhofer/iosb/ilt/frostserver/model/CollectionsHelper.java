@@ -72,7 +72,7 @@ public class CollectionsHelper {
         return getFrom((Object) map, path);
     }
 
-    public static Object getFrom(final ComplexValue cv, final List<String> path) {
+    public static Object getFrom(final ComplexValue<?> cv, final List<String> path) {
         return getFrom((Object) cv, path);
     }
 
@@ -83,7 +83,7 @@ public class CollectionsHelper {
             String key = path.get(idx);
             if (currentEntry instanceof Map map) {
                 currentEntry = map.get(key);
-            } else if (currentEntry instanceof ComplexValue cv) {
+            } else if (currentEntry instanceof ComplexValue<?> cv) {
                 currentEntry = cv.getProperty(key);
             } else if (currentEntry instanceof List list) {
                 try {

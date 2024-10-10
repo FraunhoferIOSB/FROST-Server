@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -199,7 +200,7 @@ public class MqttSettings implements ConfigDefaults {
         } else {
             String serviceRootUrl = coreSettings.getQueryDefaults().getServiceRootUrl();
             try {
-                URL serviceRoot = new URL(serviceRootUrl);
+                URL serviceRoot = URI.create(serviceRootUrl).toURL();
                 List<String> genEndpoints = new ArrayList<>();
                 genEndpoints.add("mqtt://" + serviceRoot.getHost() + ":" + getPort());
                 endpoints = Collections.unmodifiableList(genEndpoints);

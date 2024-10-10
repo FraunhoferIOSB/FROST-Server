@@ -64,7 +64,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -937,8 +936,8 @@ public class Service implements AutoCloseable {
         if (!targetUrl.startsWith(serviceRootUrl)) {
             try {
                 // id is a relative url, resolve against the request url.
-                URL requestUrl = new URL(serviceRootUrl + '/' + versionUrl + request.getUrlPath());
-                targetUrl = new URL(requestUrl, targetUrl).toString();
+                URI requestUri = URI.create(serviceRootUrl + '/' + versionUrl + request.getUrlPath());
+                targetUrl = requestUri.resolve(targetUrl).toURL().toString();
             } catch (MalformedURLException ex) {
                 return LinkData.error("Failed to parse URL in $id: " + ex.getMessage());
             }

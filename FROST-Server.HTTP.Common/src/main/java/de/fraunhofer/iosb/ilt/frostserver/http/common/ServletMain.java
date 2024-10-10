@@ -146,6 +146,7 @@ public class ServletMain extends HttpServlet {
         processRequest(request, response);
     }
 
+    @Override
     protected void doPatch(HttpServletRequest request, HttpServletResponse response) {
         processRequest(request, response);
     }

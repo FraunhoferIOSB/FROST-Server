@@ -79,9 +79,6 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceRead;
     protected static SensorThingsService serviceAnon;
     private static EntityHelper2 ehAdmin;
-    private static EntityHelper2 ehWrite;
-    private static EntityHelper2 ehRead;
-    private static EntityHelper2 ehAnon;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
@@ -103,9 +100,6 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         serviceRead = getServiceRead();
         serviceAnon = getServiceAnonymous();
         ehAdmin = new EntityHelper2(serviceAdmin);
-        ehWrite = new EntityHelper2(serviceWrite);
-        ehRead = new EntityHelper2(serviceRead);
-        ehAnon = new EntityHelper2(serviceAnon);
         mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());

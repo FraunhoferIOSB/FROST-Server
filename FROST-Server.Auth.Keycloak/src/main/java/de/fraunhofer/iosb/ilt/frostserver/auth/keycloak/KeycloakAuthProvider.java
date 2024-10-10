@@ -17,19 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_MAX_CLIENTS_PER_USER;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_MAX_PASSWORD_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_MAX_USERNAME_LENGTH;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_REGISTER_USER_LOCALLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
-import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -57,62 +56,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
+public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
 
-    @DefaultValue("")
-    @SensitiveValue
-    public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
-
-    @DefaultValue("")
-    public static final String TAG_KEYCLOAK_CONFIG_FILE = "keycloakConfigFile";
-
-    /**
-     * The URL on the Keycloak server that can be used to download the Keycloak
-     * config file. Usually this URL is in the form of:
-     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[clientId]
-     */
-    @DefaultValue("")
-    public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
-
-    /**
-     * If the client has "access-type" set to "confidential" then a secret is
-     * required to download the configuration. This secret can be found in the
-     * configuration itself, in Keycloak.
-     */
-    @DefaultValue("")
-    @SensitiveValue
-    public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
-
-    @DefaultValueInt(10)
-    public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";
-
-    @DefaultValueBoolean(false)
-    public static final String TAG_REGISTER_USER_LOCALLY = "registerUserLocally";
-
-    @DefaultValue("USERS")
-    public static final String TAG_USER_TABLE = "userTable";
-
-    @DefaultValue("USER_NAME")
-    public static final String TAG_USERNAME_COLUMN = "usernameColumn";
-
-    @DefaultValueInt(MAX_PASSWORD_LENGTH)
-    public static final String TAG_MAX_PASSWORD_LENGTH = "maxPasswordLength";
-
-    @DefaultValueInt(MAX_USERNAME_LENGTH)
-    public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
-
-    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoderDflt")
-    public static final String TAG_USER_ROLE_DECODER_CLASS = "userRoleDecoderClass";
-
-    @DefaultValue("PT5M")
-    public static final String TAG_USER_CACHE_LIFETIME = "userCacheLifetime";
-
-    @DefaultValue("PT5S")
-    public static final String TAG_USER_CACHE_CLEANUP_INTERVAL = "userCacheCleanupInterval";
-
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);
 
     /**
@@ -148,10 +93,10 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
         OPTIONS.put("keycloak-config-file", FROST_SERVER_KEYCLOAKJSON);
         final Settings authSettings = coreSettings.getAuthSettings();
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
-        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
-        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
-        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
+        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, KeycloakSettings.class);
+        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, KeycloakSettings.class);
+        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, KeycloakSettings.class);
+        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
         authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         if (registerUserLocally) {
             DatabaseHandler.init(coreSettings);

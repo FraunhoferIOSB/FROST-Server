@@ -151,6 +151,7 @@ public class MqttHelper2 {
             executor.shutdownNow();
         }
         MqttManager.clearTestSubscriptionListeners();
+        Assertions.assertFalse(ma.topics.isEmpty(), "No topics to test?");
         for (TestSubscription tl : ma.topics) {
             Assertions.assertTrue(
                     tl.checkAllReceived(mqttTimeoutMs),

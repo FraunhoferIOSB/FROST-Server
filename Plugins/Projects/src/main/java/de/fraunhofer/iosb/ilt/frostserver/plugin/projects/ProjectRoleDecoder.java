@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.projects;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USERNAME_COLUMN;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_TABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USERNAME_COLUMN;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_TABLE;
 
-import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider;
+import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings;
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoder;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -68,8 +68,8 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
     @Override
     public void init(CoreSettings coreSettings) {
         final Settings authSettings = coreSettings.getAuthSettings();
-        userTable = authSettings.get(TAG_USER_TABLE, KeycloakAuthProvider.class);
-        usernameColumn = authSettings.get(TAG_USERNAME_COLUMN, KeycloakAuthProvider.class);
+        userTable = authSettings.get(TAG_USER_TABLE, KeycloakSettings.class);
+        usernameColumn = authSettings.get(TAG_USERNAME_COLUMN, KeycloakSettings.class);
         uprInsertQuery = authSettings.get(TAG_UPR_INSERT_QUERY, ProjectRoleDecoder.class);
         uprCleanupQuery = authSettings.get(TAG_UPR_CLEANUP_QUERY, ProjectRoleDecoder.class);
         String projectRoleRegex = authSettings.get(TAG_ROLE_REGEX, ProjectRoleDecoder.class);

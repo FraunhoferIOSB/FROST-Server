@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USERNAME_COLUMN;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_USER_TABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USERNAME_COLUMN;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_TABLE;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -40,8 +40,8 @@ public class UserRoleDecoderDflt implements UserRoleDecoder {
     @Override
     public void init(CoreSettings coreSettings) {
         Settings authSettings = coreSettings.getAuthSettings();
-        userTable = authSettings.get(TAG_USER_TABLE, KeycloakAuthProvider.class);
-        usernameColumn = authSettings.get(TAG_USERNAME_COLUMN, KeycloakAuthProvider.class);
+        userTable = authSettings.get(TAG_USER_TABLE, KeycloakSettings.class);
+        usernameColumn = authSettings.get(TAG_USERNAME_COLUMN, KeycloakSettings.class);
     }
 
     @Override

@@ -393,7 +393,7 @@ public class OpenApiGenerator {
 
         for (Property property : entityType.getPropertySet()) {
             String propertyName = property.getJsonName();
-            if (property instanceof EntityPropertyMain epm) {
+            if (property instanceof EntityPropertyMain<?> epm) {
                 if (epm.getAliases().contains("@iot.id")) {
                     propertyName = version.getIdName();
                 }

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_REGISTER_USER_LOCALLY;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_REGISTER_USER_LOCALLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
@@ -99,7 +99,7 @@ public class KeycloakFilter implements Filter {
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
-        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
+        registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
         if (registerUserLocally) {
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
         }

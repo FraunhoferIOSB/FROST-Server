@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_FILE;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_SECRET;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_KEYCLOAK_CONFIG;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_KEYCLOAK_CONFIG_FILE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_KEYCLOAK_CONFIG_SECRET;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_KEYCLOAK_CONFIG_URL;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -78,7 +78,7 @@ public class Utils {
      */
     public static String getKeycloakConfig(CoreSettings coreSettings) {
         Settings authSettings = coreSettings.getAuthSettings();
-        String keycloakConfig = authSettings.get(TAG_KEYCLOAK_CONFIG, "");
+        String keycloakConfig = authSettings.get(TAG_KEYCLOAK_CONFIG, KeycloakSettings.class);
         if (!StringHelper.isNullOrEmpty(keycloakConfig)) {
             return keycloakConfig;
         }
@@ -99,7 +99,7 @@ public class Utils {
      * @return the contents of the config file.
      */
     private static String getKeycloakConfigFromFile(Settings authSettings) {
-        String keycloakConfigFile = authSettings.get(TAG_KEYCLOAK_CONFIG_FILE, "");
+        String keycloakConfigFile = authSettings.get(TAG_KEYCLOAK_CONFIG_FILE, KeycloakSettings.class);
         if (StringHelper.isNullOrEmpty(keycloakConfigFile)) {
             return "";
         }
@@ -120,11 +120,11 @@ public class Utils {
      * @return the contents of the config file.
      */
     private static String getKeycloakConfigFromServer(Settings authSettings) {
-        String keycloakConfigUrl = authSettings.get(TAG_KEYCLOAK_CONFIG_URL, "");
+        String keycloakConfigUrl = authSettings.get(TAG_KEYCLOAK_CONFIG_URL, KeycloakSettings.class);
         if (StringHelper.isNullOrEmpty(keycloakConfigUrl)) {
             return "";
         }
-        String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "");
+        String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, KeycloakSettings.class);
 
         LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
         try (CloseableHttpClient client = HttpClients.createSystem()) {

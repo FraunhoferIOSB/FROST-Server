@@ -188,7 +188,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
             }
             return xfProto + "://" + xfHost + ":" + xfPort + basePath;
         } else {
-            final StringBuffer requestURL = request.getRequestURL();
+            final String requestURL = request.getRequestURL().toString();
             int versionIdx = requestURL.indexOf(version.urlPart);
             return requestURL.substring(0, versionIdx - 1);
         }
