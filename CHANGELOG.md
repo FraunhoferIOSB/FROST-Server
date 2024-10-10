@@ -7,6 +7,7 @@ FROST-Server version 2.5 and higher requires Java 21. This is because some libra
 **New Features**
 * Updated to jakarta EE 10: FROST-Server is now runs on Tomcat 10 and later.
 * Added a validator that sets a time to now(), unless otherwise set.
+* Added support for spatial queries on MariaDB.
 
 **Internal changes & Bugfixes**
 * Set limit to 1 for entity-by-primary-key requests.

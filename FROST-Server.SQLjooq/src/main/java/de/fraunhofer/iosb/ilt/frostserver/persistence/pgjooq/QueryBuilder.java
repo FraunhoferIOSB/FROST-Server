@@ -428,7 +428,7 @@ public class QueryBuilder implements ResourcePathVisitor {
 
     private void parseOrder(Query query) {
         if (query != null) {
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
+            ExpressionHandler handler = getPersistenceManager().createExpressionHandler(this);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -440,7 +440,7 @@ public class QueryBuilder implements ResourcePathVisitor {
             queryState.setFilter(true);
             final Expression filter = query.getFilter();
             final Expression skipFilter = query.getSkipFilter();
-            PgExpressionHandler handler = new PgExpressionHandler(coreSettings, this);
+            ExpressionHandler handler = getPersistenceManager().createExpressionHandler(this);
             if (filter != null) {
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
