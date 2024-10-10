@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
@@ -39,11 +40,15 @@ import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A FROST Auth implementation for Basic Authentication.
  */
 public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthProvider.class.getName());
 
     public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
 
@@ -81,6 +86,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     private CoreSettings coreSettings;
     private String roleAdmin;
+    private boolean authenticateOnly;
     private int maxClientsPerUser;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
@@ -93,6 +99,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         this.coreSettings = coreSettings;
         DatabaseHandler.init(coreSettings);
         final Settings authSettings = coreSettings.getAuthSettings();
+        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
@@ -129,6 +136,10 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @Override
     public boolean userHasRole(String clientId, String userName, String roleName) {
+        if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
+            LOGGER.trace("Only authenticating, not checking of User {} has role {}", userName, roleName);
+            return true;
+        }
         return DatabaseHandler.getInstance(coreSettings)
                 .userHasRole(userName, roleName);
     }

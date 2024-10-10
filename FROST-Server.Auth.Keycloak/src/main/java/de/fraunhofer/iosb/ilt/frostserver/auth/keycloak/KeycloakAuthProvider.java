@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
@@ -126,6 +127,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     private String roleAdmin;
     private int maxClientsPerUser;
     private boolean registerUserLocally;
+    private boolean authenticateOnly;
     private DatabaseHandler databaseHandler;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
@@ -150,6 +152,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakAuthProvider.class);
+        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         if (registerUserLocally) {
             DatabaseHandler.init(coreSettings);
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
@@ -234,6 +237,10 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
             return false;
         }
         client.setLastSeen(Instant.now());
+        if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
+            LOGGER.trace("Only authenticating, not checking of User {} has role {}", userName, roleName);
+            return true;
+        }
         boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
         LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
         return hasRole;
