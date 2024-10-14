@@ -93,7 +93,7 @@
         <sonar.language>java</sonar.language>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
-        <version.FROST-Client-Dynamic>2.18</version.FROST-Client-Dynamic>
+        <version.FROST-Client-Dynamic>2.19</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
         <version.commons-csv>1.12.0</version.commons-csv>
         <version.commons-io>2.17.0</version.commons-io>
@@ -118,7 +118,7 @@
         <version.junit-platform-suite>1.11.2</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
         <version.liquibase>4.29.2</version.liquibase>
-        <version.logback>1.5.8</version.logback>
+        <version.logback>1.5.10</version.logback>
         <version.mariadb>3.4.1</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
@@ -148,7 +148,7 @@
         <version.postgres>42.7.4</version.postgres>
         <version.slf4j-api>2.0.16</version.slf4j-api>
         <version.testcontainers>1.20.2</version.testcontainers>
-        <version.testcontainers-keycloak>3.4.0</version.testcontainers-keycloak>
+        <version.testcontainers-keycloak>3.5.1</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
