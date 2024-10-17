@@ -104,7 +104,7 @@ Setting this up correctly is not trivial and a mistake in the authorisation may 
 Therefore, we strongly recommend you contact us for support if your use case requires fine-grained authorisation.
 
 * **plugins.modelLoader.enable:** Since 2.0.0  
-  Toggle indicating the MultiDatastream plugin should be enabled. Default: `false`.
+  Toggle indicating the ModelLoader plugin should be enabled. Default: `false`.
 * **plugins.modelLoader.idType.<EntityTypeName>:**  
   The type of the primary key column of the table for the given Entity Type. Defaults to the value of **plugins.coreModel.idType**.
 * **plugins.modelLoader.modelPath:** 2.0.0  
