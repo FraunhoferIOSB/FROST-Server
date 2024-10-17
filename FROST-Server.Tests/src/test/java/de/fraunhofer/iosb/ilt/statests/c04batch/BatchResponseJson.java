@@ -66,6 +66,11 @@ public class BatchResponseJson {
         return Objects.equals(this.responses, other.responses);
     }
 
+    @Override
+    public String toString() {
+        return responses.toString();
+    }
+
     public static class ResponsePart {
 
         private String id;

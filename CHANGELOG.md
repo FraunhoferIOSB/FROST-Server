@@ -21,6 +21,7 @@ FROST-Server version 2.5 and higher requires Java 21. This is because some libra
 * Fixed #2030: NPE when using anonymous access when authentication is enabled on MQTT.
 * Added conformance class to index document for Projects plugin.
 * Apply fine-grained authorisation to MQTT-Create.
+* Fixed the resolving of references in the URL of json batch requests.
 
 
 ## Release version 2.4.0

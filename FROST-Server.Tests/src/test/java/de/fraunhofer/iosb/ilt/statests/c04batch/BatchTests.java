@@ -474,8 +474,8 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    void test07JsonBatchRequestWithChangeSetReferencingNewEntities() {
-        LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntities");
+    void test07JsonBatchRequestWithChangeSetReferencingNewEntitiesInBody() {
+        LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntitiesInBody");
         String post1 = """
                 {
                   "name": "DS18B20",
@@ -534,7 +534,69 @@ public abstract class BatchTests extends AbstractTestClass {
         } catch (JsonProcessingException ex) {
             fail("Failed to parse response as json.", ex);
         }
+    }
 
+    @Test
+    void test08JsonBatchRequestWithChangeSetReferencingNewEntitiesInUrl() {
+        LOGGER.info("  test08JsonBatchRequestWithChangeSetReferencingNewEntitiesInUrl");
+        String post1 = """
+                {
+                  "name": "DS18B20",
+                  "description": "DS18B20 is an air temperature sensor",
+                  "encodingType": "application/pdf",
+                  "metadata": "http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf"
+                }""";
+        String post2 = """
+                {\r
+                  "name": "Temperature Thing 5",
+                  "description": "The temperature of thing 5",
+                  "unitOfMeasurement": {
+                    "name": "degree Celsius",
+                    "symbol": "\u00b0C",
+                    "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                  },
+                  "observationType": "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement",
+                  "ObservedProperty": {"@iot.id": $ObservedProperty0},
+                  "Thing": {"@iot.id": $thing0}
+                }""";
+        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
+        post2 = StringUtils.replace(post2, "$thing0", Utils.quoteForJson(THINGS.get(0).getPrimaryKeyValues().get(0)));
+        String request = """
+                {
+                    "requests":[{
+                        "id": "sensor1",
+                        "atomicityGroup": "group1",
+                        "method": "post",
+                        "url": "Sensors",
+                        "body":$post1
+                    },{
+                        "id": "any",
+                        "atomicityGroup": "group1",
+                        "method": "post",
+                        "url": "$sensor1/Datastreams",
+                        "body": $post2
+                    }]
+                }""";
+        request = StringUtils.replace(request, "$post1", post1);
+        request = StringUtils.replace(request, "$post2", post2);
+        String response = postBatch(null, request);
+
+        String sensorId = Utils.quoteForUrl(eh2.getEntity(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
+        String datastreamId = Utils.quoteForUrl(eh2.getEntity(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
+
+        try {
+            BatchResponseJson expected = mapper.readValue("{\"responses\":["
+                    + "{\"id\":\"sensor1\","
+                    + "\"status\":201,"
+                    + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
+                    + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                    + "/Datastreams(" + datastreamId + ")\"}"
+                    + "]}", BatchResponseJson.class);
+            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+            assertEquals(expected, actual, "Response not as expected.");
+        } catch (JsonProcessingException ex) {
+            fail("Failed to parse response as json.", ex);
+        }
     }
 
     private String postBatch(String boundary, String body) {

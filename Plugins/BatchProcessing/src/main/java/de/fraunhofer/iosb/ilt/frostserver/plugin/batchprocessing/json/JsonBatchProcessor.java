@@ -186,7 +186,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
 
     private String replaceIdsUrl(String url) {
         Matcher matcher = REFERENCE_URL_PATTERN.matcher(url);
-        if (matcher.matches()) {
+        if (matcher.find()) {
             String name = matcher.group(1);
             ContentIdPair pair = ids.get(name);
             if (pair == null) {
