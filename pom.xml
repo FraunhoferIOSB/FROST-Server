@@ -93,7 +93,7 @@
         <sonar.language>java</sonar.language>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
-        <version.FROST-Client-Dynamic>2.18</version.FROST-Client-Dynamic>
+        <version.FROST-Client-Dynamic>2.19</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
         <version.commons-csv>1.12.0</version.commons-csv>
         <version.commons-io>2.17.0</version.commons-io>
@@ -112,22 +112,22 @@
         <version.javax-activation>1.1.1</version.javax-activation>
         <version.javax-servlet>4.0.1</version.javax-servlet>
         <version.jetty>10.0.23</version.jetty>
-        <version.jooq>3.19.13</version.jooq>
+        <version.jooq>3.19.14</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.11.2</version.junit>
-        <version.junit-platform-suite>1.11.2</version.junit-platform-suite>
+        <version.junit>5.11.3</version.junit>
+        <version.junit-platform-suite>1.11.3</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
         <version.liquibase>4.29.2</version.liquibase>
-        <version.logback>1.5.8</version.logback>
-        <version.mariadb>3.4.1</version.mariadb>
+        <version.logback>1.5.12</version.logback>
+        <version.mariadb>3.5.0</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.0</version.maven.plugin.build-helper>
         <version.maven.plugin.compiler>3.13.0</version.maven.plugin.compiler>
-        <version.maven.plugin.dependency>3.8.0</version.maven.plugin.dependency>
-        <version.maven.plugin.dependency-check>10.0.4</version.maven.plugin.dependency-check>
-        <version.maven.plugin.download>1.10.0</version.maven.plugin.download>
-        <version.maven.plugin.exec>3.4.1</version.maven.plugin.exec>
+        <version.maven.plugin.dependency>3.8.1</version.maven.plugin.dependency>
+        <version.maven.plugin.dependency-check>11.0.0</version.maven.plugin.dependency-check>
+        <version.maven.plugin.download>1.11.1</version.maven.plugin.download>
+        <version.maven.plugin.exec>3.5.0</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>9.0.1</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.2.7</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.12</version.maven.plugin.jacoco>
@@ -147,8 +147,8 @@
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.7.4</version.postgres>
         <version.slf4j-api>2.0.16</version.slf4j-api>
-        <version.testcontainers>1.20.2</version.testcontainers>
-        <version.testcontainers-keycloak>3.4.0</version.testcontainers-keycloak>
+        <version.testcontainers>1.20.3</version.testcontainers>
+        <version.testcontainers-keycloak>3.5.1</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
