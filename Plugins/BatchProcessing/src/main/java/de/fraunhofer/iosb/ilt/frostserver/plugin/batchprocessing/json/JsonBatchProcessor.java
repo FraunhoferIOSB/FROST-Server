@@ -149,7 +149,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             if (parser.nextToken() == JsonToken.START_OBJECT) {
                 JsonBatchRequestItem item = parser.readValueAs(JsonBatchRequestItem.class);
                 final String itemGroup = item.getAtomicityGroup();
-                if (!StringUtils.equals(currentGroup, itemGroup)) {
+                if (itemGroup == null || !StringUtils.equals(currentGroup, itemGroup)) {
                     service.commitTransaction();
                     service.startTransaction(request.getUserPrincipal());
                     currentGroup = itemGroup;
