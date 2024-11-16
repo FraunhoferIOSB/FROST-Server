@@ -48,8 +48,9 @@ public abstract class BasicAuthCryptPwTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         final String dbName = "hashauth";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
-        SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
+        final String dbDriver = "org.postgresql.Driver";
+        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
         SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
         SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);

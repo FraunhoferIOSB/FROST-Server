@@ -47,8 +47,9 @@ public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "true");
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         final String dbName = "basicauth";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbName));
-        SERVER_PROPERTIES.put("auth.db.driver", "org.postgresql.Driver");
+        final String dbDriver = "org.postgresql.Driver";
+        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
         SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
         SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);

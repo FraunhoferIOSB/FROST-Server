@@ -17,7 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_DRIVER;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_PASSWRD;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_USERNAME;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.TAG_AUTO_UPDATE_DATABASE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -31,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests10;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests11;
@@ -196,7 +203,8 @@ public class TestSuite {
     public static final String KEY_DB_NAME = "dbName";
 
     public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
-    public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_UUID;
+    public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_LONG;
+    public static final String VAL_ID_TYPE_LOCATIONS = Constants.VALUE_ID_TYPE_UUID;
     public static final String VAL_ID_TYPE_OBSERVATIONS = Constants.VALUE_ID_TYPE_LONG;
     public static final String VAL_ID_TYPE_OBSERVEDPROPERTIES = Constants.VALUE_ID_TYPE_LONG;
     public static final String VAL_ID_TYPE_HIST_LOCATIONS = Constants.VALUE_ID_TYPE_LONG;
@@ -204,8 +212,10 @@ public class TestSuite {
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";
 
-    private static final String DATABASE_CONNECT_URL_BASE = "jdbc:tc:postgis:14-3.2:///";
-    private static final String DATABASE_CONNECT_URL_POSTFIX = "?TC_DAEMON=true&TC_INITSCRIPT=file:src/test/resources/pgInit.sql";
+    private static final String DB_PG_CONNECT_URL_BASE = "jdbc:tc:postgis:14-3.2:///";
+    private static final String DB_PG_CONNECT_URL_POSTFIX = "?TC_DAEMON=true&TC_INITSCRIPT=file:src/test/resources/pgInit.sql";
+    private static final String DB_MARIADB_CONNECT_URL_BASE = "jdbc:tc:mariadb:11.5.2:///";
+    private static final String DB_MARIADB_CONNECT_URL_POSTFIX = "?TC_DAEMON=true";
 
     private static TestSuite instance;
 
@@ -362,16 +372,18 @@ public class TestSuite {
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_DEFAULT, VAL_ID_TYPE_DEFAULT);
+        handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VAL_ID_TYPE_LOCATIONS);
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBSERVATION, VAL_ID_TYPE_OBSERVATIONS);
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBS_PROPERTY, VAL_ID_TYPE_OBSERVEDPROPERTIES);
         handler.setInitParameter(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_HIST_LOCATION, VAL_ID_TYPE_HIST_LOCATIONS);
 
-        handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
-        handler.setInitParameter("persistence.autoUpdateDatabase", "true");
-        handler.setInitParameter("persistence.db.driver", "org.postgresql.Driver");
-        handler.setInitParameter("persistence.db.url", createDbUrl(parameters.get(KEY_DB_NAME)));
-        handler.setInitParameter("persistence.db.username", VAL_PG_USER);
-        handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
+        String dbDriver = paramsMap.computeIfAbsent(PREFIX_PERSISTENCE + TAG_DB_DRIVER, t -> "org.postgresql.Driver");
+        handler.setInitParameter(PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, VAL_PERSISTENCE_MANAGER);
+        handler.setInitParameter(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "true");
+        handler.setInitParameter(PREFIX_PERSISTENCE + TAG_DB_DRIVER, dbDriver);
+        handler.setInitParameter(PREFIX_PERSISTENCE + TAG_DB_URL, createDbUrl(dbDriver, parameters.get(KEY_DB_NAME)));
+        handler.setInitParameter(PREFIX_PERSISTENCE + TAG_DB_USERNAME, VAL_PG_USER);
+        handler.setInitParameter(PREFIX_PERSISTENCE + TAG_DB_PASSWRD, VAL_PG_PASS);
 
         handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
@@ -400,8 +412,12 @@ public class TestSuite {
         serverSetting.initExtensionsAndTypes();
     }
 
-    public static String createDbUrl(String dbName) {
-        return DATABASE_CONNECT_URL_BASE + dbName + DATABASE_CONNECT_URL_POSTFIX;
+    public static String createDbUrl(String type, String dbName) {
+        if (type.toLowerCase().contains("mariadb")) {
+            return DB_MARIADB_CONNECT_URL_BASE + dbName + DB_MARIADB_CONNECT_URL_POSTFIX;
+        } else {
+            return DB_PG_CONNECT_URL_BASE + dbName + DB_PG_CONNECT_URL_POSTFIX;
+        }
     }
 
     private void startMqttServer(int key, Map<String, String> parameters) throws IOException {
@@ -430,15 +446,18 @@ public class TestSuite {
         properties.put("mqtt.WebsocketPort", "" + mqttWsPort);
 
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_DEFAULT, VAL_ID_TYPE_DEFAULT);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VAL_ID_TYPE_LOCATIONS);
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBSERVATION, VAL_ID_TYPE_OBSERVATIONS);
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBS_PROPERTY, VAL_ID_TYPE_OBSERVEDPROPERTIES);
         properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_HIST_LOCATION, VAL_ID_TYPE_HIST_LOCATIONS);
 
-        properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
-        properties.put("persistence.db.driver", "org.postgresql.Driver");
-        properties.put("persistence.db.url", createDbUrl(parameters.get(KEY_DB_NAME)));
-        properties.put("persistence.db.username", VAL_PG_USER);
-        properties.put("persistence.db.password", VAL_PG_PASS);
+        String dbDriver = parameters.getOrDefault(PREFIX_PERSISTENCE + TAG_DB_DRIVER, "org.postgresql.Driver");
+        properties.put(PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, VAL_PERSISTENCE_MANAGER);
+        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "true");
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_DRIVER, dbDriver);
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_URL, createDbUrl(dbDriver, parameters.get(KEY_DB_NAME)));
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_USERNAME, VAL_PG_USER);
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_PASSWRD, VAL_PG_PASS);
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
         properties.putAll(parameters);
