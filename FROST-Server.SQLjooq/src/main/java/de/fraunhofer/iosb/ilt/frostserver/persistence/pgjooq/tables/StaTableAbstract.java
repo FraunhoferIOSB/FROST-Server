@@ -75,6 +75,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.exception.DataAccessException;
 import org.jooq.exception.TooManyRowsException;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -449,16 +450,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
         Record result = null;
         if (!updateFields.isEmpty()) {
-            try {
-                result = dslContext.update(thisTable)
-                        .set(updateFields)
-                        .where(where)
-                        .returningResult(selectFields)
-                        .fetchOne();
-            } catch (TooManyRowsException e) {
-                LOGGER.error("Updating {} {} caused too many rows to change (more than one)!", entityType, entityId);
-                throw new IllegalStateException(CHANGED_MULTIPLE_ROWS, e);
-            }
+            result = executeUpdate(pm, dslContext, thisTable, updateFields, where, selectFields);
         }
 
         for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
@@ -481,6 +473,34 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         return message;
+    }
+
+    public Record executeUpdate(JooqPersistenceManager pm, DSLContext dslContext, T thisTable, Map<Field, Object> updateFields, Condition where, Set<Field> selectFields) throws DataAccessException, IllegalStateException {
+        try {
+            if (pm.hasUpdateReturning()) {
+                return dslContext.update(thisTable)
+                        .set(updateFields)
+                        .where(where)
+                        .returningResult(selectFields)
+                        .fetchOne();
+            } else {
+                int execute = dslContext.update(thisTable)
+                        .set(updateFields)
+                        .where(where)
+                        .execute();
+                if (execute != 1) {
+                    LOGGER.error("Updating {} with WHERE {} caused too many rows to change (more than one)!", getName(), where);
+                    throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+                }
+                return dslContext.select(selectFields)
+                        .from(thisTable)
+                        .where(where)
+                        .fetchOne();
+            }
+        } catch (TooManyRowsException e) {
+            LOGGER.error("Updating {} with WHERE {} caused too many rows to change (more than one)!", getName(), where);
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS, e);
+        }
     }
 
     @Override

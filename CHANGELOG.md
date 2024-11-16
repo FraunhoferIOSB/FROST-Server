@@ -5,6 +5,7 @@
 **Internal changes & Bugfixes**
 * Added support for spatial queries on MariaDB.
 * Fixed json batch requests without atomicity group all running in the same group.
+* Avoid use of UPDATE ... RETURNING ... on MariaDB.
 
 
 ## Release version 2.4.2

@@ -880,4 +880,10 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
                 .build();
         return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props, out);
     }
+
+    @Override
+    public boolean hasUpdateReturning() {
+        return false;
+    }
+
 }

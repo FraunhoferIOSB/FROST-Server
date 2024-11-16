@@ -106,4 +106,7 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
      */
     boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException;
 
+    public default boolean hasUpdateReturning() {
+        return true;
+    }
 }
