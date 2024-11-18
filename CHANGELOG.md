@@ -1,5 +1,10 @@
 # Changelog
 
+## Development version 2.5.1
+
+**Internal changes & Bugfixes**
+
+
 ## Release version 2.5.0
 
 FROST-Server version 2.5 and higher requires Java 21. This is because some libraries that are used now require Java 21.
