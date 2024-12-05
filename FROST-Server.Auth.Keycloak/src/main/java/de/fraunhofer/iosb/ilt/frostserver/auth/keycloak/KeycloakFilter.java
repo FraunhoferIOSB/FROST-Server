@@ -172,7 +172,7 @@ public class KeycloakFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         Role requiredRole = findRequiredRoleForRequest(httpRequest);
-        if (requiredRole == Role.NONE) {
+        if (!authenticateOnly && requiredRole == Role.NONE) {
             chain.doFilter(request, response);
             return;
         }
@@ -236,6 +236,12 @@ public class KeycloakFilter implements Filter {
                 }
             }
         }
+
+        if (requiredRole == Role.NONE) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         AuthChallenge challenge = authenticator.getChallenge();
         if (challenge != null) {
             LOGGER.debug("Challenge.");
@@ -244,7 +250,6 @@ public class KeycloakFilter implements Filter {
                 return;
             } catch (IllegalStateException ex) {
                 LOGGER.debug("Challenge failed.", ex);
-                // Failed the challenge.
             }
         }
         LOGGER.debug("User is not allowed.");

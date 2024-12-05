@@ -85,6 +85,7 @@ import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTestsBasic11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTestsKeycloak11;
+import de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTestsKeycloakAnon11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests10;
@@ -172,22 +173,23 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     Capability7Tests11.class,
     MqttCoreTests.class,
     MqttExtraTests.class,
+    CustomLinksTests10.class,
+    CustomLinksTests11.class,
+    MetadataTests10.class,
+    MetadataTests11.class,
     BasicAuthTests10.class,
     BasicAuthTests11.class,
     BasicAuthAnonReadTests10.class,
     BasicAuthAnonReadTests11.class,
     BasicAuthCryptPwTests10.class,
     BasicAuthCryptPwTests11.class,
-    FineGrainedAuthTestsBasic11.class,
-    FineGrainedAuthTestsKeycloak11.class,
     KeyCloakTests10.class,
     KeyCloakTests11.class,
     KeyCloakAnonReadTests10.class,
     KeyCloakAnonReadTests11.class,
-    CustomLinksTests10.class,
-    CustomLinksTests11.class,
-    MetadataTests10.class,
-    MetadataTests11.class,
+    FineGrainedAuthTestsBasic11.class,
+    FineGrainedAuthTestsKeycloak11.class,
+    FineGrainedAuthTestsKeycloakAnon11.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite
@@ -452,7 +454,7 @@ public class TestSuite {
 
         String dbDriver = parameters.getOrDefault(PREFIX_PERSISTENCE + TAG_DB_DRIVER, "org.postgresql.Driver");
         properties.put(PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, VAL_PERSISTENCE_MANAGER);
-        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "true");
+        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "false");
         properties.put(PREFIX_PERSISTENCE + TAG_DB_DRIVER, dbDriver);
         properties.put(PREFIX_PERSISTENCE + TAG_DB_URL, createDbUrl(dbDriver, parameters.get(KEY_DB_NAME)));
         properties.put(PREFIX_PERSISTENCE + TAG_DB_USERNAME, VAL_PG_USER);

@@ -152,6 +152,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     private static MqttHelper2 mqttHelperAdminProject1;
     private static MqttHelper2 mqttHelperAdminProject2;
 
+    private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
 
     protected static void addCommonProperties(Map<String, String> properties) {
@@ -175,8 +176,9 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         properties.put("auth.mqtt.topicAllowList", "^/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+$");
     }
 
-    public FineGrainedAuthTests(ServerVersion version, Map<String, String> properties) {
+    public FineGrainedAuthTests(ServerVersion version, Map<String, String> properties, boolean anonymousReadAllowed) {
         super(version, properties);
+        this.anonymousReadAllowed = anonymousReadAllowed;
         ath = new AuthTestHelper(serverSettings);
     }
 
@@ -325,7 +327,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(READ, serviceRead, mdlUsers.etProject, "", PROJECTS);
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401);
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", PROJECTS);
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401);
+        }
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etProject, "", PROJECTS);
@@ -369,7 +375,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
         filterForException(WRITE, serviceWrite, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(READ, serviceRead, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", HTTP_CODE_401_UNAUTHORIZED, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", anonymousReadAllowed ? new int[]{H404} : new int[]{H401, H403});
         filterForException(ADMIN_P1, serviceAdminProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(ADMIN_P2, serviceAdminProject2, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", HTTP_CODE_404_NOT_FOUND);
@@ -382,7 +388,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
         testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", H401, H403);
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", Collections.emptyList());
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", H401, H403);
+        }
         testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
@@ -408,7 +418,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etRole, "", ROLES);
         filterForException(WRITE, serviceWrite, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(READ, serviceRead, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", H401, H403);
+        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", anonymousReadAllowed ? new int[]{H404} : new int[]{H401, H403});
         filterForException(ADMIN_P1, serviceAdminProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(ADMIN_P2, serviceAdminProject2, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
         filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etRole, "", HTTP_CODE_404_NOT_FOUND);
@@ -489,7 +499,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(READ, serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
-        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", Collections.emptyList());
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, "", HTTP_CODE_401_UNAUTHORIZED);
+        }
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, "", Utils.getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23));
@@ -503,7 +517,11 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(READ, serviceRead, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
-        filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, Collections.emptyList());
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
+        }
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservedProperty, filter, Collections.emptyList());
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
@@ -518,7 +536,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN, serviceAdmin, link, H200);
         fetchForCode(WRITE, serviceWrite, link, H200);
         fetchForCode(READ, serviceRead, link, H200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, H401);
+        fetchForCode(ANONYMOUS, serviceAnon, link, anonymousReadAllowed ? H404 : H401);
         fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
@@ -533,7 +551,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN, serviceAdmin, link, H200);
         fetchForCode(WRITE, serviceWrite, link, H200);
         fetchForCode(READ, serviceRead, link, H200);
-        fetchForCode(ANONYMOUS, serviceAnon, link, H401);
+        fetchForCode(ANONYMOUS, serviceAnon, link, anonymousReadAllowed ? H404 : H401);
         fetchForCode(ADMIN_P1, serviceAdminProject1, link, H200);
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);

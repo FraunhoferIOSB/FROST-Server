@@ -74,7 +74,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
     }
 
     public FineGrainedAuthTestsBasic(ServerVersion version) {
-        super(version, SERVER_PROPERTIES);
+        super(version, SERVER_PROPERTIES, false);
     }
 
     @Override
