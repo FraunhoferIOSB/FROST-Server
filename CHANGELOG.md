@@ -3,6 +3,7 @@
 ## Development version 2.4.4
 
 **Internal changes & Bugfixes**
+* Fixed #2072: Users are always anonymous when combining keycloak, finegrained auth and anonymous access.
 
 
 ## Release version 2.4.3

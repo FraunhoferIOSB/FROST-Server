@@ -48,6 +48,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTestsKeycloak.class.getName());
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
+    private static final Map<String, String> SERVER_PROPERTIES_ANON = new LinkedHashMap<>();
 
     static {
         FineGrainedAuthTests.addCommonProperties(SERVER_PROPERTIES);
@@ -68,10 +69,18 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
         SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
         SERVER_PROPERTIES.put("auth.registerUserLocally", "true");
         SERVER_PROPERTIES.put("auth.userRoleDecoderClass", ProjectRoleDecoder.class.getName());
+
+        final String dbNameAnon = "fineGrainedAuthKeycloakAnon";
+        SERVER_PROPERTIES_ANON.putAll(SERVER_PROPERTIES);
+        SERVER_PROPERTIES_ANON.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbNameAnon));
+        SERVER_PROPERTIES_ANON.put(KEY_DB_NAME, dbNameAnon);
+        SERVER_PROPERTIES_ANON.put("auth_allowAnonymousRead", "true");
     }
 
-    public FineGrainedAuthTestsKeycloak(ServerVersion version) {
-        super(version, SERVER_PROPERTIES);
+    public FineGrainedAuthTestsKeycloak(ServerVersion version, boolean anonymousReadAllowed) {
+        super(version,
+                anonymousReadAllowed ? SERVER_PROPERTIES_ANON : SERVER_PROPERTIES,
+                anonymousReadAllowed);
     }
 
     @BeforeEach

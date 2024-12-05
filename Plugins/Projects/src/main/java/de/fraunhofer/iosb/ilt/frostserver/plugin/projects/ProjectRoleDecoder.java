@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Decodes Roles for the Projects plugsin.
+ * Decodes Roles for the Projects plugin.
  */
 public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
 
