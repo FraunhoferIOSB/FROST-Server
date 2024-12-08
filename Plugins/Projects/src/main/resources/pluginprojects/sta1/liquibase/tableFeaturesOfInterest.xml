@@ -32,5 +32,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="generated" id="2024-12-04-FEATURES-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addDefaultValue tableName="FEATURES" columnName="RESTRICTED" defaultValueBoolean="false" />
+    </changeSet>
+
 </databaseChangeLog>
 

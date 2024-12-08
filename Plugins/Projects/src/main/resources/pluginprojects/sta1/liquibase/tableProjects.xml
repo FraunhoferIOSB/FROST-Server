@@ -69,5 +69,9 @@
         </createIndex>
     </changeSet>
 
+    <changeSet author="generated" id="2024-12-04-PROJECTS-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addDefaultValue tableName="PROJECTS" columnName="ISPUBLIC" defaultValueBoolean="false" />
+    </changeSet>
+
 </databaseChangeLog>
 
