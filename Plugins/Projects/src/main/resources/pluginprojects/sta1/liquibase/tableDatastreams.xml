@@ -32,5 +32,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="generated" id="2024-12-04-DATASTREAMS-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addDefaultValue tableName="DATASTREAMS" columnName="RESTRICTED" defaultValueBoolean="false" />
+    </changeSet>
+
 </databaseChangeLog>
 

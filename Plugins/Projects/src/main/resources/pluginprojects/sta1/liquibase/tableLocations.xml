@@ -43,5 +43,9 @@
         </createIndex>
     </changeSet>
 
+    <changeSet author="generated" id="2024-12-04-LOCATIONS-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addDefaultValue tableName="LOCATIONS" columnName="RESTRICTED" defaultValueBoolean="false" />
+    </changeSet>
+
 </databaseChangeLog>
 

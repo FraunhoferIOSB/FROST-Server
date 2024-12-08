@@ -33,5 +33,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="generated" id="2024-12-04-MULTI_DATASTREAMS-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="MULTI_DATASTREAMS"/>
+            <columnExists columnName="RESTRICTED" tableName="MULTI_DATASTREAMS" />
+        </preConditions>
+        <addDefaultValue tableName="MULTI_DATASTREAMS" columnName="RESTRICTED" defaultValueBoolean="false" />
+    </changeSet>
+
 </databaseChangeLog>
 
