@@ -1,10 +1,11 @@
 # Changelog
 
-## Development version 2.5.1
+## Release version 2.5.1
 
 **Internal changes & Bugfixes**
 * Fixed #2072: Users are always anonymous when combining keycloak, finegrained auth and anonymous access.
 * Fixed #2073: Projects plugin has no default value for isPublic and restricted columns.
+* Updated depencencies.
 
 
 ## Release version 2.5.0
