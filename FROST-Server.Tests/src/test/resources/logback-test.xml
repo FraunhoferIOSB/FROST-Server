@@ -13,9 +13,14 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.service.PluginManager" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service.Service" level="INFO"/>
-
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" level="WARN"/>
+    
     <logger name="de.fraunhofer.iosb.ilt.frostclient.SensorThingsService" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostclient.settings" level="WARN"/>
 
@@ -30,6 +35,7 @@
     <logger name="io.moquette" level="INFO"/>
     <logger name="io.moquette.broker.PostOffice" level="WARN"/>
     <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
+    <logger name="io.moquette.broker.NewNettyAcceptor" level="WARN"/>
     <logger name="io.moquette.broker.SessionEventLoop" level="WARN"/>
 
     <logger name="liquibase" level="WARN"/>

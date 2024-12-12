@@ -104,14 +104,15 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
     }
 
     private void decodeRole(String role, String username, DSLContext dslContext) {
+        LOGGER.debug("  Decoding role {} for user {}", role, username);
         Matcher m = projectRoleMatcher.matcher(role);
         if (m.matches()) {
             String projectName = m.group(1);
             String roleName = m.group(2);
             try {
-                LOGGER.debug("Executing uprInsert: {}, {}, {}", username, projectName, roleName);
+                LOGGER.debug("  Executing uprInsert: {}, {}, {}", username, projectName, roleName);
                 int result = dslContext.execute(uprInsertQuery, username, projectName, roleName);
-                LOGGER.debug(" Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
+                LOGGER.debug("  Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
             } catch (RuntimeException ex) {
                 LOGGER.warn("Exception inserting role " + roleName, ex);
             }
