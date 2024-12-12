@@ -200,7 +200,7 @@ public class Query {
             }
         }
         pkOrder = pkCount >= primaryKey.getKeyProperties().size();
-        if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct) {
+        if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
                 boolean found = false;
                 for (OrderBy order : orderBy) {

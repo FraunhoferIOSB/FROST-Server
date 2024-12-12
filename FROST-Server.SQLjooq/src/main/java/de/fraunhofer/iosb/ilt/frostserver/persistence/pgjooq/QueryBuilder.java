@@ -132,11 +132,19 @@ public class QueryBuilder implements ResourcePathVisitor {
                 if (staQuery == null || !staQuery.isPkOrder()) {
                     queryState.getSqlSortFields().addAll(queryState.getSqlMainIdFields());
                 }
-                selectStep = dslContext.select(queryState.getSqlSelectFields())
-                        .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
+                if (pm.hasDistinctOn()) {
+                    selectStep = dslContext.select(queryState.getSqlSelectFields())
+                            .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
+                } else {
+                    selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
+                }
             } else {
-                selectStep = dslContext.select(queryState.getSqlSelectFields())
-                        .distinctOn(queryState.getSqlMainIdFields());
+                if (pm.hasDistinctOn()) {
+                    selectStep = dslContext.select(queryState.getSqlSelectFields())
+                            .distinctOn(queryState.getSqlMainIdFields());
+                } else {
+                    selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
+                }
             }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());

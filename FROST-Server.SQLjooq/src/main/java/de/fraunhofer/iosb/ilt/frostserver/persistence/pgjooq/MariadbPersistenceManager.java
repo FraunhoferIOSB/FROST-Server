@@ -886,4 +886,9 @@ public class MariadbPersistenceManager extends AbstractPersistenceManager implem
         return false;
     }
 
+    @Override
+    public boolean hasDistinctOn() {
+        return false;
+    }
+
 }

@@ -109,4 +109,8 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
     public default boolean hasUpdateReturning() {
         return true;
     }
+
+    public default boolean hasDistinctOn() {
+        return true;
+    }
 }
