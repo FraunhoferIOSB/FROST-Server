@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.4.5
+## Release version 2.4.5
 
 **Internal changes & Bugfixes**
 * MariaDB: avoid use of distinctOn on MariaDb, as not supported.
