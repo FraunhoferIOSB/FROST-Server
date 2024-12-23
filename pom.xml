@@ -98,26 +98,26 @@
         <version.commons-csv>1.12.0</version.commons-csv>
         <version.commons-io>2.18.0</version.commons-io>
         <version.commons-lang3>3.17.0</version.commons-lang3>
-        <version.commons-text>1.12.0</version.commons-text>
+        <version.commons-text>1.13.0</version.commons-text>
         <version.configurable>0.36</version.configurable>
         <version.congocc>2.0.0-RC5</version.congocc>
         <version.dbcp2>2.13.0</version.dbcp2>
         <version.geolatte-common>0.8</version.geolatte-common>
-        <version.guava>33.3.1-jre</version.guava>
+        <version.guava>33.4.0-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
         <version.jackson>2.18.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
         <version.jacksonGeojson>1.14</version.jacksonGeojson>
         <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
         <version.jakartaee-web-api>10.0.0</version.jakartaee-web-api>
-        <version.jetty>12.0.15</version.jetty>
-        <version.jooq>3.19.15</version.jooq>
+        <version.jetty>12.0.16</version.jetty>
+        <version.jooq>3.19.16</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.11.3</version.junit>
-        <version.junit-platform-suite>1.11.3</version.junit-platform-suite>
+        <version.junit>5.11.4</version.junit>
+        <version.junit-platform-suite>1.11.4</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
         <version.liquibase>4.30.0</version.liquibase>
-        <version.logback>1.5.12</version.logback>
+        <version.logback>1.5.15</version.logback>
         <version.mariadb>3.5.1</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
