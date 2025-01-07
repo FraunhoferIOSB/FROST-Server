@@ -9,6 +9,7 @@
 
 **Internal changes & Bugfixes**
 * MariaDB: avoid use of distinctOn on MariaDb, as not supported.
+* Fixed #2084: Helm generates trailing slash in serviceRootUrl and mqtt endpoint.
 
 
 ## Release version 2.4.4
