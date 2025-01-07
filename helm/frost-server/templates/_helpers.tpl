@@ -77,9 +77,9 @@ Get the MQTT Websock-Path.
 */}}
 {{- define "frost-server.mqtt.websockPath" -}}
   {{- if not .Values.frost.mqtt.urlSubPath | empty -}}
-      {{- printf "/%s/" .Values.frost.mqtt.urlSubPath | replace "//" "/" -}}
+      {{- printf "/%s" .Values.frost.mqtt.urlSubPath | replace "//" "/" -}}
   {{- else -}}
-      {{- printf "/mqtt/" -}}
+      {{- printf "/mqtt" -}}
   {{- end -}}
 {{- end -}}
 
