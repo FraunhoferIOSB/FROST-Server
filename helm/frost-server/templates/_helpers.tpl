@@ -52,9 +52,9 @@ Get the HTTP service SubPath
 */}}
 {{- define "frost-server.http.serviceSubPath" -}}
   {{- if not .Values.frost.http.urlSubPath | empty -}}
-      {{- printf "/%s/" .Values.frost.http.urlSubPath | replace "//" "/" -}}
+      {{- printf "/%s" .Values.frost.http.urlSubPath | replace "//" "/" -}}
   {{- else -}}
-      {{- printf "/" -}}
+      {{- printf "" -}}
   {{- end -}}
 {{- end -}}
 

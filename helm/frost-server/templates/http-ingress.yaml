@@ -42,7 +42,7 @@ spec:
   - host: {{ include "frost-server.http.serviceHost" . }}
     http:
       paths:
-      - path:  {{ template "frost-server.http.serviceSubPath" . }}
+      - path:  {{ template "frost-server.http.serviceSubPath" . }}/
         pathType: Prefix
         backend:
           service:
