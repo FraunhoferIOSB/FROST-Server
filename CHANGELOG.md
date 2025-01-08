@@ -1,11 +1,12 @@
 # Changelog
 
-## Development version 2.5.2
+## Release version 2.5.2
 
 **Internal changes & Bugfixes**
 * MariaDB: avoid use of distinctOn on MariaDb, as not supported.
 * Fixed #2084: Helm generates trailing slash in serviceRootUrl and mqtt endpoint.
 * Fixed exception in Projects plugin when fetching Locations.
+* Updated depencencies.
 
 
 ## Release version 2.5.1
