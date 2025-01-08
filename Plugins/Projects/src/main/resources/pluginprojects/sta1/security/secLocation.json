@@ -132,7 +132,7 @@
                   {
                     "targetTable": "PROJECTS",
                     "targetAlias": "pr",
-                    "joinOnSql": "tp.\"PROJECT_ID\" \u003d pr.\"ID\"",
+                    "joinOnSql": "lp.\"PROJECT_ID\" \u003d pr.\"ID\"",
                     "joinType": "INNER"
                   },
                   {
