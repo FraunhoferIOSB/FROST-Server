@@ -60,7 +60,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - exec pg_isready -h 127.0.0.1 -p 5432
+                - exec pg_isready -U {{ default "postgres" .Values.frost.db.username | quote }} -h 127.0.0.1 -p 5432
             initialDelaySeconds: 120
             periodSeconds: 10
             timeoutSeconds: 5
@@ -71,7 +71,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - exec pg_isready -h 127.0.0.1 -p 5432
+                - exec pg_isready -U {{ default "postgres" .Values.frost.db.username | quote }} -h 127.0.0.1 -p 5432
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
