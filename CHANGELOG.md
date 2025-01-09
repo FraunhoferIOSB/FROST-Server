@@ -3,6 +3,7 @@
 ## Development version 2.4.7
 
 **Internal changes & Bugfixes**
+* When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 
 
 ## Release version 2.4.6

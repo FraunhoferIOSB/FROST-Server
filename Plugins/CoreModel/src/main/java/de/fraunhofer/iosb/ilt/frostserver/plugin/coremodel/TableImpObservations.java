@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -34,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -45,6 +47,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -59,12 +63,14 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
@@ -400,7 +406,6 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     }
 
     public Entity generateFeatureOfInterest(JooqPersistenceManager pm, ResultQuery<Record3<Object, Object, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
-        final DSLContext dslContext = pm.getDslContext();
         TableImpLocations ql = getTables().getTableForClass(TableImpLocations.class);
         Result<Record3<Object, Object, String>> tuples = locationQuery.fetch();
         if (tuples.isEmpty()) {
@@ -424,50 +429,105 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
         // Either genFoiId will have a value, if a generated foi was found,
         // Or locationId will have a value if a supported encoding type was found.
-        Entity foi;
         if (genFoiId != null) {
-            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(genFoiId));
+            return new DefaultEntity(pluginCoreModel.etFeatureOfInterest, PkValue.of(genFoiId));
         } else if (locationId != null) {
-            SelectConditionStep<Record3<Object, String, String>> query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties)
-                    .from(ql)
-                    .where(((TableField) ql.getId()).eq(locationId));
-            Record tuple = query2.fetchOne();
-            if (tuple == null) {
-                // Can not generate foi from Thing with no locations.
-                // Should not happen, since the query succeeded just before.
-                return null;
-            }
-            String name = getFieldOrNull(tuple, ql.colName);
-            String description = getFieldOrNull(tuple, ql.colDescription);
-            JsonValue properties = getFieldOrNull(tuple, ql.colProperties);
-            String encoding = getFieldOrNull(tuple, ql.colEncodingType);
-            String locString = getFieldOrNull(tuple, ql.colLocation);
-            Object locObject = Utils.jsonToTreeOrString(locString);
-            foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
-                    .setProperty(pluginCoreModel.epName, name)
-                    .setProperty(pluginCoreModel.epDescription, description)
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
-                    .setProperty(pluginCoreModel.epFeature, locObject)
-                    .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
-
-            // Switch to ADMIN user
-            PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
-            PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
-            pm.insert(foi, UpdateMode.INSERT_STA_11);
-            // Switch back to normal user
-            PrincipalExtended.setLocalPrincipal(userPrincipal);
-
-            Object foiId = foi.getPrimaryKeyValues().get(0);
-            dslContext.update(ql)
-                    .set(((TableField) ql.getGenFoiId()), foiId)
-                    .where(((TableField) ql.getId()).eq(locationId))
-                    .execute();
-            LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
+            return generateFeature(pm, ql, locationId);
         } else {
             // Can not generate foi from Thing with no locations.
             return null;
         }
+    }
+
+    public Entity generateFeature(JooqPersistenceManager pm, TableImpLocations ql, Object locationId) throws IncompleteEntityException, DataAccessException, NoSuchEntityException {
+        final DSLContext dslContext = pm.getDslContext();
+        Field<?> fRestricted = ql.field("RESTRICTED");
+        Property epRestricted = pluginCoreModel.etFeatureOfInterest.getProperty("restricted");
+
+        SelectConditionStep<Record> query2;
+        if (fRestricted == null || epRestricted == null) {
+            query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties)
+                    .from(ql)
+                    .where(((TableField) ql.getId()).eq(locationId));
+        } else {
+            query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties, fRestricted)
+                    .from(ql)
+                    .where(((TableField) ql.getId()).eq(locationId));
+        }
+        Record tuple = query2.fetchOne();
+        if (tuple == null) {
+            // Can not generate foi from Thing with no locations.
+            // Should not happen, since the query succeeded just before.
+            return null;
+        }
+        String name = getFieldOrNull(tuple, ql.colName);
+        String description = getFieldOrNull(tuple, ql.colDescription);
+        JsonValue properties = getFieldOrNull(tuple, ql.colProperties);
+        String encoding = getFieldOrNull(tuple, ql.colEncodingType);
+        String locString = getFieldOrNull(tuple, ql.colLocation);
+        Object locObject = Utils.jsonToTreeOrString(locString);
+        Entity foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                .setProperty(pluginCoreModel.epName, name)
+                .setProperty(pluginCoreModel.epDescription, description)
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
+                .setProperty(pluginCoreModel.epFeature, locObject)
+                .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
+        if (fRestricted != null && epRestricted != null) {
+            foi.setProperty(epRestricted, getFieldOrNull(tuple, fRestricted));
+        }
+        ModelRegistry mr = pm.getCoreSettings().getModelRegistry();
+        EntityType etProject = mr.getEntityTypeForName("Project", true);
+        if (etProject != null) {
+            linkProjects(dslContext, locationId, etProject, foi);
+        }
+
+        // Switch to ADMIN user
+        PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
+        PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
+        pm.insert(foi, UpdateMode.INSERT_STA_11);
+        // Switch back to normal user
+        PrincipalExtended.setLocalPrincipal(userPrincipal);
+
+        Object foiId = foi.getPrimaryKeyValues().get(0);
+        dslContext.update(ql)
+                .set(((TableField) ql.getGenFoiId()), foiId)
+                .where(((TableField) ql.getId()).eq(locationId))
+                .execute();
+        LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         return foi;
+    }
+
+    public void linkProjects(final DSLContext dslContext, Object locationId, EntityType etProject, Entity foi) {
+        try {
+            StaTable tlp = getTables().getTableForName("LOCATION_PROJECTS");
+            NavigationPropertyMain.NavigationPropertyEntitySet npFeatureProjects = pluginCoreModel.etFeatureOfInterest.getNavigationPropertyEntitySet("Projects");
+            if (tlp == null || npFeatureProjects == null) {
+                LOGGER.error("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS not found.");
+                return;
+            }
+            EntitySetImpl projects = new EntitySetImpl(npFeatureProjects);
+            TableField fPid = (TableField) tlp.field("PROJECT_ID");
+            TableField fLid = (TableField) tlp.field("LOCATION_ID");
+            if (fPid == null || fLid == null) {
+                LOGGER.error("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS does not have columns PROJECT_ID and LOCATION_ID.");
+                return;
+            }
+            Result<Record1<Object>> projectIds = dslContext.select(fPid)
+                    .from(tlp)
+                    .where(fLid.eq(locationId))
+                    .fetch();
+            for (Record pidTuple : projectIds) {
+                Object projectId = getFieldOrNull(pidTuple, fPid);
+                projects.add(new DefaultEntity(etProject).setPrimaryKeyValues(PkValue.of(projectId)));
+            }
+            if (!projects.isEmpty()) {
+                LOGGER.debug("Assigning {} projects to generated foi", projects.size());
+                foi.setProperty(npFeatureProjects, projects);
+            }
+
+        } catch (RuntimeException ex) {
+            LOGGER.error("Failed to link Projects to generated FoI.", ex);
+        }
     }
 
 }
