@@ -137,7 +137,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @Override
     public boolean userHasRole(String clientId, String userName, String roleName) {
         if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
-            LOGGER.trace("Only authenticating, not checking of User {} has role {}", userName, roleName);
+            LOGGER.trace("Only authenticating, not checking if User {} has role {}", userName, roleName);
             return true;
         }
         return DatabaseHandler.getInstance(coreSettings)

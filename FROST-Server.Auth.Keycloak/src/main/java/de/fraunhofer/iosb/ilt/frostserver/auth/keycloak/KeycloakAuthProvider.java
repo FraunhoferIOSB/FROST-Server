@@ -179,11 +179,12 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
     public boolean userHasRole(String clientId, String userName, String roleName) {
         Client client = CLIENTMAP.get(clientId);
         if (client == null) {
+            LOGGER.info("No user for {}", clientId);
             return false;
         }
         client.setLastSeen(Instant.now());
         if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
-            LOGGER.trace("Only authenticating, not checking of User {} has role {}", userName, roleName);
+            LOGGER.trace("Only authenticating, not checking if User {} has role {}", userName, roleName);
             return true;
         }
         boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));

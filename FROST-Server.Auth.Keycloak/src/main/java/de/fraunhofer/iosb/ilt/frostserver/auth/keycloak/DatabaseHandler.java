@@ -134,9 +134,14 @@ public class DatabaseHandler {
         if (cleanupThread != null) {
             return;
         }
-        cleanupThread = new Thread(this::cleanUserCacheLoop, "userCacheCleaner");
-        cleanupThread.setDaemon(true);
-        cleanupThread.start();
+        synchronized (this) {
+            if (cleanupThread != null) {
+                return;
+            }
+            cleanupThread = new Thread(this::cleanUserCacheLoop, "userCacheCleaner");
+            cleanupThread.setDaemon(true);
+            cleanupThread.start();
+        }
     }
 
     private void cleanUserCacheLoop() {

@@ -77,6 +77,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
             init(contextEntity, pm);
         }
         final PrincipalExtended localPrincipal = PrincipalExtended.getLocalPrincipal();
+        LOGGER.debug("  LocalPrincipal: {}", localPrincipal);
         try {
             context.setEntity(contextEntity);
             context.setUser(localPrincipal);
@@ -130,7 +131,10 @@ public class CheckNavLinkQuery implements ValidationCheck {
         return false;
     }
 
-    private void init(Entity contextEntity, JooqPersistenceManager pm) {
+    private synchronized void init(Entity contextEntity, JooqPersistenceManager pm) {
+        if (parsedQuery != null) {
+            return;
+        }
         try {
             entityType = contextEntity.getEntityType();
             targetNp = entityType.getNavigationProperty(getTargetNavLink());
