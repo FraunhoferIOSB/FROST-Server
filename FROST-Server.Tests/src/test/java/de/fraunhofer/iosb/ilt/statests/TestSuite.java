@@ -214,7 +214,7 @@ public class TestSuite {
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";
 
-    private static final String DB_PG_CONNECT_URL_BASE = "jdbc:tc:postgis:14-3.2:///";
+    private static final String DB_PG_CONNECT_URL_BASE = "jdbc:tc:postgis:14-3.2-alpine:///";
     private static final String DB_PG_CONNECT_URL_POSTFIX = "?TC_DAEMON=true&TC_INITSCRIPT=file:src/test/resources/pgInit.sql";
     private static final String DB_MARIADB_CONNECT_URL_BASE = "jdbc:tc:mariadb:11.5.2:///";
     private static final String DB_MARIADB_CONNECT_URL_POSTFIX = "?TC_DAEMON=true";
