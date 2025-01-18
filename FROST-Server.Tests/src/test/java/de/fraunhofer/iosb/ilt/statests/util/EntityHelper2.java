@@ -62,9 +62,12 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,27 +175,27 @@ public class EntityHelper2 {
     }
 
     public JsonNode getEntity(Entity entity, List<String> select) {
-        return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, null, null);
+        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, null, null);
     }
 
     public JsonNode getEntity(Entity entity, List<String> select, String expand) {
-        return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, expand, null);
+        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, expand, null);
     }
 
     public JsonNode getEntity(Entity entity, NavigationProperty np) {
-        return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues(), np, null, null, null);
+        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), np, null, null, null);
     }
 
     public JsonNode getEntity(Entity entity, NavigationProperty np, List<String> select, String expand, String orderby) {
-        return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues(), np, select, expand, orderby);
+        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), np, select, expand, orderby);
     }
 
     public JsonNode getEntity(EntityType entityType) {
-        return getEntity(entityType, null, null, null, null, null);
+        return EntityHelper2.this.getEntityJson(entityType, null, null, null, null, null);
     }
 
     public JsonNode getEntity(EntityType entityType, PkValue pk) {
-        return getEntity(entityType, pk, null, null, null, null);
+        return EntityHelper2.this.getEntityJson(entityType, pk, null, null, null, null);
     }
 
     public String createSelect(List<String> select) {
@@ -227,10 +230,17 @@ public class EntityHelper2 {
                 + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues().get(0)) + ')';
     }
 
-    public JsonNode getEntityWithRetry(EntityType entityType, String expand, int retries) {
+    public Entity getEntityWithRetry(EntityType entityType, String filter, String expand, int retries) throws ServiceFailureException {
         int retry = 0;
         while (retry < retries) {
-            JsonNode entity = getEntity(entityType, expand);
+            Query query = sSrvc.dao(entityType).query();
+            if (!StringHelper.isNullOrEmpty(filter)) {
+                query.filter(filter);
+            }
+            if (!StringHelper.isNullOrEmpty(expand)) {
+                query.expand(expand);
+            }
+            Entity entity = query.first();
             if (entity != null) {
                 return entity;
             }
@@ -238,15 +248,42 @@ public class EntityHelper2 {
             LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, entityType);
             MqttHelper2.waitMillis(MqttHelper2.WAIT_AFTER_INSERT);
         }
-        LOGGER.error("Failed to read an entity from url after {} tries: {}", retries, entityType);
+        LOGGER.info("Failed to read an entity from url after {} tries: {}", retries, entityType);
         return null;
     }
 
-    public JsonNode getEntity(EntityType entityType, String expand) {
-        return getEntity(entityType, null, null, null, expand, null);
+    public JsonNode getEntityJsonWithRetry(EntityType entityType, String expand, int retries) {
+        return getEntityJsonWithRetry(entityType, null, expand, retries);
     }
 
-    public JsonNode getEntity(EntityType entityType, PkValue pk, NavigationProperty np, List<String> select, String expand, String orderby) {
+    public JsonNode getEntityJsonWithRetry(EntityType entityType, String filter, String expand, int retries) {
+        int retry = 0;
+        while (retry < retries) {
+            JsonNode entity = EntityHelper2.this.getEntityJson(entityType, filter, expand);
+            if (entity != null) {
+                return entity;
+            }
+            retry++;
+            LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, entityType);
+            MqttHelper2.waitMillis(MqttHelper2.WAIT_AFTER_INSERT);
+        }
+        LOGGER.info("Failed to read an entity from url after {} tries: {}", retries, entityType);
+        return null;
+    }
+
+    public JsonNode getEntityJson(EntityType entityType, String expand) {
+        return getEntityJson(entityType, null, null, null, null, expand, null);
+    }
+
+    public JsonNode getEntityJson(EntityType entityType, String filter, String expand) {
+        return getEntityJson(entityType, null, null, filter, null, expand, null);
+    }
+
+    public JsonNode getEntityJson(EntityType entityType, PkValue pk, NavigationProperty np, List<String> select, String expand, String orderby) {
+        return getEntityJson(entityType, pk, np, null, select, expand, orderby);
+    }
+
+    public JsonNode getEntityJson(EntityType entityType, PkValue pk, NavigationProperty np, String filter, List<String> select, String expand, String orderby) {
         if (pk != null && pk.size() == 0) {
             return null;
         }
@@ -258,6 +295,10 @@ public class EntityHelper2 {
             } else {
                 query += "?$expand=" + expand;
             }
+            join = '&';
+        }
+        if (!StringHelper.isNullOrEmpty(filter)) {
+            query += join + "$filter=" + URLEncoder.encode(filter, StandardCharsets.UTF_8);
             join = '&';
         }
         if (!StringHelper.isNullOrEmpty(select)) {
@@ -277,12 +318,16 @@ public class EntityHelper2 {
         }
         urlString += query;
         try {
-            final JsonNode tree = Utils.MAPPER.readTree(HTTPMethods.doGet(urlString).response);
+            final HTTPMethods.HttpResponse result = HTTPMethods.doGet(sSrvc, urlString);
+            if (StringHelper.isNullOrEmpty(result.response)) {
+                return null;
+            }
+            final JsonNode tree = Utils.MAPPER.readTree(result.response);
             JsonNode value = tree.get("value");
             if (value == null) {
                 return tree;
             } else {
-                return tree.get("value").get(0);
+                return value.get(0);
             }
         } catch (IOException e) {
             LOGGER.error("Exception:", e);

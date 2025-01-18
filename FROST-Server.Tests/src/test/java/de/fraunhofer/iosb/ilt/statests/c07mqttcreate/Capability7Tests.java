@@ -90,7 +90,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         JsonNode createdObservation = getObservation();
         mqttHelper.publish(entityHelper.createUrl(sMdl.etObservation), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+        JsonNode latestObservation = entityHelper.getEntityJsonWithRetry(
                 sMdl.etObservation,
                 "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
@@ -106,7 +106,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         datastreamId = createdObservation.get("Datastream").get(ControlInformation.ID);
         mqttHelper.publish(entityHelper.createUrl(sMdl.etDatastream, datastreamId, "/Observations"), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+        JsonNode latestObservation = entityHelper.getEntityJsonWithRetry(
                 sMdl.etObservation,
                 "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
@@ -122,7 +122,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         featureOfInterestId = createdObservation.get("FeatureOfInterest").get(ControlInformation.ID);
         mqttHelper.publish(entityHelper.createUrl(sMdl.etFeatureOfInterest, featureOfInterestId, "/Observations"), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+        JsonNode latestObservation = entityHelper.getEntityJsonWithRetry(
                 sMdl.etObservation,
                 "Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
                 10);
@@ -136,7 +136,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         JsonNode createdObservation = getObservationWithDeepInsert();
         mqttHelper.publish(entityHelper.createUrl(sMdl.etObservation), createdObservation.toString());
 
-        JsonNode latestObservation = entityHelper.getEntityWithRetry(
+        JsonNode latestObservation = entityHelper.getEntityJsonWithRetry(
                 sMdl.etObservation,
                 expandQueryFromJsonObject(createdObservation),
                 10);

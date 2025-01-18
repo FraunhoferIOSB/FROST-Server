@@ -44,7 +44,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import net.time4j.range.MomentInterval;
-import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +59,7 @@ public class MqttHelper2 {
     public static final int WAIT_AFTER_INSERT = 100;
     public static final int WAIT_AFTER_CLEANUP = 1;
     public static final int QOS = 2;
-    public static final String CLIENT_ID = "TS";
+    public String clientId = "TS";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttHelper2.class);
 
@@ -72,9 +72,19 @@ public class MqttHelper2 {
     private final long mqttTimeoutMs;
 
     public MqttHelper2(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs) {
+        this(sSrvc, mqttServerUri, mqttTimeoutMs, "TS");
+    }
+
+    public MqttHelper2(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs, String clientId) {
         this.sSrvc = sSrvc;
         this.mqttServerUri = mqttServerUri;
         this.mqttTimeoutMs = mqttTimeoutMs;
+        this.clientId = clientId;
+    }
+
+    public MqttHelper2 setClientId(String clientId) {
+        this.clientId = clientId;
+        return this;
     }
 
     public boolean isAuthSet() {
@@ -99,13 +109,18 @@ public class MqttHelper2 {
     }
 
     public void publish(String topic, String message, int qos, boolean retained) {
-        MqttClient client = null;
+        MqttAsyncClient client = null;
         try {
-            client = new MqttClient(mqttServerUri, CLIENT_ID);
+            client = new MqttAsyncClient(mqttServerUri, "Pub-" + clientId);
             MqttConnectOptions connOpts = new MqttConnectOptions();
+            if (isAuthSet()) {
+                MqttConfig mqttConfig = sSrvc.getMqttConfig();
+                connOpts.setUserName(mqttConfig.getUsername());
+                connOpts.setPassword(mqttConfig.getPassword().toCharArray());
+            }
             connOpts.setCleanSession(true);
-            client.connect(connOpts);
-            client.publish(topic, message.getBytes(), qos, retained);
+            client.connect(connOpts).waitForCompletion(1000);
+            client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(1000);
         } catch (MqttException ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             fail("error publishing message on MQTT: " + ex.getMessage());
@@ -113,6 +128,9 @@ public class MqttHelper2 {
             if (client != null) {
                 try {
                     client.disconnect();
+                } catch (MqttException ex) {
+                }
+                try {
                     client.close();
                 } catch (MqttException ex) {
                 }

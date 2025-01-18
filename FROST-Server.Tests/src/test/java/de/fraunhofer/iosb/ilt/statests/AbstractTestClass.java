@@ -98,11 +98,12 @@ public abstract class AbstractTestClass {
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
-                    service = new StaService(new URI(serverSettings.getServiceUrl(version)).toURL());
-                    sSrvc = service.service;
-                    sMdl = service.modelSensing;
-                    mMdl = service.modelMultiDatastream;
-                    tMdl = service.modelTasking;
+
+                    sSrvc = createService();
+                    sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+                    mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
+                    tMdl = sSrvc.getModel(SensorThingsV11Tasking.class);
+                    service = new StaService(sSrvc, sMdl, tMdl, mMdl);
                 } catch (MalformedURLException ex) {
                     LOGGER.error("Failed to create URL", ex);
                 }
@@ -111,6 +112,12 @@ public abstract class AbstractTestClass {
         } catch (RuntimeException | ServiceFailureException | URISyntaxException | IOException | InterruptedException ex) {
             LOGGER.error("init failed.", ex);
         }
+    }
+
+    protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
+        return new SensorThingsService(new SensorThingsV11Sensing(), new SensorThingsV11MultiDatastream(), new SensorThingsV11Tasking())
+                .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .init();
     }
 
     protected abstract void setUpVersion() throws ServiceFailureException, URISyntaxException;

@@ -248,6 +248,8 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     }
 
     public PrincipalExtended getUserPrincipal(String clientId) {
-        return authProvider.getUserPrincipal(clientId);
+        final PrincipalExtended userPrincipal = authProvider.getUserPrincipal(clientId);
+        LOGGER.debug("User principal for {} is {}", clientId, userPrincipal);
+        return userPrincipal;
     }
 }

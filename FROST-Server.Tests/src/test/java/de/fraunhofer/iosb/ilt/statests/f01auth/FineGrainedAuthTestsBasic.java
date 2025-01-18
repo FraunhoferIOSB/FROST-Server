@@ -95,7 +95,8 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         serviceObsCreaterProject2 = AuthTestHelper.setAuthBasic(createService(), "ObsCreaterProject2", "ObsCreaterProject2");
     }
 
-    private SensorThingsService createService() {
+    @Override
+    protected SensorThingsService createService() {
         if (!baseService.isBaseUrlSet()) {
             try {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))

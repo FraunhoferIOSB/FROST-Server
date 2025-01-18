@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Connec
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_PASSWRD;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_URL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.TAG_DB_USERNAME;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_AUTH;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PERSISTENCE;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.TAG_AUTO_UPDATE_DATABASE;
@@ -454,7 +455,6 @@ public class TestSuite {
 
         String dbDriver = parameters.getOrDefault(PREFIX_PERSISTENCE + TAG_DB_DRIVER, "org.postgresql.Driver");
         properties.put(PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, VAL_PERSISTENCE_MANAGER);
-        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "false");
         properties.put(PREFIX_PERSISTENCE + TAG_DB_DRIVER, dbDriver);
         properties.put(PREFIX_PERSISTENCE + TAG_DB_URL, createDbUrl(dbDriver, parameters.get(KEY_DB_NAME)));
         properties.put(PREFIX_PERSISTENCE + TAG_DB_USERNAME, VAL_PG_USER);
@@ -462,6 +462,8 @@ public class TestSuite {
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort());
         properties.putAll(parameters);
+        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "false");
+        properties.put(PREFIX_AUTH + TAG_AUTO_UPDATE_DATABASE, "false");
 
         CoreSettings coreSettings = new CoreSettings(properties);
         FrostMqttServer server = new FrostMqttServer(coreSettings);

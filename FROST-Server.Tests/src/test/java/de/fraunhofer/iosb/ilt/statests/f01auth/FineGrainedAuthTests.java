@@ -34,7 +34,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
@@ -60,6 +62,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -149,8 +152,12 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     protected static EntityHelper2 ehAdminProject2;
 
     private static MqttHelper2 mqttHelperAdmin;
+    private static MqttHelper2 mqttHelperWrite;
+    private static MqttHelper2 mqttHelperRead;
     private static MqttHelper2 mqttHelperAdminProject1;
     private static MqttHelper2 mqttHelperAdminProject2;
+    private static MqttHelper2 mqttHelperObsCreaterProject1;
+    private static MqttHelper2 mqttHelperObsCreaterProject2;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
@@ -190,9 +197,13 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         ehAdminProject1 = setCaches(new EntityHelper2(serviceAdminProject1));
         ehAdminProject2 = setCaches(new EntityHelper2(serviceAdminProject2));
 
-        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        mqttHelperAdminProject1 = new MqttHelper2(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        mqttHelperAdminProject2 = new MqttHelper2(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN);
+        mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + WRITE);
+        mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + READ);
+        mqttHelperAdminProject1 = new MqttHelper2(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P1);
+        mqttHelperAdminProject2 = new MqttHelper2(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P2);
+        mqttHelperObsCreaterProject1 = new MqttHelper2(serviceObsCreaterProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P1);
+        mqttHelperObsCreaterProject2 = new MqttHelper2(serviceObsCreaterProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P2);
         createEntities();
     }
 
@@ -475,6 +486,38 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
+    void test_06d_ThingCreateForProject1Mqtt() throws JsonProcessingException {
+        LOGGER.info("  test_06d_ThingCreateForProject1Mqtt");
+        EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
+                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
+        StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
+        String topic = version.urlPart + '/' + sMdl.etThing.mainSet;
+
+        List<MqttCreateTester> testers = new ArrayList<>();
+        testers.add(new MqttCreateTester(mqttHelperRead, ehAdmin, READ, creator, filterCreator, topic, sMdl.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperWrite, ehAdmin, WRITE, creator, filterCreator, topic, sMdl.etThing, true));
+        testers.add(new MqttCreateTester(mqttHelperAdminProject1, ehAdmin, ADMIN_P1, creator, filterCreator, topic, sMdl.etThing, true));
+        testers.add(new MqttCreateTester(mqttHelperAdminProject2, ehAdmin, ADMIN_P2, creator, filterCreator, topic, sMdl.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject1, ehAdmin, OBS_CREATE_P1, creator, filterCreator, topic, sMdl.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject2, ehAdmin, OBS_CREATE_P2, creator, filterCreator, topic, sMdl.etThing, false));
+
+        for (var tester : testers) {
+            tester.start();
+        }
+        for (var tester : testers) {
+            tester.join();
+            if (tester.hasCreatedEntity()) {
+                LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
+                THINGS.add(tester.getCreatedEntity());
+            }
+        }
+        for (var tester : testers) {
+            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            assertTrue(tester.isSuccess(), tester.getMessage());
+        }
+    }
+
+    @Test
     void test_07a_DatastreamRelinkToThing2() {
         LOGGER.info("  test_07a_DatastreamRelinkToThing2");
         EntityCreator creator = (user) -> DATASTREAMS.get(0).withOnlyPk()
@@ -744,4 +787,104 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
         public Entity create(String user);
     }
+
+    public static interface StringCreator {
+
+        public String create(String user);
+    }
+
+    private static class MqttCreateTester {
+
+        private static final int JOIN_TIMEOUT = 1500;
+
+        private final MqttHelper2 mh;
+        private final EntityHelper2 eh;
+        private final String name;
+        private final EntityCreator entityCreator;
+        private final StringCreator filterCreator;
+        private final String topic;
+        private final EntityType et;
+        private final boolean expectSuccess;
+
+        private boolean done;
+        private boolean success;
+        private String message;
+        private Entity createdEntity;
+
+        public MqttCreateTester(MqttHelper2 mh, EntityHelper2 eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
+            this.mh = mh;
+            this.eh = eh;
+            this.name = name;
+            this.entityCreator = entityCreator;
+            this.filterCreator = filterCreator;
+            this.topic = topic;
+            this.et = et;
+            this.expectSuccess = expectSuccess;
+            this.success = false;
+            this.message = "Still running for " + name;
+        }
+
+        private Thread thread;
+
+        public void start() {
+            thread = new Thread(this::executeTest);
+            thread.start();
+        }
+
+        public void join() {
+            if (thread == null) {
+                return;
+            }
+            LOGGER.info("Joining {}", name);
+            try {
+                thread.join(JOIN_TIMEOUT);
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interrupted", ex);
+            }
+        }
+
+        private void executeTest() {
+            try {
+                Entity entity = entityCreator.create(name);
+                String json = JsonWriter.writeEntity(entity);
+                mh.publish(topic, json);
+                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, 10);
+                if (createdEntity == null && !expectSuccess) {
+                    success = true;
+                    message = "Success";
+                } else if (createdEntity != null && expectSuccess) {
+                    success = true;
+                    message = "Success";
+                } else {
+                    success = false;
+                    message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
+                }
+            } catch (JsonProcessingException | ServiceFailureException ex) {
+                LOGGER.error("Failed to create JSON or fetch entity");
+            }
+            done = true;
+        }
+
+        public boolean isDone() {
+            return done;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public boolean hasCreatedEntity() {
+            return createdEntity != null;
+        }
+
+        public Entity getCreatedEntity() {
+            return createdEntity;
+        }
+
+    }
+
 }

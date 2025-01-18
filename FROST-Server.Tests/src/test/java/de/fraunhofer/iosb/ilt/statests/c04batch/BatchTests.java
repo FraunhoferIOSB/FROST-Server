@@ -166,7 +166,7 @@ public abstract class BatchTests extends AbstractTestClass {
                 + "\r\n"
                 + "--batch_36522ad7-fc75-4b56-8c71-56071383e77b--";
         String response = postBatch("batch_36522ad7-fc75-4b56-8c71-56071383e77b", batchContent);
-        String thingId = Utils.quoteForUrl(eh2.getEntity(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
+        String thingId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
         String batchBoundary = response.split("\n", 2)[0];
         int mixedBoundaryStart = response.indexOf("boundary=") + 9;
         String mixedBoundary = response.substring(mixedBoundaryStart, mixedBoundaryStart + 40);
@@ -447,7 +447,7 @@ public abstract class BatchTests extends AbstractTestClass {
         request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
         request = StringUtils.replace(request, "$thing1", formatKeyValuesForUrl(THINGS.get(1)));
         String response = postBatch(null, request);
-        String thingId = Utils.quoteForUrl(eh2.getEntity(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
+        String thingId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
 
         try {
             String expResponse = """
@@ -518,8 +518,8 @@ public abstract class BatchTests extends AbstractTestClass {
         request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
         String response = postBatch(null, request);
 
-        String sensorId = Utils.quoteForUrl(eh2.getEntity(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
-        String datastreamId = Utils.quoteForUrl(eh2.getEntity(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
+        String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
+        String datastreamId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
 
         try {
             BatchResponseJson expected = mapper.readValue("{\"responses\":["
@@ -581,8 +581,8 @@ public abstract class BatchTests extends AbstractTestClass {
         request = StringUtils.replace(request, "$post2", post2);
         String response = postBatch(null, request);
 
-        String sensorId = Utils.quoteForUrl(eh2.getEntity(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
-        String datastreamId = Utils.quoteForUrl(eh2.getEntity(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
+        String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
+        String datastreamId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
 
         try {
             BatchResponseJson expected = mapper.readValue("{\"responses\":["

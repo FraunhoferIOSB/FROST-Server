@@ -7,6 +7,7 @@
         </encoder>
     </appender>
 
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.auth.keycloak" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.AuthWrapper" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSet" level="INFO"/>
