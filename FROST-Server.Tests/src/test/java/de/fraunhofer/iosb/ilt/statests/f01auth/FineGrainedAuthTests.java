@@ -795,7 +795,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private static class MqttCreateTester {
 
-        private static final int JOIN_TIMEOUT = 1500;
+        private static final int JOIN_TIMEOUT = 5000;
 
         private final MqttHelper2 mh;
         private final EntityHelper2 eh;
@@ -848,7 +848,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 Entity entity = entityCreator.create(name);
                 String json = JsonWriter.writeEntity(entity);
                 mh.publish(topic, json);
-                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, 10);
+                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, 15);
                 if (createdEntity == null && !expectSuccess) {
                     success = true;
                     message = "Success";

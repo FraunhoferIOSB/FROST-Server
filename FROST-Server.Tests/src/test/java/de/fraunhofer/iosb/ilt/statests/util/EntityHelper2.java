@@ -248,7 +248,7 @@ public class EntityHelper2 {
             LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, entityType);
             MqttHelper2.waitMillis(MqttHelper2.WAIT_AFTER_INSERT);
         }
-        LOGGER.info("Failed to read an entity from url after {} tries: {}", retries, entityType);
+        LOGGER.info("Failed to read an entity of type {} after {} tries with filter {}", entityType, retries, filter);
         return null;
     }
 
