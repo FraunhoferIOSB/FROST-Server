@@ -502,7 +502,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
             StaTable tlp = getTables().getTableForName("LOCATION_PROJECTS");
             NavigationPropertyMain.NavigationPropertyEntitySet npFeatureProjects = pluginCoreModel.etFeatureOfInterest.getNavigationPropertyEntitySet("Projects");
             if (tlp == null || npFeatureProjects == null) {
-                LOGGER.error("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS not found.");
+                LOGGER.debug("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS not found.");
                 return;
             }
             EntitySetImpl projects = new EntitySetImpl(npFeatureProjects);

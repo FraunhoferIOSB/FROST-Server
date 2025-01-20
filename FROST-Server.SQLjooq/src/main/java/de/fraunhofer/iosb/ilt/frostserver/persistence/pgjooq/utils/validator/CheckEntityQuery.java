@@ -79,17 +79,25 @@ public class CheckEntityQuery implements ValidationCheck {
         }
     }
 
-    private void init(Entity contextEntity, JooqPersistenceManager pm) {
-        entityType = contextEntity.getEntityType();
-        final CoreSettings coreSettings = pm.getCoreSettings();
-        final ResourcePath path = new ResourcePath("", Version.V_1_1, '/' + entityType.plural)
-                .addPathElement(new PathElementEntitySet(entityType));
-        context = new DynamicContext();
-        final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-        final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
-        parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
-                .validate(null, entityType);
-        LOGGER.info("Initialised check on {}", entityType);
+    private synchronized void init(Entity contextEntity, JooqPersistenceManager pm) {
+        if (parsedQuery != null) {
+            return;
+        }
+        try {
+            entityType = contextEntity.getEntityType();
+            final CoreSettings coreSettings = pm.getCoreSettings();
+            final ResourcePath path = new ResourcePath("", Version.V_1_1, '/' + entityType.plural)
+                    .addPathElement(new PathElementEntitySet(entityType));
+            context = new DynamicContext();
+            final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
+            final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
+            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+                    .validate(null, entityType);
+            LOGGER.info("Initialised check on {}", entityType);
+        } catch (RuntimeException ex) {
+            LOGGER.error("Failed to initialise check.", ex);
+            throw new IllegalStateException("Failed to initialise Check Query.");
+        }
     }
 
     public String getQuery() {

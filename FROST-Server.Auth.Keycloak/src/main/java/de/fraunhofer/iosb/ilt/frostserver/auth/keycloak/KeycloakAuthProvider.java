@@ -231,6 +231,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
     public boolean userHasRole(String clientId, String userName, String roleName) {
         Client client = CLIENTMAP.get(clientId);
         if (client == null) {
+            LOGGER.info("No user for {}", clientId);
             return false;
         }
         client.setLastSeen(Instant.now());
