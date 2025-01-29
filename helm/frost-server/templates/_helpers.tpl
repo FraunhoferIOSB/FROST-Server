@@ -49,12 +49,15 @@ Get the HTTP service root URL.
 
 {{/*
 Get the HTTP service SubPath
+!! this definition returns a full conform path with all necessary trailing and leading slashes !!
+!! if no urlSubPath is provided returns "/" for "root" if a urlSubPath is set then it has to build "/<urlSubpath>"
+!! if trailing slashes are added it results in problems with the redirect if a webrequest calls for "http://myFDQN/FROST-Server"
 */}}
 {{- define "frost-server.http.serviceSubPath" -}}
   {{- if not .Values.frost.http.urlSubPath | empty -}}
       {{- printf "/%s" .Values.frost.http.urlSubPath | replace "//" "/" -}}
   {{- else -}}
-      {{- printf "" -}}
+      {{- printf "/" -}}
   {{- end -}}
 {{- end -}}
 
@@ -74,6 +77,9 @@ Get the MQTT service root URL.
 
 {{/*
 Get the MQTT Websock-Path.
+!! this definition returns a full conform path with all necessary trailing and leading slashes !!
+!! if no urlSubPath is provided returns "/" for "root" if a urlSubPath is set then it has to build "/<urlSubpath>"
+!! if trailing slashes are added it results in problems with the redirect if a webrequest calls for "http://myFDQN/FROST-Server"
 */}}
 {{- define "frost-server.mqtt.websockPath" -}}
   {{- if not .Values.frost.mqtt.urlSubPath | empty -}}
