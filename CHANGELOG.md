@@ -1,12 +1,14 @@
 # Changelog
 
-## Development version 2.5.3
+## Release version 2.5.3
 
 **Internal changes & Bugfixes**
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 * [HELM] Fix livenessProbe for postgresql to use customized username with pg_isready.
+* [HELM] Fixed trailing slash in ingress.
 * Fixed double-initialisation under heavy load.
 * Added tests for MQTT-Create and fine-grained authorisation.
+* Updated dependencies.
 
 
 ## Release version 2.5.2
