@@ -3,6 +3,7 @@
 ## Development version 2.5.4
 
 **Internal changes & Bugfixes**
+* Fixed #2103: Moved postgres and postgis libs in Docker containers from `${CATALINA_HOME}/lib` to `${CATALINA_HOME}/webapps/FROST-Server/WEB-INF/lib`
 
 
 ## Release version 2.5.3
