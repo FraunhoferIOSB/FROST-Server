@@ -126,11 +126,11 @@ frost:
         nodePort:
         servicePort: 80
     ingress:
-      enabled: true      
+      enabled: false      
       ## Set a specific ingress-class for the ingress ([default] not set)
       # className: nginx-hamel
-      ## Defines the type of ingress-Controller in use (nginx [default], agic ) 
-      # ingressProvider: agic
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic ) 
+      # ingressProvider: "nginx-nginx"
       ## Additional annotations
       # annotations:
       #   cert-manager.io/cluster-issuer: letsencrypt
@@ -245,17 +245,18 @@ frost:
         message_size: 8092
 
     ingress:
-      enabled: true      
+      enabled: false
+      ## Set to true to use the same ingress as the HTTP service, otherwise set to false
+      ## no dedicated ingress will be created for the MQTT service
+      # useSameAsHttp: false
       ## Set a specific ingress-class for the ingress ([default] not set)
-      # className: azure-application-gateway
-      ## Defines the type of ingress-Controller in use (nginx [default], agic or traefik) 
-      # ingressProvider: agic
+      # className: nginx
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic ) 
+      # ingressProvider: "nginx-nginx"
       ## Additional annotations
-      annotations:
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-        # cert-manager.io/cluster-issuer: letsencrypt
-        # cert-manager.io/issue-temporary-certificate: "true"
+      # annotations:
+      #   cert-manager.io/cluster-issuer: letsencrypt
+      #   cert-manager.io/issue-temporary-certificate: "true"
       tls:
         enabled: false
         secretName: []

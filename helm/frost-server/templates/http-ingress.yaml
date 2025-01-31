@@ -1,7 +1,15 @@
 {{- if .Values.frost.http.ingress.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
-{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" "http") -}}
+{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" $tier "fullName" $fullName) -}}
+{{- /*Begin of mqtt definition used if same ingress is used*/ -}}
+{{- $mqtier := "mqtt" -}}
+{{- $mqfullName := include "frost-server.fullName" (merge (dict "tier" $mqtier) .) -}}
+{{- $mqdefaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.mqtt "type" $mqtier "fullName" $mqfullName "combine" .Values.frost.http) -}}
+{{- /*End of mqtt definition used if same ingress is used*/ -}}
+{{- /*BEGIN Predefine empty variables*/ -}}
+{{- $annotations := dict -}}
+{{- /*END Predefine empty variables*/ -}}
 {{- if and .Values.frost.http.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.frost.http.ingress.annotations "kubernetes.io/ingress.class" .Values.frost.http.ingress.className}}
@@ -18,8 +26,26 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}
-  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
+  {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
+  {{- $annotations = include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $mqdefaultRewriteAnnotations $defaultRewriteAnnotations ) "context" . ) }}
+  {{- else }}
+  {{- $annotations = include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
+  {{- end }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- /*Following annotation can't be described in the _helpers.tpl, so actually it hast to stay here*/ -}}
+  {{- if and .Values.frost.mqtt.ingress.useSameAsHttp (or (eq .Values.frost.http.ingress.ingressProvider "kubernetes-nginx") (not .Values.frost.http.ingress.ingressProvider))}}
+    nginx.ingress.kubernetes.io/server-snippets: |
+        location / {
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-Host $http_host;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Forwarded-For $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header Connection "upgrade";
+          proxy_cache_bypass $http_upgrade;
+        }
+  {{- end }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -34,19 +60,27 @@ spec:
   tls:
     - hosts: 
         - {{ include "frost-server.http.serviceHost" . }}
-    {{- if .Values.frost.http.ingress.tls.secretName }}
       secretName: {{ .Values.frost.http.ingress.tls.secretName }}
-    {{- end -}}
   {{- end }}
   rules:
   - host: {{ include "frost-server.http.serviceHost" . }}
     http:
       paths:
-      - path:  {{ template "frost-server.http.serviceSubPath" . }}
+      - path: {{ template "frost-server.http.serviceSubPath" . }}
         pathType: Prefix
         backend:
           service:
             name:  {{ $fullName }}
             port:
               number: {{ .Values.frost.http.ports.http.servicePort }}
+    {{- /* Defines the additional path if same ingress for http and mqtt ingress is set*/ -}}
+    {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
+      - path: {{ template "frost-server.mqtt.websockPath" . }}
+        pathType: Prefix
+        backend:
+          service:
+            name:  {{ $mqfullName }}
+            port:
+              number: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+    {{- end -}}
 {{- end -}}
