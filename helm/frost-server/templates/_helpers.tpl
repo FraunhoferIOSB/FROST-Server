@@ -143,6 +143,8 @@ Get the default agic rewriteAnnotations for ingress.
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
       {{- $_ := set $myannotations "nginx.org/websocket-services" .fullName -}}
+	  {{- $_ := set $myannotations "nginx.org/proxy-read-timeout" "3600" -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-send-timeout" "3600" -}}
       {{/* put here default annotations for mqtt-service */}}
     {{- end -}}
   {{- else if or (eq $ingressProvider "kubernetes-nginx") (eq $ingressProvider "default") -}} {{/* Set annotations for ingress of type kubernetes.nginx */}}
