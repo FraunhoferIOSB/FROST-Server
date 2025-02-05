@@ -1,7 +1,11 @@
-{{- if and .Values.frost.mqtt.ingress.enabled (not .Values.frost.mqtt.ingress.useSameAsHttp) -}}
+{{- if and .Values.frost.mqtt.ingress.enabled -}}
 {{- $tier := "mqtt" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
-{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.mqtt "type" $tier "fullName" $fullName) -}}
+{{- $combine := false -}}
+{{- if .Values.frost.mqtt.ingress.useSameAsHttp -}}
+  {{- $combine = .Values.frost.http -}}
+{{- end -}}
+{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.mqtt "type" $tier "fullName" $fullName "path" ( include "frost-server.mqtt.websockPath" . ) "combine"  $combine ) -}}
 {{- if and .Values.frost.mqtt.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.frost.mqtt.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.frost.mqtt.ingress.annotations "kubernetes.io/ingress.class" .Values.frost.mqtt.ingress.className}}
@@ -19,10 +23,13 @@ metadata:
   name: {{ $fullName }}
   {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.mqtt.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
+    nginx.org/mergeable-ingress-type: "minion"
+  {{- end }}
   {{- /*Following annotation can't be described in the _helpers.tpl, so actually it hast to stay here*/ -}}
-  {{- if or (eq .Values.frost.mqtt.ingress.ingressProvider "kubernetes-nginx") (not .Values.frost.mqtt.ingress.ingressProvider) }}
+  {{- if and (not .Values.frost.mqtt.ingress.useSameAsHttp) (or (eq .Values.frost.mqtt.ingress.ingressProvider "kubernetes-nginx") (not .Values.frost.mqtt.ingress.ingressProvider)) }}
     nginx.ingress.kubernetes.io/server-snippets: |
-        location / {
+        location {{ template "frost-server.mqtt.websockPath" . }} {
           proxy_set_header Upgrade $http_upgrade;
           proxy_http_version 1.1;
           proxy_set_header X-Forwarded-Host $http_host;

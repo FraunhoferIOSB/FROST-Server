@@ -65,7 +65,11 @@ Get the HTTP service SubPath
 Get the MQTT serviceHost.
 */}}
 {{- define "frost-server.mqtt.serviceHost" -}}
-  {{ if not .Values.frost.mqtt.serviceHost | empty }}{{ .Values.frost.mqtt.serviceHost }}{{else}}{{ .Values.frost.http.serviceHost }}{{end}}
+  {{- if or .Values.frost.mqtt.ingress.useSameAsHttp ( .Values.frost.mqtt.serviceHost | empty ) -}}
+    {{- printf "%s" .Values.frost.http.serviceHost -}}
+  {{- else -}}
+    {{- printf "%s" .Values.frost.mqtt.serviceHost -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -140,10 +144,12 @@ Get the default agic rewriteAnnotations for ingress.
     {{- end -}}
     {{- if eq .type "http" -}}
       {{- $_ := set $myannotations "nginx.org/rewrites" (printf "serviceName=%s rewrite=/FROST-Server" .fullName ) -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-set-headers" (printf "X-Forwarded-Path: %s" .path ) -}}
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
       {{- $_ := set $myannotations "nginx.org/websocket-services" .fullName -}}
-	  {{- $_ := set $myannotations "nginx.org/proxy-read-timeout" "3600" -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-set-headers" (printf "proxy_cache_bypass: $http_upgrade" ) -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-read-timeout" "3600" -}}
       {{- $_ := set $myannotations "nginx.org/proxy-send-timeout" "3600" -}}
       {{/* put here default annotations for mqtt-service */}}
     {{- end -}}

@@ -1,12 +1,7 @@
 {{- if .Values.frost.http.ingress.enabled -}}
 {{- $tier := "http" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
-{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" $tier "fullName" $fullName) -}}
-{{- /*Begin of mqtt definition used if same ingress is used*/ -}}
-{{- $mqtier := "mqtt" -}}
-{{- $mqfullName := include "frost-server.fullName" (merge (dict "tier" $mqtier) .) -}}
-{{- $mqdefaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.mqtt "type" $mqtier "fullName" $mqfullName "combine" .Values.frost.http) -}}
-{{- /*End of mqtt definition used if same ingress is used*/ -}}
+{{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" $tier "fullName" $fullName "path" ( include "frost-server.http.serviceSubPath" . ) ) -}}
 {{- /*BEGIN Predefine empty variables*/ -}}
 {{- $annotations := dict -}}
 {{- /*END Predefine empty variables*/ -}}
@@ -26,16 +21,15 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}
-  {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
-  {{- $annotations = include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $mqdefaultRewriteAnnotations $defaultRewriteAnnotations ) "context" . ) }}
-  {{- else }}
   {{- $annotations = include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
-  {{- end }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
+    nginx.org/mergeable-ingress-type: "master"
+  {{- end }}
   {{- /*Following annotation can't be described in the _helpers.tpl, so actually it hast to stay here*/ -}}
   {{- if and .Values.frost.mqtt.ingress.useSameAsHttp (or (eq .Values.frost.http.ingress.ingressProvider "kubernetes-nginx") (not .Values.frost.http.ingress.ingressProvider))}}
     nginx.ingress.kubernetes.io/server-snippets: |
-        location / {
+        location {{ template "frost-server.mqtt.websockPath" . }} {
           proxy_set_header Upgrade $http_upgrade;
           proxy_http_version 1.1;
           proxy_set_header X-Forwarded-Host $http_host;
@@ -73,14 +67,4 @@ spec:
             name:  {{ $fullName }}
             port:
               number: {{ .Values.frost.http.ports.http.servicePort }}
-    {{- /* Defines the additional path if same ingress for http and mqtt ingress is set*/ -}}
-    {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
-      - path: {{ template "frost-server.mqtt.websockPath" . }}
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ $mqfullName }}
-            port:
-              number: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
-    {{- end -}}
 {{- end -}}

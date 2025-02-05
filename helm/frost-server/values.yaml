@@ -75,7 +75,7 @@ frost:
       enable:
 
   auth:
-    provider:
+    provider: 
     allowAnonymousRead: false
     authenticateOnly:
     role:
@@ -126,15 +126,16 @@ frost:
         nodePort:
         servicePort: 80
     ingress:
-      enabled: false      
+      enabled: false     
       ## Set a specific ingress-class for the ingress ([default] not set)
       # className: nginx-hamel
-      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic ) 
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none ) 
+      ## Use "none" to disable render predefined annotations for this service
       # ingressProvider: "nginx-nginx"
       ## Additional annotations
-      # annotations:
-      #   cert-manager.io/cluster-issuer: letsencrypt
-      #   cert-manager.io/issue-temporary-certificate: "true"
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        cert-manager.io/issue-temporary-certificate: "true"
       tls:
         enabled: false
         secretName: []
@@ -160,7 +161,7 @@ frost:
     securityContext:
 
     # FROST-Server HTTP business settings
-    serviceHost: frost-server
+    serviceHost: frost-server.example.com
     urlSubPath: ""
     serviceProtocol: http
     servicePort:
@@ -248,10 +249,11 @@ frost:
       enabled: false
       ## Set to true to use the same ingress as the HTTP service, otherwise set to false
       ## no dedicated ingress will be created for the MQTT service
-      # useSameAsHttp: false
+      # useSameAsHttp: true
       ## Set a specific ingress-class for the ingress ([default] not set)
       # className: nginx
-      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic ) 
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none) 
+      ## Use "none" to disable render predefined annotations for this service
       # ingressProvider: "nginx-nginx"
       ## Additional annotations
       # annotations:
@@ -262,7 +264,7 @@ frost:
         secretName: []
 
     # FROST-Server MQTT business settings
-    serviceHost: "" # default URI is the same then frost.http.serviceHost"
+    serviceHost: "mqtt-server.example.com" # default URI is the same then frost.http.serviceHost"
     urlSubPath: "" # default is mqtt 
     serviceProtocol: http
     qos: 2
@@ -306,7 +308,7 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
-    enableIntegratedDb: true
+    enableIntegratedDb: false
     dbExternalConnectionString: "jdbc:postgresql://externaldbhost:5432/sensorthings"
     image:
       registry: docker.io
