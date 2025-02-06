@@ -126,19 +126,19 @@ frost:
         nodePort:
         servicePort: 80
     ingress:
-      enabled: false     
+      enabled: true     
       ## Set a specific ingress-class for the ingress ([default] not set)
-      # className: nginx-hamel
+      ingressClassName: regioit-private-ingress
       ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none ) 
       ## Use "none" to disable render predefined annotations for this service
-      # ingressProvider: "nginx-nginx"
+      ingressProvider: "nginx-nginx"
       ## Additional annotations
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt
         cert-manager.io/issue-temporary-certificate: "true"
       tls:
-        enabled: false
-        secretName: []
+        enabled: true
+        secretName: hamel-test-frost-server-http-tls
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
@@ -161,8 +161,8 @@ frost:
     securityContext:
 
     # FROST-Server HTTP business settings
-    serviceHost: frost-server.example.com
-    urlSubPath: ""
+    serviceHost: frost.hameltest.intern.cnaphci.regioit.cloud
+    urlSubPath: "meinFrost"
     serviceProtocol: http
     servicePort:
     defaultCount: false
@@ -246,25 +246,25 @@ frost:
         message_size: 8092
 
     ingress:
-      enabled: false
+      enabled: true
       ## Set to true to use the same ingress as the HTTP service, otherwise set to false
       ## no dedicated ingress will be created for the MQTT service
-      # useSameAsHttp: true
+      useSameAsHttp: false
       ## Set a specific ingress-class for the ingress ([default] not set)
-      # className: nginx
+      ingressClassName: regioit-private-ingress
       ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none) 
       ## Use "none" to disable render predefined annotations for this service
-      # ingressProvider: "nginx-nginx"
+      ingressProvider: "nginx-nginx"
       ## Additional annotations
-      # annotations:
-      #   cert-manager.io/cluster-issuer: letsencrypt
-      #   cert-manager.io/issue-temporary-certificate: "true"
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        cert-manager.io/issue-temporary-certificate: "true"
       tls:
-        enabled: false
-        secretName: []
+        enabled: true
+        secretName: hamel-test-frost-server-mqtt-tls
 
     # FROST-Server MQTT business settings
-    serviceHost: "mqtt-server.example.com" # default URI is the same then frost.http.serviceHost"
+    serviceHost: "mqtt.hameltest.intern.cnaphci.regioit.cloud" # default URI is the same then frost.http.serviceHost"
     urlSubPath: "" # default is mqtt 
     serviceProtocol: http
     qos: 2
@@ -308,7 +308,7 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
-    enableIntegratedDb: false
+    enableIntegratedDb: true
     dbExternalConnectionString: "jdbc:postgresql://externaldbhost:5432/sensorthings"
     image:
       registry: docker.io

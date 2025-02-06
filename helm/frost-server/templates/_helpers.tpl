@@ -12,8 +12,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "frost-server.fullName" -}}
 {{- $name := default .Chart.Name .Values.name -}}
-{{- if .tier -}}
+{{- if and .tier (not .merge) -}}
 {{- printf "%s-%s-%s" .Release.Name $name .tier | trunc 63 | trimSuffix "-" -}}
+{{- else if .merge -}}
+{{- printf "%s-%s-minion-%s" .Release.Name $name .tier | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -148,7 +150,7 @@ Get the default agic rewriteAnnotations for ingress.
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
       {{- $_ := set $myannotations "nginx.org/websocket-services" .fullName -}}
-      {{- $_ := set $myannotations "nginx.org/proxy-set-headers" (printf "proxy_cache_bypass: $http_upgrade" ) -}}
+      {{- $_ := set $myannotations "nginx.org/location-snippets" (printf "proxy_cache_bypass $http_upgrade" ) -}}
       {{- $_ := set $myannotations "nginx.org/proxy-read-timeout" "3600" -}}
       {{- $_ := set $myannotations "nginx.org/proxy-send-timeout" "3600" -}}
       {{/* put here default annotations for mqtt-service */}}

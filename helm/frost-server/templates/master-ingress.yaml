@@ -1,6 +1,6 @@
-{{- if .Values.frost.http.ingress.enabled -}}
-{{- $tier := "http" -}}
-{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier "merge" .Values.frost.mqtt.ingress.useSameAsHttp ) .) -}}
+{{- if and .Values.frost.http.ingress.enabled .Values.frost.mqtt.ingress.useSameAsHttp -}}
+{{- $tier := "master" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
 {{- $defaultRewriteAnnotations := include "frost-server.ingress.rewriteAnnotation" (dict "scope" .Values.frost.http "type" $tier "fullName" $fullName "path" ( include "frost-server.http.serviceSubPath" . ) ) -}}
 {{- /*BEGIN Predefine empty variables*/ -}}
 {{- $annotations := dict -}}
@@ -23,9 +23,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- $annotations = include "common.tplvalues.merge" ( dict "values" ( list .Values.frost.http.ingress.annotations $defaultRewriteAnnotations ) "context" . ) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
-  {{- if .Values.frost.mqtt.ingress.useSameAsHttp }}
-    nginx.org/mergeable-ingress-type: "minion"
-  {{- end }}
+    nginx.org/mergeable-ingress-type: "master"
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -36,7 +34,7 @@ spec:
   {{- if and .Values.frost.http.ingress.ingressClassName (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.frost.http.ingress.ingressClassName }}
   {{- end }}
-  {{- if and .Values.frost.http.ingress.tls.enabled (not .Values.frost.mqtt.ingress.useSameAsHttp)}}
+  {{- if .Values.frost.http.ingress.tls.enabled }}
   tls:
     - hosts: 
         - {{ include "frost-server.http.serviceHost" . }}
@@ -44,13 +42,4 @@ spec:
   {{- end }}
   rules:
   - host: {{ include "frost-server.http.serviceHost" . }}
-    http:
-      paths:
-      - path: {{ template "frost-server.http.serviceSubPath" . }}
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ $fullName }}
-            port:
-              number: {{ .Values.frost.http.ports.http.servicePort }}
 {{- end -}}
