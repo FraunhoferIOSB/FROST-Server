@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.projects;
 
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 
+import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
@@ -57,6 +58,7 @@ public class PluginProjects implements Plugin, ConfigDefaults {
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             boolean pCoreModelV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
             boolean multiDatastream = pluginManager.isPluginEnabled(PluginMultiDatastream.class);
+            boolean actuation = pluginManager.isPluginEnabled(PluginActuation.class);
             if (pml == null || !pml.isEnabled()) {
                 LOGGER.warn("PluginModelLoader must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
@@ -88,6 +90,10 @@ public class PluginProjects implements Plugin, ConfigDefaults {
             if (multiDatastream) {
                 pml.addModelFile("pluginprojects/sta1/model/RestrictedMd.json");
             }
+            if (actuation) {
+                pml.addModelFile("pluginprojects/sta1/model/ProjectActuation.json");
+                pml.addModelFile("pluginprojects/sta1/model/RestrictedActuation.json");
+            }
 
             if (rules) {
                 pml.addSecurityFile("pluginprojects/sta1/security/secDatastream.json");
@@ -104,6 +110,11 @@ public class PluginProjects implements Plugin, ConfigDefaults {
                 pml.addSecurityFile("pluginprojects/sta1/security/secThing.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secUser.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secUserProjectRole.json");
+                if (actuation) {
+                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                }
             }
             pluginManager.registerPlugin(this);
         }
