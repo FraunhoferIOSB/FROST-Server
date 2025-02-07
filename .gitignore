@@ -24,3 +24,4 @@ logs
 Tools/ModelExtractor/examples
 *.tgz
 .vscode/
+.lck
