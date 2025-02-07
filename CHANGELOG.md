@@ -6,6 +6,7 @@
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 
 **Internal changes & Bugfixes**
+* Added Actuation support to the Projects plugin.
 * Fixed #2072: Users are always anonymous when combining keycloak, finegrained auth and anonymous access.
 * Fixed #2073: Projects plugin has no default value for isPublic and restricted columns.
 * MariaDB: avoid use of distinctOn on MariaDb, as not supported.

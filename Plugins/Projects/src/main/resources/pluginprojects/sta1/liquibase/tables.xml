@@ -31,6 +31,8 @@
     <property name="idType-Datastream" value="BIGINT" />
     <property name="id-FeatureOfInterest" value="LONG" />
     <property name="idType-FeatureOfInterest" value="BIGINT" />
+    <property name="id-TaskingCapability" value="LONG" />
+    <property name="idType-TaskingCapability" value="BIGINT" />
     <property name="id-MultiDatastream" value="LONG" />
     <property name="idType-MultiDatastream" value="BIGINT" />
     <property name="id-Role" value="LONG" />
@@ -45,10 +47,13 @@
     <include relativeToChangelogFile="true" file="tableLocationProjects.xml" />
     <include relativeToChangelogFile="true" file="tableThingProjects.xml" />
     <include relativeToChangelogFile="true" file="tableFeatureProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableActuatorProjects.xml" />
     <include relativeToChangelogFile="true" file="tableThings.xml" />
     <include relativeToChangelogFile="true" file="tableLocations.xml" />
     <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
     <include relativeToChangelogFile="true" file="tableFeaturesOfInterest.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingCapsProjects.xml" />
     <include relativeToChangelogFile="true" file="tableMultiDatastreams.xml" />
     <include relativeToChangelogFile="true" file="tableRoles.xml" />
     <include relativeToChangelogFile="true" file="tableUsers.xml" />

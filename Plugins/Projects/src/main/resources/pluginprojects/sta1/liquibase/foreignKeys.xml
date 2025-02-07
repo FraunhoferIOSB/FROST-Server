@@ -217,5 +217,65 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
+    <changeSet author="generated" id="2025-02-05-fk_ACTUATOR_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="ACTUATOR_PROJECTS" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_ACTUATOR_PROJECTS_PROJECT_ID" foreignKeyTableName="ACTUATOR_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_ACTUATOR_PROJECTS_PROJECT_ID"
+            baseTableName="ACTUATOR_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-02-05-fk_ACTUATOR_PROJECTS_ACTUATOR_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="ACTUATOR_PROJECTS" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_ACTUATOR_PROJECTS_ACTUATOR_ID" foreignKeyTableName="ACTUATOR_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_ACTUATOR_PROJECTS_ACTUATOR_ID"
+            baseTableName="ACTUATOR_PROJECTS" baseColumnNames="ACTUATOR_ID"
+            referencedTableName="ACTUATORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-02-05-fk_TASKINGCAPABILITIES_PROJECTS_PROJECT_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="TASKINGCAPABILITIES_PROJECTS" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_TASKINGCAPABILITIES_PROJECTS_PROJECT_ID" foreignKeyTableName="TASKINGCAPABILITIES_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_TASKINGCAPABILITIES_PROJECTS_PROJECT_ID"
+            baseTableName="TASKINGCAPABILITIES_PROJECTS" baseColumnNames="PROJECT_ID"
+            referencedTableName="PROJECTS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-02-05-fk_TASKINGCAPABILITIES_PROJECTS_TASKINGCAPABILITY_ID" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="TASKINGCAPABILITIES_PROJECTS" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_TASKINGCAPABILITIES_PROJECTS_TASKINGCAPABILITY_ID" foreignKeyTableName="TASKINGCAPABILITIES_PROJECTS" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_TASKINGCAPABILITIES_PROJECTS_TASKINGCAPABILITY_ID"
+            baseTableName="TASKINGCAPABILITIES_PROJECTS" baseColumnNames="TASKINGCAPABILITY_ID"
+            referencedTableName="ACTUATORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
 </databaseChangeLog>
 
