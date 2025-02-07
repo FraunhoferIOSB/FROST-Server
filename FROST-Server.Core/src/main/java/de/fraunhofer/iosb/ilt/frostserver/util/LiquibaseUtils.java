@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Map;
 import org.slf4j.Logger;
 
 /**
@@ -41,12 +42,12 @@ public class LiquibaseUtils {
      * @param user The liquibase user to try to upgrade.
      * @return true if the upgrade should be tried again.
      */
-    public static boolean maybeUpdateDatabase(Logger logger, LiquibaseUser user) {
+    public static boolean maybeUpdateDatabase(Logger logger, LiquibaseUser user, Map<String, Object> params) {
         boolean retry = false;
         StringWriter updateLog = new StringWriter();
         try {
             logger.info("Running database update for {}", user.getClass().getName());
-            boolean success = user.doUpgrades(updateLog);
+            boolean success = user.doUpgrades(updateLog, params);
             retry = !success;
             if (success) {
                 logger.info("Database-update successful.");

@@ -31,7 +31,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -50,6 +49,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
@@ -861,18 +861,19 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager imple
     }
 
     @Override
-    public String checkForUpgrades() {
-        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
-                .addProperty(CHANGE_SET_NAME, "PostgresPersistenceManager")
-                .build();
-        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props);
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+        return target;
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-        Map<String, Object> props = CollectionsHelper.LinkedHashMapBuilder()
-                .addProperty(CHANGE_SET_NAME, "PostgresPersistenceManager")
-                .build();
-        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, props, out);
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
+        liquibaseParams.put(CHANGE_SET_NAME, "PostgresPersistenceManager");
+        return checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, liquibaseParams);
+    }
+
+    @Override
+    public boolean doUpgrades(Writer out, Map<String, Object> params) throws UpgradeFailedException, IOException {
+        params.put(CHANGE_SET_NAME, "PostgresPersistenceManager");
+        return doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, params, out);
     }
 }

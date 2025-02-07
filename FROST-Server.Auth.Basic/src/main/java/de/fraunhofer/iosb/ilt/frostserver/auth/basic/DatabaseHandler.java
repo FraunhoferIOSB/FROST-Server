@@ -52,8 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Database handler for the basic auth plugin.
  */
 public class DatabaseHandler {
 
@@ -242,18 +241,16 @@ public class DatabaseHandler {
         if (maybeUpdateDatabase) {
             BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
             basicAuthProvider.init(coreSettings);
-            maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, basicAuthProvider);
+            Map<String, Object> params = CollectionsHelper.propertiesBuilder()
+                    .addProperty(CHANGE_SET_NAME, "Auth.Basic")
+                    .build();
+            basicAuthProvider.createLiqibaseParams(null, params);
+            maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, basicAuthProvider, params);
         }
     }
 
-    public String checkForUpgrades() {
-        Map<String, Object> params = CollectionsHelper.propertiesBuilder()
-                .addProperty(CHANGE_SET_NAME, "Auth.Basic")
-                .build();
-        return checkForUpgrades(params);
-    }
-
     public String checkForUpgrades(Map<String, Object> params) {
+        params.put(CHANGE_SET_NAME, "Auth.Basic");
         Settings customSettings = coreSettings.getAuthSettings();
         try (Connection connection = ConnectionUtils.getConnection(connectionUrl, customSettings)) {
             return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, params);

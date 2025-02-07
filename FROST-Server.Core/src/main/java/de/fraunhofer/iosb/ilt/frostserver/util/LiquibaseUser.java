@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 
 /**
  * An interface for components that want to be called when it is time to upgrade
@@ -43,21 +45,24 @@ public interface LiquibaseUser {
      * Give a summary of any upgrades that need to be done to the storage
      * backend.
      *
+     * @param liquibaseParams The parameters to use for upgrading.
      * @return A human readable text summarising the upgrades that need to be
      * done to the storage backend.
      */
-    public String checkForUpgrades();
+    public String checkForUpgrades(Map<String, Object> liquibaseParams);
 
     /**
      * Upgrade the storage backend.
      *
      * @param out The Writer to append logging messages to.
+     * @param liquibaseParams The parameters to use for upgrading.
      * @return true if the upgrade was successful, false if upgrade should be
      * tried again later.
      * @throws UpgradeFailedException when upgrading fails and should not be
      * attempted again at a later stage.
      * @throws IOException when the Writer throws this exception.
      */
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException;
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException;
 
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target);
 }

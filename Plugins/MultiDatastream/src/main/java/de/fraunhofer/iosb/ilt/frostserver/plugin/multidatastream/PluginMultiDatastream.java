@@ -53,7 +53,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -236,32 +235,31 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         return true;
     }
 
-    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
-        if (target == null) {
-            target = new LinkedHashMap<>();
+    @Override
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+        if (pm instanceof JooqPersistenceManager jpm) {
+            jpm.generateLiquibaseVariables(target, MULTI_DATASTREAM, modelSettings.idTypeMultiDatastream);
         }
-        PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        pCoreModel.createLiqibaseParams(ppm, target);
-        ppm.generateLiquibaseVariables(target, MULTI_DATASTREAM, modelSettings.idTypeMultiDatastream);
-        target.put(CHANGE_SET_NAME, "Plugin.MultiDatastream");
         return target;
     }
 
     @Override
-    public String checkForUpgrades() {
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
+        liquibaseParams.put(CHANGE_SET_NAME, "Plugin.MultiDatastream");
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
-                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
+                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, liquibaseParams);
             }
             return "Unknown persistence manager class";
         }
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
+        liquibaseParams.put(CHANGE_SET_NAME, "Plugin.MultiDatastream");
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
-                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
+                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, liquibaseParams, out);
             }
             out.append("Unknown persistence manager class");
             return false;

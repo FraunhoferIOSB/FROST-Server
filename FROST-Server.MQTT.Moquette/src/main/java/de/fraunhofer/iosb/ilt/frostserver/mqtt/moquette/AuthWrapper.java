@@ -85,12 +85,17 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         }
 
         @Override
-        public String checkForUpgrades() {
+        public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+            return target;
+        }
+
+        @Override
+        public String checkForUpgrades(Map<String, Object> liquibaseParams) {
             return "Something went wrong while configuring your auth provider. You have a configuration error.";
         }
 
         @Override
-        public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
             return false;
         }
 

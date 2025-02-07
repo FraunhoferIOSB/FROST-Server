@@ -3,6 +3,7 @@
 ## Development version 2.5.4
 
 **Internal changes & Bugfixes**
+* Fixed that not all plugins would generate liquibase parameters for all liquibase calls.
 * Added Actuation support to the Projects plugin.
 * Fixed #2103: Moved postgres and postgis libs in Docker containers from `${CATALINA_HOME}/lib` to `${CATALINA_HOME}/webapps/FROST-Server/WEB-INF/lib`
 

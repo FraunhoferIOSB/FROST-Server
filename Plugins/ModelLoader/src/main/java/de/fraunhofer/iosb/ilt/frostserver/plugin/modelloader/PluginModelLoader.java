@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
@@ -345,23 +344,19 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         return pluginSettings.get(PLUGIN_NAME + ".idType." + entityTypeName, idTypeDefault).toUpperCase();
     }
 
-    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager jpm, Map<String, Object> target) {
-        if (target == null) {
-            target = new LinkedHashMap<>();
-        }
-        PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        if (pCoreModel != null) {
-            pCoreModel.createLiqibaseParams(jpm, target);
-        }
-        for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
-            String typeName = entry.getKey();
-            jpm.generateLiquibaseVariables(target, typeName, getTypeFor(settings, typeName));
+    @Override
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+        if (pm instanceof JooqPersistenceManager jpm) {
+            for (Entry<String, DefEntityProperty> entry : primaryKeys.entrySet()) {
+                String typeName = entry.getKey();
+                jpm.generateLiquibaseVariables(target, typeName, getTypeFor(settings, typeName));
+            }
         }
         return target;
     }
 
     @Override
-    public String checkForUpgrades() {
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
         if (!isFullyInitialised()) {
             return "ModelLoader not fully initialised yet.";
         }
@@ -369,7 +364,6 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             if (pm instanceof JooqPersistenceManager jpm) {
                 StringBuilder result = new StringBuilder();
                 for (String file : liquibaseFiles) {
-                    final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
                     liquibaseParams.put(CHANGE_SET_NAME, file);
                     liquibaseParams.put("searchPath", liquibasePath);
                     result.append(jpm.checkForUpgrades(file, liquibaseParams));
@@ -382,7 +376,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
         if (!isFullyInitialised()) {
             out.append("ModelLoader not fully initialised yet.");
             return false;
@@ -390,7 +384,6 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 for (String file : liquibaseFiles) {
-                    final Map<String, Object> liquibaseParams = createLiqibaseParams(jpm, null);
                     liquibaseParams.put("searchPath", liquibasePath);
                     if (!jpm.doUpgrades(file, liquibaseParams, out)) {
                         return false;
