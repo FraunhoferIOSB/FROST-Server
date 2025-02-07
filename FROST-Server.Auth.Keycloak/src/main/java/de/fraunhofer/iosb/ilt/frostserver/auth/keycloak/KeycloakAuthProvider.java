@@ -26,11 +26,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
-import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
+public class KeycloakAuthProvider implements AuthProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);
 
@@ -202,12 +202,17 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
     }
 
     @Override
-    public String checkForUpgrades() {
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+        return target;
+    }
+
+    @Override
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
         return "";
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
         return true;
     }
 

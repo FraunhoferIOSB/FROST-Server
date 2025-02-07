@@ -32,6 +32,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,11 +83,16 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<p><a href='.'>Back...</a></p>");
 
             try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
-                if (pm instanceof LiquibaseUser liquibaseUser) {
-                    checkForUpgrades(out, liquibaseUser);
+                final Set<LiquibaseUser> liquibaseUsers = coreSettings.getLiquibaseUsers();
+                Map<String, Object> liquibaseParams = new LinkedHashMap<>();
+                for (LiquibaseUser lbu : liquibaseUsers) {
+                    liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
                 }
-                for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
-                    checkForUpgrades(out, user);
+                if (pm instanceof LiquibaseUser liquibaseUser) {
+                    checkForUpgrades(out, liquibaseUser, liquibaseParams);
+                }
+                for (LiquibaseUser user : liquibaseUsers) {
+                    checkForUpgrades(out, user, liquibaseParams);
                 }
             }
 
@@ -96,18 +104,18 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
-    public void checkForUpgrades(final PrintWriter out, LiquibaseUser user) {
+    public void checkForUpgrades(PrintWriter out, LiquibaseUser user, Map<String, Object> liquibaseParams) {
         out.print("<h2>");
         out.print(user.getClass().getName());
         out.println("</h2>");
         out.println("<textarea rows=\"10\" style=\"width:95%;\">");
-        String log = checkForUpgrades(user);
+        String log = checkForUpgrades(user, liquibaseParams);
         out.println(log);
         out.println("</textarea>");
     }
 
-    private String checkForUpgrades(final LiquibaseUser user) {
-        return user.checkForUpgrades();
+    private String checkForUpgrades(LiquibaseUser user, Map<String, Object> liquibaseParams) {
+        return user.checkForUpgrades(liquibaseParams);
     }
 
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -131,11 +139,21 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
             try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
-                if (pm instanceof LiquibaseUser liquibaseUser) {
-                    processUpgrade(out, liquibaseUser);
+                final Set<LiquibaseUser> liquibaseUsers = coreSettings.getLiquibaseUsers();
+                Map<String, Object> liquibaseParams = new LinkedHashMap<>();
+                for (LiquibaseUser lbu : liquibaseUsers) {
+                    liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
                 }
-                for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
-                    processUpgrade(out, user);
+                if (LOGGER.isDebugEnabled()) {
+                    for (var entry : liquibaseParams.entrySet()) {
+                        LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
+                    }
+                }
+                if (pm instanceof LiquibaseUser liquibaseUser) {
+                    processUpgrade(out, liquibaseUser, liquibaseParams);
+                }
+                for (LiquibaseUser user : liquibaseUsers) {
+                    processUpgrade(out, user, liquibaseParams);
                 }
             }
 
@@ -147,18 +165,18 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
-    public void processUpgrade(final PrintWriter out, LiquibaseUser user) throws IOException {
+    public void processUpgrade(final PrintWriter out, LiquibaseUser user, Map<String, Object> liquibaseParams) throws IOException {
         out.print("<h2>");
         out.print(user.getClass().getName());
         out.println("</h2>");
         out.println("<textarea rows=\"10\" style=\"width:95%;\">");
-        processUpgrade(user, out);
+        processUpgrade(user, out, liquibaseParams);
         out.println("</textarea>");
     }
 
-    private void processUpgrade(final LiquibaseUser user, final PrintWriter out) throws IOException {
+    private void processUpgrade(final LiquibaseUser user, final PrintWriter out, Map<String, Object> liquibaseParams) throws IOException {
         try {
-            user.doUpgrades(out);
+            user.doUpgrades(out, liquibaseParams);
         } catch (UpgradeFailedException ex) {
             LOGGER.error("Could not initialise database.", ex);
         }

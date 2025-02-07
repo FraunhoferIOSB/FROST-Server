@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -37,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -153,23 +153,22 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         return userInfo.getUserPrincipal();
     }
 
-    public Map<String, Object> createLiqibaseParams(DatabaseHandler dbHandler, Map<String, Object> target) {
-        if (target == null) {
-            target = new LinkedHashMap<>();
-        }
+    @Override
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
+        final DatabaseHandler dbHandler = DatabaseHandler.getInstance(coreSettings);
         target.put(TAG_PLAIN_TEXT_PASSWORD, Boolean.toString(dbHandler.isPlainTextPassword()));
         return target;
     }
 
     @Override
-    public String checkForUpgrades() {
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
         final DatabaseHandler dbHandler = DatabaseHandler.getInstance(coreSettings);
-        return dbHandler.checkForUpgrades(createLiqibaseParams(dbHandler, null));
+        return dbHandler.checkForUpgrades(liquibaseParams);
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
         final DatabaseHandler dbHandler = DatabaseHandler.getInstance(coreSettings);
-        return dbHandler.doUpgrades(out, createLiqibaseParams(dbHandler, null));
+        return dbHandler.doUpgrades(out, liquibaseParams);
     }
 }

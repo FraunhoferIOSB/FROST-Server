@@ -50,7 +50,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -237,49 +236,48 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         return true;
     }
 
-    public Map<String, Object> createLiqibaseParams(JooqPersistenceManager ppm, Map<String, Object> target) {
-        if (target == null) {
-            target = new LinkedHashMap<>();
-        }
+    @Override
+    public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
         if (isVersion2) {
             // Nothing to do if we run V2.
-            target.put(CHANGE_SET_NAME, PLUGIN_NAME);
             return target;
         }
-        PluginCoreModel pCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        pCoreModel.createLiqibaseParams(ppm, target);
-        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_ACTUATOR, modelSettings.idTypeActuator);
-        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASK, modelSettings.idTypeTask);
-        ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASKING_CAP, modelSettings.idTypeTaskingCap);
-        target.put(CHANGE_SET_NAME, PLUGIN_NAME);
-
+        if (pm instanceof JooqPersistenceManager ppm) {
+            ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_ACTUATOR, modelSettings.idTypeActuator);
+            ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASK, modelSettings.idTypeTask);
+            ppm.generateLiquibaseVariables(target, LIQUIBASE_NAME_TASKING_CAP, modelSettings.idTypeTaskingCap);
+        } else {
+            LOGGER.info("Not generating variables for {}", pm);
+        }
         return target;
     }
 
     @Override
-    public String checkForUpgrades() {
+    public String checkForUpgrades(Map<String, Object> liquibaseParams) {
         if (isVersion2) {
             // Nothing to do if we run V2.
             return "Up to date, no changes to apply: " + PLUGIN_NAME + ".\n";
         }
+        liquibaseParams.put(CHANGE_SET_NAME, PLUGIN_NAME);
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
-                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null));
+                return ppm.checkForUpgrades(LIQUIBASE_CHANGELOG_FILENAME, liquibaseParams);
             }
             return "Unknown persistence manager class";
         }
     }
 
     @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(Writer out, Map<String, Object> liquibaseParams) throws UpgradeFailedException, IOException {
         if (isVersion2) {
             out.append("Up to date, no changes to apply: ").append(PLUGIN_NAME).append(".\n");
             // Nothing to do if we run V2.
             return true;
         }
+        liquibaseParams.put(CHANGE_SET_NAME, PLUGIN_NAME);
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager ppm) {
-                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, createLiqibaseParams(ppm, null), out);
+                return ppm.doUpgrades(LIQUIBASE_CHANGELOG_FILENAME, liquibaseParams, out);
             }
             out.append("Unknown persistence manager class");
             return false;

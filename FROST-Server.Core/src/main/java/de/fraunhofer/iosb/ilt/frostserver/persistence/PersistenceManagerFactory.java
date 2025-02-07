@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -94,15 +95,28 @@ public class PersistenceManagerFactory {
     public void maybeUpdateDatabase() {
         if (maybeUpdateDatabase) {
             PersistenceManager pm = create();
-            if (pm instanceof LiquibaseUser liquibaseUser) {
-                LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser);
-            }
             final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
+            Map<String, Object> liquibaseParams = new LinkedHashMap<>();
+            for (LiquibaseUser lbu : liquibaseUsers) {
+                liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
+            }
+            if (LOGGER.isDebugEnabled()) {
+                for (var entry : liquibaseParams.entrySet()) {
+                    LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
+                }
+            }
+
+            // Ensure the PM gets to go first.
+            if (pm instanceof LiquibaseUser liquibaseUser) {
+                LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser, liquibaseParams);
+            }
+
             if (liquibaseUsers.isEmpty()) {
+                LOGGER.warn("No Liquibase users found!");
                 return;
             }
             for (LiquibaseUser lbu : liquibaseUsers) {
-                if (LiquibaseUtils.maybeUpdateDatabase(LOGGER, lbu)) {
+                if (LiquibaseUtils.maybeUpdateDatabase(LOGGER, lbu, liquibaseParams)) {
                     // upgrade failed, but should be tried again later.
                     return;
                 }
