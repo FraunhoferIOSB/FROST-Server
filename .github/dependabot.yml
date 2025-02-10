@@ -10,6 +10,9 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "org.openjfx:*"
+        versions: ["[24,)"]
 
   
   # Maintain dependencies for Maven in the v2.5.x branch
@@ -22,6 +25,9 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "org.openjfx:*"
+        versions: ["[24,)"]
 
   
   # Maintain dependencies for Maven in the v2.4.x branch
