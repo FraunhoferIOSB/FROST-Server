@@ -229,7 +229,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epObservationType, table -> table.colObservationType);
-        pfReg.addEntry(pluginCoreModel.epObservedArea,
+        pfReg.addEntry(pluginCoreModel.epObservedArea, true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             String observedArea = tuple.get(table.colObservedAreaText);
@@ -242,7 +242,8 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                                 }
                             }
                         }, null, null),
-                new NFP<>("s", table -> table.colObservedAreaText));
+                new NFP<>("s", table -> table.colObservedAreaText),
+                new NFP<>("j", table -> table.colObservedAreaText));
         pfReg.addEntryNoSelect(pluginCoreModel.epObservedArea, "g", table -> table.colObservedArea);
         pfReg.addEntry(pluginCoreModel.epPhenomenonTimeDs,
                 new ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
