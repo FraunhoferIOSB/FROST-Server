@@ -160,6 +160,13 @@ public abstract class GeoTests extends AbstractTestClass {
         datastream.setProperty(sMdl.npDatastreamObservedproperty, O_PROPS.get(0));
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
+
+        datastream = sMdl.newDatastream("Datastream 4", "The temperature of thing 4, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(3));
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
+        datastream.setProperty(sMdl.npDatastreamObservedproperty, O_PROPS.get(0));
+        sSrvc.create(datastream);
+        DATASTREAMS.add(datastream);
     }
 
     private static void createLocation0() throws ServiceFailureException {
@@ -253,6 +260,12 @@ public abstract class GeoTests extends AbstractTestClass {
         Entity featureOfInterest = sMdl.newFeatureOfInterest("FoI 4", "This should be FoI #4.", "application/geo+json", gjo);
         sSrvc.create(featureOfInterest);
         FEATURESOFINTEREST.add(featureOfInterest);
+
+        Entity o = sMdl.newObservation(4, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), DATASTREAMS.get(3))
+                .setProperty(sMdl.npObservationFeatureofinterest, featureOfInterest)
+                .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-04T01:01:01.000Z"), Instant.parse("2016-01-04T23:59:59.999Z")));
+        sSrvc.create(o);
+        OBSERVATIONS.add(o);
     }
 
     private static void createLocation5() throws ServiceFailureException {
@@ -309,7 +322,7 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'POINT(8 54.1)') gt 1", getFromList(LOCATIONS, 0, 1, 2, 4, 5, 6, 7));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') lt 1", getFromList(OBSERVATIONS, 3));
-        testFilterResults(sSrvc.dao(sMdl.etObservation), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') gt 1", getFromList(OBSERVATIONS, 0, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etObservation), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') gt 1", getFromList(OBSERVATIONS, 0, 1, 2, 4));
     }
 
     /**
@@ -324,7 +337,7 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etFeatureOfInterest), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etDatastream),
                 "geo.intersects(observedArea, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
-                getFromList(DATASTREAMS, 0, 1));
+                getFromList(DATASTREAMS, 0, 1, 3));
     }
 
     /**
@@ -420,7 +433,7 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etFeatureOfInterest), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etDatastream),
                 "st_intersects(observedArea, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
-                getFromList(DATASTREAMS, 0, 1));
+                getFromList(DATASTREAMS, 0, 1, 3));
     }
 
     /**
@@ -477,6 +490,20 @@ public abstract class GeoTests extends AbstractTestClass {
         LOGGER.info("  testStWithin");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_within(geography'POINT(7.5 52.75)', location)", getFromList(LOCATIONS, 4));
         testFilterResults(sSrvc.dao(sMdl.etFeatureOfInterest), "st_within(geography'POINT(7.5 52.75)', feature)", getFromList(FEATURESOFINTEREST, 4));
+    }
+
+    /**
+     * Test JSON-filters on geoJson fields.
+     */
+    @Test
+    void testGeoJsonFilters() {
+        LOGGER.info("  testGeoJsonFilters");
+        testFilterResults(sSrvc.dao(sMdl.etDatastream),
+                "observedArea/type eq 'Point'",
+                getFromList(DATASTREAMS, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream),
+                "observedArea/type eq 'LineString'",
+                getFromList(DATASTREAMS, 0));
     }
 
 }
