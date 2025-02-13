@@ -3,6 +3,7 @@
 ## Development version 2.4.8
 
 **Internal changes & Bugfixes**
+* Fixed #2114: JSON-filters not working on Datastream/observedArea.
 
 
 ## Release version 2.4.7
