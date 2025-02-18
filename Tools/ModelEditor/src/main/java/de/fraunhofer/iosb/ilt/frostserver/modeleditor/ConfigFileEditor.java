@@ -127,6 +127,7 @@ public class ConfigFileEditor {
             JsonWriter jw = gson.newJsonWriter(sw);
             jw.setIndent(indent);
             gson.toJson(json, jw);
+            sw.append('\n');
             String config = sw.toString();
             saveStringToCurrentFile(config);
             return config;
