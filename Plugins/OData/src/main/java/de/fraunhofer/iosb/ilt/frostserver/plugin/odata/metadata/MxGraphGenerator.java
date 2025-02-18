@@ -252,12 +252,10 @@ public class MxGraphGenerator {
 
     private String createText(String name, String typeName, boolean required) {
         StringBuilder result = new StringBuilder();
+        result.append("+ ").append(name).append(": ").append(StringUtils.replace(typeName, "Edm.", ""));
         if (required) {
-            result.append("+ ");
-        } else {
-            result.append("&nbsp;&nbsp;&nbsp;");
+            result.append(" [0..1]");
         }
-        result.append(name).append(": ").append(StringUtils.replace(typeName, "Edm.", ""));
         return result.toString();
     }
 
