@@ -28,7 +28,7 @@ metadata:
   {{- end }}
   {{- /*Following annotation can't be described in the _helpers.tpl, so actually it has to stay here*/ -}}
   {{- if and (not .Values.frost.mqtt.ingress.useSameAsHttp) (or (eq .Values.frost.mqtt.ingress.ingressProvider "kubernetes-nginx") (not .Values.frost.mqtt.ingress.ingressProvider)) }}
-    nginx.ingress.kubernetes.io/server-snippets: |
+    nginx.ingress.kubernetes.io/server-snippet: |
         location {{ template "frost-server.mqtt.websockPath" . }} {
           proxy_set_header Upgrade $http_upgrade;
           proxy_http_version 1.1;
