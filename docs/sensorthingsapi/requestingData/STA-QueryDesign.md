@@ -22,7 +22,7 @@ To get Observations one could start:
 
 All these options can give the same data, but it will be structured differently.
 
-![SensorThings API Data Model](../../images/SensorThingsAPI_DatenModel_v1.1-900.png)
+![SensorThings API Data Model](../../images/Datamodel-SensorThingsApi-Sensing.drawio.png)
 
 
 ## Starting from /Observations

@@ -61,7 +61,7 @@ All entities can link to other entities. In some cases, these relations are mand
 For instance, a Datastream must link to a Thing, a Sensor and an ObservedProperty.
 The Datamodel shows all these relations:
 
-![SensorThings API Data Model](../../images/SensorThingsAPI_DatenModel_v1.1-900.png)
+![SensorThings API Data Model](../../images/Datamodel-SensorThingsApi-Sensing.drawio.png)
 
 This means there is a certain order in which the entities must be created.
 It's impossible to create an Observation without a Datastream.
