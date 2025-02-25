@@ -136,9 +136,9 @@ frost:
       # annotations:
       #   cert-manager.io/cluster-issuer: letsencrypt
       #   cert-manager.io/issue-temporary-certificate: "true"
-      # tls:
-      #   enabled: true
-      #   secretName: []
+      tls:
+        enabled: false
+        secretName: []
 
     # FROST-Server HTTP deployment resource option. An empty resources field will default to the limits of the namespace.
     resources:
@@ -259,9 +259,9 @@ frost:
       # annotations:
       #   cert-manager.io/cluster-issuer: letsencrypt
       #   cert-manager.io/issue-temporary-certificate: "true"
-      # tls:
-      #   enabled: true
-      #   secretName: []
+      tls:
+        enabled: false
+        secretName: []
 
     # FROST-Server MQTT business settings
     serviceHost: "mqtt.mydomain.com" # default URI is the same then frost.http.serviceHost"
