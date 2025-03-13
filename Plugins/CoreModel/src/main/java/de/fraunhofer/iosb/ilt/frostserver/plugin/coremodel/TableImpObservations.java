@@ -483,10 +483,13 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
         // Switch to ADMIN user
         PrincipalExtended userPrincipal = PrincipalExtended.getLocalPrincipal();
-        PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
-        pm.insert(foi, UpdateMode.INSERT_STA_11);
-        // Switch back to normal user
-        PrincipalExtended.setLocalPrincipal(userPrincipal);
+        try {
+            PrincipalExtended.setLocalPrincipal(PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL);
+            pm.insert(foi, UpdateMode.INSERT_STA_11);
+        } finally {
+            // Switch back to normal user
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
+        }
 
         Object foiId = foi.getPrimaryKeyValues().get(0);
         dslContext.update(ql)
