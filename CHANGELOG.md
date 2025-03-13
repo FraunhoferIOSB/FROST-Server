@@ -3,6 +3,7 @@
 ## Development version 2.5.4
 
 **Internal changes & Bugfixes**
+* Fixed sources for test suite not being created
 * Fixed #2114: JSON-filters not working on Datastream/observedArea.
 * Fixed that not all plugins would generate liquibase parameters for all liquibase calls.
 * Added Actuation support to the Projects plugin.
