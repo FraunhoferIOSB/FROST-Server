@@ -23,6 +23,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import io.prometheus.metrics.core.metrics.Counter;
+import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,6 +122,25 @@ public class FrostMqttServer {
             configFileName = args[0];
         }
         CoreSettings coreSettings = loadCoreSettings(configFileName);
+
+        JvmMetrics.builder().register(); // initialize the out-of-the-box JVM metrics
+
+        Counter counter = Counter.builder()
+                .name("my_count_total")
+                .help("example counter")
+                .labelNames("status")
+                .register();
+
+        counter.labelValues("ok").inc();
+        counter.labelValues("ok").inc();
+        counter.labelValues("error").inc();
+
+        int metricsPort = 9400;
+        HTTPServer metricsServer = HTTPServer.builder()
+                .port(metricsPort)
+                .buildAndStart();
+        LOGGER.info("Prometheus metrics endpoint started on port {}", metricsPort);
+
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
 
@@ -129,6 +151,7 @@ public class FrostMqttServer {
                 String read = input.readLine();
                 LOGGER.warn("Exiting due to input {}...", read);
                 server.stop();
+                metricsServer.stop();
             }
         }
     }

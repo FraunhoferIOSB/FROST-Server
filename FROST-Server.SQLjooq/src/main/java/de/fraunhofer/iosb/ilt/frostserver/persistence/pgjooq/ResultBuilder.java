@@ -45,6 +45,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.CountMode;
+import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +90,13 @@ public class ResultBuilder implements ResourcePathVisitor {
      * $value, then the resultObject is encapsulated in a Map, using this key.
      */
     private String entityName;
+
+    private static Histogram queryDuration = Histogram.builder()
+            .name("sql_query_duration_seconds")
+            .help("SQL query execution time in seconds")
+            .unit(Unit.SECONDS)
+            .labelNames("EntityType")
+            .register();
 
     /**
      *
@@ -248,7 +257,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
         long start = System.currentTimeMillis();
         Cursor<R> result;
-        try {
+        try (var timer = queryDuration.labelValues(path.getMainElementType().entityName).startTimer()) {
             result = query.fetchLazy();
         } catch (DataAccessException exc) {
             if (LOGGER.isWarnEnabled()) {

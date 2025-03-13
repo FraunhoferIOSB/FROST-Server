@@ -28,6 +28,9 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import io.prometheus.metrics.core.datapoints.Timer;
+import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.model.snapshots.Unit;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -43,8 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The main FROST Servlet.
  */
 @WebServlet(
         name = "CoreServlet",
@@ -55,13 +57,23 @@ import org.slf4j.LoggerFactory;
 @MultipartConfig()
 public class ServletMain extends HttpServlet {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
     private static final String NOT_FOUND = "{\"error\":\"Version Not Found\"}";
 
+    private static Histogram duration = Histogram.builder()
+            .name("http_request_duration_seconds")
+            .help("HTTP request service time in seconds")
+            .unit(Unit.SECONDS)
+            .labelNames("method")
+            .register();
+
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
+        try (Timer timer = duration.labelValues(request.getMethod()).startTimer()) {
+            executeRequest(request, response);
+        }
+    }
+
+    private void executeRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         String pathInfo = request.getPathInfo();
         final CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);

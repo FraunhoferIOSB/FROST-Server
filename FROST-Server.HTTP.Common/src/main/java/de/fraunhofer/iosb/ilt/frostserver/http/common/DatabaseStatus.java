@@ -39,8 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The Servlet that provides the database status page.
  */
 @WebServlet(name = "DatabaseStatus", urlPatterns = {"/DatabaseStatus"})
 public class DatabaseStatus extends HttpServlet {

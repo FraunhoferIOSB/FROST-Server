@@ -36,12 +36,16 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import io.prometheus.metrics.core.datapoints.CounterDataPoint;
+import io.prometheus.metrics.core.metrics.Counter;
+import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -64,9 +68,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A message bus implementation for out-of-JVM use.
- *
- * @author scf
+ * A message bus implementation for out-of-JVM use. This uses an MQTT broker as
+ * message bus.
  */
 public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults {
 
@@ -87,9 +90,6 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     @DefaultValueInt(50)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttMessageBus.class);
 
     private int sendPoolSize;
@@ -97,23 +97,24 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private int recvPoolSize;
     private int recvQueueSize;
 
+    private final String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
+
     private BlockingQueue<EntityChangedMessage> sendQueue;
     private ExecutorService sendService;
-    private List<Processor<EntityChangedMessage>> sendProcessors = new ArrayList<>();
+    private final List<Processor<EntityChangedMessage>> sendProcessors = new ArrayList<>();
 
     private BlockingQueue<EntityChangedMessage> recvQueue;
     private ExecutorService recvService;
-    private List<Processor<EntityChangedMessage>> recvProcessors = new ArrayList<>();
+    private final List<Processor<EntityChangedMessage>> recvProcessors = new ArrayList<>();
 
     private ScheduledExecutorService maintenanceTimer;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
     private final AtomicInteger sendQueueCount = new AtomicInteger();
-    private final LoggingStatus logStatus = new LoggingStatus(this::checkWorkers);
+    private final LoggingStatus logStatus = new LoggingStatus(this, this::checkWorkers);
 
     private String broker;
-    private final String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
     private MqttClient client;
     private String topicName;
     private int qosLevel;
@@ -289,6 +290,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         if (sendQueue.offer(message)) {
             logStatus.setSendQueueCount(sendQueueCount.incrementAndGet());
         } else {
+            logStatus.addSendOverrun();
             LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                     PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
         }
@@ -346,6 +348,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             return;
         }
         if (!recvQueue.offer(ecMessage)) {
+            logStatus.addRecvOverrun();
             LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                     PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);
         }
@@ -381,14 +384,57 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
         public static final String MESSAGE = "RecvQueue: {} [{}, {}, {}] SendQueue: {} [{}, {}, {}] ";
+        public static final String SEND = "Send";
+        public static final String RECEIVE = "Receive";
+        public static final String DEAD = "Dead";
+        public static final String WORKING = "Working";
+        public static final String WAITING = "Waiting";
+
         public final Object[] status;
         private final Runnable processor;
+        private final MqttMessageBus parent;
 
-        public LoggingStatus(Runnable processor) {
+        private final Counter queueOverrunCounter;
+        private final CounterDataPoint queueOverrunRecv;
+        private final CounterDataPoint queueOverrunSend;
+
+        public LoggingStatus(MqttMessageBus parent, Runnable processor) {
             super(MESSAGE, new Object[8]);
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
             this.processor = processor;
+            this.parent = parent;
+            GaugeWithCallback.builder()
+                    .name("CB_mqtt_bus_queue_fill_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .help("Number of items in the Queue")
+                    .labelNames("queue_name")
+                    .callback(cb -> {
+                        cb.call((1.0 * (Integer) status[0] / parent.recvQueueSize), RECEIVE);
+                        cb.call((1.0 * (Integer) status[4] / parent.sendQueueSize), SEND);
+                    })
+                    .register();
+            GaugeWithCallback.builder()
+                    .name("CB_mqtt_bus_worker_status_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .help("Overview of what workers do")
+                    .labelNames("queue_name", "worker_status")
+                    .callback(cb -> {
+                        process();
+                        cb.call((Integer) status[1], RECEIVE, WAITING);
+                        cb.call((Integer) status[2], RECEIVE, WORKING);
+                        cb.call((Integer) status[3], RECEIVE, DEAD);
+                        cb.call((Integer) status[5], SEND, WAITING);
+                        cb.call((Integer) status[6], SEND, WORKING);
+                        cb.call((Integer) status[7], SEND, DEAD);
+                    })
+                    .register();
+
+            queueOverrunCounter = Counter.builder()
+                    .name("queue_overruns_total_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .help("Number of items dropped because the queue was full")
+                    .labelNames("queue_name")
+                    .register();
+            queueOverrunRecv = queueOverrunCounter.labelValues(RECEIVE);
+            queueOverrunSend = queueOverrunCounter.labelValues(SEND);
         }
 
         @Override
@@ -416,6 +462,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             return this;
         }
 
+        public void addRecvOverrun() {
+            queueOverrunRecv.inc();
+        }
+
         public LoggingStatus setSendQueueCount(Integer count) {
             status[4] = count;
             return this;
@@ -434,6 +484,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         public LoggingStatus setSendBad(Integer size) {
             status[7] = size;
             return this;
+        }
+
+        public void addSendOverrun() {
+            queueOverrunSend.inc();
         }
 
     }

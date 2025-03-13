@@ -30,8 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Custom simple (non-complex) property types.
  */
 public class TypeSimpleCustom extends TypeSimple {
 
