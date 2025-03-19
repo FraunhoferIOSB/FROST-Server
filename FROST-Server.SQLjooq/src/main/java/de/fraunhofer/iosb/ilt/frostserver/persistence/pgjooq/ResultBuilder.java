@@ -62,8 +62,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Turns the sqlQuery into the model instances to be returned to the client.
- *
- * @author scf
  */
 public class ResultBuilder implements ResourcePathVisitor {
 
@@ -91,7 +89,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      */
     private String entityName;
 
-    private static Histogram queryDuration = Histogram.builder()
+    private static final Histogram QUERY_DURATION = Histogram.builder()
             .name("sql_query_duration_seconds")
             .help("SQL query execution time in seconds")
             .unit(Unit.SECONDS)
@@ -257,7 +255,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
         long start = System.currentTimeMillis();
         Cursor<R> result;
-        try (var timer = queryDuration.labelValues(path.getMainElementType().entityName).startTimer()) {
+        try (var timer = QUERY_DURATION.labelValues(path.getMainElementType().entityName).startTimer()) {
             result = query.fetchLazy();
         } catch (DataAccessException exc) {
             if (LOGGER.isWarnEnabled()) {

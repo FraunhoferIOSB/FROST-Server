@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Logging
+title: Logging & Metrics
 category: settings
 order: 23
 ---
@@ -49,4 +49,22 @@ environment variables that influence basic logging options.
   The log level for the `liquibase` package. Default: INFO
 * **FROST_LL_org_jooq:** 2.0.0  
   The log level for the `org.jooq` package. Default: INFO
+
+
+# Metrics
+
+FROST-Server uses prometheus to gather metrics.
+For the HTTP component, the metrics end point can be made available on the same port as the normal service, or on a separate port.
+
+
+## Environment variables
+
+* **metrics.useServlet:**  
+  For the HTTP and All-In-One components, use a servlet to expose the metrics.
+  This makes `/FROST-Server/metrics` available, next to the other end-points. Default: `false`.
+* **metrics.useInternalHttpServer:**  
+  Use a separate HTTP service, on its own port, to expose the metrics.
+  This makes a `/metrics` URL available on a configurable port. Default: `true`.
+* **metrics.endpointPort:**  
+  The port to use for the separate HTTP service that exposes the metrics. Default: `9400`.
 

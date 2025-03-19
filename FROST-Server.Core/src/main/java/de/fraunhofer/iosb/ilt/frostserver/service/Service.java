@@ -61,6 +61,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
+import io.prometheus.metrics.core.datapoints.Timer;
+import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -92,8 +95,6 @@ import org.slf4j.LoggerFactory;
  * explicitly started.
  *
  * This class is not thread-safe.
- *
- * @author jab, scf
  */
 public class Service implements AutoCloseable {
 
@@ -109,6 +110,14 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+
+    private static final Histogram REQUEST_DURATION = Histogram.builder()
+            .name("service_request_duration_seconds")
+            .help("Service request service time in seconds")
+            .unit(Unit.SECONDS)
+            .labelNames("requestType")
+            .register();
+
     private static final String EXCEPTION = "Exception:";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
@@ -149,27 +158,29 @@ public class Service implements AutoCloseable {
             response = new ServiceResponseDefault();
         }
         String requestType = request.getRequestType();
-        switch (requestType) {
-            case GET_CAPABILITIES:
-                return executeGetCapabilities(request, response);
-            case CREATE:
-                return executePost(request, response);
-            case READ:
-                return executeGet(request, response);
-            case DELETE:
-                return executeDelete(request, response);
-            case UPDATE_ALL:
-                return executePut(request, response);
-            case UPDATE_CHANGES:
-                return executePatch(request, response, false);
-            case UPDATE_CHANGESET:
-                return executePatch(request, response, true);
-            default:
-                PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
-                if (plugin == null) {
-                    return errorResponse(response, 500, "Illegal request type.");
-                }
-                return plugin.execute(this, request, response);
+        try (Timer timer = REQUEST_DURATION.labelValues(requestType).startTimer()) {
+            switch (requestType) {
+                case GET_CAPABILITIES:
+                    return executeGetCapabilities(request, response);
+                case CREATE:
+                    return executePost(request, response);
+                case READ:
+                    return executeGet(request, response);
+                case DELETE:
+                    return executeDelete(request, response);
+                case UPDATE_ALL:
+                    return executePut(request, response);
+                case UPDATE_CHANGES:
+                    return executePatch(request, response, false);
+                case UPDATE_CHANGESET:
+                    return executePatch(request, response, true);
+                default:
+                    PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
+                    if (plugin == null) {
+                        return errorResponse(response, 500, "Illegal request type.");
+                    }
+                    return plugin.execute(this, request, response);
+            }
         }
     }
 

@@ -27,13 +27,16 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.SessionCookieConfig;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -43,7 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jab, scf
+ * The abstract version of the context listener that starts FROST services when
+ * running in a java EE environment.
  */
 public abstract class AbstractContextListener implements ServletContextListener {
 
@@ -53,6 +57,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
     private static final String JETTY_CORS_FILTER_CLASS = "org.eclipse.jetty.servlets.CrossOriginFilter";
 
     private CoreSettings coreSettings;
+    private HTTPServer metricsServer;
 
     public CoreSettings getCoreSettings() {
         return coreSettings;
@@ -97,6 +102,12 @@ public abstract class AbstractContextListener implements ServletContextListener 
 
                 setUpCorsFilter(context, coreSettings);
 
+                // Maybe start Prometheus metrics endpoint
+                MetricsSettings metricsSettings = new MetricsSettings(coreSettings);
+                if (metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL)) {
+                    startMetricsServer(metricsSettings);
+                }
+
                 PersistenceManagerFactory.init(coreSettings);
                 PersistenceManagerFactory.getInstance(coreSettings);
                 MessageBusFactory.createMessageBus(coreSettings);
@@ -117,9 +128,24 @@ public abstract class AbstractContextListener implements ServletContextListener 
         }
     }
 
+    public void startMetricsServer(MetricsSettings settings) {
+        int metricsPort = settings.getInt(MetricsSettings.TAG_ENDPOINT_PORT);
+        try {
+            metricsServer = HTTPServer.builder()
+                    .port(metricsPort)
+                    .buildAndStart();
+            LOGGER.info("Prometheus metrics endpoint started on port {}", metricsPort);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to start metrics server.", ex);
+        }
+    }
+
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
+        if (metricsServer != null) {
+            metricsServer.stop();
+        }
         if (coreSettings == null) {
             return;
         }

@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
@@ -48,6 +49,7 @@ public class FrostMqttServer {
     private static final String KEY_WAIT_FOR_ENTER = "WaitForEnter";
     private static final String CONFIG_FILE_NAME = "FrostMqtt.properties";
     private final CoreSettings coreSettings;
+    private HTTPServer metricsServer;
     private MqttManager mqttManager;
     private Thread shutdownHook;
 
@@ -71,10 +73,28 @@ public class FrostMqttServer {
 
     public void start() {
         addShutdownHook();
+
+        MetricsSettings metricsSettings = new MetricsSettings(coreSettings);
+        if (metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL)) {
+            startMetricsServer(metricsSettings);
+        }
+
         PersistenceManagerFactory.init(coreSettings);
         MessageBusFactory.createMessageBus(coreSettings);
         mqttManager = new MqttManager(coreSettings);
         coreSettings.getMessageBus().addMessageListener(mqttManager);
+    }
+
+    public void startMetricsServer(MetricsSettings settings) {
+        int metricsPort = settings.getInt(MetricsSettings.TAG_ENDPOINT_PORT);
+        try {
+            metricsServer = HTTPServer.builder()
+                    .port(metricsPort)
+                    .buildAndStart();
+            LOGGER.info("Prometheus metrics endpoint started on port {}", metricsPort);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to start metrics server.", ex);
+        }
     }
 
     public void stop() {
@@ -84,6 +104,10 @@ public class FrostMqttServer {
         } catch (IllegalStateException ex) {
             LOGGER.trace("Already shutting down.", ex);
         }
+        if (metricsServer != null) {
+            metricsServer.stop();
+        }
+
         mqttManager.shutdown();
         coreSettings.getMessageBus().stop();
         try {

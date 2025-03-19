@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A message bus implementation for in-JVM use.
- *
- * @author scf
  */
 public class InternalMessageBus implements MessageBus, ConfigDefaults {
 

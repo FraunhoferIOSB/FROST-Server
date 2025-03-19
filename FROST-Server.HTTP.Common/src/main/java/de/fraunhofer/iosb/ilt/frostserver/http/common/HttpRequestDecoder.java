@@ -54,6 +54,8 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestDecoder.class.getName());
 
+    public static final String PREFIX_REQUEST_DECODER = "requestDecoder.";
+
     @DefaultValueBoolean(false)
     public static final String TAG_AUTODETECT_ROOT_URL = "autodetectRootUrl";
     @DefaultValueBoolean(false)
@@ -77,7 +79,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
 
     private HttpRequestDecoder(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
-        setSettings(coreSettings.getHttpSettings().getSubSettings("requestDecoder."));
+        setSettings(coreSettings.getHttpSettings().getSubSettings(PREFIX_REQUEST_DECODER));
         String serviceRootUrl = coreSettings.getQueryDefaults().getServiceRootUrl();
         boolean myAutodetectRootUrl = getBoolean(TAG_AUTODETECT_ROOT_URL);
         if (!myAutodetectRootUrl && StringHelper.isNullOrEmpty(serviceRootUrl)) {

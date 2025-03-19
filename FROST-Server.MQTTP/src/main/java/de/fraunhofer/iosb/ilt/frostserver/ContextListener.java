@@ -26,7 +26,7 @@ import jakarta.servlet.annotation.WebListener;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
- * @author jab, scf
+ * ContextListener that also starts an MQTT server, if needed.
  */
 @WebListener
 public class ContextListener extends AbstractContextListener {

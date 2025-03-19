@@ -17,13 +17,35 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * The Servlet that supplies the Prometheus metrics.
  */
 @WebServlet(name = "PrometheusMetrics", urlPatterns = {"/metrics"})
 public class ServletPrometheusMetrics extends PrometheusMetricsServlet {
+
+    public static MetricsSettings settings;
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (settings == null) {
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+            settings = new MetricsSettings(coreSettings);
+        }
+        if (settings.getBoolean(MetricsSettings.TAG_USE_SERVLET)) {
+            super.service(request, response);
+        }
+        response.sendError(404);
+    }
 
 }

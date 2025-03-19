@@ -111,7 +111,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
+    private final AtomicInteger recvQueueCount = new AtomicInteger();
     private final AtomicInteger sendQueueCount = new AtomicInteger();
+    private long lastSendOverrun = 0;
+    private long lastRecvOverrun = 0;
     private final LoggingStatus logStatus = new LoggingStatus(this, this::checkWorkers);
 
     private String broker;
@@ -291,8 +294,12 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             logStatus.setSendQueueCount(sendQueueCount.incrementAndGet());
         } else {
             logStatus.addSendOverrun();
-            LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
-                    PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
+            long now = System.currentTimeMillis();
+            if (now - lastRecvOverrun > 200) {
+                lastRecvOverrun = now;
+                LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                        PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
+            }
         }
     }
 
@@ -347,10 +354,16 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
             return;
         }
-        if (!recvQueue.offer(ecMessage)) {
+        if (recvQueue.offer(ecMessage)) {
+            logStatus.setRecvQueueCount(recvQueueCount.incrementAndGet());
+        } else {
             logStatus.addRecvOverrun();
-            LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
-                    PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);
+            long now = System.currentTimeMillis();
+            if (now - lastRecvOverrun > 200) {
+                lastRecvOverrun = now;
+                LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                        PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);
+            }
         }
     }
 
@@ -360,6 +373,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     }
 
     private void handleMessageReceived(EntityChangedMessage message) {
+        logStatus.setRecvQueueCount(recvQueueCount.decrementAndGet());
         for (MessageListener listener : listeners) {
             try {
                 listener.messageReceived(message);
@@ -392,7 +406,6 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         public final Object[] status;
         private final Runnable processor;
-        private final MqttMessageBus parent;
 
         private final Counter queueOverrunCounter;
         private final CounterDataPoint queueOverrunRecv;
@@ -403,7 +416,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
             this.processor = processor;
-            this.parent = parent;
+
             GaugeWithCallback.builder()
                     .name("CB_mqtt_bus_queue_fill_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
                     .help("Number of items in the Queue")

@@ -60,7 +60,7 @@ public class ServletMain extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
     private static final String NOT_FOUND = "{\"error\":\"Version Not Found\"}";
 
-    private static Histogram duration = Histogram.builder()
+    private static final Histogram REQUEST_DURATION = Histogram.builder()
             .name("http_request_duration_seconds")
             .help("HTTP request service time in seconds")
             .unit(Unit.SECONDS)
@@ -68,7 +68,7 @@ public class ServletMain extends HttpServlet {
             .register();
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
-        try (Timer timer = duration.labelValues(request.getMethod()).startTimer()) {
+        try (Timer timer = REQUEST_DURATION.labelValues(request.getMethod()).startTimer()) {
             executeRequest(request, response);
         }
     }
