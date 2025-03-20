@@ -22,7 +22,7 @@ Password are not visible to anyone, not even to admin users.
 
 Users can change their own password.
 
-**Roles** embody sets of permissions that a user can have. Roles are stored in the `ROLES` table. Test roles are:
+**Roles** embody sets of permissions that a user can have. Roles are stored in the `ROLES` table. The default roles are:
 
 - read
 - create
@@ -35,9 +35,9 @@ The `Roles` entity type is only visible to admin users.
 
 Users can have global Roles. The global roles are stored in the `USER_ROLES` table that directly links Users to Roles.
 
-- A global admin user is allowed to do everything.
-- A user with a global "create" role is allowed to create all entity types except for Users and admin-only types (Roles, UserProjectRoles).
-- A user with a global "read" role can read all entities, except for other User entities or admin-only types.
+- A global `admin` user is allowed to do everything.
+- A user with a global `create` role is allowed to create all entity types except for Users and admin-only types (Roles, UserProjectRoles).
+- A user with a global `read` role can read all entities, except for other User entities or admin-only types.
 
 **Projects** are administrative entities grouping data (through Things).
 Projects are stored in the `PROJECTS` table.
@@ -51,7 +51,8 @@ Users can have project-roles. Users are linked to a Project with a certain Role 
 
 The `UserProjectRoles` entity type is only visible to admin users.
 
-Users without a global "read" role, but with a project-related role can only read entities associated with a project they are related to.
+Users without a global "read" role, but with a project-related role can only read entities associated with a project they are related to, or entities that are related to a project that is `public`.
+This means they can not read entities that are not related to any projects.
 
 
 ## Linking entities to Projects
@@ -90,7 +91,8 @@ Project admins can link users to projects.
 ### KeyCloak Auth
 
 When using [KeyCloak Authentication](https://fraunhoferiosb.github.io/FROST-Server/settings/auth.html#settings-for-the-auth-provider-class-keycloakauthprovider) the contents of the user and roles tables are automatically filled from the data supplied by KeyCloak.
-The links between Projects and Users/Roles can also be decoded from the KeyCloak data, by using a userRoleDecoder.
+
+The links between Projects and Users/Roles can also be decoded from the KeyCloak data, by using a userRoleDecoder. The ProjectRoleDecoder takes the list of roles (strings) that KeyCloak provides, uses a regular expression to extract a project name and a role name from each string, and creates a UserProjectRole for the user for each of these.
 
 
 ## Data Model
@@ -117,10 +119,70 @@ A new project can be created by posting to v1.1/Projects:
     }
 
 
+### Location
+
+A new location can be created by posting to `v1.1/Locations`, or any other path that represents a list of Locations.
+For users that do not have global `create` rights, the new Location must be linked to a Project that the user has `create` rights on.
+The location can be linked to multiple projects, but the user creating the Location must have `create` rights on all these projects.
+
+    {
+        "name": "Location Station 1",
+        "restricted": false,
+        "description": "The location of the first station",
+        "encodingType": "application/geo+json",
+        "location": {"type": "Point", "coordinates": [ 8, 49 ]},
+        "Projects": [{"@iot.id": 42}]
+    }
+
+To make linking to the correct Project easier, the Location can also be created by posting to `v1.1/Projects(42)/Locations`.
+This will automatically link the new Location to the Project referenced in the URL.
+
+
+### Thing, Sensor
+
+Like Locations, users that do not have global `ceate` rights must directly link created Things or Sensors to a Project they have `create` rights on.
+
+    {
+        "name": "Station 1",
+        "description": "The first station",
+        "Locations": [{"@iot.id": 1}],
+        "Projects": [{"@iot.id": 42}]
+    }
+
+### FeatureOfInterest
+
+When features of interest are created manually, they too must be linked to a project the user has `create` rights on, if the user does not have global `create` rights.
+
+When features are created automatically, they inherit the Projects and `restricted` setting from the Location the Feature is created from.
+When the Projects of the Location, or the `restricted` setting of the Location, is changed, the FeatureOfInterest is currently not updated.
+
+
+### ObservedProperties
+
+Since ObservedProperties are inherently shared entities, they are not linked to Projects.
+Only users with global `create` rights and administrators can create or edit ObservedProperties.
+
+
+### Datastreams
+
+Access rights on Datastreams are controlled through the Thing the Datastream is associated with.
+Users that want to create a Datastream must have `create` rights on a Project of the Thing the Datastream is associated with.
+At the same time, when creating a Datastream, it must be linked to a Sensor.
+To be able to create this link, the user creating the Datastream must have `create` rights on (a Project linked to) the Sensor.
+
+
+### Observations
+
+Access rights on Observations are conntrolled through the Datastream the Observation is associated with, and thus through the Thing of the Datastream.
+
+There are two user rights that give a user the right to create Observations: `create` and `obscreate`.
+Users with the right `obscreate` can only create observations, not other entities.
+Users can only create Observations in Datastreams in Things in Projects that they have one of these rights on.
+
 
 ## Conformance Class
 
-The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
+The conformance class this extension registers in the SensorThings (v1.1 and up) index document is:
 
     https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-Projects.html
 
