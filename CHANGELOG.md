@@ -3,6 +3,7 @@
 ## Development version 2.5.4
 
 **Internal changes & Bugfixes**
+* Generated features' Projects and restricted flag can be updated when the Location is updated.
 * Fixed expand of single entity with no target returning an object.
 * Fixed sources for test suite not being created
 * Fixed #2114: JSON-filters not working on Datastream/observedArea.
