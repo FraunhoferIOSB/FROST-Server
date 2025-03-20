@@ -3,6 +3,7 @@
 ## Development version 2.6.0
 
 **New Features**
+* Generated features' Projects and restricted flag can be updated when the Location is updated.
 * Fixed expand of single entity with no target returning an object.
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 
