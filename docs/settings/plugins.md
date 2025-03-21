@@ -135,7 +135,10 @@ This plugin requires the CoreModel and ModelLoader plugins.
 * **plugins.projects.enable:**  
   Toggle indicating the Projects plugin should be enabled. Default: `false`.
 * **plugins.projects.enableDefaultRules:**  
-  Toggle indicating the default fine-grained access control rules should be activated.
+  Toggle indicating the default fine-grained access control rules should be activated. Default: `true`.
+* **plugins.projects.updateFeatureWithLocation:** Since 2.5.4  
+  Toggle indicating that generated FeaturesOfInterest should be updated when the restricted flag, or the Projects of a Location are updated. Default: `false`.
+
 
 #### Settings for the UserRoleDecoder class `UserRoleDecoderDflt`
 
