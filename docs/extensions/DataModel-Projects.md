@@ -60,6 +60,9 @@ This means they can not read entities that are not related to any projects.
 **Things**, **Locations**, **Sensors** and **FeaturesOfInterest** link directly to one or more Projects.
 **Datastreams** link to Projects through their Thing.
 **Observations** link to Projects through their Datastream.
+When using the default access rules, users can only see entities that are linked to a Project that is 'public', or to a Project that they themselves are linked to.
+If an entity is linked to multiple Projects, only one of those Projects needs to be 'public' for the entity to be visible to non-project users.
+Entities that are not linked any projects are not visible to users that do not have global `read` rights.
 
 **Things**, **Locations**, **Datastreams** and **FeaturesOfInterest** can be restricted.
 This means that even if they are associated with a public project, they can still only be read by users associated to that project.
@@ -82,7 +85,7 @@ FROST-Server comes with following two out of the box: Basic Auth and KeyCloak Au
 
 ### Basic Auth
 
-When using [Basic Authentication](https://fraunhoferiosb.github.io/FROST-Server/settings/auth.html#settings-for-the-auth-provider-class-basicauthprovider) the user/password table and the role mapping of users to roles are maintained in the SensorThings database.
+When using [Basic Authentication](../settings/auth.html#settings-for-the-auth-provider-class-basicauthprovider) the user/password table and the role mapping of users to roles are maintained in the SensorThings database.
 The Users and Roles tables are exposed through the API, and users can change their password using the API.
 Global admins can create users, links users to roles and to projects.
 Project admins can link users to projects.
@@ -90,9 +93,22 @@ Project admins can link users to projects.
 
 ### KeyCloak Auth
 
-When using [KeyCloak Authentication](https://fraunhoferiosb.github.io/FROST-Server/settings/auth.html#settings-for-the-auth-provider-class-keycloakauthprovider) the contents of the user and roles tables are automatically filled from the data supplied by KeyCloak.
+When using [KeyCloak Authentication](../settings/auth.html#settings-for-the-auth-provider-class-keycloakauthprovider) the contents of the user and roles tables are automatically filled from the data supplied by KeyCloak.
 
 The links between Projects and Users/Roles can also be decoded from the KeyCloak data, by using a userRoleDecoder. The ProjectRoleDecoder takes the list of roles (strings) that KeyCloak provides, uses a regular expression to extract a project name and a role name from each string, and creates a UserProjectRole for the user for each of these.
+
+
+## MQTT
+
+Using MQTT a client can subscribe to almost any URL in the SensorThings API, and received notifications when something changes for that URL.
+Access rights in the MQTT protocol are checked when a user makes a subscription to a topic, and not when a message arrives on a topic.
+This means that, when combining MQTT with fine-grained authorisation, a user must only be allowed to make subscriptions on topics for which this user is allowed to see _all_ messages.
+
+A subscription on the topic `v1.1/Observations` must thus not be allowed, since that would allow the user to receive all Observations that are added to the server, even those in Datastreams he is not allowed to see.
+
+In most cases, it is enough to restrict all upper-level topics, and only allow subscriptions to relative topics such as `v1.1/Datastreams(5)/Observations`.
+These restrictions can be made using the option `auth.mqtt.topicAllowList`.
+The suggested value for this option is: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`.
 
 
 ## Data Model
@@ -104,7 +120,7 @@ The image below shows the core STA data model in blue, with the security extensi
 
 ## Example Data
 
-An example JSON-Batch document is [available](https://github.com/hylkevds/FROST-Server.Plugin.Projects/blob/main/scripts/dataBatchPost.json).
+An example JSON-Batch document is [available](projectsBatchPost.json).
 When posting this Batch to v1.1/$batch it will create several Projects, User, Roles and STA entities linked to the Projects.
 
 
