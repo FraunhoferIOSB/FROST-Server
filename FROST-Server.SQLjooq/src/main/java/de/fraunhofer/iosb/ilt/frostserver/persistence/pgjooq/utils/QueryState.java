@@ -76,18 +76,28 @@ public class QueryState<T extends StaMainTable<T>> {
     private final TableRef tableRef;
 
     public QueryState(T table, QueryState parent, String staAlias) {
-        this(parent.getPersistenceManager(), table, null);
+        this(parent.getPersistenceManager(), table, new TableRef(table), null);
+        this.parent = parent;
+        this.staAlias = staAlias;
+    }
+
+    public QueryState(T table, TableRef tableRef, QueryState parent, String staAlias) {
+        this(parent.getPersistenceManager(), table, tableRef, null);
         this.parent = parent;
         this.staAlias = staAlias;
     }
 
     public QueryState(JooqPersistenceManager pm, T table, Set<PropertyFields<T>> sqlSelectFields) {
+        this(pm, table, new TableRef(table), sqlSelectFields);
+    }
+
+    public QueryState(JooqPersistenceManager pm, T table, TableRef tableRef, Set<PropertyFields<T>> sqlSelectFields) {
         this.persistenceManager = pm;
         this.selectedProperties = sqlSelectFields;
+        this.tableRef = tableRef;
         sqlFrom = table;
         mainTable = table;
         sqlMainPkFields = table.getPkFields();
-        tableRef = new TableRef(table);
         staAlias = ALIAS_ROOT;
     }
 
@@ -112,8 +122,11 @@ public class QueryState<T extends StaMainTable<T>> {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath instanceof NavigationPropertyEntity navPropEntity) {
                     QueryState childState = getChildState(navPropEntity);
-                    Entity subEntity = childState.entityFromRecord(tuple, dataSize, expand.getSubQuery());
-                    mainEntity.setProperty(navPropEntity, subEntity);
+                    if (tuple.get(childState.getTableRef().getJoinedOnField()) != null) {
+                        // This navlink has a target.
+                        Entity subEntity = childState.entityFromRecord(tuple, dataSize, expand.getSubQuery());
+                        mainEntity.setProperty(navPropEntity, subEntity);
+                    }
                 }
             }
         }
@@ -133,6 +146,13 @@ public class QueryState<T extends StaMainTable<T>> {
             return this;
         }
         return parent.findStateForAlias(alias);
+    }
+
+    public String getCurrentAlias() {
+        if (parent == null) {
+            return ALIAS_PREFIX + aliasNr;
+        }
+        return parent.getCurrentAlias();
     }
 
     public String getNextAlias() {
