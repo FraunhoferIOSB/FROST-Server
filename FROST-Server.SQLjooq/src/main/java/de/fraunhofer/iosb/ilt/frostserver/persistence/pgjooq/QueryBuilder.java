@@ -422,9 +422,8 @@ public class QueryBuilder implements ResourcePathVisitor {
         Query subQuery = expand.getSubQuery();
         TableRef tableRef = sqlState.getTableRef();
         TableRef joinRef = tableRef.createJoin(navPropEntity.getName(), queryState);
-        tableRef.addJoin(navPropEntity, joinRef);
         StaMainTable<?> joinedTable = joinRef.getTable();
-        QueryState subState = new QueryState(joinedTable, sqlState, sqlState.getNextAlias());
+        QueryState subState = new QueryState(joinedTable, joinRef, sqlState, sqlState.getCurrentAlias());
         Set<Property> subProperties = findSelectedProperties(subQuery);
         subState.setSelectedProperties(joinedTable.getPropertyFieldRegistry().getFieldsForProperties(subProperties));
         sqlState.addChildState(navPropEntity, subState);

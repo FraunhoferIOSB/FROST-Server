@@ -121,7 +121,8 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         Map<Field, Field> joinEquals = new HashMap<>();
         joinEquals.put(targetField, sourceField);
         return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased)
-                .setJoinEquals(joinEquals);
+                .setJoinEquals(joinEquals)
+                .setJoinedOnField(sourceField);
     }
 
     @Override
