@@ -181,7 +181,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         JsonNode rqArray = mapper.readTree(resultQualityArrayString);
 
         for (int i = 0; i <= 12; i++) {
-            Map<String, Object> parameters = new HashMap<>();
+            MapValue parameters = new MapValue();
             Entity o = sMdl.newObservation(i, datastream);
             parameters.put("string", generateString(i, 10));
             parameters.put("boolean", i % 2 == 0);
@@ -196,7 +196,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         }
         {
             // 13
-            Map<String, Object> parameters = new HashMap<>();
+            MapValue parameters = new MapValue();
             Entity o = sMdl.newObservation("badVales1", datastream);
             parameters.put("int", generateString(13, 10));
             parameters.put("string", 13 % 2 == 0);
@@ -210,7 +210,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         }
         {
             // 14
-            Map<String, Object> parameters = new HashMap<>();
+            MapValue parameters = new MapValue();
             Entity o = sMdl.newObservation("badVales2", datastream);
             parameters.put("boolean", generateString(14, 10));
             parameters.put("int", 14 % 2 == 0);
@@ -224,7 +224,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         }
         {
             // 15
-            Map<String, Object> parameters = new HashMap<>();
+            MapValue parameters = new MapValue();
             Entity o = sMdl.newObservation("badVales3", datastream);
             parameters.put("boolean", "true");
             parameters.put("int", "5");

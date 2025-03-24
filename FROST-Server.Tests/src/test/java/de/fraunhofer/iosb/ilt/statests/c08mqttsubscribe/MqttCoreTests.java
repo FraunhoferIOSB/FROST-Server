@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
-import de.fraunhofer.iosb.ilt.frostclient.model.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -619,7 +618,7 @@ public class MqttCoreTests extends AbstractTestClass {
         final Callable<Object> updateAction = () -> {
             Entity thing = eh2.getCache(sMdl.etThing, 0);
             Entity loc2 = eh2.getCache(sMdl.etLocation, 1);
-            EntitySet thingLocs = new EntitySetImpl(sMdl.npThingLocations);
+            EntitySet thingLocs = new EntitySet(thing, sMdl.npThingLocations);
             thing.setProperty(sMdl.npThingLocations, thingLocs);
             thingLocs.add(loc2.withOnlyPk());
             sSrvc.update(thing);
