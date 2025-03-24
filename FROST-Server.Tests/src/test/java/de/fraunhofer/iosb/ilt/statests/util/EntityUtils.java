@@ -53,10 +53,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
@@ -595,7 +593,7 @@ public class EntityUtils {
 
     public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime, List<Entity> registry) throws ServiceFailureException {
         int idx = registry.size();
-        Map<String, Object> parameters = new HashMap<>();
+        MapValue parameters = new MapValue();
         parameters.put("idx", idx);
         SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)

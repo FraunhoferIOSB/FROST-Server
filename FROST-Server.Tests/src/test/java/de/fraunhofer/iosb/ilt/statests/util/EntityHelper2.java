@@ -325,7 +325,7 @@ public class EntityHelper2 {
                 .setProperty(EP_PARAMETERS, propertiesBuilder()
                         .addItem("param1", "some value1")
                         .addItem("param2", "some value2")
-                        .buildMap());
+                        .build());
         list.add(obs);
         return obs;
     }
