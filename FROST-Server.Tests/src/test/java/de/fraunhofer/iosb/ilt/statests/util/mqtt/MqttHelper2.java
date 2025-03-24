@@ -56,8 +56,9 @@ import org.slf4j.LoggerFactory;
  */
 public class MqttHelper2 {
 
-    public static final int WAIT_AFTER_INSERT = 100;
+    public static final int WAIT_AFTER_INSERT = 150;
     public static final int WAIT_AFTER_CLEANUP = 1;
+    public static final int MQTT_READ_RETRIES = 40;
     public static final int QOS = 2;
     public String clientId = "TS";
 

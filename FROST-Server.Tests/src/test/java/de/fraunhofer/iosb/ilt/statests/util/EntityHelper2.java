@@ -242,6 +242,7 @@ public class EntityHelper2 {
             }
             Entity entity = query.first();
             if (entity != null) {
+                LOGGER.info("Found entity of type {} after {} tries with filter {}: {}", entityType, retry, filter, entity);
                 return entity;
             }
             retry++;
@@ -259,7 +260,7 @@ public class EntityHelper2 {
     public JsonNode getEntityJsonWithRetry(EntityType entityType, String filter, String expand, int retries) {
         int retry = 0;
         while (retry < retries) {
-            JsonNode entity = EntityHelper2.this.getEntityJson(entityType, filter, expand);
+            JsonNode entity = getEntityJson(entityType, filter, expand);
             if (entity != null) {
                 return entity;
             }

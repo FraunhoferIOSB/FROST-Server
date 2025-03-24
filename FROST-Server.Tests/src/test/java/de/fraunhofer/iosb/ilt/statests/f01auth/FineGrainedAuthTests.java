@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MQTT_READ_RETRIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -795,7 +796,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private static class MqttCreateTester {
 
-        private static final int JOIN_TIMEOUT = 5000;
+        private static final int JOIN_TIMEOUT = 500 + MqttHelper2.MQTT_READ_RETRIES * MqttHelper2.WAIT_AFTER_INSERT;
 
         private final MqttHelper2 mh;
         private final EntityHelper2 eh;
@@ -848,7 +849,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 Entity entity = entityCreator.create(name);
                 String json = JsonWriter.writeEntity(entity);
                 mh.publish(topic, json);
-                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, 15);
+                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
                 if (createdEntity == null && !expectSuccess) {
                     success = true;
                     message = "Success";
