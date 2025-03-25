@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
@@ -104,9 +105,17 @@ public abstract class AbstractContextListener implements ServletContextListener 
 
                 // Maybe start Prometheus metrics endpoint
                 MetricsSettings metricsSettings = new MetricsSettings(coreSettings);
-                if (metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL)) {
+                final boolean metricsInternal = metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL);
+                final boolean metricsServlet = metricsSettings.getBoolean(MetricsSettings.TAG_USE_SERVLET);
+                if (metricsInternal || metricsServlet) {
+                    // initialize the out-of-the-box JVM metrics
+                    JvmMetrics.builder().register();
+                }
+                if (metricsInternal) {
                     startMetricsServer(metricsSettings);
                 }
+                // initialize the out-of-the-box JVM metrics
+                JvmMetrics.builder().register();
 
                 PersistenceManagerFactory.init(coreSettings);
                 PersistenceManagerFactory.getInstance(coreSettings);

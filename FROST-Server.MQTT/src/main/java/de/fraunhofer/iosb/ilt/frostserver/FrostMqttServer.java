@@ -88,6 +88,9 @@ public class FrostMqttServer {
     public void startMetricsServer(MetricsSettings settings) {
         int metricsPort = settings.getInt(MetricsSettings.TAG_ENDPOINT_PORT);
         try {
+            // initialize the out-of-the-box JVM metrics
+            JvmMetrics.builder().register();
+
             metricsServer = HTTPServer.builder()
                     .port(metricsPort)
                     .buildAndStart();
@@ -146,8 +149,6 @@ public class FrostMqttServer {
             configFileName = args[0];
         }
         CoreSettings coreSettings = loadCoreSettings(configFileName);
-
-        JvmMetrics.builder().register(); // initialize the out-of-the-box JVM metrics
 
         Counter counter = Counter.builder()
                 .name("my_count_total")
