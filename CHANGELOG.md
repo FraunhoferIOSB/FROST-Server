@@ -1,8 +1,9 @@
 # Changelog
 
-## Development version 2.5.4
+## Release version 2.5.4
 
 **Internal changes & Bugfixes**
+* Updated depencencies.
 * Generated features' Projects and restricted flag can be updated when the Location is updated.
 * Fixed expand of single entity with no target returning an object.
 * Fixed sources for test suite not being created
