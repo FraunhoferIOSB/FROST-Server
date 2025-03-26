@@ -34,6 +34,8 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
+import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -300,7 +302,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
                 + "  \"result\": 301\n"
                 + "}";
         response = HTTPMethods.doPut(urlObsGood, observationJson);
-        assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood);
+        assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood + "\n" + response.toString());
         observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 302\n"
@@ -416,5 +418,17 @@ public abstract class AdditionalTests extends AbstractTestClass {
         Entity found;
         found = doa.find(observation.getPrimaryKeyValues());
         assertNotNull(found.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be auto generated.");
+    }
+
+    @Test
+    void test08IncompletePut() throws ServiceFailureException {
+        Entity thing = sMdl.newThing("Thing Put", "A thing for testing PUT.");
+        sSrvc.create(thing);
+
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thing.getPrimaryKeyValues().get(0), null, null);
+        HTTPMethods.HttpResponse responseMap = HTTPMethods.doPut(urlString, "{}");
+        int responseCode = responseMap.code;
+        String message = "Invalid put should have failed.";
+        assertEquals(400, responseCode, message);
     }
 }
