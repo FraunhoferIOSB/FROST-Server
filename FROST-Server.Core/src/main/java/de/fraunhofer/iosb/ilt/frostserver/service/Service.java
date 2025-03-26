@@ -682,6 +682,7 @@ public class Service implements AutoCloseable {
 
             JsonReader entityParser = request.getJsonReader();
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
+            entity.setEntityPropertiesSet(true, true);
             entity.validateUpdate();
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
