@@ -1,8 +1,9 @@
 # Changelog
 
-## Development version 2.4.8
+## Release version 2.4.8
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 * Fixed #2132: Incomplete validation of entities for PUT.
 * Fixed expand of single entity with no target returning an object.
 * Fixed #2114: JSON-filters not working on Datastream/observedArea.
