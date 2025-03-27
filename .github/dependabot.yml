@@ -45,6 +45,8 @@ updates:
         versions: ["[10,)"]
       - dependency-name: "org.openjfx:*"
         versions: ["[22,)"]
+      - dependency-name: "org.jooq:*"
+        versions: ["[3.19,)"]
 
 
   # Maintain dependencies for GitHub Actions
