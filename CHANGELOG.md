@@ -1,6 +1,6 @@
 # Changelog
 
-## Development version 2.5.5
+## Release version 2.5.5
 
 **Internal changes & Bugfixes**
 * Fixed #2132: Incomplete validation of entities for PUT.
