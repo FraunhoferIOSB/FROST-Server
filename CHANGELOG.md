@@ -3,6 +3,7 @@
 ## Development version 2.5.6
 
 **Internal changes & Bugfixes**
+* Changed GeoJSON serialiser to streaming, improving performance of the GeoJSON resultFormat.
 
 
 ## Release version 2.5.5
