@@ -7,6 +7,7 @@
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 
 **Internal changes & Bugfixes**
+* Changed GeoJSON serialiser to streaming, improving performance of the GeoJSON resultFormat.
 * Fixed #2132: Incomplete validation of entities for PUT.
 * Fixed expand of single entity with no target returning an object.
 * Fixed sources for test suite not being created

@@ -20,22 +20,71 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_GEOJSON;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriter;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjElementSet;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjRowCollector;
+import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.geojson.Feature;
+import org.geojson.GeoJsonObject;
 
 /**
  *
  * @author scf
  */
 public class ResultFormatterGeoJson implements ResultFormatter {
+
+    private static class FeatureList extends ArrayList<GeoJsonObject> {
+        // Nothing to override.
+    }
+
+    private static class FeatureListDynamic implements Iterable<GeoJsonObject> {
+
+        private final EntitySet entitySet;
+        private final GjRowCollector rowCollector;
+        private final GjElementSet elementSet;
+        private final Map<String, Object> collection;
+        final Iterator<Entity> backingIterator;
+
+        public FeatureListDynamic(EntitySet entitySet, GjRowCollector rowCollector, GjElementSet elementSet, Map<String, Object> collection) {
+            this.entitySet = entitySet;
+            this.rowCollector = rowCollector;
+            this.elementSet = elementSet;
+            this.collection = collection;
+            this.backingIterator = entitySet.iterator();
+        }
+
+        @Override
+        public Iterator<GeoJsonObject> iterator() {
+            return new Iterator<GeoJsonObject>() {
+
+                @Override
+                public boolean hasNext() {
+                    final boolean result = backingIterator.hasNext();
+                    if (!result) {
+                        collection.put(SpecialNames.AT_IOT_NEXT_LINK, entitySet.getNextLink());
+                    }
+                    return result;
+                }
+
+                @Override
+                public GeoJsonObject next() {
+                    return elementSet.generateFeature(rowCollector, backingIterator.next());
+                }
+            };
+        }
+
+    }
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
@@ -54,13 +103,21 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         elementSet.initFrom(type);
 
         GjRowCollector rowCollector = new GjRowCollector();
-        elementSet.writeData(rowCollector, result, "");
+        Map<String, Object> collection = new LinkedHashMap<>();
+        collection.put("type", "FeatureCollection");
 
-        try {
-            return new FormatWriterGeneric(JsonWriter.writeObject(rowCollector.getCollection()));
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to generate GeoJSON.", ex);
+        if (result instanceof Entity entity) {
+            Feature feature = elementSet.generateFeature(rowCollector, entity);
+            return target -> JsonWriter.writeObject(target, feature);
+        } else if (result instanceof EntitySet entitySet) {
+            long count = entitySet.getCount();
+            if (count >= 0) {
+                collection.put(SpecialNames.AT_IOT_COUNT, count);
+            }
+            collection.put("features", new FeatureListDynamic(entitySet, rowCollector, elementSet, collection));
+            collection.put(SpecialNames.AT_IOT_NEXT_LINK, null);
         }
+        return target -> JsonWriter.writeObject(target, collection);
     }
 
 }

@@ -20,61 +20,26 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 import com.fasterxml.jackson.core.TreeNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimple;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Feature;
-import org.geojson.GeoJsonObject;
 
 /**
- * Collects all elements for a single row in a CSV file.
- *
- * First, each element is registered by its header name. This returns the index
- * of the element. After this, for each row, each element is collected in order.
- * If one or more elements are skipped, the elements set to null. Finally, the
- * entire row is flushed to the CSVPrinter, and the collector is reset.
- *
- * @author scf
+ * Collects all elements for a single feature in a feature collection.
  */
 public class GjRowCollector {
 
-    private static class FeatureList extends ArrayList<GeoJsonObject> {
-        // Nothing to override.
-    }
-
-    private final Map<String, Object> collection = new LinkedHashMap<>();
-    private final FeatureList features = new FeatureList();
     private Feature feature;
 
     /**
      * Create a new Collector.
      */
     public GjRowCollector() {
-        // Ensure type & nextLink are first, nicer for users
-        collection.put("type", "FeatureCollection");
-        collection.put(SpecialNames.AT_IOT_NEXT_LINK, null);
-        collection.put(SpecialNames.AT_IOT_COUNT, null);
-        collection.put("features", features);
         newFeature();
-    }
-
-    public Map<String, Object> getCollection() {
-        return collection;
-    }
-
-    public void setNextLink(String nextLink) {
-        collection.put(SpecialNames.AT_IOT_NEXT_LINK, nextLink);
-    }
-
-    public void setCount(Long count) {
-        if (count >= 0) {
-            collection.put(SpecialNames.AT_IOT_COUNT, count);
-        }
     }
 
     private void newFeature() {
@@ -158,13 +123,9 @@ public class GjRowCollector {
         }
     }
 
-    /**
-     * Flush the Feature to the FeatureCollection, and reset the collector.
-     *
-     */
-    public void flush() {
-        features.add(feature);
+    public Feature toFeature() {
+        Feature result = feature;
         newFeature();
+        return result;
     }
-
 }

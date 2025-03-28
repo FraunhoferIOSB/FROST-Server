@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.geojson.Feature;
 
 /**
  *
@@ -69,12 +70,12 @@ public class GjElementSet {
 
     private final Query query;
 
-    public GjElementSet(Query query, String serviceRootUrl, Version version, String name, boolean flush) {
+    public GjElementSet(Query query, String serviceRootUrl, Version version, String name, boolean topLevel) {
         this.query = query;
         this.serviceRootUrl = serviceRootUrl;
         this.version = version;
         this.name = name;
-        this.topLevel = flush;
+        this.topLevel = topLevel;
     }
 
     public void initFrom(EntityType type) {
@@ -152,9 +153,6 @@ public class GjElementSet {
             return;
         }
         collectElements(collector, entity, namePrefix);
-        if (topLevel) {
-            collector.flush();
-        }
     }
 
     public void writeData(GjRowCollector collector, EntitySet entitySet, String namePrefix) {
@@ -162,16 +160,9 @@ public class GjElementSet {
             return;
         }
         int idx = 0;
-        if (topLevel) {
-            collector.setNextLink(entitySet.getNextLink());
-            collector.setCount(entitySet.getCount());
-        }
         for (Entity entity : entitySet) {
             String localName = topLevel ? namePrefix : namePrefix + idx + "/";
             collectElements(collector, entity, localName);
-            if (topLevel) {
-                collector.flush();
-            }
             idx++;
         }
     }
@@ -180,6 +171,14 @@ public class GjElementSet {
         for (GjEntityEntry element : elements) {
             element.writeData(collector, entity, namePrefix);
         }
+    }
+
+    public Feature generateFeature(GjRowCollector collector, Entity entity) {
+        if (!topLevel) {
+            throw new IllegalArgumentException("generateFeature can only be called on a top-level set.");
+        }
+        collectElements(collector, entity, name);
+        return collector.toFeature();
     }
 
 }
