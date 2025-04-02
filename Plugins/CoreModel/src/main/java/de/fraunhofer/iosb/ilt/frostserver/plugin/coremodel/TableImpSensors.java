@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -26,6 +27,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
@@ -65,7 +69,7 @@ public class TableImpSensors extends StaTableAbstract<TableImpSensors> {
     /**
      * The column <code>public.SENSORS.METADATA</code>.
      */
-    public final TableField<Record, String> colMetadata = createField(DSL.name(NAME_COL_METADATA), SQLDataType.CLOB, this);
+    public final TableField<Record, JsonValue> colMetadata = createField(DSL.name(NAME_COL_METADATA), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", JsonBinding.instance());
 
     /**
      * The column <code>public.SENSORS.NAME</code>.
@@ -120,7 +124,27 @@ public class TableImpSensors extends StaTableAbstract<TableImpSensors> {
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
+        pfReg.addEntry(pluginCoreModel.epMetadata,
+                true,
+                new PropertyFieldRegistry.ConverterRecordDeflt<>(
+                        (TableImpSensors table, Record tuple, Entity entity, DataSize dataSize) -> {
+                            JsonValue data = Utils.getFieldJsonValue(tuple, colMetadata);
+                            if (data == null) {
+                                return;
+                            }
+                            dataSize.increase(data.getStringLength());
+                            entity.setProperty(pluginCoreModel.epMetadata, data.getValue());
+                        },
+                        (table, entity, insertFields) -> {
+                            Object metadata = entity.getProperty(pluginCoreModel.epMetadata);
+                            insertFields.put(table.colMetadata, new JsonValue(metadata));
+                        },
+                        (table, entity, updateFields, message) -> {
+                            Object metadata = entity.getProperty(pluginCoreModel.epMetadata);
+                            updateFields.put(table.colMetadata, new JsonValue(metadata));
+                            message.addField(pluginCoreModel.epMetadata);
+                        }),
+                new PropertyFieldRegistry.NFP<>("j", table -> table.colMetadata));
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npDatastreamsSensor, TableImpSensors::getId);
     }

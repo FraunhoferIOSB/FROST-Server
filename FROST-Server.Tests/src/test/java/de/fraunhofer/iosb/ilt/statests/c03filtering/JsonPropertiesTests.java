@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_METADATA;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PARAMETERS;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTQUALITY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_UNITOFMEASUREMENT;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
@@ -88,6 +90,8 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         try {
             createEntities();
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Failed to set up; {}.\n{}", ex.getStatusCode(), ex.getReturnedContent(), ex);
         } catch (ServiceFailureException | URISyntaxException | IOException ex) {
             LOGGER.error("Failed to set up.", ex);
         }
@@ -125,10 +129,15 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
                     .addItem("intIntArray", generateIntIntArray(i + 8, 3))
                     .addItem("objArray", generateObjectList(i + 8, 3))
                     .build();
-            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
-            thing.setProperty(EP_PROPERTIES, properties);
+            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.")
+                    .setProperty(EP_PROPERTIES, properties);
             sSrvc.create(thing);
             THINGS.add(thing);
+
+            Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "application/geo+json", "")
+                    .setProperty(EP_METADATA, properties);
+            sSrvc.create(sensor);
+            SENSORS.add(sensor);
         }
 
         Entity location = sMdl.newLocation("Location 1", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
@@ -136,17 +145,13 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        sSrvc.create(sensor);
-        SENSORS.add(sensor);
-
         Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
 
         Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "Cel"));
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
-        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
         datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
@@ -235,7 +240,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
 
         datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree Fahrenheit", "°F", "[degF]"));
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
-        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
         datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
@@ -363,6 +368,46 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     }
 
     /**
+     * Test if deep-requests on Sensors/metadata work.
+     */
+    @Test
+    void test01FetchLowLevelSensorMetadata() {
+        LOGGER.info("  test01FetchLowLevelSensorMetadata");
+        String urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/string";
+        JsonNode json = getJsonObjectForResponse(urlString);
+        final MapValue metadata = (MapValue) SENSORS.get(0).getProperty(EP_METADATA);
+        testResponseProperty(json, "string", (String) metadata.get("string"), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/boolean";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "boolean", (Boolean) metadata.get("boolean"), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/int";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "int", (Integer) metadata.get("int"), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/intArray";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "intArray", (int[]) metadata.get("intArray"), urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/intArray[1]";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "intArray[1]", ((int[]) metadata.get("intArray"))[1], urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/intIntArray[1]";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "intIntArray[1]", ((int[][]) metadata.get("intIntArray"))[1], urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/intIntArray[0][1]";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "intIntArray[0][1]", ((int[][]) metadata.get("intIntArray"))[0][1], urlString);
+
+        urlString = serverSettings.getServiceUrl(version) + "/Sensors(" + formatKeyValuesForUrl(SENSORS.get(0)) + ")/metadata/objArray[0]/string";
+        json = getJsonObjectForResponse(urlString);
+        testResponseProperty(json, "string", ((List<Map<String, String>>) metadata.get("objArray")).get(0).get("string"), urlString);
+    }
+
+    /**
      * Test if deep-requests on Observations/parameters work.
      */
     @Test
@@ -410,12 +455,15 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     void test03StringFilter() {
         LOGGER.info("  test03StringFilter");
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/string eq '" + THINGS.get(2).getProperty(EP_PROPERTIES).get("string") + "'", getFromList(THINGS, 2));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/string eq '" + ((MapValue) SENSORS.get(2).getProperty(EP_METADATA)).get("string") + "'", getFromList(SENSORS, 2));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/string eq '" + OBSERVATIONS.get(2).getProperty(EP_PARAMETERS).get("string") + "'", getFromList(OBSERVATIONS, 2));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "substringof('cdefgh', properties/string)", getFromList(THINGS, 0, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "substringof('cdefgh', metadata/string)", getFromList(SENSORS, 0, 1, 2));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "substringof('cdefgh', parameters/string)", getFromList(OBSERVATIONS, 0, 1, 2));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[0]/string eq 'jklmnopqrs'", getFromList(THINGS, 1));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/objArray[0]/string eq 'jklmnopqrs'", getFromList(SENSORS, 1));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[0]/string eq 'jklmnopqrs'", getFromList(OBSERVATIONS, 9));
 
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
@@ -432,21 +480,27 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int eq " + OBSERVATIONS.get(2).getProperty(EP_PARAMETERS).get("int"), getFromList(OBSERVATIONS, 2));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int gt 9", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/int gt 9", getFromList(SENSORS, 2, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int gt 8", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/int lt 9", getFromList(THINGS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/int lt 9", getFromList(SENSORS, 0));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/int lt 8", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intArray[1] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/intArray[1] gt 10", getFromList(SENSORS, 2, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intArray[1] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intArray[1] lt 10", getFromList(THINGS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/intArray[1] lt 10", getFromList(SENSORS, 0));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intArray[1] lt 9", getFromList(OBSERVATIONS, 0, 1, 2, 3, 4, 5, 6, 7));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/intIntArray[1][0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/intIntArray[1][0] gt 10", getFromList(SENSORS, 2, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/intIntArray[1][0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[1]/intArray[0] gt 10", getFromList(THINGS, 2, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/objArray[1]/intArray[0] gt 10", getFromList(SENSORS, 2, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
     }
 
@@ -461,12 +515,15 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean eq " + OBSERVATIONS.get(1).getProperty(EP_PARAMETERS).get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/boolean", getFromList(THINGS, 0, 2));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/boolean", getFromList(SENSORS, 0, 2));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "not properties/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "not metadata/boolean", getFromList(SENSORS, 1, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "not parameters/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
         testFilterResults(sSrvc.dao(sMdl.etThing), "properties/objArray[1]/boolean", getFromList(THINGS, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etSensor), "metadata/objArray[1]/boolean", getFromList(SENSORS, 1, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 

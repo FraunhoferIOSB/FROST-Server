@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSetti
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_UNTYPED;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 
@@ -141,14 +142,14 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, true, false);
     public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
     public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
-    public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_STRING, true, false);
+    public final EntityPropertyMain<Object> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_UNTYPED, true, false);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, true, false);
     public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
     public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, false, false, true, false);
     public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, false, true, true, false);
     public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, false, true, true, false);
-    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true, true, true);
+    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, EDM_UNTYPED, true, true, true, true);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true, false, true);
     public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, true, false, false);
     public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeSimplePrimitive.EDM_UNTYPED, false, true, true, false);

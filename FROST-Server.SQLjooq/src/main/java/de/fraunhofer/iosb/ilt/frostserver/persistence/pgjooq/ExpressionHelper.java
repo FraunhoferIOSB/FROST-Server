@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.*;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
@@ -125,6 +126,9 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         if (resultExpression instanceof StaDateTimeWrapper dateTime) {
             addToQuery(orderBy, dateTime.getDateTime(), orderFields);
             return;
+        }
+        if (resultExpression instanceof JsonFieldWrapper jfw) {
+            jfw.materialise();
         }
         if (resultExpression instanceof FieldListWrapper fieldListWrapper) {
             for (Field sqlExpression : fieldListWrapper.getExpressionsForOrder().values()) {

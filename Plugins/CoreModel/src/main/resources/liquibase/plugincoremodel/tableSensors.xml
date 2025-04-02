@@ -68,4 +68,8 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="scf" id="2025-04-02-sensors-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <sql>update "SENSORS" set "METADATA"=to_json("METADATA")</sql>
+    </changeSet>
+
 </databaseChangeLog>

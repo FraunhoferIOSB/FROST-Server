@@ -52,7 +52,7 @@ public class JsonValue {
 
     public Object getValue() {
         if (value == null) {
-            return Utils.jsonToTree(stringValue);
+            return Utils.jsonToTreeOrString(stringValue);
         }
         return value;
     }
