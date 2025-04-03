@@ -107,7 +107,13 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         mqttHelperAnon = new MqttHelper2(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
     }
 
+    @Override
     protected SensorThingsService createService() {
+        try {
+            sSrvc = super.createService();
+        } catch (MalformedURLException | URISyntaxException ex) {
+            throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
+        }
         if (!sSrvc.isBaseUrlSet()) {
             try {
                 sSrvc.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))

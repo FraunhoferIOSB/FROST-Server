@@ -25,7 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MQTT_READ_RETRIES;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,9 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
@@ -53,6 +51,9 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttCreateTester;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.StringCreator;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -63,7 +64,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -316,6 +316,35 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
+    void test_00_TriggerInit() throws IOException {
+        LOGGER.info("  test_00_TriggerInit");
+        EntityCreator creator = (user) -> mdlSensing.newSensor(
+                user + " MQTT-Sensor",
+                "A Sensor made by " + user + " using MQTT",
+                "encodingType", "metadata");
+        StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Sensor");
+        String topic = version.urlPart + '/' + sMdl.etSensor.mainSet;
+
+        List<MqttCreateTester> testers = new ArrayList<>();
+        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true));
+
+        for (var tester : testers) {
+            tester.start();
+        }
+        for (var tester : testers) {
+            tester.join();
+            if (tester.hasCreatedEntity()) {
+                LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
+                SENSORS.add(tester.getCreatedEntity());
+            }
+        }
+        for (var tester : testers) {
+            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            assertTrue(tester.isSuccess(), tester.getMessage());
+        }
+    }
+
+    @Test
     void test_01_UpdateDb() throws IOException {
         LOGGER.info("  test_01_UpdateDb");
         ath.getDatabaseStatus(ADMIN, serviceAdmin, HTTP_CODE_200_OK);
@@ -505,6 +534,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         for (var tester : testers) {
             tester.start();
         }
+        MqttHelper2.waitMillis(WAIT_AFTER_INSERT);
         for (var tester : testers) {
             tester.join();
             if (tester.hasCreatedEntity()) {
@@ -782,110 +812,6 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private void deleteForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int... expectedCodes) {
         ath.deleteForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
-    }
-
-    public static interface EntityCreator {
-
-        public Entity create(String user);
-    }
-
-    public static interface StringCreator {
-
-        public String create(String user);
-    }
-
-    private static class MqttCreateTester {
-
-        private static final int JOIN_TIMEOUT = 500 + MqttHelper2.MQTT_READ_RETRIES * MqttHelper2.WAIT_AFTER_INSERT;
-
-        private final MqttHelper2 mh;
-        private final EntityHelper2 eh;
-        private final String name;
-        private final EntityCreator entityCreator;
-        private final StringCreator filterCreator;
-        private final String topic;
-        private final EntityType et;
-        private final boolean expectSuccess;
-
-        private boolean done;
-        private boolean success;
-        private String message;
-        private Entity createdEntity;
-
-        public MqttCreateTester(MqttHelper2 mh, EntityHelper2 eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
-            this.mh = mh;
-            this.eh = eh;
-            this.name = name;
-            this.entityCreator = entityCreator;
-            this.filterCreator = filterCreator;
-            this.topic = topic;
-            this.et = et;
-            this.expectSuccess = expectSuccess;
-            this.success = false;
-            this.message = "Still running for " + name;
-        }
-
-        private Thread thread;
-
-        public void start() {
-            thread = new Thread(this::executeTest);
-            thread.start();
-        }
-
-        public void join() {
-            if (thread == null) {
-                return;
-            }
-            LOGGER.info("Joining {}", name);
-            try {
-                thread.join(JOIN_TIMEOUT);
-            } catch (InterruptedException ex) {
-                LOGGER.error("Interrupted", ex);
-            }
-        }
-
-        private void executeTest() {
-            try {
-                Entity entity = entityCreator.create(name);
-                String json = JsonWriter.writeEntity(entity);
-                mh.publish(topic, json);
-                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
-                if (createdEntity == null && !expectSuccess) {
-                    success = true;
-                    message = "Success";
-                } else if (createdEntity != null && expectSuccess) {
-                    success = true;
-                    message = "Success";
-                } else {
-                    success = false;
-                    message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
-                }
-            } catch (JsonProcessingException | ServiceFailureException ex) {
-                LOGGER.error("Failed to create JSON or fetch entity");
-            }
-            done = true;
-        }
-
-        public boolean isDone() {
-            return done;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public boolean hasCreatedEntity() {
-            return createdEntity != null;
-        }
-
-        public Entity getCreatedEntity() {
-            return createdEntity;
-        }
-
     }
 
 }

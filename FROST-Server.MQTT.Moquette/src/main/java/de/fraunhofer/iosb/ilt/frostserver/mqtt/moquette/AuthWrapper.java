@@ -185,6 +185,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             return false;
         }
         PrincipalExtended userPrincipal = authProvider.getUserPrincipal(clientId);
+        LOGGER.debug("Checking access to {} for {} / {}", mqttTopic, user, userPrincipal);
         if (user != null && !user.equals(userPrincipal.getName())) {
             LOGGER.warn("Username {} does not match name in Principal: {}", user, userPrincipal);
             return false;
@@ -197,18 +198,22 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             LOGGER.debug("Allowing access to {}, user {} has role 'read' or 'admin'.", topic, user);
             return true;
         }
+        if (userPrincipal == PrincipalExtended.ANONYMOUS_PRINCIPAL && !anonymousRead) {
+            LOGGER.debug("Denied access to {}, user {} anonymous access not allowed.", topic, user);
+            return false;
+        }
         Version version;
         try {
             version = MqttManager.getVersionFromTopic(coreSettings, topic);
         } catch (UnknownVersionException ex) {
-            LOGGER.debug("Denied access to {}, unknown version.", topic);
+            LOGGER.debug("Denied access to {}, user {}, unknown version.", topic, user);
             return false;
         }
         String internalTopic = topic.substring(version.urlPart.length() + 1);
         internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
         if (topicAllowPattern != null) {
             if (!topicAllowPattern.matcher(internalTopic).matches()) {
-                LOGGER.debug("Denied access to {}, not matching allow pattern.", internalTopic);
+                LOGGER.debug("Denied access to {}, user {}, not matching allow pattern.", internalTopic, user);
                 return false;
             }
 

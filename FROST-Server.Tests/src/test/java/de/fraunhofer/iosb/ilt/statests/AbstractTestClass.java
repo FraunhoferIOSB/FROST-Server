@@ -94,11 +94,10 @@ public abstract class AbstractTestClass {
                     tearDownVersion();
                 }
                 version = serverVersion;
-                LOGGER.trace("Setting up for version {}.", version.urlPart);
+                LOGGER.info("Setting up for version {}.\n\n", version.urlPart);
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
-
                     sSrvc = createService();
                     sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
                     mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
