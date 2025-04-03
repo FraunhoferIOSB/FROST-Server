@@ -87,11 +87,11 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
-        SERVER_PROPERTIES.put("auth_provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
-        SERVER_PROPERTIES.put("auth_keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
-        SERVER_PROPERTIES.put("auth_keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
-        SERVER_PROPERTIES.put("auth_allowAnonymousRead", "false");
-        SERVER_PROPERTIES.put("auth_registerUserLocally", "true");
+        SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
+        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
+        SERVER_PROPERTIES.put("auth.keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
+        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
+        SERVER_PROPERTIES.put("auth.registerUserLocally", "true");
         SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
         SERVER_PROPERTIES.put("plugins.modelLoader.enable", "true");
         SERVER_PROPERTIES.put("plugins.modelLoader.modelPath", "");
@@ -173,6 +173,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
                         .setClientId(KEYCLOAK_FROST_CLIENT_ID)
                         .setUserName(username)
                         .setPassword(password));
+        service.getOrCreateMqttConfig().setAuth(username, password);
         return service;
     }
 

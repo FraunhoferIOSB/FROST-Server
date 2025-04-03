@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -56,7 +57,7 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
-        final String dbName = "fineGrainedAuthBasic";
+        final String dbName = "projectAuthBasic";
         final String dbDriver = "org.postgresql.Driver";
         SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
@@ -111,9 +112,9 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
     @Test
     void test_99_ChangePassword() {
         LOGGER.info("  test_04c_ChangePassword");
-        ProjectAuthTests.EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .setProperty(EP_USERPASS, user + "2");
-        ProjectAuthTests.EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 
@@ -128,7 +129,7 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
     }
 
-    private void testChangePasswordFail(String user, SensorThingsService service, ProjectAuthTests.EntityCreator creator, String user2) {
+    private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
         LOGGER.debug("    {}", user);
         try {
             service.update(creator.create(user2));
@@ -140,7 +141,7 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         }
     }
 
-    private SensorThingsService testChangePassword(String user, SensorThingsService service, ProjectAuthTests.EntityCreator creator, List<Entity> entityList) {
+    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator, List<Entity> entityList) {
         LOGGER.debug("    {}", user);
         final Entity userEntity = creator.create(user);
         try {

@@ -123,6 +123,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
         serviceObsCreaterProject2 = setAuth(createService(), "ObsCreaterProject2", "ObsCreaterProject2");
     }
 
+    @Override
     protected SensorThingsService createService() {
         if (!baseService.isBaseUrlSet()) {
             try {

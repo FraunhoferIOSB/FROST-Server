@@ -19,14 +19,18 @@ package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.utils.MqttConfig;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener.ReceivedListener;
 import java.io.IOException;
@@ -36,6 +40,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -60,7 +65,7 @@ public class MqttHelper2 {
     public static final int MQTT_PUBLISH_TIMEOUT = 2000;
     public static final int WAIT_AFTER_INSERT = 150;
     public static final int WAIT_AFTER_CLEANUP = 1;
-    public static final int MQTT_READ_RETRIES = 40;
+    public static final int MQTT_READ_RETRIES = 20;
     public static final int QOS = 2;
     public String clientId = "TS";
 
@@ -643,6 +648,110 @@ public class MqttHelper2 {
 
         public List<TestSubscription> getTopics() {
             return topics;
+        }
+
+    }
+
+    public static interface EntityCreator {
+
+        public Entity create(String user);
+    }
+
+    public static interface StringCreator {
+
+        public String create(String user);
+    }
+
+    public static class MqttCreateTester {
+
+        private static final int JOIN_TIMEOUT = 500 + MqttHelper2.MQTT_READ_RETRIES * MqttHelper2.WAIT_AFTER_INSERT;
+
+        public final MqttHelper2 mh;
+        public final EntityHelper2 eh;
+        public final String name;
+        public final EntityCreator entityCreator;
+        public final StringCreator filterCreator;
+        public final String topic;
+        public final EntityType et;
+        public final boolean expectSuccess;
+
+        private boolean done;
+        private boolean success;
+        private String message;
+        private Entity createdEntity;
+
+        public MqttCreateTester(MqttHelper2 mh, EntityHelper2 eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
+            this.mh = mh;
+            this.eh = eh;
+            this.name = name;
+            this.entityCreator = entityCreator;
+            this.filterCreator = filterCreator;
+            this.topic = topic;
+            this.et = et;
+            this.expectSuccess = expectSuccess;
+            this.success = false;
+            this.message = "Still running for " + name;
+        }
+
+        private Thread thread;
+
+        public void start() {
+            thread = new Thread(this::executeTest);
+            thread.start();
+        }
+
+        public void join() {
+            if (thread == null) {
+                return;
+            }
+            LOGGER.info("Joining {}", name);
+            try {
+                thread.join(JOIN_TIMEOUT);
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interrupted", ex);
+            }
+        }
+
+        private void executeTest() {
+            try {
+                Entity entity = entityCreator.create(name);
+                String json = JsonWriter.writeEntity(entity);
+                mh.publish(topic, json);
+                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
+                if (createdEntity == null && !expectSuccess) {
+                    success = true;
+                    message = "Success";
+                } else if (createdEntity != null && expectSuccess) {
+                    success = true;
+                    message = "Success";
+                } else {
+                    success = false;
+                    message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
+                }
+            } catch (JsonProcessingException | ServiceFailureException ex) {
+                LOGGER.error("Failed to create JSON or fetch entity");
+            }
+            done = true;
+        }
+
+        public boolean isDone() {
+            return done;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public boolean hasCreatedEntity() {
+            return createdEntity != null;
+        }
+
+        public Entity getCreatedEntity() {
+            return createdEntity;
         }
 
     }

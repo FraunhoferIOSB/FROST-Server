@@ -25,18 +25,15 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MQTT_READ_RETRIES;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
@@ -52,6 +49,9 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttCreateTester;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.StringCreator;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -61,13 +61,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.geojson.Point;
@@ -304,8 +302,37 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
+    void test_00_TriggerInit() throws IOException {
+        LOGGER.info("  test_00_TriggerInit");
+        EntityCreator creator = (user) -> mdlSensing.newSensor(
+                user + " MQTT-Sensor",
+                "A Sensor made by " + user + " using MQTT",
+                "encodingType", "metadata");
+        StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Sensor");
+        String topic = version.urlPart + '/' + sMdl.etSensor.mainSet;
+
+        List<MqttCreateTester> testers = new ArrayList<>();
+        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true));
+
+        for (var tester : testers) {
+            tester.start();
+        }
+        for (var tester : testers) {
+            tester.join();
+            if (tester.hasCreatedEntity()) {
+                LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
+                SENSORS.add(tester.getCreatedEntity());
+            }
+        }
+        for (var tester : testers) {
+            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            assertTrue(tester.isSuccess(), tester.getMessage());
+        }
+    }
+
+    @Test
     void test_01_UpdateDb() throws IOException {
-        LOGGER.info("  test_01_UpdateDb\n");
+        LOGGER.info("  test_01_UpdateDb");
         ath.getDatabaseStatus(ADMIN, serviceAdmin, HTTP_CODE_200_OK);
         ath.getDatabaseStatus(WRITE, serviceWrite, HTTP_CODE_403_FORBIDDEN);
         ath.getDatabaseStatus(READ, serviceRead, HTTP_CODE_403_FORBIDDEN);
@@ -323,7 +350,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02a_ReadProjects() {
-        LOGGER.info("  test_02a_ReadProjects\n");
+        LOGGER.info("  test_02a_ReadProjects");
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etProject, "", PROJECTS);
         testFilterResults(READ, serviceRead, mdlUsers.etProject, "", PROJECTS);
@@ -340,7 +367,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02b_ReadUserProjectRole() {
-        LOGGER.info("  test_02b_ReadUserProjectRole\n");
+        LOGGER.info("  test_02b_ReadUserProjectRole");
         testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etUserProjectRole, "", Collections.emptyList());
         testFilterResults(READ, serviceRead, mdlUsers.etUserProjectRole, "", Collections.emptyList());
@@ -353,7 +380,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02c_ReadUser() {
-        LOGGER.info("  test_02c_ReadUser\n");
+        LOGGER.info("  test_02c_ReadUser");
         testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
         testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
         testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
@@ -370,7 +397,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02d_ReadRole() {
-        LOGGER.info("  test_02d_ReadRole\n");
+        LOGGER.info("  test_02d_ReadRole");
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etRole, "", ROLES);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etRole, "", Collections.emptyList());
         testFilterResults(READ, serviceRead, mdlUsers.etRole, "", Collections.emptyList());
@@ -383,7 +410,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02e_ReadThings() {
-        LOGGER.info("  test_02e_ReadThings\n");
+        LOGGER.info("  test_02e_ReadThings");
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etThing, "", THINGS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etThing, "", THINGS);
         testFilterResults(READ, serviceRead, mdlSensing.etThing, "", THINGS);
@@ -400,7 +427,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02f_ReadDatastreams() {
-        LOGGER.info("  test_07a_ReadDatastreams\n");
+        LOGGER.info("  test_07a_ReadDatastreams");
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etDatastream, "", DATASTREAMS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etDatastream, "", DATASTREAMS);
         testFilterResults(READ, serviceRead, mdlSensing.etDatastream, "", DATASTREAMS);
@@ -417,7 +444,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_03a_CreateProject() {
-        LOGGER.info("  test_03a_CreateProject\n");
+        LOGGER.info("  test_03a_CreateProject");
         EntityCreator creator = (user) -> mdlUsers.newProject(user + "-Project", "A Project made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS);
@@ -431,7 +458,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_03b_UpdateProject() {
-        LOGGER.info("  test_03b_UpdateProject\n");
+        LOGGER.info("  test_03b_UpdateProject");
         final Entity original = PROJECTS.get(1);
         EntityCreator creator = (user) -> original.withOnlyPk().setProperty(EP_NAME, user + "-Edited");
         EntityCreator reset = (user) -> original.withOnlyPk().setProperty(EP_NAME, original.getProperty(EP_NAME));
@@ -448,7 +475,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_03c_CreateUser() {
-        LOGGER.info("  test_03c_CreateUser\n");
+        LOGGER.info("  test_03c_CreateUser");
         EntityCreator creator = (user) -> mdlUsers.newUser(user + "-User", user + "-password");
 
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
@@ -461,7 +488,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_04a_PlainThingCreate() {
-        LOGGER.info("  test_04a_PlainThingCreate\n");
+        LOGGER.info("  test_04a_PlainThingCreate");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
@@ -475,7 +502,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_04b_ThingCreateForProject1() {
-        LOGGER.info("  test_04b_ThingCreateForProject1\n");
+        LOGGER.info("  test_04b_ThingCreateForProject1");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
 
@@ -490,7 +517,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_04c_ThingCreateForProject1WithDatastream() {
-        LOGGER.info("  test_04c_ThingCreateForProject1WithDatastream\n");
+        LOGGER.info("  test_04c_ThingCreateForProject1WithDatastream");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk())
                 .addNavigationEntity(
@@ -510,7 +537,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_04d_ThingCreateForProject1Mqtt() throws JsonProcessingException {
-        LOGGER.info("  test_04d_ThingCreateForProject1Mqtt\n");
+        LOGGER.info("  test_04d_ThingCreateForProject1Mqtt");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
         StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
@@ -527,6 +554,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         for (var tester : testers) {
             tester.start();
         }
+        MqttHelper2.waitMillis(WAIT_AFTER_INSERT);
         for (var tester : testers) {
             tester.join();
             if (tester.hasCreatedEntity()) {
@@ -542,7 +570,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_05a_DatastreamRelinkToThing2() {
-        LOGGER.info("  test_05a_DatastreamRelinkToThing2\n");
+        LOGGER.info("  test_05a_DatastreamRelinkToThing2");
         EntityCreator creator = (user) -> DATASTREAMS.get(0).withOnlyPk()
                 .setProperty(mdlSensing.npDatastreamThing, THINGS.get(1).withOnlyPk());
         EntityCreator reset = (user) -> DATASTREAMS.get(0).withOnlyPk()
@@ -561,7 +589,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_08a_ObservationRead() {
-        LOGGER.info("  test_08a_ObservationRead\n");
+        LOGGER.info("  test_08a_ObservationRead");
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservation, "", OBSERVATIONS);
         testFilterResults(READ, serviceRead, mdlSensing.etObservation, "", OBSERVATIONS);
@@ -578,7 +606,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_08b_ObservationReadFilter() {
-        LOGGER.info("  test_08b_ObservationReadFilter\n");
+        LOGGER.info("  test_08b_ObservationReadFilter");
         final String filter = "Datastreams/Observations/id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(8).getPrimaryKeyValues().get(0));
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
         testFilterResults(WRITE, serviceWrite, mdlSensing.etObservedProperty, filter, Utils.getFromList(O_PROPS, 0));
@@ -596,7 +624,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_08c_DatastreamFromObservationRead() throws ServiceFailureException, URISyntaxException {
-        LOGGER.info("  test_08c_DatastreamFromObservationRead\n");
+        LOGGER.info("  test_08c_DatastreamFromObservationRead");
 
         URL link = serviceAdmin.getFullPath(OBSERVATIONS.get(8), mdlSensing.npObservationDatastream);
         fetchForCode(ADMIN, serviceAdmin, link, H200);
@@ -611,7 +639,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_08d_ObservationsFromDatastreamRead() throws ServiceFailureException, URISyntaxException {
-        LOGGER.info("  test_08d_ObservationsFromDatastreamRead\n");
+        LOGGER.info("  test_08d_ObservationsFromDatastreamRead");
 
         URL link = serviceAdmin.getFullPath(DATASTREAMS.get(1), mdlSensing.npDatastreamObservations);
         fetchForCode(ADMIN, serviceAdmin, link, H200);
@@ -626,66 +654,97 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_09a_SubscribeObservations() {
-        LOGGER.info("  test_09a_SubscribeObservations\n");
-        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
+        LOGGER.info("  test_09a_SubscribeObservations");
+        final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
+        final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
-            Entity obs = EntityUtils.createObservation(
+            Entity obs1 = EntityUtils.createObservation(
                     serviceAdmin,
                     ehAdmin.getCache(mdlSensing.etDatastream, 1),
                     0,
                     ZonedDateTime.parse("2024-01-01T01:00:00.000Z"),
                     ehAdmin.getCache(mdlSensing.etObservation));
-            LOGGER.debug("Created {}", obs);
-            obsFuture.complete(obs);
+            LOGGER.debug("Created {}", obs1);
+            obsFuture1.complete(obs1);
+
+            Entity obs2 = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 2),
+                    0,
+                    ZonedDateTime.parse("2024-02-02T02:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs2);
+            obsFuture2.complete(obs2);
             return null;
         };
 
-        Entity ds0 = ehAdmin.getCache(mdlSensing.etDatastream, 1);
-        String relationPath = ParserUtils.relationPath(ds0, mdlSensing.npDatastreamObservations);
-        String dsTopic = "v1.1/" + relationPath;
-        final MqttHelper2.TestSubscription testSubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
+        Entity ds1 = ehAdmin.getCache(mdlSensing.etDatastream, 1);
+        String relationPathDs1 = ParserUtils.relationPath(ds1, mdlSensing.npDatastreamObservations);
+        String dsTopic1 = "v1.1/" + relationPathDs1;
+
+        Entity ds2 = ehAdmin.getCache(mdlSensing.etDatastream, 2);
+        String relationPathDs2 = ParserUtils.relationPath(ds2, mdlSensing.npDatastreamObservations);
+        String dsTopic2 = "v1.1/" + relationPathDs2;
+
+        final MqttHelper2.TestSubscription test1SubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
                 .setName(ADMIN)
-                .addExpectedEntity(obsFuture)
+                .addExpectedEntity(obsFuture1)
+                .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription testSubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic)
+        final MqttHelper2.TestSubscription test1SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN)
-                .addExpectedEntity(obsFuture)
+                .addExpectedEntity(obsFuture1)
+                .createReceivedListener(mdlSensing.etObservation);
+        final MqttHelper2.TestSubscription test2SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic2)
+                .setName(ADMIN)
+                .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription testSubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
+        final MqttHelper2.TestSubscription test1SubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
                 .setName(ADMIN_P1)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription testSubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic)
+        final MqttHelper2.TestSubscription test1SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1)
-                .addExpectedEntity(obsFuture)
+                .addExpectedEntity(obsFuture1)
+                .createReceivedListener(mdlSensing.etObservation);
+        final MqttHelper2.TestSubscription test2SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic2)
+                .setName(ADMIN_P1)
+                .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription testSubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
+        final MqttHelper2.TestSubscription test1SubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
                 .setName(ADMIN_P2)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription testSubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic)
+        final MqttHelper2.TestSubscription test1SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic1)
                 .setName(ADMIN_P2)
                 .addExpectedError("Failed to subscribe to")
+                .createReceivedListener(mdlSensing.etObservation);
+        final MqttHelper2.TestSubscription test2SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic2)
+                .setName(ADMIN_P2)
+                .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
         MqttHelper2.MqttAction mqttAction = new MqttHelper2.MqttAction(insertAction)
-                .add(testSubAdmin)
-                .add(testSubDsAdmin)
-                .add(testSubAdminP1)
-                .add(testSubDsAdminP1)
-                .add(testSubAdminP2)
-                .add(testSubDsAdminP2);
+                .add(test1SubAdmin)
+                .add(test1SubDsAdmin)
+                .add(test1SubAdminP1)
+                .add(test1SubDsAdminP1)
+                .add(test1SubAdminP2)
+                .add(test1SubDsAdminP2)
+                .add(test2SubDsAdmin)
+                .add(test2SubDsAdminP1)
+                .add(test2SubDsAdminP2);
         mqttHelperAdmin.executeRequest(mqttAction);
     }
 
     @Test
     void test_18a_ObservationCreate() {
-        LOGGER.info("  test_08e_ObservationCreate\n");
+        LOGGER.info("  test_08e_ObservationCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
@@ -694,7 +753,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_18b_ObservationCreateNewFoi() throws ServiceFailureException {
-        LOGGER.info("  test_08f_ObservationCreateNewFoi\n");
+        LOGGER.info("  test_08f_ObservationCreateNewFoi");
         // Create a new Location for Thing 1, so a new FoI must be generated.
         Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
                 .addNavigationEntity(mdlSensing.npLocationThings, THINGS.get(0));
@@ -708,7 +767,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_18c_ObservedPropertyCreate() {
-        LOGGER.info("  test_09_ObservedPropertyCreate\n");
+        LOGGER.info("  test_09_ObservedPropertyCreate");
         EntityCreator creator = (user) -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
@@ -722,7 +781,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_19a_ThingDelete() {
-        LOGGER.info("  test_10a_ThingDelete\n");
+        LOGGER.info("  test_10a_ThingDelete");
         EntityCreator creator = (user) -> THINGS.get(0);
 
         deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
@@ -732,13 +791,6 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         deleteForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
-    }
-
-    private JsonNode getRootUrl() throws JsonProcessingException, ParseException, IOException {
-        String urlString = serverSettings.getServiceUrl(version);
-        HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin, urlString);
-        assertEquals(200, responseMap.code, () -> "Error fetching root URI: " + urlString);
-        return Utils.MAPPER.readTree(responseMap.response);
     }
 
     private void fetchForCode(String user, SensorThingsService service, URL link, int... codesWant) throws URISyntaxException {
@@ -788,110 +840,6 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     private void deleteForFail(String user, SensorThingsService service, EntityCreator creator, Dao validateDoa, List<Entity> entityList, int... expectedCodes) {
         ath.deleteForFail(user, service, creator.create(user), validateDoa, entityList, expectedCodes);
-    }
-
-    public static interface EntityCreator {
-
-        public Entity create(String user);
-    }
-
-    public static interface StringCreator {
-
-        public String create(String user);
-    }
-
-    private static class MqttCreateTester {
-
-        private static final int JOIN_TIMEOUT = 500 + MqttHelper2.MQTT_READ_RETRIES * MqttHelper2.WAIT_AFTER_INSERT;
-
-        private final MqttHelper2 mh;
-        private final EntityHelper2 eh;
-        private final String name;
-        private final EntityCreator entityCreator;
-        private final StringCreator filterCreator;
-        private final String topic;
-        private final EntityType et;
-        private final boolean expectSuccess;
-
-        private boolean done;
-        private boolean success;
-        private String message;
-        private Entity createdEntity;
-
-        public MqttCreateTester(MqttHelper2 mh, EntityHelper2 eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
-            this.mh = mh;
-            this.eh = eh;
-            this.name = name;
-            this.entityCreator = entityCreator;
-            this.filterCreator = filterCreator;
-            this.topic = topic;
-            this.et = et;
-            this.expectSuccess = expectSuccess;
-            this.success = false;
-            this.message = "Still running for " + name;
-        }
-
-        private Thread thread;
-
-        public void start() {
-            thread = new Thread(this::executeTest);
-            thread.start();
-        }
-
-        public void join() {
-            if (thread == null) {
-                return;
-            }
-            LOGGER.info("Joining {}", name);
-            try {
-                thread.join(JOIN_TIMEOUT);
-            } catch (InterruptedException ex) {
-                LOGGER.error("Interrupted", ex);
-            }
-        }
-
-        private void executeTest() {
-            try {
-                Entity entity = entityCreator.create(name);
-                String json = JsonWriter.writeEntity(entity);
-                mh.publish(topic, json);
-                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
-                if (createdEntity == null && !expectSuccess) {
-                    success = true;
-                    message = "Success";
-                } else if (createdEntity != null && expectSuccess) {
-                    success = true;
-                    message = "Success";
-                } else {
-                    success = false;
-                    message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
-                }
-            } catch (JsonProcessingException | ServiceFailureException ex) {
-                LOGGER.error("Failed to create JSON or fetch entity");
-            }
-            done = true;
-        }
-
-        public boolean isDone() {
-            return done;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public boolean hasCreatedEntity() {
-            return createdEntity != null;
-        }
-
-        public Entity getCreatedEntity() {
-            return createdEntity;
-        }
-
     }
 
 }

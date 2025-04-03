@@ -47,10 +47,10 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
     static {
-        SERVER_PROPERTIES.put("auth_provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
-        SERVER_PROPERTIES.put("auth_keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
-        SERVER_PROPERTIES.put("auth_keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
-        SERVER_PROPERTIES.put("auth_allowAnonymousRead", "true");
+        SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
+        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
+        SERVER_PROPERTIES.put("auth.keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
+        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "true");
     }
 
     public KeyCloakAnonReadTests(ServerVersion version) {

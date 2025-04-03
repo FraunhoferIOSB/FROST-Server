@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -117,9 +118,9 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
     @Test
     void test_99_ChangePassword() {
         LOGGER.info("  test_04c_ChangePassword");
-        FineGrainedAuthTests.EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .setProperty(EP_USERPASS, user + "2");
-        FineGrainedAuthTests.EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 
@@ -134,7 +135,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
     }
 
-    private void testChangePasswordFail(String user, SensorThingsService service, FineGrainedAuthTests.EntityCreator creator, String user2) {
+    private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
         LOGGER.debug("    {}", user);
         try {
             service.update(creator.create(user2));
@@ -146,7 +147,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         }
     }
 
-    private SensorThingsService testChangePassword(String user, SensorThingsService service, FineGrainedAuthTests.EntityCreator creator, List<Entity> entityList) {
+    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator, List<Entity> entityList) {
         LOGGER.debug("    {}", user);
         final Entity userEntity = creator.create(user);
         try {
