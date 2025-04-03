@@ -1,0 +1,27 @@
+Projects
+- 0, Project 1, public
+- 1, Project 2, private
+
+Things
+- 0, Thing 1, Project 1,   public
+- 1, Thing 2, Project 2,   private
+- 2, Thing 3, Project 1+2, public
+- 3, Thing 4, no project,  private
+
+Datastreams
+- 0, Temperature of Thing 1, p1,   public
+  - Obs: 0,1,2,3
+- 1, Humidity of Thing 1,    p1,   private
+  - Obs: 4,5,6,7
+- 2, Temperature of Thing 2, p2,   private
+  - Obs: 8,9,10,11
+- 3, Humidity of Thing 2,    p2,   private
+  - Obs: 12,13,14,15
+- 4, Temperature of Thing 3, p1+2, public
+  - Obs: 16,17,18,19
+- 5, Humidity of Thing 3,    p1+2, private
+  - Obs: 20,21,22,23
+- 6, Temperature of Thing 4, -   , private
+  - Obs: 24,25,26,27
+- 7, Humidity of Thing 4,    -   , private
+  - Obs: 28,29,30,31
