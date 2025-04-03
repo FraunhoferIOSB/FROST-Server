@@ -128,19 +128,15 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
 
     @Override
     protected SensorThingsService createService() {
-        if (!baseService.isBaseUrlSet()) {
-            try {
+        try {
+            if (!baseService.isBaseUrlSet()) {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                         .init();
-            } catch (MalformedURLException | URISyntaxException ex) {
-                throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
-        }
-        try {
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .init();
-        } catch (MalformedURLException | URISyntaxException ex) {
+        } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
     }

@@ -197,7 +197,7 @@
             "url": "Things",
             "body": {
                 "name": "Thing 3",
-                "restricted": true,
+                "restricted": false,
                 "description": "The third test thing",
                 "Locations": [{"@iot.id": "$location3"}],
                 "Projects": [{"@iot.id": "$project1"},{"@iot.id": "$project2"}]

@@ -92,6 +92,7 @@ import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakAnonReadTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.ProjectAuthTestsBasic11;
+import de.fraunhofer.iosb.ilt.statests.f01auth.ProjectAuthTestsBasicAnon11;
 import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests10;
 import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests11;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests10;
@@ -193,6 +194,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     FineGrainedAuthTestsKeycloak11.class,
     FineGrainedAuthTestsKeycloakAnon11.class,
     ProjectAuthTestsBasic11.class,
+    ProjectAuthTestsBasicAnon11.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite

@@ -18,46 +18,33 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERPASS;
-import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
-import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Runs the Project Auth Tests using BasicAuth.
  */
-public class ProjectAuthTestsBasic extends ProjectAuthTests {
+public class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectAuthTestsBasic.class.getName());
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     static {
         ProjectAuthTests.addCommonProperties(SERVER_PROPERTIES);
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider");
         SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
-        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
+        SERVER_PROPERTIES.put("auth.allowAnonymousRead", "true");
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
-        final String dbName = "projectAuthBasic";
+        final String dbName = "projectAuthBasicAnon";
         final String dbDriver = "org.postgresql.Driver";
         SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
@@ -68,8 +55,8 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
 
     }
 
-    public ProjectAuthTestsBasic(ServerVersion version) {
-        super(version, SERVER_PROPERTIES, false);
+    public ProjectAuthTestsBasicAnon(ServerVersion version) {
+        super(version, SERVER_PROPERTIES, true);
     }
 
     @Override
@@ -103,53 +90,6 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
         }
-    }
-
-    @Test
-    void test_99_ChangePassword() {
-        LOGGER.info("  test_99_ChangePassword");
-        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
-                .setProperty(EP_USERPASS, user + "2");
-        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
-                .withOnlyPk()
-                .setProperty(EP_USERPASS, user + "2");
-
-        serviceRead = testChangePassword(READ, serviceRead, changed, Utils.getFromList(USERS, 5));
-        serviceWrite = testChangePassword(WRITE, serviceWrite, changed, Utils.getFromList(USERS, 6));
-        serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed, USERS);
-        serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed, USERS);
-        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed, Utils.getFromList(USERS, 3));
-        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed, Utils.getFromList(USERS, 4));
-
-        testChangePasswordFail(WRITE, serviceWrite, changedCopy, READ);
-        testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);
-    }
-
-    private void testChangePasswordFail(String user, SensorThingsService service, EntityCreator creator, String user2) {
-        LOGGER.debug("    {}", user);
-        try {
-            service.update(creator.create(user2));
-            String failMessage = "User " + user + " should NOT be able to update password for user " + user2 + ".";
-            LOGGER.error(failMessage);
-            fail(failMessage);
-        } catch (ServiceFailureException ex) {
-            // Good!
-        }
-    }
-
-    private SensorThingsService testChangePassword(String user, SensorThingsService service, EntityCreator creator, List<Entity> entityList) {
-        LOGGER.debug("    {}", user);
-        final Entity userEntity = creator.create(user);
-        try {
-            service.update(userEntity);
-        } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to update password. Got " + ex.getMessage();
-            LOGGER.error(failMessage, ex);
-            fail(failMessage);
-        }
-        SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
-        testFilterResults(user, newService, mdlUsers.etUser, "", entityList);
-        return newService;
     }
 
 }

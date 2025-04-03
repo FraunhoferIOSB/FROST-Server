@@ -147,6 +147,7 @@ public class BasicAuthFilter implements Filter {
         String[] split = userPassDecoded.split(":", 2);
         final UserData userData = new UserData(split[0], maxNameLength, split[1], maxPassLength);
         if (databaseHandler.isValidUser(userData)) {
+            LOGGER.debug("User {}", userData.userName);
             return userData;
         } else {
             return USER_DATA_NO_USER;

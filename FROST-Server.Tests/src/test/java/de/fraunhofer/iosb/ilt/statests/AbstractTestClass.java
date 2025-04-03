@@ -98,6 +98,7 @@ public abstract class AbstractTestClass {
                 TestSuite suite = TestSuite.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
+                    sSrvc = null;
                     sSrvc = createService();
                     sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
                     mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
