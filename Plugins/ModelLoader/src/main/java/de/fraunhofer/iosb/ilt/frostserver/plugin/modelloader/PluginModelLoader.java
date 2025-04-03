@@ -112,7 +112,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
             securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
             String securityFilesString = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_FILES, ModelLoaderSettings.class);
-            securityFiles.addAll(Arrays.asList(StringUtils.split(securityFilesString.trim(), ", ")));
+            for (var securityFile : StringUtils.split(securityFilesString.trim(), ", ")) {
+                addSecurityFileWithPath(securityFile);
+            }
 
             metadataStringData = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_DATA, ModelLoaderSettings.class);
             metadataPath = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_PATH, ModelLoaderSettings.class);
@@ -146,6 +148,16 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         modelFiles.add(filename);
     }
 
+    private void addSecurityFileWithPath(String fileName) {
+        final File fullFile;
+        if (StringHelper.isNullOrEmpty(securityPath)) {
+            fullFile = new File(fileName);
+        } else {
+            fullFile = new File(securityPath, fileName);
+        }
+        securityFiles.add(fullFile.toString());
+    }
+
     public void addSecurityFile(String filename) {
         securityFiles.add(filename);
     }
@@ -154,39 +166,53 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         liquibaseFiles.add(filename);
     }
 
+    private <T> T loadfile(String fullPathString, Class<T> clazz) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        File fullFile = new File(fullPathString);
+        try {
+            if (fullFile.exists()) {
+                String data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
+                return objectMapper.readValue(data, clazz);
+            } else {
+                try (InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPathString)) {
+                    if (stream == null) {
+                        LOGGER.error("File not found: {}", fullPathString);
+                        return null;
+                    }
+                    return objectMapper.readValue(stream, clazz);
+                }
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load file {}", fullPathString, ex);
+        }
+        return null;
+    }
+
     public void loadModelFile(String fullPathString) {
         File fullFile = new File(fullPathString);
         LOGGER.info("Loading model definition from {}", fullFile.toString());
-        String data;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            DefModel modelDefinition;
-            if (fullFile.exists()) {
-                data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
-                modelDefinition = objectMapper.readValue(data, DefModel.class);
-            } else {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
-                modelDefinition = objectMapper.readValue(stream, DefModel.class);
-            }
-            modelDefinition.init();
-            modelDefinitions.add(modelDefinition);
-            for (DefEntityType type : modelDefinition.getEntityTypes()) {
-                final DefEntityProperty primaryKey = type.getPrimaryKey();
-                if (primaryKey != null) {
-                    primaryKeys.put(type.getName(), primaryKey);
-                }
-            }
-            conformance.addAll(modelDefinition.getConformance());
-        } catch (IOException ex) {
-            LOGGER.error("Failed to load model definition", ex);
+        DefModel modelDefinition = loadfile(fullPathString, DefModel.class);
+        if (modelDefinition == null) {
+            LOGGER.error("Failed to load model definition from {}", fullPathString);
+            return;
         }
+        modelDefinition.init();
+        modelDefinitions.add(modelDefinition);
+        for (DefEntityType type : modelDefinition.getEntityTypes()) {
+            final DefEntityProperty primaryKey = type.getPrimaryKey();
+            if (primaryKey != null) {
+                primaryKeys.put(type.getName(), primaryKey);
+            }
+        }
+        conformance.addAll(modelDefinition.getConformance());
     }
 
     @Override
     public void installSecurityDefinitions(PersistenceManager pm) {
         if (pm instanceof JooqPersistenceManager) {
             for (String fileName : securityFiles) {
-                SecurityModel secModel = loadSecurityFile(fileName);
+                LOGGER.info("Loading security definition from {}", fileName);
+                SecurityModel secModel = loadfile(fileName, SecurityModel.class);
                 if (secModel == null) {
                     continue;
                 }
@@ -196,31 +222,6 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
                 }
             }
         }
-    }
-
-    private SecurityModel loadSecurityFile(String fileName) {
-        final File fullFile = new File(securityPath, fileName);
-        LOGGER.info("Loading security definition from {}", fullFile.toString());
-        String data;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            SecurityModel securityModel;
-            if (fullFile.exists()) {
-                data = FileUtils.readFileToString(fullFile, StandardCharsets.UTF_8);
-                securityModel = objectMapper.readValue(data, SecurityModel.class);
-            } else {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
-                if (stream == null) {
-                    LOGGER.info("  Not found: {}", fullFile);
-                    return null;
-                }
-                securityModel = objectMapper.readValue(stream, SecurityModel.class);
-            }
-            return securityModel;
-        } catch (IOException ex) {
-            LOGGER.error("Failed to load model definition", ex);
-        }
-        return null;
     }
 
     @Override
@@ -293,7 +294,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             } else {
                 InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFile.toString());
                 if (stream == null) {
-                    LOGGER.info("  Not found: {}", fullFile);
+                    LOGGER.info("  Not found: {}, {}", fullFile, fileName);
                 } else {
                     return objectMapper.readValue(stream, TYPE_REFERENCE_MAP);
                 }
