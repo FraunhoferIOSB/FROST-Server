@@ -56,6 +56,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MqttHelper2 {
 
+    public static final int MQTT_CONNECT_TIMEOUT = 2000;
+    public static final int MQTT_PUBLISH_TIMEOUT = 2000;
     public static final int WAIT_AFTER_INSERT = 150;
     public static final int WAIT_AFTER_CLEANUP = 1;
     public static final int MQTT_READ_RETRIES = 40;
@@ -120,8 +122,8 @@ public class MqttHelper2 {
                 connOpts.setPassword(mqttConfig.getPassword().toCharArray());
             }
             connOpts.setCleanSession(true);
-            client.connect(connOpts).waitForCompletion(1000);
-            client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(1000);
+            client.connect(connOpts).waitForCompletion(MQTT_CONNECT_TIMEOUT);
+            client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(MQTT_PUBLISH_TIMEOUT);
         } catch (MqttException ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             fail("error publishing message on MQTT: " + ex.getMessage());
@@ -174,13 +176,13 @@ public class MqttHelper2 {
         for (TestSubscription tl : ma.topics) {
             Assertions.assertTrue(
                     tl.checkAllReceived(mqttTimeoutMs),
-                    () -> "failure checking received entities on " + tl.getTopic());
+                    () -> "failure checking received entities for " + tl.getName() + " on " + tl.getTopic());
             Assertions.assertTrue(
                     tl.allReceived(),
-                    () -> "Did not receive " + tl.getExpectedCount() + " messages on " + tl.getTopic());
+                    () -> "" + tl.getName() + " Did not receive " + tl.getExpectedCount() + " messages on " + tl.getTopic());
             Assertions.assertFalse(
                     tl.hasErrors(),
-                    () -> "Errors encountered on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
+                    () -> "Errors encountered for " + tl.getName() + " on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
         }
 
     }
@@ -315,6 +317,11 @@ public class MqttHelper2 {
         private String topic;
 
         /**
+         * The name of the subscription for debugging.
+         */
+        private String name;
+
+        /**
          * These are the entities that we expect to receive. When creating the
          * Subscription we don't actually know all details yet, since some
          * properties are server generated.
@@ -327,7 +334,7 @@ public class MqttHelper2 {
         private final List<Future<JsonNode>> expectedJson = new ArrayList<>();
 
         /**
-         * The list of receivedErrors that we expect to receive.
+         * The list of errors that we expect to receive.
          */
         private final List<String> expectedErrors = new ArrayList<>();
 
@@ -364,6 +371,15 @@ public class MqttHelper2 {
 
         public TestSubscription setTopic(String topic) {
             this.topic = topic;
+            return this;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public TestSubscription setName(String name) {
+            this.name = name;
             return this;
         }
 
@@ -453,7 +469,7 @@ public class MqttHelper2 {
                 }
                 boolean result = checkReceived(receivedEntity, timeoutMs);
                 if (!result) {
-                    LOGGER.debug("    Check failed on entity {}.", receivedEntity);
+                    LOGGER.error("    {} Check failed on entity {}.", name, receivedEntity);
                     return false;
                 }
             }
@@ -465,23 +481,29 @@ public class MqttHelper2 {
                 }
                 boolean result = checkReceived(jsonNode, timeoutMs);
                 if (!result) {
-                    LOGGER.debug("    Check failed on JOSN {}.", jsonNode);
+                    LOGGER.error("    {} Check failed on JOSN {}.", name, jsonNode);
                     return false;
                 }
             }
             while (!receivedErrors.isEmpty()) {
                 String gotError = receivedErrors.remove(0);
                 boolean found = false;
-                for (String expErr : expectedErrors) {
+                for (Iterator<String> it = expectedErrors.iterator(); it.hasNext();) {
+                    String expErr = it.next();
                     if (gotError.startsWith(expErr)) {
                         found = true;
+                        it.remove();
                         break;
                     }
                 }
                 if (!found) {
-                    LOGGER.debug("    Received unexpected error: {}", gotError);
+                    LOGGER.error("    {} Received unexpected error: {}", name, gotError);
                     return false;
                 }
+            }
+            if (!expectedErrors.isEmpty()) {
+                LOGGER.error("    {} expected error: {}.", name, expectedErrors.getFirst());
+                return false;
             }
             return true;
         }
