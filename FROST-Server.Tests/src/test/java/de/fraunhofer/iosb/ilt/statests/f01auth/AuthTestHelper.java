@@ -29,16 +29,15 @@ import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntit
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.message.BasicHeader;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,15 +180,12 @@ public class AuthTestHelper {
     }
 
     public static SensorThingsService setAuthBasic(SensorThingsService service, String username, String password) {
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        URL url = service.getBaseUrl();
-
-        credsProvider.setCredentials(
-                new AuthScope(url.getHost(), url.getPort()),
-                new UsernamePasswordCredentials(username, password));
+        final String auth = username + ":" + password;
+        final byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
+        final String authHeader = "Basic " + new String(encodedAuth);
 
         service.getClientBuilder()
-                .setDefaultCredentialsProvider(credsProvider);
+                .setDefaultHeaders(Arrays.asList(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader)));
 
         service.rebuildHttpClient();
 

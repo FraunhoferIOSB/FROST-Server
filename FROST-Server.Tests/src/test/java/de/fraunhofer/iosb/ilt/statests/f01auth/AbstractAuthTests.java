@@ -110,19 +110,13 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     @Override
     protected SensorThingsService createService() {
         try {
-            sSrvc = super.createService();
-        } catch (MalformedURLException | URISyntaxException ex) {
-            throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
-        }
-        if (!sSrvc.isBaseUrlSet()) {
-            try {
+            if (sSrvc == null) {
+                sSrvc = super.createService();
+            }
+            if (!sSrvc.isBaseUrlSet()) {
                 sSrvc.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                         .init();
-            } catch (MalformedURLException | URISyntaxException ex) {
-                throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
             }
-        }
-        try {
             return new SensorThingsService(sSrvc.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .init();

@@ -52,6 +52,7 @@ import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttCreateTester;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.StringCreator;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -150,6 +151,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     private static MqttHelper2 mqttHelperAdmin;
     private static MqttHelper2 mqttHelperWrite;
     private static MqttHelper2 mqttHelperRead;
+    private static MqttHelper2 mqttHelperAnon;
     private static MqttHelper2 mqttHelperAdminProject1;
     private static MqttHelper2 mqttHelperAdminProject2;
     private static MqttHelper2 mqttHelperObsCreaterProject1;
@@ -187,6 +189,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN);
         mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + WRITE);
         mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + READ);
+        mqttHelperAnon = new MqttHelper2(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ANONYMOUS);
         mqttHelperAdminProject1 = new MqttHelper2(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P1);
         mqttHelperAdminProject2 = new MqttHelper2(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P2);
         mqttHelperObsCreaterProject1 = new MqttHelper2(serviceObsCreaterProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P1);
@@ -371,7 +374,11 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etUserProjectRole, "", Collections.emptyList());
         testFilterResults(READ, serviceRead, mdlUsers.etUserProjectRole, "", Collections.emptyList());
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", anonymousReadAllowed ? new int[]{H404} : new int[]{H401, H403});
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", Collections.emptyList());
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", H401, H403);
+        }
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 0, 1));
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 2, 3));
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", Collections.emptyList());
@@ -401,7 +408,11 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         testFilterResults(ADMIN, serviceAdmin, mdlUsers.etRole, "", ROLES);
         testFilterResults(WRITE, serviceWrite, mdlUsers.etRole, "", Collections.emptyList());
         testFilterResults(READ, serviceRead, mdlUsers.etRole, "", Collections.emptyList());
-        filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", anonymousReadAllowed ? new int[]{H404} : new int[]{H401, H403});
+        if (anonymousReadAllowed) {
+            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", Collections.emptyList());
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", H401, H403);
+        }
         testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etRole, "", ROLES);
         testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etRole, "", ROLES);
         testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etRole, "", Collections.emptyList());
@@ -427,7 +438,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_02f_ReadDatastreams() {
-        LOGGER.info("  test_07a_ReadDatastreams");
+        LOGGER.info("  test_02f_ReadDatastreams");
         testFilterResults(ADMIN, serviceAdmin, mdlSensing.etDatastream, "", DATASTREAMS);
         testFilterResults(WRITE, serviceWrite, mdlSensing.etDatastream, "", DATASTREAMS);
         testFilterResults(READ, serviceRead, mdlSensing.etDatastream, "", DATASTREAMS);
@@ -449,7 +460,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, anonymousReadAllowed ? H403 : H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
@@ -464,7 +475,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         EntityCreator reset = (user) -> original.withOnlyPk().setProperty(EP_NAME, original.getProperty(EP_NAME));
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, anonymousReadAllowed ? H404 : H401);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H404);
         updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H404);
@@ -493,7 +504,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -508,7 +519,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -528,7 +539,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -544,6 +555,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String topic = version.urlPart + '/' + sMdl.etThing.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
+        testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, sMdl.etThing, false));
         testers.add(new MqttCreateTester(mqttHelperRead, ehAdmin, READ, creator, filterCreator, topic, sMdl.etThing, false));
         testers.add(new MqttCreateTester(mqttHelperWrite, ehAdmin, WRITE, creator, filterCreator, topic, sMdl.etThing, true));
         testers.add(new MqttCreateTester(mqttHelperAdminProject1, ehAdmin, ADMIN_P1, creator, filterCreator, topic, sMdl.etThing, true));
@@ -578,7 +590,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         Entity original = DATASTREAMS.get(0);
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, anonymousReadAllowed ? H403 : H401);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
         updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H403);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
@@ -655,9 +667,19 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_09a_SubscribeObservations() {
         LOGGER.info("  test_09a_SubscribeObservations");
+        final CompletableFuture<Entity> obsFuture0 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
+            Entity obs0 = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 0),
+                    0,
+                    ZonedDateTime.parse("2024-01-01T00:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs0);
+            obsFuture1.complete(obs0);
+
             Entity obs1 = EntityUtils.createObservation(
                     serviceAdmin,
                     ehAdmin.getCache(mdlSensing.etDatastream, 1),
@@ -678,6 +700,10 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
             return null;
         };
 
+        Entity ds0 = ehAdmin.getCache(mdlSensing.etDatastream, 0);
+        String relationPathDs0 = ParserUtils.relationPath(ds0, mdlSensing.npDatastreamObservations);
+        String dsTopic0 = "v1.1/" + relationPathDs0;
+
         Entity ds1 = ehAdmin.getCache(mdlSensing.etDatastream, 1);
         String relationPathDs1 = ParserUtils.relationPath(ds1, mdlSensing.npDatastreamObservations);
         String dsTopic1 = "v1.1/" + relationPathDs1;
@@ -686,59 +712,109 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String relationPathDs2 = ParserUtils.relationPath(ds2, mdlSensing.npDatastreamObservations);
         String dsTopic2 = "v1.1/" + relationPathDs2;
 
-        final MqttHelper2.TestSubscription test1SubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
+        final TestSubscription test1SubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
                 .setName(ADMIN)
+                .addExpectedEntity(obsFuture0)
                 .addExpectedEntity(obsFuture1)
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription test1SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic1)
+        final TestSubscription test0SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic0)
+                .setName(ADMIN)
+                .addExpectedEntity(obsFuture0)
+                .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test1SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN)
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final MqttHelper2.TestSubscription test2SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic2)
+        final TestSubscription test2SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic2)
                 .setName(ADMIN)
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription test1SubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
+        final TestSubscription test1SubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
                 .setName(ADMIN_P1)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription test1SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic1)
+        final TestSubscription test0SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic0)
+                .setName(ADMIN_P1)
+                .addExpectedEntity(obsFuture0)
+                .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test1SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1)
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final MqttHelper2.TestSubscription test2SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic2)
+        final TestSubscription test2SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic2)
                 .setName(ADMIN_P1)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription test1SubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
+        final TestSubscription test1SubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
                 .setName(ADMIN_P2)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final MqttHelper2.TestSubscription test1SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic1)
+        final TestSubscription test0SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic0)
+                .setName(ADMIN_P2)
+                .addExpectedEntity(obsFuture0)
+                .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test1SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic1)
                 .setName(ADMIN_P2)
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
-        final MqttHelper2.TestSubscription test2SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic2)
+        final TestSubscription test2SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic2)
                 .setName(ADMIN_P2)
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
+
+        final TestSubscription test0SubDsAnon;
+        final TestSubscription test1SubDsAnon;
+        final TestSubscription test2SubDsAnon;
+        if (anonymousReadAllowed) {
+            test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
+                    .setName(ANONYMOUS)
+                    .addExpectedEntity(obsFuture0)
+                    .createReceivedListener(mdlSensing.etObservation);
+            test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
+                    .setName(ANONYMOUS)
+                    .addExpectedError("Failed to subscribe to")
+                    .createReceivedListener(mdlSensing.etObservation);
+            test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
+                    .setName(ANONYMOUS)
+                    .addExpectedError("Failed to subscribe to")
+                    .createReceivedListener(mdlSensing.etObservation);
+        } else {
+            test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
+                    .setName(ANONYMOUS)
+                    .addExpectedError("Failed to subscribe to")
+                    .createReceivedListener(mdlSensing.etObservation);
+            test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
+                    .setName(ANONYMOUS)
+                    .addExpectedError("Failed to subscribe to")
+                    .createReceivedListener(mdlSensing.etObservation);
+            test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
+                    .setName(ANONYMOUS)
+                    .addExpectedError("Failed to subscribe to")
+                    .createReceivedListener(mdlSensing.etObservation);
+        }
 
         MqttHelper2.MqttAction mqttAction = new MqttHelper2.MqttAction(insertAction)
+                .add(test0SubDsAdmin)
+                .add(test0SubDsAdminP1)
+                .add(test0SubDsAdminP2)
+                .add(test0SubDsAnon)
                 .add(test1SubAdmin)
                 .add(test1SubDsAdmin)
                 .add(test1SubAdminP1)
                 .add(test1SubDsAdminP1)
                 .add(test1SubAdminP2)
                 .add(test1SubDsAdminP2)
+                .add(test1SubDsAnon)
                 .add(test2SubDsAdmin)
                 .add(test2SubDsAdminP1)
-                .add(test2SubDsAdminP2);
+                .add(test2SubDsAdminP2)
+                .add(test2SubDsAnon);
         mqttHelperAdmin.executeRequest(mqttAction);
     }
 
@@ -772,7 +848,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, anonymousReadAllowed ? H403 : H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
@@ -784,7 +860,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         LOGGER.info("  test_10a_ThingDelete");
         EntityCreator creator = (user) -> THINGS.get(0);
 
-        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401);
+        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
         deleteForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
