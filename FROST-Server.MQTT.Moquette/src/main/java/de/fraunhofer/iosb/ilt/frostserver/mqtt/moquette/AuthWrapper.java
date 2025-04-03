@@ -197,26 +197,23 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             LOGGER.debug("Allowing access to {}, user {} has role 'read' or 'admin'.", topic, user);
             return true;
         }
+        Version version;
+        try {
+            version = MqttManager.getVersionFromTopic(coreSettings, topic);
+        } catch (UnknownVersionException ex) {
+            LOGGER.debug("Denied access to {}, unknown version.", topic);
+            return false;
+        }
+        String internalTopic = topic.substring(version.urlPart.length() + 1);
+        internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
         if (topicAllowPattern != null) {
-            Version version;
-            try {
-                version = MqttManager.getVersionFromTopic(coreSettings, topic);
-            } catch (UnknownVersionException ex) {
-                LOGGER.debug("Denied access to {}, unknown version.", topic);
-                return false;
-            }
-            String internalTopic = topic.substring(version.urlPart.length() + 1);
-            internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
-
             if (!topicAllowPattern.matcher(internalTopic).matches()) {
                 LOGGER.debug("Denied access to {}, not matching allow pattern.", internalTopic);
                 return false;
             }
 
-            return validatePath(version, internalTopic, userPrincipal);
         }
-
-        return anonymousRead;
+        return validatePath(version, internalTopic, userPrincipal);
     }
 
     private boolean validatePath(Version version, String topic, PrincipalExtended userPrincipal) {
