@@ -38,7 +38,7 @@ public class ServerSettings {
     /**
      * The timeout to use when waiting for MQTT messages.
      */
-    public static final long MQTT_TIMEOUT_MS = 30000;
+    public static final long MQTT_TIMEOUT_MS = 30_000;
 
     /**
      * The root of FROST, without the v1.0.

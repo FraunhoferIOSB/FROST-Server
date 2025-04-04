@@ -280,7 +280,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             clientSubscriptions
                     .getOrDefault(clientId, new ArrayList<>())
                     .stream()
-                    .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic)));
+                    .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(clientId, subscribedTopic)));
             clientSubscriptions.remove(clientId);
         }
 
@@ -295,7 +295,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             clientSubscriptions
                     .computeIfAbsent(clientId, t -> new ArrayList<>())
                     .add(topicFilter);
-            fireSubscribe(new SubscriptionEvent(topicFilter));
+            fireSubscribe(new SubscriptionEvent(clientId, topicFilter));
         }
 
         @Override
@@ -309,7 +309,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             boolean removed = clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
                     .remove(topicFilter);
             if (removed) {
-                fireUnsubscribe(new SubscriptionEvent(topicFilter));
+                fireUnsubscribe(new SubscriptionEvent(clientId, topicFilter));
             }
         }
 

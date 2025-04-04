@@ -18,23 +18,37 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 /**
- *
- * @author jab
+ * Event that a client subscribed.
  */
 public class SubscriptionEvent {
 
+    private String clientId;
     private String topic;
 
-    public SubscriptionEvent(String topic) {
+    public SubscriptionEvent() {
+    }
+
+    public SubscriptionEvent(String clientId, String topic) {
+        this.clientId = clientId;
         this.topic = topic;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public SubscriptionEvent setClientId(String clientId) {
+        this.clientId = clientId;
+        return this;
     }
 
     public String getTopic() {
         return topic;
     }
 
-    public void setTopic(String topic) {
+    public SubscriptionEvent setTopic(String topic) {
         this.topic = topic;
+        return this;
     }
 
     @Override

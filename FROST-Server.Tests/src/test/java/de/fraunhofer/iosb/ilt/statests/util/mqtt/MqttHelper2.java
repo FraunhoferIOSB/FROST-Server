@@ -151,8 +151,8 @@ public class MqttHelper2 {
         final ExecutorService executor = Executors.newFixedThreadPool(ma.topics.size());
         try {
             for (TestSubscription tl : ma.topics) {
-                LOGGER.debug("  Creating Subsctiption for {} messages on {}", tl.getExpectedCount(), tl.topic);
-                MqttListener listener = new MqttListener(mqttServerUri, tl.getTopic(), tl.getExpectedCount());
+                LOGGER.debug("  {} Creating Subsctiption for {} messages on {}", tl.name, tl.getExpectedCount(), tl.topic);
+                MqttListener listener = new MqttListener(tl.name, mqttServerUri, tl.getTopic(), tl.getExpectedCount());
                 if (tl.mqttHelper.isAuthSet()) {
                     MqttConfig mqttConfig = tl.mqttHelper.sSrvc.getMqttConfig();
                     listener.setAuth(mqttConfig.getUsername(), mqttConfig.getPassword());
@@ -523,25 +523,25 @@ public class MqttHelper2 {
          * @return true this.
          */
         public boolean checkReceived(Entity receivedEntity, long timeoutMs) {
-            LOGGER.debug("    Received entity {}", receivedEntity);
+            LOGGER.debug("    {} received entity {}", name, receivedEntity);
             Iterator<Future<Entity>> it = expectedEntities.iterator();
             while (it.hasNext()) {
                 Future<Entity> entityFuture = it.next();
                 try {
-                    LOGGER.debug("    Getting expected for entity {}", receivedEntity);
+                    LOGGER.debug("    {} getting expected for entity {}", name, receivedEntity);
                     Entity expected = entityFuture.get(timeoutMs, TimeUnit.MILLISECONDS);
-                    LOGGER.debug("    Comparing received entity {} against expected {}", receivedEntity, expected);
+                    LOGGER.debug("    {} comparing received entity {} against expected {}", name, receivedEntity, expected);
                     if (expected.equals(receivedEntity)) {
                         it.remove();
-                        LOGGER.debug("    Received entity {} matches expected {}", receivedEntity, expected);
+                        LOGGER.debug("    {} received entity {} matches expected {}", name, receivedEntity, expected);
                         return true;
                     }
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                    LOGGER.warn("Exeption waiting for future.", ex);
+                    LOGGER.warn("Exeption waiting for future for {}.", name, ex);
                     return false;
                 }
             }
-            receivedErrors.add("    Received entity " + receivedEntity + " matches nothing");
+            receivedErrors.add("    " + name + ": Received entity " + receivedEntity + " matches nothing");
             return false;
         }
 
@@ -569,7 +569,7 @@ public class MqttHelper2 {
                         return true;
                     }
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                    LOGGER.warn("Exeption waiting for future.", ex);
+                    LOGGER.warn("Exeption waiting for future for {}.", name, ex);
                     return false;
                 }
             }
