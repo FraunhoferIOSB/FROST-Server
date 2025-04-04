@@ -51,6 +51,7 @@ public class MqttListener implements Callable<JsonNode> {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MqttListener.class);
 
     private final CountDownLatch barrier;
+    private final String name;
     private final String topic;
     private final String mqttServerUri;
 
@@ -58,18 +59,20 @@ public class MqttListener implements Callable<JsonNode> {
     private String password;
 
     private MqttAsyncClient mqttClient;
+    private String clientId = "";
     private JsonNode result;
     private ReceivedListener listener;
 
-    public MqttListener(String mqttServer, String topic) {
-        this(mqttServer, topic, 1);
+    public MqttListener(String name, String mqttServer, String topic) {
+        this(name, mqttServer, topic, 1);
     }
 
-    public MqttListener(String mqttServer, String topic, int expectedMessages) {
+    public MqttListener(String name, String mqttServer, String topic, int expectedMessages) {
+        this.name = name;
         this.mqttServerUri = mqttServer;
         this.topic = topic;
         barrier = new CountDownLatch(expectedMessages);
-        LOGGER.debug("Created MqttListener for {} expecting {} on {}", mqttServer, expectedMessages, topic);
+        LOGGER.debug("{} Created MqttListener for {} expecting {} on {}", name, mqttServer, expectedMessages, topic);
     }
 
     public void setListener(ReceivedListener listener) {
@@ -84,7 +87,7 @@ public class MqttListener implements Callable<JsonNode> {
 
     private void notifyMessage(String message) {
         barrier.countDown();
-        LOGGER.debug("Received message, barrier now at {}", barrier.getCount());
+        LOGGER.debug("{} Received message, barrier now at {}", clientId, barrier.getCount());
         if (listener != null) {
             listener.received(message, false);
         }
@@ -92,7 +95,7 @@ public class MqttListener implements Callable<JsonNode> {
 
     private void notifyError(String message) {
         barrier.countDown();
-        LOGGER.debug("Received error, barrier now at {}", barrier.getCount());
+        LOGGER.debug("{} Received error, barrier now at {}", clientId, barrier.getCount());
         if (listener != null) {
             listener.received(message, true);
         }
@@ -101,7 +104,8 @@ public class MqttListener implements Callable<JsonNode> {
     public MqttListener connect() {
         try {
             final CountDownLatch connectBarrier = new CountDownLatch(2);
-            mqttClient = new MqttAsyncClient(mqttServerUri, "TS-" + topic + "-" + UUID.randomUUID(), new MemoryPersistence());
+            clientId = "TS-" + name + "-" + topic + "-" + UUID.randomUUID();
+            mqttClient = new MqttAsyncClient(mqttServerUri, clientId, new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
             if (!isNullOrEmpty(username)) {
@@ -113,15 +117,17 @@ public class MqttListener implements Callable<JsonNode> {
             MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
                 @Override
                 public void onSubscribe(SubscriptionEvent subscription) {
-                    LOGGER.debug("sc: Subscribe to {}", subscription);
-                    if (topic.equals(subscription.getTopic())) {
+                    if (clientId.equals(subscription.getClientId()) && topic.equals(subscription.getTopic())) {
+                        LOGGER.debug("  s: {} Subscribed to {}", clientId, subscription);
                         connectBarrier.countDown();
                     }
                 }
 
                 @Override
                 public void onUnsubscribe(SubscriptionEvent subscription) {
-                    LOGGER.debug("sc: Unsubscribe from {}", subscription);
+                    if (clientId.equals(subscription.getClientId()) && topic.equals(subscription.getTopic())) {
+                        LOGGER.debug("  s: {} Unsubscribe from {}", clientId, subscription);
+                    }
                 }
             });
             mqttClient.connect(connOpts, null, new IMqttActionListener() {
@@ -131,7 +137,7 @@ public class MqttListener implements Callable<JsonNode> {
                         @Override
                         public void connectionLost(Throwable thrwbl) {
                             LOGGER.error("Exception:", thrwbl);
-                            fail("MQTT connection lost.");
+                            fail("MQTT connection lost: " + clientId);
                         }
 
                         @Override
@@ -144,9 +150,9 @@ public class MqttListener implements Callable<JsonNode> {
                                     LOGGER.error("Failed to parse result", ex);
                                 }
                                 notifyMessage(payload);
-                                LOGGER.debug("Received on {}. To go: {}", topic, barrier.getCount());
+                                LOGGER.debug("  c: {} Received on {}. To go: {}", clientId, topic, barrier.getCount());
                             } else {
-                                LOGGER.error("Received on {}. Barrier already empty!", topic);
+                                LOGGER.error("  c: {} Received on {}. Barrier already empty!", clientId, topic);
                             }
                         }
 
@@ -160,12 +166,12 @@ public class MqttListener implements Callable<JsonNode> {
                             @Override
                             public void onSuccess(IMqttToken imt) {
                                 if (imt.getGrantedQos()[0] == 128) {
-                                    LOGGER.debug("Subscribed Failed on {}", topic);
+                                    LOGGER.debug("  c: {} Failed to subscribe on {}", clientId, topic);
                                     notifyError("Failed to subscribe to " + topic);
                                     // Extra countdown
                                     connectBarrier.countDown();
                                 } else {
-                                    LOGGER.debug("Subscribed to {}", topic);
+                                    LOGGER.debug("  c: {} Subscribed to {}", clientId, topic);
                                 }
                                 connectBarrier.countDown();
                             }

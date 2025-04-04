@@ -243,7 +243,7 @@ class MqttManagerTest {
 
         public void subscribe(String topic) {
             topics.add(topic);
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(topic);
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent("unknown", topic);
             for (SubscriptionListener l : subscriptionListeners) {
                 l.onSubscribe(subscriptionEvent);
             }
@@ -251,7 +251,7 @@ class MqttManagerTest {
 
         public void unsubscribe(String topic) {
             topics.remove(topic);
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(topic);
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent("unknown", topic);
             for (SubscriptionListener l : subscriptionListeners) {
                 l.onUnsubscribe(subscriptionEvent);
             }
@@ -259,7 +259,7 @@ class MqttManagerTest {
 
         public void unsubscribeAll() {
             for (String topic : topics) {
-                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(topic);
+                SubscriptionEvent subscriptionEvent = new SubscriptionEvent("unknown", topic);
                 for (SubscriptionListener l : subscriptionListeners) {
                     l.onUnsubscribe(subscriptionEvent);
                 }

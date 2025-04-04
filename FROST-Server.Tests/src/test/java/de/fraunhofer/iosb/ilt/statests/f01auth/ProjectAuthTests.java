@@ -678,7 +678,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ZonedDateTime.parse("2024-01-01T00:00:00.000Z"),
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs0);
-            obsFuture1.complete(obs0);
+            obsFuture0.complete(obs0);
 
             Entity obs1 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -713,58 +713,58 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String dsTopic2 = "v1.1/" + relationPathDs2;
 
         final TestSubscription test1SubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
-                .setName(ADMIN)
+                .setName(ADMIN + "-1")
                 .addExpectedEntity(obsFuture0)
                 .addExpectedEntity(obsFuture1)
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test0SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic0)
-                .setName(ADMIN)
+                .setName(ADMIN + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic1)
-                .setName(ADMIN)
+                .setName(ADMIN + "-3")
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic2)
-                .setName(ADMIN)
+                .setName(ADMIN + "-4")
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test1SubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
-                .setName(ADMIN_P1)
+                .setName(ADMIN_P1 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test0SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic0)
-                .setName(ADMIN_P1)
+                .setName(ADMIN_P1 + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic1)
-                .setName(ADMIN_P1)
+                .setName(ADMIN_P1 + "-3")
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic2)
-                .setName(ADMIN_P1)
+                .setName(ADMIN_P1 + "-4")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test1SubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
-                .setName(ADMIN_P2)
+                .setName(ADMIN_P2 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test0SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic0)
-                .setName(ADMIN_P2)
+                .setName(ADMIN_P2 + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic1)
-                .setName(ADMIN_P2)
+                .setName(ADMIN_P2 + "-3")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic2)
-                .setName(ADMIN_P2)
+                .setName(ADMIN_P2 + "-4")
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
@@ -773,28 +773,28 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         final TestSubscription test2SubDsAnon;
         if (anonymousReadAllowed) {
             test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-1")
                     .addExpectedEntity(obsFuture0)
                     .createReceivedListener(mdlSensing.etObservation);
             test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-2")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
             test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-3")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
         } else {
             test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-4")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
             test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-5")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
             test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
-                    .setName(ANONYMOUS)
+                    .setName(ANONYMOUS + "-6")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
         }
