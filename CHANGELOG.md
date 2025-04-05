@@ -3,6 +3,7 @@
 ## Development version 2.5.6
 
 **Internal changes & Bugfixes**
+* When anonymous read is not allowed, anonymous connections over MQTT are rejected.
 * Changed GeoJSON serialiser to streaming, improving performance of the GeoJSON resultFormat.
 
 

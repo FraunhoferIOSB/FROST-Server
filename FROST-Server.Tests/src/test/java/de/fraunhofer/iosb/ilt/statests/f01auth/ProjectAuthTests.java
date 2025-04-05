@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.JOIN_TIMEOUT;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -315,20 +316,20 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String topic = version.urlPart + '/' + sMdl.etSensor.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
-        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true));
+        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN + "-0", creator, filterCreator, topic, sMdl.etSensor, true));
 
         for (var tester : testers) {
             tester.start();
         }
         for (var tester : testers) {
-            tester.join();
+            tester.join(20_000);
             if (tester.hasCreatedEntity()) {
                 LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
                 SENSORS.add(tester.getCreatedEntity());
             }
         }
         for (var tester : testers) {
-            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            LOGGER.info("  User {}, {}, Message: {}", tester.name, tester.isSuccess(), tester.getMessage());
             assertTrue(tester.isSuccess(), tester.getMessage());
         }
     }
@@ -555,7 +556,12 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String topic = version.urlPart + '/' + sMdl.etThing.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
-        testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, sMdl.etThing, false));
+        if (anonymousReadAllowed) {
+            testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, sMdl.etThing, false));
+        } else {
+            testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, sMdl.etThing, false)
+                    .addExpectedException(org.eclipse.paho.client.mqttv3.MqttSecurityException.class));
+        }
         testers.add(new MqttCreateTester(mqttHelperRead, ehAdmin, READ, creator, filterCreator, topic, sMdl.etThing, false));
         testers.add(new MqttCreateTester(mqttHelperWrite, ehAdmin, WRITE, creator, filterCreator, topic, sMdl.etThing, true));
         testers.add(new MqttCreateTester(mqttHelperAdminProject1, ehAdmin, ADMIN_P1, creator, filterCreator, topic, sMdl.etThing, true));
@@ -568,14 +574,14 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         }
         MqttHelper2.waitMillis(WAIT_AFTER_INSERT);
         for (var tester : testers) {
-            tester.join();
+            tester.join(JOIN_TIMEOUT);
             if (tester.hasCreatedEntity()) {
                 LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
                 THINGS.add(tester.getCreatedEntity());
             }
         }
         for (var tester : testers) {
-            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            LOGGER.info("  User {}, {}, Message: {}", tester.name, tester.isSuccess(), tester.getMessage());
             assertTrue(tester.isSuccess(), tester.getMessage());
         }
     }
@@ -787,15 +793,15 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         } else {
             test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-4")
-                    .addExpectedError("Failed to subscribe to")
+                    .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
             test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
                     .setName(ANONYMOUS + "-5")
-                    .addExpectedError("Failed to subscribe to")
+                    .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
             test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
                     .setName(ANONYMOUS + "-6")
-                    .addExpectedError("Failed to subscribe to")
+                    .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
         }
 

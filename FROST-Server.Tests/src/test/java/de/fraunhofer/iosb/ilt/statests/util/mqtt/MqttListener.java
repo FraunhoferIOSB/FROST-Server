@@ -136,8 +136,8 @@ public class MqttListener implements Callable<JsonNode> {
                     mqttClient.setCallback(new MqttCallback() {
                         @Override
                         public void connectionLost(Throwable thrwbl) {
-                            LOGGER.error("Exception:", thrwbl);
-                            fail("MQTT connection lost: " + clientId);
+                            LOGGER.info("Connection lost for {}:", name, thrwbl.getMessage());
+                            notifyError("MQTT connection lost: " + clientId);
                         }
 
                         @Override
@@ -178,19 +178,19 @@ public class MqttListener implements Callable<JsonNode> {
 
                             @Override
                             public void onFailure(IMqttToken imt, Throwable thrwbl) {
-                                LOGGER.error("Exception:", thrwbl);
+                                LOGGER.debug("Exception during subscribe for {}:", name, thrwbl.getMessage());
                                 notifyError("Failed to subscribe to " + topic);
                             }
                         });
                     } catch (MqttException ex) {
-                        LOGGER.error("Exception:", ex);
+                        LOGGER.debug("Exception for {} during subscribe:", name, ex.getMessage());
                         notifyError("Failed to subscribe to " + topic + ": " + ex.getMessage());
                     }
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    LOGGER.error("Exception:", exception);
+                    LOGGER.debug("Exception during connect for {}:", name, exception.getMessage());
                     notifyError("MQTT connect failed: " + exception.getMessage());
                 }
             });
@@ -200,8 +200,8 @@ public class MqttListener implements Callable<JsonNode> {
                 LOGGER.error("Exception:", ex);
             }
         } catch (MqttException | IllegalArgumentException ex) {
-            LOGGER.error("Exception:", ex);
-            fail("Could not connect to MQTT server: " + ex.getMessage());
+            LOGGER.info("Exception for {} during connect:", name, ex.getMessage());
+            notifyError("Could not connect to MQTT server: " + ex.getMessage());
         }
         return this;
     }

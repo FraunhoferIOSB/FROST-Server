@@ -38,6 +38,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -66,6 +67,7 @@ public class MqttHelper2 {
     public static final int WAIT_AFTER_INSERT = 150;
     public static final int WAIT_AFTER_CLEANUP = 1;
     public static final int MQTT_READ_RETRIES = 20;
+    public static final int JOIN_TIMEOUT = 10_000 + MQTT_READ_RETRIES * WAIT_AFTER_INSERT;
     public static final int QOS = 2;
     public String clientId = "TS";
 
@@ -113,10 +115,18 @@ public class MqttHelper2 {
     }
 
     public void publish(String topic, String message) {
-        publish(topic, message, QOS, false);
+        publish(topic, message, Collections.emptyList());
+    }
+
+    public void publish(String topic, String message, List<Class<? extends Exception>> expectedExceptions) {
+        publish(topic, message, QOS, false, expectedExceptions);
     }
 
     public void publish(String topic, String message, int qos, boolean retained) {
+        publish(topic, message, qos, retained, Collections.emptyList());
+    }
+
+    public void publish(String topic, String message, int qos, boolean retained, List<Class<? extends Exception>> expectedExceptions) {
         MqttAsyncClient client = null;
         try {
             client = new MqttAsyncClient(mqttServerUri, "Pub-" + clientId);
@@ -129,18 +139,26 @@ public class MqttHelper2 {
             connOpts.setCleanSession(true);
             client.connect(connOpts).waitForCompletion(MQTT_CONNECT_TIMEOUT);
             client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(MQTT_PUBLISH_TIMEOUT);
-        } catch (MqttException ex) {
-            LOGGER.error("Exception on server {} :", mqttServerUri, ex);
-            fail("error publishing message on MQTT: " + ex.getMessage());
+        } catch (RuntimeException | MqttException ex) {
+            if (expectedExceptions.contains(ex.getClass())) {
+                LOGGER.debug("Got expected exception {}", ex.getClass());
+            } else {
+                LOGGER.error("Exception on server {} :", mqttServerUri, ex);
+                fail("error publishing message on MQTT: " + ex.getMessage());
+            }
         } finally {
             if (client != null) {
                 try {
-                    client.disconnect();
+                    if (client.isConnected()) {
+                        client.disconnectForcibly();
+                    }
                 } catch (MqttException ex) {
+                    LOGGER.warn("Exception disconnecting", ex);
                 }
                 try {
                     client.close();
                 } catch (MqttException ex) {
+                    LOGGER.warn("Exception closing", ex);
                 }
             }
         }
@@ -664,8 +682,6 @@ public class MqttHelper2 {
 
     public static class MqttCreateTester {
 
-        private static final int JOIN_TIMEOUT = 500 + MqttHelper2.MQTT_READ_RETRIES * MqttHelper2.WAIT_AFTER_INSERT;
-
         public final MqttHelper2 mh;
         public final EntityHelper2 eh;
         public final String name;
@@ -674,6 +690,7 @@ public class MqttHelper2 {
         public final String topic;
         public final EntityType et;
         public final boolean expectSuccess;
+        private List<Class<? extends Exception>> expectedExceptions = new ArrayList<>();
 
         private boolean done;
         private boolean success;
@@ -690,23 +707,28 @@ public class MqttHelper2 {
             this.et = et;
             this.expectSuccess = expectSuccess;
             this.success = false;
-            this.message = "Still running for " + name;
+            this.message = "Not started";
         }
 
         private Thread thread;
+
+        public MqttCreateTester addExpectedException(Class<? extends Exception> expectedException) {
+            expectedExceptions.add(expectedException);
+            return this;
+        }
 
         public void start() {
             thread = new Thread(this::executeTest);
             thread.start();
         }
 
-        public void join() {
+        public void join(long timeout) {
             if (thread == null) {
                 return;
             }
             LOGGER.info("Joining {}", name);
             try {
-                thread.join(JOIN_TIMEOUT);
+                thread.join(timeout);
             } catch (InterruptedException ex) {
                 LOGGER.error("Interrupted", ex);
             }
@@ -714,10 +736,14 @@ public class MqttHelper2 {
 
         private void executeTest() {
             try {
+                message = "Started for " + name;
                 Entity entity = entityCreator.create(name);
                 String json = JsonWriter.writeEntity(entity);
-                mh.publish(topic, json);
+                LOGGER.debug("Publising for {}", name);
+                mh.publish(topic, json, expectedExceptions);
+                LOGGER.debug("  Checking creation for {}", name);
                 createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
+                LOGGER.debug("  Analysing result for {}", name);
                 if (createdEntity == null && !expectSuccess) {
                     success = true;
                     message = "Success";
@@ -730,7 +756,9 @@ public class MqttHelper2 {
                 }
             } catch (JsonProcessingException | ServiceFailureException ex) {
                 LOGGER.error("Failed to create JSON or fetch entity");
+                message = "Exception for " + name + " " + ex.getMessage();
             }
+            LOGGER.debug("  Execution done for {}", name);
             done = true;
         }
 

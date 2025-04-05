@@ -39,6 +39,11 @@ public class ConfigWrapper extends IConfig {
         wrappedSettings.set(name.replace('_', '.'), value);
     }
 
+    public void setProperty(String name, boolean value) {
+        wrappedSettings.set(name.replace('_', '.'), value);
+        wrappedSettings.set(name.replace('_', '.'), Boolean.toString(value));
+    }
+
     @Override
     public String getProperty(String name) {
         return wrappedSettings.get(name.replace('_', '.'), (String) null);
