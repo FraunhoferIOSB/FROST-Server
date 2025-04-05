@@ -76,8 +76,8 @@ import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests10;
 import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests11;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests10;
 import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests11;
-import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.MqttCoreTests;
-import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.MqttExtraTests;
+import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.MqttCoreTests11;
+import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.MqttExtraTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests10;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests11;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthCryptPwTests10;
@@ -174,8 +174,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     DataArrayTests11.class,
     Capability7Tests10.class,
     Capability7Tests11.class,
-    MqttCoreTests.class,
-    MqttExtraTests.class,
+    MqttCoreTests11.class,
+    MqttExtraTests11.class,
     CustomLinksTests10.class,
     CustomLinksTests11.class,
     MetadataTests10.class,
