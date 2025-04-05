@@ -327,7 +327,8 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         String topic = version.urlPart + '/' + sMdl.etSensor.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
-        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true));
+        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true)
+                .setReadRetries(100));
 
         for (var tester : testers) {
             tester.start();

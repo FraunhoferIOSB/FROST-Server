@@ -147,20 +147,23 @@ public class MqttHelper2 {
                 fail("error publishing message on MQTT: " + ex.getMessage());
             }
         } finally {
-            if (client != null) {
-                try {
-                    if (client.isConnected()) {
-                        client.disconnectForcibly();
+            final MqttAsyncClient mc = client;
+            new Thread(() -> {
+                if (mc != null) {
+                    try {
+                        if (mc.isConnected()) {
+                            mc.disconnectForcibly();
+                        }
+                    } catch (MqttException ex) {
+                        LOGGER.warn("Exception disconnecting", ex);
                     }
-                } catch (MqttException ex) {
-                    LOGGER.warn("Exception disconnecting", ex);
+                    try {
+                        mc.close();
+                    } catch (MqttException ex) {
+                        LOGGER.warn("Exception closing", ex);
+                    }
                 }
-                try {
-                    client.close();
-                } catch (MqttException ex) {
-                    LOGGER.warn("Exception closing", ex);
-                }
-            }
+            }).start();
         }
     }
 
@@ -690,8 +693,9 @@ public class MqttHelper2 {
         public final String topic;
         public final EntityType et;
         public final boolean expectSuccess;
-        private List<Class<? extends Exception>> expectedExceptions = new ArrayList<>();
+        private final List<Class<? extends Exception>> expectedExceptions = new ArrayList<>();
 
+        private int readRetries = MQTT_READ_RETRIES;
         private boolean done;
         private boolean success;
         private String message;
@@ -714,6 +718,11 @@ public class MqttHelper2 {
 
         public MqttCreateTester addExpectedException(Class<? extends Exception> expectedException) {
             expectedExceptions.add(expectedException);
+            return this;
+        }
+
+        public MqttCreateTester setReadRetries(int readRetries) {
+            this.readRetries = readRetries;
             return this;
         }
 
@@ -742,7 +751,7 @@ public class MqttHelper2 {
                 LOGGER.debug("Publising for {}", name);
                 mh.publish(topic, json, expectedExceptions);
                 LOGGER.debug("  Checking creation for {}", name);
-                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, MQTT_READ_RETRIES);
+                createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, readRetries);
                 LOGGER.debug("  Analysing result for {}", name);
                 if (createdEntity == null && !expectSuccess) {
                     success = true;

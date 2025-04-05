@@ -360,7 +360,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test30SubscribeThingAdmin() {
+    void test30SubscribeThing() {
         LOGGER.info("  test30SubscribeThingAdmin");
         final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
@@ -372,78 +372,27 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             obsFuture.complete(thing);
             return null;
         };
-        final TestSubscription testSubscription = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
+        final TestSubscription testSubscriptionAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
-        MqttAction mqttAction = new MqttAction(insertAction)
-                .add(testSubscription);
-        mqttHelperAdmin.executeRequest(mqttAction);
-    }
-
-    @Test
-    void test31SubscribeThingWrite() {
-        LOGGER.info("  test31SubscribeThingWrite");
-        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
-        final Callable<Object> insertAction = () -> {
-            Entity thing = EntityUtils.createThing(
-                    serviceAdmin,
-                    "newThing",
-                    "A new Thing for Testing",
-                    ehAdmin.getCache(sMdl.etThing));
-            obsFuture.complete(thing);
-            return null;
-        };
-        final TestSubscription testSubscription = new TestSubscription(mqttHelperWrite, "v1.1/Things")
+        final TestSubscription testSubscriptionWrite = new TestSubscription(mqttHelperWrite, "v1.1/Things")
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
-        MqttAction mqttAction = new MqttAction(insertAction)
-                .add(testSubscription);
-        mqttHelperAdmin.executeRequest(mqttAction);
-    }
-
-    @Test
-    void test32SubscribeThingRead() {
-        LOGGER.info("  test32SubscribeThingRead");
-        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
-        final Callable<Object> insertAction = () -> {
-            Entity thing = EntityUtils.createThing(
-                    serviceAdmin,
-                    "newThing",
-                    "A new Thing for Testing",
-                    ehAdmin.getCache(sMdl.etThing));
-            obsFuture.complete(thing);
-            return null;
-        };
-        final TestSubscription testSubscription = new TestSubscription(mqttHelperRead, "v1.1/Things")
+        final TestSubscription testSubscriptionRead = new TestSubscription(mqttHelperRead, "v1.1/Things")
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
-        MqttAction mqttAction = new MqttAction(insertAction)
-                .add(testSubscription);
-        mqttHelperAdmin.executeRequest(mqttAction);
-    }
-
-    @Test
-    void test33SubscribeThingAnon() {
-        LOGGER.info("  test33SubscribeThingAnon");
-        final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
-        final Callable<Object> insertAction = () -> {
-            Entity thing = EntityUtils.createThing(
-                    serviceAdmin,
-                    "newThing",
-                    "A new Thing for Testing",
-                    ehAdmin.getCache(sMdl.etThing));
-            obsFuture.complete(thing);
-            return null;
-        };
-        final TestSubscription testSubscription = new TestSubscription(mqttHelperAnon, "v1.1/Things")
+        final TestSubscription testSubscriptionAnon = new TestSubscription(mqttHelperAnon, "v1.1/Things")
                 .createReceivedListener(sMdl.etThing);
         if (anonymousReadAllowed) {
-            testSubscription.addExpectedEntity(obsFuture);
+            testSubscriptionAnon.addExpectedEntity(obsFuture);
         } else {
-            testSubscription.addExpectedError("MQTT connect failed: Bad user name or password");
+            testSubscriptionAnon.addExpectedError("MQTT connect failed: Bad user name or password");
         }
         MqttAction mqttAction = new MqttAction(insertAction)
-                .add(testSubscription);
+                .add(testSubscriptionAdmin)
+                .add(testSubscriptionWrite)
+                .add(testSubscriptionRead)
+                .add(testSubscriptionAnon);
         mqttHelperAdmin.executeRequest(mqttAction);
     }
 
