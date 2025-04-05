@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.JOIN_TIMEOUT;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -332,7 +333,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             tester.start();
         }
         for (var tester : testers) {
-            tester.join();
+            tester.join(20_000);
             if (tester.hasCreatedEntity()) {
                 LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
                 SENSORS.add(tester.getCreatedEntity());
@@ -536,7 +537,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
         MqttHelper2.waitMillis(WAIT_AFTER_INSERT);
         for (var tester : testers) {
-            tester.join();
+            tester.join(JOIN_TIMEOUT);
             if (tester.hasCreatedEntity()) {
                 LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
                 THINGS.add(tester.getCreatedEntity());

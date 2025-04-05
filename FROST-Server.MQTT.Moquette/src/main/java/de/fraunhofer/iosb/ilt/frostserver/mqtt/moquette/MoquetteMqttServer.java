@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+
 import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
@@ -176,10 +178,16 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         mqttBroker = new Server();
         final List<? extends InterceptHandler> userHandlers = Arrays.asList(new AbstractInterceptHandlerImpl());
 
-        MqttSettings mqttSettings = settings.getMqttSettings();
-        Settings customSettings = mqttSettings.getCustomSettings();
-        IConfig config = new ConfigWrapper(customSettings);
+        final MqttSettings mqttSettings = settings.getMqttSettings();
+        final Settings customSettings = mqttSettings.getCustomSettings();
+        final Settings authSettings = settings.getAuthSettings();
+        final boolean allowAnonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+        authWrapper = createAuthWrapper();
 
+        final ConfigWrapper config = new ConfigWrapper(customSettings);
+        if (authWrapper != null) {
+            config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, allowAnonRead);
+        }
         // Ensure the immediate_flush property has a default of true.
         config.intProp(IConfig.BUFFER_FLUSH_MS_PROPERTY_NAME, 0);
         config.boolProp(IConfig.ENABLE_TELEMETRY_NAME, false);
@@ -204,8 +212,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
             config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }
-
-        authWrapper = createAuthWrapper();
 
         try {
             mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);

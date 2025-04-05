@@ -440,7 +440,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         if (anonymousReadAllowed) {
             testSubscription.addExpectedEntity(obsFuture);
         } else {
-            testSubscription.addExpectedError("Failed to subscribe to v1.1/Things");
+            testSubscription.addExpectedError("MQTT connect failed: Bad user name or password");
         }
         MqttAction mqttAction = new MqttAction(insertAction)
                 .add(testSubscription);
