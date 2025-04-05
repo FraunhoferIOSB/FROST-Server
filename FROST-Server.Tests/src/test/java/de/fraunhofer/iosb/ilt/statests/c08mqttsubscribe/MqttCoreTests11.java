@@ -59,16 +59,16 @@ import org.slf4j.LoggerFactory;
  * Test the standard MQTT functionality.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class MqttCoreTests extends AbstractTestClass {
+public class MqttCoreTests11 extends AbstractTestClass {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttCoreTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttCoreTests11.class);
 
     private static List<EntityType> entityTypesForCreate;
 
     private static EntityHelper2 eh2;
     private static MqttHelper2 mqttHelper;
 
-    public MqttCoreTests() {
+    public MqttCoreTests11() {
         super(ServerVersion.v_1_1);
     }
 

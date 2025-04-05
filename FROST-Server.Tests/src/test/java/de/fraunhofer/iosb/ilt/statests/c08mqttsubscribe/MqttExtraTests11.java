@@ -55,14 +55,14 @@ import org.slf4j.LoggerFactory;
  * Tests non-standard MQTT extensions.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class MqttExtraTests extends AbstractTestClass {
+public class MqttExtraTests11 extends AbstractTestClass {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttExtraTests.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttExtraTests11.class.getName());
 
     private static EntityHelper2 eh;
     private static MqttHelper2 mqttHelper;
 
-    public MqttExtraTests() {
+    public MqttExtraTests11() {
         super(ServerVersion.v_1_1);
     }
 
