@@ -3,6 +3,7 @@
 ## Development version 2.5.7
 
 **Internal changes & Bugfixes**
+* HTTP Tool on index page now formats returned JSON.
 
 
 ## Release version 2.5.6
