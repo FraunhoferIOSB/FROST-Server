@@ -30,8 +30,13 @@
                             let location = request.getResponseHeader('Location');
                             if (location === null)
                                 location = "";
-                            document.getElementById('result').innerHTML = 'Done: ' + request.responseText + "<br>"
+                            try {
+                                var data = JSON.parse(request.responseText);
+                                document.getElementById('result').innerHTML = 'Done:<br><pre>' + JSON.stringify(data,null,'  ') + '</pre>' + location;
+                            } catch (err) {
+                                document.getElementById('result').innerHTML = 'Done: ' + request.responseText + "<br>"
                                     + location;
+                            }
                         } else {
                             document.getElementById('result').innerHTML = 'Error ' + request.status + ": " + request.responseText + "";
                         }
