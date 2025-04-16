@@ -544,7 +544,6 @@ public class MqttHelper2 {
          * @return true this.
          */
         public boolean checkReceived(Entity receivedEntity, long timeoutMs) {
-            LOGGER.debug("    {} received entity {}", name, receivedEntity);
             Iterator<Future<Entity>> it = expectedEntities.iterator();
             while (it.hasNext()) {
                 Future<Entity> entityFuture = it.next();
@@ -562,6 +561,7 @@ public class MqttHelper2 {
                     return false;
                 }
             }
+            LOGGER.debug("    {} Received entity {} matches nothing", name, receivedEntity);
             receivedErrors.add("    " + name + ": Received entity " + receivedEntity + " matches nothing");
             return false;
         }
@@ -576,7 +576,6 @@ public class MqttHelper2 {
          * @return true this.
          */
         public boolean checkReceived(JsonNode received, long timeoutMs) {
-            LOGGER.debug("    Received JSON {}", received);
             Iterator<Future<JsonNode>> it = expectedJson.iterator();
             while (it.hasNext()) {
                 Future<JsonNode> entityFuture = it.next();

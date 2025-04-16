@@ -23,10 +23,12 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createDatastream;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservedProperty;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createSensor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
@@ -309,4 +311,35 @@ public class MqttExtraTests11 extends AbstractTestClass {
                 .add(testSubscription3);
         mqttHelper.executeRequest(mqttAction);
     }
+
+    @Test
+    void test04SubscribeExpand() {
+        LOGGER.info("  test04SubscribeExpand");
+        final CompletableFuture<JsonNode> obsFuture1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture2 = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs = EntityUtils.createObservation(
+                    sSrvc,
+                    eh.getCache(sMdl.etDatastream, 0),
+                    0,
+                    ZonedDateTime.parse("2016-01-01T01:00:00.000Z"),
+                    eh.getCache(sMdl.etObservation));
+            JsonNode entityJson1 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "Datastream($select=description)");
+            obsFuture1.complete(entityJson1);
+            JsonNode entityJson2 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "Datastream");
+            obsFuture2.complete(entityJson2);
+            return null;
+        };
+        final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream($select=description)")
+                .addExpectedJson(obsFuture1)
+                .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscriptionExp = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream")
+                .addExpectedJson(obsFuture2)
+                .createReceivedListener(sMdl.etObservation);
+        MqttAction mqttAction = new MqttAction(insertAction)
+                .add(testSubscription)
+                .add(testSubscriptionExp);
+        mqttHelper.executeRequest(mqttAction);
+    }
+
 }
