@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestExcepti
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +78,7 @@ public class EntitySetSubscription extends AbstractSubscription {
                     List<Expand> expandList = queryCopy.getExpand();
                     expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
                             .setExpand(expandList)
-                            .addSelect(entityType.getPrimaryKey().getKeyProperties());
+                            .addSelect(query.getSelect().toArray(Property[]::new));
                 }
             }
         }
@@ -116,9 +115,6 @@ public class EntitySetSubscription extends AbstractSubscription {
             Object expandEntity = persistenceManager.get(resourcePath, expandQuery);
 
             if (expandEntity instanceof Entity entity) {
-                Set<EntityPropertyMain> fields = entity.getEntityType().getEntityProperties();
-                fields.forEach(field -> entity.setProperty(field, newEntity.getProperty(field)));
-                entity.setQuery(query);
                 return entity;
             }
         }
