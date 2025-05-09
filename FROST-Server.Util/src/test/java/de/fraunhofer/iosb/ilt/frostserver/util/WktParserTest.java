@@ -24,6 +24,7 @@ import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.MultiPoint;
 import org.geojson.MultiPolygon;
+import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,10 +51,28 @@ class WktParserTest {
     }
 
     @Test
+    void testParsePoint2DSrid() {
+        String text = "SRID=4326;POINT (30 10)";
+        GeoJsonObject result = WktParser.parseWkt(text);
+        final Point expected = TestHelper.setCrs(
+                TestHelper.getPoint(30, 10),
+                4326);
+        assertEquals(expected, result);
+    }
+
+    @Test
     void testParsePoint3D() {
         String text = "POINTZ(30 10 10)";
         GeoJsonObject result = WktParser.parseWkt(text);
         assertEquals(TestHelper.getPoint(30, 10, 10), result);
+    }
+
+    @Test
+    void testParsePoint3DSrid() {
+        final String text = "SRID=4326;POINTZ(30 10 10)";
+        final GeoJsonObject result = WktParser.parseWkt(text);
+        final Point expected = TestHelper.setCrs(TestHelper.getPoint(30, 10, 10), 4326);
+        assertEquals(expected, result);
     }
 
     @ParameterizedTest
@@ -67,9 +86,20 @@ class WktParserTest {
 
     @Test
     void testParseMultiPoint2D() {
-        MultiPoint expected = TestHelper.buildMutliPoint().a(30, 10).a(40, 20).a(50, 10).b();
+        MultiPoint expected = TestHelper.buildMutliPoint().add(30, 10).add(40, 20).add(50, 10).build();
         String text = "MULTIPOINT ((30 10),(40 20),(50 10))";
         GeoJsonObject result = WktParser.parseWkt(text);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testParseMultiPoint2DSrid() {
+        final MultiPoint expected = TestHelper.buildMutliPoint()
+                .add(30, 10).add(40, 20).add(50, 10)
+                .setCrs(4326)
+                .build();
+        final String text = "SRID=4326;MULTIPOINT ((30 10),(40 20),(50 10))";
+        final GeoJsonObject result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }
 
@@ -79,7 +109,7 @@ class WktParserTest {
         "MULTIPOINTM ( ( 30  10  1 ) , ( 40 20 2 ) , ( 50 10 1 ) ) "
     })
     void testParseMultiPoint3D(String text) {
-        MultiPoint expected = TestHelper.buildMutliPoint().a(30, 10, 1).a(40, 20, 2).a(50, 10, 1).b();
+        MultiPoint expected = TestHelper.buildMutliPoint().a(30, 10, 1).a(40, 20, 2).a(50, 10, 1).build();
         GeoJsonObject result = WktParser.parseWkt(text);
         assertEquals(expected, result);
     }

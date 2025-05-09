@@ -3,6 +3,7 @@
 ## Development version 2.6.0
 
 **New Features**
+* Added support for EWKT in queries.
 * HTTP Tool on index page now formats returned JSON.
 * When anonymous read is not allowed, anonymous connections over MQTT are rejected.
 * Generated features' Projects and restricted flag can be updated when the Location is updated.

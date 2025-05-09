@@ -78,6 +78,13 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         this.source = source;
     }
 
+    public String getWktWithSrid(int dfltSrid) {
+        if (getValue().getCrs() == null) {
+            return "SRID=" + dfltSrid + ";" + getSource();
+        }
+        return getSource();
+    }
+
     @Override
     public String toUrl() {
         return "geography'" + source + "'";

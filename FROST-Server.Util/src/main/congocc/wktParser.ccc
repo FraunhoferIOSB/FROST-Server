@@ -29,10 +29,13 @@ TOKEN [IGNORE_CASE]:
   <LB: "(" >
 | <RB: ")" >
 | <COMMA: "," >
+| <SEMI: ";" >
+| <INTEGER: ( <SIGN> )? (["0"-"9"])+ >
 | <DOUBLE: ( <SIGN> )? ( (["0"-"9"])+ ("."(["0"-"9"])*)?) | ( "."(["0"-"9"])+ ) (["E"]("-")?(["0"-"9"])+)? >
 | <#SIGN: ["+", "-"]>
 | <ZoM: "Z" | "M">
 | <ZaM: "ZM">
+| <SRID:               "SRID=" >
 | <POINT:              "POINT" >
 | <MULTIPOINT:         "MULTIPOINT" >
 | <LINESTRING:         "LINESTRING" >
@@ -46,6 +49,7 @@ TOKEN [IGNORE_CASE]:
 ;
 
 Start Start :
+  ( SRID )?
   ( PointWithData
   | MultiPointWithData
   | LineStringWithData
@@ -53,6 +57,10 @@ Start Start :
   | MultiPolygonWithData
   ) <EOF>
   { return jjtThis; }
+;
+
+SRID #Srid :
+  <SRID> <INTEGER> <SEMI>
 ;
 
 PointWithData #WktPoint :
@@ -107,11 +115,15 @@ LinearRing3 #LinearRing :
 ;
 
 Coords2 #Coords2 :
-  <DOUBLE> <DOUBLE>
+  DoubleOrInteger DoubleOrInteger
 ;
 
 Coords3 #Coords3 :
-  <DOUBLE> <DOUBLE> <DOUBLE>
+  DoubleOrInteger DoubleOrInteger DoubleOrInteger
+;
+
+DoubleOrInteger #DoubleOrInteger :
+  (<DOUBLE>|<INTEGER>)
 ;
 
 Coords2List #void :

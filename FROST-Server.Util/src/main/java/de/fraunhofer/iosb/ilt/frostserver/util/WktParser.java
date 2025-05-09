@@ -23,9 +23,10 @@ import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.ParseException;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.WParser;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords2;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Coords3;
-import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.DOUBLE;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.DoubleOrInteger;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LinearRing;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.LinearRingList;
+import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Srid;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.Start;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktLineString;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktMultiPoint;
@@ -34,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPoint;
 import de.fraunhofer.iosb.ilt.frostserver.util.wktparser.nodes.WktPolygon;
 import java.util.ArrayList;
 import java.util.List;
+import org.geojson.Crs;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
@@ -41,6 +43,7 @@ import org.geojson.MultiPoint;
 import org.geojson.MultiPolygon;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import org.geojson.jackson.CrsType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,11 +80,32 @@ public class WktParser extends Visitor {
     }
 
     public GeoJsonObject visit(Start node) {
-        if (node.getChildCount() != 2) {
-            throw new IllegalArgumentException("Multiple items found in WKT, expected only one.");
+        final int childCount = node.getChildCount();
+
+        switch (childCount) {
+            case 2:
+                visit(node.getChild(0));
+                break;
+            case 3:
+                visit(node.getChild(1));
+                visit(node.getChild(0));
+                break;
+            default:
+                throw new IllegalArgumentException("Incorrect number of items found in WKT.");
         }
-        visit(node.getChild(0));
         return result;
+    }
+
+    public void visit(Srid node) {
+        if (result == null) {
+            throw new IllegalArgumentException("SRID found, but no geo recognised.");
+        }
+        Node child = node.getChild(1);
+        int srid = Integer.parseInt(child.getImage());
+        Crs crs = new Crs();
+        crs.setType(CrsType.name);
+        crs.getProperties().put("name", "EPSG:" + srid);
+        result.setCrs(crs);
     }
 
     public void visit(WktPoint node) {
@@ -200,11 +224,11 @@ public class WktParser extends Visitor {
         if (lastLngLatAlt != null) {
             throw new IllegalArgumentException("Previously parsed LngLatAlt not used.");
         }
-        List<DOUBLE> children = node.childrenOfType(DOUBLE.class);
+        List<DoubleOrInteger> children = node.childrenOfType(DoubleOrInteger.class);
         if (children.size() == 2) {
             lastLngLatAlt = new LngLatAlt(
-                    Double.valueOf(children.get(0).getImage()),
-                    Double.valueOf(children.get(1).getImage()));
+                    Double.parseDouble(children.get(0).getImage()),
+                    Double.parseDouble(children.get(1).getImage()));
         } else {
             throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }
@@ -214,12 +238,12 @@ public class WktParser extends Visitor {
         if (lastLngLatAlt != null) {
             throw new IllegalArgumentException("Previously parsed LngLatAlt not used.");
         }
-        List<DOUBLE> children = node.childrenOfType(DOUBLE.class);
+        List<DoubleOrInteger> children = node.childrenOfType(DoubleOrInteger.class);
         if (children.size() == 3) {
             lastLngLatAlt = new LngLatAlt(
-                    Double.valueOf(children.get(0).getImage()),
-                    Double.valueOf(children.get(1).getImage()),
-                    Double.valueOf(children.get(2).getImage()));
+                    Double.parseDouble(children.get(0).getImage()),
+                    Double.parseDouble(children.get(1).getImage()),
+                    Double.parseDouble(children.get(2).getImage()));
         } else {
             throw new IllegalArgumentException("Point can not have " + children.size() + " coordinates.");
         }

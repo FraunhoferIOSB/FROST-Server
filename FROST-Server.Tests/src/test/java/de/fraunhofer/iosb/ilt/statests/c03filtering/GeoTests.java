@@ -323,6 +323,7 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'POINT(8 54.1)') gt 1", getFromList(LOCATIONS, 0, 1, 2, 4, 5, 6, 7));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') lt 1", getFromList(OBSERVATIONS, 3));
         testFilterResults(sSrvc.dao(sMdl.etObservation), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') gt 1", getFromList(OBSERVATIONS, 0, 1, 2, 4));
+        testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'SRID=4326;POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
     }
 
     /**
@@ -337,6 +338,10 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etFeatureOfInterest), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etDatastream),
                 "geo.intersects(observedArea, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
+                getFromList(DATASTREAMS, 0, 1, 3));
+        testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.intersects(location, geography'SRID=4326;LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
+        testFilterResults(sSrvc.dao(sMdl.etDatastream),
+                "geo.intersects(observedArea, geography'SRID=4326;POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
                 getFromList(DATASTREAMS, 0, 1, 3));
     }
 

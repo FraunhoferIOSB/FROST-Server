@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.geojson.Crs;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
@@ -28,6 +29,7 @@ import org.geojson.MultiPoint;
 import org.geojson.MultiPolygon;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import org.geojson.jackson.CrsType;
 
 /**
  * Helper class for testing JSON de-/serialization.
@@ -105,11 +107,20 @@ public class TestHelper {
         return new MultiPointBuilder();
     }
 
+    public static <T extends GeoJsonObject> T setCrs(T gjo, int srid) {
+        Crs crs = new Crs();
+        crs.setType(CrsType.name);
+        crs.getProperties().put("name", "EPSG:" + srid);
+        gjo.setCrs(crs);
+        return gjo;
+    }
+
     public static class MultiPointBuilder {
 
+        private int srid;
         private List<LngLatAlt> coords = new ArrayList<>();
 
-        public MultiPointBuilder a(double longitude, double latitude) {
+        public MultiPointBuilder add(double longitude, double latitude) {
             coords.add(new LngLatAlt(longitude, latitude));
             return this;
         }
@@ -119,8 +130,20 @@ public class TestHelper {
             return this;
         }
 
-        public MultiPoint b() {
-            return new MultiPoint(coords.toArray(LngLatAlt[]::new));
+        public MultiPointBuilder setCrs(int srid) {
+            this.srid = srid;
+            return this;
+        }
+
+        public MultiPoint build() {
+            final MultiPoint result = new MultiPoint(coords.toArray(LngLatAlt[]::new));
+            if (srid != 0) {
+                Crs crs = new Crs();
+                crs.setType(CrsType.name);
+                crs.getProperties().put("name", "EPSG:" + srid);
+                result.setCrs(crs);
+            }
+            return result;
         }
     }
 }

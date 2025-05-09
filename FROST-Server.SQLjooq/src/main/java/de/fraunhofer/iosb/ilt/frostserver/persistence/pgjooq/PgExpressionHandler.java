@@ -20,14 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import org.geojson.GeoJsonObject;
-import org.geolatte.geom.Geometry;
-import org.geolatte.geom.codec.Wkt;
 import org.jooq.impl.DSL;
 
 /**
@@ -43,27 +39,20 @@ public class PgExpressionHandler extends ExpressionHandler {
 
     @Override
     public FieldWrapper visit(LineStringConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
+        final String wktString = node.getWktWithSrid(4326);
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), wktString));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
+        final String wktString = node.getWktWithSrid(4326);
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), wktString));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), geom.asText()));
+        final String wktString = node.getWktWithSrid(4326);
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), wktString));
     }
 
-    @Override
-    public Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
-        if (node.getValue().getCrs() == null) {
-            return Wkt.fromWkt("SRID=4326;" + node.getSource());
-        }
-        return Wkt.fromWkt(node.getSource());
-    }
 }

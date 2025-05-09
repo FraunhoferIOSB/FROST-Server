@@ -20,14 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import org.geojson.GeoJsonObject;
-import org.geolatte.geom.Geometry;
-import org.geolatte.geom.codec.Wkt;
 import org.jooq.impl.DSL;
 
 /**
@@ -43,27 +39,17 @@ public class MariadbExpressionHandler extends ExpressionHandler {
 
     @Override
     public FieldWrapper visit(LineStringConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), node.getSource()));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), node.getSource()));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
-        Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), node.getSource()));
     }
 
-    @Override
-    public Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
-        if (node.getValue().getCrs() == null) {
-            return Wkt.fromWkt(node.getSource());
-        }
-        return Wkt.fromWkt(node.getSource());
-    }
 }

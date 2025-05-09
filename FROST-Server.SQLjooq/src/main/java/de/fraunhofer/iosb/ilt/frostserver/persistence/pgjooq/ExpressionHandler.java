@@ -60,7 +60,6 @@ import net.time4j.PlainTime;
 import net.time4j.ZonalDateTime;
 import net.time4j.range.MomentInterval;
 import org.apache.commons.lang3.NotImplementedException;
-import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.jooq.Condition;
 import org.jooq.DatePart;
@@ -1186,8 +1185,6 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
     public FieldWrapper visit(ContextEntityProperty node) {
         return new SimpleFieldWrapper(DSL.value(node.getValue()));
     }
-
-    public abstract Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node);
 
     private static class PathState {
 
