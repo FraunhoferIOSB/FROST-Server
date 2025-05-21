@@ -41,10 +41,12 @@ public class TableData {
     private Node node;
     private TableDataController controller;
     private final String setPostFix;
+    private boolean keepTableName;
 
-    public TableData(String tableName, String setPostFix) {
+    public TableData(String tableName, String setPostFix, boolean keepTableName) {
         this.tableName = tableName;
         this.setPostFix = setPostFix;
+        this.keepTableName = keepTableName;
         getNode();
     }
 
@@ -55,7 +57,12 @@ public class TableData {
                 node = (Pane) loader.load();
                 controller = loader.getController();
                 controller.setTableName(tableName);
-                String prettyName = CaseUtils.toCamelCase(tableName, true, '_');
+                String prettyName;
+                if (keepTableName) {
+                    prettyName = tableName;
+                } else {
+                    prettyName = CaseUtils.toCamelCase(tableName, true, '_');
+                }
                 controller.setSingular(prettyName);
                 controller.setPlural(prettyName + setPostFix);
             } catch (IOException ex) {

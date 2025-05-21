@@ -376,9 +376,11 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
      * Flag indicating the property may be set to null.
      *
      * @param nullable the nullable to set
+     * @return this
      */
-    public void setNullable(boolean nullable) {
+    public DefEntityProperty setNullable(boolean nullable) {
         this.nullable = nullable;
+        return this;
     }
 
 }

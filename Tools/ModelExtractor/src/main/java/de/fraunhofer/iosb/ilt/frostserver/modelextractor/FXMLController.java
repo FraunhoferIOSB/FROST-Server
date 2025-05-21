@@ -65,6 +65,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -135,6 +136,10 @@ public class FXMLController implements Initializable {
     @FXML
     private Button buttonGenerate;
     @FXML
+    private CheckBox checkBoxDynamicPks;
+    @FXML
+    private CheckBox checkBoxKeepTableNames;
+    @FXML
     private TextField textFieldDbUrl;
     @FXML
     private TextField textFieldDriver;
@@ -204,7 +209,7 @@ public class FXMLController implements Initializable {
     }
 
     private TableData getTable(String tableName) {
-        return tables.computeIfAbsent(tableName, t -> new TableData(tableName, setPostFix));
+        return tables.computeIfAbsent(tableName, t -> new TableData(tableName, setPostFix, checkBoxKeepTableNames.isSelected()));
     }
 
     private void readFromDatabase() {
@@ -409,7 +414,7 @@ public class FXMLController implements Initializable {
                     DefNavigationProperty defNp = new DefNavigationProperty()
                             .setName(myRelationName)
                             .setEntityType(otherEntityType.getName())
-                            .setRequired(true)
+                            .setRequired(!fk.fieldMine.nullable)
                             .addHandler(new FieldMapperOneToMany()
                                     .setField(fk.fieldMine.name)
                                     .setOtherField(fk.fieldTheirs.name)
@@ -435,9 +440,10 @@ public class FXMLController implements Initializable {
                         .setTable(tableData.tableName);
 
                 for (FieldData field : tableData.getFields().values()) {
-                    DefEntityProperty defEp = new DefEntityProperty();
-                    defEp.setName(CaseUtils.toCamelCase(field.name, false, '_'));
-                    if (field.pk) {
+                    DefEntityProperty defEp = new DefEntityProperty()
+                            .setName(CaseUtils.toCamelCase(field.name, false, '_'))
+                            .setNullable(field.nullable);
+                    if (field.pk && checkBoxDynamicPks.isSelected()) {
                         defEp.addAlias("@iot.id");
                     }
                     if (fieldMapperFromFieldData(field, defEp, tableData)) {
@@ -471,7 +477,7 @@ public class FXMLController implements Initializable {
     }
 
     private boolean fieldMapperFromFieldData(FieldData fieldData, DefEntityProperty defEp, TableData tableData) {
-        if (fieldData.pk) {
+        if (fieldData.pk && checkBoxDynamicPks.isSelected()) {
             defEp.addHandler(new FieldMapperId().setField(fieldData.name))
                     .setType("Id");
             return true;

@@ -27,9 +27,16 @@ public class FieldData {
     String typeName;
     String castTypeName;
     String comment;
+    boolean nullable;
 
     public static FieldData from(Field field, boolean pk) {
-        return new FieldData(field.getName()).setPk(pk).setTypeName(field.getDataType().getTypeName()).setCastTypeName(field.getDataType().getCastTypeName()).setComment(field.getComment());
+        field.isNotNull();
+        return new FieldData(field.getName())
+                .setPk(pk)
+                .setNullable(field.getDataType().nullable())
+                .setTypeName(field.getDataType().getTypeName())
+                .setCastTypeName(field.getDataType().getCastTypeName())
+                .setComment(field.getComment());
     }
 
     public FieldData(String name) {
@@ -61,9 +68,14 @@ public class FieldData {
         return this;
     }
 
+    public FieldData setNullable(boolean nullable) {
+        this.nullable = nullable;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return name + "(" + typeName + " / " + castTypeName + ") " + (pk ? "PK" : "") + (fk ? "FK" : "");
+        return name + "(" + typeName + " / " + castTypeName + ") " + (pk ? "PK" : "") + (nullable ? "" : " NOT NULL") + (fk ? "FK" : "");
     }
 
 }
