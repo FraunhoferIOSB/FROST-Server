@@ -97,7 +97,7 @@ For Wildfly, configuration options like the `persistence.persistenceManagerImple
      Using String values for entity ids, with new values generated using uuid_generate_v1mc()
    * `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`  
      Using uuid values for entity ids, with new values generated using uuid_generate_v1mc()
-2. Browse to http://localhost:8080/FROST/DatabaseStatus
+2. Browse to http://localhost:8080/FROST-Server/DatabaseStatus
 3. Click the upgrade button
 
 This should initialise/update the database to the latest version and the service is ready for use.
