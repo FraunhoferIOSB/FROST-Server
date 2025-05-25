@@ -30,7 +30,7 @@ If you have docker and docker-compose
 
 5. Browse to http://localhost:8080/FROST-Server/DatabaseStatus
 6. Click the upgrade button
-7. Browse to http://localhost:8080/FROST-Server/v1.0
+7. Browse to http://localhost:8080/FROST-Server/v1.1
 8. Enjoy!
 
 

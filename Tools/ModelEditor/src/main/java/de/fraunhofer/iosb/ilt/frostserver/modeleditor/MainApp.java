@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 
 /**
- *
- * @author scf
+ * Alternative main class.
  */
 public class MainApp {
 
