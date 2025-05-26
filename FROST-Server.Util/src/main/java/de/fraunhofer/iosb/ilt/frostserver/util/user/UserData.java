@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util.user;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -71,6 +72,24 @@ public class UserData {
 
     public String getUserName() {
         return userName;
+    }
+
+    public String getUserPass() {
+        return userPass;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public UserData addRole(String userRole) {
+        roles.add(userRole);
+        return this;
+    }
+
+    public UserData addRoles(Collection<String> userRoles) {
+        roles.addAll(userRoles);
+        return this;
     }
 
     public boolean isEmpty() {
