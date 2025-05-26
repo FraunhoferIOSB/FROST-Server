@@ -127,7 +127,8 @@
                 "name": "Location 1",
                 "description": "The location of the first test thing",
                 "encodingType": "application/geo+json",
-                "location": {"type": "Point", "coordinates": [ 8, 49 ]}
+                "location": {"type": "Point", "coordinates": [ 8, 49 ]},
+                "Projects": [{"@iot.id": "$project1"}]
             }
         },
         {
@@ -139,7 +140,8 @@
                 "name": "Location 2",
                 "description": "The location of the second test thing",
                 "encodingType": "application/geo+json",
-                "location": {"type": "Point", "coordinates": [ 9, 50 ]}
+                "location": {"type": "Point", "coordinates": [ 9, 50 ]},
+                "Projects": [{"@iot.id": "$project2"}]
             }
         },
         {
@@ -151,7 +153,8 @@
                 "name": "Location 3",
                 "description": "The location of the third test thing",
                 "encodingType": "application/geo+json",
-                "location": {"type": "Point", "coordinates": [ 8, 50 ]}
+                "location": {"type": "Point", "coordinates": [ 8, 50 ]},
+                "Projects": [{"@iot.id": "$project1"},{"@iot.id": "$project2"}]
             }
         },
         {

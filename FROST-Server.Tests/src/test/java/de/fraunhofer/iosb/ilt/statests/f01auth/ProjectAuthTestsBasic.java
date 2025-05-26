@@ -148,7 +148,7 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
             fail(failMessage);
         }
         SensorThingsService newService = AuthTestHelper.setAuthBasic(createService(), user, userEntity.getProperty(EP_USERPASS));
-        testFilterResults(user, newService, mdlUsers.etUser, "", entityList);
+        testFilterResults(user, newService, mdlProjects.etUser, "", entityList);
         return newService;
     }
 

@@ -63,17 +63,6 @@
         <url>https://github.com/FraunhoferIOSB/FROST-Server/issues</url>
     </issueManagement>
 
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
         <congocc.sha512>bd9f03a0a78e90c2bbace005fc402a7f7d4b9f2b677feeb24466c5b219803b777fcb201a0e39d0cf532ee6f3a4e1d4c83d0b4c38e3c39629b63caea1a3c80422</congocc.sha512>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
@@ -93,7 +82,7 @@
         <sonar.language>java</sonar.language>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
-        <version.FROST-Client-Dynamic>2.26</version.FROST-Client-Dynamic>
+        <version.FROST-Client-Dynamic>2.29</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
         <version.commons-csv>1.14.0</version.commons-csv>
         <version.commons-io>2.19.0</version.commons-io>

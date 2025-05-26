@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -83,6 +84,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
             final PluginManager pluginManager = coreSettings.getPluginManager();
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             boolean pCoreModelV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
+            boolean pCoreModelV2 = pluginManager.isPluginEnabled(PluginCoreModelV2.class);
             boolean multiDatastream = pluginManager.isPluginEnabled(PluginMultiDatastream.class);
             boolean actuation = pluginManager.isPluginEnabled(PluginActuation.class);
             if (pml == null || !pml.isEnabled()) {
@@ -93,60 +95,77 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 LOGGER.warn("PluginCoreModelV1 must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
             }
-            if (!pluginSettings.containsName("modelLoader.idType.Role")) {
-                pluginSettings.set("modelLoader.idType.Role", "STRING");
+            if (pCoreModelV1 && !pCoreModelV2) {
+                // Dealing with Model v1.1
+                fixSettings(pluginSettings, coreSettings);
+                initForCoreModelV1(pml, multiDatastream, actuation, rules, pluginSettings);
+            } else if (!pCoreModelV1 && pCoreModelV2) {
+                // Dealing with Model v2.0
+                LOGGER.error("Projects plugin is not ready for V2 yet!");
+                return InitResult.INIT_FAILED;
+            } else {
+                LOGGER.warn("Either CoreModel or CoreModelV2 must be enabled, delaying initialisation...");
+                return INIT_DELAY;
             }
-            if (!pluginSettings.containsName("modelLoader.idType.User")) {
-                pluginSettings.set("modelLoader.idType.User", "STRING");
-            }
-            final Settings settings = coreSettings.getSettings();
-            if (!settings.containsName("persistence.idGenerationMode.Role")) {
-                settings.set("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
-            }
-            if (!settings.containsName("persistence.idGenerationMode.User")) {
-                settings.set("persistence.idGenerationMode.User", "ClientGeneratedOnly");
-            }
-            pml.addLiquibaseFile("pluginprojects/sta1/liquibase/tables.xml");
-
-            pml.addModelFile("pluginprojects/sta1/model/Project.json");
-            pml.addModelFile("pluginprojects/sta1/model/Restricted.json");
-            pml.addModelFile("pluginprojects/sta1/model/Role.json");
-            pml.addModelFile("pluginprojects/sta1/model/User.json");
-            pml.addModelFile("pluginprojects/sta1/model/UserProjectRole.json");
-            if (multiDatastream) {
-                pml.addModelFile("pluginprojects/sta1/model/RestrictedMd.json");
-            }
-            if (actuation) {
-                pml.addModelFile("pluginprojects/sta1/model/ProjectActuation.json");
-                pml.addModelFile("pluginprojects/sta1/model/RestrictedActuation.json");
-            }
-
-            if (rules) {
-                pml.addSecurityFile("pluginprojects/sta1/security/secDatastream.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secFeature.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secHistoricalLocation.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secLocation.json");
-                if (multiDatastream) {
-                    pml.addSecurityFile("pluginprojects/sta1/security/secMultiDatastream.json");
-                }
-                pml.addSecurityFile("pluginprojects/sta1/security/secObservation.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secProject.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secRole.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secSensor.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secThing.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secUser.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/secUserProjectRole.json");
-                if (actuation) {
-                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
-                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
-                    pml.addSecurityFile("pluginprojects/sta1/security/.json");
-                }
-            }
-            autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);
-
             pluginManager.registerPlugin(this);
         }
         return InitResult.INIT_OK;
+    }
+
+    public void fixSettings(Settings pluginSettings, CoreSettings coreSettings1) {
+        if (!pluginSettings.containsName("modelLoader.idType.Role")) {
+            pluginSettings.set("modelLoader.idType.Role", "STRING");
+        }
+        if (!pluginSettings.containsName("modelLoader.idType.User")) {
+            pluginSettings.set("modelLoader.idType.User", "STRING");
+        }
+        final Settings settings = coreSettings1.getSettings();
+        if (!settings.containsName("persistence.idGenerationMode.Role")) {
+            settings.set("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
+        }
+        if (!settings.containsName("persistence.idGenerationMode.User")) {
+            settings.set("persistence.idGenerationMode.User", "ClientGeneratedOnly");
+        }
+    }
+
+    public void initForCoreModelV1(PluginModelLoader pml, boolean multiDatastream, boolean actuation, boolean rules, Settings pluginSettings) {
+        pml.addLiquibaseFile("pluginprojects/sta1/liquibase/tables.xml");
+
+        pml.addModelFile("pluginprojects/sta1/model/Project.json");
+        pml.addModelFile("pluginprojects/sta1/model/Restricted.json");
+        pml.addModelFile("pluginprojects/sta1/model/Role.json");
+        pml.addModelFile("pluginprojects/sta1/model/User.json");
+        pml.addModelFile("pluginprojects/sta1/model/UserProjectRole.json");
+        if (multiDatastream) {
+            pml.addModelFile("pluginprojects/sta1/model/RestrictedMd.json");
+        }
+        if (actuation) {
+            pml.addModelFile("pluginprojects/sta1/model/ProjectActuation.json");
+            pml.addModelFile("pluginprojects/sta1/model/RestrictedActuation.json");
+        }
+
+        if (rules) {
+            pml.addSecurityFile("pluginprojects/sta1/security/secDatastream.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secFeature.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secHistoricalLocation.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secLocation.json");
+            if (multiDatastream) {
+                pml.addSecurityFile("pluginprojects/sta1/security/secMultiDatastream.json");
+            }
+            pml.addSecurityFile("pluginprojects/sta1/security/secObservation.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secProject.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secRole.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secSensor.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secThing.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secUser.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secUserProjectRole.json");
+            if (actuation) {
+                pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/.json");
+            }
+        }
+        autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);
     }
 
     @Override

@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
@@ -121,6 +122,79 @@ public class EntityUtils {
         if (!testExpectedList.isEmpty()) {
             LOGGER.info("Expected entity not found in result.");
             return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
+        }
+        return new ResultTestResult(true, "Check ok.");
+    }
+
+    /**
+     * Checks if the list contains all the given entities exactly once.
+     *
+     * @param result the result to check.
+     * @param expected the expected entities.
+     * @return the result of the comparison.
+     */
+    public static ResultTestResult resultContainsNested(EntitySet result, List<Entity> expected) throws ServiceFailureException {
+        long count = result.getCount();
+        if (count != -1 && count != expected.size()) {
+            LOGGER.info("Result count ({}) not equal to expected count ({})", count, expected.size());
+            return new ResultTestResult(false, "Result count " + count + " not equal to expected count (" + expected.size() + ")");
+        }
+        List<Entity> testExpectedList = new ArrayList<>(expected);
+        Iterator<Entity> resultIt;
+        for (resultIt = result.iterator(); resultIt.hasNext();) {
+            Entity nextResult = resultIt.next();
+            Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
+            if (!testExpectedList.remove(inExpectedList)) {
+                LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
+                return new ResultTestResult(false, "Entity with pk " + nextResult.getPrimaryKeyValues() + " found in result that is not expected.");
+            }
+
+            ResultTestResult subTestResult = compareNavprops(nextResult, inExpectedList);
+            if (!subTestResult.testOk) {
+                return subTestResult;
+            }
+
+        }
+        if (!testExpectedList.isEmpty()) {
+            LOGGER.info("Expected entity not found in result.");
+            return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
+        }
+        return new ResultTestResult(true, "Check ok.");
+    }
+
+    private static ResultTestResult compareNavprops(Entity nextResult, Entity inExpectedList) throws ServiceFailureException {
+        for (NavigationPropertyEntity np : nextResult.getEntityType().getNavigationEntities()) {
+            Entity resultChild = nextResult.getProperty(np, false);
+            Entity expectedChild = inExpectedList.getProperty(np, false);
+            if (resultChild != null && expectedChild == null) {
+                return new ResultTestResult(false, "Found child " + resultChild + ", expected none");
+            } else if (resultChild == null && expectedChild != null) {
+                return new ResultTestResult(false, "Not Found child " + expectedChild + ", found none");
+            } else if (resultChild != null && expectedChild != null) {
+                if (!resultChild.getPrimaryKeyValues().equals(expectedChild.getPrimaryKeyValues())) {
+                    return new ResultTestResult(false, "Not Found child " + resultChild + ", expected " + expectedChild);
+                }
+                ResultTestResult subCompareResult = compareNavprops(resultChild, expectedChild);
+                if (!subCompareResult.testOk) {
+                    return subCompareResult;
+                }
+            }
+        }
+        for (NavigationPropertyEntitySet np : nextResult.getEntityType().getNavigationSets()) {
+            EntitySet resultChild = nextResult.getProperty(np, false);
+            EntitySet expectedChild = inExpectedList.getProperty(np, false);
+            if (resultChild == null || resultChild.isEmpty()) {
+                if (expectedChild != null && !expectedChild.isEmpty()) {
+                    return new ResultTestResult(false, "Expected children of type " + np + ", found none");
+                }
+            } else if (expectedChild == null || expectedChild.isEmpty()) {
+                return new ResultTestResult(false, "Found children of type " + np + ", expected none");
+            } else {
+                ResultTestResult subCompareResult = resultContainsNested(resultChild, expectedChild.toList());
+                if (!subCompareResult.testOk) {
+                    return subCompareResult;
+                }
+            }
         }
         return new ResultTestResult(true, "Check ok.");
     }
@@ -510,6 +584,31 @@ public class EntityUtils {
             assertTrue(check.testOk, message);
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception filtering doa {} using {} :", doa, filter, ex);
+            fail("Failed to call service: " + ex.getMessage());
+        }
+    }
+
+    public static void testFilterResultsExpanded(String user, SensorThingsService service, de.fraunhofer.iosb.ilt.frostclient.model.EntityType type, String filter, String expand, List<Entity> expected) {
+        testFilterResultsExpanded(user, service.dao(type), filter, expand, expected);
+    }
+
+    public static void testFilterResultsExpanded(String user, Dao doa, String filter, String expand, List<Entity> expected) {
+        try {
+            EntitySet result = doa.query().filter(filter).expand(expand).list();
+            EntityUtils.ResultTestResult check = EntityUtils.resultContainsNested(result, expected);
+            String message = "Failed for " + user + " on filter: " + filter + " with expand: " + expand + " Cause: " + check.message;
+            if (!check.testOk) {
+                LOGGER.info(check.message);
+                LOGGER.info("Failed for {} on filter {} with expand: {}\nexpected {},\n     got {}.",
+                        user,
+                        filter,
+                        expand,
+                        EntityUtils.listEntities(expected),
+                        EntityUtils.listEntities(result.toList()));
+            }
+            assertTrue(check.testOk, message);
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Exception expanding doa {} using {} :", doa, expand, ex);
             fail("Failed to call service: " + ex.getMessage());
         }
     }
