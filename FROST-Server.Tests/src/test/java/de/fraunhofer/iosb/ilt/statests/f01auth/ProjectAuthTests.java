@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResultsExpanded;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.JOIN_TIMEOUT;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Projects;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
@@ -113,8 +115,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     protected static final SensorThingsV11Sensing mdlSensing = new SensorThingsV11Sensing();
-    protected static final SensorThingsUserModel mdlUsers = new SensorThingsUserModel();
-    protected static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlUsers);
+    protected static final SensorThingsV11Projects mdlProjects = new SensorThingsV11Projects();
+    protected static final SensorThingsService baseService = new SensorThingsService(mdlSensing, mdlProjects);
 
     protected static final List<Entity> THINGS = new ArrayList<>();
     protected static final List<Entity> LOCATIONS = new ArrayList<>();
@@ -202,7 +204,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         return eh.setCache(mdlSensing.etThing, THINGS)
                 .setCache(mdlSensing.etDatastream, DATASTREAMS)
                 .setCache(mdlSensing.etObservation, OBSERVATIONS)
-                .setCache(mdlUsers.etProject, PROJECTS);
+                .setCache(mdlProjects.etProject, PROJECTS);
     }
 
     public abstract void createServices();
@@ -219,14 +221,14 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         ROLES.clear();
         USER_PROJECT_ROLES.clear();
 
-        USERS.add(mdlUsers.newUser("read", "read"));
-        USERS.add(mdlUsers.newUser("write", "write"));
-        USERS.add(mdlUsers.newUser("admin", "admin"));
-        ROLES.add(mdlUsers.newRole("read", ""));
-        ROLES.add(mdlUsers.newRole("create", ""));
-        ROLES.add(mdlUsers.newRole("update", ""));
-        ROLES.add(mdlUsers.newRole("delete", ""));
-        ROLES.add(mdlUsers.newRole("admin", ""));
+        USERS.add(mdlProjects.newUser("read", "read"));
+        USERS.add(mdlProjects.newUser("write", "write"));
+        USERS.add(mdlProjects.newUser("admin", "admin"));
+        ROLES.add(mdlProjects.newRole("read", ""));
+        ROLES.add(mdlProjects.newRole("create", ""));
+        ROLES.add(mdlProjects.newRole("update", ""));
+        ROLES.add(mdlProjects.newRole("delete", ""));
+        ROLES.add(mdlProjects.newRole("admin", ""));
         try {
             HTTPMethods.doPost(serviceAdmin, serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
 
@@ -258,16 +260,16 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                         DATASTREAMS.add(serviceAdmin.dao(mdlSensing.etDatastream).find(pk));
                         break;
                     case "users":
-                        USERS.add(serviceAdmin.dao(mdlUsers.etUser).find(pk));
+                        USERS.add(serviceAdmin.dao(mdlProjects.etUser).find(pk));
                         break;
                     case "projects":
-                        PROJECTS.add(serviceAdmin.dao(mdlUsers.etProject).find(pk));
+                        PROJECTS.add(serviceAdmin.dao(mdlProjects.etProject).find(pk));
                         break;
                     case "roles":
-                        ROLES.add(serviceAdmin.dao(mdlUsers.etRole).find(pk));
+                        ROLES.add(serviceAdmin.dao(mdlProjects.etRole).find(pk));
                         break;
                     case "userprojectroles":
-                        USER_PROJECT_ROLES.add(serviceAdmin.dao(mdlUsers.etUserProjectRole).find(pk));
+                        USER_PROJECT_ROLES.add(serviceAdmin.dao(mdlProjects.etUserProjectRole).find(pk));
                         break;
                     default:
                         LOGGER.error("Type {} should not have been created.", type);
@@ -356,69 +358,69 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_02a_ReadProjects() {
         LOGGER.info("  test_02a_ReadProjects");
-        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(WRITE, serviceWrite, mdlUsers.etProject, "", PROJECTS);
-        testFilterResults(READ, serviceRead, mdlUsers.etProject, "", PROJECTS);
+        testFilterResults(ADMIN, serviceAdmin, mdlProjects.etProject, "", PROJECTS);
+        testFilterResults(WRITE, serviceWrite, mdlProjects.etProject, "", PROJECTS);
+        testFilterResults(READ, serviceRead, mdlProjects.etProject, "", PROJECTS);
         if (anonymousReadAllowed) {
-            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", Utils.getFromList(PROJECTS, 0));
+            testFilterResults(ANONYMOUS, serviceAnon, mdlProjects.etProject, "", Utils.getFromList(PROJECTS, 0));
         } else {
-            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etProject, "", H401);
+            filterForException(ANONYMOUS, serviceAnon, mdlProjects.etProject, "", H401);
         }
-        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etProject, "", Utils.getFromList(PROJECTS, 0));
-        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etProject, "", Utils.getFromList(PROJECTS, 0, 1));
-        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etProject, "", Utils.getFromList(PROJECTS, 0));
-        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etProject, "", Utils.getFromList(PROJECTS, 0, 1));
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlProjects.etProject, "", Utils.getFromList(PROJECTS, 0));
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlProjects.etProject, "", Utils.getFromList(PROJECTS, 0, 1));
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlProjects.etProject, "", Utils.getFromList(PROJECTS, 0));
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlProjects.etProject, "", Utils.getFromList(PROJECTS, 0, 1));
     }
 
     @Test
     void test_02b_ReadUserProjectRole() {
         LOGGER.info("  test_02b_ReadUserProjectRole");
-        testFilterResults(serviceAdmin, mdlUsers.etUserProjectRole, "", USER_PROJECT_ROLES);
-        testFilterResults(WRITE, serviceWrite, mdlUsers.etUserProjectRole, "", Collections.emptyList());
-        testFilterResults(READ, serviceRead, mdlUsers.etUserProjectRole, "", Collections.emptyList());
+        testFilterResults(serviceAdmin, mdlProjects.etUserProjectRole, "", USER_PROJECT_ROLES);
+        testFilterResults(WRITE, serviceWrite, mdlProjects.etUserProjectRole, "", Collections.emptyList());
+        testFilterResults(READ, serviceRead, mdlProjects.etUserProjectRole, "", Collections.emptyList());
         if (anonymousReadAllowed) {
-            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", Collections.emptyList());
+            testFilterResults(ANONYMOUS, serviceAnon, mdlProjects.etUserProjectRole, "", Collections.emptyList());
         } else {
-            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUserProjectRole, "", H401, H403);
+            filterForException(ANONYMOUS, serviceAnon, mdlProjects.etUserProjectRole, "", H401, H403);
         }
-        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 0, 1));
-        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 2, 3));
-        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etUserProjectRole, "", Collections.emptyList());
-        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etUserProjectRole, "", Collections.emptyList());
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlProjects.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 0, 1));
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlProjects.etUserProjectRole, "", Utils.getFromList(USER_PROJECT_ROLES, 2, 3));
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlProjects.etUserProjectRole, "", Collections.emptyList());
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlProjects.etUserProjectRole, "", Collections.emptyList());
     }
 
     @Test
     void test_02c_ReadUser() {
         LOGGER.info("  test_02c_ReadUser");
-        testFilterResults(serviceAdmin, mdlUsers.etUser, "", USERS);
-        testFilterResults(serviceWrite, mdlUsers.etUser, "", Utils.getFromList(USERS, 6));
-        testFilterResults(serviceRead, mdlUsers.etUser, "", Utils.getFromList(USERS, 5));
+        testFilterResults(serviceAdmin, mdlProjects.etUser, "", USERS);
+        testFilterResults(serviceWrite, mdlProjects.etUser, "", Utils.getFromList(USERS, 6));
+        testFilterResults(serviceRead, mdlProjects.etUser, "", Utils.getFromList(USERS, 5));
         if (anonymousReadAllowed) {
-            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", Collections.emptyList());
+            testFilterResults(ANONYMOUS, serviceAnon, mdlProjects.etUser, "", Collections.emptyList());
         } else {
-            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etUser, "", H401, H403);
+            filterForException(ANONYMOUS, serviceAnon, mdlProjects.etUser, "", H401, H403);
         }
-        testFilterResults(serviceAdminProject1, mdlUsers.etUser, "", USERS);
-        testFilterResults(serviceAdminProject2, mdlUsers.etUser, "", USERS);
-        testFilterResults(serviceObsCreaterProject1, mdlUsers.etUser, "", Utils.getFromList(USERS, 3));
-        testFilterResults(serviceObsCreaterProject2, mdlUsers.etUser, "", Utils.getFromList(USERS, 4));
+        testFilterResults(serviceAdminProject1, mdlProjects.etUser, "", USERS);
+        testFilterResults(serviceAdminProject2, mdlProjects.etUser, "", USERS);
+        testFilterResults(serviceObsCreaterProject1, mdlProjects.etUser, "", Utils.getFromList(USERS, 3));
+        testFilterResults(serviceObsCreaterProject2, mdlProjects.etUser, "", Utils.getFromList(USERS, 4));
     }
 
     @Test
     void test_02d_ReadRole() {
         LOGGER.info("  test_02d_ReadRole");
-        testFilterResults(ADMIN, serviceAdmin, mdlUsers.etRole, "", ROLES);
-        testFilterResults(WRITE, serviceWrite, mdlUsers.etRole, "", Collections.emptyList());
-        testFilterResults(READ, serviceRead, mdlUsers.etRole, "", Collections.emptyList());
+        testFilterResults(ADMIN, serviceAdmin, mdlProjects.etRole, "", ROLES);
+        testFilterResults(WRITE, serviceWrite, mdlProjects.etRole, "", Collections.emptyList());
+        testFilterResults(READ, serviceRead, mdlProjects.etRole, "", Collections.emptyList());
         if (anonymousReadAllowed) {
-            testFilterResults(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", Collections.emptyList());
+            testFilterResults(ANONYMOUS, serviceAnon, mdlProjects.etRole, "", Collections.emptyList());
         } else {
-            filterForException(ANONYMOUS, serviceAnon, mdlUsers.etRole, "", H401, H403);
+            filterForException(ANONYMOUS, serviceAnon, mdlProjects.etRole, "", H401, H403);
         }
-        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlUsers.etRole, "", ROLES);
-        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlUsers.etRole, "", ROLES);
-        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlUsers.etRole, "", Collections.emptyList());
-        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlUsers.etRole, "", Collections.emptyList());
+        testFilterResults(ADMIN_P1, serviceAdminProject1, mdlProjects.etRole, "", ROLES);
+        testFilterResults(ADMIN_P2, serviceAdminProject2, mdlProjects.etRole, "", ROLES);
+        testFilterResults(OBS_CREATE_P1, serviceObsCreaterProject1, mdlProjects.etRole, "", Collections.emptyList());
+        testFilterResults(OBS_CREATE_P2, serviceObsCreaterProject2, mdlProjects.etRole, "", Collections.emptyList());
     }
 
     @Test
@@ -458,15 +460,15 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_03a_CreateProject() {
         LOGGER.info("  test_03a_CreateProject");
-        EntityCreator creator = (user) -> mdlUsers.newProject(user + "-Project", "A Project made by " + user);
+        EntityCreator creator = (user) -> mdlProjects.newProject(user + "-Project", "A Project made by " + user);
 
-        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS);
-        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, anonymousReadAllowed ? H403 : H401);
-        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
-        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlUsers.etProject), PROJECTS, H403);
+        createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS);
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
     }
 
     @Test
@@ -489,14 +491,14 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_03c_CreateUser() {
         LOGGER.info("  test_03c_CreateUser");
-        EntityCreator creator = (user) -> mdlUsers.newUser(user + "-User", user + "-password");
+        EntityCreator creator = (user) -> mdlProjects.newUser(user + "-User", user + "-password");
 
-        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H401, H403);
-        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
-        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlUsers.etUser), USERS, H403);
+        createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H403);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H401, H403);
+        createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H403);
+        createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H403);
+        createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H403);
+        createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlProjects.etUser), USERS, H403);
     }
 
     @Test
@@ -517,7 +519,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     void test_04b_ThingCreateForProject1() {
         LOGGER.info("  test_04b_ThingCreateForProject1");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
-                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
+                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk());
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -532,7 +534,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     void test_04c_ThingCreateForProject1WithDatastream() {
         LOGGER.info("  test_04c_ThingCreateForProject1WithDatastream");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
-                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk())
+                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk())
                 .addNavigationEntity(
                         mdlSensing.npThingDatastreams,
                         mdlSensing.newDatastream("DeepInsertDs", "Ds created by deep insert", new UnitOfMeasurement("%", "%", "%"))
@@ -552,7 +554,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     void test_04d_ThingCreateForProject1Mqtt() throws JsonProcessingException {
         LOGGER.info("  test_04d_ThingCreateForProject1Mqtt");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
-                .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
+                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk());
         StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
         String topic = version.urlPart + '/' + sMdl.etThing.mainSet;
 
@@ -669,6 +671,89 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         fetchForCode(ADMIN_P2, serviceAdminProject2, link, H404);
         fetchForCode(OBS_CREATE_P1, serviceObsCreaterProject1, link, H200);
         fetchForCode(OBS_CREATE_P2, serviceObsCreaterProject2, link, H404);
+    }
+
+    @Test
+    void test_08e_ObservationReadExpand_1() throws ServiceFailureException {
+        LOGGER.info("  test_08e_ObservationReadExpand_1");
+        final String filter = "id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(16).getPrimaryKeyValues().get(0));
+        final String expand = "Datastream($select=id;$expand=Thing($select=id;$expand=Projects($select=id))),FeatureOfInterest($select=id;$expand=Projects($select=id))";
+
+        Entity expectedAdmin = OBSERVATIONS.get(16)
+                .withOnlyPk()
+                .setProperty(
+                        mdlSensing.npObservationDatastream,
+                        DATASTREAMS.get(4).withOnlyPk()
+                                .setProperty(
+                                        mdlSensing.npDatastreamThing,
+                                        THINGS.get(2).withOnlyPk()
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(1))))
+                .setProperty(
+                        mdlSensing.npObservationFeatureofinterest,
+                        OBSERVATIONS.get(16).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
+                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))
+                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(1)));
+        Entity expectedP1 = OBSERVATIONS.get(16)
+                .withOnlyPk()
+                .setProperty(
+                        mdlSensing.npObservationDatastream,
+                        DATASTREAMS.get(4).withOnlyPk()
+                                .setProperty(
+                                        mdlSensing.npDatastreamThing,
+                                        THINGS.get(2).withOnlyPk()
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))))
+                .setProperty(
+                        mdlSensing.npObservationFeatureofinterest,
+                        OBSERVATIONS.get(16).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
+                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0)));
+        testFilterResultsExpanded(ADMIN, serviceAdmin, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        if (anonymousReadAllowed) {
+            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
+        }
+
+        testFilterResultsExpanded(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedP1));
+        testFilterResultsExpanded(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedP1));
+        testFilterResultsExpanded(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+    }
+
+    @Test
+    void test_08f_ObservationReadExpand_2() throws ServiceFailureException {
+        LOGGER.info("  test_08f_ObservationReadExpand_2");
+        final String filter = "id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(8).getPrimaryKeyValues().get(0));
+        final String expand = "Datastream($select=id;$expand=Thing($select=id;$expand=Projects($select=id))),FeatureOfInterest($select=id;$expand=Projects($select=id))";
+
+        Entity expectedAdmin = OBSERVATIONS.get(8)
+                .withOnlyPk()
+                .setProperty(
+                        mdlSensing.npObservationDatastream,
+                        DATASTREAMS.get(2).withOnlyPk()
+                                .setProperty(
+                                        mdlSensing.npDatastreamThing,
+                                        THINGS.get(1).withOnlyPk()
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(1))))
+                .setProperty(
+                        mdlSensing.npObservationFeatureofinterest,
+                        OBSERVATIONS.get(8).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
+                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(1)));
+
+        testFilterResultsExpanded(ADMIN, serviceAdmin, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        if (anonymousReadAllowed) {
+            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
+        }
+        filterForException(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservedProperty, filter, H401);
+        filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, H401);
+        testFilterResultsExpanded(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
     }
 
     @Test

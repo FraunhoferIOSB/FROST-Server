@@ -25,3 +25,31 @@ Datastreams
   - Obs: 24,25,26,27
 - 7, Humidity of Thing 4,    -   , private
   - Obs: 28,29,30,31
+
+http://localhost:8080/FROST-Server/v1.1/Things?$select=id,name,restricted&$expand=Projects($select=id,name,public),Datastreams($select=id,name,restricted;$expand=Observations($select=id;$expand=FeatureOfInterest($select=id,name,restricted;$expand=Projects($select=id,name,public)))),Locations($select=id,name,restricted)
+http://localhost:8080/FROST-Server/v1.1/Datastreams(2)/Observations?
+    $top=1&
+    $select=id,phenomenonTime,result&
+    $expand=
+        Datastream(
+            $select=id,name,restricted;
+            $expand=Thing(
+                $select=id,name,restricted;
+                $expand=
+                    Locations(
+                        $select=id,name,restricted;
+                        $expand=Projects(
+                            $select=id,name,public;
+                            $expand=UserProjectRoles($expand=User($select=username),Role($select=rolename)))),
+                    Projects(
+                        $select=id,name,public;
+                        $expand=UserProjectRoles($expand=User($select=username),Role($select=rolename))))),
+        FeatureOfInterest(
+            $select=id,name,restricted;
+            $expand=
+                GeneratedForLocations(
+                    $select=id,name,restricted;
+                    $expand=Projects($select=id,name,public)),
+                Projects(
+                    $select=id,name,public;
+                    $expand=UserProjectRoles($expand=User($select=username),Role($select=rolename))))
