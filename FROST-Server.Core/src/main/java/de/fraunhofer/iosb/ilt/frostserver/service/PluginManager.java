@@ -180,9 +180,14 @@ public class PluginManager implements ConfigDefaults {
         for (String className : split) {
             try {
                 LOGGER.info("Loading {}", className);
-                Class<? extends Plugin> clazz = getClass().getClassLoader().loadClass(className.trim()).asSubclass(Plugin.class);
-                Plugin plugin = clazz.getDeclaredConstructor().newInstance();
-                pluginsToLoad.add(plugin);
+                final Class<?> loadedClass = getClass().getClassLoader().loadClass(className.trim());
+                if (!Plugin.class.isAssignableFrom(loadedClass)) {
+                    LOGGER.error("Given class {} does not implement the Plugin interface.", className);
+                } else {
+                    final Class<? extends Plugin> castedClass = loadedClass.asSubclass(Plugin.class);
+                    final Plugin plugin = castedClass.getDeclaredConstructor().newInstance();
+                    pluginsToLoad.add(plugin);
+                }
             } catch (NoClassDefFoundError | ClassNotFoundException ex) {
                 LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
