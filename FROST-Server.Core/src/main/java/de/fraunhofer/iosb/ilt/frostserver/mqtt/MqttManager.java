@@ -44,6 +44,10 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
+import io.prometheus.metrics.core.datapoints.CounterDataPoint;
+import io.prometheus.metrics.core.metrics.Counter;
+import io.prometheus.metrics.core.metrics.Gauge;
+import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -80,6 +84,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private final SubscriptionFactory subscriptionFactory;
 
     private MqttServer server;
+
+    private int entityChangedPoolSize;
+    private int entityChangedQueueSize;
+    private int entityCreatePoolSize;
+    private int entityCreateQueueSize;
+
     private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
     private ExecutorService entityChangedExecutorService;
     private final List<Processor<EntityChangedMessage>> entityChangedProcessors = new ArrayList<>();
@@ -90,9 +100,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
     private final AtomicInteger topicCount = new AtomicInteger();
-    private final AtomicInteger entityChangedQueueSize = new AtomicInteger();
-    private final AtomicInteger entityCreateQueueSize = new AtomicInteger();
-    private final LoggingStatus logStatus = new LoggingStatus(this::checkWorkers);
+    private final AtomicInteger entityChangedQueueCount = new AtomicInteger();
+    private final AtomicInteger entityCreateQueueCount = new AtomicInteger();
+    private long lastChangedOverrun = 0;
+    private long lastCreateOverrun = 0;
+
+    private final LoggingStatus logStatus = new LoggingStatus(this, this::checkWorkers);
 
     private boolean enabledMqtt = false;
     private boolean shutdown = false;
@@ -117,18 +130,24 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (mqttSettings.isEnableMqtt()) {
             enabledMqtt = true;
             shutdown = false;
-            entityChangedEventQueue = new ArrayBlockingQueue<>(mqttSettings.getSubscribeMessageQueueSize());
+
+            entityChangedPoolSize = mqttSettings.getSubscribeThreadPoolSize();
+            entityChangedQueueSize = mqttSettings.getSubscribeMessageQueueSize();
+            entityCreatePoolSize = mqttSettings.getCreateThreadPoolSize();
+            entityCreateQueueSize = mqttSettings.getCreateMessageQueueSize();
+
+            entityChangedEventQueue = new ArrayBlockingQueue<>(entityChangedQueueSize);
             // start watching for EntityChangedEvents
             entityChangedExecutorService = ProcessorHelper.createProcessors(
-                    mqttSettings.getSubscribeThreadPoolSize(),
+                    entityChangedPoolSize,
                     entityChangedEventQueue,
                     this::handleEntityChangedEvent,
                     "Mqtt-EntityChangedProcessor",
                     entityChangedProcessors);
             // start watching for EntityCreateEvents
-            entityCreateEventQueue = new ArrayBlockingQueue<>(mqttSettings.getCreateMessageQueueSize());
+            entityCreateEventQueue = new ArrayBlockingQueue<>(entityCreateQueueSize);
             entityCreateExecutorService = ProcessorHelper.createProcessors(
-                    mqttSettings.getCreateThreadPoolSize(),
+                    entityCreatePoolSize,
                     entityCreateEventQueue,
                     this::handleEntityCreateEvent,
                     "Mqtt-EntityCreateProcessor",
@@ -166,7 +185,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void handleEntityChangedEvent(EntityChangedMessage message) {
-        logStatus.setEntityChangedQueueSize(entityChangedQueueSize.decrementAndGet());
+        logStatus.setEntityChangedQueueCount(entityChangedQueueCount.decrementAndGet());
         final EntityChangedMessage.Type eventType = message.getEventType();
         EntityType entityType = message.getEntityType();
         LOGGER.trace("Received a {} message for a {}.", eventType, entityType);
@@ -199,7 +218,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void handleEntityCreateEvent(EntityCreateEvent e) {
-        logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
+        logStatus.setEntityCreateQueueCount(entityCreateQueueCount.decrementAndGet());
         final String topic = e.getTopic();
         final Version version;
         try {
@@ -235,9 +254,16 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         if (entityChangedEventQueue.offer(e)) {
-            logStatus.setEntityChangedQueueSize(entityChangedQueueSize.incrementAndGet());
+            logStatus.setEntityChangedQueueCount(entityChangedQueueCount.incrementAndGet());
         } else {
-            LOGGER.warn("EntityChangedevent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize.", entityChangedEventQueue.size());
+            logStatus.addChangedOverrun();
+            long now = System.currentTimeMillis();
+            if (now - lastChangedOverrun > 200) {
+                lastChangedOverrun = now;
+                LOGGER.warn(
+                        "EntityChangedevent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize.",
+                        entityChangedEventQueue.size());
+            }
         }
     }
 
@@ -278,9 +304,16 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         if (entityCreateEventQueue.offer(e)) {
-            logStatus.setEntityCreateQueueSize(entityCreateQueueSize.incrementAndGet());
+            logStatus.setEntityCreateQueueCount(entityCreateQueueCount.incrementAndGet());
         } else {
-            LOGGER.warn("EntityCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
+            logStatus.addCreateOverrun();
+            long now = System.currentTimeMillis();
+            if (now - lastCreateOverrun > 200) {
+                lastCreateOverrun = now;
+                LOGGER.warn(
+                        "EntityCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize",
+                        entityCreateEventQueue.size());
+            }
         }
     }
 
@@ -313,14 +346,79 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
         public static final String MESSAGE = "entityCreateQueue: {} [{}, {}, {}] entityChangedQueue: {} [{}, {}, {}] topics: {}";
+
+        public static final String CHANGED = "Changed";
+        public static final String CREATE = "Create";
+
+        public static final String DEAD = "Dead";
+        public static final String WORKING = "Working";
+        public static final String WAITING = "Waiting";
+
         public final Object[] status;
         private final Runnable processor;
 
-        public LoggingStatus(Runnable processor) {
+        private int changedQueueCountMax = 0;
+        private int createQueueCountMax = 0;
+
+        private final Counter queueOverrunCounter;
+        private final CounterDataPoint queueOverrunCreate;
+        private final CounterDataPoint queueOverrunChanged;
+        private final Gauge topicCount;
+
+        public LoggingStatus(MqttManager parent, Runnable processor) {
             super(MESSAGE, new Object[9]);
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
             this.processor = processor;
+
+            GaugeWithCallback.builder()
+                    .name("message_bus_queue_fill")
+                    .help("Number of items in the Queue")
+                    .labelNames("queue_name")
+                    .callback(cb -> {
+                        cb.call((1.0 * (Integer) status[0] / parent.entityChangedQueueSize), CHANGED);
+                        cb.call((1.0 * (Integer) status[4] / parent.entityCreateQueueSize), CREATE);
+                    })
+                    .register();
+            GaugeWithCallback.builder()
+                    .name("message_bus_queue_fill_max")
+                    .help("Maximum number of items in the Queue since last call")
+                    .labelNames("queue_name")
+                    .callback(cb -> {
+                        cb.call(changedQueueCountMax, CHANGED);
+                        changedQueueCountMax = 0;
+                        cb.call(createQueueCountMax, CREATE);
+                        createQueueCountMax = 0;
+                    })
+                    .register();
+            GaugeWithCallback.builder()
+                    .name("message_bus_worker_status")
+                    .help("Overview of what workers do")
+                    .labelNames("queue_name", "worker_status")
+                    .callback(cb -> {
+                        process();
+                        cb.call((Integer) status[1], CREATE, WAITING);
+                        cb.call((Integer) status[2], CREATE, WORKING);
+                        cb.call((Integer) status[3], CREATE, DEAD);
+                        cb.call((Integer) status[5], CHANGED, WAITING);
+                        cb.call((Integer) status[6], CHANGED, WORKING);
+                        cb.call((Integer) status[7], CHANGED, DEAD);
+                    })
+                    .register();
+
+            queueOverrunCounter = Counter.builder()
+                    .name("mqtt_manager_queue_overruns")
+                    .help("Number of items dropped because the queue was full")
+                    .labelNames("queue_name")
+                    .register();
+            queueOverrunCounter.initLabelValues(CREATE, CHANGED);
+            queueOverrunCreate = queueOverrunCounter.labelValues(CREATE);
+            queueOverrunChanged = queueOverrunCounter.labelValues(CHANGED);
+
+            topicCount = Gauge.builder()
+                    .name("mqtt_manager_topics")
+                    .help("Number of distinct topics that have subscriptions.")
+                    .register();
         }
 
         @Override
@@ -328,8 +426,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             processor.run();
         }
 
-        public LoggingStatus setEntityCreateQueueSize(Integer size) {
-            status[0] = size;
+        public LoggingStatus setEntityCreateQueueCount(int count) {
+            status[0] = count;
+            if (count > changedQueueCountMax) {
+                changedQueueCountMax = count;
+            }
             return this;
         }
 
@@ -348,8 +449,16 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return this;
         }
 
-        public LoggingStatus setEntityChangedQueueSize(Integer size) {
-            status[4] = size;
+        public void addCreateOverrun() {
+            queueOverrunCreate.inc();
+        }
+
+        public LoggingStatus setEntityChangedQueueCount(int count) {
+            status[4] = count;
+            if (count > createQueueCountMax) {
+                createQueueCountMax = count;
+            }
+
             return this;
         }
 
@@ -368,8 +477,13 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return this;
         }
 
-        public LoggingStatus setTopicCount(Integer count) {
+        public void addChangedOverrun() {
+            queueOverrunChanged.inc();
+        }
+
+        public LoggingStatus setTopicCount(int count) {
             status[8] = count;
+            topicCount.set(count);
             return this;
         }
 

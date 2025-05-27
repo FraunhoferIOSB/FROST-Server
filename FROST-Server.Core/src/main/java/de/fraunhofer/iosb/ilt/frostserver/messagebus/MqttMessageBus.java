@@ -45,7 +45,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -295,9 +294,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         } else {
             logStatus.addSendOverrun();
             long now = System.currentTimeMillis();
-            if (now - lastRecvOverrun > 200) {
-                lastRecvOverrun = now;
-                LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+            if (now - lastSendOverrun > 200) {
+                lastSendOverrun = now;
+                LOGGER.error(
+                        "Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                         PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
             }
         }
@@ -361,7 +361,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             long now = System.currentTimeMillis();
             if (now - lastRecvOverrun > 200) {
                 lastRecvOverrun = now;
-                LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                LOGGER.error(
+                        "Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                         PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);
             }
         }
@@ -418,7 +419,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             this.processor = processor;
 
             GaugeWithCallback.builder()
-                    .name("CB_mqtt_bus_queue_fill_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .name("message_bus_queue_fill")
                     .help("Number of items in the Queue")
                     .labelNames("queue_name")
                     .callback(cb -> {
@@ -427,7 +428,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     })
                     .register();
             GaugeWithCallback.builder()
-                    .name("CB_mqtt_bus_worker_status_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .name("message_bus_worker_status")
                     .help("Overview of what workers do")
                     .labelNames("queue_name", "worker_status")
                     .callback(cb -> {
@@ -442,10 +443,11 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .register();
 
             queueOverrunCounter = Counter.builder()
-                    .name("queue_overruns_total_" + parent.clientId.toLowerCase(Locale.ROOT).replace('-', '_'))
+                    .name("message_bus_queue_overruns")
                     .help("Number of items dropped because the queue was full")
                     .labelNames("queue_name")
                     .register();
+            queueOverrunCounter.initLabelValues(RECEIVE, SEND);
             queueOverrunRecv = queueOverrunCounter.labelValues(RECEIVE);
             queueOverrunSend = queueOverrunCounter.labelValues(SEND);
         }
