@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
@@ -114,7 +115,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private final AtomicInteger sendQueueCount = new AtomicInteger();
     private long lastSendOverrun = 0;
     private long lastRecvOverrun = 0;
-    private final LoggingStatus logStatus = new LoggingStatus(this, this::checkWorkers);
+    private LoggingStatus logStatus;
 
     private String broker;
     private MqttClient client;
@@ -130,10 +131,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
+        MetricsSettings metricsSettings = settings.getMetricsSettings();
+
         sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, getClass());
         sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, getClass());
         recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, getClass());
         recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, getClass());
+        logStatus = new LoggingStatus(this, this::checkWorkers, metricsSettings.isEnabled());
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -408,16 +412,24 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         public final Object[] status;
         private final Runnable processor;
 
-        private final Counter queueOverrunCounter;
-        private final CounterDataPoint queueOverrunRecv;
-        private final CounterDataPoint queueOverrunSend;
+        private boolean metrics;
+        private Counter queueOverrunCounter;
+        private CounterDataPoint queueOverrunRecv;
+        private CounterDataPoint queueOverrunSend;
 
-        public LoggingStatus(MqttMessageBus parent, Runnable processor) {
+        public LoggingStatus(MqttMessageBus parent, Runnable processor, boolean metrics) {
             super(MESSAGE, new Object[8]);
             status = getCurrentParams();
             Arrays.setAll(status, (int i) -> 0);
             this.processor = processor;
 
+            this.metrics = metrics;
+            if (metrics) {
+                initMetrics(parent);
+            }
+        }
+
+        private void initMetrics(MqttMessageBus parent) {
             GaugeWithCallback.builder()
                     .name("message_bus_queue_fill")
                     .help("Number of items in the Queue")
@@ -447,7 +459,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .help("Number of items dropped because the queue was full")
                     .labelNames("queue_name")
                     .register();
-            queueOverrunCounter.initLabelValues(RECEIVE, SEND);
+            queueOverrunCounter.initLabelValues(RECEIVE);
+            queueOverrunCounter.initLabelValues(SEND);
             queueOverrunRecv = queueOverrunCounter.labelValues(RECEIVE);
             queueOverrunSend = queueOverrunCounter.labelValues(SEND);
         }
@@ -478,7 +491,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         }
 
         public void addRecvOverrun() {
-            queueOverrunRecv.inc();
+            if (metrics) {
+                queueOverrunRecv.inc();
+            }
         }
 
         public LoggingStatus setSendQueueCount(Integer count) {
@@ -502,7 +517,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         }
 
         public void addSendOverrun() {
-            queueOverrunSend.inc();
+            if (metrics) {
+                queueOverrunSend.inc();
+            }
         }
 
     }

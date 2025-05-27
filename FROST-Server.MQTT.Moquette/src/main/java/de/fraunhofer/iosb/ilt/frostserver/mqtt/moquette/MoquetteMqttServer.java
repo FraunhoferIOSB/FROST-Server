@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.moquette.broker.Server;
@@ -181,6 +182,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         final MqttSettings mqttSettings = settings.getMqttSettings();
         final Settings customSettings = mqttSettings.getCustomSettings();
         final Settings authSettings = settings.getAuthSettings();
+        final MetricsSettings metricsSettings = settings.getMetricsSettings();
         final boolean allowAnonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         authWrapper = createAuthWrapper();
 
@@ -194,6 +196,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         config.setProperty(IConfig.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(IConfig.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
+
+        if (metricsSettings.isEnabled()) {
+            if (!customSettings.containsName("metrics.provider.class")) {
+                customSettings.set("metrics_provider_class", "MetricsProviderPrometheus");
+            }
+            customSettings.set("metrics_endpoint_port", 0);
+        }
 
         String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
         if (VALUE_STORE_TYPE_H2.equalsIgnoreCase(persistentStoreType)) {

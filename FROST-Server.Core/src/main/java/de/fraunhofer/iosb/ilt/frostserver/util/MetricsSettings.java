@@ -32,19 +32,43 @@ public class MetricsSettings extends ConfigProvider<MetricsSettings> {
     @DefaultValueBoolean(false)
     public static final String TAG_USE_SERVLET = "useServlet";
 
-    @DefaultValueBoolean(true)
+    @DefaultValueBoolean(false)
     public static final String TAG_USE_INTERNAL = "useInternalHttpServer";
 
     @DefaultValueInt(9400)
     public static final String TAG_ENDPOINT_PORT = "endpointPort";
 
+    private final boolean enabled;
+    private final boolean servlet;
+    private final boolean internal;
+
+    /**
+     * Initialise the metrics settings with the default prefex "metrics.".
+     *
+     * @param coreSettings The core settings to use.
+     */
     public MetricsSettings(CoreSettings coreSettings) {
-        setSettings(coreSettings.getHttpSettings().getSubSettings(PREFIX_METRICS));
+        setSettings(coreSettings.getSettings().getSubSettings(PREFIX_METRICS));
+        internal = getBoolean(MetricsSettings.TAG_USE_INTERNAL);
+        servlet = getBoolean(MetricsSettings.TAG_USE_SERVLET);
+        enabled = internal || servlet;
     }
 
     @Override
     public MetricsSettings getThis() {
         return this;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isServlet() {
+        return servlet;
+    }
+
+    public boolean isInternal() {
+        return internal;
     }
 
 }

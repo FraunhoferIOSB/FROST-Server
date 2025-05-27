@@ -104,14 +104,12 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 setUpCorsFilter(context, coreSettings);
 
                 // Maybe start Prometheus metrics endpoint
-                MetricsSettings metricsSettings = new MetricsSettings(coreSettings);
-                final boolean metricsInternal = metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL);
-                final boolean metricsServlet = metricsSettings.getBoolean(MetricsSettings.TAG_USE_SERVLET);
-                if (metricsInternal || metricsServlet) {
+                MetricsSettings metricsSettings = coreSettings.getMetricsSettings();
+                if (metricsSettings.isEnabled()) {
                     // initialize the out-of-the-box JVM metrics
                     JvmMetrics.builder().register();
                 }
-                if (metricsInternal) {
+                if (metricsSettings.getBoolean(MetricsSettings.TAG_USE_INTERNAL)) {
                     startMetricsServer(metricsSettings);
                 }
                 // initialize the out-of-the-box JVM metrics

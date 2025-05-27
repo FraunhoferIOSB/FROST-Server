@@ -139,6 +139,11 @@ public class CachedSettings extends Settings {
     }
 
     @Override
+    public void set(String name, int value) {
+        valuesInt.put(name, value);
+    }
+
+    @Override
     public boolean getBoolean(String name) {
         if (valuesBoolean.containsKey(name)) {
             return valuesBoolean.get(name);

@@ -173,6 +173,10 @@ public class Settings {
         properties.put(getPropertyKey(name), Boolean.toString(value));
     }
 
+    public void set(String name, int value) {
+        properties.put(getPropertyKey(name), Integer.toString(value));
+    }
+
     /**
      * Get the property with the given name, prefixed with the prefix of this
      * properties. The value of the property will be logged. Use {@link #getSensitive(String)

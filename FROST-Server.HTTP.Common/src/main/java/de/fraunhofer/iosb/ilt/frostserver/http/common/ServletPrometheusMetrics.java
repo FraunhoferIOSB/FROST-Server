@@ -40,9 +40,9 @@ public class ServletPrometheusMetrics extends PrometheusMetricsServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (settings == null) {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            settings = new MetricsSettings(coreSettings);
+            settings = coreSettings.getMetricsSettings();
         }
-        if (settings.getBoolean(MetricsSettings.TAG_USE_SERVLET)) {
+        if (settings.isServlet()) {
             super.service(request, response);
         }
         response.sendError(404);

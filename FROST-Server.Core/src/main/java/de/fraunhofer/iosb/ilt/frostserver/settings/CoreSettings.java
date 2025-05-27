@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -205,6 +206,11 @@ public class CoreSettings implements ConfigDefaults {
     private Settings extensionSettings;
 
     /**
+     * The settings for metrics gathering.
+     */
+    private MetricsSettings metricsSettings;
+
+    /**
      * The extensions, or other code parts that require Liquibase.
      */
     private final Set<LiquibaseUser> liquibaseUsers = new LinkedHashSet<>();
@@ -299,6 +305,7 @@ public class CoreSettings implements ConfigDefaults {
         authSettings = settings.getSubSettings(PREFIX_AUTH);
         pluginSettings = settings.getSubSettings(PREFIX_PLUGINS);
         extensionSettings = settings.getSubSettings(PREFIX_EXTENSION);
+        metricsSettings = new MetricsSettings(this);
     }
 
     private void initExtensions() {
@@ -381,6 +388,10 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getHttpSettings() {
         return httpSettings;
+    }
+
+    public MetricsSettings getMetricsSettings() {
+        return metricsSettings;
     }
 
     public MqttSettings getMqttSettings() {
