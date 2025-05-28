@@ -711,7 +711,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         if (anonymousReadAllowed) {
-            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedP1));
         } else {
             filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
         }
@@ -746,12 +746,12 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         if (anonymousReadAllowed) {
-            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Collections.emptyList());
         } else {
-            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservedProperty, filter, H401);
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, H401);
         }
-        filterForException(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservedProperty, filter, H401);
-        filterForException(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservedProperty, filter, H401);
+        testFilterResultsExpanded(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, filter, expand, Collections.emptyList());
+        testFilterResultsExpanded(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, filter, expand, Collections.emptyList());
         testFilterResultsExpanded(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         testFilterResultsExpanded(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
     }
