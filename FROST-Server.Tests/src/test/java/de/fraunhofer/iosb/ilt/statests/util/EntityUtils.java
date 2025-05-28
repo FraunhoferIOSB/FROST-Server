@@ -115,12 +115,12 @@ public class EntityUtils {
             Entity nextResult = resultIt.next();
             Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
             if (!testExpectedList.remove(inExpectedList)) {
-                LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
-                return new ResultTestResult(false, "Entity with pk " + nextResult.getPrimaryKeyValues() + " found in result that is not expected.");
+                LOGGER.info("Entity {} found in result that is not expected.", nextResult);
+                return new ResultTestResult(false, "Entity " + nextResult + " found in result that is not expected.");
             }
         }
         if (!testExpectedList.isEmpty()) {
-            LOGGER.info("Expected entity not found in result.");
+            LOGGER.info("Expected entity {} not found in result.", testExpectedList.get(0));
             return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
         }
         return new ResultTestResult(true, "Check ok.");
@@ -156,7 +156,7 @@ public class EntityUtils {
 
         }
         if (!testExpectedList.isEmpty()) {
-            LOGGER.info("Expected entity not found in result.");
+            LOGGER.info("Expected entity {} not found in result.", testExpectedList.get(0));
             return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
         }
         return new ResultTestResult(true, "Check ok.");
@@ -607,6 +607,9 @@ public class EntityUtils {
                         EntityUtils.listEntities(result.toList()));
             }
             assertTrue(check.testOk, message);
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Exception expanding doa {} using {}\n{}\n", doa, expand, ex.getReturnedContent());
+            fail("Failed to call service: " + ex.getMessage());
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception expanding doa {} using {} :", doa, expand, ex);
             fail("Failed to call service: " + ex.getMessage());
