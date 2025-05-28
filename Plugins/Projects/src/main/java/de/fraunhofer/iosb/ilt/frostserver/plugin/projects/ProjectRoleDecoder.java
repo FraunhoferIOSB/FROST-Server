@@ -114,7 +114,7 @@ public class ProjectRoleDecoder implements UserRoleDecoder, ConfigDefaults {
                 int result = dslContext.execute(uprInsertQuery, username, projectName, roleName);
                 LOGGER.debug("  Executed uprInsert: {}, {}, {} -> {}", username, projectName, roleName, result);
             } catch (RuntimeException ex) {
-                LOGGER.warn("Exception inserting role " + roleName, ex);
+                LOGGER.warn("  Failed inserting role {} for user {} on project {}: {}", roleName, username, projectName, ex.getMessage());
             }
         }
     }
