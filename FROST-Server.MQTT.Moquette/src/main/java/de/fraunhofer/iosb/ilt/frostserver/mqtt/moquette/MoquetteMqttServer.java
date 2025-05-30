@@ -199,9 +199,9 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
         if (metricsSettings.isEnabled()) {
             if (!customSettings.containsName("metrics.provider.class")) {
-                customSettings.set("metrics_provider_class", "MetricsProviderPrometheus");
+                customSettings.set("metrics.provider.class", "MetricsProviderPrometheus");
             }
-            customSettings.set("metrics_endpoint_port", 0);
+            customSettings.set("metrics.endpoint.port", 0);
         }
 
         String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
