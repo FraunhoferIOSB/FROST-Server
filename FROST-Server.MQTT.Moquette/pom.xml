@@ -15,7 +15,7 @@
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
-        <moquette.version>0.17</moquette.version>
+        <moquette.version>0.18.1</moquette.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
@@ -32,7 +32,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.moquette</groupId>
+            <groupId>de.fraunhofer.iosb.io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
             <version>${moquette.version}</version>
             <exclusions>
@@ -45,6 +45,11 @@
                     <artifactId>bugsnag</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iosb.io.moquette</groupId>
+            <artifactId>moquette-metrics-prometheus</artifactId>
+            <version>${moquette.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
