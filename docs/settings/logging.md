@@ -55,6 +55,7 @@ environment variables that influence basic logging options.
 
 FROST-Server uses prometheus to gather metrics.
 For the HTTP component, the metrics end point can be made available on the same port as the normal service, or on a separate port.
+If both `useServlet` and `useInternalHttpServer` are false, then metrics gathering is disabled.
 
 
 ## Environment variables
@@ -64,7 +65,7 @@ For the HTTP component, the metrics end point can be made available on the same 
   This makes `/FROST-Server/metrics` available, next to the other end-points. Default: `false`.
 * **metrics.useInternalHttpServer:**  
   Use a separate HTTP service, on its own port, to expose the metrics.
-  This makes a `/metrics` URL available on a configurable port. Default: `true`.
+  This makes a `/metrics` URL available on a configurable port. Default: `false`.
 * **metrics.endpointPort:**  
   The port to use for the separate HTTP service that exposes the metrics. Default: `9400`.
 

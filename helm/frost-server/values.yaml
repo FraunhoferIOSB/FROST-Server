@@ -8,6 +8,9 @@ frost:
   alwaysOrderbyId: true
   logSensitiveData: false
   queueLoggingInterval: 0
+  metrics:
+    enable: false
+    port: 9400
 
   # Extra global environment variables added to both MQTT and HTTP pods.
   # This can be simple key-value pairs

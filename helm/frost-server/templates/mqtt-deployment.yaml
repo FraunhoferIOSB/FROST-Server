@@ -27,6 +27,11 @@ spec:
         helm.sh/chart: {{ include "frost-server.chart" . }}
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
+      annotations:
+        {{- if .Values.frost.metrics.enable }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.frost.metrics.port | toString}}"
+        {{- end}}
     spec:
       {{- if .Values.frost.mqtt.image.imagePullSecret }}
       imagePullSecrets:
@@ -53,6 +58,10 @@ spec:
               containerPort: 1883
             - name: websocket
               containerPort: 9876
+            {{- if .Values.frost.metrics.enable }}
+            - name: metrics
+              containerPort: {{ .Values.frost.metrics.port | toString}}
+            {{- end}}
           livenessProbe:
             tcpSocket:
               port: mqtt
@@ -403,6 +412,13 @@ spec:
             {{- end }}
             {{- end }}
 
+            # Metrics
+            {{- if .Values.frost.metrics.enable }}
+            - name: metrics_useInternalHttpServer
+              value: "true"
+            - name: metrics_endpointPort
+              value: "{{ .Values.frost.metrics.port | toString}}"
+            {{- end }}
             # Logging variables
             {{- if .Values.frost.logging.default }}
             - name: FROST_LL
