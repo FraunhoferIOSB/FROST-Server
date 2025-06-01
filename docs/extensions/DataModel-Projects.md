@@ -95,7 +95,10 @@ Project admins can link users to projects.
 
 When using [KeyCloak Authentication](../settings/auth.html#settings-for-the-auth-provider-class-keycloakauthprovider) the contents of the user and roles tables are automatically filled from the data supplied by KeyCloak.
 
-The links between Projects and Users/Roles can also be decoded from the KeyCloak data, by using a userRoleDecoder. The ProjectRoleDecoder takes the list of roles (strings) that KeyCloak provides, uses a regular expression to extract a project name and a role name from each string, and creates a UserProjectRole for the user for each of these.
+The links between Projects and Users/Roles can also be decoded from the KeyCloak data, by using a userRoleDecoder.
+The ProjectRoleDecoder takes the list of roles (strings) that KeyCloak provides, uses a regular expression to extract a project name and a role name from each string, and creates a UserProjectRole for the user for each of these.
+With the default settings for the ProjectRoleDecoder, the role in KeyCloak must be the case-sensitive project name, and the case-sensitive role name, separated by two underscores.
+For example: `Project1__read`.
 
 
 ## MQTT
@@ -170,7 +173,8 @@ Like Locations, users that do not have global `ceate` rights must directly link 
 When features of interest are created manually, they too must be linked to a project the user has `create` rights on, if the user does not have global `create` rights.
 
 When features are created automatically, they inherit the Projects and `restricted` setting from the Location the Feature is created from.
-When the Projects of the Location, or the `restricted` setting of the Location, is changed, the FeatureOfInterest is currently not updated.
+When the Projects of the Location, or the `restricted` setting of the Location, is changed, the FeatureOfInterest is, by default, not updated.
+By setting `projects.updateFeatureWithLocation` to `true`, the `restricted` flag and Projects links of a generated Feature is updated when the Location is updated.
 
 
 ### ObservedProperties
