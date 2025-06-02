@@ -3,6 +3,7 @@
 ## Development version 2.5.7
 
 **Internal changes & Bugfixes**
+* Fixed ProjectRoleDecoder aborting when a non-existing project is found in a role.
 * [MQTT] Fixed missing navigation link when using expand.
 * HTTP Tool on index page now formats returned JSON.
 
