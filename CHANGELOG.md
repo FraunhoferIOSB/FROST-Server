@@ -10,6 +10,7 @@
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
 
 **Internal changes & Bugfixes**
+* Fixed ProjectRoleDecoder aborting when a non-existing project is found in a role.
 * Changed GeoJSON serialiser to streaming, improving performance of the GeoJSON resultFormat.
 * Fixed #2132: Incomplete validation of entities for PUT.
 * Fixed expand of single entity with no target returning an object.

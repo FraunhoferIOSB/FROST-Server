@@ -262,6 +262,22 @@
         "containerId" : "5f8c963c-e4ad-4d1c-a793-f8ee4cc080cd",
         "attributes" : { }
       }, {
+        "id" : "1e84e78e-176d-43a4-97e8-30d32b9a6e24",
+        "name" : "Project X__admin",
+        "description" : "",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "5f8c963c-e4ad-4d1c-a793-f8ee4cc080cd",
+        "attributes" : { }
+      }, {
+        "id" : "1e84e78e-176d-43a4-97e8-30d32b9a6e25",
+        "name" : "Project 4__admin",
+        "description" : "",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "5f8c963c-e4ad-4d1c-a793-f8ee4cc080cd",
+        "attributes" : { }
+      }, {
         "id" : "f575d011-04a8-45ff-bd7b-54338a8960a0",
         "name" : "delete",
         "description" : "User can Delete",
@@ -493,7 +509,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-frost-test" ],
     "clientRoles" : {
-      "frost-server" : [ "Project 1__admin" ]
+      "frost-server" : [ "Project 1__admin", "Project X__admin", "Project 4__admin" ]
     },
     "notBefore" : 0,
     "groups" : [ ]

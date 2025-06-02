@@ -166,9 +166,15 @@
             <column name="ID" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="PK_USER_PROJECT_ROLE" />
             </column>
-            <column name="USER_NAME" type="VARCHAR(36)" />
-            <column name="ROLE_NAME" type="VARCHAR(15)" />
-            <column name="PROJECT_ID" type="BIGINT" />
+            <column name="USER_NAME" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROJECT_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <addForeignKeyConstraint
