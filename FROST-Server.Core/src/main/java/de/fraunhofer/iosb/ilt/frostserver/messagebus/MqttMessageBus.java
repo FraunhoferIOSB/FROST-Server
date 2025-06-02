@@ -412,6 +412,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         public final Object[] status;
         private final Runnable processor;
 
+        private int recvQueueCountMax = 0;
+        private int sendQueueCountMax = 0;
+
         private boolean metrics;
         private Counter queueOverrunCounter;
         private CounterDataPoint queueOverrunRecv;
@@ -437,6 +440,17 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .callback(cb -> {
                         cb.call((1.0 * (Integer) status[0] / parent.recvQueueSize), RECEIVE);
                         cb.call((1.0 * (Integer) status[4] / parent.sendQueueSize), SEND);
+                    })
+                    .register();
+            GaugeWithCallback.builder()
+                    .name("message_bus_queue_fill_max")
+                    .help("Maximum number of items in the Queue since last call")
+                    .labelNames("queue_name")
+                    .callback(cb -> {
+                        cb.call(recvQueueCountMax, RECEIVE);
+                        recvQueueCountMax = 0;
+                        cb.call(sendQueueCountMax, SEND);
+                        sendQueueCountMax = 0;
                     })
                     .register();
             GaugeWithCallback.builder()
@@ -472,6 +486,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         public LoggingStatus setRecvQueueCount(Integer count) {
             status[0] = count;
+            if (metrics && count > recvQueueCountMax) {
+                recvQueueCountMax = count;
+            }
             return this;
         }
 
@@ -498,6 +515,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         public LoggingStatus setSendQueueCount(Integer count) {
             status[4] = count;
+            if (metrics && count > sendQueueCountMax) {
+                sendQueueCountMax = count;
+            }
             return this;
         }
 
