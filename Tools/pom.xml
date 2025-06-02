@@ -9,6 +9,7 @@
     </parent>
     <artifactId>FROST-Server.Tools</artifactId>
     <packaging>pom</packaging>
+    <name>Tools</name>
 
     <modules>
         <module>ModelEditor</module>
