@@ -35,7 +35,7 @@ TOKEN [IGNORE_CASE]:
 | <#SIGN: ["+", "-"]>
 | <ZoM: "Z" | "M">
 | <ZaM: "ZM">
-| <SRID:               "SRID=" >
+| <SRID_LITERAL:       "SRID=" >
 | <POINT:              "POINT" >
 | <MULTIPOINT:         "MULTIPOINT" >
 | <LINESTRING:         "LINESTRING" >
@@ -49,7 +49,7 @@ TOKEN [IGNORE_CASE]:
 ;
 
 Start Start :
-  ( SRID )?
+  ( Srid )?
   ( PointWithData
   | MultiPointWithData
   | LineStringWithData
@@ -59,8 +59,8 @@ Start Start :
   { return jjtThis; }
 ;
 
-SRID #Srid :
-  <SRID> <INTEGER> <SEMI>
+Srid #Srid :
+  <SRID_LITERAL> <INTEGER> <SEMI>
 ;
 
 PointWithData #WktPoint :
