@@ -191,8 +191,14 @@ public class MqttListener implements Callable<JsonNode> {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    LOGGER.debug("Exception during connect for {}:", name, exception.getMessage());
-                    notifyError("MQTT connect failed: " + exception.getMessage());
+                    String message;
+                    if (exception instanceof MqttException mexc) {
+                        message = Integer.toString(mexc.getReasonCode());
+                    } else {
+                        message = exception.getMessage();
+                    }
+                    LOGGER.debug("Exception during connect for {}:", name, message);
+                    notifyError("MQTT connect failed: " + message);
                 }
             });
             try {
