@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -386,7 +387,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         if (anonymousReadAllowed) {
             testSubscriptionAnon.addExpectedEntity(obsFuture);
         } else {
-            testSubscriptionAnon.addExpectedError("MQTT connect failed: Bad user name or password");
+            testSubscriptionAnon.addExpectedError("MQTT connect failed: " + MqttException.REASON_CODE_FAILED_AUTHENTICATION);
         }
         MqttAction mqttAction = new MqttAction(insertAction)
                 .add(testSubscriptionAdmin)
