@@ -361,7 +361,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
 
     @Test
     void test30SubscribeThing() {
-        LOGGER.info("  test30SubscribeThingAdmin");
+        LOGGER.info("  test30SubscribeThing");
         final CompletableFuture<Entity> obsFuture = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
             Entity thing = EntityUtils.createThing(
@@ -373,15 +373,19 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
             return null;
         };
         final TestSubscription testSubscriptionAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
+                .setName(ADMIN)
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
         final TestSubscription testSubscriptionWrite = new TestSubscription(mqttHelperWrite, "v1.1/Things")
+                .setName(WRITE)
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
         final TestSubscription testSubscriptionRead = new TestSubscription(mqttHelperRead, "v1.1/Things")
+                .setName(READ)
                 .addExpectedEntity(obsFuture)
                 .createReceivedListener(sMdl.etThing);
         final TestSubscription testSubscriptionAnon = new TestSubscription(mqttHelperAnon, "v1.1/Things")
+                .setName(ANONYMOUS)
                 .createReceivedListener(sMdl.etThing);
         if (anonymousReadAllowed) {
             testSubscriptionAnon.addExpectedEntity(obsFuture);

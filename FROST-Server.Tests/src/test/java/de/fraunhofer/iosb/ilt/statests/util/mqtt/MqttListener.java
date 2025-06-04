@@ -106,6 +106,7 @@ public class MqttListener implements Callable<JsonNode> {
             final CountDownLatch connectBarrier = new CountDownLatch(2);
             clientId = "TS-" + name + "-" + topic + "-" + UUID.randomUUID();
             mqttClient = new MqttAsyncClient(mqttServerUri, clientId, new MemoryPersistence());
+            LOGGER.debug("  c: {} connecting to {}", clientId, mqttServerUri);
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
             if (!isNullOrEmpty(username)) {
