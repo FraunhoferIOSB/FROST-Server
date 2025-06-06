@@ -1,0 +1,15 @@
+{{- if .Values.frost.metrics.createRoleBinding -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.frost.metrics.roleBindingName }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Values.frost.metrics.roleName }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.frost.metrics.serviceAccountName }}
+  namespace: {{ .Values.frost.metrics.serviceAccountNamespace }}
+{{- end -}}

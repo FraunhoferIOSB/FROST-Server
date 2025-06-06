@@ -8,9 +8,20 @@ frost:
   alwaysOrderbyId: true
   logSensitiveData: false
   queueLoggingInterval: 0
+
+  # Enabling metrics will add metrics endpoints to the pods.
   metrics:
     enable: false
     port: 9400
+    # Create a role for prometheus to get access to the namespace
+    # This may be required when prometheus does not have cluster-wide access
+    createRole: false
+    roleName: prometheus-server-role
+    # Create a RoleBinding for the role to a ServiceAccount
+    createRoleBinding: false
+    roleBindingName: prometheus-server
+    serviceAccountName: prometheus-server
+    serviceAccountNamespace: prometheus
 
   # Extra global environment variables added to both MQTT and HTTP pods.
   # This can be simple key-value pairs
