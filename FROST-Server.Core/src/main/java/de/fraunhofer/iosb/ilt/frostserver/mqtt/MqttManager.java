@@ -405,12 +405,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     .labelNames("queue_name", "worker_status")
                     .callback(cb -> {
                         process();
-                        cb.call((Integer) status[1], CREATE, WAITING);
-                        cb.call((Integer) status[2], CREATE, WORKING);
-                        cb.call((Integer) status[3], CREATE, DEAD);
-                        cb.call((Integer) status[5], CHANGED, WAITING);
-                        cb.call((Integer) status[6], CHANGED, WORKING);
-                        cb.call((Integer) status[7], CHANGED, DEAD);
+                        cb.call((Integer) status[1], CHANGED, WAITING);
+                        cb.call((Integer) status[2], CHANGED, WORKING);
+                        cb.call((Integer) status[3], CHANGED, DEAD);
+                        cb.call((Integer) status[5], CREATE, WAITING);
+                        cb.call((Integer) status[6], CREATE, WORKING);
+                        cb.call((Integer) status[7], CREATE, DEAD);
                     })
                     .register();
 
@@ -437,8 +437,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
         public LoggingStatus setEntityCreateQueueCount(int count) {
             status[0] = count;
-            if (metrics && count > changedQueueCountMax) {
-                changedQueueCountMax = count;
+            if (metrics && count > createQueueCountMax) {
+                createQueueCountMax = count;
             }
             return this;
         }
@@ -466,8 +466,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
         public LoggingStatus setEntityChangedQueueCount(int count) {
             status[4] = count;
-            if (metrics && count > createQueueCountMax) {
-                createQueueCountMax = count;
+            if (metrics && count > changedQueueCountMax) {
+                changedQueueCountMax = count;
             }
             return this;
         }
