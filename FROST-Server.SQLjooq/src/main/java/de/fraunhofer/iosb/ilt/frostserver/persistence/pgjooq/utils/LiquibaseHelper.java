@@ -91,6 +91,8 @@ public class LiquibaseHelper {
 
     private static void runLiquibaseCheck(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, StringWriter out) {
         String changeSetName = Objects.toString(params.get(CHANGE_SET_NAME), "Unnamed Changeset");
+        System.setProperty("liquibase.analytics.logLevel", "FINE");
+        System.setProperty("liquibase.analytics.enabled", "false");
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -131,6 +133,8 @@ public class LiquibaseHelper {
 
     private static void runLiquibaseUpdate(String liquibaseChangelogFilename, final SearchPathResourceAccessor resourceAccessor, Database database, Map<String, Object> params, Writer out) throws UpgradeFailedException, IOException {
         String changeSetName = Objects.toString(params.get(CHANGE_SET_NAME), "Unnamed Changeset");
+        System.setProperty("liquibase.analytics.logLevel", "FINE");
+        System.setProperty("liquibase.analytics.enabled", "false");
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());

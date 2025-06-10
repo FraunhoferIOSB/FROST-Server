@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <!-- reset all previous level configurations of all j.u.l. loggers -->
+        <resetJUL>true</resetJUL>
+    </contextListener> 
+
     <variable name="FROST_LL" value="${FROST_LL:-INFO}" />
     <variable name="FROST_LL_parser" value="${FROST_LL_parser:-INFO}" />
     <variable name="FROST_LL_requests" value="${FROST_LL_requests:-INFO}" />
