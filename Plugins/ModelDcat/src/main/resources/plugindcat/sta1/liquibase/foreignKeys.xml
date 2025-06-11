@@ -1,0 +1,263 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="generated" id="2025-06-10-fk_dataservice_publisher" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataservice_publisher" foreignKeyTableName="dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataservice_publisher"
+            baseTableName="dataservice" baseColumnNames="publisher"
+            referencedTableName="agent" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataservice_standard_service_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataservice_standard_service_id" foreignKeyTableName="dataservice_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataservice_standard_service_id"
+            baseTableName="dataservice_standard" baseColumnNames="service_id"
+            referencedTableName="dataservice" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataservice_standard_standard_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataservice_standard_standard_id" foreignKeyTableName="dataservice_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataservice_standard_standard_id"
+            baseTableName="dataservice_standard" baseColumnNames="standard_id"
+            referencedTableName="standard" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataservice_license" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataservice_license" foreignKeyTableName="dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataservice_license"
+            baseTableName="dataservice" baseColumnNames="license"
+            referencedTableName="license" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_dataservice_dataservice_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_dataservice_dataservice_id" foreignKeyTableName="dataset_dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_dataservice_dataservice_id"
+            baseTableName="dataset_dataservice" baseColumnNames="dataservice_id"
+            referencedTableName="dataservice" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_dataservice_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_dataservice_dataset_id" foreignKeyTableName="dataset_dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_dataservice_dataset_id"
+            baseTableName="dataset_dataservice" baseColumnNames="dataset_id"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_publisher" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_publisher" foreignKeyTableName="dataset" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_publisher"
+            baseTableName="dataset" baseColumnNames="publisher"
+            referencedTableName="agent" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_agent_dataset_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_agent_dataset_dataset_id" foreignKeyTableName="agent_dataset" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_agent_dataset_dataset_id"
+            baseTableName="agent_dataset" baseColumnNames="dataset_id"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_agent_dataset_agent_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_agent_dataset_agent_id" foreignKeyTableName="agent_dataset" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_agent_dataset_agent_id"
+            baseTableName="agent_dataset" baseColumnNames="agent_id"
+            referencedTableName="agent" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_standard_service_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_standard_service_id" foreignKeyTableName="dataset_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_standard_service_id"
+            baseTableName="dataset_standard" baseColumnNames="service_id"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_standard_standard_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_standard_standard_id" foreignKeyTableName="dataset_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_standard_standard_id"
+            baseTableName="dataset_standard" baseColumnNames="standard_id"
+            referencedTableName="standard" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_dataservice_distribution_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_dataservice_distribution_id" foreignKeyTableName="distribution_dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_dataservice_distribution_id"
+            baseTableName="distribution_dataservice" baseColumnNames="distribution_id"
+            referencedTableName="distribution" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_dataservice_dataservice_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_dataservice_dataservice_id" foreignKeyTableName="distribution_dataservice" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_dataservice_dataservice_id"
+            baseTableName="distribution_dataservice" baseColumnNames="dataservice_id"
+            referencedTableName="dataservice" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_license_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_license_id" foreignKeyTableName="distribution" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_license_id"
+            baseTableName="distribution" baseColumnNames="license_id"
+            referencedTableName="license" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_standard_distribution_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_standard_distribution_id" foreignKeyTableName="distribution_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_standard_distribution_id"
+            baseTableName="distribution_standard" baseColumnNames="distribution_id"
+            referencedTableName="distribution" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_standard_standard_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_standard_standard_id" foreignKeyTableName="distribution_standard" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_standard_standard_id"
+            baseTableName="distribution_standard" baseColumnNames="standard_id"
+            referencedTableName="standard" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_distribution_dataset" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_distribution_dataset" foreignKeyTableName="distribution" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_distribution_dataset"
+            baseTableName="distribution" baseColumnNames="dataset"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

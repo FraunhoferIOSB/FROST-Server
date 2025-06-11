@@ -1,0 +1,39 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "License",
+      "plural": "Licenses",
+      "adminOnly": false,
+      "table": "license",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "definition",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "definition"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}

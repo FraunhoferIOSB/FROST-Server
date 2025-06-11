@@ -1,0 +1,153 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "DataService",
+      "plural": "DataServices",
+      "adminOnly": false,
+      "table": "dataservice",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "title",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "title"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "endpointURL",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "endpoint_url"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "Publisher",
+          "entitySet": false,
+          "entityType": "Agent",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "PublishesDataServices",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "publisher",
+              "otherTable": "agent",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "ConformsTo",
+          "entitySet": true,
+          "entityType": "Standard",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "ImplementingDataServices",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "dataservice_standard",
+              "linkOurField": "service_id",
+              "linkOtherField": "standard_id",
+              "otherTable": "standard",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "License",
+          "entitySet": false,
+          "entityType": "License",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "DataServices",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "license",
+              "otherTable": "license",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Datasets",
+          "entitySet": true,
+          "entityType": "Dataset",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "DataServices",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "dataset_dataservice",
+              "linkOurField": "dataservice_id",
+              "linkOtherField": "dataset_id",
+              "otherTable": "dataset",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

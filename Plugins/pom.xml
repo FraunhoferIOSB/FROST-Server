@@ -17,6 +17,7 @@
         <module>BatchProcessing</module>
         <module>CoreModel</module>
         <module>CoreModelV2</module>
+        <module>ModelDcat</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>

@@ -1,0 +1,52 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <property name="id-Agent" value="LONG" />
+    <property name="idType-Agent" value="BIGINT" />
+    <property name="id-DataService" value="LONG" />
+    <property name="idType-DataService" value="BIGINT" />
+    <property name="id-Dataset" value="LONG" />
+    <property name="idType-Dataset" value="BIGINT" />
+    <property name="id-Distribution" value="LONG" />
+    <property name="idType-Distribution" value="BIGINT" />
+    <property name="id-License" value="LONG" />
+    <property name="idType-License" value="BIGINT" />
+    <property name="id-Standard" value="LONG" />
+    <property name="idType-Standard" value="BIGINT" />
+
+    <include relativeToChangelogFile="true" file="tableAgents.xml" />
+    <include relativeToChangelogFile="true" file="tableDataServices.xml" />
+    <include relativeToChangelogFile="true" file="tableDataserviceStandard.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasetDataservice.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasets.xml" />
+    <include relativeToChangelogFile="true" file="tableAgentDataset.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasetStandard.xml" />
+    <include relativeToChangelogFile="true" file="tableDistributions.xml" />
+    <include relativeToChangelogFile="true" file="tableDistributionDataservice.xml" />
+    <include relativeToChangelogFile="true" file="tableDistributionStandard.xml" />
+    <include relativeToChangelogFile="true" file="tableLicenses.xml" />
+    <include relativeToChangelogFile="true" file="tableStandards.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+
+</databaseChangeLog>
+

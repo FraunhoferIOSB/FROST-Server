@@ -1,0 +1,188 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Distribution",
+      "plural": "Distributions",
+      "adminOnly": false,
+      "table": "distribution",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "accessURL",
+          "type": "Edm.String",
+          "required": true,
+          "nullable": false,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "accessurl"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "title",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "title"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "format",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "format"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "availability",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "availability"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "AccessServices",
+          "entitySet": true,
+          "entityType": "DataService",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Distributions",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "distribution_dataservice",
+              "linkOurField": "distribution_id",
+              "linkOtherField": "dataservice_id",
+              "otherTable": "dataservice",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "License",
+          "entitySet": false,
+          "entityType": "License",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Distributions",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "license_id",
+              "otherTable": "license",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "ConformsTo",
+          "entitySet": true,
+          "entityType": "Standard",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "ImplementingDistributions",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "distribution_standard",
+              "linkOurField": "distribution_id",
+              "linkOtherField": "standard_id",
+              "otherTable": "standard",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Dataset",
+          "entitySet": false,
+          "entityType": "Dataset",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Distributions",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "dataset",
+              "otherTable": "dataset",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

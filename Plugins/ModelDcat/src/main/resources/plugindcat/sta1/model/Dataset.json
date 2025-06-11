@@ -1,0 +1,142 @@
+{
+  "conformance": [
+    "https://fraunhoferiosb.github.io/FROST-Server/extensions/DCAT.html"
+  ],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Dataset",
+      "plural": "Datasets",
+      "adminOnly": false,
+      "table": "dataset",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "title",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "title"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "keywords",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "keywords"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "Publisher",
+          "entitySet": false,
+          "entityType": "Agent",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "PublishesDatasets",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "publisher",
+              "otherTable": "agent",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Creators",
+          "entitySet": true,
+          "entityType": "Agent",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "CreatedDatasets",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "agent_dataset",
+              "linkOurField": "dataset_id",
+              "linkOtherField": "agent_id",
+              "otherTable": "agent",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "ConformsTo",
+          "entitySet": true,
+          "entityType": "Standard",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "ImplementingDatasets",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "dataset_standard",
+              "linkOurField": "service_id",
+              "linkOtherField": "standard_id",
+              "otherTable": "standard",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

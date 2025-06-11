@@ -1,0 +1,128 @@
+{
+    "post_to": "v1.1/$batch",
+    "using_content_type": "application/json",
+    "requests": [
+        {
+            "id": "agent_IOSB",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Agents?$select=id&$filter=name eq 'Fraunhofer IOSB'"
+        },
+        {
+            "id": "agent_IOSB",
+            "if": "not $agent_IOSB",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Agents",
+            "body": {
+                "name": "Fraunhofer IOSB"
+            }
+        },
+
+        {
+            "id": "standard_sta",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Standards?$select=id&$filter=definition eq 'http://www.opengis.net/doc/is/sensorthings/1.1'"
+        },
+        {
+            "id": "standard_sta",
+            "if": "not $standard_sta",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Standards",
+            "body": {
+                "definition": "http://www.opengis.net/doc/is/sensorthings/1.1",
+                "title": "OGC SensorThings API 1.1"
+            }
+        },
+
+        {
+            "id": "dservice_airquality",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "DataServices?$select=id&$filter=title eq 'Air Quality Service'"
+        },
+        {
+            "id": "dservice_airquality",
+            "if": "not $dservice_airquality",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "DataServices",
+            "body": {
+                "title": "Air Quality Service",
+                "endpointURL": "https://airquality-frost.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1/",
+                "ConformsTo": [
+                    {
+                        "id": "$standard_sta"
+                    }
+                ]
+            }
+        },
+
+        {
+            "id": "dset_airquality",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Datasets?$select=id&$filter=title eq 'European Air Quality'"
+        },
+        {
+            "id": "dset_airquality",
+            "if": "not $dset_airquality",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Datasets",
+            "body": {
+                "title": "European Air Quality",
+                "description": "A data set with air quality data harvested from the European Environmental Agency.",
+                "keywords": "Air quality, EEA",
+                "Publisher": {
+                    "id": "$agent_IOSB"
+                },
+                "Creators": [
+                    {
+                        "id": "$agent_IOSB"
+                    }
+                ],
+                "ConformsTo": [
+                    {
+                        "id": "$standard_sta"
+                    }
+                ]
+            }
+        },
+
+        {
+            "id": "dist_airquality",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Distributions?$select=id&$filter=title eq 'Air Quality Stations'"
+        },
+        {
+            "id": "dist_airquality",
+            "if": "not $dist_airquality",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Distributions",
+            "body": {
+                "accessURL": "https://airquality-frost.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1/Things",
+                "title": "Air Quality Stations",
+                "description": "Air quality measurement stations in europe",
+                "format": "application/json",
+                "Dataset": {
+                    "id": "$dset_airquality"
+                },
+                "AccessServices": [
+                    {
+                        "id": "$dservice_airquality"
+                    }
+                ],
+                "ConformsTo": [
+                    {
+                        "id": "$standard_sta"
+                    }
+                ]
+            }
+        }
+    ]
+}

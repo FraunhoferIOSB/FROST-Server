@@ -65,6 +65,7 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.dcat.PluginDcat"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.projects.PluginProjects";
 
     /**

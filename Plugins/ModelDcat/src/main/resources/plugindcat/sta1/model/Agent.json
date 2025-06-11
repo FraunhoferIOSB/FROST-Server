@@ -1,0 +1,39 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Agent",
+      "plural": "Agents",
+      "adminOnly": false,
+      "table": "agent",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "type": "Id",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "name",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "name"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}
