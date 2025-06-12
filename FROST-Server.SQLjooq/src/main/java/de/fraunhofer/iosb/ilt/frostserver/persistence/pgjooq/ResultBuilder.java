@@ -136,7 +136,7 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        Result<Record> results = pm.timeFetch(sqlQuery, entityName);
+        Result<Record> results = pm.timeFetch(sqlQuery, path.getMainElementType().entityName);
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
         }
