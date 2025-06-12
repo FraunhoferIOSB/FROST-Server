@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.projects;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 
@@ -210,11 +211,12 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
             TableImpLocations ql = tableCollection.getTableForClass(TableImpLocations.class);
             Field<?> lRestricted = ql.field("RESTRICTED");
             final Object locationId = entity.getPrimaryKeyValues().get(0);
-            Record2<?, ?> fetchAny = jpm.getDslContext()
-                    .select(ql.colGenFoiId, lRestricted)
-                    .from(ql)
-                    .where(((TableField) ql.getId()).equal(locationId))
-                    .fetchAny();
+            Record2<?, ?> fetchAny = jpm.timeFetchAny(
+                    jpm.getDslContext()
+                            .select(ql.colGenFoiId, lRestricted)
+                            .from(ql)
+                            .where(((TableField) ql.getId()).equal(locationId)),
+                    ql.getEntityType().entityName);
             if (fetchAny == null) {
                 LOGGER.error("Location not found in table for id {}", entity.getPrimaryKeyValues());
                 return;
@@ -227,11 +229,12 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
 
             TableImpFeatures tf = tableCollection.getTableForClass(TableImpFeatures.class);
             TableField fRestricted = (TableField) tf.field("RESTRICTED");
-            int updated = jpm.getDslContext()
-                    .update(tf)
-                    .set(fRestricted, fetchAny.component2())
-                    .where(((TableField) tf.getId()).eq(genFoiId))
-                    .execute();
+            int updated = jpm.timeExecute(
+                    jpm.getDslContext()
+                            .update(tf)
+                            .set(fRestricted, fetchAny.component2())
+                            .where(((TableField) tf.getId()).eq(genFoiId)),
+                    "FeatureOfInterest");
             if (updated != 1) {
                 LOGGER.warn("Update of generated FoI resulted in {} changed rows!", updated);
             }
@@ -246,24 +249,27 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 LOGGER.error("Failed to link Projects to generated FoI, linktables do not have correct columns.");
                 return;
             }
-            int unlinked = jpm.getDslContext()
-                    .deleteFrom(tfp)
-                    .where(tfpFid.eq(genFoiId))
-                    .execute();
+            int unlinked = jpm.timeExecute(
+                    jpm.getDslContext()
+                            .deleteFrom(tfp)
+                            .where(tfpFid.eq(genFoiId)),
+                    LINK_TABLE);
             LOGGER.debug("Unlinked {} projects from Feature {}", unlinked, genFoiId);
-            Result<Record1<Object>> projectIds = jpm.getDslContext()
-                    .select(tlpPid)
-                    .from(tlp)
-                    .where(tlpLid.eq(locationId))
-                    .fetch();
+            Result<Record1<Object>> projectIds = jpm.timeFetch(
+                    jpm.getDslContext()
+                            .select(tlpPid)
+                            .from(tlp)
+                            .where(tlpLid.eq(locationId)),
+                    LINK_TABLE);
             int linked = 0;
             for (org.jooq.Record pidTuple : projectIds) {
                 Object projectId = getFieldOrNull(pidTuple, tlpPid);
-                jpm.getDslContext()
-                        .insertInto(tfp)
-                        .columns(tfpFid, tfpPid)
-                        .values(genFoiId, projectId)
-                        .execute();
+                jpm.timeExecute(
+                        jpm.getDslContext()
+                                .insertInto(tfp)
+                                .columns(tfpFid, tfpPid)
+                                .values(genFoiId, projectId),
+                        LINK_TABLE);
                 linked++;
             }
             LOGGER.debug("Linked {} projects from Feature {}", linked, genFoiId);

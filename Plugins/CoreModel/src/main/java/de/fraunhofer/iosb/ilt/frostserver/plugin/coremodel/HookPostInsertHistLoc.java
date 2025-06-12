@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -64,12 +66,21 @@ class HookPostInsertHistLoc implements HookPostInsert {
         // https://github.com/opengeospatial/sensorthings/issues/30
         // Check the time of the latest HistoricalLocation of our thing.
         // If this time is earlier than our time, set the Locations of our Thing to our Locations.
-        Record lastHistLocation = dslContext.select(Collections.emptyList()).from(thl).where(((TableField) thl.getThingId()).eq(thingId).and(thl.time.gt(newTime))).orderBy(thl.time.desc()).limit(1).fetchOne();
+        Record lastHistLocation = pm.timeFetchOne(
+                dslContext.select(Collections.emptyList())
+                        .from(thl)
+                        .where(((TableField) thl.getThingId()).eq(thingId)
+                                .and(thl.time.gt(newTime)))
+                        .orderBy(thl.time.desc())
+                        .limit(1),
+                histLoc.getEntityType().entityName);
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
             TableImpThingsLocations qtl = tc.getTableForClass(TableImpThingsLocations.class);
-            long count = dslContext.delete(qtl).where(((TableField) qtl.getThingId()).eq(thingId)).execute();
+            long count = pm.timeExecute(
+                    dslContext.delete(qtl).where(((TableField) qtl.getThingId()).eq(thingId)),
+                    LINK_TABLE);
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
             // Link new locations to Thing.
             for (Entity l : histLoc.getProperty(npLocations)) {
@@ -77,7 +88,9 @@ class HookPostInsertHistLoc implements HookPostInsert {
                     throw new NoSuchEntityException("Location with no id.");
                 }
                 Object locationId = l.getPrimaryKeyValues().get(0);
-                dslContext.insertInto(qtl).set((TableField) qtl.getThingId(), thingId).set(qtl.getLocationId(), locationId).execute();
+                pm.timeExecute(
+                        dslContext.insertInto(qtl).set((TableField) qtl.getThingId(), thingId).set(qtl.getLocationId(), locationId),
+                        LINK_TABLE);
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
             }
         }

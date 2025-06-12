@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
@@ -104,11 +106,12 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
                     .from(linkTable)
                     .where(sourceLinkField.equal(targetId));
         }
-        dslContext.insertInto(linkTable)
-                .set(sourceLinkField, sourceId)
-                .set(targetLinkField, targetId)
-                .set(orderField, orderValue)
-                .execute();
+        pm.timeExecute(
+                dslContext.insertInto(linkTable)
+                        .set(sourceLinkField, sourceId)
+                        .set(targetLinkField, targetId)
+                        .set(orderField, orderValue),
+                LINK_TABLE);
     }
 
     @Override
@@ -121,24 +124,27 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
         final var sourceCondition = sourceLinkField.eq(source.getPrimaryKeyValues().get(0));
         final var targetCondition = targetLinkField.eq(target.getPrimaryKeyValues().get(0));
         final DSLContext dslContext = pm.getDslContext();
-        int deletedOrderIdx = dslContext.deleteFrom(linkTable)
-                .where(sourceCondition.and(targetCondition))
-                .limit(1)
-                .returning(orderField)
-                .execute();
+        int deletedOrderIdx = pm.timeExecute(
+                dslContext.deleteFrom(linkTable)
+                        .where(sourceCondition.and(targetCondition))
+                        .limit(1)
+                        .returning(orderField),
+                LINK_TABLE);
         int updated;
         if (orderOnSource) {
-            updated = dslContext.update(linkTable)
-                    .set(orderField, orderField.sub(1))
-                    .where(sourceCondition)
-                    .and(orderField.gt(deletedOrderIdx))
-                    .execute();
+            updated = pm.timeExecute(
+                    dslContext.update(linkTable)
+                            .set(orderField, orderField.sub(1))
+                            .where(sourceCondition)
+                            .and(orderField.gt(deletedOrderIdx)),
+                    LINK_TABLE);
         } else {
-            updated = dslContext.update(linkTable)
-                    .set(orderField, orderField.sub(1))
-                    .where(targetCondition)
-                    .and(orderField.gt(deletedOrderIdx))
-                    .execute();
+            updated = pm.timeExecute(
+                    dslContext.update(linkTable)
+                            .set(orderField, orderField.sub(1))
+                            .where(targetCondition)
+                            .and(orderField.gt(deletedOrderIdx)),
+                    LINK_TABLE);
         }
         LOGGER.trace("Updated {} order entries", updated);
     }

@@ -166,11 +166,12 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
 
         // Delete references to the FoI in the Locations table.
         TableImpLocations tLoc = getTables().getTableForClass(TableImpLocations.class);
-        pm.getDslContext()
-                .update(tLoc)
-                .setNull(tLoc.getGenFoiId())
-                .where(((TableField) tLoc.getGenFoiId()).eq(entityId.get(0)))
-                .execute();
+        pm.timeExecute(
+                pm.getDslContext()
+                        .update(tLoc)
+                        .setNull(tLoc.getGenFoiId())
+                        .where(((TableField) tLoc.getGenFoiId()).eq(entityId.get(0))),
+                pluginCoreModel.etLocation.entityName);
     }
 
     @Override

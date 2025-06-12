@@ -45,8 +45,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.CountMode;
-import io.prometheus.metrics.core.metrics.Histogram;
-import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +53,6 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
-import org.jooq.conf.ParamType;
-import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,13 +85,6 @@ public class ResultBuilder implements ResourcePathVisitor {
      */
     private String entityName;
 
-    private static final Histogram QUERY_DURATION = Histogram.builder()
-            .name("sql_query_duration_seconds")
-            .help("SQL query execution time in seconds")
-            .unit(Unit.SECONDS)
-            .labelNames("EntityType")
-            .register();
-
     /**
      *
      * @param pm The persistence manager.
@@ -110,7 +99,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         this.path = path;
         this.staQuery = query;
         this.sqlQueryBuilder = sqlQueryBuilder;
-        this.sqlQuery = sqlQueryBuilder.buildSelect();
+        this.sqlQuery = pm.setTimeout(sqlQueryBuilder.buildSelect());
         this.dataSize = dataSize;
         final CoreSettings coreSettings = pm.getCoreSettings();
         this.persistenceSettings = coreSettings.getPersistenceSettings();
@@ -147,7 +136,7 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        Result<Record> results = sqlQuery.fetch();
+        Result<Record> results = pm.timeFetch(sqlQuery, entityName);
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
         }
@@ -246,52 +235,21 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
     }
 
-    private <R extends Record> Cursor<R> timeQuery(ResultQuery<R> query) {
-        if (persistenceSettings.isTimeoutQueries()) {
-            query.queryTimeout(persistenceSettings.getQueryTimeout());
-        }
-        if (!persistenceSettings.isLogSlowQueries()) {
-            return query.fetchLazy();
-        }
-        long start = System.currentTimeMillis();
-        Cursor<R> result;
-        try (var timer = QUERY_DURATION.labelValues(path.getMainElementType().entityName).startTimer()) {
-            result = query.fetchLazy();
-        } catch (DataAccessException exc) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.info("Failed to run query:\n{}", query.getSQL(ParamType.INLINED));
-            }
-            throw new IllegalStateException("Failed to run query: " + exc.getMessage());
-        }
-        long end = System.currentTimeMillis();
-        long duration = end - start;
-        if (LOGGER.isInfoEnabled() && duration > persistenceSettings.getSlowQueryThreshold()) {
-            LOGGER.info("Slow Query executed in {} ms:\n{}", duration, query.getSQL(ParamType.INLINED));
-        }
-        return result;
-    }
-
     private int timeCountQueryRecord(ResultQuery<Record> query) {
-        try (Cursor<Record> countCursor = timeQuery(query)) {
-            return countCursor
-                    .fetchNext()
-                    .get(0, Integer.class);
-        }
+        return pm.timeExecution(query::fetchOne, query, path.getMainElementType().entityName)
+                .get(0, Integer.class);
     }
 
     private int timeCountQuery(ResultQuery<Record1<Integer>> query) {
-        try (Cursor<Record1<Integer>> countCursor = timeQuery(query)) {
-            return countCursor
-                    .fetchNext()
-                    .component1();
-        }
+        return pm.timeExecution(query::fetchOne, query, path.getMainElementType().entityName)
+                .component1();
     }
 
     @Override
     public void visit(PathElementEntitySet element) {
         final EntitySet entitySet;
         if (staQuery.getTopOrDefault() > 0) {
-            final Cursor<Record> results = timeQuery(sqlQuery);
+            final Cursor<Record> results = pm.timeExecution(sqlQuery::fetchLazy, sqlQuery, path.getMainElementType().entityName);
             entitySet = sqlQueryBuilder
                     .getQueryState()
                     .createSetFromRecords(results, this);

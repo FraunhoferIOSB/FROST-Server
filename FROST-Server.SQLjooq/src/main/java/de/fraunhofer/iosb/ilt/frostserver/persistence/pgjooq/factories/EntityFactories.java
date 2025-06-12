@@ -179,11 +179,11 @@ public class EntityFactories {
         }
 
         DSLContext dslContext = pm.getDslContext();
-        Integer count = dslContext.selectCount()
-                .from(table)
-                .where(where)
-                .fetchOne()
-                .component1();
+        Integer count = pm.timeFetchOne(
+                dslContext.selectCount()
+                        .from(table)
+                        .where(where),
+                type.entityName).component1();
 
         if (count > 1) {
             LOGGER.error("More than one instance of {} with id {}.", type, entityId);

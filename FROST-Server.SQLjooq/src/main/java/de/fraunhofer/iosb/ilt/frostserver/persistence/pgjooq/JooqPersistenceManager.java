@@ -38,16 +38,25 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
+import org.jooq.AttachableQueryPart;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
+import org.jooq.Result;
+import org.jooq.ResultQuery;
 import org.jooq.Table;
+import org.jooq.exception.DataAccessException;
 
 /**
  *
  * @author hylke
  */
 public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManager {
+
+    /**
+     * Constant for logging access to link tables.
+     */
+    public static final String LINK_TABLE = "LinkTable";
 
     String checkForUpgrades(String liquibaseChangelogFilename, Map<String, Object> params);
 
@@ -70,6 +79,26 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
     Entity get(EntityType entityType, PkValue id, Query query);
 
     ConnectionUtils.ConnectionWrapper getConnectionProvider();
+
+    public <R extends org.jooq.Record> ResultQuery<R> setTimeout(ResultQuery<R> query);
+
+    public default int timeExecute(org.jooq.Query query, String loggedEntityName) {
+        return timeExecution(query::execute, query, loggedEntityName);
+    }
+
+    public default <R extends org.jooq.Record> Result<R> timeFetch(ResultQuery<R> query, String loggedEntityName) {
+        return timeExecution(query::fetch, query, loggedEntityName);
+    }
+
+    public default <R extends org.jooq.Record> R timeFetchOne(ResultQuery<R> query, String loggedEntityName) {
+        return timeExecution(query::fetchOne, query, loggedEntityName);
+    }
+
+    public default <R extends org.jooq.Record> R timeFetchAny(ResultQuery<R> query, String loggedEntityName) {
+        return timeExecution(query::fetchAny, query, loggedEntityName);
+    }
+
+    public <V> V timeExecution(QueryExecution<V> task, AttachableQueryPart loggableQuery, String loggedEntityName);
 
     DataType<?> getDataTypeFor(String type);
 
@@ -112,5 +141,10 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     public default boolean hasDistinctOn() {
         return true;
+    }
+
+    public static interface QueryExecution<V> {
+
+        V call() throws DataAccessException;
     }
 }

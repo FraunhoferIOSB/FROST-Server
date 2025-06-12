@@ -41,7 +41,16 @@ class HookPostDeleteLocation implements HookPostDelete {
         // Also postDelete all historicalLocations that no longer reference any location
         TableImpHistLocations thl = tables.getTableForClass(TableImpHistLocations.class);
         TableImpLocationsHistLocations tlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
-        int count = pm.getDslContext().delete(thl).where(((TableField) thl.getId()).in(DSL.select(thl.getId()).from(thl).leftJoin(tlhl).on(((TableField) thl.getId()).eq(tlhl.getHistLocationId())).where(tlhl.getLocationId().isNull()))).execute();
+        int count = pm.timeExecute(
+                pm.getDslContext()
+                        .delete(thl)
+                        .where(((TableField) thl.getId()).in(
+                                DSL.select(thl.getId())
+                                        .from(thl)
+                                        .leftJoin(tlhl)
+                                        .on(((TableField) thl.getId()).eq(tlhl.getHistLocationId()))
+                                        .where(tlhl.getLocationId().isNull()))),
+                "HistoricalLocation");
         LOGGER.debug("Deleted {} HistoricalLocations", count);
     }
 

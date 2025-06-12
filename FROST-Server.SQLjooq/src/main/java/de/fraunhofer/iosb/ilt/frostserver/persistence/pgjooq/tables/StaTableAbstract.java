@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.POST_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
@@ -312,10 +313,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         DSLContext dslContext = pm.getDslContext();
         final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getSelectFields(new HashSet<>());
         final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
-        Record result = dslContext.insertInto(thisTable)
-                .set(insertFields)
-                .returningResult(selectFields)
-                .fetchAny();
+        Record result = pm.timeFetchAny(
+                dslContext.insertInto(thisTable)
+                        .set(insertFields)
+                        .returningResult(selectFields),
+                thisTable.getEntityType().entityName);
         LOGGER.debug("Inserted {} with id = {}.", entityType, result);
         if (result == null) {
             return null;
@@ -478,24 +480,27 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     public Record executeUpdate(JooqPersistenceManager pm, DSLContext dslContext, T thisTable, Map<Field, Object> updateFields, Condition where, Set<Field> selectFields) throws DataAccessException, IllegalStateException {
         try {
             if (pm.hasUpdateReturning()) {
-                return dslContext.update(thisTable)
-                        .set(updateFields)
-                        .where(where)
-                        .returningResult(selectFields)
-                        .fetchOne();
+                return pm.timeFetchOne(
+                        dslContext.update(thisTable)
+                                .set(updateFields)
+                                .where(where)
+                                .returningResult(selectFields),
+                        thisTable.getEntityType().entityName);
             } else {
-                int execute = dslContext.update(thisTable)
-                        .set(updateFields)
-                        .where(where)
-                        .execute();
+                int execute = pm.timeExecute(
+                        dslContext.update(thisTable)
+                                .set(updateFields)
+                                .where(where),
+                        LINK_TABLE);
                 if (execute != 1) {
                     LOGGER.error("Updating {} with WHERE {} caused too many rows to change (more than one)!", getName(), where);
                     throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
                 }
-                return dslContext.select(selectFields)
-                        .from(thisTable)
-                        .where(where)
-                        .fetchOne();
+                return pm.timeFetchOne(
+                        dslContext.select(selectFields)
+                                .from(thisTable)
+                                .where(where),
+                        LINK_TABLE);
             }
         } catch (TooManyRowsException e) {
             LOGGER.error("Updating {} with WHERE {} caused too many rows to change (more than one)!", getName(), where);
@@ -517,10 +522,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         final T thisTable = getThis();
-        long count = pm.getDslContext()
-                .delete(thisTable)
-                .where(where)
-                .execute();
+        long count = pm.timeExecute(
+                pm.getDslContext()
+                        .delete(thisTable)
+                        .where(where),
+                getEntityType().entityName);
         if (count == 0) {
             throw new NoSuchEntityException("Entity of type " + getEntityType() + " with id " + entityId + " not found.");
         } else {

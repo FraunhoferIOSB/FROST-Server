@@ -85,6 +85,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
@@ -98,6 +100,7 @@ import net.time4j.Moment;
 import net.time4j.format.expert.Iso8601Format;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.jooq.AttachableQueryPart;
 import org.jooq.DataType;
 import org.jooq.Delete;
 import org.jooq.Meta;
@@ -107,6 +110,8 @@ import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.Schema;
 import org.jooq.Table;
+import org.jooq.conf.ParamType;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
@@ -148,6 +153,7 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
 
     private CoreSettings settings;
     private PersistenceSettings persistenceSettings;
+    private boolean metricsEnabled;
     private ConnectionWrapper connectionProvider;
     private String connectionName;
     private String schemaPriority;
@@ -159,6 +165,13 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
      */
     private DataSize dataSize;
 
+    private static final Histogram QUERY_DURATION = Histogram.builder()
+            .name("sql_query_duration_seconds")
+            .help("SQL query execution time in seconds")
+            .unit(Unit.SECONDS)
+            .labelNames("EntityType")
+            .register();
+
     private static TableCollection getTableCollection(CoreSettings settings) {
         return tableCollections.computeIfAbsent(settings, t -> new TableCollection().setModelRegistry(t.getModelRegistry()));
     }
@@ -168,6 +181,7 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
         this.settings = settings;
         tableCollection = getTableCollection(settings);
         persistenceSettings = settings.getPersistenceSettings();
+        metricsEnabled = settings.getMetricsSettings().isEnabled();
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         final Settings customSettings = persistenceSettings.getCustomSettings();
         final String connectionUrl = customSettings.get(TAG_DB_URL, ConnectionUtils.class);
@@ -218,6 +232,40 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
         return connectionProvider;
     }
 
+    public <R extends Record> ResultQuery<R> setTimeout(ResultQuery<R> query) {
+        if (persistenceSettings.isTimeoutQueries()) {
+            query.queryTimeout(persistenceSettings.getQueryTimeout());
+        }
+        return query;
+    }
+
+    @Override
+    public <V> V timeExecution(QueryExecution<V> task, AttachableQueryPart loggableQuery, String loggedEntityName) {
+        long start = System.currentTimeMillis();
+        V result;
+        try {
+            if (metricsEnabled) {
+                try (var timer = QUERY_DURATION.labelValues(loggedEntityName).startTimer()) {
+                    result = task.call();
+                }
+            } else {
+                result = task.call();
+            }
+        } catch (DataAccessException exc) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.info("Failed to run query:\n{}", loggableQuery.getSQL(ParamType.INLINED));
+            }
+            throw new IllegalStateException("Failed to run query: " + exc.getMessage());
+        }
+
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+        if (persistenceSettings.isLogSlowQueries() && LOGGER.isInfoEnabled() && duration > persistenceSettings.getSlowQueryThreshold()) {
+            LOGGER.info("Slow Query executed in {} ms:\n{}", duration, loggableQuery.getSQL(ParamType.INLINED));
+        }
+        return result;
+    }
+
     @Override
     public boolean validatePath(ResourcePath path) {
         init();
@@ -248,7 +296,8 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
-        Integer count = query.fetchOne().component1();
+        Integer count = timeFetchOne(query, path.getMainElementType().entityName)
+                .component1();
         return count == 1;
     }
 
@@ -278,8 +327,7 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
                 .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
-
-        Record result = sqlQuery.fetchAny();
+        Record result = timeFetchAny(sqlQuery, entityType.entityName);
         if (result == null) {
             return null;
         }
@@ -437,7 +485,7 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
 
         Delete sqlDelete = psb.buildDelete((PathElementEntitySet) path.getLastElement());
 
-        long rowCount = sqlDelete.execute();
+        long rowCount = timeExecute(sqlDelete, path.getMainElementType().entityName);
         LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);
     }
 

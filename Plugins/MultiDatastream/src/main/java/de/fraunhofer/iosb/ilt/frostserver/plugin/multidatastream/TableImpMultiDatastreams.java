@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -345,14 +346,15 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
             // Must happen first, since the links in the link table would be gone otherwise.
             TableImpMultiDatastreams tMd = tables.getTableForClass(TableImpMultiDatastreams.class);
             TableImpMultiDatastreamsObsProperties tMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
-            long count = pm.getDslContext()
-                    .delete(tMd)
-                    .where(
-                            ((TableField) tMd.getId()).in(
-                                    DSL.select(tMdOp.getMultiDatastreamId())
-                                            .from(tMdOp)
-                                            .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId.get(0)))))
-                    .execute();
+            long count = pm.timeExecute(
+                    pm.getDslContext()
+                            .delete(tMd)
+                            .where(
+                                    ((TableField) tMd.getId()).in(
+                                            DSL.select(tMdOp.getMultiDatastreamId())
+                                                    .from(tMdOp)
+                                                    .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId.get(0))))),
+                    pluginMultiDatastream.etMultiDatastream.entityName);
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
         // On insert Observation
@@ -372,11 +374,12 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 List list = (List) result;
                 Object mdsId = mds.getPrimaryKeyValues().get(0);
                 TableImpMultiDatastreamsObsProperties tableMdsOps = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
-                Integer count = pm.getDslContext()
-                        .selectCount()
-                        .from(tableMdsOps)
-                        .where(((TableField) tableMdsOps.getMultiDatastreamId()).eq(mdsId))
-                        .fetchOne().component1();
+                Integer count = pm.timeFetchOne(
+                        pm.getDslContext()
+                                .selectCount()
+                                .from(tableMdsOps)
+                                .where(((TableField) tableMdsOps.getMultiDatastreamId()).eq(mdsId)),
+                        LINK_TABLE).component1();
                 if (count != list.size()) {
                     throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
                 }

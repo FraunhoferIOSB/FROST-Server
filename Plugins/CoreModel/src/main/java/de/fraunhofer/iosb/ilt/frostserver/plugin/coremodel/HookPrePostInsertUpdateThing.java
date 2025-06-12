@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
+
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -113,7 +115,10 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
             DSLContext dslContext = pm.getDslContext();
             StaTable<?> ttl = tables.getTableForName(ttlName);
             // Unlink old Locations from Thing.
-            long count = dslContext.delete(ttl).where(((TableField) ttl.field(ttlThingIdName)).eq(thingId)).execute();
+            long count = pm.timeExecute(
+                    dslContext.delete(ttl)
+                            .where(((TableField) ttl.field(ttlThingIdName)).eq(thingId)),
+                    LINK_TABLE);
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
         }
     }
@@ -144,11 +149,12 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
         if (locations != null && !locations.isEmpty()) {
             // Insert a new HL into the DB
             StaMainTable<?> thl = tables.getTableForType(etHistLoc);
-            Object histLocationId = dslContext.insertInto(thl)
-                    .set((TableField) thl.field(thlTimeName), Moment.nowInSystemTime())
-                    .set((TableField) thl.field(ttlThingIdName), thingId)
-                    .returningResult(thl.getPkFields().get(0))
-                    .fetchOne(0);
+            Object histLocationId = pm.timeFetchOne(
+                    dslContext.insertInto(thl)
+                            .set((TableField) thl.field(thlTimeName), Moment.nowInSystemTime())
+                            .set((TableField) thl.field(ttlThingIdName), thingId)
+                            .returningResult(thl.getPkFields().get(0)),
+                    LINK_TABLE).get(0);
             LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
             // Link the locations to the new HL
@@ -158,10 +164,11 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
                 if (locationId == null) {
                     LOGGER.error("Location with no ID");
                 }
-                dslContext.insertInto(tlhl)
-                        .set((TableField) tlhl.field(tlhlHistLocationIdName), histLocationId)
-                        .set((TableField) tlhl.field(ttlLocationIdName), locationId)
-                        .execute();
+                pm.timeExecute(
+                        dslContext.insertInto(tlhl)
+                                .set((TableField) tlhl.field(tlhlHistLocationIdName), histLocationId)
+                                .set((TableField) tlhl.field(ttlLocationIdName), locationId),
+                        LINK_TABLE);
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
             }
 

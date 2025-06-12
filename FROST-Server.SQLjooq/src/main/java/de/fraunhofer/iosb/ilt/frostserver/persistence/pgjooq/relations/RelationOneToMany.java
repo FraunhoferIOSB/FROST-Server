@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -163,10 +164,12 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
-        int count = pm.getDslContext().update(target)
-                .set(targetFieldAccessor.getField(target), sourceId)
-                .where(target.getPkFields().get(0).eq(targetId))
-                .execute();
+        int count = pm.timeExecute(
+                pm.getDslContext().update(target)
+                        .set(targetFieldAccessor.getField(target), sourceId)
+                        .where(target.getPkFields().get(0).eq(targetId)),
+                LINK_TABLE);
+
         if (count != 1) {
             LOGGER.error("Executing query did not result in an update!");
         }

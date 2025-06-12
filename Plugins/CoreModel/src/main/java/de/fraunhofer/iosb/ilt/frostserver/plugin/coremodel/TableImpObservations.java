@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -407,7 +408,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
     public Entity generateFeatureOfInterest(JooqPersistenceManager pm, ResultQuery<Record3<Object, Object, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
         TableImpLocations ql = getTables().getTableForClass(TableImpLocations.class);
-        Result<Record3<Object, Object, String>> tuples = locationQuery.fetch();
+        Result<Record3<Object, Object, String>> tuples = pm.timeFetch(locationQuery, pluginCoreModel.etLocation.entityName);
         if (tuples.isEmpty()) {
             // No locations found.
             return null;
@@ -454,7 +455,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                     .from(ql)
                     .where(((TableField) ql.getId()).eq(locationId));
         }
-        Record tuple = query2.fetchOne();
+        Record tuple = pm.timeFetchOne(query2, ql.getEntityType().entityName);
         if (tuple == null) {
             // Can not generate foi from Thing with no locations.
             // Should not happen, since the query succeeded just before.
@@ -478,7 +479,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         ModelRegistry mr = pm.getCoreSettings().getModelRegistry();
         EntityType etProject = mr.getEntityTypeForName("Project", true);
         if (etProject != null) {
-            linkProjects(dslContext, locationId, etProject, foi);
+            linkProjects(pm, dslContext, locationId, etProject, foi);
         }
 
         // Switch to ADMIN user
@@ -492,15 +493,16 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         }
 
         Object foiId = foi.getPrimaryKeyValues().get(0);
-        dslContext.update(ql)
-                .set(((TableField) ql.getGenFoiId()), foiId)
-                .where(((TableField) ql.getId()).eq(locationId))
-                .execute();
+        pm.timeExecute(
+                dslContext.update(ql)
+                        .set(((TableField) ql.getGenFoiId()), foiId)
+                        .where(((TableField) ql.getId()).eq(locationId)),
+                pluginCoreModel.etLocation.entityName);
         LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         return foi;
     }
 
-    public void linkProjects(final DSLContext dslContext, Object locationId, EntityType etProject, Entity foi) {
+    public void linkProjects(JooqPersistenceManager pm, DSLContext dslContext, Object locationId, EntityType etProject, Entity foi) {
         try {
             StaTable tlp = getTables().getTableForName("LOCATION_PROJECTS");
             NavigationPropertyMain.NavigationPropertyEntitySet npFeatureProjects = pluginCoreModel.etFeatureOfInterest.getNavigationPropertyEntitySet("Projects");
@@ -515,10 +517,11 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 LOGGER.error("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS does not have columns PROJECT_ID and LOCATION_ID.");
                 return;
             }
-            Result<Record1<Object>> projectIds = dslContext.select(fPid)
-                    .from(tlp)
-                    .where(fLid.eq(locationId))
-                    .fetch();
+            Result<Record1<Object>> projectIds = pm.timeFetch(
+                    dslContext.select(fPid)
+                            .from(tlp)
+                            .where(fLid.eq(locationId)),
+                    LINK_TABLE);
             for (Record pidTuple : projectIds) {
                 Object projectId = getFieldOrNull(pidTuple, fPid);
                 projects.add(new DefaultEntity(etProject).setPrimaryKeyValues(PkValue.of(projectId)));

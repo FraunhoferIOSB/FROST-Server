@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -196,9 +197,10 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         final PkValue primaryKeyValues = source.getPrimaryKeyValues();
 
         final Object sourceId = primaryKeyValues.get(0);
-        int count = pm.getDslContext().deleteFrom(linkTable)
-                .where(sourceLinkFieldAcc.getField(linkTable).eq(sourceId))
-                .execute();
+        int count = pm.timeExecute(
+                pm.getDslContext().deleteFrom(linkTable)
+                        .where(sourceLinkFieldAcc.getField(linkTable).eq(sourceId)),
+                LINK_TABLE);
         LOGGER.debug("Removed {} relations from {}", count, linkTable.getName());
         for (Entity targetEntity : targets) {
             link(pm, sourceId, targetEntity.getPrimaryKeyValues().get(0));
@@ -212,17 +214,19 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     protected void link(JooqPersistenceManager pm, Object sourceId, Object targetId) {
-        pm.getDslContext().insertInto(linkTable)
-                .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
-                .set(targetLinkFieldAcc.getField(linkTable), targetId)
-                .onConflictDoNothing()
-                .execute();
+        pm.timeExecute(
+                pm.getDslContext().insertInto(linkTable)
+                        .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
+                        .set(targetLinkFieldAcc.getField(linkTable), targetId)
+                        .onConflictDoNothing(),
+                LINK_TABLE);
         if (symmetrical && !sourceId.equals(targetId)) {
-            pm.getDslContext().insertInto(linkTable)
-                    .set(sourceLinkFieldAcc.getField(linkTable), targetId)
-                    .set(targetLinkFieldAcc.getField(linkTable), sourceId)
-                    .onConflictDoNothing()
-                    .execute();
+            pm.timeExecute(
+                    pm.getDslContext().insertInto(linkTable)
+                            .set(sourceLinkFieldAcc.getField(linkTable), targetId)
+                            .set(targetLinkFieldAcc.getField(linkTable), sourceId)
+                            .onConflictDoNothing(),
+                    LINK_TABLE);
         }
     }
 
@@ -232,17 +236,19 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
         final Object targetId = target.getPrimaryKeyValues().get(0);
         final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(sourceId);
         final Condition targetCondition = targetLinkFieldAcc.getField(linkTable).eq(targetId);
-        pm.getDslContext().deleteFrom(linkTable)
-                .where(sourceCondition.and(targetCondition))
-                .limit(1)
-                .execute();
+        pm.timeExecute(
+                pm.getDslContext().deleteFrom(linkTable)
+                        .where(sourceCondition.and(targetCondition))
+                        .limit(1),
+                LINK_TABLE);
         if (symmetrical) {
             final Condition sourceConditionInv = sourceLinkFieldAcc.getField(linkTable).eq(targetId);
             final Condition targetConditionInv = targetLinkFieldAcc.getField(linkTable).eq(sourceId);
-            pm.getDslContext().deleteFrom(linkTable)
-                    .where(sourceConditionInv.and(targetConditionInv))
-                    .limit(1)
-                    .execute();
+            pm.timeExecute(
+                    pm.getDslContext().deleteFrom(linkTable)
+                            .where(sourceConditionInv.and(targetConditionInv))
+                            .limit(1),
+                    LINK_TABLE);
         }
     }
 
