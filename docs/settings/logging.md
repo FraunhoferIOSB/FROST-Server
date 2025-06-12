@@ -69,3 +69,64 @@ If both `useServlet` and `useInternalHttpServer` are false, then metrics gatheri
 * **metrics.endpointPort:**  
   The port to use for the separate HTTP service that exposes the metrics. Default: `9400`.
 
+## Gathered metrics
+
+Besides these FROST-Server specific metrics, the JVM metrics are also gathered, as described in https://prometheus.github.io/client_java/instrumentation/jvm/
+
+### HTTP Pods
+
+One HTTP request may result in multiple service requests, which in turn may result in may SQL queries.
+
+- **http_request_duration_seconds** (histogram) HTTP request service time in seconds. Split along the HTTP Method used. (GET, PATCH, POST, ...)
+  - **http_request_duration_seconds_bucket** (counter) Cumulative counters for the observation buckets.
+  - **http_request_duration_seconds_count** (counter) Count of events that have been observed for the histogram metric.
+  - **http_request_duration_seconds_sum** (counter) Total sum of all observed values for the histogram metric.
+
+- **service_request_duration_seconds** (histogram) Service request service time in seconds. Split along the service request type. (read, create, getCapabilities)
+  - **service_request_duration_seconds_bucket** (counter) Cumulative counters for the observation buckets.
+  - **service_request_duration_seconds_count** (counter) Count of events that have been observed for the histogram metric.
+  - **service_request_duration_seconds_sum** (counter) Total sum of all observed values for the histogram metric.
+
+- **sql_query_duration_seconds** (histogram) SQL query execution time in seconds. Split along the entity type.
+  - **sql_query_duration_seconds_bucket** (counter) Cumulative counters for the observation buckets.
+  - **sql_query_duration_seconds_count** (counter) Count of events that have been observed for the histogram metric.
+  - **sql_query_duration_seconds_sum** (counter) Total sum of all observed values for the histogram metric.
+
+### MQTT Pods
+
+The MQTT Manager is the part of the FROST-MQTT component that sits between the Data Model and the MQTT Broker.
+It tracks which changes are made to the data, and determines which MQTT Topics need to be notified of these changes.
+
+- **mqtt_manager_queue_fill** (gauge)  Number of items in the MQTT Manager Queue. Split into _Create_, _Changed_.
+  - _Create_: Queue for entities being created over MQTT.
+  - _Changed_: Queue for entities that have changed and may require messages to be sent to users.
+- **mqtt_manager_queue_fill_max** (gauge) Maximum number of items in each MQTT Manager Queue since last scrape call.
+- **mqtt_manager_queue_overruns_total** (gauge) Total number of actions dropped because a queue was full. If this increases, the queue is too small, the worker count too low, or the system is overloaded.
+- **mqtt_manager_topics** (gauge) Number of distinct topics that have subscriptions.
+- **mqtt_manager_worker_status** (gauge) Overview of what workers do Overview of what workers do. Split along two dimensions: _Waiting_, _Working_, _Dead_ and _Create_, _Changed_.
+  - _Waiting_: Number of workers that are waiting for work.
+  - _Working_: Number of workers that are actively working.
+  - _Dead_: Number of workers that have not responded for several seconds. If this is non-zero ther is a problem.
+
+Moquette is the MQTT broker that distributes messages to the clients that listen to the topics those messages are sent to.
+
+- **moquette_open_sessions** (gauge) The number of open sessions in the broker.
+- **moquette_publishes_total** (counter) The number of messages publised to the broker.
+- **moquette_session_messages_total** (counter) The number of messages publised by the broker, per Session Queue. Split along two dimensions: The session queue and the QualityOfService level of the message. The number of Session Queues equals the number of CPUs detected.
+- **moquette_session_queue_fill** (gauge) Number of items in each Session Queue.
+- **moquette_session_queue_fill_max** (gauge) Maximum number of items in each Session Queue since the last scrape call.
+- **moquette_session_queue_overruns_total** (counter) Total number of actions dropped because the session queue was full. If this increases, the queue is too small, or the system is overloaded.
+
+
+### Message Bus
+
+- **message_bus_queue_fill** (gauge) Number of items in the message bus queue. Split into _Send_ and _Receive_ sub-gauges.
+  - _Send_: The outgoing queue, items being sent over the bus.
+  - _Receive_: The incoming queue, items being received over the bus.
+- **message_bus_queue_fill_max** (gauge) Maximum number of items in the Queue since last scrape. Also split into _Send_ and _Receive_.
+- **message_bus_queue_overruns_total** (gauge) Total number of messages that were dropped because the queue was full. If this increases, either the queue is too small, or the number of workers is too low. Also split into _Send_ and _Receive_.
+- **message_bus_worker_status** (gauge) Overview of what workers do. Split along two dimensions: _Waiting_, _Working_, _Dead_ and _Send_, _Receive_.
+  - _Waiting_: Number of workers that are waiting for work.
+  - _Working_: Number of workers that are actively working.
+  - _Dead_: Number of workers that have not responded for several seconds. If this is non-zero ther is a problem.
+
