@@ -403,8 +403,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
         public static final String MESSAGE = "RecvQueue: {} [{}, {}, {}] SendQueue: {} [{}, {}, {}] ";
-        public static final String SEND = "Send";
-        public static final String RECEIVE = "Receive";
+        public static final String LABEL_QUEUE_NAME = "queue_name";
+        public static final String LABEL_SEND = "Send";
+        public static final String LABEL_RECEIVE = "Receive";
         public static final String DEAD = "Dead";
         public static final String WORKING = "Working";
         public static final String WAITING = "Waiting";
@@ -415,8 +416,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         private int recvQueueCountMax = 0;
         private int sendQueueCountMax = 0;
 
-        private boolean metrics;
-        private Counter queueOverrunCounter;
+        private final boolean metrics;
         private CounterDataPoint queueOverrunRecv;
         private CounterDataPoint queueOverrunSend;
 
@@ -435,21 +435,21 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         private void initMetrics(MqttMessageBus parent) {
             GaugeWithCallback.builder()
                     .name("message_bus_queue_fill")
-                    .help("Number of items in the Queue")
+                    .help("Fill level of the Queue (0 - 1)")
                     .labelNames("queue_name")
                     .callback(cb -> {
-                        cb.call((1.0 * (Integer) status[0] / parent.recvQueueSize), RECEIVE);
-                        cb.call((1.0 * (Integer) status[4] / parent.sendQueueSize), SEND);
+                        cb.call((1.0 * (Integer) status[0] / parent.recvQueueSize), LABEL_RECEIVE);
+                        cb.call((1.0 * (Integer) status[4] / parent.sendQueueSize), LABEL_SEND);
                     })
                     .register();
             GaugeWithCallback.builder()
                     .name("message_bus_queue_fill_max")
-                    .help("Maximum number of items in the Queue since last call")
+                    .help("Maximum fill level of the Queue since last call (0 - 1)")
                     .labelNames("queue_name")
                     .callback(cb -> {
-                        cb.call(recvQueueCountMax, RECEIVE);
+                        cb.call(1.0 * recvQueueCountMax / parent.recvQueueSize, LABEL_RECEIVE);
                         recvQueueCountMax = 0;
-                        cb.call(sendQueueCountMax, SEND);
+                        cb.call(1.0 * sendQueueCountMax / parent.sendQueueSize, LABEL_SEND);
                         sendQueueCountMax = 0;
                     })
                     .register();
@@ -459,24 +459,24 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .labelNames("queue_name", "worker_status")
                     .callback(cb -> {
                         process();
-                        cb.call((Integer) status[1], RECEIVE, WAITING);
-                        cb.call((Integer) status[2], RECEIVE, WORKING);
-                        cb.call((Integer) status[3], RECEIVE, DEAD);
-                        cb.call((Integer) status[5], SEND, WAITING);
-                        cb.call((Integer) status[6], SEND, WORKING);
-                        cb.call((Integer) status[7], SEND, DEAD);
+                        cb.call((Integer) status[1], LABEL_RECEIVE, WAITING);
+                        cb.call((Integer) status[2], LABEL_RECEIVE, WORKING);
+                        cb.call((Integer) status[3], LABEL_RECEIVE, DEAD);
+                        cb.call((Integer) status[5], LABEL_SEND, WAITING);
+                        cb.call((Integer) status[6], LABEL_SEND, WORKING);
+                        cb.call((Integer) status[7], LABEL_SEND, DEAD);
                     })
                     .register();
 
-            queueOverrunCounter = Counter.builder()
+            Counter queueOverrunCounter = Counter.builder()
                     .name("message_bus_queue_overruns")
                     .help("Number of items dropped because the queue was full")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .register();
-            queueOverrunCounter.initLabelValues(RECEIVE);
-            queueOverrunCounter.initLabelValues(SEND);
-            queueOverrunRecv = queueOverrunCounter.labelValues(RECEIVE);
-            queueOverrunSend = queueOverrunCounter.labelValues(SEND);
+            queueOverrunCounter.initLabelValues(LABEL_RECEIVE);
+            queueOverrunCounter.initLabelValues(LABEL_SEND);
+            queueOverrunRecv = queueOverrunCounter.labelValues(LABEL_RECEIVE);
+            queueOverrunSend = queueOverrunCounter.labelValues(LABEL_SEND);
         }
 
         @Override

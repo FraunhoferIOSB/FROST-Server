@@ -84,9 +84,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private MqttServer server;
 
-    private int entityChangedPoolSize;
     private int entityChangedQueueSize;
-    private int entityCreatePoolSize;
     private int entityCreateQueueSize;
 
     private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
@@ -130,9 +128,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             enabledMqtt = true;
             shutdown = false;
 
-            entityChangedPoolSize = mqttSettings.getSubscribeThreadPoolSize();
+            int entityChangedPoolSize = mqttSettings.getSubscribeThreadPoolSize();
+            int entityCreatePoolSize = mqttSettings.getCreateThreadPoolSize();
             entityChangedQueueSize = mqttSettings.getSubscribeMessageQueueSize();
-            entityCreatePoolSize = mqttSettings.getCreateThreadPoolSize();
             entityCreateQueueSize = mqttSettings.getCreateMessageQueueSize();
             logStatus = new LoggingStatus(this, this::checkWorkers, settings.getMetricsSettings().isEnabled());
 
@@ -380,7 +378,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         private void initMetrics(MqttManager parent) {
             GaugeWithCallback.builder()
                     .name("mqtt_manager_queue_fill")
-                    .help("Number of items in the Queue")
+                    .help("Fill level of the Queue (0 - 1)")
                     .labelNames("queue_name")
                     .callback(cb -> {
                         cb.call((1.0 * (Integer) status[0] / parent.entityChangedQueueSize), CHANGED);
@@ -389,12 +387,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     .register();
             GaugeWithCallback.builder()
                     .name("mqtt_manager_queue_fill_max")
-                    .help("Maximum number of items in the Queue since last call")
+                    .help("Maximum fill level of the Queue since last call (0 - 1)")
                     .labelNames("queue_name")
                     .callback(cb -> {
-                        cb.call(changedQueueCountMax, CHANGED);
+                        cb.call(1.0 * changedQueueCountMax / parent.entityChangedQueueSize, CHANGED);
                         changedQueueCountMax = 0;
-                        cb.call(createQueueCountMax, CREATE);
+                        cb.call(1.0 * createQueueCountMax / parent.entityCreateQueueSize, CREATE);
                         createQueueCountMax = 0;
                     })
                     .register();
