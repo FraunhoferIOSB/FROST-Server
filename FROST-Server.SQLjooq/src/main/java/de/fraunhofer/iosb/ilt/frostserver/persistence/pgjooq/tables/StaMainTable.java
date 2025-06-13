@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
@@ -37,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.List;
@@ -106,9 +106,9 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
 
     public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize);
 
-    public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
+    public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
 
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException;
 
     public void delete(JooqPersistenceManager pm, PkValue entityId) throws NoSuchEntityException;
 

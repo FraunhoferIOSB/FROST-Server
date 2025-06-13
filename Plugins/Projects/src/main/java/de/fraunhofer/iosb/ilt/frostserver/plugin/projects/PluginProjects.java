@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -40,7 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiData
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -190,7 +190,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 StaMainTable<?> tableLocations = jpm.getTableCollection().getTableForType(pluginCoreModel.etLocation);
                 tableLocations.registerHookPostUpdate(
                         11.1,
-                        (JooqPersistenceManager jpml, Entity entity, PkValue entityId, UpdateMode updateMode) -> relinkProjectsToFeature(jpml, entity));
+                        (JooqPersistenceManager jpml, Entity entity, PkValue entityId, EditFeatures updateMode) -> relinkProjectsToFeature(jpml, entity));
             }
         }
         fullyInitialised = true;

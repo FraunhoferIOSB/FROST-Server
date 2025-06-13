@@ -24,56 +24,118 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NE
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * The versions that FROST supports.
- *
- * @author scf
+ * The version definition.
  */
 public class Version {
 
-    private static final SyntheticPropertyRegistry spr = new SyntheticPropertyRegistry();
-    public static final String VERSION_STA_V10_NAME = "v1.0";
-    public static final String VERSION_STA_V11_NAME = "v1.1";
-    public static final Version V_1_0 = new Version(VERSION_STA_V10_NAME, spr, AT_IOT_COUNT, AT_IOT_ID, AT_IOT_SELF_LINK, AT_IOT_NEXT_LINK, AT_IOT_NAVIGATION_LINK);
-    public static final Version V_1_1 = new Version(VERSION_STA_V11_NAME, spr, AT_IOT_COUNT, AT_IOT_ID, AT_IOT_SELF_LINK, AT_IOT_NEXT_LINK, AT_IOT_NAVIGATION_LINK);
-
-    static {
-        spr.registerProperty(ModelRegistry.EP_SELFLINK);
-    }
+    public static final Version INTERNAL = builder()
+            .setUrlPart("int")
+            .setCountName(AT_IOT_COUNT)
+            .setIdName(AT_IOT_ID)
+            .setSelfLinkName(AT_IOT_SELF_LINK)
+            .setNextLinkName(AT_IOT_NEXT_LINK)
+            .setNavLinkName(AT_IOT_NAVIGATION_LINK)
+            .setCreateFeatures(EditFeatures.NONE)
+            .setUpdateFeatures(EditFeatures.NONE)
+            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .build();
 
     public final String urlPart;
     public final SyntheticPropertyRegistry syntheticPropertyRegistry;
-    public final Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
+    public final Map<CannedResponseType, CannedResponse> responses;
     public final String countName;
     public final String idName;
     public final String navLinkName;
     public final String nextLinkName;
     public final String selfLinkName;
+    public final EditFeatures createFeatures;
+    public final EditFeatures updateFeatures;
 
-    public Version(String urlPart, String countName, String idName, String navLinkName, String nextLinkName, String selfLinkName) {
-        this(urlPart, new SyntheticPropertyRegistry(), countName, idName, selfLinkName, nextLinkName, navLinkName);
+    public static class Builder {
+
+        private String urlPart;
+        private String countName;
+        private String idName;
+        private String navLinkName;
+        private String nextLinkName;
+        private String selfLinkName;
+        private EditFeatures createFeatures;
+        private EditFeatures updateFeatures;
+        private SyntheticPropertyRegistry spr = new SyntheticPropertyRegistry();
+        private Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
+
+        public Builder setUrlPart(String urlPart) {
+            this.urlPart = urlPart;
+            return this;
+        }
+
+        public Builder setSyntheticPropertyRegistry(SyntheticPropertyRegistry spr) {
+            this.spr = spr;
+            return this;
+        }
+
+        public Builder registerSytheticProperty(EntityPropertyMain property) {
+            spr.registerProperty(property);
+            return this;
+        }
+
+        public Builder registerSytheticProperty(String externalName, EntityPropertyMain property) {
+            spr.registerProperty(externalName, property);
+            return this;
+        }
+
+        public Builder addResponse(CannedResponseType type, CannedResponse response) {
+            responses.put(type, response);
+            return this;
+        }
+
+        public Builder setCountName(String countName) {
+            this.countName = countName;
+            return this;
+        }
+
+        public Builder setIdName(String idName) {
+            this.idName = idName;
+            return this;
+        }
+
+        public Builder setNavLinkName(String navLinkName) {
+            this.navLinkName = navLinkName;
+            return this;
+        }
+
+        public Builder setNextLinkName(String nextLinkName) {
+            this.nextLinkName = nextLinkName;
+            return this;
+        }
+
+        public Builder setSelfLinkName(String selfLinkName) {
+            this.selfLinkName = selfLinkName;
+            return this;
+        }
+
+        public Builder setCreateFeatures(EditFeatures createFeatures) {
+            this.createFeatures = createFeatures;
+            return this;
+        }
+
+        public Builder setUpdateFeatures(EditFeatures updateFeatures) {
+            this.updateFeatures = updateFeatures;
+            return this;
+        }
+
+        public Version build() {
+            return new Version(this);
+        }
     }
 
-    public Version(String urlPart, SyntheticPropertyRegistry spr, String countName, String idName, String selfLinkName, String nextLinkName, String navLinkName) {
-        this.urlPart = urlPart;
-        this.syntheticPropertyRegistry = spr;
-        this.countName = countName;
-        this.idName = idName;
-        this.selfLinkName = selfLinkName;
-        this.nextLinkName = nextLinkName;
-        this.navLinkName = navLinkName;
-    }
-
-    @Override
-    public String toString() {
-        return urlPart;
-    }
-
-    public CannedResponse getCannedResponse(CannedResponseType type) {
-        return responses.getOrDefault(type, type.dflt);
+    public static Builder builder() {
+        return new Builder();
     }
 
     public enum CannedResponseType {
@@ -95,6 +157,28 @@ public class Version {
             this.code = code;
             this.message = message;
         }
+    }
+
+    private Version(Builder builder) {
+        this.urlPart = builder.urlPart;
+        this.syntheticPropertyRegistry = builder.spr;
+        this.countName = builder.countName;
+        this.idName = builder.idName;
+        this.selfLinkName = builder.selfLinkName;
+        this.nextLinkName = builder.nextLinkName;
+        this.navLinkName = builder.navLinkName;
+        this.createFeatures = builder.createFeatures;
+        this.updateFeatures = builder.updateFeatures;
+        this.responses = builder.responses;
+    }
+
+    @Override
+    public String toString() {
+        return urlPart;
+    }
+
+    public CannedResponse getCannedResponse(CannedResponseType type) {
+        return responses.getOrDefault(type, type.dflt);
     }
 
     public String getCountName() {

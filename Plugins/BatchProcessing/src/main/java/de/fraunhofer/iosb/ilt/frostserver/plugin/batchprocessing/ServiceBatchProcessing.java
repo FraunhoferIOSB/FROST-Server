@@ -71,7 +71,8 @@ public class ServiceBatchProcessing {
                 BatchFactory<?> batchFactory = new MultipartFactory();
                 Batch<?> batch = batchFactory.createBatch(request.getVersion(), settings, false);
                 batch.parse(request);
-                Batch<?> resultContent = new BatchProcessor(batchFactory).processBatch(request, service, batch);
+                Batch<?> resultContent = new BatchProcessor(batchFactory)
+                        .processBatch(request, service, batch);
                 return sendResponse(resultContent, response);
 
             case CONTENT_TYPE_APPLICATION_JSON:

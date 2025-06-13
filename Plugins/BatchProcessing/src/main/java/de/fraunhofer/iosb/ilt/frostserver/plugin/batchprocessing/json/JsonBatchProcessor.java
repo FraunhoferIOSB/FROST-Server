@@ -37,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedWriter;
@@ -252,7 +251,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                 .setCoreSettings(coreSettings)
                 .setVersion(version)
                 .setRequestType(requestType)
-                .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11)
+                .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? version.createFeatures : version.updateFeatures)
                 .setUrl(path)
                 .setContent(requestBody)
                 .setUserPrincipal(request.getUserPrincipal());

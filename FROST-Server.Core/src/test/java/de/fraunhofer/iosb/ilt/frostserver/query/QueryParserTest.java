@@ -88,7 +88,7 @@ class QueryParserTest {
         queryDefaults = coreSettings.getQueryDefaults()
                 .setAlwaysOrder(false)
                 .setUseAbsoluteNavigationLinks(false);
-        path = new ResourcePath("http://example.org/FROST-Server", Version.V_1_0, "/");
+        path = new ResourcePath("http://example.org/FROST-Server", Version.INTERNAL, "/");
     }
 
     @Test

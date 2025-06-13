@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefPmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -74,7 +75,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -131,6 +131,8 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
     public static final String DATETIME_MIN_INSTANT = "-4000-01-02T00:00:00.000Z";
     public static final Moment DATETIME_MAX = parseMoment(DATETIME_MAX_INSTANT);
     public static final Moment DATETIME_MIN = parseMoment(DATETIME_MIN_INSTANT);
+
+    public static final EditFeatures UPDATE_JSON_PATCH = new EditFeatures(false, false, false);
 
     static final Moment parseMoment(String value) {
         try {
@@ -374,14 +376,14 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
     }
 
     @Override
-    public Entity doInsert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity doInsert(Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
         return table.insertIntoDatabase(this, entity, updateMode, dataSize);
     }
 
     @Override
-    public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
         final EntityFactories ef = getEntityFactories();
         final PkValue id = pathElement.getPkValues();
@@ -435,7 +437,7 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
         }
 
         StaMainTable<?> table = getTableCollection().getTableForType(entityType);
-        table.updateInDatabase(this, newEntity, id, UpdateMode.UPDATE_ODATA_40, dataSize);
+        table.updateInDatabase(this, newEntity, id, UPDATE_JSON_PATCH, dataSize);
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);

@@ -23,12 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -54,7 +54,7 @@ public interface PersistenceManager extends AutoCloseable {
      * point to a non-existing entity.
      * @throws IncompleteEntityException If an in-line entity is incomplete.
      */
-    public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean insert(Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Get the Entity of the given EntityType with the given Primary Key.
@@ -112,7 +112,7 @@ public interface PersistenceManager extends AutoCloseable {
      * @throws IncompleteEntityException If the given entity is missing required
      * fields.
      */
-    public boolean update(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean update(PathElementEntity pathElement, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Update the given entity using the given (rfc6902) JSON Patch.

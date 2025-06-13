@@ -23,13 +23,17 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSetti
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
+import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -54,9 +58,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -228,6 +234,23 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
 
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
+        Version version = request.getVersion();
+        if (version == PluginCoreService.V_1_1) {
+            Map<String, Object> serverSettings = new LinkedHashMap<>();
+            result.put(KEY_SERVER_SETTINGS, serverSettings);
+
+            final Set<Extension> enabledSettings = settings.getEnabledExtensions();
+            Set<String> extensionList = new TreeSet<>();
+            serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
+            for (Extension setting : enabledSettings) {
+                if (setting.isExposedFeature()) {
+                    extensionList.addAll(setting.getRequirements());
+                }
+            }
+
+            settings.getMqttSettings().fillServerSettings(serverSettings);
+        }
+
         Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
         if (serverSettings == null) {
             // Nothing to add to.

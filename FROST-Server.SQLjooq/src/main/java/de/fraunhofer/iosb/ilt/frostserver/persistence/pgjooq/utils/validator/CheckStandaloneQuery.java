@@ -69,7 +69,7 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
     private void init(JooqPersistenceManager pm) {
         entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
         final CoreSettings coreSettings = pm.getCoreSettings();
-        path = new ResourcePath("", Version.V_1_1, '/' + entityType.plural)
+        path = new ResourcePath("", Version.INTERNAL, '/' + entityType.plural)
                 .addPathElement(new PathElementEntitySet(entityType));
         context = new DynamicContext();
         final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();

@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -38,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -65,7 +65,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
  */
 class MqttManagerTest {
 
@@ -100,8 +99,7 @@ class MqttManagerTest {
 
     @Test
     void testVersionParse() throws UnknownVersionException {
-        assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic(coreSettings, "v1.0/Observations"));
-        assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic(coreSettings, "v1.1/Observations"));
+        assertEquals(Version.INTERNAL, MqttManager.getVersionFromTopic(coreSettings, "int/Observations"));
     }
 
     @Test
@@ -116,10 +114,10 @@ class MqttManagerTest {
         MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
         TestMqttServer mqttServer = mqttServers.get(0);
-        mqttServer.subscribe("v1.1/Houses");
-        mqttServer.subscribe("v1.1/Houses(1)");
-        mqttServer.subscribe("v1.1/Houses(1)/Rooms");
-        mqttServer.subscribe("v1.1/Rooms(1)/House");
+        mqttServer.subscribe("int/Houses");
+        mqttServer.subscribe("int/Houses(1)");
+        mqttServer.subscribe("int/Houses(1)/Rooms");
+        mqttServer.subscribe("int/Rooms(1)/House");
     }
 
     @Test
@@ -155,7 +153,7 @@ class MqttManagerTest {
     private void testTopics(List<TestMqttServer> mqttServers, MqttManager mqttManager, int subscriptionCount, int publishCount) throws InterruptedException {
         TestMqttServer mqttServer = mqttServers.get(0);
         for (int i = 0; i < subscriptionCount; i++) {
-            String topic = "v1.1/Houses(" + i + ")/Rooms";
+            String topic = "int/Houses(" + i + ")/Rooms";
             mqttServer.subscribe(topic);
         }
 
@@ -323,7 +321,7 @@ class MqttManagerTest {
         }
 
         @Override
-        public boolean insert(Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        public boolean insert(Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
             return true;
         }
 
@@ -351,7 +349,7 @@ class MqttManagerTest {
         }
 
         @Override
-        public boolean update(PathElementEntity pathElement, Entity entity, UpdateMode updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        public boolean update(PathElementEntity pathElement, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
             return true;
         }
 

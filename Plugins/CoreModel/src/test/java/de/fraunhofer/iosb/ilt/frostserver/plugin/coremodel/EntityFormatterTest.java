@@ -36,7 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -88,7 +87,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
         Query query = new Query(modelRegistry, new QueryDefaults(true, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -117,7 +116,7 @@ class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
         Query query = new Query(modelRegistry, new QueryDefaults(false, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -137,7 +136,7 @@ class EntityFormatterTest {
                 + "\"@iot.id\": 1,\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id,name", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -171,7 +170,7 @@ class EntityFormatterTest {
                 + thing + ",\n"
                 + thing
                 + "]}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = new Query(modelRegistry, queryDefaults, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -191,7 +190,7 @@ class EntityFormatterTest {
     @Test
     void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -250,7 +249,7 @@ class EntityFormatterTest {
                 + "\"value\":[\n"
                 + thing
                 + "]}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -300,7 +299,7 @@ class EntityFormatterTest {
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -329,7 +328,7 @@ class EntityFormatterTest {
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -357,7 +356,7 @@ class EntityFormatterTest {
                 + "\"Datastreams\": [{\"@iot.id\":123, \"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(123)\"}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -386,7 +385,7 @@ class EntityFormatterTest {
                 + "  \"Datastreams\": [],\n"
                 + "  \"name\": \"This thing is an oven.\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -413,7 +412,7 @@ class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/vnd.geo+json\""
                     + "}";
-            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
+            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                     .validate();
             DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
@@ -432,7 +431,7 @@ class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/geo+json\""
                     + "}";
-            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
+            ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                     .validate();
             DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
@@ -463,7 +462,7 @@ class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Locations(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
@@ -483,7 +482,7 @@ class EntityFormatterTest {
                 + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
                 + "	\"time\": \"2015-01-25T19:00:00Z\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/HistoricalLocations(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation)
@@ -515,7 +514,7 @@ class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
@@ -557,7 +556,7 @@ class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
@@ -601,7 +600,7 @@ class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
@@ -634,7 +633,7 @@ class EntityFormatterTest {
                 + "	\"encodingType\": \"application/pdf\",\n"
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
@@ -657,7 +656,7 @@ class EntityFormatterTest {
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n,"
                 + " \"Datastreams\": []"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etSensor)
@@ -680,7 +679,7 @@ class EntityFormatterTest {
                 + "	\"name\": \"DewPoint Temperature\",\n"
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/ObservedProperties(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/ObservedProperties(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservedProperty)
@@ -703,7 +702,7 @@ class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
                 + "	\"result\": 70.40\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
@@ -728,7 +727,7 @@ class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
                 + "	\"result\": null\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
@@ -754,7 +753,7 @@ class EntityFormatterTest {
                 + "	\"resultTime\": null,\n"
                 + "	\"result\": \"70.4\"\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
@@ -778,7 +777,7 @@ class EntityFormatterTest {
                 + "	\"description\": \"This is a weather station.\",\n"
                 + "	\"encodingType\": \"application/geo+json\""
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
@@ -811,7 +810,7 @@ class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)

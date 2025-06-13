@@ -30,6 +30,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETUR
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
@@ -40,7 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -67,35 +67,45 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginOData.class.getName());
 
+    private static final EditFeatures INSERT_ODATA_40 = new EditFeatures(true, false, false);
+    private static final EditFeatures UPDATE_ODATA_40 = new EditFeatures(false, false, false);
+    private static final EditFeatures INSERT_ODATA_401 = INSERT_ODATA_40;
+    private static final EditFeatures UPDATE_ODATA_401 = new EditFeatures(true, true, true);
+
     public static final String VERSION_ODATA_40_NAME = "ODATA_4.0";
     public static final String VERSION_ODATA_401_NAME = "ODATA_4.01";
-    public static final Version VERSION_ODATA_40 = new Version(
-            VERSION_ODATA_40_NAME,
-            JsonWriterOdata40.AT_COUNT,
-            "id",
-            JsonWriterOdata40.AT_NAVIGATION_LINK,
-            JsonWriterOdata40.AT_NEXT_LINK,
-            JsonWriterOdata40.AT_ID);
-    public static final Version VERSION_ODATA_401 = new Version(
-            VERSION_ODATA_401_NAME,
-            JsonWriterOdata401.AT_COUNT,
-            "id",
-            JsonWriterOdata401.AT_NAVIGATION_LINK,
-            JsonWriterOdata401.AT_NEXT_LINK,
-            JsonWriterOdata401.AT_ID);
+
+    public static final Version VERSION_ODATA_40 = Version.builder()
+            .setUrlPart(VERSION_ODATA_40_NAME)
+            .setCountName(JsonWriterOdata40.AT_COUNT)
+            .setIdName("id")
+            .setSelfLinkName(JsonWriterOdata40.AT_ID)
+            .setNextLinkName(JsonWriterOdata40.AT_NEXT_LINK)
+            .setNavLinkName(JsonWriterOdata40.AT_NAVIGATION_LINK)
+            .setCreateFeatures(INSERT_ODATA_40)
+            .setUpdateFeatures(UPDATE_ODATA_40)
+            .registerSytheticProperty(JsonWriterOdata40.AT_ID, ModelRegistry.EP_SELFLINK)
+            .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
+            .build();
+    public static final Version VERSION_ODATA_401 = Version.builder()
+            .setUrlPart(VERSION_ODATA_401_NAME)
+            .setCountName(JsonWriterOdata401.AT_COUNT)
+            .setIdName("id")
+            .setSelfLinkName(JsonWriterOdata401.AT_ID)
+            .setNextLinkName(JsonWriterOdata401.AT_NEXT_LINK)
+            .setNavLinkName(JsonWriterOdata401.AT_NAVIGATION_LINK)
+            .setCreateFeatures(INSERT_ODATA_401)
+            .setUpdateFeatures(UPDATE_ODATA_401)
+            .registerSytheticProperty(JsonWriterOdata401.AT_ID, ModelRegistry.EP_SELFLINK)
+            .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
+            .build();
+
     public static final String PARAM_METADATA = "$metadata";
     public static final String PATH_METADATA = '/' + PARAM_METADATA;
     public static final String REQUEST_TYPE_METADATA = PARAM_METADATA;
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ODATA = "odata.enable";
-
-    static {
-        VERSION_ODATA_40.syntheticPropertyRegistry.registerProperty(JsonWriterOdata40.AT_ID, ModelRegistry.EP_SELFLINK);
-        VERSION_ODATA_40.responses.put(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"));
-        VERSION_ODATA_401.syntheticPropertyRegistry.registerProperty(JsonWriterOdata401.AT_ID, ModelRegistry.EP_SELFLINK);
-        VERSION_ODATA_401.responses.put(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"));
-    }
 
     private CoreSettings settings;
     private boolean enabled;
@@ -202,7 +212,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
-                request.setUpdateMode(isOdata401 ? UpdateMode.INSERT_ODATA_401 : UpdateMode.INSERT_ODATA_40);
+                request.setUpdateMode(isOdata401 ? INSERT_ODATA_401 : INSERT_ODATA_40);
                 return mainService.execute(request, response);
 
             case UPDATE_ALL:
@@ -211,7 +221,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
-                request.setUpdateMode(isOdata401 ? UpdateMode.UPDATE_ODATA_401 : UpdateMode.UPDATE_ODATA_40);
+                request.setUpdateMode(isOdata401 ? UPDATE_ODATA_401 : UPDATE_ODATA_40);
                 return mainService.execute(request, response);
 
             default:

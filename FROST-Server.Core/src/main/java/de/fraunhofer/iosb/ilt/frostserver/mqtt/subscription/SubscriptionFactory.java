@@ -75,7 +75,7 @@ public class SubscriptionFactory {
         try {
             version = MqttManager.getVersionFromTopic(settings, topic);
         } catch (UnknownVersionException ex) {
-            throw new IllegalArgumentException(errorMsg + "topic must start with a version number.");
+            throw new IllegalArgumentException(errorMsg + "topic must start with a version numer. Known versions :" + settings.getPluginManager().getVersions().keySet());
         }
 
         String internalTopic = topic.substring(version.urlPart.length() + 1);

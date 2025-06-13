@@ -65,9 +65,9 @@ class PathParserTest {
     @Test
     void testPathsetRooms() {
         String path = "/Rooms";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -78,9 +78,9 @@ class PathParserTest {
     @Test
     void testPathsetRoomsRef() {
         String path = "/Rooms/$ref";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -92,9 +92,9 @@ class PathParserTest {
     @Test
     void testPathsetHouses() {
         String path = "/Houses";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -117,9 +117,9 @@ class PathParserTest {
             for (Property property : entityType.getPropertySet()) {
                 String basePath = "/" + entityType.plural + "(1)/";
                 String path = basePath + property.getName();
-                ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+                ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-                ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+                ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
                 PathElementEntitySet espe = new PathElementEntitySet(entityType);
                 expResult.addPathElement(espe, false, false);
                 PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), entityType, espe);
@@ -146,9 +146,9 @@ class PathParserTest {
     @Test
     void testPathEntityHousePropertyValue() {
         String path = "/Houses(1)/properties/$value";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -164,8 +164,8 @@ class PathParserTest {
     void testPathEntityHouseSubProperty() {
         {
             String path = "/Houses(1)/properties/property1";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -178,8 +178,8 @@ class PathParserTest {
         }
         {
             String path = "/Houses(1)/properties/name_two";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -192,8 +192,8 @@ class PathParserTest {
         }
         {
             String path = "/Houses(1)/properties/property1[2]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -208,8 +208,8 @@ class PathParserTest {
         }
         {
             String path = "/Houses(1)/properties/property1[2][3]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -226,8 +226,8 @@ class PathParserTest {
         }
         {
             String path = "/Houses(1)/properties/property1[2]/deep[3]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
@@ -250,7 +250,7 @@ class PathParserTest {
     void testPathIllegal1() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Rooms(1)/Houses";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
@@ -258,11 +258,11 @@ class PathParserTest {
     void testPathIllegal2() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Room";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Room(1)";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
@@ -270,15 +270,15 @@ class PathParserTest {
     void testPathIllegal3() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Rooms/House";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
     private void testHouse(long id) {
         String path = "/Houses(" + id + ")";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{id}), testModel.ET_HOUSE, espe);

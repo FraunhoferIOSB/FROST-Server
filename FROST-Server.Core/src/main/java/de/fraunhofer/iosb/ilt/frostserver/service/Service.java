@@ -75,7 +75,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,21 +288,6 @@ public class Service implements AutoCloseable {
                     + "/" + version.urlPart
                     + "/" + entityType.plural).normalize().toString();
             capList.add(createCapability(entityType.plural, collectionUri));
-        }
-
-        if (version == Version.V_1_1) {
-            Map<String, Object> serverSettings = new LinkedHashMap<>();
-            result.put(KEY_SERVER_SETTINGS, serverSettings);
-
-            Set<String> extensionList = new TreeSet<>();
-            serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
-            for (Extension setting : enabledSettings) {
-                if (setting.isExposedFeature()) {
-                    extensionList.addAll(setting.getRequirements());
-                }
-            }
-
-            settings.getMqttSettings().fillServerSettings(serverSettings);
         }
 
         settings.getPluginManager().modifyServiceDocument(request, result);

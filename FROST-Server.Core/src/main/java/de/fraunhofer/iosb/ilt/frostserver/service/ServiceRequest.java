@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -60,7 +61,7 @@ public class ServiceRequest {
     private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
     private CoreSettings coreSettings;
     private QueryDefaults queryDefaults;
-    private UpdateMode updateMode;
+    private EditFeatures updateMode;
     private JsonReader jsonReader;
 
     public Map<String, Object> getAttributeMap() {
@@ -174,11 +175,11 @@ public class ServiceRequest {
         return this;
     }
 
-    public UpdateMode getUpdateMode() {
+    public EditFeatures getUpdateMode() {
         return updateMode;
     }
 
-    public ServiceRequest setUpdateMode(UpdateMode updateMode) {
+    public ServiceRequest setUpdateMode(EditFeatures updateMode) {
         this.updateMode = updateMode;
         return this;
     }

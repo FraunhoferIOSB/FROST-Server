@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.ServiceOpenApi;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -42,7 +43,7 @@ public final class GeneratorContext {
     private boolean addEntityProperties = false;
     private boolean addValue = false;
     private boolean addEditing = false;
-    private Version version = Version.V_1_0;
+    private Version version = PluginCoreService.V_1_0;
     private String serviceRootUrl;
     private String base = "/v1.0";
 

@@ -15,24 +15,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.service;
+package de.fraunhofer.iosb.ilt.frostserver.path;
 
 /**
- * How updates should behave.
+ * How updates/inserts should behave.
  *
  * @see <a
  * href="https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateRelatedEntitiesWhenUpdatinganE">OData
  * v4.01 Part 1</a>
  *
  */
-public class UpdateMode {
+public class EditFeatures {
 
-    public static final UpdateMode INSERT_ODATA_40 = new UpdateMode(true, false, false);
-    public static final UpdateMode UPDATE_ODATA_40 = new UpdateMode(false, false, false);
-    public static final UpdateMode INSERT_ODATA_401 = INSERT_ODATA_40;
-    public static final UpdateMode UPDATE_ODATA_401 = new UpdateMode(true, true, true);
-    public static final UpdateMode INSERT_STA_11 = INSERT_ODATA_40;
-    public static final UpdateMode UPDATE_STA_11 = UPDATE_ODATA_40;
+    public static final EditFeatures NONE = new EditFeatures(false, false, false);
 
     /**
      * Can an update create new related entities and link them.
@@ -49,7 +44,7 @@ public class UpdateMode {
      */
     public final boolean deepUpdate;
 
-    public UpdateMode(boolean createNew, boolean remove, boolean deepUpdate) {
+    public EditFeatures(boolean createNew, boolean remove, boolean deepUpdate) {
         this.createAndLinkNew = createNew;
         this.removeMissing = remove;
         this.deepUpdate = deepUpdate;

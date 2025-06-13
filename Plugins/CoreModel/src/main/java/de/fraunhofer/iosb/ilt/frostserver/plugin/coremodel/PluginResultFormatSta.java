@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.formatter;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterDefault;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterEmpty;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
@@ -25,10 +28,9 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- *
- * @author scf
+ * The default SensorThings resultFormatter.
  */
-public class PluginResultFormatDefault implements PluginResultFormat {
+public class PluginResultFormatSta implements PluginResultFormat {
 
     @Override
     public InitResult init(CoreSettings settings) {
@@ -43,7 +45,7 @@ public class PluginResultFormatDefault implements PluginResultFormat {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+        return Arrays.asList(PluginCoreService.V_1_0, PluginCoreService.V_1_1);
     }
 
     @Override

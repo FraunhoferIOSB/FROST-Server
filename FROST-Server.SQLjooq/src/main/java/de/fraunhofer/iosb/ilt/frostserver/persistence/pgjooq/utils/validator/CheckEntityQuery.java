@@ -86,7 +86,7 @@ public class CheckEntityQuery implements ValidationCheck {
         try {
             entityType = contextEntity.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
-            final ResourcePath path = new ResourcePath("", Version.V_1_1, '/' + entityType.plural)
+            final ResourcePath path = new ResourcePath("", Version.INTERNAL, '/' + entityType.plural)
                     .addPathElement(new PathElementEntitySet(entityType));
             context = new DynamicContext();
             final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();

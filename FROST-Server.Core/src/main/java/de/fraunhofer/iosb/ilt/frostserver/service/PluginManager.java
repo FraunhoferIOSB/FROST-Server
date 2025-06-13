@@ -49,9 +49,9 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginManager implements ConfigDefaults {
 
-    public static final String VALUE_PROVIDED_PLUGINS = "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
+    public static final String VALUE_PROVIDED_PLUGINS = "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatInternal"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
-            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"

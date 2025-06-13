@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -55,7 +56,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -260,7 +260,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
@@ -364,7 +364,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
      * @throws NoSuchEntityException If the entity to be updated does not exist.
      * @throws IllegalStateException If something else goes wrong.
      */
-    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, JooqPersistenceManager pm, UpdateMode updateMode) throws IncompleteEntityException, NoSuchEntityException {
+    protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, JooqPersistenceManager pm, EditFeatures updateMode) throws IncompleteEntityException, NoSuchEntityException {
         final NavigationPropertyEntitySet navProp = linkedSet.getNavigationProperty();
         final Relation relation = findRelation(navProp.getName());
         if (relation == null) {
@@ -406,7 +406,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
-    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, UpdateMode updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         final EntityFactories entityFactories = pm.getEntityFactories();
         final EntityType entityType = entity.getEntityType();

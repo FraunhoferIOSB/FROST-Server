@@ -17,6 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import static de.fraunhofer.iosb.ilt.frostserver.path.Version.builder;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_EMPTY;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
@@ -26,6 +32,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
@@ -50,6 +58,34 @@ import org.slf4j.LoggerFactory;
  */
 public class PluginCoreService implements PluginService, ConfigDefaults {
 
+    private static final EditFeatures INSERT_STA_11 = new EditFeatures(true, false, false);
+    private static final EditFeatures UPDATE_STA_11 = new EditFeatures(false, false, false);
+
+    public static final String VERSION_STA_V10_NAME = "v1.0";
+    public static final String VERSION_STA_V11_NAME = "v1.1";
+    public static final Version V_1_0 = builder()
+            .setUrlPart(VERSION_STA_V10_NAME)
+            .setCountName(AT_IOT_COUNT)
+            .setIdName(AT_IOT_ID)
+            .setSelfLinkName(AT_IOT_SELF_LINK)
+            .setNextLinkName(AT_IOT_NEXT_LINK)
+            .setNavLinkName(AT_IOT_NAVIGATION_LINK)
+            .setCreateFeatures(INSERT_STA_11)
+            .setUpdateFeatures(UPDATE_STA_11)
+            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .build();
+    public static final Version V_1_1 = builder()
+            .setUrlPart(VERSION_STA_V11_NAME)
+            .setCountName(AT_IOT_COUNT)
+            .setIdName(AT_IOT_ID)
+            .setSelfLinkName(AT_IOT_SELF_LINK)
+            .setNextLinkName(AT_IOT_NEXT_LINK)
+            .setNavLinkName(AT_IOT_NAVIGATION_LINK)
+            .setCreateFeatures(INSERT_STA_11)
+            .setUpdateFeatures(UPDATE_STA_11)
+            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .build();
+
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_SERVICE = "coreService.enable";
 
@@ -63,6 +99,7 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
         enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_SERVICE, PluginCoreService.class);
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
+            settings.getPluginManager().registerPlugin(new PluginResultFormatSta());
         }
         return InitResult.INIT_OK;
     }
@@ -74,7 +111,7 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+        return Arrays.asList(V_1_0, V_1_1);
     }
 
     @Override

@@ -67,9 +67,9 @@ class PathParserUuidIdTest {
     @Test
     void testPathsetRooms() {
         String path = "/Rooms";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -80,9 +80,9 @@ class PathParserUuidIdTest {
     @Test
     void testPathsetRoomsRef() {
         String path = "/Rooms/$ref";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -94,9 +94,9 @@ class PathParserUuidIdTest {
     @Test
     void testPathsetHouses() {
         String path = "/Houses";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -115,9 +115,9 @@ class PathParserUuidIdTest {
             for (Property property : entityType.getPropertySet()) {
                 String basePath = "/" + entityType.plural + "('123e4567-e89b-12d3-a456-426614174000')/";
                 String path = basePath + property.getName();
-                ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+                ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-                ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+                ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
                 PathElementEntitySet espe = new PathElementEntitySet(entityType);
                 expResult.addPathElement(espe, false, false);
                 PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), entityType, espe);
@@ -144,9 +144,9 @@ class PathParserUuidIdTest {
     @Test
     void testPathEntityHousePropertyValue() {
         String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/$value";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -162,8 +162,8 @@ class PathParserUuidIdTest {
     void testPathEntityHouseSubProperty() {
         {
             String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/property1";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -176,8 +176,8 @@ class PathParserUuidIdTest {
         }
         {
             String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/name_two";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -190,8 +190,8 @@ class PathParserUuidIdTest {
         }
         {
             String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/property1[2]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -206,8 +206,8 @@ class PathParserUuidIdTest {
         }
         {
             String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/property1[2][3]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -224,8 +224,8 @@ class PathParserUuidIdTest {
         }
         {
             String path = "/Houses('123e4567-e89b-12d3-a456-426614174000')/properties/property1[2]/deep[3]";
-            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
-            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
             PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(1).set(0, UUID.fromString("123e4567-e89b-12d3-a456-426614174000")), testModel.ET_HOUSE, espe);
@@ -248,7 +248,7 @@ class PathParserUuidIdTest {
     void testPathIllegal1() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Rooms('123e4567-e89b-12d3-a456-426614174000')/Houses";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
@@ -256,11 +256,11 @@ class PathParserUuidIdTest {
     void testPathIllegal2() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Room";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Room'123e4567-e89b-12d3-a456-426614174000'";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
@@ -268,16 +268,16 @@ class PathParserUuidIdTest {
     void testPathIllegal3() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Rooms/House";
-            PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
         });
     }
 
     private void testHouse(PkValue id) {
         PrimaryKey primaryKey = testModel.ET_HOUSE.getPrimaryKey();
         String path = "/Houses(" + id.getUrl(primaryKey) + ")";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(id, testModel.ET_HOUSE, espe);

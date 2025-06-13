@@ -140,7 +140,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
             targetNp = entityType.getNavigationProperty(getTargetNavLink());
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
-            final ResourcePath path = new ResourcePath("", Version.V_1_1, '/' + targetType.plural)
+            final ResourcePath path = new ResourcePath("", Version.INTERNAL, '/' + targetType.plural)
                     .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
             final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();

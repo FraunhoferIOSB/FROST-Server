@@ -17,10 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
-import static de.fraunhofer.iosb.ilt.frostserver.path.Version.VERSION_STA_V10_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.path.Version.VERSION_STA_V11_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V10_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V11_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_MAP_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_OBJECT_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_TIMEINTERVAL_NAME;
@@ -121,25 +119,17 @@ public final class OASchema {
 
     public OASchema(Version version, PropertyType propertyType) {
         final String propertyTypeName = propertyType.getName();
-        switch (version.urlPart) {
-            case VERSION_STA_V10_NAME:
-            case VERSION_STA_V11_NAME:
-                if (STA_TIMEINTERVAL_NAME.equals(propertyTypeName) || STA_TIMEVALUE_NAME.equals(propertyTypeName)) {
+        switch (propertyTypeName) {
+            case STA_TIMEINTERVAL_NAME:
+            case STA_TIMEVALUE_NAME:
+                if (VERSION_STA_V10_NAME.equals(version.urlPart) || VERSION_STA_V11_NAME.equals(version.urlPart)) {
                     type = Type.STRING;
-                    return;
+                } else {
+                    type = Type.OBJECT;
+                    addSubtypeComplex(version, (TypeComplex) propertyType);
                 }
                 break;
 
-            case VERSION_ODATA_40_NAME:
-            case VERSION_ODATA_401_NAME:
-            default:
-                if (STA_TIMEINTERVAL_NAME.equals(propertyTypeName) || STA_TIMEVALUE_NAME.equals(propertyTypeName)) {
-                    type = Type.OBJECT;
-                    addSubtypeComplex(version, (TypeComplex) propertyType);
-                    return;
-                }
-        }
-        switch (propertyType.getName()) {
             case EDM_BINARY_NAME:
                 type = Type.STRING;
                 format = Format.BINARY;

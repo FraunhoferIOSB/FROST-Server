@@ -138,7 +138,7 @@ public class TestModel implements PluginService {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(Version.V_1_0, Version.V_1_1);
+        return Arrays.asList(Version.INTERNAL);
     }
 
     @Override

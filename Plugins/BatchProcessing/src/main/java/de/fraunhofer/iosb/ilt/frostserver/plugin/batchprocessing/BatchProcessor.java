@@ -24,6 +24,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
@@ -37,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
-import de.fraunhofer.iosb.ilt.frostserver.service.UpdateMode;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -80,19 +80,7 @@ public class BatchProcessor<C extends Content> {
                 httpRequest.getPath(),
                 ct);
         boolean isCreate = RequestTypeUtils.CREATE.equals(type);
-        UpdateMode updateMode;
-        switch (version.urlPart) {
-            case "ODATA_4.0":
-                updateMode = isCreate ? UpdateMode.INSERT_ODATA_40 : UpdateMode.UPDATE_ODATA_40;
-                break;
-
-            case "ODATA_4.01":
-                updateMode = isCreate ? UpdateMode.INSERT_ODATA_401 : UpdateMode.UPDATE_ODATA_401;
-                break;
-
-            default:
-                updateMode = isCreate ? UpdateMode.INSERT_STA_11 : UpdateMode.UPDATE_STA_11;
-        }
+        final EditFeatures updateMode = isCreate ? version.createFeatures : version.updateFeatures;
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setCoreSettings(coreSettings)
                 .setVersion(version)
