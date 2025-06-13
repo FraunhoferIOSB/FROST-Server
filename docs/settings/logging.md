@@ -30,48 +30,49 @@ environment variables that influence basic logging options.
   The maximum individual log file size.  See the [logback docs](https://logback.qos.ch/manual/appenders.html#SizeAndTimeBasedRollingPolicy). Default: `50MB`.
 * **FROST_LOG_maxfilecount:** Since 2.2.0, 2.1.1, 2.0.7  
   The maximum number of log file to keep. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpMaxHistory). Default: `5`.
-* **FROST_LL:** 2.0.0  
+* **FROST_LL:** Since 2.0.0  
   The "root" log level. Default: INFO
-* **FROST_LL_parser:** 2.0.0  
+* **FROST_LL_parser:** Since 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.parser` package. Default: INFO
-* **FROST_LL_queries:** 2.0.0  
+* **FROST_LL_queries:** Since 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder` package. Default: INFO
-* **FROST_LL_requests:** 2.0.0  
+* **FROST_LL_requests:** Since 2.0.0  
   The log level for the request decoder. When set to DEBUG each request with its headers will be logged. Default: INFO
-* **FROST_LL_service:** 2.0.0  
+* **FROST_LL_service:** Since 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.service` package.
   When set to DEBUG, 4xx error details and 5xx stack traces will be logged. Default: INFO
-* **FROST_LL_settings:** 2.0.0  
+* **FROST_LL_settings:** Since 2.0.0  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.settings` package. Default: INFO
-* **FROST_LL_io_moquette:** 2.0.0  
+* **FROST_LL_io_moquette:** Since 2.0.0  
   The log level for the `io.moquette` package. Default: WARN
-* **FROST_LL_liquibase:** 2.0.0  
+* **FROST_LL_liquibase:** Since 2.0.0  
   The log level for the `liquibase` package. Default: INFO
-* **FROST_LL_org_jooq:** 2.0.0  
+* **FROST_LL_org_jooq:** Since 2.0.0  
   The log level for the `org.jooq` package. Default: INFO
 
 
 # Metrics
 
 FROST-Server uses prometheus to gather metrics.
-For the HTTP component, the metrics end point can be made available on the same port as the normal service, or on a separate port.
+For the HTTP component, the metrics end point can be made available on the same port as the normal service by setting the `useServlet` variable,
+or on a separate port by setting the `useInternalHttpServer` variable.
 If both `useServlet` and `useInternalHttpServer` are false, then metrics gathering is disabled.
 
 
 ## Environment variables
 
-* **metrics.useServlet:**  
+* **metrics.useServlet:** Since 2.6.0  
   For the HTTP and All-In-One components, use a servlet to expose the metrics.
   This makes `/FROST-Server/metrics` available, next to the other end-points. Default: `false`.
-* **metrics.useInternalHttpServer:**  
+* **metrics.useInternalHttpServer:** Since 2.6.0  
   Use a separate HTTP service, on its own port, to expose the metrics.
   This makes a `/metrics` URL available on a configurable port. Default: `false`.
-* **metrics.endpointPort:**  
+* **metrics.endpointPort:** Since 2.6.0  
   The port to use for the separate HTTP service that exposes the metrics. Default: `9400`.
 
 ## Gathered metrics
 
-Besides these FROST-Server specific metrics, the JVM metrics are also gathered, as described in https://prometheus.github.io/client_java/instrumentation/jvm/
+Besides the FROST-Server specific metrics listed below, the JVM metrics are also gathered, as described in the [Prometheus Documentation](https://prometheus.github.io/client_java/instrumentation/jvm/)
 
 ### HTTP Pods
 
