@@ -27,18 +27,18 @@ import java.util.TreeMap;
  */
 public class SyntheticPropertyRegistry {
 
-    private final Map<String, EntityPropertyMain> properties = new TreeMap<>();
+    private final Map<String, EntityPropertyMain<?>> properties = new TreeMap<>();
 
-    public SyntheticPropertyRegistry registerProperty(EntityPropertyMain property) {
+    public SyntheticPropertyRegistry registerProperty(EntityPropertyMain<?> property) {
         return registerProperty(property.getName(), property);
     }
 
-    public SyntheticPropertyRegistry registerProperty(String externalName, EntityPropertyMain property) {
+    public SyntheticPropertyRegistry registerProperty(String externalName, EntityPropertyMain<?> property) {
         properties.put(externalName, property);
         return this;
     }
 
-    public EntityPropertyMain getProperty(String name) {
+    public EntityPropertyMain<?> getProperty(String name) {
         return properties.get(name);
     }
 

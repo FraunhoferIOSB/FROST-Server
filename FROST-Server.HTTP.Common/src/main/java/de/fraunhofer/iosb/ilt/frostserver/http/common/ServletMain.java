@@ -144,8 +144,12 @@ public class ServletMain extends HttpServlet {
     }
 
     @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doHead(req, resp);
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            super.doHead(req, resp);
+        } catch (ServletException | IOException ex) {
+            LOGGER.error("Exception while calculating HEAD.", ex);
+        }
     }
 
     @Override

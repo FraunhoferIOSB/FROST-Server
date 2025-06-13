@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

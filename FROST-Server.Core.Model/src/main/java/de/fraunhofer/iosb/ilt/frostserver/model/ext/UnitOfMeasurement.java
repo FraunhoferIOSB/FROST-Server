@@ -33,9 +33,12 @@ import java.util.Objects;
  */
 public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
 
-    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", EDM_STRING);
-    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>("definition", EDM_STRING);
-    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>("symbol", EDM_STRING);
+    public static final String NAME_DEFINITION = "definition";
+    public static final String NAME_NAME = "name";
+    public static final String NAME_SYMBOL = "symbol";
+    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING);
+    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING);
+    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING);
 
     private String name;
     private String symbol;
@@ -56,11 +59,11 @@ public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
     @Override
     public Object getProperty(String name) {
         switch (name) {
-            case "name":
+            case NAME_NAME:
                 return getName();
-            case "symbol":
+            case NAME_SYMBOL:
                 return getSymbol();
-            case "definition":
+            case NAME_DEFINITION:
                 return getDefinition();
             default:
                 return null;
@@ -70,11 +73,11 @@ public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
     @Override
     public UnitOfMeasurement setProperty(String name, Object value) {
         switch (name) {
-            case "name":
+            case NAME_NAME:
                 return setName((String) value);
-            case "symbol":
+            case NAME_SYMBOL:
                 return setSymbol((String) value);
-            case "definition":
+            case NAME_DEFINITION:
                 return setDefinition((String) value);
             default:
                 return this;

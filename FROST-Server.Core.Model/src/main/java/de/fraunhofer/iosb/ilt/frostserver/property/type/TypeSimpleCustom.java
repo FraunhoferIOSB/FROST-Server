@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
 
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import net.time4j.range.MomentInterval;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -241,6 +243,15 @@ public class Utils {
             fail("time properies could neither be parsed as time nor as interval: " + expected + " and " + given);
         }
         return false;
+    }
+
+    public static final String readFile(String fileName) {
+        try {
+            return IOUtils.resourceToString(fileName, StandardCharsets.UTF_8, Utils.class.getClassLoader());
+        } catch (IOException ex) {
+            LOGGER.error("Failed to read file {}", fileName, ex);
+            return "";
+        }
     }
 
 }

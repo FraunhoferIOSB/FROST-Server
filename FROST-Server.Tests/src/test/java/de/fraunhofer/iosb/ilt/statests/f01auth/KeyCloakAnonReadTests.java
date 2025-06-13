@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     public static final String KEYCLOAK_FROST_CLIENT_ID = "frost-server";
-    public static final String KEYCLOAK_FROST_CONFIG_SECRET = "5aa9087d-817f-47b6-92a1-2b5f7caac967";
+    public static final String KEYCLOAK_FROST_CONFIG_SECRET = Utils.readFile("keycloak/api_key.txt");
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
     static {

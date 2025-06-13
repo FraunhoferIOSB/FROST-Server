@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserUtils;
 import java.util.ArrayList;
 import java.util.List;
 

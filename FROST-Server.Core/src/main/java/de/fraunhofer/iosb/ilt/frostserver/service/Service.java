@@ -30,7 +30,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FO
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.github.fge.jsonpatch.JsonPatch;
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
@@ -74,7 +73,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -277,7 +275,6 @@ public class Service implements AutoCloseable {
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
         final Map<String, Object> result = new LinkedHashMap<>();
-        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
         final Version version = request.getVersion();
 
         final List<Map<String, String>> capList = new ArrayList<>();

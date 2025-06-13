@@ -34,13 +34,21 @@ import java.io.IOException;
 @WebServlet(name = "PrometheusMetrics", urlPatterns = {"/metrics"})
 public class ServletPrometheusMetrics extends PrometheusMetricsServlet {
 
-    public static MetricsSettings settings;
+    private static MetricsSettings settings;
+
+    public static synchronized MetricsSettings setSettings(MetricsSettings settings) {
+        if (ServletPrometheusMetrics.settings != null) {
+            return ServletPrometheusMetrics.settings;
+        }
+        ServletPrometheusMetrics.settings = settings;
+        return settings;
+    }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (settings == null) {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            settings = coreSettings.getMetricsSettings();
+            settings = setSettings(coreSettings.getMetricsSettings());
         }
         if (settings.isServlet()) {
             super.service(request, response);

@@ -50,16 +50,16 @@ public class DatabaseStatus extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseStatus.class);
     private static final String DESCRIPTION = "Database status and upgrade servlet.";
 
-    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         String authProviderClassName = coreSettings.getAuthSettings().get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
         PrincipalExtended userPrincipal = PrincipalExtended.fromPrincipal(request.getUserPrincipal());
         if (!isNullOrEmpty(authProviderClassName)) {
             if (userPrincipal == PrincipalExtended.ANONYMOUS_PRINCIPAL) {
-                response.sendError(401);
+                sendError(response, 401);
                 return;
             } else if (!userPrincipal.isAdmin()) {
-                response.sendError(403);
+                sendError(response, 403);
                 return;
             }
         }
@@ -103,6 +103,14 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
+    public void sendError(HttpServletResponse response, int error) {
+        try {
+            response.sendError(error);
+        } catch (IOException ex) {
+            LOGGER.error("Exception while sending error response.", ex);
+        }
+    }
+
     public void checkForUpgrades(PrintWriter out, LiquibaseUser user, Map<String, Object> liquibaseParams) {
         out.print("<h2>");
         out.print(user.getClass().getName());
@@ -117,12 +125,12 @@ public class DatabaseStatus extends HttpServlet {
         return user.checkForUpgrades(liquibaseParams);
     }
 
-    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         String authProviderClassName = coreSettings.getAuthSettings().get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
         PrincipalExtended userPrincipal = PrincipalExtended.fromPrincipal(request.getUserPrincipal());
         if (!isNullOrEmpty(authProviderClassName) && !userPrincipal.isAdmin()) {
-            response.sendError(403);
+            sendError(response, 403);
             return;
         }
         PersistenceManagerFactory.init(coreSettings);
@@ -188,7 +196,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         processGetRequest(request, response);
     }
 
@@ -199,7 +207,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         processPostRequest(request, response);
     }
 

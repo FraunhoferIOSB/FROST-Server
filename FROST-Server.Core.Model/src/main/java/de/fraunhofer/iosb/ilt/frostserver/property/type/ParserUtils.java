@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -32,12 +32,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.io.IOException;
 
 /**
- *
- * @author hylke
+ * Utility class for (de)serialising.
  */
 public class ParserUtils {
 
@@ -98,13 +96,13 @@ public class ParserUtils {
             }
             currentToken = parser.nextToken();
             while (currentToken == JsonToken.FIELD_NAME) {
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
                 parser.nextValue();
                 Property property = type.getProperty(fieldName);
                 if (property == null) {
                     if (!type.isOpenType()) {
                         final String message = "Unknown field: " + fieldName + " on " + type.getName() + " expected one of: " + type.getPropertiesByName().keySet();
-                        throw new UnrecognizedPropertyException(parser, message, parser.getCurrentLocation(), TypeComplex.class, fieldName, null);
+                        throw new UnrecognizedPropertyException(parser, message, parser.currentLocation(), TypeComplex.class, fieldName, null);
                     } else {
                         result.setProperty(fieldName, parser.readValueAsTree());
                     }

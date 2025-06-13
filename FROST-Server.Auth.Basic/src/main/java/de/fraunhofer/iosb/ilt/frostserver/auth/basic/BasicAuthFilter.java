@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.EnumMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,8 +144,7 @@ public class BasicAuthFilter implements Filter {
             LOGGER.debug("No username:password in basic auth header.");
             return USER_DATA_NO_USER;
         }
-
-        String[] split = userPassDecoded.split(":", 2);
+        String[] split = StringUtils.split(userPassDecoded, ":", 2);
         final UserData userData = new UserData(split[0], maxNameLength, split[1], maxPassLength);
         if (databaseHandler.isValidUser(userData)) {
             LOGGER.debug("User {}", userData.userName);

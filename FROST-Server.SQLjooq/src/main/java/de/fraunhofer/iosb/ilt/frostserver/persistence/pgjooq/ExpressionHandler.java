@@ -842,12 +842,12 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(MaxDateTime node) {
-        return new StaDateTimeWrapper(PostgresPersistenceManager.DATETIME_MAX, true);
+        return new StaDateTimeWrapper(JooqAbstractPersistenceManager.DATETIME_MAX, true);
     }
 
     @Override
     public FieldWrapper visit(MinDateTime node) {
-        return new StaDateTimeWrapper(PostgresPersistenceManager.DATETIME_MIN, true);
+        return new StaDateTimeWrapper(JooqAbstractPersistenceManager.DATETIME_MIN, true);
     }
 
     @Override
