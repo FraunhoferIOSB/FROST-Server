@@ -98,10 +98,10 @@ One HTTP request may result in multiple service requests, which in turn may resu
 The MQTT Manager is the part of the FROST-MQTT component that sits between the Data Model and the MQTT Broker.
 It tracks which changes are made to the data, and determines which MQTT Topics need to be notified of these changes.
 
-- **mqtt_manager_queue_fill** (gauge)  Number of items in the MQTT Manager Queue. Split into _Create_, _Changed_.
+- **mqtt_manager_queue_fill** (gauge) Fill level of the Queue (0 - 1). Split into _Create_, _Changed_.
   - _Create_: Queue for entities being created over MQTT.
   - _Changed_: Queue for entities that have changed and may require messages to be sent to users.
-- **mqtt_manager_queue_fill_max** (gauge) Maximum number of items in each MQTT Manager Queue since last scrape call.
+- **mqtt_manager_queue_fill_max** (gauge) Maximum fill level of the Queue since last scrape call (0 - 1). Split into _Create_, _Changed_.
 - **mqtt_manager_queue_overruns_total** (gauge) Total number of actions dropped because a queue was full. If this increases, the queue is too small, the worker count too low, or the system is overloaded.
 - **mqtt_manager_topics** (gauge) Number of distinct topics that have subscriptions.
 - **mqtt_manager_worker_status** (gauge) Overview of what workers do Overview of what workers do. Split along two dimensions: _Waiting_, _Working_, _Dead_ and _Create_, _Changed_.
@@ -121,10 +121,10 @@ Moquette is the MQTT broker that distributes messages to the clients that listen
 
 ### Message Bus
 
-- **message_bus_queue_fill** (gauge) Number of items in the message bus queue. Split into _Send_ and _Receive_ sub-gauges.
+- **message_bus_queue_fill** (gauge) Fill level of the Queue (0 - 1). Split into _Send_ and _Receive_ sub-gauges.
   - _Send_: The outgoing queue, items being sent over the bus.
   - _Receive_: The incoming queue, items being received over the bus.
-- **message_bus_queue_fill_max** (gauge) Maximum number of items in the Queue since last scrape. Also split into _Send_ and _Receive_.
+- **message_bus_queue_fill_max** (gauge) Maximum fill level of the Queue since last scrape call (0 - 1). Also split into _Send_ and _Receive_.
 - **message_bus_queue_overruns_total** (gauge) Total number of messages that were dropped because the queue was full. If this increases, either the queue is too small, or the number of workers is too low. Also split into _Send_ and _Receive_.
 - **message_bus_worker_status** (gauge) Overview of what workers do. Split along two dimensions: _Waiting_, _Working_, _Dead_ and _Send_, _Receive_.
   - _Waiting_: Number of workers that are waiting for work.
