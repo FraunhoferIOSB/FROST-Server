@@ -58,7 +58,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
     public static final String KEYCLOAK_FROST_CLIENT_ID = "frost-server";
-    public static final String KEYCLOAK_FROST_CONFIG_SECRET = Utils.readFile("keycloak/api_key.txt");
+    public static final String KEYCLOAK_FROST_CONFIG_SECRET = Utils.readFile("keycloak/test_api_key.txt");
     public static final String KEYCLOAK_TOKEN_PATH = "/realms/FROST-Test/protocol/openid-connect/token";
 
     private static final SensorThingsV11Sensing mdlSensing = new SensorThingsV11Sensing();
