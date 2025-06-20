@@ -125,6 +125,11 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     protected static final List<Entity> DATASTREAMS = new ArrayList<>();
     protected static final List<Entity> OBSERVATIONS = new ArrayList<>();
     protected static final List<Entity> PROJECTS = new ArrayList<>();
+
+    /**
+     * Users: admin, AdminProject1, AdminProject2, GlobalObsCreater, GlobalObsPropCreater, ObsCreaterProject1,
+     * ObsCreaterProject2, read, write
+     */
     protected static final List<Entity> USERS = new ArrayList<>();
     protected static final List<Entity> ROLES = new ArrayList<>();
     protected static final List<Entity> USER_PROJECT_ROLES = new ArrayList<>();
@@ -132,6 +137,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     protected static final String ADMIN = "admin";
     protected static final String WRITE = "write";
     protected static final String READ = "read";
+    protected static final String GLOBAL_OBS_CREATE = "GlobalObsCreater";
+    protected static final String GLOBAL_OBSPROP_CREATE = "GlobalObsPropCreater";
     protected static final String ANONYMOUS = "anonymous";
     protected static final String ADMIN_P1 = "AdminProject1";
     protected static final String ADMIN_P2 = "AdminProject2";
@@ -141,6 +148,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceAdmin;
     protected static SensorThingsService serviceWrite;
     protected static SensorThingsService serviceRead;
+    protected static SensorThingsService serviceGlObsCr;
+    protected static SensorThingsService serviceGlObsPropCr;
     protected static SensorThingsService serviceAnon;
     protected static SensorThingsService serviceAdminProject1;
     protected static SensorThingsService serviceAdminProject2;
@@ -229,6 +238,12 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         ROLES.add(mdlProjects.newRole("update", ""));
         ROLES.add(mdlProjects.newRole("delete", ""));
         ROLES.add(mdlProjects.newRole("admin", ""));
+        ROLES.add(mdlProjects.newRole("obscreate", ""));
+        ROLES.add(mdlProjects.newRole("obsupdate", ""));
+        ROLES.add(mdlProjects.newRole("obsdelete", ""));
+        ROLES.add(mdlProjects.newRole("obspropcreate", ""));
+        ROLES.add(mdlProjects.newRole("obspropupdate", ""));
+        ROLES.add(mdlProjects.newRole("obspropdelete", ""));
         try {
             HTTPMethods.doPost(serviceAdmin, serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
 
@@ -393,8 +408,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     void test_02c_ReadUser() {
         LOGGER.info("  test_02c_ReadUser");
         testFilterResults(serviceAdmin, mdlProjects.etUser, "", USERS);
-        testFilterResults(serviceWrite, mdlProjects.etUser, "", Utils.getFromList(USERS, 6));
-        testFilterResults(serviceRead, mdlProjects.etUser, "", Utils.getFromList(USERS, 5));
+        testFilterResults(serviceWrite, mdlProjects.etUser, "", Utils.getFromList(USERS, 8));
+        testFilterResults(serviceRead, mdlProjects.etUser, "", Utils.getFromList(USERS, 7));
         if (anonymousReadAllowed) {
             testFilterResults(ANONYMOUS, serviceAnon, mdlProjects.etUser, "", Collections.emptyList());
         } else {
@@ -402,8 +417,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         }
         testFilterResults(serviceAdminProject1, mdlProjects.etUser, "", USERS);
         testFilterResults(serviceAdminProject2, mdlProjects.etUser, "", USERS);
-        testFilterResults(serviceObsCreaterProject1, mdlProjects.etUser, "", Utils.getFromList(USERS, 3));
-        testFilterResults(serviceObsCreaterProject2, mdlProjects.etUser, "", Utils.getFromList(USERS, 4));
+        testFilterResults(serviceObsCreaterProject1, mdlProjects.etUser, "", Utils.getFromList(USERS, 5));
+        testFilterResults(serviceObsCreaterProject2, mdlProjects.etUser, "", Utils.getFromList(USERS, 6));
     }
 
     @Test
@@ -464,6 +479,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
+        createForFail(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, anonymousReadAllowed ? H403 : H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
@@ -479,6 +496,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         EntityCreator reset = (user) -> original.withOnlyPk().setProperty(EP_NAME, original.getProperty(EP_NAME));
 
         updateForFail(READ, serviceRead, creator, original, H403);
+        updateForFail(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, original, H403);
+        updateForFail(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, original, H403);
         updateForFail(ANONYMOUS, serviceAnon, creator, original, anonymousReadAllowed ? H404 : H401);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H404);
         updateForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, original, H403);
@@ -916,7 +935,9 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         EntityCreator creator = (user) -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
+        createForFail(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
         createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
+        createForOk(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
     }
 
     @Test
@@ -940,6 +961,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
+        createForFail(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
+        createForOk(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, anonymousReadAllowed ? H403 : H401);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);

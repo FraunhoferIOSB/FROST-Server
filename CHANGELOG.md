@@ -3,6 +3,10 @@
 ## Version 2.5.8-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Projects Plugin:
+  * Automatically create roles `obscreate`, `obsupdate`, `obsdelete`, `obspropcreate`, `obspropupdate`, `obspropdelete`.
+  * `obsprop*` roles can be applied globally, to create users that can manage (all) ObservedProperties.
+  * `obs*` rolea can be applied globally or project related, to create users that can manage only Observations.
 
 
 ## Version 2.5.7

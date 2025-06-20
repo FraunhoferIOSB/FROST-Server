@@ -3,16 +3,6 @@
     "Headers": "Content-Type: application/json",
     "requests": [
         {
-            "id": "roleObsCreater",
-            "atomicityGroup": "group1",
-            "method": "post",
-            "url": "Roles",
-            "body": {
-                "rolename": "obscreate",
-                "description": "Can create Observations for the Projects the user is in."
-            }
-        },
-        {
             "id": "project1",
             "atomicityGroup": "group1",
             "method": "post",
@@ -105,6 +95,34 @@
             "body": {
                 "username": "ObsCreaterProject2",
                 "userpass": "ObsCreaterProject2"
+            }
+        },
+        {
+            "id": "GlobalObsCreater",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "GlobalObsCreater",
+                "userpass": "GlobalObsCreater",
+                "Roles": [
+                    { "rolename": "read" },
+                    { "rolename": "obscreate" }
+                ]
+            }
+        },
+        {
+            "id": "GlobalObsPropCreater",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Users",
+            "body": {
+                "username": "GlobalObsPropCreater",
+                "userpass": "GlobalObsPropCreater",
+                "Roles": [
+                    { "rolename": "read" },
+                    { "rolename": "obspropcreate" }
+                ]
             }
         },
         {

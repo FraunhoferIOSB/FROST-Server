@@ -62,5 +62,47 @@
         </insert>
     </changeSet>
 
+    <changeSet author="scf" id="2025-06-01-ROLES-data-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <sqlCheck expectedResult="0">select count("ROLE_NAME") from "ROLES" where "ROLE_NAME"='obscreate'</sqlCheck>
+        </preConditions>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obscreate" />
+            <column name="DESCRIPTION" value="Can create Observations" />
+        </insert>
+    </changeSet>
+    <changeSet author="scf" id="2025-06-01-ROLES-data-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ROLES" />
+            <sqlCheck expectedResult="0">select count("ROLE_NAME") from "ROLES" where "ROLE_NAME"='obsupdate'</sqlCheck>
+        </preConditions>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obsupdate" />
+            <column name="DESCRIPTION" value="Can update Observations" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obsdelete" />
+            <column name="DESCRIPTION" value="Can delete Observations" />
+        </insert>
+
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obspropcreate" />
+            <column name="DESCRIPTION" value="Can create ObservedProperties" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obspropupdate" />
+            <column name="DESCRIPTION" value="Can update ObservedProperties" />
+        </insert>
+        <insert tableName="ROLES">
+            <column name="ROLE_NAME" value="obspropdelete" />
+            <column name="DESCRIPTION" value="Can delete ObservedProperties" />
+        </insert>
+    </changeSet>
+
+
+
 </databaseChangeLog>
 
