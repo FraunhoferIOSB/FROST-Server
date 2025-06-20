@@ -3,6 +3,10 @@
 ## Development version 2.6.0
 
 **New Features**
+* Projects Plugin:
+  * Automatically create roles `obscreate`, `obsupdate`, `obsdelete`, `obspropcreate`, `obspropupdate`, `obspropdelete`.
+  * `obsprop*` roles can be applied globally, to create users that can manage (all) ObservedProperties.
+  * `obs*` rolea can be applied globally or project related, to create users that can manage only Observations.
 * Added metrics support, sponsored by the city of Hamburg.
 * Added support for EWKT in queries.
 * HTTP Tool on index page now formats returned JSON.

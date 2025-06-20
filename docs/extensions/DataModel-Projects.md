@@ -26,18 +26,26 @@ Users can change their own password.
 
 - read
 - create
-- obscreate
 - update
 - delete
 - admin
+- obscreate
+- obsupdate
+- obsdelete
+- obspropcreate
+- obspropupdate
+- obspropdelete
 
 The `Roles` entity type is only visible to admin users.
 
-Users can have global Roles. The global roles are stored in the `USER_ROLES` table that directly links Users to Roles.
+Users can have global Roles or project-related roles.
+The global roles of users are stored in the `USER_ROLES` table that directly links Users to Roles.
 
 - A global `admin` user is allowed to do everything.
 - A user with a global `create` role is allowed to create all entity types except for Users and admin-only types (Roles, UserProjectRoles).
 - A user with a global `read` role can read all entities, except for other User entities or admin-only types.
+- A user with a global `obscreate`, `obsupdate` or `obsdelete` can create, update or delete Observations, but not other entity types.
+- A user with a global `obspropcreate`, `obspropupdate` or `obspropdelete` can create, update or delete ObservedProperties, but not other entity types.
 
 **Projects** are administrative entities grouping data (through Things).
 Projects are stored in the `PROJECTS` table.

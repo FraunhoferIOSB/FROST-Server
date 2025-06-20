@@ -83,6 +83,8 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         serviceAdmin = AuthTestHelper.setAuthBasic(createService(), "admin", "admin");
         serviceWrite = AuthTestHelper.setAuthBasic(createService(), "write", "write");
         serviceRead = AuthTestHelper.setAuthBasic(createService(), "read", "read");
+        serviceGlObsCr = AuthTestHelper.setAuthBasic(createService(), "GlobalObsCreater", "GlobalObsCreater");
+        serviceGlObsPropCr = AuthTestHelper.setAuthBasic(createService(), "GlobalObsPropCreater", "GlobalObsPropCreater");
         serviceAnon = createService();
         serviceAdminProject1 = AuthTestHelper.setAuthBasic(createService(), "AdminProject1", "AdminProject1");
         serviceAdminProject2 = AuthTestHelper.setAuthBasic(createService(), "AdminProject2", "AdminProject2");
@@ -114,12 +116,12 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 
-        serviceRead = testChangePassword(READ, serviceRead, changed, Utils.getFromList(USERS, 5));
-        serviceWrite = testChangePassword(WRITE, serviceWrite, changed, Utils.getFromList(USERS, 6));
+        serviceRead = testChangePassword(READ, serviceRead, changed, Utils.getFromList(USERS, 7));
+        serviceWrite = testChangePassword(WRITE, serviceWrite, changed, Utils.getFromList(USERS, 8));
         serviceAdminProject1 = testChangePassword(ADMIN_P1, serviceAdminProject1, changed, USERS);
         serviceAdminProject2 = testChangePassword(ADMIN_P2, serviceAdminProject2, changed, USERS);
-        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed, Utils.getFromList(USERS, 3));
-        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed, Utils.getFromList(USERS, 4));
+        serviceObsCreaterProject1 = testChangePassword(OBS_CREATE_P1, serviceObsCreaterProject1, changed, Utils.getFromList(USERS, 5));
+        serviceObsCreaterProject2 = testChangePassword(OBS_CREATE_P2, serviceObsCreaterProject2, changed, Utils.getFromList(USERS, 6));
 
         testChangePasswordFail(WRITE, serviceWrite, changedCopy, READ);
         testChangePasswordFail(ADMIN_P1, serviceAdminProject1, changedCopy, OBS_CREATE_P1);

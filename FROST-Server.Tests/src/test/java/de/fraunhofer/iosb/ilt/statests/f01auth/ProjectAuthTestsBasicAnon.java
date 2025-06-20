@@ -70,6 +70,8 @@ public class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
         serviceAdmin = AuthTestHelper.setAuthBasic(createService(), "admin", "admin");
         serviceWrite = AuthTestHelper.setAuthBasic(createService(), "write", "write");
         serviceRead = AuthTestHelper.setAuthBasic(createService(), "read", "read");
+        serviceGlObsCr = AuthTestHelper.setAuthBasic(createService(), "GlobalObsCreater", "GlobalObsCreater");
+        serviceGlObsPropCr = AuthTestHelper.setAuthBasic(createService(), "GlobalObsPropCreater", "GlobalObsPropCreater");
         serviceAnon = createService();
         serviceAdminProject1 = AuthTestHelper.setAuthBasic(createService(), "AdminProject1", "AdminProject1");
         serviceAdminProject2 = AuthTestHelper.setAuthBasic(createService(), "AdminProject2", "AdminProject2");

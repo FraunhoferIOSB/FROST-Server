@@ -14,7 +14,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "create"
+                  "create",
+                  "obscreate"
                 ]
               },
               {
@@ -34,7 +35,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "update"
+                  "update",
+                  "obsupdate"
                 ]
               },
               {
@@ -43,7 +45,7 @@
                 "subChecks": [
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
-                    "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and (Datastream/Thing/Projects/UserProjectRoles/Role/rolename eq \u0027update\u0027 or Datastream/Thing/Projects/UserProjectRoles/Role/rolename eq \u0027admin\u0027)"
+                    "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and Datastream/Thing/Projects/UserProjectRoles/Role/rolename in (\u0027obsupdate\u0027, \u0027update\u0027, \u0027admin\u0027)"
                   },
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkQuery",
@@ -53,7 +55,8 @@
                   },
                   {
                     "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckNavLinkEmpty",
-                    "targetNavLink": "FeatureOfInterest"
+                    "targetNavLink": "FeatureOfInterest",
+                    "requiredState": "MUST_BE_EMPTY"
                   }
                 ]
               }
@@ -68,12 +71,13 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "delete"
+                  "delete",
+                  "obsdelete"
                 ]
               },
               {
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckEntityQuery",
-                "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and Datastream/Thing/Projects/UserProjectRoles/Role/rolename in (\u0027delete\u0027,\u0027admin\u0027)"
+                "query": "$filter\u003dDatastream/Thing/Projects/UserProjectRoles/User/username eq principalName() and Datastream/Thing/Projects/UserProjectRoles/Role/rolename in (\u0027obsdelete\u0027, \u0027delete\u0027,\u0027admin\u0027)"
               }
             ]
           }

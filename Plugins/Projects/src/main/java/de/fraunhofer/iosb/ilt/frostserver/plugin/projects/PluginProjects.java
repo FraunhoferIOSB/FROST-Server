@@ -154,6 +154,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 pml.addSecurityFile("pluginprojects/sta1/security/secMultiDatastream.json");
             }
             pml.addSecurityFile("pluginprojects/sta1/security/secObservation.json");
+            pml.addSecurityFile("pluginprojects/sta1/security/secObservedProperty.json");
             pml.addSecurityFile("pluginprojects/sta1/security/secProject.json");
             pml.addSecurityFile("pluginprojects/sta1/security/secRole.json");
             pml.addSecurityFile("pluginprojects/sta1/security/secSensor.json");
