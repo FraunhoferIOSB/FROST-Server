@@ -129,6 +129,7 @@
         <version.maven.plugin.surefire>3.5.3</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
+        <version.moquette>0.18.3</version.moquette>
         <version.openjfx>23.0.2</version.openjfx>
         <version.org.json>20231013</version.org.json>
         <version.paho>1.2.5</version.paho>
