@@ -122,10 +122,15 @@ public class QueryState<T extends StaMainTable<T>> {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath instanceof NavigationPropertyEntity navPropEntity) {
                     QueryState childState = getChildState(navPropEntity);
-                    if (tuple.get(childState.getTableRef().getJoinedOnField()) != null) {
+                    final Object joinedFromValue = tuple.get(childState.getTableRef().getJoinedFromField());
+                    final Object joinedTargetValue = tuple.get(childState.getTableRef().getJoinedTargetField());
+                    if (joinedFromValue != null && joinedTargetValue != null) {
                         // This navlink has a target.
                         Entity subEntity = childState.entityFromRecord(tuple, dataSize, expand.getSubQuery());
                         mainEntity.setProperty(navPropEntity, subEntity);
+                    } else if (joinedFromValue != joinedTargetValue) {
+                        // The join failed, probably because the user is not allowed to read the target.
+                        mainEntity.setProperty(navPropEntity, null);
                     }
                 }
             }

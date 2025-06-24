@@ -188,10 +188,12 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
 
         Query subQuery = expand.getSubQuery();
-        if (existing == null || existing.isEmpty()) {
+        if (firstNp instanceof NavigationPropertyEntitySet npes) {
             createExpandedElement(entity, firstNp, subQuery);
-        } else if (existing instanceof EntitySet subEntitySet) {
-            expandEntitySet(subEntitySet, subQuery);
+        } else if (existing == null) {
+            // Nothing to expand.
+        } else if (existing.isEmpty()) {
+            createExpandedElement(entity, firstNp, subQuery);
         } else if (existing instanceof Entity subEntity) {
             expandEntity(subEntity, subQuery);
         }
@@ -227,12 +229,6 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
         Object child = pm.get(ePath, subQuery);
         entity.setProperty(firstNp, child);
-    }
-
-    private void expandEntitySet(EntitySet entitySet, Query subQuery) {
-        for (Entity subEntity : entitySet) {
-            expandEntity(subEntity, subQuery);
-        }
     }
 
     private int timeCountQueryRecord(ResultQuery<Record> query) {

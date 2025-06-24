@@ -123,7 +123,8 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         joinEquals.put(targetField, sourceField);
         return QueryBuilder.createJoinedRef(sourceRef, navProp, targetAliased)
                 .setJoinEquals(joinEquals)
-                .setJoinedOnField(sourceField);
+                .setJoinedTargetField(targetField)
+                .setJoinedFromField(sourceField);
     }
 
     @Override
