@@ -122,6 +122,18 @@ These restrictions can be made using the option `auth.mqtt.topicAllowList`.
 The suggested value for this option is: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`.
 
 
+## Editing many-to-many relations
+
+In the default SensorThings data model, there are no many-to-many relations that can be freely edited.
+As a result, the specification does not explain how a relation can be removed in such a case.
+The Projects plugin, however, does add many-to-many relations, and thus it is relevant to know how to remove an item from such a relation.
+The OData specification explains how to do this in the section [Addressing References between Entities](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_AddressingReferencesbetweenEntities).
+
+In short, these two requests unlink a given Location from a given Project:
+- DELETE https://example.org/FROST-Server/v1.1/Projects(21)/Locations(85)/$ref 
+- DELETE https://example.org/FROST-Server/v1.1/Projects(21)/Locations/$ref?$id=../../Locations(85) 
+
+
 ## Data Model
 
 The image below shows the core STA data model in blue, with the security extension in yellow.
@@ -145,6 +157,9 @@ A new project can be created by posting to v1.1/Projects:
         "public": true
     }
 
+Only users with a global admin or create role can create Projects.
+Project-Admins can update their own Projects, including adding new users, when the user-role-management is done in FROST and not externally in Keycloak.
+
 
 ### Location
 
@@ -163,6 +178,13 @@ The location can be linked to multiple projects, but the user creating the Locat
 
 To make linking to the correct Project easier, the Location can also be created by posting to `v1.1/Projects(42)/Locations`.
 This will automatically link the new Location to the Project referenced in the URL.
+
+For moving things, the SensorThings API specifies that for each "move" of the Thing, a new Location object is created.
+The "old" Locations of the Thing can be found in the automatically created HistoricalLocations navigationLink, with the timestamp of when the Thing arrived at this Location.
+After each "move", a new FeatureOfInterest will be created to link the Observations to that are created in the new Location.
+One should not update an individual Location object to simulate a moving Thing, since the server won't know it has to create a new FeatureOfInterest.
+
+When a Location is updated, for instance to add missing information, the generated FeatureOfInterest is not automatically updated.
 
 
 ### Thing, Sensor
