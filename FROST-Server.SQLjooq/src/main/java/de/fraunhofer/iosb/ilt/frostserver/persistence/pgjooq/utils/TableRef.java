@@ -34,7 +34,8 @@ public class TableRef {
     private final StaMainTable<?> table;
     private final Map<NavigationProperty, TableRef> joins = new HashMap<>();
     private Map<Field, Field> joinEquals;
-    private Field<?> joinedOnField;
+    private Field<?> joinedTargetField;
+    private Field<?> joinedFromField;
 
     public TableRef(StaMainTable<?> table) {
         this.type = table.getEntityType();
@@ -95,12 +96,21 @@ public class TableRef {
         return found;
     }
 
-    public Field<?> getJoinedOnField() {
-        return joinedOnField;
+    public Field<?> getJoinedTargetField() {
+        return joinedTargetField;
     }
 
-    public TableRef setJoinedOnField(Field<?> joinedOnField) {
-        this.joinedOnField = joinedOnField;
+    public TableRef setJoinedTargetField(Field<?> joinedFromField) {
+        this.joinedTargetField = joinedFromField;
+        return this;
+    }
+
+    public Field<?> getJoinedFromField() {
+        return joinedFromField;
+    }
+
+    public TableRef setJoinedFromField(Field<?> joinedOnField) {
+        this.joinedFromField = joinedOnField;
         return this;
     }
 
