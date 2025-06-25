@@ -3,6 +3,7 @@
 ## Version 2.7.0-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed expand returning null link when target can not be read
 
 
 ## Version 2.6.0
