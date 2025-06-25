@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.prometheus.metrics.core.datapoints.Timer;
+import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
 import jakarta.servlet.ServletException;
@@ -66,11 +67,17 @@ public class ServletMain extends HttpServlet {
             .unit(Unit.SECONDS)
             .labelNames("method")
             .register();
+    private static final Counter RESPONSE_CODE = Counter.builder()
+            .name("http_request_response_code_total")
+            .help("HTTP request response counts per response code")
+            .labelNames("responseCode")
+            .register();
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) {
         try (Timer timer = REQUEST_DURATION.labelValues(request.getMethod()).startTimer()) {
             executeRequest(request, response);
         }
+        RESPONSE_CODE.labelValues(Integer.toString(response.getStatus())).inc();
     }
 
     private void executeRequest(HttpServletRequest request, HttpServletResponse response) {

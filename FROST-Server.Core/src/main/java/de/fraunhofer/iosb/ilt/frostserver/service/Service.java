@@ -62,6 +62,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
 import io.prometheus.metrics.core.datapoints.Timer;
+import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.IOException;
@@ -108,12 +109,19 @@ public class Service implements AutoCloseable {
     public static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+    private static final String LABEL_REQUEST_TYPE = "requestType";
+    private static final String LABEL_RESPONSE_CODE = "responseCode";
 
     private static final Histogram REQUEST_DURATION = Histogram.builder()
             .name("service_request_duration_seconds")
             .help("Service request service time in seconds")
             .unit(Unit.SECONDS)
-            .labelNames("requestType")
+            .labelNames(LABEL_REQUEST_TYPE)
+            .register();
+    private static final Counter RESPONSE_CODE = Counter.builder()
+            .name("service_request_response_code_total")
+            .help("Service request response counts per response code")
+            .labelNames(LABEL_RESPONSE_CODE)
             .register();
 
     private static final String EXCEPTION = "Exception:";
@@ -155,6 +163,12 @@ public class Service implements AutoCloseable {
         if (response == null) {
             response = new ServiceResponseDefault();
         }
+        final ServiceResponse finalResponse = doExecute(request, response);
+        RESPONSE_CODE.labelValues(Integer.toString(response.getCode())).inc();
+        return finalResponse;
+    }
+
+    private ServiceResponse doExecute(ServiceRequest request, ServiceResponse response) {
         String requestType = request.getRequestType();
         try (Timer timer = REQUEST_DURATION.labelValues(requestType).startTimer()) {
             switch (requestType) {
