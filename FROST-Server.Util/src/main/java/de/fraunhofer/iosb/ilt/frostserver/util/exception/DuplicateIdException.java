@@ -18,23 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.util.exception;
 
 /**
- * Exception thrown when the user tries to create or update an incomplete
- * entity.
+ * The exception that should be thrown when a user sends a create request with a
+ * duplicate ID.
  */
-public class IncompleteEntityException extends Exception {
+public class DuplicateIdException extends IncorrectRequestException {
 
-    public IncompleteEntityException() {
+    public DuplicateIdException() {
     }
 
-    public IncompleteEntityException(String message) {
+    public DuplicateIdException(String message) {
         super(message);
     }
 
-    public IncompleteEntityException(Throwable cause) {
+    public DuplicateIdException(Throwable cause) {
         super(cause);
     }
 
-    public IncompleteEntityException(String message, Throwable cause) {
+    public DuplicateIdException(String message, Throwable cause) {
         super(message, cause);
     }
 

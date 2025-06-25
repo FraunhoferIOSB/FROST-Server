@@ -81,6 +81,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.DuplicateIdException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -112,6 +113,7 @@ import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.conf.ParamType;
 import org.jooq.exception.DataAccessException;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
@@ -253,10 +255,17 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
             } else {
                 result = task.call();
             }
-        } catch (DataAccessException exc) {
-            if (LOGGER.isWarnEnabled()) {
+        } catch (IntegrityConstraintViolationException exc) {
+            if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Failed to run query:\n{}", loggableQuery.getSQL(ParamType.INLINED));
             }
+            LOGGER.debug("Failed to run query", exc);
+            throw new DuplicateIdException("Data violates constraints.");
+        } catch (DataAccessException exc) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Failed to run query:\n{}", loggableQuery.getSQL(ParamType.INLINED));
+            }
+            LOGGER.debug("Failed to run query", exc);
             throw new IllegalStateException("Failed to run query: " + exc.getMessage());
         }
 

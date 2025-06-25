@@ -19,10 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.util.exception;
 
 /**
  * The exception that should be thrown when a user sends an incorrect request.
- *
- * @author Hylke van der Schaaf
  */
-public class IncorrectRequestException extends Exception {
+public class IncorrectRequestException extends RuntimeException {
 
     public IncorrectRequestException() {
     }

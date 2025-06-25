@@ -114,13 +114,13 @@ public class ServiceDataArray {
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return Service.errorResponse(response, 400, e.getMessage());
+        } catch (IncorrectRequestException ex) {
+            LOGGER.error("Formatter not available.", ex);
+            return Service.errorResponse(response, 500, "Failed to instantiate formatter");
         } catch (RuntimeException e) {
             pm.rollbackAndClose();
             LOGGER.error("CreateObservations failed.", e);
             return Service.errorResponse(response, 500, e.getMessage());
-        } catch (IncorrectRequestException ex) {
-            LOGGER.error("Formatter not available.", ex);
-            return Service.errorResponse(response, 500, "Failed to instantiate formatter");
         } finally {
             service.maybeRollbackAndClose();
         }

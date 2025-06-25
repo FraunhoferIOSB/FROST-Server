@@ -55,6 +55,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.DuplicateIdException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -504,9 +505,12 @@ public class Service implements AutoCloseable {
                 response.addHeader(Constants.HEADER_LOCATION, url);
             }
             return formatResponse(response, formatter, query, path, entity);
-        } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
+        } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, 409, exc.getMessage());
+        } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException exc) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 400, exc.getMessage());
         }
     }
 
@@ -576,6 +580,9 @@ public class Service implements AutoCloseable {
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, "Failed to patch entity.");
             }
+        } catch (DuplicateIdException exc) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 409, exc.getMessage());
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
@@ -606,6 +613,9 @@ public class Service implements AutoCloseable {
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
+        } catch (DuplicateIdException exc) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 409, exc.getMessage());
         } catch (IllegalArgumentException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
@@ -696,6 +706,9 @@ public class Service implements AutoCloseable {
                 pm.rollbackAndClose();
                 return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
+        } catch (DuplicateIdException exc) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 409, exc.getMessage());
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
