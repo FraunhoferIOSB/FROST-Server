@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="scf" id="2024-05-05-fk_datastreams_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_sensor_id" foreignKeyTableName="datastreams" />
@@ -35,7 +35,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_datastreams_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_thing_id" foreignKeyTableName="datastreams" />
@@ -49,21 +49,35 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_datastreams_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_ultimate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_feature_id" foreignKeyTableName="datastreams" />
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_ultimate_feature_id" foreignKeyTableName="datastreams" />
             </not>
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_datastreams_feature_id"
-            baseTableName="datastreams" baseColumnNames="feature_id"
+            constraintName="fk_datastreams_ultimate_feature_id"
+            baseTableName="datastreams" baseColumnNames="ultimate_feature_id"
             referencedTableName="features" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_features_feature_types_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_proximate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_proximate_feature_id" foreignKeyTableName="datastreams" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_proximate_feature_id"
+            baseTableName="datastreams" baseColumnNames="proximate_feature_id"
+            referencedTableName="features" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_features_feature_types_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_id" foreignKeyTableName="features_feature_types" />
@@ -77,7 +91,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_features_feature_types_feature_type_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_features_feature_types_feature_type_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_type_id" foreignKeyTableName="features_feature_types" />
@@ -91,7 +105,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_hist_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_hist_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_hist_locations_thing_id" foreignKeyTableName="hist_locations" />
@@ -105,7 +119,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_locations_hist_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_locations_hist_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_location_id" foreignKeyTableName="locations_hist_locations" />
@@ -119,7 +133,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_locations_hist_locations_hist_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_locations_hist_locations_hist_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_hist_location_id" foreignKeyTableName="locations_hist_locations" />
@@ -133,7 +147,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_observations_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_observations_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observations_datastream_id" foreignKeyTableName="observations" />
@@ -147,7 +161,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_observations_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_observations_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observations_feature_id" foreignKeyTableName="observations" />
@@ -161,7 +175,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_datastreams_observed_properties_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_observed_properties_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_observed_property_id" foreignKeyTableName="datastreams_observed_properties" />
@@ -175,7 +189,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_datastreams_observed_properties_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_datastreams_observed_properties_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_datastream_id" foreignKeyTableName="datastreams_observed_properties" />
@@ -189,7 +203,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_things_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_things_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_things_locations_thing_id" foreignKeyTableName="things_locations" />
@@ -203,7 +217,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-fk_things_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_things_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_things_locations_location_id" foreignKeyTableName="things_locations" />

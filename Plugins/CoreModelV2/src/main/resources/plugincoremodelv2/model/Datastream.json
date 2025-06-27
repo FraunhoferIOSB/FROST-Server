@@ -173,14 +173,14 @@
                     "annotations": []
                 },
                 {
-                    "name": "ultimateFeatureOfInterest",
+                    "name": "UltimateFeatureOfInterest",
                     "entitySet": false,
                     "entityType": "Feature",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,
                     "inverse": {
-                        "name": "Datastreams",
+                        "name": "DatastreamsUltimate",
                         "entitySet": true,
                         "required": false,
                         "priority": 0,
@@ -189,7 +189,31 @@
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "feature_id",
+                            "field": "ultimate_feature_id",
+                            "otherTable": "features",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "ProximateFeatureOfInterest",
+                    "entitySet": false,
+                    "entityType": "Feature",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "DatastreamsProximate",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "proximate_feature_id",
                             "otherTable": "features",
                             "otherField": "id"
                         }

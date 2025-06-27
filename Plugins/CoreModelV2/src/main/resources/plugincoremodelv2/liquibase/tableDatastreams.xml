@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="scf" id="2024-05-05-datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Datastream" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Datastream" value="STRING" />
@@ -52,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="datastreams" />
@@ -65,7 +65,8 @@
             <column name="thing_id" type="${idType-Thing}">
                 <constraints nullable="false"/>
             </column>
-            <column name="feature_id" type="${idType-Feature}"/>
+            <column name="ultimate_feature_id" type="${idType-Feature}"/>
+            <column name="proximate_feature_id" type="${idType-Feature}"/>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
@@ -79,7 +80,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-idx-sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-idx-sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="datastreams" indexName="datastreams_sensor_id" />
@@ -90,7 +91,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="datastreams" indexName="datastreams_thing_id" />
@@ -101,14 +102,25 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="scf" id="2024-05-05-datastreams-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-datastreams-idx-ultimate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="datastreams" indexName="datastreams_feature_id" />
+                <indexExists tableName="datastreams" indexName="datastreams_ultimate_feature_id" />
             </not>
         </preConditions>
-        <createIndex tableName="datastreams" indexName="datastreams_feature_id">
-            <column name="feature_id" />
+        <createIndex tableName="datastreams" indexName="datastreams_ultimate_feature_id">
+            <column name="ultimate_feature_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-datastreams-idx-proximate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="datastreams" indexName="datastreams_proximate_feature_id" />
+            </not>
+        </preConditions>
+        <createIndex tableName="datastreams" indexName="datastreams_proximate_feature_id">
+            <column name="proximate_feature_id" />
         </createIndex>
     </changeSet>
 
