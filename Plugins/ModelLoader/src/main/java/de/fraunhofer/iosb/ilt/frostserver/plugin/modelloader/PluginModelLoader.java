@@ -144,8 +144,9 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         modelFiles.add(fullFile.toString());
     }
 
-    public void addModelFile(String filename) {
+    public PluginModelLoader addModelFile(String filename) {
         modelFiles.add(filename);
+        return this;
     }
 
     private void addSecurityFileWithPath(String fileName) {
@@ -158,12 +159,19 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         securityFiles.add(fullFile.toString());
     }
 
-    public void addSecurityFile(String filename) {
+    public PluginModelLoader addSecurityFile(String filename) {
         securityFiles.add(filename);
+        return this;
     }
 
-    public void addLiquibaseFile(String filename) {
+    public PluginModelLoader addLiquibaseFile(String filename) {
         liquibaseFiles.add(filename);
+        return this;
+    }
+
+    public PluginModelLoader addConformanceItem(String item) {
+        conformance.add(item);
+        return this;
     }
 
     private <T> T loadfile(String fullPathString, Class<T> clazz) {
