@@ -17,13 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2;
 
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
-import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
-import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.Plugin;
@@ -45,14 +44,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The core data model of STA Version 2.0.
  */
 public class PluginCoreModelV2 implements Plugin, PluginRootDocument, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModelV2.class.getName());
     private static final List<String> REQUIREMENTS_CORE_MODEL = Arrays.asList(
             "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core");
+
+    public static final String CONFORMANCE_CLASS_CORE_MODEL = "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core";
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_PCMV2 = "coreModelV2.enable";
@@ -64,24 +64,30 @@ public class PluginCoreModelV2 implements Plugin, PluginRootDocument, ConfigDefa
     public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
+        boolean enabledV1 = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, CoreModelSettings.class);
         enabled = pluginSettings.getBoolean(TAG_ENABLE_PCMV2, PluginCoreModelV2.class);
         if (enabled) {
+            if (enabledV1) {
+                LOGGER.error("Can not enable both CoreModelV1 and CoreModelV2");
+                return InitResult.INIT_FAILED;
+            }
             final PluginManager pluginManager = settings.getPluginManager();
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             if (pml == null || !pml.isEnabled()) {
                 LOGGER.warn("PluginModelLoader must be enabled first, delaying initialisation...");
                 return INIT_DELAY;
             }
-            pml.addLiquibaseFile("plugincoremodelv2/liquibase/tables.xml");
-            pml.addModelFile("plugincoremodelv2/model/Datastream.json");
-            pml.addModelFile("plugincoremodelv2/model/Feature.json");
-            pml.addModelFile("plugincoremodelv2/model/FeatureType.json");
-            pml.addModelFile("plugincoremodelv2/model/HistoricalLocation.json");
-            pml.addModelFile("plugincoremodelv2/model/Location.json");
-            pml.addModelFile("plugincoremodelv2/model/Observation.json");
-            pml.addModelFile("plugincoremodelv2/model/ObservedProperty.json");
-            pml.addModelFile("plugincoremodelv2/model/Sensor.json");
-            pml.addModelFile("plugincoremodelv2/model/Thing.json");
+            pml.addLiquibaseFile("plugincoremodelv2/liquibase/tables.xml")
+                    .addModelFile("plugincoremodelv2/model/Datastream.json")
+                    .addModelFile("plugincoremodelv2/model/Feature.json")
+                    .addModelFile("plugincoremodelv2/model/FeatureType.json")
+                    .addModelFile("plugincoremodelv2/model/HistoricalLocation.json")
+                    .addModelFile("plugincoremodelv2/model/Location.json")
+                    .addModelFile("plugincoremodelv2/model/Observation.json")
+                    .addModelFile("plugincoremodelv2/model/ObservedProperty.json")
+                    .addModelFile("plugincoremodelv2/model/Sensor.json")
+                    .addModelFile("plugincoremodelv2/model/Thing.json")
+                    .addConformanceItem(CONFORMANCE_CLASS_CORE_MODEL);
             pluginManager.registerPlugin(this);
         }
         return InitResult.INIT_OK;
@@ -95,28 +101,21 @@ public class PluginCoreModelV2 implements Plugin, PluginRootDocument, ConfigDefa
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
         Version version = request.getVersion();
-        if (version == PluginCoreService.V_1_1) {
-            Map<String, Object> serverSettings = new LinkedHashMap<>();
-            result.put(KEY_SERVER_SETTINGS, serverSettings);
-
-            final Set<Extension> enabledSettings = settings.getEnabledExtensions();
-            Set<String> extensionList = new TreeSet<>();
-            serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
-            for (Extension setting : enabledSettings) {
-                if (setting.isExposedFeature()) {
-                    extensionList.addAll(setting.getRequirements());
-                }
-            }
-
-            settings.getMqttSettings().fillServerSettings(serverSettings);
-        }
-
-        Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
-        if (serverSettings == null) {
-            // Nothing to add to.
+        if (version != PluginCoreServiceV2.VERSION_STA_2_0) {
             return;
         }
-        Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
+        Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(Service.KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
+
+        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
+        Set<String> extensionList = (Set<String>) serverSettings.computeIfAbsent(Service.KEY_CONFORMANCE_LIST, t -> new TreeSet<>());
+        for (Extension setting : enabledSettings) {
+            if (setting.isExposedFeature()) {
+                extensionList.addAll(setting.getRequirements());
+            }
+        }
+
+        settings.getMqttSettings().fillServerSettings(serverSettings);
+
         extensionList.addAll(REQUIREMENTS_CORE_MODEL);
     }
 
