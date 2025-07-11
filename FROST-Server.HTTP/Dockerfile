@@ -1,5 +1,8 @@
 FROM tomcat:10-jre21
 
+# Set compression="ON" on server.xml
+RUN sed -i 's/\(<Connector port="8080" protocol="HTTP\/1.1"\)/\1 compression="on" /' conf/server.xml
+
 RUN apt-get update && apt-get install unzip && apt-get clean
 
 # Copy to images tomcat path
