@@ -3,6 +3,7 @@
 ## Version 2.6.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Enabled compression in Tomcat.
 
 
 ## Version 2.6.0
