@@ -82,11 +82,11 @@
         <sonar.language>java</sonar.language>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
-        <version.FROST-Client-Dynamic>2.29</version.FROST-Client-Dynamic>
+        <version.FROST-Client-Dynamic>2.30</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
         <version.commons-csv>1.14.0</version.commons-csv>
-        <version.commons-io>2.19.0</version.commons-io>
-        <version.commons-lang3>3.17.0</version.commons-lang3>
+        <version.commons-io>2.20.0</version.commons-io>
+        <version.commons-lang3>3.18.0</version.commons-lang3>
         <version.commons-text>1.13.1</version.commons-text>
         <version.configurable>0.37</version.configurable>
         <version.congocc>2.0.0-RC5</version.congocc>
@@ -94,20 +94,20 @@
         <version.geolatte-common>0.8</version.geolatte-common>
         <version.guava>33.4.8-jre</version.guava>
         <version.httpclient>4.5.14</version.httpclient>
-        <version.jackson>2.19.1</version.jackson>
+        <version.jackson>2.19.2</version.jackson>
         <version.jackson-databind>${version.jackson}</version.jackson-databind>
         <version.jacksonGeojson>1.14</version.jacksonGeojson>
         <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
         <version.jakartaee-web-api>11.0.0</version.jakartaee-web-api>
-        <version.jetty>12.0.22</version.jetty>
+        <version.jetty>12.0.23</version.jetty>
         <version.jooq>3.20.5</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.13.1</version.junit>
-        <version.junit-platform-suite>1.13.1</version.junit-platform-suite>
+        <version.junit>5.13.3</version.junit>
+        <version.junit-platform-suite>1.13.3</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
-        <version.liquibase>4.32.0</version.liquibase>
+        <version.liquibase>4.33.0</version.liquibase>
         <version.logback>1.5.18</version.logback>
-        <version.mariadb>3.5.3</version.mariadb>
+        <version.mariadb>3.5.4</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.1</version.maven.plugin.build-helper>
@@ -118,14 +118,14 @@
         <version.maven.plugin.download>1.13.0</version.maven.plugin.download>
         <version.maven.plugin.exec>3.5.1</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>9.0.2</version.maven.plugin.git-commit-id>
-        <version.maven.plugin.gpg>3.2.7</version.maven.plugin.gpg>
+        <version.maven.plugin.gpg>3.2.8</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.13</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.4.2</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.11.2</version.maven.plugin.javadoc>
         <version.maven.plugin.release>3.1.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.0</version.maven.plugin.shade>
         <version.maven.plugin.source>3.3.1</version.maven.plugin.source>
-        <version.maven.plugin.spotless>2.44.5</version.maven.plugin.spotless>
+        <version.maven.plugin.spotless>2.46.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.5.3</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.4.0</version.maven.plugin.war>
 
@@ -135,10 +135,10 @@
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
         <version.postgres>42.7.7</version.postgres>
-        <version.prometheus>1.3.8</version.prometheus>
+        <version.prometheus>1.3.10</version.prometheus>
         <version.slf4j-api>2.0.17</version.slf4j-api>
-        <version.testcontainers>1.21.2</version.testcontainers>
-        <version.testcontainers-keycloak>3.7.0</version.testcontainers-keycloak>
+        <version.testcontainers>1.21.3</version.testcontainers>
+        <version.testcontainers-keycloak>3.8.0</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
