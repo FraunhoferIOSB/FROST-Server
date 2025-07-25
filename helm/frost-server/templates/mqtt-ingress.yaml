@@ -1,4 +1,4 @@
-{{- if and .Values.frost.mqtt.ingress.enabled -}}
+{{- if .Values.frost.mqtt.ingress.enabled -}}
 {{- $tier := "mqtt" -}}
 {{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier "merge" .Values.frost.mqtt.ingress.useSameAsHttp ) .) -}}
 {{- $combine := false -}}
