@@ -12,8 +12,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "frost-server.fullName" -}}
 {{- $name := default .Chart.Name .Values.name -}}
-{{- if .tier -}}
+{{- if and .tier (not .merge) -}}
 {{- printf "%s-%s-%s" .Release.Name $name .tier | trunc 63 | trimSuffix "-" -}}
+{{- else if .merge -}}
+{{- printf "%s-%s-minion-%s" .Release.Name $name .tier | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -65,7 +67,11 @@ Get the HTTP service SubPath
 Get the MQTT serviceHost.
 */}}
 {{- define "frost-server.mqtt.serviceHost" -}}
-  {{ if not .Values.frost.mqtt.serviceHost | empty }}{{ .Values.frost.mqtt.serviceHost }}{{else}}{{ .Values.frost.http.serviceHost }}{{end}}
+  {{- if or .Values.frost.mqtt.ingress.useSameAsHttp ( .Values.frost.mqtt.serviceHost | empty ) -}}
+    {{- printf "%s" .Values.frost.http.serviceHost -}}
+  {{- else -}}
+    {{- printf "%s" .Values.frost.mqtt.serviceHost -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -104,8 +110,16 @@ Get the MQTT TCP service EndPoint
 Get the default agic rewriteAnnotations for ingress.
 */}}
 {{- define "frost-server.ingress.rewriteAnnotation" -}}
-  {{- $myannotations := dict -}}  
-  {{- if eq .scope.ingress.ingressProvider "agic" -}} {{/* Set annotations for ingress of type azure agic */}}
+  {{- $myannotations := dict -}} 
+  {{- $ingressProvider := "default" -}} 
+  {{- if and .scope.ingress.ingressProvider ( not .combine ) -}}
+    {{- $ingressProvider = .scope.ingress.ingressProvider -}}
+  {{- else if .combine -}}
+    {{- if .combine.ingress.ingressProvider -}}
+      {{- $ingressProvider = .combine.ingress.ingressProvider -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if eq $ingressProvider "agic" -}} {{/* Set annotations for ingress of type azure agic */}}
     {{- if .scope.ingress.tls.enabled -}}
       {{- $_ := set $myannotations "appgw.ingress.kubernetes.io/ssl-redirect" "true" -}}
     {{- end -}}
@@ -114,8 +128,9 @@ Get the default agic rewriteAnnotations for ingress.
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
       {{/* put here default annotations for mqtt-service */}}
+      {{/* AGIV seems to be (out of the box) able to handle websocket without additional annotations*/}}
     {{- end -}}
-  {{- else if eq .scope.ingress.ingressProvider "traefik" -}} {{/* Set annotations for ingress of type traefik */}}
+  {{- else if eq $ingressProvider "traefik" -}} {{/* Set annotations for ingress of type traefik */}}
     {{- if .scope.ingress.tls.enabled -}}
       {{- $_ := set $myannotations "traefik.ingress.kubernetes.io/router.tls" "true" -}}
     {{- end -}}
@@ -123,8 +138,24 @@ Get the default agic rewriteAnnotations for ingress.
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
       {{/* put here default annotations for mqtt-service */}}
+      {{/* TRAEFIK seems to be (out of the box) able to handle websockets without additional annotations*/}}
     {{- end -}}
-  {{- else if eq .scope.ingress.ingressProvider "nginx" -}} {{/* Set annotations for ingress of type kubernetes.nginx */}}
+  {{- else if eq $ingressProvider "nginx-nginx" -}} {{/* Set annotations for ingress of type nginx.nginx */}}
+    {{- if .scope.ingress.tls.enabled -}}
+      {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/ssl-redirect" "true" -}}
+    {{- end -}}
+    {{- if eq .type "http" -}}
+      {{- $_ := set $myannotations "nginx.org/rewrites" (printf "serviceName=%s rewrite=/FROST-Server" .fullName ) -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-set-headers" (printf "X-Forwarded-Path: %s" .path ) -}}
+      {{/* put here default annotations for http-service */}}
+    {{- else if eq .type "mqtt" -}}
+      {{- $_ := set $myannotations "nginx.org/websocket-services" .fullName -}}
+      {{- $_ := set $myannotations "nginx.org/location-snippets" (printf "proxy_cache_bypass $http_upgrade" ) -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-read-timeout" "3600" -}}
+      {{- $_ := set $myannotations "nginx.org/proxy-send-timeout" "3600" -}}
+      {{/* put here default annotations for mqtt-service */}}
+    {{- end -}}
+  {{- else if or (eq $ingressProvider "kubernetes-nginx") (eq $ingressProvider "default") -}} {{/* Set annotations for ingress of type kubernetes.nginx */}}
     {{- if .scope.ingress.tls.enabled -}}
       {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/ssl-redirect" "true" -}}
     {{- end -}}
@@ -132,7 +163,8 @@ Get the default agic rewriteAnnotations for ingress.
       {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/rewrite-target" "/FROST-Server/$1" -}}
       {{/* put here default annotations for http-service */}}
     {{- else if eq .type "mqtt" -}}
-      {{- $_ := set $myannotations "nginx.mqtt.hamel.test" "true" -}}
+      {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/proxy-read-timeout" "3600" -}}
+      {{- $_ := set $myannotations "nginx.ingress.kubernetes.io/proxy-send-timeout" "3600" -}}
       {{/* put here default annotations for mqtt-service */}}
     {{- end -}}
   {{- end -}}

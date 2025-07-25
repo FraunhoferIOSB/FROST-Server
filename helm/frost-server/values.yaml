@@ -89,7 +89,7 @@ frost:
       enable:
 
   auth:
-    provider:
+    provider: 
     allowAnonymousRead: false
     authenticateOnly:
     role:
@@ -140,11 +140,12 @@ frost:
         nodePort:
         servicePort: 80
     ingress:
-      enabled: true      
+      enabled: true     
       ## Set a specific ingress-class for the ingress ([default] not set)
-      # className: nginx-hamel
-      ## Defines the type of ingress-Controller in use (nginx [default], agic ) 
-      # ingressProvider: agic
+      # ingressClassName: nginx
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none ) 
+      ## Use "none" to disable render predefined annotations for this service
+      # ingressProvider: "nginx-nginx"
       ## Additional annotations
       # annotations:
       #   cert-manager.io/cluster-issuer: letsencrypt
@@ -174,7 +175,7 @@ frost:
     securityContext:
 
     # FROST-Server HTTP business settings
-    serviceHost: frost-server
+    serviceHost: frost.mydomain.com
     urlSubPath: ""
     serviceProtocol: http
     servicePort:
@@ -259,23 +260,25 @@ frost:
         message_size: 8092
 
     ingress:
-      enabled: true      
+      enabled: true
+      ## Set to true to use the same ingress as the HTTP service, otherwise set to false
+      ## no dedicated ingress will be created for the MQTT service
+      useSameAsHttp: false
       ## Set a specific ingress-class for the ingress ([default] not set)
-      # className: azure-application-gateway
-      ## Defines the type of ingress-Controller in use (nginx [default], agic or traefik) 
-      # ingressProvider: agic
+      # ingressClassName: nginx
+      ## Defines the type of ingress-Controller in use (kubernetes-nginx [default], nginx-nginx, agic, none) 
+      ## Use "none" to disable render predefined annotations for this service
+      # ingressProvider: "nginx-nginx"
       ## Additional annotations
-      annotations:
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-        # cert-manager.io/cluster-issuer: letsencrypt
-        # cert-manager.io/issue-temporary-certificate: "true"
+      # annotations:
+      #   cert-manager.io/cluster-issuer: letsencrypt
+      #   cert-manager.io/issue-temporary-certificate: "true"
       tls:
         enabled: false
         secretName: []
 
     # FROST-Server MQTT business settings
-    serviceHost: "" # default URI is the same then frost.http.serviceHost"
+    serviceHost: "mqtt.mydomain.com" # default URI is overwritten, when mqtt.ingress.useSameAsHttp=true the URI is taken from frost.http.serviceHost"
     urlSubPath: "" # default is mqtt 
     serviceProtocol: http
     qos: 2
