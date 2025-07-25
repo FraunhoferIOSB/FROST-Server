@@ -264,7 +264,7 @@ frost:
         secretName: []
 
     # FROST-Server MQTT business settings
-    serviceHost: "mqtt.mydomain.com" # default URI is the same then frost.http.serviceHost"
+    serviceHost: "mqtt.mydomain.com" # default URI is overwritten, when mqtt.ingress.useSameAsHttp=true the URI is taken from frost.http.serviceHost"
     urlSubPath: "" # default is mqtt 
     serviceProtocol: http
     qos: 2
