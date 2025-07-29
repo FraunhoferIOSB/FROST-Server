@@ -128,6 +128,13 @@ public class TableCollection {
         }
     }
 
+    public void initSecurity(JooqPersistenceManager ppm) {
+        for (StaMainTable<?> table : getAllTables()) {
+            initSecurityWrapper(table);
+            initSecurityValidators(table, ppm);
+        }
+    }
+
     /**
      * @return the tablesByType
      */

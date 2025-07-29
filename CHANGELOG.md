@@ -3,6 +3,7 @@
 ## Version 2.6.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed timing of security wrapper initialisation.
 * Enabled compression in Tomcat.
 
 
