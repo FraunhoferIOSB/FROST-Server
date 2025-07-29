@@ -30,7 +30,7 @@ import org.jooq.impl.DSL;
 /**
  * MariaDB implementation of the JOOQ Persistence Manager.
  */
-public class MariadbPersistenceManager extends JooqAbstractPersistenceManager {
+public class MariadbPersistenceManager extends JooqAbsPersistenceManager {
 
     private DSLContext dslContext;
 

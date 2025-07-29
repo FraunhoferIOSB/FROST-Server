@@ -30,7 +30,7 @@ import org.jooq.impl.DSL;
 /**
  * PostgreSQL implementation of the JOOQ Persistence Manager.
  */
-public class PostgresPersistenceManager extends JooqAbstractPersistenceManager {
+public class PostgresPersistenceManager extends JooqAbsPersistenceManager {
 
     private DSLContext dslContext;
 

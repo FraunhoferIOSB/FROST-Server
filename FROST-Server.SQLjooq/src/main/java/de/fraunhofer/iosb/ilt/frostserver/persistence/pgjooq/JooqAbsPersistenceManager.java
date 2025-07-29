@@ -122,9 +122,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Common implementation of the JOOQ Persistence managers.
  */
-public abstract class JooqAbstractPersistenceManager extends AbstractPersistenceManager implements JooqPersistenceManager {
+public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManager implements JooqPersistenceManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JooqAbstractPersistenceManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JooqAbsPersistenceManager.class.getName());
     public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/core.xml";
 
     public static final String DATETIME_MAX_INSTANT = "9999-12-30T23:59:59.999Z";
