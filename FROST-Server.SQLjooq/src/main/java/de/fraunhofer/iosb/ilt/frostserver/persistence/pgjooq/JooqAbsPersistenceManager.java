@@ -210,6 +210,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 if (tableCollection.init(this)) {
                     loadMapping();
                     validateMappings();
+                    tableCollection.initSecurity(this);
                 }
                 initialised = true;
             }
@@ -665,8 +666,6 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                     LOGGER.info("  Table: {}.", tableName);
                     getDbTable(tableName);
                     StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
-                    tableCollection.initSecurityWrapper(mainTable);
-                    tableCollection.initSecurityValidators(mainTable, this);
                 }
             }
         }
