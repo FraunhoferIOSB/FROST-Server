@@ -119,8 +119,6 @@ public class TableCollection {
                     LOGGER.info("  Table: {}.", table.getName());
                     table.initProperties(entityFactories);
                     table.initRelations();
-                    initSecurityWrapper(table);
-                    initSecurityValidators(table, ppm);
                 }
                 return true;
             }
@@ -195,6 +193,9 @@ public class TableCollection {
     public void addSecurityValidator(String tableName, HookValidator hv) {
         if (securityValidators == null) {
             securityValidators = new HashMap<>();
+        }
+        if (hv == null) {
+            return;
         }
         securityValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
                 .add(hv);

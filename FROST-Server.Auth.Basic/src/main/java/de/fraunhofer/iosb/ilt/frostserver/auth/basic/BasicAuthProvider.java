@@ -23,6 +23,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -104,6 +106,16 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
+
+        if (authenticateOnly) {
+            PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
+            if (pm instanceof JooqPersistenceManager jpm) {
+                // Ensure security validators are initialised even if no specific
+                // security validators are defined.
+                jpm.getTableCollection().addSecurityValidator("", null);
+            }
+        }
+
         return InitResult.INIT_OK;
     }
 
