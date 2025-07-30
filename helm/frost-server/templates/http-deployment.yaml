@@ -175,6 +175,14 @@ spec:
               value: "{{ .Values.frost.http.db.maximumIdleConnection }}"
             - name: persistence_db_conn_idle_min
               value: "{{ .Values.frost.http.db.maximumIdleConnection }}"
+            - name: persistence_db_conn_testOnBorrow
+              value: "{{ .Values.frost.http.db.testOnBorrow }}"
+            - name: persistence_db_conn_testWhileIdle
+              value: "{{ .Values.frost.http.db.testWhileIdle }}"
+            - name: persistence_db_conn_validationQuery
+              value: "{{ .Values.frost.http.db.validationQuery }}"
+            - name: persistence_db_conn_timeBetweenEvictionRunsMillis
+              value: "{{ .Values.frost.http.db.timeBetweenEvictionRunsMillis }}"
             - name: persistence_db_username
               valueFrom:
                 secretKeyRef:

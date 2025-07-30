@@ -207,6 +207,10 @@ frost:
       maximumConnection: 10
       maximumIdleConnection: 10
       minimumIdleConnection: 10
+      testOnBorrow: false
+      testWhileIdle: false
+      validationQuery: ""
+      timeBetweenEvictionRunsMillis: 0
 
     # FROST-Server Messages Bus related settings to the FROST-Server HTTP
     bus:
@@ -292,6 +296,10 @@ frost:
       maximumConnection: 10
       maximumIdleConnection: 10
       minimumIdleConnection: 10
+      testOnBorrow: false
+      testWhileIdle: false
+      validationQuery: ""
+      timeBetweenEvictionRunsMillis: 0
 
     # FROST-Server Messages Bus related settings to the FROST-Server MQTT
     bus:
