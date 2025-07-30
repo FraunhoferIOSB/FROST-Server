@@ -193,6 +193,14 @@ spec:
               value: "{{ .Values.frost.mqtt.db.maximumIdleConnection }}"
             - name: persistence_db_conn_idle_min
               value: "{{ .Values.frost.mqtt.db.minimumIdleConnection }}"
+            - name: persistence_db_conn_testOnBorrow
+              value: "{{ .Values.frost.mqtt.db.testOnBorrow }}"
+            - name: persistence_db_conn_testWhileIdle
+              value: "{{ .Values.frost.mqtt.db.testWhileIdle }}"
+            - name: persistence_db_conn_validationQuery
+              value: "{{ .Values.frost.mqtt.db.validationQuery }}"
+            - name: persistence_db_conn_timeBetweenEvictionRunsMillis
+              value: "{{ .Values.frost.mqtt.db.timeBetweenEvictionRunsMillis }}"
             - name: persistence_db_username
               valueFrom:
                 secretKeyRef:

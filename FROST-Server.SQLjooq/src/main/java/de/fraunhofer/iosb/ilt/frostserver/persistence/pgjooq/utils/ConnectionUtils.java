@@ -67,6 +67,16 @@ public class ConnectionUtils implements ConfigDefaults {
     public static final String TAG_DB_MAXIDLE = "db.conn.idle.max";
     public static final String TAG_DB_MINIDLE = "db.conn.idle.min";
 
+    // Connection validation settings
+    @DefaultValue("false")
+    public static final String TAG_DB_TEST_ON_BORROW = "db.conn.testOnBorrow";
+    @DefaultValue("false")
+    public static final String TAG_DB_TEST_WHILE_IDLE = "db.conn.testWhileIdle";
+    @DefaultValue("")
+    public static final String TAG_DB_VALIDATION_QUERY = "db.conn.validationQuery";
+    @DefaultValue("0")
+    public static final String TAG_DB_EVICTION_INTERVAL = "db.conn.timeBetweenEvictionRunsMillis";
+
     /**
      * The logger for this class.
      */
@@ -131,6 +141,21 @@ public class ConnectionUtils implements ConfigDefaults {
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
+
+            // Connection validation settings (default false for backward compatibility)
+            ds.setTestOnBorrow(settings.getBoolean(TAG_DB_TEST_ON_BORROW, false));
+            ds.setTestWhileIdle(settings.getBoolean(TAG_DB_TEST_WHILE_IDLE, false));
+
+            String validationQuery = settings.get(TAG_DB_VALIDATION_QUERY, ConnectionUtils.class);
+            if (!validationQuery.isEmpty()) {
+                ds.setValidationQuery(validationQuery);
+            }
+
+            long evictionInterval = settings.getLong(TAG_DB_EVICTION_INTERVAL, 0L);
+            if (evictionInterval > 0) {
+                ds.setTimeBetweenEvictionRunsMillis(evictionInterval);
+            }
+
             return ds;
         } catch (ClassNotFoundException exc) {
             throw new IllegalArgumentException(exc);
