@@ -213,6 +213,14 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
   The maximum number of idle database connections to keep open, when not using JNDI.
 * **persistence.db.conn.idle.min:**  
   The minimum number of idle database connections to keep open, when not using JNDI.
+* **persistence.db.conn.testOnBorrow:**  
+  If true, connections are validated before being borrowed from the pool. Default: `false` (for backward compatibility).
+* **persistence.db.conn.testWhileIdle:**  
+  If true, connections are validated during idle periods. Default: `false` (for backward compatibility).
+* **persistence.db.conn.validationQuery:**  
+  The SQL query used to validate connections (e.g., `SELECT 1` for PostgreSQL). Empty by default.
+* **persistence.db.conn.timeBetweenEvictionRunsMillis:**  
+  The time in milliseconds between eviction runs for idle connections. Set to 0 to disable. Default: `0`.
 * **persistence.db.schemaPriority:** Since 2.2.0  
   When searching table definitions, if a table with a given name is found in multiple schemas,
   use this comma-separated list of schemas to determine which table to use.
