@@ -162,9 +162,9 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
             pml.addSecurityFile("pluginprojects/sta1/security/secUser.json");
             pml.addSecurityFile("pluginprojects/sta1/security/secUserProjectRole.json");
             if (actuation) {
-                pml.addSecurityFile("pluginprojects/sta1/security/.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/.json");
-                pml.addSecurityFile("pluginprojects/sta1/security/.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secActuator.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secTask.json");
+                pml.addSecurityFile("pluginprojects/sta1/security/secTaskingCapability.json");
             }
         }
         autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);
