@@ -353,8 +353,8 @@ frost:
     existingSecret:
     secretUsernameKey: db.username
     secretPasswordKey: db.password
-    username: c2Vuc29ydGhpbmdz
-    password: bm93eW91Y2FuY2hhbmdlaXQ=
+    username:
+    password:
     securityContext:
       runAsUser:
       runAsGroup:
