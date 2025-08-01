@@ -46,7 +46,7 @@ spec:
   - host: {{ include "frost-server.http.serviceHost" . }}
     http:
       paths:
-      - path: {{ template "frost-server.http.serviceSubPath" . }}
+      - path: {{ if .Values.frost.http.ingress.path }}{{ .Values.frost.http.ingress.path  }}{{ else }}{{ template "frost-server.http.serviceSubPath" . }}{{ end }}
         pathType: Prefix
         backend:
           service:
