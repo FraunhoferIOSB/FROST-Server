@@ -45,8 +45,8 @@ The server can operate on these, for instance by adding a navigationLink when re
     Get V1.0/Things(1)
     {
         "Properties" : {
-            "building.Thing@Iot.Id": 45,
-            "building.Thing@Iot.Navigationlink": "http://example.org/Frost-Server/V1.0/Things(45)"
+            "building.Thing@iot.id": 45,
+            "building.Thing@iot.navigationLink": "http://example.org/Frost-Server/V1.0/Things(45)"
         }
     }
 
