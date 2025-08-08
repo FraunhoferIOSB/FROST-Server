@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -141,6 +142,7 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void initPlugins(PersistenceManager pm) {
+        DefaultFunctions.registerDefaultFunctions(settings.getFunctionRegistry());
         initResultFormatters();
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (PluginModel plugin : modelModifiers) {
@@ -236,6 +238,9 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void registerPlugin(Plugin plugin) {
+        if (plugin == null) {
+            return;
+        }
         if (plugin instanceof PluginService ps) {
             registerPlugin(ps);
         }
@@ -250,6 +255,9 @@ public class PluginManager implements ConfigDefaults {
         }
         if (plugin instanceof LiquibaseUser lu) {
             settings.addLiquibaseUser(lu);
+        }
+        if (plugin instanceof PluginFunction pf) {
+            pf.registerFunctions(settings.getFunctionRegistry());
         }
         plugins.put(plugin.getClass(), plugin);
     }
