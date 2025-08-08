@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_relate function.
  */
-public class STRelate extends Function {
+public class STRelate extends Function<STRelate> {
 
     public STRelate() {
         super("st_relate");
     }
 
     public STRelate(Expression... parameters) {
-        super("st_relate", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STRelate extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STRelate newInstance() {
+        return new STRelate()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STRelate getSelf() {
+        return this;
     }
 
 }

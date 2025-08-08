@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Floor function.
  */
-public class Floor extends Function {
+public class Floor extends Function<Floor> {
 
     public Floor() {
-        // Parameters added later...
+        super("floor");
     }
 
     public Floor(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DoubleConstant eval(DoubleConstant p1) {
@@ -43,12 +43,23 @@ public class Floor extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Floor newInstance() {
+        return new Floor()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Floor getSelf() {
+        return this;
     }
 
 }

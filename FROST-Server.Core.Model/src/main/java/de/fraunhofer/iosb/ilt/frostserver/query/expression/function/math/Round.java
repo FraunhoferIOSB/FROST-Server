@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The round function.
  */
-public class Round extends Function {
+public class Round extends Function<Round> {
 
     public Round() {
-        // Parameters added later...
+        super("round");
     }
 
     public Round(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DoubleConstant eval(DoubleConstant p1) {
@@ -43,12 +43,23 @@ public class Round extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Round newInstance() {
+        return new Round()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Round getSelf() {
+        return this;
     }
 
 }

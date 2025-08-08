@@ -25,17 +25,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The EndsWith function.
  */
-public class EndsWith extends Function {
+public class EndsWith extends Function<EndsWith> {
 
     public EndsWith() {
-        // Parameters added later...
+        super("endswith");
     }
 
     public EndsWith(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(StringConstant p1, StringConstant p2) {
@@ -44,12 +44,23 @@ public class EndsWith extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public EndsWith newInstance() {
+        return new EndsWith()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public EndsWith getSelf() {
+        return this;
     }
 
 }

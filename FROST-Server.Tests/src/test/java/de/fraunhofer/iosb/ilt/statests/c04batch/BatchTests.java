@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -444,8 +444,8 @@ public abstract class BatchTests extends AbstractTestClass {
                         "method": "get",
                         "url": "Things(null)"
                     }]}""";
-        request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
-        request = StringUtils.replace(request, "$thing1", formatKeyValuesForUrl(THINGS.get(1)));
+        request = Strings.CS.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
+        request = Strings.CS.replace(request, "$thing1", formatKeyValuesForUrl(THINGS.get(1)));
         String response = postBatch(null, request);
         String thingId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
 
@@ -458,8 +458,8 @@ public abstract class BatchTests extends AbstractTestClass {
                         {"id":"3","status":200},
                         {"id":"4","status":404,"body":{"code":404,"type":"error","message":"Not a valid id: Path is not valid."}}
                     ]}""";
-            expResponse = StringUtils.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
-            expResponse = StringUtils.replace(expResponse, "$newThingId", thingId);
+            expResponse = Strings.CS.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
+            expResponse = Strings.CS.replace(expResponse, "$newThingId", thingId);
             BatchResponseJson expected = mapper.readValue(expResponse, BatchResponseJson.class);
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
@@ -496,7 +496,7 @@ public abstract class BatchTests extends AbstractTestClass {
                   "ObservedProperty": {"@iot.id": $ObservedProperty0},
                   "Sensor": {"@iot.id": "$sensor1"}
                 }""";
-        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
+        post2 = Strings.CS.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
         String request = """
                 {
                     "requests":[{
@@ -513,9 +513,9 @@ public abstract class BatchTests extends AbstractTestClass {
                         "body": $post2
                     }]
                 }""";
-        request = StringUtils.replace(request, "$post1", post1);
-        request = StringUtils.replace(request, "$post2", post2);
-        request = StringUtils.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
+        request = Strings.CS.replace(request, "$post1", post1);
+        request = Strings.CS.replace(request, "$post2", post2);
+        request = Strings.CS.replace(request, "$thing0", formatKeyValuesForUrl(THINGS.get(0)));
         String response = postBatch(null, request);
 
         String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
@@ -559,8 +559,8 @@ public abstract class BatchTests extends AbstractTestClass {
                   "ObservedProperty": {"@iot.id": $ObservedProperty0},
                   "Thing": {"@iot.id": $thing0}
                 }""";
-        post2 = StringUtils.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
-        post2 = StringUtils.replace(post2, "$thing0", Utils.quoteForJson(THINGS.get(0).getPrimaryKeyValues().get(0)));
+        post2 = Strings.CS.replace(post2, "$ObservedProperty0", Utils.quoteForJson(OBSERVED_PROPS.get(0).getPrimaryKeyValues().get(0)));
+        post2 = Strings.CS.replace(post2, "$thing0", Utils.quoteForJson(THINGS.get(0).getPrimaryKeyValues().get(0)));
         String request = """
                 {
                     "requests":[{
@@ -577,8 +577,8 @@ public abstract class BatchTests extends AbstractTestClass {
                         "body": $post2
                     }]
                 }""";
-        request = StringUtils.replace(request, "$post1", post1);
-        request = StringUtils.replace(request, "$post2", post2);
+        request = Strings.CS.replace(request, "$post1", post1);
+        request = Strings.CS.replace(request, "$post2", post2);
         String response = postBatch(null, request);
 
         String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));

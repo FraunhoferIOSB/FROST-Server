@@ -28,17 +28,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The year function.
  */
-public class Year extends Function {
+public class Year extends Function<Year> {
 
     public Year() {
-        // Parameters added later...
+        super("year");
     }
 
     public Year(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
@@ -51,13 +51,24 @@ public class Year extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Year newInstance() {
+        return new Year()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Year getSelf() {
+        return this;
     }
 
 }

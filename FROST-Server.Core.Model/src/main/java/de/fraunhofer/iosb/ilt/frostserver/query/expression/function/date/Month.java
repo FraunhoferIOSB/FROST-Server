@@ -28,17 +28,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The month function.
  */
-public class Month extends Function {
+public class Month extends Function<Month> {
 
     public Month() {
-        // Parameters added later...
+        super("month");
     }
 
     public Month(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
@@ -51,13 +51,24 @@ public class Month extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Month newInstance() {
+        return new Month()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Month getSelf() {
+        return this;
     }
 
 }

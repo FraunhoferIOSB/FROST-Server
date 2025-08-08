@@ -21,19 +21,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The ge operator.
  */
-public class GreaterEqual extends ComparisonFunction {
+public class GreaterEqual extends ComparisonFunction<GreaterEqual> {
 
     public GreaterEqual() {
-        // Parameters added later...
+        super("ge");
     }
 
     public GreaterEqual(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     public BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
@@ -42,12 +43,24 @@ public class GreaterEqual extends ComparisonFunction {
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " ge " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public GreaterEqual newInstance() {
+        return new GreaterEqual()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public GreaterEqual getSelf() {
+        return this;
     }
 
 }

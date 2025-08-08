@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_disjoint function.
  */
-public class STDisjoint extends Function {
+public class STDisjoint extends Function<STDisjoint> {
 
     public STDisjoint() {
         super("st_disjoint");
     }
 
     public STDisjoint(Expression... parameters) {
-        super("st_disjoint", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STDisjoint extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STDisjoint newInstance() {
+        return new STDisjoint()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STDisjoint getSelf() {
+        return this;
     }
 
 }

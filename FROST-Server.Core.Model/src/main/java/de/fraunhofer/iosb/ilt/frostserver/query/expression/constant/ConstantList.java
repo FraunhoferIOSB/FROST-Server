@@ -43,12 +43,13 @@ public class ConstantList<T> extends Constant<List<Constant<T>>> {
     }
 
     @Override
-    public void addParameter(Expression parameter) {
+    public ConstantList<T> addParameter(Expression parameter) {
         if (parameter instanceof Constant c) {
             getValue().add(c);
         } else {
             throw new IllegalArgumentException("ConstantList should not contain " + parameter + "");
         }
+        return this;
     }
 
     @Override

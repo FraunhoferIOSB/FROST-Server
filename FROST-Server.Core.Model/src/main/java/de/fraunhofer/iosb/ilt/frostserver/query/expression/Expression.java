@@ -19,16 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 
 /**
+ * The core interface of expressions (Operators and Functions).
  *
- * @author jab
+ * @param <T> The exact type of the implementing class.
  */
-public interface Expression {
+public interface Expression<T extends Expression<T>> {
 
-    public default void addParameter(Expression parameter) {
+    public default T addParameter(Expression parameter) {
         throw new IllegalArgumentException("Expression of type " + getClass().getName() + " does not accept parameters.");
     }
 
@@ -53,12 +52,12 @@ public interface Expression {
      */
     public String toUrl();
 
-    public default Expression and(Expression that) {
-        return new And(this, that);
-    }
+    /**
+     * Create an new instance of this Expression.
+     *
+     * @return A new instance of this Expression without any parameters.
+     */
+    public T newInstance();
 
-    public default Expression or(Expression that) {
-        return new Or(this, that);
-    }
-
+    public T getSelf();
 }

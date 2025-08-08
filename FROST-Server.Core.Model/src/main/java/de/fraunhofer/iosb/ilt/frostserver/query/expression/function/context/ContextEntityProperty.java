@@ -29,14 +29,15 @@ import org.apache.commons.lang3.NotImplementedException;
  *
  * TODO: Work in progress.
  */
-public class ContextEntityProperty extends Function {
+public class ContextEntityProperty extends Function<ContextEntityProperty> {
 
     public ContextEntityProperty() {
-        // Parameters added later...
+        super("ContextEntityProperty");
     }
 
     public ContextEntityProperty(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     public String getValue() {
@@ -45,12 +46,23 @@ public class ContextEntityProperty extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ContextEntityProperty newInstance() {
+        return new ContextEntityProperty()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public ContextEntityProperty getSelf() {
+        return this;
     }
 
 }

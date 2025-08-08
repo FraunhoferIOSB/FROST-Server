@@ -26,17 +26,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Overlaps function.
  */
-public class Overlaps extends Function {
+public class Overlaps extends Function<Overlaps> {
 
     public Overlaps() {
-        // Parameters added later...
+        super("overlaps");
     }
 
     public Overlaps(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(IntervalConstant p1, IntervalConstant p2) {
@@ -49,13 +49,24 @@ public class Overlaps extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, IntervalConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, IntervalConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, IntervalConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, IntervalConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Overlaps newInstance() {
+        return new Overlaps()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Overlaps getSelf() {
+        return this;
     }
 
 }

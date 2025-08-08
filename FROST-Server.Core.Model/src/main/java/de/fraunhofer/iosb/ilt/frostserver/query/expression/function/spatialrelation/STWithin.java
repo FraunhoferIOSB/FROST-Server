@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_within function.
  */
-public class STWithin extends Function {
+public class STWithin extends Function<STWithin> {
 
     public STWithin() {
         super("st_within");
     }
 
     public STWithin(Expression... parameters) {
-        super("st_within", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STWithin extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STWithin newInstance() {
+        return new STWithin()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STWithin getSelf() {
+        return this;
     }
 
 }

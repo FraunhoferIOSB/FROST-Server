@@ -24,19 +24,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Utils;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The div operator.
  */
-public class Divide extends Function {
+public class Divide extends Function<Divide> {
 
     public Divide() {
-        // Parameters added later...
+        super("div");
     }
 
     public Divide(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
@@ -51,17 +52,29 @@ public class Divide extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        Utils.allowTypeBindingsCommonNumbers(allowedTypeBindings);
+        Utils.allowTypeBindingsCommonNumbers(this);
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " div " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Divide newInstance() {
+        return new Divide()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Divide getSelf() {
+        return this;
     }
 
 }

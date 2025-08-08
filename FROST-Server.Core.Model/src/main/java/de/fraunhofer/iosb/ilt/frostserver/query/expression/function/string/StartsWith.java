@@ -25,17 +25,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The StartsWith function.
  */
-public class StartsWith extends Function {
+public class StartsWith extends Function<StartsWith> {
 
     public StartsWith() {
-        // Parameters added later...
+        super("startswith");
     }
 
     public StartsWith(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(StringConstant p1, StringConstant p2) {
@@ -44,12 +44,23 @@ public class StartsWith extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public StartsWith newInstance() {
+        return new StartsWith()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public StartsWith getSelf() {
+        return this;
     }
 
 }

@@ -26,27 +26,38 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The geo.intersects function.
  */
-public class GeoIntersects extends Function {
+public class GeoIntersects extends Function<GeoIntersects> {
 
     public GeoIntersects() {
         super("geo.intersects");
     }
 
     public GeoIntersects(Expression... parameters) {
-        super("geo.intersects", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, PointConstant.class, PolygonConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, PointConstant.class, PolygonConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public GeoIntersects newInstance() {
+        return new GeoIntersects()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public GeoIntersects getSelf() {
+        return this;
     }
 
 }

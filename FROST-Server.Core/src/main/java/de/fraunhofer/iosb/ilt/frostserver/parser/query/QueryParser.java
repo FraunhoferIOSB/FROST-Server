@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
@@ -29,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
@@ -72,8 +72,7 @@ public class QueryParser extends Visitor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
 
-    private final QueryDefaults queryDefaults;
-    private final ModelRegistry modelRegistry;
+    private final CoreSettings settings;
     private final ResourcePath path;
     private final PrincipalExtended user;
     private final DynamicContext context;
@@ -81,16 +80,19 @@ public class QueryParser extends Visitor {
     private Query currentQuery;
     private P_Option currentOption;
 
-    public QueryParser(QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        this.queryDefaults = queryDefaults;
-        this.modelRegistry = modelRegistry;
+    public QueryParser(CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+        this.settings = settings;
         this.path = path;
         this.user = user;
         this.context = context;
     }
 
+    public CoreSettings getSettings() {
+        return settings;
+    }
+
     private Query handle(Start node) {
-        Query query = new Query(modelRegistry, queryDefaults, path, user);
+        Query query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path, user);
         for (P_Ref child : node.childrenOfType(P_Ref.class)) {
             handle(child, query);
         }
@@ -181,7 +183,7 @@ public class QueryParser extends Visitor {
         if (node == null) {
             LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
-        if (currentOption.getChild(1) instanceof T_DISTINCT) {
+        if (currentOption.get(1) instanceof T_DISTINCT) {
             currentQuery.setSelectDistinct(true);
         }
         List<P_PlainPath> values = currentOption.childrenOfType(P_PlainPath.class);
@@ -227,10 +229,10 @@ public class QueryParser extends Visitor {
 
     public void handle(P_OrderBy node) {
         var dir = OrderBy.OrderType.ASCENDING;
-        if (node.getChildCount() == 2 && node.getChild(1) instanceof T_O_DESC) {
+        if (node.size() == 2 && node.get(1) instanceof T_O_DESC) {
             dir = OrderBy.OrderType.DESCENDING;
         }
-        Expression expression = getExpressionParser().parseExpression(node.getChild(0));
+        Expression expression = getExpressionParser().parseExpression(node.get(0));
         currentQuery.addOrderBy(new OrderBy(expression, dir));
     }
 
@@ -238,14 +240,14 @@ public class QueryParser extends Visitor {
         if (node == null) {
             LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
-        currentQuery.setFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
+        currentQuery.setFilter(getExpressionParser().parseExpression(currentOption.get(1)));
     }
 
     public void visit(T_O_SKIPFILTER node) {
         if (node == null) {
             LOGGER.warn(VISIT_CALLED_WITHOUT_PARAMETER);
         }
-        currentQuery.setSkipFilter(getExpressionParser().parseExpression(currentOption.getChild(1)));
+        currentQuery.setSkipFilter(getExpressionParser().parseExpression(currentOption.get(1)));
     }
 
     public void visit(T_O_EXPAND node) {
@@ -262,7 +264,7 @@ public class QueryParser extends Visitor {
     }
 
     public void handle(P_ExpandItem expandItem) {
-        Expand expand = new Expand(modelRegistry);
+        Expand expand = new Expand(settings.getModelRegistry());
         List<P_PlainPath> paths = expandItem.childrenOfType(P_PlainPath.class);
         if (paths.isEmpty()) {
             return;
@@ -274,7 +276,7 @@ public class QueryParser extends Visitor {
         }
         List<P_Option> subOptions = expandItem.childrenOfType(P_Option.class);
         if (!subOptions.isEmpty()) {
-            Query subQuery = new Query(modelRegistry, queryDefaults, path, user);
+            Query subQuery = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path, user);
             for (P_Option subOption : subOptions) {
                 handle(subOption, subQuery);
             }
@@ -290,31 +292,31 @@ public class QueryParser extends Visitor {
         return expressionParser;
     }
 
-    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
+    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path) {
+        return parseQuery(query, StringHelper.UTF8, qd, settings, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
     }
 
-    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user) {
-        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, user, new DynamicContext());
+    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user) {
+        return parseQuery(query, StringHelper.UTF8, qd, settings, path, user, new DynamicContext());
     }
 
-    public static Query parseQuery(String query, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        return parseQuery(query, StringHelper.UTF8, queryDefaults, modelRegistry, path, user, context);
+    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+        return parseQuery(query, StringHelper.UTF8, qd, settings, path, user, context);
     }
 
-    public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path) {
-        return parseQuery(query, encoding, queryDefaults, modelRegistry, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
+    public static Query parseQuery(String query, Charset encoding, QueryDefaults qd, CoreSettings settings, ResourcePath path) {
+        return parseQuery(query, encoding, qd, settings, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
     }
 
-    public static Query parseQuery(String query, Charset encoding, QueryDefaults queryDefaults, ModelRegistry modelRegistry, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+    public static Query parseQuery(String query, Charset encoding, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
         if (query == null || query.isEmpty()) {
-            return new Query(modelRegistry, queryDefaults, path, user);
+            return new Query(settings.getModelRegistry(), qd, path, user);
         }
         LOGGER.debug("Parsing: {}", query);
         QParser t = new QParser(query);
         try {
             Start start = t.Start();
-            QueryParser v = new QueryParser(queryDefaults, modelRegistry, path, user, context);
+            QueryParser v = new QueryParser(settings, path, user, context);
             return v.handle(start);
         } catch (ParseException | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));

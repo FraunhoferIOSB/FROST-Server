@@ -22,19 +22,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The not operator.
  */
-public class Not extends Function {
+public class Not extends Function<Not> {
 
     public Not() {
-        // Parameters added later...
+        super("not");
     }
 
     public Not(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(BooleanConstant p1) {
@@ -43,11 +44,12 @@ public class Not extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class));
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "( not (" + parameters.get(0).toUrl() + "))";
     }
 
@@ -56,4 +58,14 @@ public class Not extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public Not newInstance() {
+        return new Not()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Not getSelf() {
+        return this;
+    }
 }

@@ -28,17 +28,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The hour function.
  */
-public class Hour extends Function {
+public class Hour extends Function<Hour> {
 
     public Hour() {
-        // Parameters added later...
+        super("hour");
     }
 
     public Hour(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
@@ -51,8 +51,8 @@ public class Hour extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
     }
 
     @Override
@@ -60,4 +60,14 @@ public class Hour extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public Hour newInstance() {
+        return new Hour()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Hour getSelf() {
+        return this;
+    }
 }

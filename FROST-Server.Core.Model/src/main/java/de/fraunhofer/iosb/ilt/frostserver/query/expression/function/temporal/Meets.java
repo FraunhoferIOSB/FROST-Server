@@ -26,17 +26,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Meets function.
  */
-public class Meets extends Function {
+public class Meets extends Function<Meets> {
 
     public Meets() {
-        // Parameters added later...
+        super("meets");
     }
 
     public Meets(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(IntervalConstant p1, IntervalConstant p2) {
@@ -59,15 +59,26 @@ public class Meets extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, IntervalConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, IntervalConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, DateTimeConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, IntervalConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, IntervalConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Meets newInstance() {
+        return new Meets()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Meets getSelf() {
+        return this;
     }
 
 }

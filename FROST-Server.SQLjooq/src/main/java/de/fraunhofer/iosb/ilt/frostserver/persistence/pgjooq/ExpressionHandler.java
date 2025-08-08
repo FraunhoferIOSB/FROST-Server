@@ -90,7 +90,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
         }
     }
 
-    public Condition addFilterToWhere(Expression filter, Condition sqlWhere) {
+    public Condition addFilterToWhere(Expression<?> filter, Condition sqlWhere) {
         FieldWrapper filterField = filter.accept(this);
         if (filterField.isCondition()) {
             return sqlWhere.and(filterField.getCondition());
@@ -351,7 +351,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
         // Set our subQuery state to be the active one.
         queryState = existsQueryState;
         try {
-            List<Expression> params = node.getParameters();
+            List<Expression<?>> params = node.getParameters();
             FieldWrapper p1 = params.get(0).accept(this);
             if (!p1.isCondition()) {
                 throw new IllegalArgumentException("Any() requires a condition, got " + p1);
@@ -486,7 +486,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Before node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -497,7 +497,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(After node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -508,7 +508,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Meets node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -519,7 +519,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(During node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p2 instanceof StaTimeIntervalWrapper ti2) {
@@ -530,7 +530,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Overlaps node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -541,7 +541,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Starts node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -552,7 +552,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Finishes node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper timeExpression) {
@@ -563,7 +563,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Add node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -579,7 +579,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Divide node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -595,7 +595,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Modulo node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         Field<? extends Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -611,7 +611,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Multiply node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -627,7 +627,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Subtract node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -643,7 +643,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Equal node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof NullWrapper) {
@@ -671,7 +671,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(GreaterEqual node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -692,7 +692,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(GreaterThan node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -713,7 +713,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(LessEqual node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -734,7 +734,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(LessThan node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper ti1) {
@@ -755,7 +755,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(NotEqual node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof NullWrapper) {
@@ -782,7 +782,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(In node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p2 instanceof ArrayConstandFieldWrapper clP2) {
@@ -798,7 +798,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Date node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
@@ -812,7 +812,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Day node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
@@ -822,7 +822,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(FractionalSeconds node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.field("(date_part('SECONDS', TIMESTAMPTZ ?) - floor(date_part('SECONDS', TIMESTAMPTZ ?)))", Double.class, timeExpression.getDateTime(), timeExpression.getDateTime()));
@@ -832,7 +832,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Hour node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
@@ -852,7 +852,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Minute node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
@@ -862,7 +862,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Month node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
@@ -877,7 +877,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Second node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
@@ -887,7 +887,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Time node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
@@ -897,7 +897,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(TotalOffsetMinutes node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
@@ -907,7 +907,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Year node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper timeExpression) {
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
@@ -917,8 +917,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(GeoDistance node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
@@ -936,7 +936,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(GeoLength node) {
-        Expression p1 = node.getParameters().get(0);
+        Expression<?> p1 = node.getParameters().get(0);
         FieldWrapper e1 = p1.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         if (g1 == null) {
@@ -947,7 +947,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(And node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1.isCondition() && p2.isCondition()) {
@@ -958,7 +958,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Not node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         if (p1.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().not());
@@ -968,7 +968,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Or node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1.isCondition() && p2.isCondition()) {
@@ -979,7 +979,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Ceiling node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.ceil(n1));
@@ -987,7 +987,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Floor node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.floor(n1));
@@ -995,15 +995,15 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Round node) {
-        List<Expression> params = node.getParameters();
+        List<Expression<?>> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.round(n1));
     }
 
-    private FieldWrapper stCompare(Function node, String functionName) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+    private FieldWrapper stCompare(Function<?> node, String functionName) {
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
@@ -1046,9 +1046,9 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(STRelate node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
-        Expression p3 = node.getParameters().get(2);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
+        Expression<?> p3 = node.getParameters().get(2);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         FieldWrapper e3 = p3.accept(this);
@@ -1073,8 +1073,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Concat node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1084,8 +1084,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(EndsWith node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1095,8 +1095,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(IndexOf node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1106,7 +1106,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Length node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper e1 = param.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.length(s1));
@@ -1114,8 +1114,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(StartsWith node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1125,15 +1125,15 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Substring node) {
-        List<Expression> params = node.getParameters();
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        List<Expression<?>> params = node.getParameters();
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
         Field<Integer> n2 = e2.getFieldAsType(Integer.class, true);
         if (params.size() > 2) {
-            Expression p3 = node.getParameters().get(2);
+            Expression<?> p3 = node.getParameters().get(2);
             FieldWrapper e3 = p3.accept(this);
             Field<Integer> n3 = e3.getFieldAsType(Integer.class, true);
             return new SimpleFieldWrapper(DSL.substring(s1, n2.add(1), n3));
@@ -1143,8 +1143,8 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(SubstringOf node) {
-        Expression p1 = node.getParameters().get(0);
-        Expression p2 = node.getParameters().get(1);
+        Expression<?> p1 = node.getParameters().get(0);
+        Expression<?> p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1154,7 +1154,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(ToLower node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.lower(field));
@@ -1162,7 +1162,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(ToUpper node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.upper(field));
@@ -1170,7 +1170,7 @@ public abstract class ExpressionHandler implements ExpressionVisitor<FieldWrappe
 
     @Override
     public FieldWrapper visit(Trim node) {
-        Expression param = node.getParameters().get(0);
+        Expression<?> param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.trim(field));

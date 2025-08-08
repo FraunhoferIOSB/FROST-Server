@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The ToLower function.
  */
-public class ToLower extends Function {
+public class ToLower extends Function<ToLower> {
 
     public ToLower() {
-        // Parameters added later...
+        super("tolower");
     }
 
     public ToLower(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected StringConstant eval(StringConstant p1) {
@@ -43,12 +43,23 @@ public class ToLower extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ToLower newInstance() {
+        return new ToLower()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public ToLower getSelf() {
+        return this;
     }
 
 }

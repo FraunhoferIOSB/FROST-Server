@@ -22,8 +22,7 @@ import net.time4j.PlainDate;
 import net.time4j.format.expert.Iso8601Format;
 
 /**
- *
- * @author jab
+ * A constant Date.
  */
 public class DateConstant extends Constant<PlainDate> {
 

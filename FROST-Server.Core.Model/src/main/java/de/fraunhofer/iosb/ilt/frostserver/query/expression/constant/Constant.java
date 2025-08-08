@@ -23,23 +23,23 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
 import java.util.Objects;
 
 /**
+ * The abstract class for constant values.
  *
- * @author jab, scf
- * @param <T> The type of the constant value.
+ * @param <V> The type of the constant value.
  */
-public abstract class Constant<T> implements Value {
+public abstract class Constant<V> implements Value<Constant<V>> {
 
-    protected T value;
+    protected V value;
 
     protected Constant() {
         // Nothing here
     }
 
-    protected Constant(T value) {
+    protected Constant(V value) {
         this.value = value;
     }
 
-    public T getValue() {
+    public V getValue() {
         return value;
     }
 
@@ -66,6 +66,16 @@ public abstract class Constant<T> implements Value {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public Constant<V> newInstance() {
+        throw new UnsupportedOperationException("Can not instantiate constants using newInstance");
+    }
+
+    @Override
+    public Constant<V> getSelf() {
+        return this;
     }
 
 }

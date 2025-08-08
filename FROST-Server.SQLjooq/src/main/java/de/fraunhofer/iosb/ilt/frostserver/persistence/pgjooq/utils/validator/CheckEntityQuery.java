@@ -91,7 +91,7 @@ public class CheckEntityQuery implements ValidationCheck {
             context = new DynamicContext();
             final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
             final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
-            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                     .validate(null, entityType);
             LOGGER.info("Initialised check on {}", entityType);
         } catch (RuntimeException ex) {

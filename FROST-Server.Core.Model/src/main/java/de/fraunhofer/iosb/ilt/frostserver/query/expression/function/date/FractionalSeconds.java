@@ -26,17 +26,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The fractionalseconds function.
  */
-public class FractionalSeconds extends Function {
+public class FractionalSeconds extends Function<FractionalSeconds> {
 
     public FractionalSeconds() {
-        // Parameters added later...
+        super("fractionalseconds");
     }
 
     public FractionalSeconds(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(DateTimeConstant p1) {
@@ -49,8 +49,8 @@ public class FractionalSeconds extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
     }
 
     @Override
@@ -58,4 +58,14 @@ public class FractionalSeconds extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public FractionalSeconds newInstance() {
+        return new FractionalSeconds()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public FractionalSeconds getSelf() {
+        return this;
+    }
 }

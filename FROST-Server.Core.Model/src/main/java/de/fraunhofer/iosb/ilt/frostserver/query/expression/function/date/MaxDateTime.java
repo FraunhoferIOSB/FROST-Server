@@ -26,17 +26,17 @@ import java.time.LocalDateTime;
 import net.time4j.PlainTimestamp;
 
 /**
- *
- * @author jab
+ * The maxdatetime function.
  */
-public class MaxDateTime extends Function {
+public class MaxDateTime extends Function<MaxDateTime> {
 
     public MaxDateTime() {
-        // Parameters added later...
+        super("maxdatetime");
     }
 
     public MaxDateTime(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DateTimeConstant eval() {
@@ -45,12 +45,23 @@ public class MaxDateTime extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public MaxDateTime newInstance() {
+        return new MaxDateTime()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public MaxDateTime getSelf() {
+        return this;
     }
 
 }

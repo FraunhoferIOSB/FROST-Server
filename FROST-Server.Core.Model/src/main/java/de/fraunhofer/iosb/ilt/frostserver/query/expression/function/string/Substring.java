@@ -25,17 +25,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Substring function.
  */
-public class Substring extends Function {
+public class Substring extends Function<Substring> {
 
     public Substring() {
-        // Parameters added later...
+        super("substring");
     }
 
     public Substring(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected StringConstant eval(StringConstant p1, IntegerConstant p2) {
@@ -48,13 +48,24 @@ public class Substring extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class, IntegerConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class, IntegerConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Substring newInstance() {
+        return new Substring()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Substring getSelf() {
+        return this;
     }
 
 }

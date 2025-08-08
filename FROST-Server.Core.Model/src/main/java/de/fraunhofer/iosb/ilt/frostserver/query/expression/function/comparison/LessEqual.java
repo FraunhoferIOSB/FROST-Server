@@ -21,19 +21,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The le operator.
  */
-public class LessEqual extends ComparisonFunction {
+public class LessEqual extends ComparisonFunction<LessEqual> {
 
     public LessEqual() {
-        // Parameters added later...
+        super("le");
     }
 
     public LessEqual(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     public BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
@@ -42,12 +43,24 @@ public class LessEqual extends ComparisonFunction {
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " le " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public LessEqual newInstance() {
+        return new LessEqual()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public LessEqual getSelf() {
+        return this;
     }
 
 }

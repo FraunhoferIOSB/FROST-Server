@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -217,6 +218,8 @@ public class CoreSettings implements ConfigDefaults {
 
     private final ModelRegistry modelRegistry = new ModelRegistry();
 
+    private final FunctionRegistry functionRegistry = new FunctionRegistry();
+
     private Object requestDecoder;
 
     private MessageBus messageBus;
@@ -349,6 +352,10 @@ public class CoreSettings implements ConfigDefaults {
      */
     public ModelRegistry getModelRegistry() {
         return modelRegistry;
+    }
+
+    public FunctionRegistry getFunctionRegistry() {
+        return functionRegistry;
     }
 
     public static CoreSettings load(String file) {

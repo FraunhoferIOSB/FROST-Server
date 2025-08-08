@@ -25,27 +25,38 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The geo.distance function.
  */
-public class GeoDistance extends Function {
+public class GeoDistance extends Function<GeoDistance> {
 
     public GeoDistance() {
         super("geo.distance");
     }
 
     public GeoDistance(Expression... parameters) {
-        super("geo.distance", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, PointConstant.class, PointConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, PointConstant.class, PointConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public GeoDistance newInstance() {
+        return new GeoDistance()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public GeoDistance getSelf() {
+        return this;
     }
 
 }

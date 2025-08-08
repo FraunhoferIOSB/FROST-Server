@@ -60,7 +60,7 @@ public class Query {
 
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
 
-    private final QueryDefaults settings;
+    private final QueryDefaults queryDefaults;
     private final ModelRegistry modelRegistry;
     private final PrincipalExtended principal;
     private ResourcePath path;
@@ -118,7 +118,7 @@ public class Query {
     public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path, PrincipalExtended principal) {
         this.modelRegistry = modelRegistry;
         this.path = path;
-        this.settings = settings;
+        this.queryDefaults = settings;
         this.principal = principal;
         this.top = Optional.empty();
         this.skip = Optional.empty();
@@ -200,7 +200,7 @@ public class Query {
             }
         }
         pkOrder = pkCount >= primaryKey.getKeyProperties().size();
-        if (settings.isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
+        if (queryDefaults.isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
                 boolean found = false;
                 for (OrderBy order : orderBy) {
@@ -227,7 +227,7 @@ public class Query {
     }
 
     public QueryDefaults getSettings() {
-        return settings;
+        return queryDefaults;
     }
 
     public ResourcePath getPath() {
@@ -262,7 +262,7 @@ public class Query {
         if (top.isPresent()) {
             return top.get();
         }
-        return settings.getTopDefault();
+        return queryDefaults.getTopDefault();
     }
 
     public Optional<Integer> getSkip() {
@@ -284,7 +284,7 @@ public class Query {
         if (count.isPresent()) {
             return count.get();
         }
-        return settings.isCountDefault();
+        return queryDefaults.isCountDefault();
     }
 
     public Query clearSelect() {
@@ -455,10 +455,10 @@ public class Query {
     }
 
     public Query setTop(int top) {
-        if (top <= settings.getTopMax()) {
+        if (top <= queryDefaults.getTopMax()) {
             this.top = Optional.of(top);
         } else {
-            this.top = Optional.of(settings.getTopMax());
+            this.top = Optional.of(queryDefaults.getTopMax());
         }
         return this;
     }

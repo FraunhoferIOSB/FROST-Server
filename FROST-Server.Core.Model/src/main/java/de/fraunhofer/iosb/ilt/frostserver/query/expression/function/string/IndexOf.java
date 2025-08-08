@@ -25,17 +25,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The IndexOf function.
  */
-public class IndexOf extends Function {
+public class IndexOf extends Function<IndexOf> {
 
     public IndexOf() {
-        // Parameters added later...
+        super("indexof");
     }
 
     public IndexOf(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(StringConstant p1, StringConstant p2) {
@@ -44,12 +44,23 @@ public class IndexOf extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public IndexOf newInstance() {
+        return new IndexOf()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public IndexOf getSelf() {
+        return this;
     }
 
 }

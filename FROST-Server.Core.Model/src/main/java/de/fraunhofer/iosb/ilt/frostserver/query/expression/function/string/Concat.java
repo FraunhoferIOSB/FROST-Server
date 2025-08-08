@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Concat function.
  */
-public class Concat extends Function {
+public class Concat extends Function<Concat> {
 
     public Concat() {
-        // Parameters added later...
+        super("concat");
     }
 
     public Concat(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected StringConstant eval(StringConstant p1, StringConstant p2) {
@@ -43,12 +43,23 @@ public class Concat extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class, StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Concat newInstance() {
+        return new Concat()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Concat getSelf() {
+        return this;
     }
 
 }

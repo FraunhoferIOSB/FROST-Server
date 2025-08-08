@@ -25,27 +25,38 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The totaloffsetminutes function.
  */
-public class TotalOffsetMinutes extends Function {
+public class TotalOffsetMinutes extends Function<TotalOffsetMinutes> {
 
     public TotalOffsetMinutes() {
-        // Parameters added later...
+        super("totaloffsetminutes");
     }
 
     public TotalOffsetMinutes(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DurationConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public TotalOffsetMinutes newInstance() {
+        return new TotalOffsetMinutes()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public TotalOffsetMinutes getSelf() {
+        return this;
     }
 
 }

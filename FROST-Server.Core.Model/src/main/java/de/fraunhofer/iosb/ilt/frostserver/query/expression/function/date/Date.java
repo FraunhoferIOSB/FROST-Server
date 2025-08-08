@@ -27,17 +27,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The date function.
  */
-public class Date extends Function {
+public class Date extends Function<Date> {
 
     public Date() {
-        // Parameters added later...
+        super("date");
     }
 
     public Date(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DateConstant eval(DateTimeConstant p1) {
@@ -46,12 +46,23 @@ public class Date extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Date newInstance() {
+        return new Date()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Date getSelf() {
+        return this;
     }
 
 }

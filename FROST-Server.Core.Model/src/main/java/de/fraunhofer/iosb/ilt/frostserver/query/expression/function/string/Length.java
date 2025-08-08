@@ -25,17 +25,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Length function.
  */
-public class Length extends Function {
+public class Length extends Function<Length> {
 
     public Length() {
-        // Parameters added later...
+        super("length");
     }
 
     public Length(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected IntegerConstant eval(StringConstant p1) {
@@ -44,12 +44,23 @@ public class Length extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Length newInstance() {
+        return new Length()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Length getSelf() {
+        return this;
     }
 
 }

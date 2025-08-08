@@ -18,9 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 /**
+ * Interface for variable value expressions.
  *
- * @author jab
+ * @param <T> The exact type of the implementing class.
  */
-public interface Variable extends Value {
+public interface Variable<T extends Variable<T>> extends Value<T> {
 
 }

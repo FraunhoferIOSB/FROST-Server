@@ -89,7 +89,7 @@ public class EntitySetSubscription extends AbstractSubscription {
         String queryString;
         queryString = URLDecoder.decode(topic, StringHelper.UTF8);
         try {
-            return QueryParser.parseQuery(queryString, queryDefaults, modelRegistry, path).validate();
+            return QueryParser.parseQuery(queryString, queryDefaults, settings, path).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
             return new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL).validate();

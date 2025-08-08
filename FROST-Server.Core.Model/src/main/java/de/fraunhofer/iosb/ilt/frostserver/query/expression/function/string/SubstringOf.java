@@ -25,17 +25,22 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The
+ * <a href="https://docs.ogc.org/is/18-088/18-088.html#requirement-request-data-built-in-query-functions">STA
+ * substringof</a> function. This is the STA defined inverse of
+ * <a
+ * href="https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_contains">OData
+ * contains</a>
  */
-public class SubstringOf extends Function {
+public class SubstringOf extends Function<SubstringOf> {
 
     public SubstringOf() {
-        // Parameters added later...
+        super("substringof");
     }
 
     public SubstringOf(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(StringConstant p1, StringConstant p2) {
@@ -44,12 +49,23 @@ public class SubstringOf extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public SubstringOf newInstance() {
+        return new SubstringOf()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public SubstringOf getSelf() {
+        return this;
     }
 
 }

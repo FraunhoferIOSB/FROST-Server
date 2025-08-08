@@ -21,19 +21,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The gt operator.
  */
-public class GreaterThan extends ComparisonFunction {
+public class GreaterThan extends ComparisonFunction<GreaterThan> {
 
     public GreaterThan() {
-        // Parameters added later...
+        super("gt");
     }
 
     public GreaterThan(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     public BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
@@ -42,12 +43,24 @@ public class GreaterThan extends ComparisonFunction {
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " gt " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public GreaterThan newInstance() {
+        return new GreaterThan()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public GreaterThan getSelf() {
+        return this;
     }
 
 }

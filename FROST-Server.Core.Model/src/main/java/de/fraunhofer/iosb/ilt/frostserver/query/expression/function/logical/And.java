@@ -22,19 +22,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The and operator.
  */
-public class And extends Function {
+public class And extends Function<And> {
 
     public And() {
-        // Parameters added later...
+        super("and");
     }
 
     public And(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(BooleanConstant p1, BooleanConstant p2) {
@@ -43,11 +44,12 @@ public class And extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class, BooleanConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class, BooleanConstant.class));
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " and " + parameters.get(1).toUrl() + ")";
     }
 
@@ -56,4 +58,14 @@ public class And extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public And newInstance() {
+        return new And()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public And getSelf() {
+        return this;
+    }
 }

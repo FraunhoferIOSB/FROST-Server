@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
@@ -62,6 +63,7 @@ class EntityFormatterTest {
     public static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
+            DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
             coreSettings.getSettings().getProperties().put("plugins." + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
@@ -141,7 +143,7 @@ class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id,name", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
+        Query query = QueryParser.parseQuery("$select=id,name", coreSettings.getQueryDefaults(), coreSettings, path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -196,7 +198,7 @@ class EntityFormatterTest {
     void writeThingOnlyId() throws IOException {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things(1)");
-        Query query = QueryParser.parseQuery("$select=id", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
+        Query query = QueryParser.parseQuery("$select=id", coreSettings.getQueryDefaults(), coreSettings, path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
@@ -256,7 +258,7 @@ class EntityFormatterTest {
                 + thing
                 + "]}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", PluginCoreService.V_1_0, "/Things");
-        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings.getModelRegistry(), path)
+        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings.getQueryDefaults(), coreSettings, path)
                 .validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)

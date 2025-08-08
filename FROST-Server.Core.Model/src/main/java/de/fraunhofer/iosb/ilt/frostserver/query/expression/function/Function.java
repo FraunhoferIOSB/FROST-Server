@@ -44,18 +44,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a function of the API which can be used in a query.
  *
- * @author jab
+ * @param <T> The exact type of the implementing class.
  */
-public abstract class Function implements Expression {
+public abstract class Function<T extends Function<T>> implements Expression<T> {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Function.class);
 
-    protected List<Expression> parameters = new ArrayList<>();
-    protected List<FunctionTypeBinding> allowedTypeBindings;
+    private final List<Expression<?>> parameters = new ArrayList<>();
+    private List<FunctionTypeBinding> allowedTypeBindings = new ArrayList<>();
+
     private final String functionName;
+    private final boolean adminOnly;
 
     /**
      * The context to use when rendering the function.
@@ -63,29 +65,25 @@ public abstract class Function implements Expression {
     private DynamicContext context;
 
     protected Function() {
-        allowedTypeBindings = new ArrayList<>();
         functionName = getClass().getSimpleName().toLowerCase();
-    }
-
-    protected Function(Expression... parameters) {
-        this.parameters.addAll(Arrays.asList(parameters));
-        allowedTypeBindings = new ArrayList<>();
-        functionName = getClass().getSimpleName().toLowerCase();
+        adminOnly = false;
     }
 
     protected Function(String functionName) {
-        this.functionName = functionName;
-        allowedTypeBindings = new ArrayList();
+        this(functionName, false);
     }
 
-    protected Function(String functionName, Expression... parameters) {
+    protected Function(String functionName, boolean adminOnly) {
         this.functionName = functionName;
-        this.parameters = Arrays.asList(parameters);
-        allowedTypeBindings = new ArrayList();
+        this.adminOnly = adminOnly;
     }
 
     public String getFunctionName() {
         return functionName;
+    }
+
+    public boolean isAdminOnly() {
+        return adminOnly;
     }
 
     @Override
@@ -105,20 +103,23 @@ public abstract class Function implements Expression {
         return sb.toString();
     }
 
-    public void setParameters(List<Expression> parameters) {
-        this.parameters = parameters;
+    public T addParameters(List<Expression<?>> parameters) {
+        this.parameters.addAll(parameters);
+        return getSelf();
     }
 
-    public void setParameters(Expression... parameters) {
-        this.parameters = Arrays.asList(parameters);
+    public T addParameters(Expression<?>... parameters) {
+        this.parameters.addAll(Arrays.asList(parameters));
+        return getSelf();
     }
 
     @Override
-    public void addParameter(Expression parameter) {
+    public T addParameter(Expression parameter) {
         parameters.add(parameter);
+        return getSelf();
     }
 
-    public List<Expression> getParameters() {
+    public List<Expression<?>> getParameters() {
         return parameters;
     }
 
@@ -220,6 +221,21 @@ public abstract class Function implements Expression {
             initAllowedTypeBindings();
         }
         return allowedTypeBindings;
+    }
+
+    protected T addAllowedTypeBinding(FunctionTypeBinding allowedTypeBinding) {
+        allowedTypeBindings.add(allowedTypeBinding);
+        return getSelf();
+    }
+
+    protected T addAllowedTypeBindings(List<FunctionTypeBinding> allowedTypeBindings) {
+        this.allowedTypeBindings.addAll(allowedTypeBindings);
+        return getSelf();
+    }
+
+    public T setAllowedTypeBindings(List<FunctionTypeBinding> allowedTypeBindings) {
+        this.allowedTypeBindings = allowedTypeBindings;
+        return getSelf();
     }
 
     @Override

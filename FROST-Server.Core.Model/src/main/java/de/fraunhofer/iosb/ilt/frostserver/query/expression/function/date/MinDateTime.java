@@ -26,17 +26,17 @@ import java.time.LocalDateTime;
 import net.time4j.PlainTimestamp;
 
 /**
- *
- * @author jab
+ * The mindatetime function.
  */
-public class MinDateTime extends Function {
+public class MinDateTime extends Function<MinDateTime> {
 
     public MinDateTime() {
-        // Parameters added later...
+        super("mindatetime");
     }
 
     public MinDateTime(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DateTimeConstant eval() {
@@ -45,12 +45,23 @@ public class MinDateTime extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public MinDateTime newInstance() {
+        return new MinDateTime()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public MinDateTime getSelf() {
+        return this;
     }
 
 }

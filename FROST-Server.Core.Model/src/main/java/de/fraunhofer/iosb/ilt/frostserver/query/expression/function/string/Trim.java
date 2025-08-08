@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Trim function.
  */
-public class Trim extends Function {
+public class Trim extends Function<Trim> {
 
     public Trim() {
-        // Parameters added later...
+        super("trim");
     }
 
     public Trim(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected StringConstant eval(StringConstant p1) {
@@ -43,12 +43,23 @@ public class Trim extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Trim newInstance() {
+        return new Trim()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Trim getSelf() {
+        return this;
     }
 
 }

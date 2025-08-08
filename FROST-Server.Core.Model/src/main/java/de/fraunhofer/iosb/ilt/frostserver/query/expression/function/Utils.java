@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
-import java.util.List;
 
 /**
  *
@@ -31,11 +30,11 @@ public class Utils {
         // Utility class, not to be instantiated.
     }
 
-    public static void allowTypeBindingsCommonNumbers(List<FunctionTypeBinding> allowedTypeBindings) {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, IntegerConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, IntegerConstant.class));
+    public static void allowTypeBindingsCommonNumbers(Function f) {
+        f.addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, IntegerConstant.class));
+        f.addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, DoubleConstant.class));
+        f.addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, IntegerConstant.class, DoubleConstant.class));
+        f.addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, IntegerConstant.class));
     }
 
 }

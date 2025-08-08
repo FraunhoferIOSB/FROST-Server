@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
@@ -37,10 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author jab
- */
 class UrlHelperTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelperTest.class.getName());
@@ -59,6 +56,7 @@ class UrlHelperTest {
     @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
+        DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
         modelRegistry = coreSettings.getModelRegistry();
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);

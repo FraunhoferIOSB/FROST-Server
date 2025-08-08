@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
@@ -29,28 +28,25 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
+ * The abstract class for comparison operators.
  *
- * @author jab
+ * @param <T> The exact type of the implementing class.
  */
-public abstract class ComparisonFunction extends Function {
+public abstract class ComparisonFunction<T extends ComparisonFunction<T>> extends Function<T> {
 
-    protected ComparisonFunction() {
-        super();
-    }
-
-    protected ComparisonFunction(Expression... parameters) {
-        super(parameters);
+    protected ComparisonFunction(String name) {
+        super(name);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DateConstant.class, DateConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, DateTimeConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DoubleConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, DurationConstant.class, DurationConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, IntegerConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, IntegerConstant.class, IntegerConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateConstant.class, DateConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DoubleConstant.class, DoubleConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DurationConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntegerConstant.class, IntegerConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntegerConstant.class, IntegerConstant.class));
     }
 
 }

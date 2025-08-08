@@ -29,11 +29,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- *
- * @author scf
- * @author jab
+ * A path is a variable that points to an entity property.
  */
-public class Path implements Variable {
+public class Path implements Variable<Path> {
 
     private final PropertyPlaceholder rawElements;
     private final List<Property> elements;
@@ -145,6 +143,16 @@ public class Path implements Variable {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Path newInstance() {
+        return new Path();
+    }
+
+    @Override
+    public Path getSelf() {
+        return this;
     }
 
 }

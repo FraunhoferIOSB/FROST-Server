@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_equals function.
  */
-public class STEquals extends Function {
+public class STEquals extends Function<STEquals> {
 
     public STEquals() {
         super("st_equals");
     }
 
     public STEquals(Expression... parameters) {
-        super("st_equals", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STEquals extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STEquals newInstance() {
+        return new STEquals()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STEquals getSelf() {
+        return this;
     }
 
 }

@@ -292,12 +292,12 @@ public class PathParser extends Visitor {
         return resourcePath;
     }
 
-    public static Query parsePathAndQuery(Version version, String pathAndQuery, CoreSettings settings, QueryDefaults queryDefaults) {
+    public static Query parsePathAndQuery(Version version, String pathAndQuery, CoreSettings settings, QueryDefaults qd) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), queryDefaults.getServiceRootUrl(), version, pathString);
-        return QueryParser.parseQuery(queryString, queryDefaults, settings.getModelRegistry(), path).validate(null, path.getMainElementType());
+        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), qd.getServiceRootUrl(), version, pathString);
+        return QueryParser.parseQuery(queryString, qd, settings, path).validate(null, path.getMainElementType());
     }
 
 }

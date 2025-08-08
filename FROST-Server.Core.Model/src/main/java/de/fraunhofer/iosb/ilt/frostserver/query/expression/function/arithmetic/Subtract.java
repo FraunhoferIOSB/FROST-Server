@@ -28,19 +28,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Utils;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The sub operator.
  */
-public class Subtract extends Function {
+public class Subtract extends Function<Subtract> {
 
     public Subtract() {
-
+        super("sub");
     }
 
     public Subtract(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
@@ -55,23 +56,35 @@ public class Subtract extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        Utils.allowTypeBindingsCommonNumbers(allowedTypeBindings);
+        Utils.allowTypeBindingsCommonNumbers(this);
 
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class, DurationConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DurationConstant.class, DurationConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DateTimeConstant.class, DateTimeConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DateConstant.class, DateConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DurationConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DateTimeConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DateConstant.class, DateConstant.class));
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " sub " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Subtract newInstance() {
+        return new Subtract()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Subtract getSelf() {
+        return this;
     }
 
 }

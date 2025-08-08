@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.context;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
@@ -27,14 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionType
  * A function that returns the principal name of the user executing the current
  * request.
  */
-public class PrincipalName extends Function {
+public class PrincipalName extends Function<PrincipalName> {
 
     public PrincipalName() {
-        // Parameters added later...
-    }
-
-    public PrincipalName(Expression... parameters) {
-        super(parameters);
+        super("principalname", true);
     }
 
     public String getValue() {
@@ -43,12 +38,23 @@ public class PrincipalName extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public PrincipalName newInstance() {
+        return new PrincipalName()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public PrincipalName getSelf() {
+        return this;
     }
 
 }

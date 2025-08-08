@@ -145,7 +145,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
             context = new DynamicContext();
             final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
             final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
-            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, modelRegistry, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                     .validate(null, targetType);
             LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
         } catch (RuntimeException ex) {

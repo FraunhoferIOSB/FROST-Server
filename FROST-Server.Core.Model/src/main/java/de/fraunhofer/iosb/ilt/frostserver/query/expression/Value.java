@@ -18,10 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 /**
+ * Interface for value expressions.
  *
- * @author jab
+ * @param <T> The exact type of the implementing class.
  */
-public interface Value extends Expression {
+public interface Value<T extends Value<T>> extends Expression<T> {
 
     @Override
     public default Expression compress() {

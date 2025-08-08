@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 /**
  * Class holding default values for queries.
@@ -71,7 +71,7 @@ public class QueryDefaults {
      * @return this.
      */
     public final QueryDefaults setServiceRootUrl(String serviceRootUrl) {
-        this.serviceRootUrl = StringUtils.removeEnd(serviceRootUrl, "/");
+        this.serviceRootUrl = Strings.CS.removeEnd(serviceRootUrl, "/");
         return this;
     }
 

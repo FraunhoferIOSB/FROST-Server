@@ -21,19 +21,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The eq operator.
  */
-public class Equal extends ComparisonFunction {
+public class Equal extends ComparisonFunction<Equal> {
 
     public Equal() {
-        // Parameters added later...
+        super("eq");
     }
 
     public Equal(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     public BooleanConstant eval(Constant p1, Constant p2) {
@@ -42,12 +43,24 @@ public class Equal extends ComparisonFunction {
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " eq " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Equal newInstance() {
+        return new Equal()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Equal getSelf() {
+        return this;
     }
 
 }

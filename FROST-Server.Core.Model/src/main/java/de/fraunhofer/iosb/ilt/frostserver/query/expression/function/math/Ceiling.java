@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The Ceiling function.
  */
-public class Ceiling extends Function {
+public class Ceiling extends Function<Ceiling> {
 
     public Ceiling() {
-        // Parameters added later...
+        super("ceiling");
     }
 
     public Ceiling(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DoubleConstant eval(DoubleConstant p1) {
@@ -43,12 +43,23 @@ public class Ceiling extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Ceiling newInstance() {
+        return new Ceiling()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Ceiling getSelf() {
+        return this;
     }
 
 }

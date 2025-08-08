@@ -90,7 +90,7 @@ public class ServiceDataArray {
         try {
             final ModelRegistry modelRegistry = settings.getModelRegistry();
             final QueryDefaults queryDefaults = request.getQueryDefaults();
-            Query query = QueryParser.parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, null, request.getUserPrincipal());
+            Query query = QueryParser.parseQuery(request.getUrlQuery(), queryDefaults, settings, null, request.getUserPrincipal());
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();

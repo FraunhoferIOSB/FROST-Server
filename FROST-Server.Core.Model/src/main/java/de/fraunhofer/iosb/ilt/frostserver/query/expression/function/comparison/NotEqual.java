@@ -21,34 +21,46 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * the ne operator.
  */
-public class NotEqual extends Equal {
+public class NotEqual extends ComparisonFunction<NotEqual> {
 
     public NotEqual() {
-        // Parameters added later...
+        super("ne");
     }
 
     public NotEqual(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
-    @Override
     public BooleanConstant eval(Constant p1, Constant p2) {
-        return new BooleanConstant(!super.eval(p1, p2).getValue());
+        return new BooleanConstant(!p1.equals(p2));
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " ne " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public NotEqual newInstance() {
+        return new NotEqual()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public NotEqual getSelf() {
+        return this;
     }
 
 }

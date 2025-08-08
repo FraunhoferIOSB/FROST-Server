@@ -375,7 +375,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = settings.getFormatter(version, query.getFormat());
@@ -475,7 +475,7 @@ public class Service implements AutoCloseable {
         ResultFormatter formatter;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = findFormatter(query, request, version);
@@ -846,7 +846,7 @@ public class Service implements AutoCloseable {
         Query query;
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), request.getQueryDefaults(), modelRegistry, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), request.getQueryDefaults(), settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
@@ -951,7 +951,7 @@ public class Service implements AutoCloseable {
         final QueryDefaults queryDefaults = request.getQueryDefaults();
         try {
             query = QueryParser
-                    .parseQuery(request.getUrlQuery(), queryDefaults, modelRegistry, path, request.getUserPrincipal())
+                    .parseQuery(request.getUrlQuery(), queryDefaults, settings, path, request.getUserPrincipal())
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException ex) {

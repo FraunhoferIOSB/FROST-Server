@@ -118,35 +118,35 @@ public class MqttExtraTests11 extends AbstractTestClass {
         eh.cache(thing);
 
         // Locations 0
-        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51))
+        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/geo+json", new Point(8, 51))
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 0));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 1
-        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52))
+        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/geo+json", new Point(8, 52))
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1.1).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 0));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 2
-        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/vnd.geo+json", new Point(8, 53))
+        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/geo+json", new Point(8, 53))
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 1));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 3
-        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/vnd.geo+json", new Point(8, 54))
+        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/geo+json", new Point(8, 54))
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 2));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 4
-        location = sMdl.newLocation("Location 4", "Location of Thing 4.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 4", "Location of Thing 4.", "application/geo+json",
                 new Polygon(
                         new LngLatAlt(8, 53),
                         new LngLatAlt(7, 52),
@@ -158,7 +158,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         eh.cache(location);
 
         // Locations 5
-        location = sMdl.newLocation("Location 5", "A line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 5", "A line.", "application/geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(5, 53)))
@@ -167,7 +167,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         eh.cache(location);
 
         // Locations 6
-        location = sMdl.newLocation("Location 6", "A longer line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 6", "A longer line.", "application/geo+json",
                 new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(6, 53)))
@@ -176,7 +176,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         eh.cache(location);
 
         // Locations 7
-        location = sMdl.newLocation("Location 7", "The longest line.", "application/vnd.geo+json",
+        location = sMdl.newLocation("Location 7", "The longest line.", "application/geo+json",
                 new LineString(
                         new LngLatAlt(4, 52),
                         new LngLatAlt(8, 52)))
@@ -317,6 +317,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         LOGGER.info("  test04SubscribeExpand");
         final CompletableFuture<JsonNode> obsFuture1 = new CompletableFuture<>();
         final CompletableFuture<JsonNode> obsFuture2 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture3 = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
             Entity obs = EntityUtils.createObservation(
                     sSrvc,
@@ -328,17 +329,23 @@ public class MqttExtraTests11 extends AbstractTestClass {
             obsFuture1.complete(entityJson1);
             JsonNode entityJson2 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "Datastream");
             obsFuture2.complete(entityJson2);
+            JsonNode entityJson3 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "FeatureOfInterest($select=feature)");
+            obsFuture3.complete(entityJson3);
             return null;
         };
-        final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream($select=description)")
+        final TestSubscription testSubscription1 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream($select=description)")
                 .addExpectedJson(obsFuture1)
                 .createReceivedListener(sMdl.etObservation);
-        final TestSubscription testSubscriptionExp = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream")
+        final TestSubscription testSubscription2 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream")
                 .addExpectedJson(obsFuture2)
                 .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=FeatureOfInterest($select=feature)")
+                .addExpectedJson(obsFuture3)
+                .createReceivedListener(sMdl.etObservation);
         MqttAction mqttAction = new MqttAction(insertAction)
-                .add(testSubscription)
-                .add(testSubscriptionExp);
+                .add(testSubscription1)
+                .add(testSubscription2)
+                .add(testSubscription3);
         mqttHelper.executeRequest(mqttAction);
     }
 

@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_overlaps function.
  */
-public class STOverlaps extends Function {
+public class STOverlaps extends Function<STOverlaps> {
 
     public STOverlaps() {
         super("st_overlaps");
     }
 
     public STOverlaps(Expression... parameters) {
-        super("st_overlaps", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STOverlaps extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STOverlaps newInstance() {
+        return new STOverlaps()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STOverlaps getSelf() {
+        return this;
     }
 
 }

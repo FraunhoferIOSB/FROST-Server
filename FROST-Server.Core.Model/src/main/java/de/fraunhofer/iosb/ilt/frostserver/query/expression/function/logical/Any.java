@@ -28,18 +28,19 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Any is not really a Function.
+ * The any Function.
  */
-public class Any extends Function {
+public class Any extends Function<Any> {
 
     private Path collection;
     private String lambdaName;
 
     public Any() {
-        // Parameters added later...
+        super("any");
     }
 
     public Any(Path collection, String lambdaName) {
@@ -48,14 +49,15 @@ public class Any extends Function {
     }
 
     public Any(Path collection, String lambdaName, Expression filter) {
-        super(filter);
+        this();
+        addParameters(filter);
         this.collection = collection;
         this.lambdaName = lambdaName;
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class));
     }
 
     @Override
@@ -97,6 +99,7 @@ public class Any extends Function {
         sb.append(lambdaName);
         sb.append(':');
         boolean first = true;
+        List<Expression<?>> parameters = getParameters();
         for (Expression p : parameters) {
             if (first) {
                 first = false;
@@ -143,4 +146,14 @@ public class Any extends Function {
         return 23 * hash + super.hashCode();
     }
 
+    @Override
+    public Any newInstance() {
+        return new Any()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Any getSelf() {
+        return this;
+    }
 }

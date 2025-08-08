@@ -24,17 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The ToUpper function.
  */
-public class ToUpper extends Function {
+public class ToUpper extends Function<ToUpper> {
 
     public ToUpper() {
-        // Parameters added later...
+        super("toupper");
     }
 
     public ToUpper(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected StringConstant eval(StringConstant p1) {
@@ -43,12 +43,23 @@ public class ToUpper extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(StringConstant.class, StringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ToUpper newInstance() {
+        return new ToUpper()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public ToUpper getSelf() {
+        return this;
     }
 
 }

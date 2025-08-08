@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
- *
- * @author jab
+ * The st_touches function.
  */
-public class STTouches extends Function {
+public class STTouches extends Function<STTouches> {
 
     public STTouches() {
         super("st_touches");
     }
 
     public STTouches(Expression... parameters) {
-        super("st_touches", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
@@ -43,6 +43,17 @@ public class STTouches extends Function {
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public STTouches newInstance() {
+        return new STTouches()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public STTouches getSelf() {
+        return this;
     }
 
 }

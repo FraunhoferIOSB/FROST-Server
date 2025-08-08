@@ -27,17 +27,17 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionType
 import net.time4j.PlainTimestamp;
 
 /**
- *
- * @author jab
+ * The now function.
  */
-public class Now extends Function {
+public class Now extends Function<Now> {
 
     public Now() {
-        // Parameters added later...
+        super("now");
     }
 
     public Now(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected DateTimeConstant eval() {
@@ -46,12 +46,23 @@ public class Now extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Now newInstance() {
+        return new Now()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Now getSelf() {
+        return this;
     }
 
 }

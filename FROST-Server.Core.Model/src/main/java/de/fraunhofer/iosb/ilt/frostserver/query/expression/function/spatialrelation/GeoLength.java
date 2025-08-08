@@ -25,27 +25,38 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
 /**
- *
- * @author jab
+ * The geo.length function.
  */
-public class GeoLength extends Function {
+public class GeoLength extends Function<GeoLength> {
 
     public GeoLength() {
         super("geo.length");
     }
 
     public GeoLength(Expression... parameters) {
-        super("geo.length", parameters);
+        this();
+        addParameters(parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, LineStringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, LineStringConstant.class));
     }
 
     @Override
     public <O> O accept(ExpressionVisitor<O> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public GeoLength newInstance() {
+        return new GeoLength()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public GeoLength getSelf() {
+        return this;
     }
 
 }

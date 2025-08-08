@@ -22,19 +22,20 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import java.util.List;
 
 /**
- *
- * @author jab
+ * The or operator.
  */
-public class Or extends Function {
+public class Or extends Function<Or> {
 
     public Or() {
-        // Parameters added later...
+        super("or");
     }
 
     public Or(Expression... parameters) {
-        super(parameters);
+        this();
+        addParameters(parameters);
     }
 
     protected BooleanConstant eval(BooleanConstant p1, BooleanConstant p2) {
@@ -43,11 +44,12 @@ public class Or extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class, BooleanConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class, BooleanConstant.class));
     }
 
     @Override
     public String toUrl() {
+        List<Expression<?>> parameters = getParameters();
         return "(" + parameters.get(0).toUrl() + " or " + parameters.get(1).toUrl() + ")";
     }
 
@@ -56,4 +58,14 @@ public class Or extends Function {
         return visitor.visit(this);
     }
 
+    @Override
+    public Or newInstance() {
+        return new Or()
+                .setAllowedTypeBindings(getAllowedTypeBindings());
+    }
+
+    @Override
+    public Or getSelf() {
+        return this;
+    }
 }

@@ -62,7 +62,7 @@ public final class GeneratorContext {
         addValue = ServiceOpenApi.paramValueAsBool(request, PARAM_ADD_VALUE, addValue);
         addEditing = ServiceOpenApi.paramValueAsBool(request, PARAM_ADD_EDITING, addEditing);
         version = request.getVersion();
-        serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
+        serviceRootUrl = request.getQueryDefaults().getServiceRootUrl();
         base = "/" + version.urlPart;
         return this;
     }
