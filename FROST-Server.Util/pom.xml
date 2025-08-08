@@ -55,7 +55,7 @@
                 <configuration>
                     <url>https://repo1.maven.org/maven2/org/congocc/org.congocc.parser.generator/${version.congocc}/org.congocc.parser.generator-${version.congocc}.jar</url>
                     <unpack>false</unpack>
-                    <outputDirectory>${project.build.directory}/scripts</outputDirectory>
+                    <outputDirectory>${settings.localRepository}/org/congocc/org.congocc.parser.generator/${version.congocc}/</outputDirectory>
                     <sha512>${congocc.sha512}</sha512>
                     <alwaysVerifyChecksum>true</alwaysVerifyChecksum>
                 </configuration>
@@ -84,7 +84,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
+                                <argument>${settings.localRepository}/org/congocc/org.congocc.parser.generator/${version.congocc}/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/pathParser.ccc</argument>
                                 <argument>-d</argument>
@@ -103,7 +103,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
+                                <argument>${settings.localRepository}/org/congocc/org.congocc.parser.generator/${version.congocc}/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/queryParser.ccc</argument>
                                 <argument>-d</argument>
@@ -122,7 +122,7 @@
                             <workingDirectory>${basedir}</workingDirectory>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>${project.build.directory}/scripts/org.congocc.parser.generator-${version.congocc}.jar</argument>
+                                <argument>${settings.localRepository}/org/congocc/org.congocc.parser.generator/${version.congocc}/org.congocc.parser.generator-${version.congocc}.jar</argument>
                                 <argument>-n</argument>
                                 <argument>src/main/congocc/wktParser.ccc</argument>
                                 <argument>-d</argument>

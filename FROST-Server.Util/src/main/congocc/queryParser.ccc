@@ -131,57 +131,7 @@ SKIP : " " | "\n" | "\r" | "\t";
 | <T_QO_DIV:      "div" >
 | <T_QO_MOD:      "mod" >
 
-| <T_QF_SUBSTRINGOF:        "substringof" <T_LB> >
-| <T_QF_ENDSWITH:           "endswith" <T_LB> >
-| <T_QF_STARTSWITH:         "startswith" <T_LB> >
-| <T_QF_LENGTH:             "length" <T_LB> >
-| <T_QF_INDEXOF:            "indexof" <T_LB> >
-| <T_QF_SUBSTRING:          "substring" <T_LB> >
-| <T_QF_TOLOWER:            "tolower" <T_LB> >
-| <T_QF_TOUPPER:            "toupper" <T_LB> >
-| <T_QF_TRIM:               "trim" <T_LB> >
-| <T_QF_CONCAT:             "concat" <T_LB> >
-| <T_QF_YEAR:               "year" <T_LB> >
-| <T_QF_MONTH:              "month" <T_LB> >
-| <T_QF_DAY:                "day" <T_LB> >
-| <T_QF_HOUR:               "hour" <T_LB> >
-| <T_QF_MINUTE:             "minute" <T_LB> >
-| <T_QF_SECOND:             "second" <T_LB> >
-| <T_QF_FRACTIONALSECONDS:  "fractionalseconds" <T_LB> >
-| <T_QF_DATE:               "date" <T_LB> >
-| <T_QF_TIME:               "time" <T_LB> >
-| <T_QF_TOTALOFFSETMINUTES: "totaloffsetminutes" <T_LB> >
-| <T_QF_NOW:                "now" <T_LB> >
-| <T_QF_MINDATETIME:        "mindatetime" <T_LB> >
-| <T_QF_MAXDATETIME:        "maxdatetime" <T_LB> >
-
-| <T_QF_BEFORE:   "before" <T_LB> >
-| <T_QF_AFTER:    "after" <T_LB> >
-| <T_QF_MEETS:    "meets" <T_LB> >
-| <T_QF_DURING:   "during" <T_LB> >
-| <T_QF_OVERLAPS: "overlaps" <T_LB> >
-| <T_QF_STARTS:   "starts" <T_LB> >
-| <T_QF_FINISHES: "finishes" <T_LB> >
-
-| <T_QF_ROUND:   "round" <T_LB> >
-| <T_QF_FLOOR:   "floor" <T_LB> >
-| <T_QF_CEILING: "ceiling" <T_LB> >
-
-| <T_QF_GEO_DISTANCE:   "geo.distance" <T_LB> >
-| <T_QF_GEO_LENGTH:     "geo.length" <T_LB> >
-| <T_QF_GEO_INTERSECTS: "geo.intersects" <T_LB> >
-
-| <T_QF_ST_EQUALS:     "st_equals" <T_LB> >
-| <T_QF_ST_DISJOINT:   "st_disjoint" <T_LB> >
-| <T_QF_ST_TOUCHES:    "st_touches" <T_LB> >
-| <T_QF_ST_WITHIN:     "st_within" <T_LB> >
-| <T_QF_ST_OVERLAPS:   "st_overlaps" <T_LB> >
-| <T_QF_ST_CROSSES:    "st_crosses" <T_LB> >
-| <T_QF_ST_INTERSECTS: "st_intersects" <T_LB> >
-| <T_QF_ST_CONTAINS:   "st_contains" <T_LB> >
-| <T_QF_ST_RELATE:     "st_relate" <T_LB> >
-
-| <T_QF_PRINCIPAL_NAME:"principalName" <T_LB> >
+| <T_FUNCTION_NAME: (["0"-"9", "a"-"z", ".", "_"])+ <T_LB> >
 ;
 
 <LS_CONSTANTS> TOKEN [IGNORE_CASE]:
@@ -297,39 +247,7 @@ P_LogicalAnd :
     P_NegationExpression (<T_QO_AND> P_NegationExpression )*
 ;
 P_NegationExpression :
-    (<T_QO_NOT>)? (SCAN P_BoolFunction | SCAN P_ComparativeExpression)
-;
-
-P_BoolFunction :
-  ( P_BoolFunctionNameTwo P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_RB>
-  | P_BoolFunctionNameThree P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_VALUE_SEPARATOR> P_UnaryExpression <T_RB>
-  )
-;
-
-P_BoolFunctionNameTwo :
-    <T_QF_SUBSTRINGOF>
-  | <T_QF_ENDSWITH>
-  | <T_QF_STARTSWITH>
-  | <T_QF_BEFORE>
-  | <T_QF_AFTER>
-  | <T_QF_MEETS>
-  | <T_QF_DURING>
-  | <T_QF_OVERLAPS>
-  | <T_QF_STARTS>
-  | <T_QF_FINISHES>
-  | <T_QF_GEO_INTERSECTS>
-  | <T_QF_ST_EQUALS>
-  | <T_QF_ST_DISJOINT>
-  | <T_QF_ST_TOUCHES>
-  | <T_QF_ST_WITHIN>
-  | <T_QF_ST_OVERLAPS>
-  | <T_QF_ST_CROSSES>
-  | <T_QF_ST_INTERSECTS>
-  | <T_QF_ST_CONTAINS>
-;
-
-P_BoolFunctionNameThree:
-    <T_QF_ST_RELATE>
+    (<T_QO_NOT>)? P_ComparativeExpression
 ;
 
 P_ComparativeExpression :
@@ -369,53 +287,12 @@ P_MulDiv #void:
 P_UnaryExpression :
     P_MathFunction
   | (<T_LB> P_LogicalExpression <T_RB>)
-  | (P_Constant)
-  | (P_PlainPath)
+  | P_Constant
+  | P_PlainPath
 ;
 
 P_MathFunction:
-    (P_FunctionNameNone  <T_RB>)
-  | (P_FunctionNameSingle  P_AdditiveExpression  <T_RB>)
-  | (P_FunctionNameDouble  P_AdditiveExpression <T_VALUE_SEPARATOR> P_AdditiveExpression  <T_RB>)
-  | (P_FunctionNameDoubleTripple  P_AdditiveExpression <T_VALUE_SEPARATOR> P_AdditiveExpression (<T_VALUE_SEPARATOR> P_AdditiveExpression)?  <T_RB>)
-;
-
-P_FunctionNameNone:
-    <T_QF_NOW>
-  | <T_QF_MINDATETIME>
-  | <T_QF_MAXDATETIME>
-  | <T_QF_PRINCIPAL_NAME>
-;
-
-P_FunctionNameSingle:
-    <T_QF_ROUND>
-  | <T_QF_FLOOR>
-  | <T_QF_CEILING>
-  | <T_QF_LENGTH>
-  | <T_QF_YEAR>
-  | <T_QF_MONTH>
-  | <T_QF_DAY>
-  | <T_QF_HOUR>
-  | <T_QF_MINUTE>
-  | <T_QF_SECOND>
-  | <T_QF_FRACTIONALSECONDS>
-  | <T_QF_DATE>
-  | <T_QF_TIME>
-  | <T_QF_TOTALOFFSETMINUTES>
-  | <T_QF_TOLOWER>
-  | <T_QF_TOUPPER>
-  | <T_QF_TRIM>
-  | <T_QF_GEO_LENGTH>
-;
-
-P_FunctionNameDouble:
-    <T_QF_INDEXOF>
-  | <T_QF_CONCAT>
-  | <T_QF_GEO_DISTANCE>
-;
-
-P_FunctionNameDoubleTripple:
-    <T_QF_SUBSTRING>
+    (<T_FUNCTION_NAME> (P_AdditiveExpression (<T_VALUE_SEPARATOR> P_AdditiveExpression)* )? <T_RB>)
 ;
 
 P_Identifier : LS_CONSTANTS :

@@ -64,7 +64,7 @@
     </issueManagement>
 
     <properties>
-        <congocc.sha512>bd9f03a0a78e90c2bbace005fc402a7f7d4b9f2b677feeb24466c5b219803b777fcb201a0e39d0cf532ee6f3a4e1d4c83d0b4c38e3c39629b63caea1a3c80422</congocc.sha512>
+        <congocc.sha512>b29508d55d81cf5842cb5629df9ccfabfe75438bf17fa09347cde0a87cf8ce7cd158e5210881b7508a5f357685a19858ab03b635f6b4e8b61fbc1c4d70890400</congocc.sha512>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
 
         <maven.compiler.source>17</maven.compiler.source>
@@ -89,7 +89,7 @@
         <version.commons-lang3>3.18.0</version.commons-lang3>
         <version.commons-text>1.13.1</version.commons-text>
         <version.configurable>0.37</version.configurable>
-        <version.congocc>2.0.0-RC5</version.congocc>
+        <version.congocc>2.0.0</version.congocc>
         <version.dbcp2>2.13.0</version.dbcp2>
         <version.geolatte-common>0.8</version.geolatte-common>
         <version.guava>33.4.8-jre</version.guava>

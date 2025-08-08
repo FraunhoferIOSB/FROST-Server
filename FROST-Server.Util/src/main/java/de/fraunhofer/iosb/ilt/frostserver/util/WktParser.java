@@ -80,15 +80,15 @@ public class WktParser extends Visitor {
     }
 
     public GeoJsonObject visit(Start node) {
-        final int childCount = node.getChildCount();
+        final int childCount = node.size();
 
         switch (childCount) {
             case 2:
-                visit(node.getChild(0));
+                visit(node.get(0));
                 break;
             case 3:
-                visit(node.getChild(1));
-                visit(node.getChild(0));
+                visit(node.get(1));
+                visit(node.get(0));
                 break;
             default:
                 throw new IllegalArgumentException("Incorrect number of items found in WKT.");
@@ -100,7 +100,7 @@ public class WktParser extends Visitor {
         if (result == null) {
             throw new IllegalArgumentException("SRID found, but no geo recognised.");
         }
-        Node child = node.getChild(1);
+        Node child = node.get(1);
         int srid = Integer.parseInt(child.getImage());
         Crs crs = new Crs();
         crs.setType(CrsType.name);
