@@ -25,15 +25,14 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConsta
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Utils;
-import java.util.List;
 
 /**
  * The sub operator.
  */
-public class Subtract extends Function<Subtract> {
+public class Subtract extends Operator<Subtract> {
 
     public Subtract() {
         super("sub");
@@ -63,12 +62,6 @@ public class Subtract extends Function<Subtract> {
         addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DateTimeConstant.class, DateTimeConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DateConstant.class, DateConstant.class));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " sub " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

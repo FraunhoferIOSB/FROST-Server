@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
-import java.util.List;
 
 /**
  * The and operator.
@@ -45,12 +44,6 @@ public class And extends Function<And> {
     @Override
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class, BooleanConstant.class));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " and " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

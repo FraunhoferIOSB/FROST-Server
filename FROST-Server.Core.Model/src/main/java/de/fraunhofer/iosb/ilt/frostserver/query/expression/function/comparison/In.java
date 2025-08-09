@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
-import java.util.List;
 
 /**
  * The in function.
@@ -40,12 +39,6 @@ public class In extends ComparisonFunction<In> {
 
     public BooleanConstant eval(Constant p1, ConstantList p2) {
         return new BooleanConstant(p2.contains(p1));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " in " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

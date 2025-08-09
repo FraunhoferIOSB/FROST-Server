@@ -20,14 +20,13 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
-import java.util.List;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 
 /**
  * The not operator.
  */
-public class Not extends Function<Not> {
+public class Not extends Operator<Not> {
 
     public Not() {
         super("not");
@@ -45,12 +44,6 @@ public class Not extends Function<Not> {
     @Override
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, BooleanConstant.class));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "( not (" + parameters.get(0).toUrl() + "))";
     }
 
     @Override

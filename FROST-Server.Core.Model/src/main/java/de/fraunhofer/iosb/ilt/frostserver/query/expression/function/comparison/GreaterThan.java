@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
-import java.util.List;
 
 /**
  * The gt operator.
@@ -39,12 +38,6 @@ public class GreaterThan extends ComparisonFunction<GreaterThan> {
 
     public BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
         return new BooleanConstant(p1.getValue().doubleValue() > p2.getValue().doubleValue());
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " gt " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

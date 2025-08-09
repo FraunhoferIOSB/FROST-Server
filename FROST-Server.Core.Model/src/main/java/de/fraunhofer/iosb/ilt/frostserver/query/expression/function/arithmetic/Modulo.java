@@ -22,14 +22,13 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Utils;
-import java.util.List;
 
 /**
  * The mod operator.
  */
-public class Modulo extends Function<Modulo> {
+public class Modulo extends Operator<Modulo> {
 
     public Modulo() {
         super("mod");
@@ -53,12 +52,6 @@ public class Modulo extends Function<Modulo> {
     @Override
     protected void initAllowedTypeBindings() {
         Utils.allowTypeBindingsCommonNumbers(this);
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " mod " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

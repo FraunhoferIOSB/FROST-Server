@@ -25,15 +25,14 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConsta
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Utils;
-import java.util.List;
 
 /**
  * The add operator.
  */
-public class Add extends Function<Add> {
+public class Add extends Operator<Add> {
 
     public Add() {
         super("add");
@@ -60,12 +59,6 @@ public class Add extends Function<Add> {
         addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class, DurationConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DurationConstant.class, DurationConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " add " + parameters.get(1).toUrl() + ")";
     }
 
     @Override

@@ -24,15 +24,15 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConsta
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 
 /**
  * The abstract class for comparison operators.
  *
  * @param <T> The exact type of the implementing class.
  */
-public abstract class ComparisonFunction<T extends ComparisonFunction<T>> extends Function<T> {
+public abstract class ComparisonFunction<T extends ComparisonFunction<T>> extends Operator<T> {
 
     protected ComparisonFunction(String name) {
         super(name);

@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
-import java.util.List;
 
 /**
  * The eq operator.
@@ -39,12 +38,6 @@ public class Equal extends ComparisonFunction<Equal> {
 
     public BooleanConstant eval(Constant p1, Constant p2) {
         return new BooleanConstant(p1.equals(p2));
-    }
-
-    @Override
-    public String toUrl() {
-        List<Expression<?>> parameters = getParameters();
-        return "(" + parameters.get(0).toUrl() + " eq " + parameters.get(1).toUrl() + ")";
     }
 
     @Override
