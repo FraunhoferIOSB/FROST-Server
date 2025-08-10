@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefPmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PmHook;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -908,6 +909,11 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     @Override
     public Map<String, Object> createLiqibaseParams(PersistenceManager pm, Map<String, Object> target) {
         return target;
+    }
+
+    @Override
+    public void addExpressionHandlers(FunctionRegistry fr) {
+        ExpressionHandlers.addExpressionHandlers(fr, this);
     }
 
 }

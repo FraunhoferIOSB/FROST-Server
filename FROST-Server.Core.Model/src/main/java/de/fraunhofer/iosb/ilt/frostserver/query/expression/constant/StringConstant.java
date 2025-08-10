@@ -17,21 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-
 /**
- *
- * @author jab
+ * A constant string.
  */
-public class StringConstant extends Constant<String> {
+public class StringConstant extends Constant<StringConstant, String> {
 
-    public StringConstant(String value) {
-        super(value.replace("''", "'"));
+    public static final String EXPR_NAME_STRINGCONSTANT = "stringconstant";
+
+    public StringConstant() {
+        super(EXPR_NAME_STRINGCONSTANT);
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public StringConstant(String value) {
+        super(EXPR_NAME_STRINGCONSTANT, value.replace("''", "'"));
     }
 
     @Override
@@ -39,4 +37,8 @@ public class StringConstant extends Constant<String> {
         return "'" + getValue().replace("'", "''") + "'";
     }
 
+    @Override
+    public StringConstant getSelf() {
+        return this;
+    }
 }

@@ -43,8 +43,8 @@ public class MariadbPersistenceManager extends JooqAbsPersistenceManager {
     }
 
     @Override
-    public ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder) {
-        return new MariadbExpressionHandler(getCoreSettings(), queryBuilder);
+    public ExpressionHelper createExpressionHelper(QueryBuilder queryBuilder) {
+        return new ExpressionHelper(getCoreSettings(), queryBuilder);
     }
 
     @Override

@@ -17,20 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
 import org.geojson.GeoJsonObject;
 import org.geojson.Point;
 
 /**
- *
- * @author jab
+ * A constant geojson point.
  */
-public class PointConstant extends GeoJsonConstant<Point> {
+public class PointConstant extends GeoJsonConstant<PointConstant, Point> {
+
+    public static final String EXPR_NAME_POINTCONSTANT = "pointconstant";
+
+    public PointConstant() {
+        super(EXPR_NAME_POINTCONSTANT, null);
+    }
 
     public PointConstant(Point value, String source) {
-        super(value, source);
+        super(EXPR_NAME_POINTCONSTANT, value, source);
     }
 
     public static PointConstant parse(String value) {
@@ -42,8 +46,7 @@ public class PointConstant extends GeoJsonConstant<Point> {
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public PointConstant getSelf() {
+        return this;
     }
-
 }

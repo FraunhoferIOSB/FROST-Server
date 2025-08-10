@@ -25,6 +25,17 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 public interface Value<T extends Value<T>> extends Expression<T> {
 
     @Override
+    public default boolean isAdminOnly() {
+        return false;
+    }
+
+    @Override
+    public default T setContext(DynamicContext context) {
+        // Values have (so far) no use for context.
+        return getSelf();
+    }
+
+    @Override
     public default Expression compress() {
         return this;
     }

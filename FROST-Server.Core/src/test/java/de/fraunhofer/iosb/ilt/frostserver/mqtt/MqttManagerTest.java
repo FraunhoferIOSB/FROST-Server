@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -314,6 +315,10 @@ class MqttManagerTest {
     public static final class DummyPersistenceManager implements PersistenceManager {
 
         private CoreSettings coreSettings;
+
+        @Override
+        public void addExpressionHandlers(FunctionRegistry fr) {
+        }
 
         @Override
         public boolean validatePath(ResourcePath path) {

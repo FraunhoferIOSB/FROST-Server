@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.spatialrelation;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
@@ -41,11 +40,6 @@ public class GeoLength extends Function<GeoLength> {
     @Override
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, LineStringConstant.class));
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

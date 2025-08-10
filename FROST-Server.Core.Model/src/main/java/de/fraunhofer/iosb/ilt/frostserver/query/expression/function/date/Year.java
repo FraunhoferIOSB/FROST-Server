@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date;
 import static net.time4j.tz.ZonalOffset.UTC;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
@@ -53,11 +52,6 @@ public class Year extends Function<Year> {
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

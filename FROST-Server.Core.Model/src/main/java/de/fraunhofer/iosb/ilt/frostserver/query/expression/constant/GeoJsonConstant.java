@@ -25,18 +25,19 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 
 /**
+ * A constant geojson object.
  *
- * @author jab
- * @param <T> The type of GeoJSON object this constant wraps.
+ * @param <T> The exact type of the implementing class.
+ * @param <V> The type of GeoJSON object this constant wraps.
  */
-public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<T> {
+public abstract class GeoJsonConstant<T extends GeoJsonConstant<T, V>, V extends GeoJsonObject> extends Constant<T, V> {
 
     /**
      * The WKT that generated this geometry.
      */
     private String source;
 
-    public static GeoJsonConstant<? extends GeoJsonObject> fromString(String value) {
+    public static GeoJsonConstant<?, ? extends GeoJsonObject> fromString(String value) {
 
         GeoJsonObject geoJsonObject = WktParser.parseWkt(value);
         if (geoJsonObject instanceof Point point) {
@@ -51,12 +52,12 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
-    protected GeoJsonConstant(T value) {
-        this(value, null);
+    protected GeoJsonConstant(String name, V value) {
+        this(name, value, null);
     }
 
-    protected GeoJsonConstant(T value, String source) {
-        super(value);
+    protected GeoJsonConstant(String name, V value, String source) {
+        super(name, value);
         this.source = source;
     }
 
@@ -106,7 +107,7 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final GeoJsonConstant<?> other = (GeoJsonConstant<?>) obj;
+        final GeoJsonConstant<T, V> other = (GeoJsonConstant<T, V>) obj;
         return Objects.equals(this.source, other.source);
     }
 

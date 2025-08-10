@@ -17,20 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
 import org.geojson.GeoJsonObject;
 import org.geojson.Polygon;
 
 /**
- *
- * @author jab
+ * A constant geojson polygon.
  */
-public class PolygonConstant extends GeoJsonConstant<Polygon> {
+public class PolygonConstant extends GeoJsonConstant<PolygonConstant, Polygon> {
+
+    public static final String EXPR_NAME_POLYGONCONSTANT = "polygonconstant";
+
+    public PolygonConstant() {
+        super(EXPR_NAME_POLYGONCONSTANT, null);
+    }
 
     public PolygonConstant(Polygon value, String source) {
-        super(value, source);
+        super(EXPR_NAME_POLYGONCONSTANT, value, source);
     }
 
     public static PolygonConstant parse(String value) {
@@ -42,8 +46,7 @@ public class PolygonConstant extends GeoJsonConstant<Polygon> {
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public PolygonConstant getSelf() {
+        return this;
     }
-
 }

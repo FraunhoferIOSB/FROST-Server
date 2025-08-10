@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.string;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
@@ -50,11 +49,6 @@ public class Substring extends Function<Substring> {
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, StringConstant.class, IntegerConstant.class, IntegerConstant.class));
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

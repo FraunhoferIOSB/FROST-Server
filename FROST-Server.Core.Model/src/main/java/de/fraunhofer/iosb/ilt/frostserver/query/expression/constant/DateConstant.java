@@ -17,20 +17,26 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import net.time4j.PlainDate;
 import net.time4j.format.expert.Iso8601Format;
 
 /**
  * A constant Date.
  */
-public class DateConstant extends Constant<PlainDate> {
+public class DateConstant extends Constant<DateConstant, PlainDate> {
+
+    public static final String EXPR_NAME_DATECONSTANT = "dateconstant";
+
+    public DateConstant() {
+        super(EXPR_NAME_DATECONSTANT);
+    }
 
     public DateConstant(PlainDate value) {
-        super(value);
+        super(EXPR_NAME_DATECONSTANT, value);
     }
 
     public DateConstant(String value) {
+        super(EXPR_NAME_DATECONSTANT);
         if (value.lastIndexOf('-') <= 0) {
             // We do not want simple integers be interpreted as a year.
             throw new IllegalArgumentException("Not a date: " + value);
@@ -43,13 +49,12 @@ public class DateConstant extends Constant<PlainDate> {
         return getValue().toString();
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
-    }
-
     public static DateConstant parse(String value) {
         return new DateConstant(value);
     }
 
+    @Override
+    public DateConstant getSelf() {
+        return this;
+    }
 }

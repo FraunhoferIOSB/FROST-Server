@@ -21,6 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
@@ -64,6 +66,8 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
      */
     private DynamicContext context;
 
+    private ExpressionHandler handler;
+
     protected Function() {
         functionName = getClass().getSimpleName().toLowerCase();
         adminOnly = false;
@@ -78,17 +82,46 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
         this.adminOnly = adminOnly;
     }
 
-    public String getFunctionName() {
+    @Override
+    public String getName() {
         return functionName;
     }
 
+    @Override
     public boolean isAdminOnly() {
         return adminOnly;
     }
 
     @Override
+    public boolean hasHandler() {
+        return handler != null;
+    }
+
+    @Override
+    public ExpressionHandler getHandler() {
+        return handler;
+    }
+
+    @Override
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler) {
+        if (this.handler != null) {
+            LOGGER.warn("Replacing handler for function {}", getName());
+        }
+        this.handler = handler;
+        return getSelf();
+    }
+
+    @Override
+    public <R> R handle(ExpressionHelper<R> h) {
+        if (!hasHandler()) {
+            LOGGER.error("No hanlder for {} ({})", getName(), getClass());
+        }
+        return (R) handler.handle(this, h);
+    }
+
+    @Override
     public String toUrl() {
-        StringBuilder sb = new StringBuilder(getFunctionName());
+        StringBuilder sb = new StringBuilder(getName());
         sb.append("(");
         boolean first = true;
         for (Expression p : parameters) {
@@ -132,15 +165,10 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
         return context;
     }
 
-    /**
-     * The context to use when rendering the function.
-     *
-     * @param context the context to set
-     * @return this.
-     */
-    public Function setContext(DynamicContext context) {
+    @Override
+    public T setContext(DynamicContext context) {
         this.context = context;
-        return this;
+        return getSelf();
     }
 
     /**
@@ -289,6 +317,11 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
         result.add(new FunctionTypeBinding(StringConstant.class, StringConstant.class, returnType));
         result.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, returnType));
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " " + getName();
     }
 
 }

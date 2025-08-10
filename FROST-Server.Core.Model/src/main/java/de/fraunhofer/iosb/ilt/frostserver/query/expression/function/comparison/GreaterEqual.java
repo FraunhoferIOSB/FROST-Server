@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
 
@@ -36,13 +35,8 @@ public class GreaterEqual extends ComparisonFunction<GreaterEqual> {
         addParameters(parameters);
     }
 
-    public BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
+    public BooleanConstant eval(NumericConstant<?, ? extends Number> p1, NumericConstant<?, ? extends Number> p2) {
         return new BooleanConstant(p1.getValue().doubleValue() >= p2.getValue().doubleValue());
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

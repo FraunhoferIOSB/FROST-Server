@@ -17,6 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantList;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NullConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeObjectConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Divide;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Modulo;
@@ -44,6 +60,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date.Year;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.math.Ceiling;
@@ -83,77 +100,95 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Sta
  * Class that initialises the default functions.
  */
 public class DefaultFunctions {
-    public static void registerDefaultFunctions(FunctionRegistry fr) {
 
-        fr.registerFunction(new Not());
-        fr.registerFunction(new And());
-        fr.registerFunction(new Or());
+    public static void registerDefaultFunctions(FunctionRegistry fr) {
+        // Constants
+        fr.registerExpression(new BooleanConstant());
+        fr.registerExpression(new ConstantList());
+        fr.registerExpression(new DateConstant());
+        fr.registerExpression(new DateTimeConstant());
+        fr.registerExpression(new DoubleConstant());
+        fr.registerExpression(new DurationConstant());
+        fr.registerExpression(new IntegerConstant());
+        fr.registerExpression(new IntervalConstant());
+        fr.registerExpression(new LineStringConstant());
+        fr.registerExpression(new NullConstant());
+        fr.registerExpression(new PointConstant());
+        fr.registerExpression(new PolygonConstant());
+        fr.registerExpression(new StringConstant());
+        fr.registerExpression(new TimeConstant());
+        fr.registerExpression(new TimeObjectConstant());
+        // Logic
+        fr.registerExpression(new Not());
+        fr.registerExpression(new And());
+        fr.registerExpression(new Or());
         // Math
-        fr.registerFunction(new Add());
-        fr.registerFunction(new Subtract());
-        fr.registerFunction(new Multiply());
-        fr.registerFunction(new Divide());
-        fr.registerFunction(new Modulo());
+        fr.registerExpression(new Add());
+        fr.registerExpression(new Subtract());
+        fr.registerExpression(new Multiply());
+        fr.registerExpression(new Divide());
+        fr.registerExpression(new Modulo());
+        fr.registerExpression(new Round());
+        fr.registerExpression(new Floor());
+        fr.registerExpression(new Ceiling());
         // Comparison
-        fr.registerFunction(new Equal());
-        fr.registerFunction(new NotEqual());
-        fr.registerFunction(new GreaterThan());
-        fr.registerFunction(new GreaterEqual());
-        fr.registerFunction(new LessThan());
-        fr.registerFunction(new LessEqual());
-        fr.registerFunction(new In());
+        fr.registerExpression(new Equal());
+        fr.registerExpression(new NotEqual());
+        fr.registerExpression(new GreaterThan());
+        fr.registerExpression(new GreaterEqual());
+        fr.registerExpression(new LessThan());
+        fr.registerExpression(new LessEqual());
+        fr.registerExpression(new In());
         // String
-        fr.registerFunction(new SubstringOf());
-        fr.registerFunction(new EndsWith());
-        fr.registerFunction(new StartsWith());
-        fr.registerFunction(new Length());
-        fr.registerFunction(new IndexOf());
-        fr.registerFunction(new Substring());
-        fr.registerFunction(new ToLower());
-        fr.registerFunction(new ToUpper());
-        fr.registerFunction(new Trim());
-        fr.registerFunction(new Concat());
+        fr.registerExpression(new SubstringOf());
+        fr.registerExpression(new EndsWith());
+        fr.registerExpression(new StartsWith());
+        fr.registerExpression(new Length());
+        fr.registerExpression(new IndexOf());
+        fr.registerExpression(new Substring());
+        fr.registerExpression(new ToLower());
+        fr.registerExpression(new ToUpper());
+        fr.registerExpression(new Trim());
+        fr.registerExpression(new Concat());
         // DateTime
-        fr.registerFunction(new Year());
-        fr.registerFunction(new Month());
-        fr.registerFunction(new Day());
-        fr.registerFunction(new Hour());
-        fr.registerFunction(new Minute());
-        fr.registerFunction(new Second());
-        fr.registerFunction(new FractionalSeconds());
-        fr.registerFunction(new Date());
-        fr.registerFunction(new Time());
-        fr.registerFunction(new TotalOffsetMinutes());
-        fr.registerFunction(new Now());
-        fr.registerFunction(new MinDateTime());
-        fr.registerFunction(new MaxDateTime());
+        fr.registerExpression(new Year());
+        fr.registerExpression(new Month());
+        fr.registerExpression(new Day());
+        fr.registerExpression(new Hour());
+        fr.registerExpression(new Minute());
+        fr.registerExpression(new Second());
+        fr.registerExpression(new FractionalSeconds());
+        fr.registerExpression(new Date());
+        fr.registerExpression(new Time());
+        fr.registerExpression(new TotalOffsetMinutes());
+        fr.registerExpression(new Now());
+        fr.registerExpression(new MinDateTime());
+        fr.registerExpression(new MaxDateTime());
         // Allen's interval algebra
-        fr.registerFunction(new Before());
-        fr.registerFunction(new After());
-        fr.registerFunction(new Meets());
-        fr.registerFunction(new During());
-        fr.registerFunction(new Overlaps());
-        fr.registerFunction(new Starts());
-        fr.registerFunction(new Finishes());
-        // Math
-        fr.registerFunction(new Round());
-        fr.registerFunction(new Floor());
-        fr.registerFunction(new Ceiling());
+        fr.registerExpression(new Before());
+        fr.registerExpression(new After());
+        fr.registerExpression(new Meets());
+        fr.registerExpression(new During());
+        fr.registerExpression(new Overlaps());
+        fr.registerExpression(new Starts());
+        fr.registerExpression(new Finishes());
         // Geo
-        fr.registerFunction(new GeoDistance());
-        fr.registerFunction(new GeoLength());
-        fr.registerFunction(new GeoIntersects());
-        fr.registerFunction(new STEquals());
-        fr.registerFunction(new STDisjoint());
-        fr.registerFunction(new STTouches());
-        fr.registerFunction(new STWithin());
-        fr.registerFunction(new STOverlaps());
-        fr.registerFunction(new STCrosses());
-        fr.registerFunction(new STIntersects());
-        fr.registerFunction(new STContains());
-        fr.registerFunction(new STRelate());
-        // Current user related
-        fr.registerFunction(new PrincipalName());
+        fr.registerExpression(new GeoDistance());
+        fr.registerExpression(new GeoLength());
+        fr.registerExpression(new GeoIntersects());
+        fr.registerExpression(new STEquals());
+        fr.registerExpression(new STDisjoint());
+        fr.registerExpression(new STTouches());
+        fr.registerExpression(new STWithin());
+        fr.registerExpression(new STOverlaps());
+        fr.registerExpression(new STCrosses());
+        fr.registerExpression(new STIntersects());
+        fr.registerExpression(new STContains());
+        fr.registerExpression(new STRelate());
+        // Other
+        fr.registerExpression(new Path());
+        fr.registerExpression(new Any());
+        fr.registerExpression(new PrincipalName());
     }
 
 }

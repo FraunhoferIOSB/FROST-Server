@@ -18,14 +18,19 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 /**
+ * Base class for numeric constants.
  *
- * @author jab, scf
- * @param <T> The type of Number this constant encapsulates.
+ * @param <T> The exact type of the implementing class.
+ * @param <V> The type of Number this constant encapsulates.
  */
-public abstract class NumericConstant<T extends Number> extends Constant<T> {
+public abstract class NumericConstant<T extends NumericConstant<T, V>, V extends Number> extends Constant<T, V> {
 
-    protected NumericConstant(T value) {
-        super(value);
+    protected NumericConstant(String name) {
+        super(name);
+    }
+
+    protected NumericConstant(String name, V value) {
+        super(name, value);
     }
 
     @Override

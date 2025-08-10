@@ -15,34 +15,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
+package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 /**
- * A Constant boolean.
+ * The interface for functions that handle an expression.
+ *
+ * @param <E> the Expression to handle.
+ * @param <P> the parameter type for the handle calls.
+ * @param <R> the return type for the handle calls.
  */
-public class BooleanConstant extends Constant<BooleanConstant, Boolean> {
+public interface ExpressionHandler<E extends Expression<E>, P extends ExpressionHelper<R>, R> {
 
-    public static final String EXPR_NAME_BOOLEANCONSTANT = "booleanconstant";
-
-    public BooleanConstant() {
-        super(EXPR_NAME_BOOLEANCONSTANT);
-    }
-
-    public BooleanConstant(Boolean value) {
-        super(EXPR_NAME_BOOLEANCONSTANT, value);
-    }
-
-    public BooleanConstant(String value) {
-        super("booleanconstant", Boolean.valueOf(value));
-    }
-
-    @Override
-    public String toUrl() {
-        return getValue().toString();
-    }
-
-    @Override
-    public BooleanConstant getSelf() {
-        return this;
-    }
+    public R handle(E expression, P helper);
 }

@@ -18,21 +18,20 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 
 /**
- *
- * @author jab
+ * A constant time object.
  */
-public class TimeObjectConstant extends Constant<TimeObject> {
+public class TimeObjectConstant extends Constant<TimeObjectConstant, TimeObject> {
 
-    public TimeObjectConstant(TimeObject value) {
-        super(value);
+    public static final String EXPR_NAME_TIMEOBJECTCONSTANT = "timeobjectconstant";
+
+    public TimeObjectConstant() {
+        super(EXPR_NAME_TIMEOBJECTCONSTANT);
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        throw new UnsupportedOperationException("Not supported for this type.");
+    public TimeObjectConstant(TimeObject value) {
+        super(EXPR_NAME_TIMEOBJECTCONSTANT, value);
     }
 
     @Override
@@ -40,4 +39,8 @@ public class TimeObjectConstant extends Constant<TimeObject> {
         return value.asISO8601();
     }
 
+    @Override
+    public TimeObjectConstant getSelf() {
+        return this;
+    }
 }

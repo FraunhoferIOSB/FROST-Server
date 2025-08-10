@@ -48,8 +48,7 @@ import org.jooq.Table;
 import org.jooq.exception.DataAccessException;
 
 /**
- *
- * @author hylke
+ * The interface for PersistanceManagers based on JOOQ.
  */
 public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManager {
 
@@ -74,7 +73,7 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     void generateLiquibaseVariables(Map<String, Object> target, String entity, String type);
 
-    ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder);
+    ExpressionHelper createExpressionHelper(QueryBuilder queryBuilder);
 
     Entity get(EntityType entityType, PkValue id, Query query);
 

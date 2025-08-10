@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -176,4 +177,12 @@ public interface PersistenceManager extends AutoCloseable {
     public default void addSecurityDefinition(SecurityModel.SecurityEntry entry) {
         // Optional method.
     }
+
+    /**
+     * Add expression handlers to functions (or other expressions) in the
+     * FunctionRegestry.
+     *
+     * @param fr The FunctionRegistry holding all expressions. expressions.
+     */
+    public void addExpressionHandlers(FunctionRegistry fr);
 }

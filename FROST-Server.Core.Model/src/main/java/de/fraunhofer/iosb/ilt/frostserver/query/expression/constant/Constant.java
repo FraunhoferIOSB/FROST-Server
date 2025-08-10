@@ -19,28 +19,68 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The abstract class for constant values.
  *
+ * @param <T> The exact type of the implementing class.
  * @param <V> The type of the constant value.
  */
-public abstract class Constant<V> implements Value<Constant<V>> {
+public abstract class Constant<T extends Constant<T, V>, V> implements Value<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Constant.class.getName());
+
+    private String name;
+    private ExpressionHandler handler;
 
     protected V value;
 
-    protected Constant() {
-        // Nothing here
+    protected Constant(String name) {
+        this.name = name;
     }
 
-    protected Constant(V value) {
+    protected Constant(String name, V value) {
+        this(name);
         this.value = value;
     }
 
     public V getValue() {
         return value;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public boolean hasHandler() {
+        return handler != null;
+    }
+
+    @Override
+    public ExpressionHandler getHandler() {
+        return handler;
+    }
+
+    @Override
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler) {
+        this.handler = handler;
+        return getSelf();
+    }
+
+    @Override
+    public <R> R handle(ExpressionHelper<R> h) {
+        if (!hasHandler()) {
+            LOGGER.error("No hanlder for {} ({})", getName(), getClass());
+        }
+        return (R) handler.handle(this, h);
     }
 
     @Override
@@ -59,7 +99,7 @@ public abstract class Constant<V> implements Value<Constant<V>> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Constant<?> other = (Constant<?>) obj;
+        final T other = (T) obj;
         return Objects.equals(this.value, other.value);
     }
 
@@ -69,13 +109,8 @@ public abstract class Constant<V> implements Value<Constant<V>> {
     }
 
     @Override
-    public Constant<V> newInstance() {
+    public T newInstance() {
         throw new UnsupportedOperationException("Can not instantiate constants using newInstance");
-    }
-
-    @Override
-    public Constant<V> getSelf() {
-        return this;
     }
 
 }

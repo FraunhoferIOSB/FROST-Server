@@ -17,25 +17,27 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-
 /**
- *
- * @author jab
+ * A constant double.
  */
-public class DoubleConstant extends NumericConstant<Double> {
+public class DoubleConstant extends NumericConstant<DoubleConstant, Double> {
+
+    public static final String EXPR_NAME_DOUBLECONSTANT = "doubleconstant";
+
+    public DoubleConstant() {
+        super(EXPR_NAME_DOUBLECONSTANT);
+    }
 
     public DoubleConstant(Double value) {
-        super(value);
+        super(EXPR_NAME_DOUBLECONSTANT, value);
     }
 
     public DoubleConstant(String value) {
-        super(Double.parseDouble(value));
+        super(EXPR_NAME_DOUBLECONSTANT, Double.valueOf(value));
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public DoubleConstant getSelf() {
+        return this;
     }
-
 }

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.NumericConstant;
@@ -39,7 +38,7 @@ public class Divide extends Operator<Divide> {
         addParameters(parameters);
     }
 
-    protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
+    protected NumericConstant eval(NumericConstant<?, ? extends Number> p1, NumericConstant<?, ? extends Number> p2) {
         Number n1 = p1.getValue();
         Number n2 = p2.getValue();
         if (n1 instanceof Double || n2 instanceof Double) {
@@ -52,11 +51,6 @@ public class Divide extends Operator<Divide> {
     @Override
     protected void initAllowedTypeBindings() {
         Utils.allowTypeBindingsCommonNumbers(this);
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

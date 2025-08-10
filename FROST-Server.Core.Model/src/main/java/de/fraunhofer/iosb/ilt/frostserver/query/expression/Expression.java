@@ -33,7 +33,27 @@ public interface Expression<T extends Expression<T>> {
 
     public Expression compress();
 
-    public <O> O accept(ExpressionVisitor<O> visitor);
+    /**
+     * Get the (type) name of the expression.
+     *
+     * @return the name of the expression.
+     */
+    public String getName();
+
+    /**
+     * AdminOnly expressions can only be used by Administrators.
+     *
+     * @return true if this expression is only for admin use.
+     */
+    public boolean isAdminOnly();
+
+    public boolean hasHandler();
+
+    public ExpressionHandler getHandler();
+
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler);
+
+    public <R> R handle(ExpressionHelper<R> h);
 
     /**
      * Validate the raw elements in this Expression against the given context
@@ -53,6 +73,14 @@ public interface Expression<T extends Expression<T>> {
     public String toUrl();
 
     /**
+     * The context to use when rendering the expression.
+     *
+     * @param context the context to set
+     * @return this.
+     */
+    public T setContext(DynamicContext context);
+
+    /**
      * Create an new instance of this Expression.
      *
      * @return A new instance of this Expression without any parameters.
@@ -60,4 +88,5 @@ public interface Expression<T extends Expression<T>> {
     public T newInstance();
 
     public T getSelf();
+
 }

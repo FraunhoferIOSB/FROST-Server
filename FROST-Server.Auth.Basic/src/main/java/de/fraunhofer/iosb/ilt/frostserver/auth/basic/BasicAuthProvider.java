@@ -108,11 +108,12 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
 
         if (authenticateOnly) {
-            PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
-            if (pm instanceof JooqPersistenceManager jpm) {
-                // Ensure security validators are initialised even if no specific
-                // security validators are defined.
-                jpm.getTableCollection().addSecurityValidator("", null);
+            try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
+                if (pm instanceof JooqPersistenceManager jpm) {
+                    // Ensure security validators are initialised even if no specific
+                    // security validators are defined.
+                    jpm.getTableCollection().addSecurityValidator("", null);
+                }
             }
         }
 

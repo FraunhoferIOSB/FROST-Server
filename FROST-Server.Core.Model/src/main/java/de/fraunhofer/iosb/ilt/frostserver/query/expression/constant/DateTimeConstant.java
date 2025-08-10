@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import static net.time4j.tz.ZonalOffset.UTC;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import net.time4j.ZonalDateTime;
 import net.time4j.engine.ChronoException;
@@ -27,18 +26,24 @@ import net.time4j.format.expert.Iso8601Format;
 import net.time4j.tz.Timezone;
 
 /**
- *
- * @author jab
+ * A constant dateTime.
  */
-public class DateTimeConstant extends Constant<ZonalDateTime> {
+public class DateTimeConstant extends Constant<DateTimeConstant, ZonalDateTime> {
+
+    public static final String EXPR_NAME_DATETIMECONSTANT = "datetimeconstant";
 
     public static final Timezone TIMEZONE_UTC = Timezone.of(UTC);
 
+    public DateTimeConstant() {
+        super(EXPR_NAME_DATETIMECONSTANT);
+    }
+
     public DateTimeConstant(ZonalDateTime value) {
-        super(value);
+        super(EXPR_NAME_DATETIMECONSTANT, value);
     }
 
     public DateTimeConstant(String value) {
+        super(EXPR_NAME_DATETIMECONSTANT);
         if (value.lastIndexOf('-') <= 0) {
             // We do not want simple integers be interpreted as a year.
             throw new IllegalArgumentException("Not a date: " + value);
@@ -51,11 +56,6 @@ public class DateTimeConstant extends Constant<ZonalDateTime> {
         return StringHelper.FORMAT_MOMENT.print(getValue().toMoment());
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
-    }
-
     public static DateTimeConstant parse(String value) {
         try {
             return new DateTimeConstant(value);
@@ -64,4 +64,8 @@ public class DateTimeConstant extends Constant<ZonalDateTime> {
         }
     }
 
+    @Override
+    public DateTimeConstant getSelf() {
+        return this;
+    }
 }

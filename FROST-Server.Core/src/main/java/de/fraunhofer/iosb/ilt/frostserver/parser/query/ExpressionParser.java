@@ -69,7 +69,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
  */
 public class ExpressionParser extends Visitor {
 
@@ -116,7 +115,7 @@ public class ExpressionParser extends Visitor {
 
     public void visit(P_PlainPath node) {
         PropertyPlaceholder property = queryParser.handle(node);
-        Path path = new Path(property);
+        Path path = fr.newPath(property);
         final Node lastChild = node.getLastChild();
         if (lastChild instanceof P_Any pAny) {
             handleAny(pAny, path);
@@ -226,7 +225,7 @@ public class ExpressionParser extends Visitor {
 
     public void visit(P_ConstantsList node) {
         Expression previousExpression = currentExpression;
-        ConstantList<Object> cl = new ConstantList<>();
+        ConstantList cl = new ConstantList();
         currentExpression = cl;
         for (Node child : node.children()) {
             visit(child);

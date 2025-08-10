@@ -17,29 +17,31 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-
 /**
- *
- * @author jab
+ * A constant integer.
  */
-public class IntegerConstant extends NumericConstant<Long> {
+public class IntegerConstant extends NumericConstant<IntegerConstant, Long> {
+
+    public static final String EXPR_NAME_INTCONSTANT = "intconstant";
+
+    public IntegerConstant() {
+        super(EXPR_NAME_INTCONSTANT);
+    }
 
     public IntegerConstant(Integer value) {
-        super(Long.valueOf(value.longValue()));
+        super(EXPR_NAME_INTCONSTANT, value.longValue());
     }
 
     public IntegerConstant(Long value) {
-        super(value);
+        super(EXPR_NAME_INTCONSTANT, value);
     }
 
     public IntegerConstant(String value) {
-        super(Long.parseLong(value));
+        super(EXPR_NAME_INTCONSTANT, Long.valueOf(value));
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public IntegerConstant getSelf() {
+        return this;
     }
-
 }

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
@@ -43,7 +42,7 @@ public class Add extends Operator<Add> {
         addParameters(parameters);
     }
 
-    protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
+    protected NumericConstant eval(NumericConstant<?, ? extends Number> p1, NumericConstant<?, ? extends Number> p2) {
         Number n1 = p1.getValue();
         Number n2 = p2.getValue();
         if (n1 instanceof Double || n2 instanceof Double) {
@@ -59,11 +58,6 @@ public class Add extends Operator<Add> {
         addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class, DurationConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DurationConstant.class, DurationConstant.class, DurationConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

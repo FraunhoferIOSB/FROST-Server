@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -45,8 +46,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The manager that handles plugins.
- *
- * @author scf
  */
 public class PluginManager implements ConfigDefaults {
 
@@ -115,6 +114,11 @@ public class PluginManager implements ConfigDefaults {
     private final List<PluginModel> modelModifiers = new ArrayList<>();
 
     /**
+     * The plugins that add functions.
+     */
+    private final List<PluginFunction> functionPlugins = new ArrayList<>();
+
+    /**
      * All plugins, by their class.
      */
     private final Map<Class<? extends Plugin>, Object> plugins = new HashMap<>();
@@ -142,8 +146,22 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void initPlugins(PersistenceManager pm) {
-        DefaultFunctions.registerDefaultFunctions(settings.getFunctionRegistry());
+        final FunctionRegistry fr = settings.getFunctionRegistry();
+        DefaultFunctions.registerDefaultFunctions(fr);
+        if (pm != null) {
+            // Can be null in tests.
+            pm.addExpressionHandlers(fr);
+        }
+
+        for (PluginFunction pf : functionPlugins) {
+            pf.registerFunctions(fr);
+        }
+        for (PluginFunction pf : functionPlugins) {
+            pf.addExpressionHandlers(fr, pm);
+        }
+
         initResultFormatters();
+
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerEntityTypes();
@@ -170,6 +188,10 @@ public class PluginManager implements ConfigDefaults {
             plugin.installSecurityDefinitions(pm);
         }
         modelRegistry.initFinalise();
+
+        // We no longer need these lists.
+        functionPlugins.clear();
+        modelModifiers.clear();
     }
 
     private void loadPlugins(String classList) {
@@ -257,7 +279,7 @@ public class PluginManager implements ConfigDefaults {
             settings.addLiquibaseUser(lu);
         }
         if (plugin instanceof PluginFunction pf) {
-            pf.registerFunctions(settings.getFunctionRegistry());
+            functionPlugins.add(pf);
         }
         plugins.put(plugin.getClass(), plugin);
     }
@@ -315,10 +337,6 @@ public class PluginManager implements ConfigDefaults {
 
     public <P extends Plugin> P getPlugin(Class<P> plugin) {
         return (P) plugins.get(plugin);
-    }
-
-    public List<PluginModel> getModelPlugins() {
-        return modelModifiers;
     }
 
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntervalConstant;
@@ -30,8 +29,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionType
  */
 public class After extends Function<After> {
 
+    public static final String FUNC_NAME_AFTER = "after";
+
     public After() {
-        super("after");
+        super(FUNC_NAME_AFTER);
     }
 
     public After(Expression... parameters) {
@@ -61,11 +62,6 @@ public class After extends Function<After> {
         addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, IntervalConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, IntervalConstant.class, DateTimeConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(BooleanConstant.class, DateTimeConstant.class, DateTimeConstant.class));
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

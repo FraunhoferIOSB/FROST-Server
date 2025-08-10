@@ -37,11 +37,11 @@ public abstract class Operator<T extends Operator<T>> extends Function<T> {
         final int size = parameters.size();
         switch (size) {
             case 1:
-                return "( " + getFunctionName() + " (" + parameters.get(1).toUrl() + "))";
+                return "( " + getName() + " (" + parameters.get(1).toUrl() + "))";
             case 2:
-                return "(" + parameters.get(0).toUrl() + " " + getFunctionName() + " " + parameters.get(1).toUrl() + ")";
+                return "(" + parameters.get(0).toUrl() + " " + getName() + " " + parameters.get(1).toUrl() + ")";
             default:
-                throw new IllegalArgumentException("Operator " + getFunctionName() + " should not have " + size + " parameters.");
+                throw new IllegalArgumentException("Operator " + getName() + " should not have " + size + " parameters.");
         }
     }
 

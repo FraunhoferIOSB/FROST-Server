@@ -18,11 +18,27 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 
 /**
  * The interface for plugins that expose filter functions.
  */
 public interface PluginFunction extends Plugin {
 
+    /**
+     * Register new functions in the FunctionRegistry.
+     *
+     * @param fr the FunctionRegistry to add new functions to.
+     */
     public void registerFunctions(FunctionRegistry fr);
+
+    /**
+     * Add expression handlers to functions (or other expressions) in the
+     * FunctionRegestry.
+     *
+     * @param fr The FunctionRegistry holding all expressions.
+     * @param pm The PersistenceManager that needs the handlers to execute the
+     * expressions.
+     */
+    public void addExpressionHandlers(FunctionRegistry fr, PersistenceManager pm);
 }

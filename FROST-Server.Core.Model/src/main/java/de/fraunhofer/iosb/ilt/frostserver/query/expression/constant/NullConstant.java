@@ -17,20 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
-
 /**
  * A Constant null.
  */
-public class NullConstant extends Constant<Void> {
+public class NullConstant extends Constant<NullConstant, Void> {
+
+    public static final String EXPR_NAME_NULLCONSTANT = "nullconstant";
 
     public NullConstant() {
-        super(null);
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+        super(EXPR_NAME_NULLCONSTANT, null);
     }
 
     @Override
@@ -38,4 +33,8 @@ public class NullConstant extends Constant<Void> {
         return "null";
     }
 
+    @Override
+    public NullConstant getSelf() {
+        return this;
+    }
 }

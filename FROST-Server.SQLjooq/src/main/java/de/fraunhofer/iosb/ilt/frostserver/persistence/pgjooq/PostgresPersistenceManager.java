@@ -43,8 +43,8 @@ public class PostgresPersistenceManager extends JooqAbsPersistenceManager {
     }
 
     @Override
-    public ExpressionHandler createExpressionHandler(QueryBuilder queryBuilder) {
-        return new PgExpressionHandler(getCoreSettings(), queryBuilder);
+    public ExpressionHelper createExpressionHelper(QueryBuilder queryBuilder) {
+        return new ExpressionHelper(getCoreSettings(), queryBuilder);
     }
 
     @Override

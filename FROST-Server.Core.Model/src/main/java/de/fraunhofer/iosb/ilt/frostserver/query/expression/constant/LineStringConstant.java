@@ -17,20 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.WktParser;
 import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 
 /**
- *
- * @author jab
+ * A constant geojson linestring.
  */
-public class LineStringConstant extends GeoJsonConstant<LineString> {
+public class LineStringConstant extends GeoJsonConstant<LineStringConstant, LineString> {
+
+    public static final String EXPR_NAME_LINESTRINGCONSTANT = "linestringconstant";
+
+    public LineStringConstant() {
+        super(EXPR_NAME_LINESTRINGCONSTANT, null);
+    }
 
     public LineStringConstant(LineString value, String source) {
-        super(value, source);
+        super(EXPR_NAME_LINESTRINGCONSTANT, value, source);
     }
 
     public static LineStringConstant parse(String value) {
@@ -42,8 +46,7 @@ public class LineStringConstant extends GeoJsonConstant<LineString> {
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public LineStringConstant getSelf() {
+        return this;
     }
-
 }

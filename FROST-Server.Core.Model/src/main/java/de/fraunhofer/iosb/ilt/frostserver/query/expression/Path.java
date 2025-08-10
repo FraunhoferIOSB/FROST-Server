@@ -33,6 +33,10 @@ import java.util.Objects;
  */
 public class Path implements Variable<Path> {
 
+    public static final String EXPR_NAME_PATH = "path";
+
+    private ExpressionHandler handler;
+
     private final PropertyPlaceholder rawElements;
     private final List<Property> elements;
 
@@ -54,6 +58,32 @@ public class Path implements Variable<Path> {
     public Path(List<Property> elements) {
         this.rawElements = null;
         this.elements = elements;
+    }
+
+    @Override
+    public String getName() {
+        return EXPR_NAME_PATH;
+    }
+
+    @Override
+    public boolean hasHandler() {
+        return handler != null;
+    }
+
+    @Override
+    public ExpressionHandler getHandler() {
+        return handler;
+    }
+
+    @Override
+    public <R> Path setHandler(ExpressionHandler<Path, ExpressionHelper<R>, R> handler) {
+        this.handler = handler;
+        return getSelf();
+    }
+
+    @Override
+    public <R> R handle(ExpressionHelper<R> h) {
+        return (R) handler.handle(this, h);
     }
 
     @Override
@@ -141,13 +171,13 @@ public class Path implements Variable<Path> {
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    public Path newInstance() {
+        return new Path()
+                .setHandler(handler);
     }
 
-    @Override
-    public Path newInstance() {
-        return new Path();
+    public Path newInstance(PropertyPlaceholder rawElements) {
+        return new Path(rawElements).setHandler(handler);
     }
 
     @Override

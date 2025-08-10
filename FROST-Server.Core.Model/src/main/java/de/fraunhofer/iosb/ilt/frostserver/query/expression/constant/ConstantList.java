@@ -18,22 +18,24 @@
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A constant that is a list of constants.
  *
- * @param <T> The type of the constants in the list.
+ * @param <T> The exact type of the implementing class.
+ * @param <V> The type of the constants in the list.
  */
-public class ConstantList<T> extends Constant<List<Constant<T>>> {
+public class ConstantList<T extends Constant<T, V>, V> extends Constant<ConstantList<T, V>, List<Constant<T, V>>> {
+
+    public static final String EXPR_NAME_CONSTANTLIST = "constantlist";
 
     public ConstantList() {
-        super(new ArrayList<>());
+        super(EXPR_NAME_CONSTANTLIST, new ArrayList<>());
     }
 
-    public ConstantList<T> addItem(Constant item) {
+    public ConstantList<T, V> addItem(Constant item) {
         getValue().add(item);
         return this;
     }
@@ -43,7 +45,7 @@ public class ConstantList<T> extends Constant<List<Constant<T>>> {
     }
 
     @Override
-    public ConstantList<T> addParameter(Expression parameter) {
+    public ConstantList<T, V> addParameter(Expression parameter) {
         if (parameter instanceof Constant c) {
             getValue().add(c);
         } else {
@@ -52,23 +54,22 @@ public class ConstantList<T> extends Constant<List<Constant<T>>> {
         return this;
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
-    }
-
-    public boolean contains(Constant<T> search) {
+    public boolean contains(Constant<T, V> search) {
         return getValue().contains(search);
     }
 
     @Override
     public String toUrl() {
         StringBuilder result = new StringBuilder();
-        for (Constant<T> item : getValue()) {
+        for (Constant<T, V> item : getValue()) {
             result.append(item.toUrl());
             result.append(',');
         }
         return '(' + result.substring(0, result.length() - 1) + ')';
     }
 
+    @Override
+    public ConstantList getSelf() {
+        return this;
+    }
 }

@@ -17,34 +17,33 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
 import net.time4j.PlainTime;
 import net.time4j.format.expert.Iso8601Format;
 
 /**
- *
- * @author jab
+ * A constant plain time.
  */
-public class TimeConstant extends Constant<PlainTime> {
+public class TimeConstant extends Constant<TimeConstant, PlainTime> {
+
+    public static final String EXPR_NAME_TIMECONSTANT = "timeconstant";
+
+    public TimeConstant() {
+        super(EXPR_NAME_TIMECONSTANT);
+    }
 
     public TimeConstant(PlainTime value) {
-        super(value);
+        super(EXPR_NAME_TIMECONSTANT, value);
     }
 
     public TimeConstant(String value) throws ParseException {
-        super(Iso8601Format.EXTENDED_WALL_TIME.parse(value));
+        super(EXPR_NAME_TIMECONSTANT, Iso8601Format.EXTENDED_WALL_TIME.parse(value));
     }
 
     @Override
     public String toUrl() {
         return getValue().toString();
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     public static TimeConstant parse(String value) {
@@ -55,4 +54,8 @@ public class TimeConstant extends Constant<PlainTime> {
         }
     }
 
+    @Override
+    public TimeConstant getSelf() {
+        return this;
+    }
 }

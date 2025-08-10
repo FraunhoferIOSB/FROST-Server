@@ -17,23 +17,27 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
 import net.time4j.Duration;
 
 /**
- *
- * @author jab
+ * A constant (time) duration.
  */
-public class DurationConstant extends Constant<Duration> {
+public class DurationConstant extends Constant<DurationConstant, Duration> {
+
+    public static final String EXPR_NAME_DURATIONCONSTANT = "durationconstant";
+
+    public DurationConstant() {
+        super(EXPR_NAME_DURATIONCONSTANT);
+    }
 
     public DurationConstant(Duration value) {
-        super(value);
+        super(EXPR_NAME_DURATIONCONSTANT, value);
     }
 
     public DurationConstant(String value) throws ParseException {
-        super(Duration.parsePeriod(value));
+        super(EXPR_NAME_DURATIONCONSTANT, Duration.parsePeriod(value));
     }
 
     @Override
@@ -45,11 +49,6 @@ public class DurationConstant extends Constant<Duration> {
         return getValue().toStringISO();
     }
 
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
-    }
-
     public static DurationConstant parse(String value) {
         try {
             return new DurationConstant(value);
@@ -58,4 +57,8 @@ public class DurationConstant extends Constant<Duration> {
         }
     }
 
+    @Override
+    public DurationConstant getSelf() {
+        return this;
+    }
 }

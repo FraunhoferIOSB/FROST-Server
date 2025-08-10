@@ -17,33 +17,32 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
 import net.time4j.range.MomentInterval;
 
 /**
- *
- * @author scf
+ * A constant time interval.
  */
-public class IntervalConstant extends Constant<MomentInterval> {
+public class IntervalConstant extends Constant<IntervalConstant, MomentInterval> {
+
+    public static final String EXPR_NAME_INTERVALCONSTANT = "intervalconstant";
+
+    public IntervalConstant() {
+        super(EXPR_NAME_INTERVALCONSTANT);
+    }
 
     public IntervalConstant(MomentInterval value) {
-        super(value);
+        super(EXPR_NAME_INTERVALCONSTANT, value);
     }
 
     public IntervalConstant(String value) throws ParseException {
-        super(MomentInterval.parseISO(value));
+        super(EXPR_NAME_INTERVALCONSTANT, MomentInterval.parseISO(value));
     }
 
     @Override
     public String toUrl() {
         return StringHelper.FORMAT_INTERVAL.print(getValue());
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
     }
 
     public static IntervalConstant parse(String value) {
@@ -53,4 +52,10 @@ public class IntervalConstant extends Constant<MomentInterval> {
             throw new IllegalArgumentException("Failed to parse MomentInterval " + StringHelper.cleanForLogging(value), ex);
         }
     }
+
+    @Override
+    public IntervalConstant getSelf() {
+        return this;
+    }
+
 }
