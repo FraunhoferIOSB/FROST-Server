@@ -524,13 +524,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                     LINK_TABLE);
             for (Record pidTuple : projectIds) {
                 Object projectId = getFieldOrNull(pidTuple, fPid);
-                projects.add(new DefaultEntity(etProject).setPrimaryKeyValues(PkValue.of(projectId)));
+                final DefaultEntity projectEntity = new DefaultEntity(etProject).setPrimaryKeyValues(PkValue.of(projectId));
+                foi.addNavigationEntity(npFeatureProjects, projectEntity);
+                LOGGER.debug("Assigning project {} to generated foi", projectId);
             }
-            if (!projects.isEmpty()) {
-                LOGGER.debug("Assigning {} projects to generated foi", projects.size());
-                foi.setProperty(npFeatureProjects, projects);
-            }
-
         } catch (RuntimeException ex) {
             LOGGER.error("Failed to link Projects to generated FoI.", ex);
         }
