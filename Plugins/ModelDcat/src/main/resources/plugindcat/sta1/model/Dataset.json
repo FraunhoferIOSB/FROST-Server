@@ -54,6 +54,28 @@
             }
           ],
           "annotations": []
+        },
+        {
+          "name": "temporalResolution",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "temporal_resolution"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "spatialResolution",
+          "type": "Edm.Double",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBigDecimal",
+              "field": "spatial_resolution"
+            }
+          ],
+          "annotations": []
         }
       ],
       "navigationProperties": [
@@ -99,7 +121,7 @@
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
               "field": "id",
-              "linkTable": "agent_dataset",
+              "linkTable": "dataset_creator",
               "linkOurField": "dataset_id",
               "linkOtherField": "agent_id",
               "otherTable": "agent",
@@ -131,6 +153,60 @@
               "linkOtherField": "standard_id",
               "otherTable": "standard",
               "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "ContactPoint",
+          "entitySet": true,
+          "entityType": "Agent",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "ContactPointForDatasets",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "dataset_contact",
+              "linkOurField": "dataset_id",
+              "linkOtherField": "agent_id",
+              "otherTable": "agent",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "Datastreams",
+          "entitySet": true,
+          "entityType": "Datastream",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Datasets",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "dataset_datastream",
+              "linkOurField": "dataset_id",
+              "linkOtherField": "datastream_id",
+              "otherTable": "DATASTREAMS",
+              "otherField": "ID"
             }
           ],
           "annotations": []

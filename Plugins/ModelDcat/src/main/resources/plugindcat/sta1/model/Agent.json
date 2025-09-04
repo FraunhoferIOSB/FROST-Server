@@ -30,6 +30,72 @@
             }
           ],
           "annotations": []
+        },
+        {
+          "name": "email",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "email"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "telephone",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "telephone"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "countryName",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "countryname"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "postalCode",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "postcode"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "locality",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "locality"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "streetAddress",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "streetaddress"
+            }
+          ],
+          "annotations": []
         }
       ],
       "navigationProperties": [],

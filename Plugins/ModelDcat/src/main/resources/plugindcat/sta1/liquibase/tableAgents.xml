@@ -60,6 +60,12 @@
         </preConditions>
         <addColumn tableName="agent">
             <column name="name" type="TEXT"/>
+            <column name="email" type="TEXT"/>
+            <column name="telephone" type="TEXT"/>
+            <column name="countryname" type="TEXT"/>
+            <column name="postcode" type="TEXT"/>
+            <column name="locality" type="TEXT"/>
+            <column name="streetaddress" type="TEXT"/>
         </addColumn>
     </changeSet>
 

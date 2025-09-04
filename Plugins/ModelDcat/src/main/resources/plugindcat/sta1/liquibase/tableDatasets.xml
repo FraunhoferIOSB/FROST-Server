@@ -63,6 +63,8 @@
             <column name="title" type="TEXT"/>
             <column name="description" type="TEXT"/>
             <column name="keywords" type="TEXT"/>
+            <column name="temporal_resolution" type="TEXT"/>
+            <column name="spatial_resolution" type="DOUBLE"/>
         </addColumn>
     </changeSet>
 

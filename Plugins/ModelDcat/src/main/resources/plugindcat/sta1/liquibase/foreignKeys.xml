@@ -119,29 +119,29 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2025-06-10-fk_agent_dataset_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="generated" id="2025-06-10-fk_dataset_creator_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_agent_dataset_dataset_id" foreignKeyTableName="agent_dataset" />
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_creator_dataset_id" foreignKeyTableName="dataset_creator" />
             </not>
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_agent_dataset_dataset_id"
-            baseTableName="agent_dataset" baseColumnNames="dataset_id"
+            constraintName="fk_dataset_creator_dataset_id"
+            baseTableName="dataset_creator" baseColumnNames="dataset_id"
             referencedTableName="dataset" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2025-06-10-fk_agent_dataset_agent_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="generated" id="2025-06-10-fk_dataset_creator_agent_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_agent_dataset_agent_id" foreignKeyTableName="agent_dataset" />
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_creator_agent_id" foreignKeyTableName="dataset_creator" />
             </not>
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_agent_dataset_agent_id"
-            baseTableName="agent_dataset" baseColumnNames="agent_id"
+            constraintName="fk_dataset_creator_agent_id"
+            baseTableName="dataset_creator" baseColumnNames="agent_id"
             referencedTableName="agent" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
@@ -171,6 +171,62 @@
             constraintName="fk_dataset_standard_standard_id"
             baseTableName="dataset_standard" baseColumnNames="standard_id"
             referencedTableName="standard" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_contact_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_contact_dataset_id" foreignKeyTableName="dataset_contact" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_contact_dataset_id"
+            baseTableName="dataset_contact" baseColumnNames="dataset_id"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_contact_agent_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_contact_agent_id" foreignKeyTableName="dataset_contact" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_contact_agent_id"
+            baseTableName="dataset_contact" baseColumnNames="agent_id"
+            referencedTableName="agent" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_datastream_dataset_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_datastream_dataset_id" foreignKeyTableName="dataset_datastream" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_datastream_dataset_id"
+            baseTableName="dataset_datastream" baseColumnNames="dataset_id"
+            referencedTableName="dataset" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="generated" id="2025-06-10-fk_dataset_datastream_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_datastream_datastream_id" foreignKeyTableName="dataset_datastream" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_dataset_datastream_datastream_id"
+            baseTableName="dataset_datastream" baseColumnNames="datastream_id"
+            referencedTableName="DATASTREAMS" referencedColumnNames="ID"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>

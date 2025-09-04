@@ -39,8 +39,10 @@
     <include relativeToChangelogFile="true" file="tableDataserviceStandard.xml" />
     <include relativeToChangelogFile="true" file="tableDatasetDataservice.xml" />
     <include relativeToChangelogFile="true" file="tableDatasets.xml" />
-    <include relativeToChangelogFile="true" file="tableAgentDataset.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasetCreator.xml" />
     <include relativeToChangelogFile="true" file="tableDatasetStandard.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasetContact.xml" />
+    <include relativeToChangelogFile="true" file="tableDatasetDatastream.xml" />
     <include relativeToChangelogFile="true" file="tableDistributions.xml" />
     <include relativeToChangelogFile="true" file="tableDistributionDataservice.xml" />
     <include relativeToChangelogFile="true" file="tableDistributionStandard.xml" />
