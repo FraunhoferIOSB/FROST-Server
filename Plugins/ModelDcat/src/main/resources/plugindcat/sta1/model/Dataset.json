@@ -13,6 +13,9 @@
       "entityProperties": [
         {
           "name": "id",
+          "aliases": [
+            "@iot.id"
+          ],
           "type": "Id",
           "handlers": [
             {
