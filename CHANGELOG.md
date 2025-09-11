@@ -2,9 +2,12 @@
 
 ## Version 2.7.0-SNAPSHOT
 
-**Internal changes & Bugfixes**
+**New Features**
 * Made query functions pluggable using the interface PluginFunction.
 * Enabled compression in Tomcat.
+
+**Internal changes & Bugfixes**
+* Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
 * Changed error when insertion fails due to constraints to 409.
 * Fixed expand returning null link when target can not be read
 
