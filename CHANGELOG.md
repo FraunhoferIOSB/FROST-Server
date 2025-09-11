@@ -3,6 +3,7 @@
 ## Version 2.6.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
 * Fixed missing projects-rules for Tasking.
 * Fixed expand returning null link when target can not be read.
 * Fixed timing of security wrapper initialisation.

@@ -398,6 +398,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         if (pm instanceof JooqPersistenceManager ppm) {
             ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_DATASTREAM, modelSettings.idTypeDatastream);
             ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_FEATURE, modelSettings.idTypeFeature);
+            ppm.generateLiquibaseVariables(target, NAME_ET_FEATUREOFINTEREST, modelSettings.idTypeFeature);
             ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_HIST_LOCATION, modelSettings.idTypeHistLoc);
             ppm.generateLiquibaseVariables(target, NAME_ET_HISTORICALLOCATION, modelSettings.idTypeHistLoc);
             ppm.generateLiquibaseVariables(target, NAME_LIQUIBASE_LOCATION, modelSettings.idTypeLocation);
