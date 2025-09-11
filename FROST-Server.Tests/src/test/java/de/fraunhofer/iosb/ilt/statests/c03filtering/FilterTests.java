@@ -255,7 +255,7 @@ public abstract class FilterTests extends AbstractTestClass {
     }
 
     /**
-     * Test equals null.
+     * Test substring function.
      *
      * @throws ServiceFailureException If the service doesn't respond.
      */

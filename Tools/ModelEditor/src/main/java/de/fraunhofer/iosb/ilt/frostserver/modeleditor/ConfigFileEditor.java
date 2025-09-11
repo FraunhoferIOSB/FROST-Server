@@ -37,8 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * An editor for Configurable Config Files.
  */
 public class ConfigFileEditor {
 
@@ -110,7 +109,7 @@ public class ConfigFileEditor {
     }
 
     public void saveToFileWithChooser(JsonElement json, String title, Window window) {
-        String config = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+        String config = new GsonBuilder().setPrettyPrinting().create().toJson(json) + '\n';
         fileChooser.setTitle(title);
         File file = fileChooser.showSaveDialog(window);
         if (file == null) {

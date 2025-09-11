@@ -25,7 +25,6 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service.Service" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" level="WARN"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" level="WARN"/>
     
     <logger name="de.fraunhofer.iosb.ilt.frostclient.SensorThingsService" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostclient.utils.Utils" level="WARN"/>

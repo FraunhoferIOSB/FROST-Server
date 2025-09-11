@@ -62,8 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A plugin that loads arbitrary models from files.
  */
 public class PluginModelLoader implements PluginRootDocument, PluginModel, LiquibaseUser {
 
@@ -176,7 +175,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
             } else {
                 try (InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPathString)) {
                     if (stream == null) {
-                        LOGGER.error("File not found: {}", fullPathString);
+                        LOGGER.error("File not found: {} ({})", fullPathString, fullFile.getAbsolutePath());
                         return null;
                     }
                     return objectMapper.readValue(stream, clazz);
