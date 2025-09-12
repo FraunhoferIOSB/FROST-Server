@@ -116,8 +116,19 @@ public class Query {
      * @param principal the user principal.
      */
     public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path, PrincipalExtended principal) {
+        this(modelRegistry, settings, principal);
+        setPath(path);
+    }
+
+    /**
+     * Create a Query with the given model registry, settings, path and user.
+     *
+     * @param modelRegistry the model registry to use.
+     * @param settings the setting to use.
+     * @param principal the user principal.
+     */
+    public Query(ModelRegistry modelRegistry, QueryDefaults settings, PrincipalExtended principal) {
         this.modelRegistry = modelRegistry;
-        this.path = path;
         this.queryDefaults = settings;
         this.principal = principal;
         this.top = Optional.empty();
@@ -238,8 +249,9 @@ public class Query {
         return path;
     }
 
-    public void setPath(ResourcePath path) {
+    public final Query setPath(ResourcePath path) {
         this.path = path;
+        return this;
     }
 
     public String getServiceRootUrl() {
