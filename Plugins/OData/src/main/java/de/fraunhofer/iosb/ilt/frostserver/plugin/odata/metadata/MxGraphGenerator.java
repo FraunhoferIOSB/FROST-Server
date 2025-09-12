@@ -211,7 +211,7 @@ public class MxGraphGenerator {
         MxCell propCell = new MxCell()
                 .setId(genIdForTypeProperty(tc, name))
                 .setParent(typeCell.getId())
-                .setValue(createText(name, pt.getName(), required))
+                .setValue(createText(name, pt.getName(), required, false))
                 .setStyle(STYLE_LIST_ITEM)
                 .setVertex(1)
                 .setConnectable(0)
@@ -224,10 +224,11 @@ public class MxGraphGenerator {
                 .setWidth(BOX_WIDTH)
                 .setHeight(BOX_HEIGHT_ITEM)
                 .setY(listItemY);
+        boolean pk = et.getPrimaryKey().getKeyProperties().contains(ep);
         MxCell propCell = new MxCell()
                 .setId(genIdFor(et, ep))
                 .setParent(typeCell.getId())
-                .setValue(createTextForEp(ep))
+                .setValue(createTextForEp(ep, pk))
                 .setStyle(STYLE_LIST_ITEM)
                 .setVertex(1)
                 .setConnectable(0)
@@ -235,7 +236,7 @@ public class MxGraphGenerator {
         root.addMxCell(propCell);
     }
 
-    private String createTextForEp(EntityPropertyMain ep) {
+    private String createTextForEp(EntityPropertyMain ep, boolean pk) {
         String name = ep.getName();
         Collection<String> aliases = ep.getAliases();
         if (aliases.size() > 1) {
@@ -247,13 +248,15 @@ public class MxGraphGenerator {
                 }
             }
         }
-        return createText(name, ep.getType().getName(), ep.isRequired());
+        return createText(name, ep.getType().getName(), ep.isRequired(), pk);
     }
 
-    private String createText(String name, String typeName, boolean required) {
+    private String createText(String name, String typeName, boolean required, boolean pk) {
         StringBuilder result = new StringBuilder();
         result.append("+ ").append(name).append(": ").append(StringUtils.replace(typeName, "Edm.", ""));
-        if (required) {
+        if (pk) {
+            result.append(" {id}");
+        } else if (!required) {
             result.append(" [0..1]");
         }
         return result.toString();
