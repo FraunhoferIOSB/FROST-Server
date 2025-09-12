@@ -21,21 +21,21 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <property name="id-RelatedDatastream" value="LONG" />
-    <property name="idType-RelatedDatastream" value="BIGINT" />
-    <property name="id-RelatedFeature" value="LONG" />
-    <property name="idType-RelatedFeature" value="BIGINT" />
-    <property name="id-RelatedObservation" value="LONG" />
-    <property name="idType-RelatedObservation" value="BIGINT" />
-    <property name="id-RelatedThing" value="LONG" />
-    <property name="idType-RelatedThing" value="BIGINT" />
+    <property name="id-DatastreamRelation" value="LONG" />
+    <property name="idType-DatastreamRelation" value="BIGINT" />
+    <property name="id-FeatureRelation" value="LONG" />
+    <property name="idType-FeatureRelation" value="BIGINT" />
+    <property name="id-ObservationRelation" value="LONG" />
+    <property name="idType-ObservationRelation" value="BIGINT" />
+    <property name="id-ThingRelation" value="LONG" />
+    <property name="idType-ThingRelation" value="BIGINT" />
     <property name="id-RelationRole" value="LONG" />
     <property name="idType-RelationRole" value="BIGINT" />
 
-    <include relativeToChangelogFile="true" file="tableRelatedDatastreams.xml" />
-    <include relativeToChangelogFile="true" file="tableRelatedFeatures.xml" />
-    <include relativeToChangelogFile="true" file="tableRelatedObservations.xml" />
-    <include relativeToChangelogFile="true" file="tableRelatedThings.xml" />
+    <include relativeToChangelogFile="true" file="tableDatastreamRelations.xml" />
+    <include relativeToChangelogFile="true" file="tableFeatureRelations.xml" />
+    <include relativeToChangelogFile="true" file="tableObservationRelations.xml" />
+    <include relativeToChangelogFile="true" file="tableThingRelations.xml" />
     <include relativeToChangelogFile="true" file="tableRelationRoles.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />
 

@@ -3,8 +3,8 @@
   "simplePropertyTypes": [],
   "entityTypes": [
     {
-      "name": "RelatedDatastream",
-      "plural": "RelatedDatastreams",
+      "name": "DatastreamRelation",
+      "plural": "DatastreamRelations",
       "adminOnly": false,
       "table": "related_datastreams",
       "orderByDflt": [],
@@ -27,6 +27,7 @@
           "name": "externalTarget",
           "type": "Edm.String",
           "required": false,
+          "nullable": true,
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
@@ -45,7 +46,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "TargetRelatedDatastreams",
+            "name": "TargetDatastreamRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -69,7 +70,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "SourceRelatedDatastreams",
+            "name": "SourceDatastreamRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -93,7 +94,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "RelatedDatastreams",
+            "name": "DatastreamRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,

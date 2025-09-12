@@ -21,9 +21,9 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-01-related_observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
-            <changeLogPropertyDefined property="id-RelatedObservation" value="LONG" />
+            <changeLogPropertyDefined property="id-ObservationRelation" value="LONG" />
             <not>
                 <tableExists tableName="related_observations" />
             </not>
@@ -35,38 +35,42 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
-                <changeLogPropertyDefined property="id-RelatedObservation" value="STRING" />
-                <changeLogPropertyDefined property="id-RelatedObservation" value="UUID" />
+                <changeLogPropertyDefined property="id-ObservationRelation" value="STRING" />
+                <changeLogPropertyDefined property="id-ObservationRelation" value="UUID" />
             </or>
             <not>
                 <tableExists tableName="related_observations" />
             </not>
         </preConditions>
         <createTable tableName="related_observations">
-            <column name="id" type="${idType-RelatedObservation}" defaultValueComputed="${defaultValueComputed-RelatedObservation}">
+            <column name="id" type="${idType-ObservationRelation}" defaultValueComputed="${defaultValueComputed-ObservationRelation}">
                 <constraints primaryKey="true" primaryKeyName="pk_related_observations"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="external_target" tableName="related_observations" />
             </not>
         </preConditions>
         <addColumn tableName="related_observations">
-            <column name="external_target" type="TEXT"/>
-            <column name="source_observation_id" type="${idType-Observation}"/>
+            <column name="source_observation_id" type="${idType-Observation}">
+                <constraints nullable="false"/>
+            </column>
             <column name="target_observation_id" type="${idType-Observation}"/>
-            <column name="relation_role_id" type="${idType-RelationRole}"/>
+            <column name="relation_role_id" type="${idType-RelationRole}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_target" type="TEXT"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_observations-idx-source_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-idx-source_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_observations" indexName="related_observations_source_observation_id" />
@@ -77,7 +81,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_observations-idx-target_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-idx-target_observation_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_observations" indexName="related_observations_target_observation_id" />
@@ -88,7 +92,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_observations-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_observations-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_observations" indexName="related_observations_relation_role_id" />

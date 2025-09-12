@@ -3,8 +3,8 @@
   "simplePropertyTypes": [],
   "entityTypes": [
     {
-      "name": "RelatedThing",
-      "plural": "RelatedThings",
+      "name": "ThingRelation",
+      "plural": "ThingRelations",
       "adminOnly": false,
       "table": "related_things",
       "orderByDflt": [],
@@ -45,7 +45,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "TargetRelatedThings",
+            "name": "TargetThingRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -69,7 +69,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "SourceRelatedThings",
+            "name": "SourceThingRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -93,7 +93,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "RelatedThings",
+            "name": "ThingRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,

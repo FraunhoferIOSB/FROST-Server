@@ -3,8 +3,8 @@
   "simplePropertyTypes": [],
   "entityTypes": [
     {
-      "name": "RelatedFeature",
-      "plural": "RelatedFeatures",
+      "name": "FeatureRelation",
+      "plural": "FeatureRelations",
       "adminOnly": false,
       "table": "related_features",
       "orderByDflt": [],
@@ -45,7 +45,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "TargetRelatedFeatures",
+            "name": "TargetFeatureRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -69,7 +69,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "SourceRelatedFeatures",
+            "name": "SourceFeatureRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -93,7 +93,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "RelatedFeatures",
+            "name": "FeatureRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,

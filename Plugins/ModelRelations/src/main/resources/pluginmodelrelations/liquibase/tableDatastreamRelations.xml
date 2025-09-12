@@ -21,9 +21,9 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
-            <changeLogPropertyDefined property="id-RelatedDatastream" value="LONG" />
+            <changeLogPropertyDefined property="id-DatastreamRelation" value="LONG" />
             <not>
                 <tableExists tableName="related_datastreams" />
             </not>
@@ -35,38 +35,42 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
-                <changeLogPropertyDefined property="id-RelatedDatastream" value="STRING" />
-                <changeLogPropertyDefined property="id-RelatedDatastream" value="UUID" />
+                <changeLogPropertyDefined property="id-DatastreamRelation" value="STRING" />
+                <changeLogPropertyDefined property="id-DatastreamRelation" value="UUID" />
             </or>
             <not>
                 <tableExists tableName="related_datastreams" />
             </not>
         </preConditions>
         <createTable tableName="related_datastreams">
-            <column name="id" type="${idType-RelatedDatastream}" defaultValueComputed="${defaultValueComputed-RelatedDatastream}">
+            <column name="id" type="${idType-DatastreamRelation}" defaultValueComputed="${defaultValueComputed-DatastreamRelation}">
                 <constraints primaryKey="true" primaryKeyName="pk_related_datastreams"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="external_target" tableName="related_datastreams" />
             </not>
         </preConditions>
         <addColumn tableName="related_datastreams">
-            <column name="external_target" type="TEXT"/>
-            <column name="source_datastream_id" type="${idType-Datastream}"/>
+            <column name="source_datastream_id" type="${idType-Datastream}">
+                <constraints nullable="false"/>
+            </column>
             <column name="target_datastream_id" type="${idType-Datastream}"/>
-            <column name="relation_role_id" type="${idType-RelationRole}"/>
+            <column name="relation_role_id" type="${idType-RelationRole}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_target" type="TEXT"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-source_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-idx-source_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_datastreams" indexName="related_datastreams_source_datastream_id" />
@@ -77,7 +81,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-target_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-idx-target_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_datastreams" indexName="related_datastreams_target_datastream_id" />
@@ -88,7 +92,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_datastreams-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_datastreams-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_datastreams" indexName="related_datastreams_relation_role_id" />

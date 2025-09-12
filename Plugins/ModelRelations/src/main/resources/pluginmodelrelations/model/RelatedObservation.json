@@ -3,8 +3,8 @@
   "simplePropertyTypes": [],
   "entityTypes": [
     {
-      "name": "RelatedObservation",
-      "plural": "RelatedObservations",
+      "name": "ObservationRelation",
+      "plural": "ObservationRelations",
       "adminOnly": false,
       "table": "related_observations",
       "orderByDflt": [],
@@ -45,7 +45,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "TargetRelatedObservations",
+            "name": "TargetObservationRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -69,7 +69,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "SourceRelatedObservations",
+            "name": "SourceObservationRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -93,7 +93,7 @@
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "RelatedObservations",
+            "name": "ObservationRelations",
             "entitySet": true,
             "required": false,
             "priority": 0,

@@ -21,9 +21,9 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-01-related_things-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
-            <changeLogPropertyDefined property="id-RelatedThing" value="LONG" />
+            <changeLogPropertyDefined property="id-ThingRelation" value="LONG" />
             <not>
                 <tableExists tableName="related_things" />
             </not>
@@ -35,38 +35,42 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_things-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
-                <changeLogPropertyDefined property="id-RelatedThing" value="STRING" />
-                <changeLogPropertyDefined property="id-RelatedThing" value="UUID" />
+                <changeLogPropertyDefined property="id-ThingRelation" value="STRING" />
+                <changeLogPropertyDefined property="id-ThingRelation" value="UUID" />
             </or>
             <not>
                 <tableExists tableName="related_things" />
             </not>
         </preConditions>
         <createTable tableName="related_things">
-            <column name="id" type="${idType-RelatedThing}" defaultValueComputed="${defaultValueComputed-RelatedThing}">
+            <column name="id" type="${idType-ThingRelation}" defaultValueComputed="${defaultValueComputed-ThingRelation}">
                 <constraints primaryKey="true" primaryKeyName="pk_related_things"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_things-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="external_target" tableName="related_things" />
             </not>
         </preConditions>
         <addColumn tableName="related_things">
-            <column name="external_target" type="TEXT"/>
-            <column name="source_thing_id" type="${idType-Thing}"/>
+            <column name="source_thing_id" type="${idType-Thing}">
+                <constraints nullable="false"/>
+            </column>
             <column name="target_thing_id" type="${idType-Thing}"/>
-            <column name="relation_role_id" type="${idType-RelationRole}"/>
+            <column name="relation_role_id" type="${idType-RelationRole}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_target" type="TEXT"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_things-idx-source_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-idx-source_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_things" indexName="related_things_source_thing_id" />
@@ -77,7 +81,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_things-idx-target_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-idx-target_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_things" indexName="related_things_target_thing_id" />
@@ -88,7 +92,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-related_things-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-related_things-idx-relation_role_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="related_things" indexName="related_things_relation_role_id" />
