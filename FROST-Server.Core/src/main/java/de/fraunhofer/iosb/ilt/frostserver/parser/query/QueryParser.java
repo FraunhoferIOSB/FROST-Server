@@ -264,7 +264,7 @@ public class QueryParser extends Visitor {
     }
 
     public void handle(P_ExpandItem expandItem) {
-        Expand expand = new Expand(settings.getModelRegistry());
+        Expand expand = new Expand();
         List<P_PlainPath> paths = expandItem.childrenOfType(P_PlainPath.class);
         if (paths.isEmpty()) {
             return;

@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,36 +42,38 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Expand {
 
-    private ModelRegistry modelRegistry;
     private List<String> rawPath;
     private NavigationProperty validatedPath;
     private Query parentQuery;
     private Query subQuery;
 
-    public Expand(ModelRegistry modelRegistry) {
-        this.modelRegistry = modelRegistry;
+    public Expand() {
     }
 
-    public Expand(ModelRegistry modelRegistry, Query subQuery) {
-        this.modelRegistry = modelRegistry;
+    public Expand(Query subQuery) {
         if (subQuery != null) {
             setSubQuery(subQuery);
         }
     }
 
-    public Expand(ModelRegistry modelRegistry, NavigationProperty path) {
+    public Expand(String path) {
+        if (StringHelper.isNullOrEmpty(path)) {
+            throw new IllegalArgumentException("path must be non-empty");
+        }
+        addToRawPath(path);
+    }
+
+    public Expand(NavigationProperty path) {
         if (path == null) {
             throw new IllegalArgumentException("path must be non-empty");
         }
-        this.modelRegistry = modelRegistry;
         this.validatedPath = path;
     }
 
-    public Expand(ModelRegistry modelRegistry, Query subQuery, NavigationProperty path) {
+    public Expand(Query subQuery, NavigationProperty path) {
         if (path == null) {
             throw new IllegalArgumentException("paths must be non-empty");
         }
-        this.modelRegistry = modelRegistry;
         this.validatedPath = path;
         setSubQuery(subQuery);
     }
@@ -79,11 +82,12 @@ public class Expand {
         return validatedPath;
     }
 
-    public void addToRawPath(String subPath) {
+    public final Expand addToRawPath(String subPath) {
         if (rawPath == null) {
             rawPath = new ArrayList<>();
         }
         this.rawPath.add(subPath);
+        return this;
     }
 
     public List<String> getRawPath() {
@@ -135,6 +139,7 @@ public class Expand {
 
     protected void validate(ParserContext context, EntityType entityType) {
         if (validatedPath == null) {
+            ModelRegistry modelRegistry = parentQuery.getModelRegistry();
             final String firstRawPath = rawPath.get(0);
             final Property property = entityType.getProperty(firstRawPath);
             final int rawCount = rawPath.size();
@@ -145,7 +150,7 @@ public class Expand {
                 validatedPath = npm;
                 if (rawCount > 1) {
                     // Need to re-nest this expand!
-                    Expand subExpand = new Expand(modelRegistry, subQuery);
+                    Expand subExpand = new Expand(subQuery);
                     for (int i = 1; i < rawCount; i++) {
                         subExpand.addToRawPath(rawPath.get(i));
                     }

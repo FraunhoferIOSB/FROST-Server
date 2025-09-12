@@ -19,8 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
+import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -316,4 +319,22 @@ public class ServiceRequest {
         PrincipalExtended.removeLocalPrincipal();
     }
 
+    /**
+     * Create a new Path with the settings of this request.
+     *
+     * @param path The path-string to create the path with.
+     * @return a new ResourcePath.
+     */
+    public ResourcePath newPath(String path) {
+        return PathParser.parsePath(coreSettings.getModelRegistry(), queryDefaults.getServiceRootUrl(), version, path);
+    }
+
+    /**
+     * Create a new Query with the settings and user of this request.
+     *
+     * @return a new Query.
+     */
+    public Query newQuery() {
+        return new Query(coreSettings.getModelRegistry(), coreSettings.getQueryDefaults(), userPrincipal);
+    }
 }
