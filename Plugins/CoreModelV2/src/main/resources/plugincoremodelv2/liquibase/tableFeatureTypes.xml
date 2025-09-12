@@ -60,8 +60,8 @@
         </preConditions>
         <addColumn tableName="feature_types">
             <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
+            <column name="description" type="TEXT"/>
             <column name="properties" type="JSONB"/>
         </addColumn>
     </changeSet>

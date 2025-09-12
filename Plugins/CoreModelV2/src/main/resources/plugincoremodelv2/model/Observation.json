@@ -28,6 +28,7 @@
                 {
                     "name": "phenomenonTime",
                     "type": "TM_Object",
+                    "required": true,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInterval",
@@ -44,6 +45,22 @@
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
                             "field": "result_time"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "result",
+                    "type": "Edm.Untyped",
+                    "required": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperResult",
+                            "fieldType": "result_type",
+                            "fieldString": "result_string",
+                            "fieldNumber": "result_number",
+                            "fieldJson": "result_json",
+                            "fieldBoolean": "result_boolean"
                         }
                     ],
                     "annotations": []
@@ -69,21 +86,6 @@
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
                             "field": "properties",
                             "isMap": true
-                        }
-                    ],
-                    "annotations": []
-                },
-                {
-                    "name": "result",
-                    "type": "Edm.Untyped",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperResult",
-                            "fieldType": "result_type",
-                            "fieldString": "result_string",
-                            "fieldNumber": "result_number",
-                            "fieldJson": "result_json",
-                            "fieldBoolean": "result_boolean"
                         }
                     ],
                     "annotations": []

@@ -68,9 +68,10 @@
             <column name="ultimate_feature_id" type="${idType-Feature}"/>
             <column name="proximate_feature_id" type="${idType-Feature}"/>
             <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
+            <column name="description" type="TEXT"/>
             <column name="result_type" type="JSONB"/>
+            <column name="result_encoding" type="JSONB"/>
             <column name="properties" type="JSONB"/>
             <column name="phenomenon_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="phenomenon_time_end" type="TIMESTAMP WITH TIME ZONE"/>

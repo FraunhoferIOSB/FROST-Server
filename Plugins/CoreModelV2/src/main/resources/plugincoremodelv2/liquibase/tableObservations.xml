@@ -66,14 +66,14 @@
             <column name="phenomenon_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="phenomenon_time_end" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="result_time" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="valid_time_start" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="valid_time_end" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="properties" type="JSONB"/>
             <column name="result_type" type="TINYINT"/>
             <column name="result_number" type="FLOAT8"/>
             <column name="result_boolean" type="BOOLEAN"/>
             <column name="result_json" type="JSONB"/>
             <column name="result_string" type="TEXT"/>
+            <column name="valid_time_start" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="valid_time_end" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="properties" type="JSONB"/>
         </addColumn>
     </changeSet>
 

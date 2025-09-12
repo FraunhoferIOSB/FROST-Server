@@ -37,23 +37,23 @@
                     "annotations": []
                 },
                 {
-                    "name": "description",
-                    "type": "Edm.String",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "description"
-                        }
-                    ],
-                    "annotations": []
-                },
-                {
                     "name": "definition",
                     "type": "Edm.String",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
                             "field": "definition"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "description",
+                    "type": "Edm.String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "description"
                         }
                     ],
                     "annotations": []
@@ -71,11 +71,12 @@
                 },
                 {
                     "name": "metadata",
-                    "type": "Edm.String",
+                    "type": "Edm.Untyped",
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "metadata"
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "metadata",
+                            "isMap": false
                         }
                     ],
                     "annotations": []
