@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-TaskingCapability" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-TaskingCapability" value="STRING" />
@@ -52,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="tasking_capabilities" />
@@ -74,7 +74,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_actuator_id" />
@@ -85,7 +85,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_thing_id" />
@@ -96,7 +96,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasking_capabilities-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_feature_id" />

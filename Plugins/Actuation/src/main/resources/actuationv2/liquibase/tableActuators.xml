@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-10-actuators-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-actuators-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Actuator" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-actuators-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-actuators-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Actuator" value="STRING" />
@@ -52,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-actuators-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-actuators-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="actuators" />
@@ -60,10 +60,10 @@
         </preConditions>
         <addColumn tableName="actuators">
             <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
+            <column name="description" type="TEXT"/>
             <column name="encoding_type" type="TEXT"/>
-            <column name="metadata" type="TEXT"/>
+            <column name="metadata" type="JSONB"/>
             <column name="properties" type="JSONB"/>
         </addColumn>
     </changeSet>

@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-10-fk_tasks_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasks_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasks_tasking_capability_id" foreignKeyTableName="tasks" />
@@ -35,7 +35,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasks_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasks_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasks_feature_id" foreignKeyTableName="tasks" />
@@ -49,7 +49,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_actuator_id" foreignKeyTableName="tasking_capabilities" />
@@ -63,7 +63,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasking_capability_observed_property_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasking_capability_observed_property_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_tasking_capability_id" foreignKeyTableName="tasking_capability_observed_property" />
@@ -77,7 +77,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasking_capability_observed_property_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasking_capability_observed_property_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_observed_property_id" foreignKeyTableName="tasking_capability_observed_property" />
@@ -91,7 +91,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_thing_id" foreignKeyTableName="tasking_capabilities" />
@@ -105,7 +105,7 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-fk_tasking_capabilities_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_feature_id" foreignKeyTableName="tasking_capabilities" />

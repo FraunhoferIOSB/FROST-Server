@@ -44,6 +44,18 @@
           "annotations": []
         },
         {
+          "name": "runLog",
+          "type": "Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+              "field": "run_log",
+              "isMap": true
+            }
+          ],
+          "annotations": []
+        },
+        {
           "name": "status",
           "type": "Edm.String",
           "handlers": [

@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-10-tasks-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasks-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Task" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasks-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasks-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Task" value="STRING" />
@@ -52,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasks-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasks-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="creation_time" tableName="tasks" />
@@ -66,12 +66,13 @@
             <column name="creation_time" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="run_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="run_time_end" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="run_log" type="JSONB"/>
             <column name="status" type="TEXT"/>
             <column name="tasking_parameters" type="JSONB"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasks-idx-tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasks-idx-tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="tasks" indexName="tasks_tasking_capability_id" />
@@ -82,7 +83,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-10-tasks-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-tasks-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="tasks" indexName="tasks_feature_id" />
