@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-01-preparation_steps-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-preparation_steps-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-PreparationStep" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-preparation_steps-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-preparation_steps-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-PreparationStep" value="STRING" />
@@ -52,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-preparation_steps-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-preparation_steps-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="preparation_steps" />
@@ -66,14 +66,14 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
+            <column name="description" type="TEXT"/>
             <column name="properties" type="JSONB"/>
             <column name="time" type="TIMESTAMP WITH TIME ZONE"/>
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-preparation_steps-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-preparation_steps-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="preparation_steps" indexName="preparation_steps_feature_id" />
@@ -84,7 +84,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-preparation_steps-idx-preparation_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-preparation_steps-idx-preparation_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="preparation_steps" indexName="preparation_steps_preparation_procedure_id" />

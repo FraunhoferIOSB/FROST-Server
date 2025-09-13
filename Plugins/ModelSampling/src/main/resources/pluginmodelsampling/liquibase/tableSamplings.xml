@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-06-01-samplings-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Sampling" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Sampling" value="STRING" />
@@ -52,24 +52,22 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="name" tableName="samplings" />
             </not>
         </preConditions>
         <addColumn tableName="samplings">
-            <column name="thing_id" type="${idType-Thing}">
-                <constraints nullable="false"/>
-            </column>
+            <column name="thing_id" type="${idType-Thing}"/>
             <column name="sampled_feature_id" type="${idType-Feature}">
                 <constraints nullable="false"/>
             </column>
             <column name="sampler_id" type="${idType-Sampler}"/>
             <column name="procedure_id" type="${idType-SamplingProcedure}"/>
             <column name="name" type="TEXT"/>
-            <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
+            <column name="description" type="TEXT"/>
             <column name="encoding_type" type="TEXT"/>
             <column name="location" type="TEXT"/>
             <column name="geom" type="geometry(Geometry,4326)"/>
@@ -79,7 +77,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="samplings" indexName="samplings_thing_id" />
@@ -90,7 +88,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-idx-sampled_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-idx-sampled_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="samplings" indexName="samplings_sampled_feature_id" />
@@ -101,7 +99,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-idx-sampler_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-idx-sampler_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="samplings" indexName="samplings_sampler_id" />
@@ -112,7 +110,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-samplings-idx-procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-samplings-idx-procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="samplings" indexName="samplings_procedure_id" />
@@ -123,7 +121,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-features-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-features-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists columnName="creator_sampling_id" tableName="features" />
@@ -134,7 +132,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="generated" id="2024-06-01-features-idx-creator_sampling_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-features-idx-creator_sampling_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="features" indexName="features_creator_sampling_id" />
