@@ -478,9 +478,9 @@ public class Service implements AutoCloseable {
     }
 
     private ServiceResponse handlePostRef(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) {
-        //     Add one reference to a collection:
-        //     POST Datastream(1)/ObservedProperties/$ref
-        //     {"@id": "ObservedProperties(2)"}
+        // Add one reference to a collection:
+        // POST Datastream(1)/ObservedProperties/$ref
+        // {"@id": "ObservedProperties(2)"}
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementEntitySet mainSet) {
             EntityType type = mainSet.getEntityType();
@@ -732,9 +732,12 @@ public class Service implements AutoCloseable {
     }
 
     private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
-        //     Replace all references, or the one reference for non-sets:
-        //     PUT Datastream(1)/ObservedProperties/$ref
+        // TODO: Replace all references in a set,
+        //   PUT Datastream(1)/ObservedProperties/$ref
         //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
+        // or the one reference for non-sets:
+        //   PUT Datastream(1)/Thing/$ref
+        //     {"@id": "Things(2)"}
         PathElementEntity mainElement;
         Entity entity;
         try {
