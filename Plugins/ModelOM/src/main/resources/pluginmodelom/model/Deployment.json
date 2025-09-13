@@ -38,23 +38,23 @@
           "annotations": []
         },
         {
-          "name": "description",
-          "type": "Edm.String",
-          "handlers": [
-            {
-              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-              "field": "description"
-            }
-          ],
-          "annotations": []
-        },
-        {
           "name": "definition",
           "type": "Edm.String",
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
               "field": "definition"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
             }
           ],
           "annotations": []
@@ -106,7 +106,7 @@
           "annotations": []
         },
         {
-          "name": "deploymentTime",
+          "name": "time",
           "type": "TimeValue",
           "handlers": [
             {

@@ -36,23 +36,23 @@
           "annotations": []
         },
         {
-          "name": "description",
-          "type": "Edm.String",
-          "handlers": [
-            {
-              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-              "field": "description"
-            }
-          ],
-          "annotations": []
-        },
-        {
           "name": "definition",
           "type": "Edm.String",
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
               "field": "definition"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "description",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "description"
             }
           ],
           "annotations": []
@@ -102,7 +102,7 @@
           "name": "ObservedProperties",
           "entitySet": true,
           "entityType": "ObservedProperty",
-          "required": false,
+          "required": true,
           "symmetrical": false,
           "priority": 0,
           "inverse": {
