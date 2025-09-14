@@ -191,7 +191,7 @@ public class Service implements AutoCloseable {
                 default:
                     PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
                     if (plugin == null) {
-                        return errorResponse(response, 500, "Illegal request type.");
+                        return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Illegal request type.");
                     }
                     return plugin.execute(this, request, response);
             }
@@ -306,7 +306,7 @@ public class Service implements AutoCloseable {
 
         settings.getPluginManager().modifyServiceDocument(request, result);
 
-        response.setCode(200);
+        response.setCode(HttpURLConnection.HTTP_OK);
         response.setResult(result);
         return formatResponse(request, response, result);
     }
@@ -317,7 +317,7 @@ public class Service implements AutoCloseable {
             formatter = settings.getFormatter(request.getVersion(), FORMAT_NAME_DEFAULT);
         } catch (IncorrectRequestException ex) {
             LOGGER.error("Formatter not available.", ex);
-            return errorResponse(response, 500, "Failed to instantiate formatter");
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to instantiate formatter");
         }
         return formatResponse(response, formatter, null, null, result);
     }
@@ -329,7 +329,7 @@ public class Service implements AutoCloseable {
                     .writeFormatted(response.getWriter());
         } catch (IOException ex) {
             LOGGER.error("Formatter not available.", ex);
-            return errorResponse(response, 500, "Failed to format");
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to format");
         }
         return response;
     }
@@ -347,15 +347,15 @@ public class Service implements AutoCloseable {
             return handleGet(pm, request, response);
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
             LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
-            return errorResponse(response, 500, "Failed to execute query. See logs for details.");
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to execute query. See logs for details.");
         } finally {
             maybeRollbackAndClose();
         }
@@ -371,7 +371,7 @@ public class Service implements AutoCloseable {
                     request.getUrlPath(),
                     request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            return errorResponse(response, 404, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, ex.getMessage());
         }
         Query query;
         ResultFormatter formatter;
@@ -383,7 +383,7 @@ public class Service implements AutoCloseable {
             formatter = settings.getFormatter(version, query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
-            return errorResponse(response, 400, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, ex.getMessage());
         }
 
         if (!pm.validatePath(path)) {
@@ -396,33 +396,33 @@ public class Service implements AutoCloseable {
                 query.setTop(0);
                 pm.get(path, query);
                 response.setMessage("");
-                response.setCode(200);
+                response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
             }
             Object object = pm.get(path, query);
             if (object == null) {
                 if (path.isValue() || path.isEntityProperty()) {
-                    return successResponse(response, 204, "No Content");
+                    return successResponse(response, HttpURLConnection.HTTP_NO_CONTENT, "No Content");
                 } else {
                     return errorResponse(response, version.getCannedResponse(Version.CannedResponseType.NOTHING_FOUND));
                 }
             } else {
                 response.setResult(object);
-                response.setCode(200);
+                response.setCode(HttpURLConnection.HTTP_OK);
                 return formatResponse(response, formatter, query, path, object);
             }
         } catch (UnsupportedOperationException e) {
             LOGGER.error("Unsupported operation.", e);
             pm.rollbackAndClose();
-            return errorResponse(response, 500, "Unsupported operation: " + e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Unsupported operation: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             LOGGER.trace("Illegal operation.", e);
             pm.rollbackAndClose();
-            return errorResponse(response, 400, "Illegal operation: " + e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Illegal operation: " + e.getMessage());
         } catch (ClassCastException e) {
             LOGGER.error("Result did not match expected format", e);
             pm.rollbackAndClose();
-            return errorResponse(response, 500, "Illegal result type: " + e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Illegal result type: " + e.getMessage());
         } finally {
             maybeCommitAndClose();
         }
@@ -431,7 +431,7 @@ public class Service implements AutoCloseable {
     private ServiceResponse executePost(ServiceRequest request, ServiceResponse response) {
         String urlPath = request.getUrlPath();
         if (urlPath == null || urlPath.equals("/")) {
-            return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
         ResourcePath path;
         try {
@@ -442,28 +442,28 @@ public class Service implements AutoCloseable {
                     urlPath,
                     request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return errorResponse(response, 404, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         }
 
         PersistenceManager pm = getPm();
         try {
             if (!pm.validatePath(path)) {
-                maybeCommitAndClose();
-                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                maybeRollbackAndClose();
+                return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
             }
             if (path.isRef()) {
                 return handlePostRef(pm, path, request, response);
             } else if (path.getMainElement() instanceof PathElementEntitySet) {
                 return handlePostCollection(pm, path, request, response);
             } else {
-                return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, POST_ONLY_ALLOWED_TO_COLLECTIONS);
             }
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IllegalArgumentException e) {
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Incorrect request: " + e.getMessage());
@@ -471,7 +471,7 @@ public class Service implements AutoCloseable {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
             LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
-            return errorResponse(response, 500, "Failed to store data.");
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
         }
@@ -504,6 +504,8 @@ public class Service implements AutoCloseable {
 
             } catch (IOException ex) {
                 throw new IllegalArgumentException("Failed to parse body as entity reference");
+            } catch (NoSuchEntityException ex) {
+                return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
             }
 
             response.setCode(HttpURLConnection.HTTP_NO_CONTENT);
@@ -524,7 +526,7 @@ public class Service implements AutoCloseable {
             settings.getPluginManager().parsedQuery(settings, request, query);
             formatter = findFormatter(query, request);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
-            return errorResponse(response, 400, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, ex.getMessage());
         }
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
@@ -541,7 +543,7 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
         } catch (IncompleteEntityException | IllegalStateException | IOException ex) {
             LOGGER.trace("Post failed.", ex);
-            return errorResponse(response, 400, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, ex.getMessage());
         }
 
         try {
@@ -552,7 +554,7 @@ public class Service implements AutoCloseable {
 
             entity.setQuery(query);
             response.setResult(entity);
-            response.setCode(201);
+            response.setCode(HttpURLConnection.HTTP_CREATED);
             if (query.getMetadata() != Metadata.OFF) {
                 String url = UrlHelper.generateSelfLink(path, entity);
                 response.addHeader(Constants.HEADER_LOCATION, url);
@@ -560,10 +562,10 @@ public class Service implements AutoCloseable {
             return formatResponse(response, formatter, query, path, entity);
         } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 409, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 400, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         }
     }
 
@@ -581,7 +583,7 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = null;
         try {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-                return errorResponse(response, 400, "PATCH only allowed on Entities.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "PATCH only allowed on Entities.");
             }
 
             pm = getPm();
@@ -591,15 +593,15 @@ public class Service implements AutoCloseable {
             return handlePatch(pm, request, response);
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException exc) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, exc.getMessage());
             LOGGER.debug(EXCEPTION, exc);
             rollbackAndClose(pm);
-            return errorResponse(response, 500, "Failed to store data.");
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
         }
@@ -616,29 +618,29 @@ public class Service implements AutoCloseable {
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
-            return errorResponse(response, 400, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         } catch (JsonParseException | JsonMappingException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
-            return errorResponse(response, 400, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
         } catch (IncompleteEntityException | NoSuchEntityException exc) {
-            return errorResponse(response, 404, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
         }
 
         try {
             if (pm.update(mainElement, entity, request.getUpdateMode())) {
                 maybeCommitAndClose();
-                response.setCode(200);
+                response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
             } else {
                 pm.rollbackAndClose();
-                return errorResponse(response, 400, "Failed to patch entity.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Failed to patch entity.");
             }
         } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 409, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -650,28 +652,28 @@ public class Service implements AutoCloseable {
             jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContentReader(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return errorResponse(response, 400, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         } catch (JsonParseException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
-            return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
         } catch (NoSuchEntityException exc) {
-            return errorResponse(response, 404, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
         }
 
         try {
             if (pm.update(mainElement, jsonPatch)) {
                 maybeCommitAndClose();
-                return successResponse(response, 200, "JSON-Patch applied.");
+                return successResponse(response, HttpURLConnection.HTTP_OK, "JSON-Patch applied.");
             } else {
                 pm.rollbackAndClose();
-                return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 409, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | NoSuchEntityException e) {
             pm.rollbackAndClose();
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -709,21 +711,21 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = null;
         try {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-                return errorResponse(response, 400, "PATCH only allowed on Entities.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "PATCH only allowed on Entities.");
             }
 
             pm = getPm();
             return handlePut(pm, request, response);
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IncompleteEntityException | IOException | RuntimeException e) {
             LOGGER.trace("Failed to handle request", e);
             rollbackAndClose(pm);
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
@@ -746,34 +748,34 @@ public class Service implements AutoCloseable {
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return errorResponse(response, 400, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         } catch (JsonParseException | IncompleteEntityException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
-            return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
         } catch (NoSuchEntityException exc) {
-            return errorResponse(response, 404, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
         }
 
         try {
             if (pm.update(mainElement, entity, request.getUpdateMode())) {
                 maybeCommitAndClose();
-                return successResponse(response, 200, "Updated.");
+                return successResponse(response, HttpURLConnection.HTTP_OK, "Updated.");
             } else {
                 pm.rollbackAndClose();
-                return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
-            return errorResponse(response, 409, exc.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
 
     private ServiceResponse executeDelete(ServiceRequest request, ServiceResponse response) {
         if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-            return errorResponse(response, 400, "DELETE only allowed on Entities and Sets.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "DELETE only allowed on Entities and Sets.");
         }
 
         ResourcePath path;
@@ -785,7 +787,7 @@ public class Service implements AutoCloseable {
                     request.getUrlPath(),
                     request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            return errorResponse(response, 404, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, ex.getMessage());
         }
 
         if (path.isRef()) {
@@ -797,7 +799,7 @@ public class Service implements AutoCloseable {
         if (settings.isFilterDeleteEnabled() && (path.getMainElement() instanceof PathElementEntitySet)) {
             return executeDeleteSet(request, response, path);
         }
-        return errorResponse(response, 400, "Not a valid path for DELETE.");
+        return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Not a valid path for DELETE.");
     }
 
     private ServiceResponse executeDeleteEntity(ServiceRequest request, ServiceResponse response, ResourcePath path) {
@@ -805,33 +807,33 @@ public class Service implements AutoCloseable {
         try {
             PathElementEntity mainEntity = (PathElementEntity) path.getMainElement();
             if (mainEntity != path.getLastElement()) {
-                return errorResponse(response, 400, "DELETE not allowed on properties.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "DELETE not allowed on properties.");
             }
             if (!mainEntity.primaryKeyFullySet()) {
-                return errorResponse(response, 400, "No ID found.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "No ID found.");
             }
             if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-                return errorResponse(response, 400, "No query options allowed on PATH when deleting an entity.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "No query options allowed on PATH when deleting an entity.");
             }
 
             pm = getPm();
 
             if (!pm.validatePath(path)) {
                 maybeCommitAndClose();
-                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
             }
 
             return handleDeleteEntity(pm, mainEntity, response);
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             LOGGER.trace("", e);
             rollbackAndClose(pm);
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
@@ -841,15 +843,15 @@ public class Service implements AutoCloseable {
         try {
             if (pm.delete(mainEntity)) {
                 maybeCommitAndClose();
-                response.setCode(200);
+                response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
             } else {
                 pm.rollbackAndClose();
-                return errorResponse(response, 400, "Failed to delete entity.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Failed to delete entity.");
             }
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            return errorResponse(response, 404, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         }
     }
 
@@ -858,27 +860,27 @@ public class Service implements AutoCloseable {
         try {
             PathElementEntitySet mainEntity = (PathElementEntitySet) path.getMainElement();
             if (mainEntity != path.getLastElement()) {
-                return errorResponse(response, 400, "DELETE not allowed on properties.");
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "DELETE not allowed on properties.");
             }
 
             pm = getPm();
 
             if (!pm.validatePath(path)) {
                 maybeCommitAndClose();
-                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+                return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
             }
 
             return handleDeleteSet(request, response, pm, path);
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 403, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (UnauthorizedException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 401, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
             LOGGER.trace("", e);
             rollbackAndClose(pm);
-            return errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
@@ -892,28 +894,28 @@ public class Service implements AutoCloseable {
                     .validate();
             settings.getPluginManager().parsedQuery(settings, request, query);
         } catch (IllegalArgumentException e) {
-            return errorResponse(response, 400, "Failed to parse query: " + e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Failed to parse query: " + e.getMessage());
         }
         if (query.getCount().isPresent()) {
-            return errorResponse(response, 400, "$count not allowed on delete requests.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "$count not allowed on delete requests.");
         }
         if (!query.getExpand().isEmpty()) {
-            return errorResponse(response, 400, "$expand not allowed on delete requests.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "$expand not allowed on delete requests.");
         }
         if (query.getTop().isPresent()) {
-            return errorResponse(response, 400, "$top not allowed on delete requests.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "$top not allowed on delete requests.");
         }
         if (query.getSkip().isPresent()) {
-            return errorResponse(response, 400, "$skip not allowed on delete requests.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "$skip not allowed on delete requests.");
         }
 
         try {
             pm.delete(path, query);
             maybeCommitAndClose();
-            return successResponse(response, 200, "Deleted.");
+            return successResponse(response, HttpURLConnection.HTTP_OK, "Deleted.");
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            return errorResponse(response, 404, e.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         }
     }
 
@@ -940,12 +942,12 @@ public class Service implements AutoCloseable {
         final PersistenceManager pm = getPm();
         if (!pm.validatePath(path)) {
             maybeRollbackAndClose();
-            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
         }
 
         final List<PathElement> pathElements = path.getPathElements();
         if (pathElements.size() < 2) {
-            return errorResponse(response, 400, "Path must contain at least an Entity and a NavigationProperty to delete a reference.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Path must contain at least an Entity and a NavigationProperty to delete a reference.");
         }
 
         final LinkData linkData;
@@ -957,24 +959,24 @@ public class Service implements AutoCloseable {
             // Option 2 or 3
             linkData = parseForRefInPath(path, peEntity);
         } else {
-            return errorResponse(response, 400, "Not a valid DELETE-Reference action.");
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Not a valid DELETE-Reference action.");
         }
         if (linkData.message != null) {
-            return errorResponse(response, 400, linkData.message);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, linkData.message);
         }
         if (!linkData.navigationProperty.getEntityType().equals(linkData.targetEntity.getEntityType())) {
-            return errorResponse(response, 400, "Target Entity does not match NavigationProperty type: " + linkData.targetEntity.getEntityType().entityName + " != " + linkData.navigationProperty.getEntityType().entityName);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Target Entity does not match NavigationProperty type: " + linkData.targetEntity.getEntityType().entityName + " != " + linkData.navigationProperty.getEntityType().entityName);
         }
 
         try {
             pm.deleteRelation(linkData.sourceEntity, linkData.navigationProperty, linkData.targetEntity);
             maybeCommitAndClose();
-            return successResponse(response, 204, "");
+            return successResponse(response, HttpURLConnection.HTTP_NO_CONTENT, "");
         } catch (IncompleteEntityException ex) {
             pm.rollbackAndClose();
-            return errorResponse(response, 405, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_METHOD, ex.getMessage());
         } catch (NoSuchEntityException ex) {
-            return errorResponse(response, 404, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, ex.getMessage());
         }
     }
 
@@ -1064,7 +1066,7 @@ public class Service implements AutoCloseable {
     }
 
     public static ServiceResponse errorResponse(ServiceResponse response, int code, String message) {
-        if (code < 500) {
+        if (code < HttpURLConnection.HTTP_INTERNAL_ERROR) {
             LOGGER.debug("{} response: {}", code, message);
         }
         if (response == null) {
@@ -1074,7 +1076,7 @@ public class Service implements AutoCloseable {
     }
 
     public static ServiceResponse jsonResponse(ServiceResponse response, String type, int code, String message) {
-        String cleanMessage = StringHelper.cleanForOutput(message, 200);
+        String cleanMessage = StringHelper.cleanForOutput(message, HttpURLConnection.HTTP_OK);
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("code", code);
